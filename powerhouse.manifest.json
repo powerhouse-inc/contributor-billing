@@ -16,7 +16,7 @@
     {
       "id": "powerhouse/invoice",
       "name": "Invoice",
-      "documentTypes": ["*"]
+      "documentTypes": ["powerhouse/invoice"]
     }
   ]
 }
