@@ -74,14 +74,14 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState }) => {
         },
         body: JSON.stringify({
           payerWallet,
-          paymentDetails
+          paymentDetails,
         }),
       });
 
       const data = await response.json();
       console.log("Transfer result:", data);
       setResponseData(data);
-        setTransactionLink(data.txHash.safeTxHash)
+      setTransactionLink(data.txHash.safeTxHash);
       setIsLoading(false);
     } catch (error) {
       console.error("Error during transfer:", error);
@@ -106,7 +106,9 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState }) => {
           <p>Safe Transaction Hash: {transactionLink}</p>
           <a
             style={{ color: "blue" }}
-            href={'https://app.safe.global/transactions/queue?safe=base:0x1FB6bEF04230d67aF0e3455B997a28AFcCe1F45e'}
+            href={
+              "https://app.safe.global/transactions/queue?safe=base:0x1FB6bEF04230d67aF0e3455B997a28AFcCe1F45e"
+            }
             target="_blank"
             rel="noopener noreferrer"
             className="view-invoice-button"

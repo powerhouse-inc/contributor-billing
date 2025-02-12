@@ -21,12 +21,14 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({ docState }) => {
       const response = await axios.post(
         "http://localhost:5000/api/create-invoice",
         {
-          creationDate: `${docState.dateIssued}T09:38:16.916Z` || "2025-01-27T14:38:16.916Z",
+          creationDate:
+            `${docState.dateIssued}T09:38:16.916Z` ||
+            "2025-01-27T14:38:16.916Z",
           invoiceItems: docState.lineItems.map((item: any) => ({
             currency: item.currency,
             name: item.description,
             quantity: item.quantity,
-            unitPrice: item.totalPriceTaxIncl *100,
+            unitPrice: item.totalPriceTaxIncl * 100,
           })) || [
             {
               currency: "EUR",
@@ -36,7 +38,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({ docState }) => {
             },
           ],
           invoiceNumber: docState.invoiceNo || "2.07",
-          buyerInfo:  {
+          buyerInfo: {
             businessName: "Liberuum",
             email: "liberuum@powerhouse.inc",
           },
@@ -46,14 +48,16 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({ docState }) => {
               value: {
                 currencies: ["EURe"],
                 paymentInformation: {
-                  paymentAddress: docState.issuer.paymentRouting.wallet.address || "0x4714C7EfE5D0213615FC6CBB8717B524eC433e9a",
+                  paymentAddress:
+                    docState.issuer.paymentRouting.wallet.address ||
+                    "0x4714C7EfE5D0213615FC6CBB8717B524eC433e9a",
                   chain: "xdai",
                 },
               },
             },
           ],
           tags: ["created_in_connect"],
-        }
+        },
       );
 
       console.log("Invoice created successfully:", response.data);
