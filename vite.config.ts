@@ -42,6 +42,8 @@ export default defineConfig(() => {
     "document-model-libs",
     "@powerhousedao/design-system",
     /^@powerhousedao\/design-system\//,
+    "@powerhousedao/common",
+    /^@powerhousedao\/common\//,
   ];
 
   const test: InlineConfig = {
