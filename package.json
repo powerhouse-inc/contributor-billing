@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "license": "AGPL-3.0-only",
   "types": "dist/index.d.ts",
-  "main": "dist/index.cjs",
+  "main": "dist/index.js",
   "publishConfig": {},
   "module": "dist/index.js",
   "type": "module",
@@ -14,17 +14,22 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/es/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "require": "./dist/cjs/index.js"
     },
     "./editors": {
       "types": "./dist/editors.d.ts",
       "import": "./dist/es/editors.js",
-      "require": "./dist/cjs/editors.cjs"
+      "require": "./dist/cjs/editors.js"
     },
     "./document-models": {
       "types": "./dist/documentModels.d.ts",
       "import": "./dist/es/documentModels.js",
-      "require": "./dist/cjs/documentModels.cjs"
+      "require": "./dist/cjs/documentModels.js"
+    },
+    "./manifest": {
+      "types": "./dist/manifest.d.ts",
+      "require": "./dist/cjs/manifest.js",
+      "import": "./dist/es/manifest.js"
     }
   },
   "scripts": {
@@ -50,8 +55,9 @@
     "service-unstartup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-unstartup.sh"
   },
   "peerDependencies": {
-    "document-model": "^2.18.0",
+    "document-model": "^2.20.0",
     "document-model-libs": "^1.128.0",
+    "@powerhousedao/common": "link:../monorepo/packages/common",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -61,16 +67,24 @@
     "@eslint/js": "^9.18.0",
     "@powerhousedao/analytics-engine-core": "^0.3.2",
     "@powerhousedao/codegen": "^0.32.0",
+    "@powerhousedao/common": "link:../monorepo/packages/common",
     "@powerhousedao/config": "^1.13.0",
-    "@powerhousedao/design-system": "^1.22.1",
+    "@powerhousedao/design-system": "^1.28.0",
     "@powerhousedao/ph-cli": "^0.30.0",
     "@powerhousedao/reactor-api": "^1.17.0",
     "@powerhousedao/reactor-local": "^1.16.0",
     "@powerhousedao/scalars": "^1.20.0",
-    "@storybook/components": "^8.5.4",
-    "@storybook/manager-api": "^8.5.4",
-    "@storybook/react": "^8.5.4",
-    "@storybook/react-vite": "^8.5.4",
+    "@storybook/addon-essentials": "^8.4.4",
+    "@storybook/addon-interactions": "^8.4.4",
+    "@storybook/addon-links": "^8.4.4",
+    "@storybook/blocks": "^8.4.4",
+    "@storybook/components": "^8.5.8",
+    "@storybook/manager-api": "^8.5.8",
+    "@storybook/preview-api": "^8.4.4",
+    "@storybook/react": "^8.5.8",
+    "@storybook/react-vite": "^8.5.8",
+    "@storybook/test": "^8.0.2",
+    "@storybook/types": "^8.4.4",
     "@types/eslint__js": "^8.42.3",
     "@types/node": "^22.10.9",
     "@types/react": "^18.3.18",
@@ -78,7 +92,7 @@
     "@typescript-eslint/parser": "^8.21.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.9",
-    "document-model": "^2.18.0",
+    "document-model": "^2.20.0",
     "document-model-libs": "^1.128.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^9.1.0",
@@ -92,6 +106,7 @@
     "prettier-plugin-organize-imports": "^4.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "storybook": "^8.4.4",
     "storybook-mock-date-decorator": "^2.0.6",
     "tailwind-merge": "^3.0.1",
     "tailwind-scrollbar": "^3.1.0",
