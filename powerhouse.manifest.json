@@ -18,5 +18,17 @@
       "name": "Invoice",
       "documentTypes": ["powerhouse/invoice"]
     }
+  ],
+  "apps": [
+    {
+      "id": "powerhouse/invoice/contributor",
+      "name": "Contributor App",
+      "driveEditor": "ContributorDrive"
+    },
+    {
+      "id": "powerhouse/invoice/administrator",
+      "name": "OH Administrator App",
+      "driveEditor": "AdministratorDrive"
+    }
   ]
 }
