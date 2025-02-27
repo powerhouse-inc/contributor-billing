@@ -10,11 +10,22 @@ Here you will find a field to add new packages. Add the package by adding inputt
 NPM handle: @powerhousedao/contributor-billing
 
 ## How to install this package in a local version of Connect?
-
-If you want to explore this package locally you can clone this repository and run a local version of connect with the following command: 
+Clone the repository and install the dependencies
 
 ```bash
+npm install
+```
+
+Generate the reducer files based of the document model schema
+
+```bash
+npm run generate
+```
+## Start connect: npm run connect
+
+If you want to explore this package run a local version of connect with the following command:
+```
 npm run connect
 ```
 
-You will then find the document models and editors that are part of this package below to test. 
+You will now find the document models and editors that are part of this package at the bottom of the connect interface an be able to test them in Connect Studio.
