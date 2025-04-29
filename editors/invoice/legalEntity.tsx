@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
-  AccountType,
-  InputMaybe,
-  LegalEntity,
-  LegalEntityId,
-  Scalars,
+  type AccountType,
+  type InputMaybe,
+  type LegalEntity,
+  type Scalars,
 } from "../../document-models/invoice";
-import React, { useCallback, useState } from "react";
-import { ComponentPropsWithRef, Ref, forwardRef } from "react";
+import type React from "react";
+import { useCallback, useState } from "react";
+import { type ComponentPropsWithRef, type Ref, forwardRef } from "react";
 import { twMerge } from "tailwind-merge";
 
 export type LegalEntityBasicInput = {

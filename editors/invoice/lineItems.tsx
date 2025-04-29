@@ -2,7 +2,7 @@
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable react/button-has-type */
 import { RWAButton } from "@powerhousedao/design-system";
-import { EditInvoiceInput, DeleteLineItemInput } from "document-models/invoice";
+import { EditInvoiceInput, DeleteLineItemInput } from "document-models/invoice/index.js";
 import { forwardRef, useState, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
 

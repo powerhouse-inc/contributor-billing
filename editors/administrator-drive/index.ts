@@ -1,15 +1,8 @@
-import { ExtendedEditor, EditorContextProps } from "document-model-libs";
-import Editor from "./editor";
-import {
-  DocumentDriveState,
-  DocumentDriveAction,
-  DocumentDriveLocalState,
-} from "@powerhousedao/common/document-drive";
-export const module: ExtendedEditor<
-  DocumentDriveState,
-  DocumentDriveAction,
-  DocumentDriveLocalState
-> = {
+import { type DriveEditorModule } from "@powerhousedao/reactor-browser";
+import Editor from "./editor.js";
+import { type DocumentDriveDocument } from "document-drive";
+
+export const module: DriveEditorModule<DocumentDriveDocument> = {
   Component: Editor,
   documentTypes: ["powerhouse/document-drive"],
   config: {

@@ -1,4 +1,4 @@
-import { InvoiceState } from "document-models/invoice";
+import { type InvoiceState } from "document-models/invoice/index.js";
 
 const mockInvoiceState: InvoiceState = {
   currency: "USD",

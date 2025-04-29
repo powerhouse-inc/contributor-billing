@@ -1,33 +1,32 @@
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable react/jsx-no-bind */
+ 
+ 
+ 
 import { useMemo } from "react";
-import { EditorProps } from "document-model/document";
+import type { EditorProps } from "document-model";
 import {
-  InvoiceState,
-  InvoiceAction,
-  InvoiceLineItem,
-  InvoiceLocalState,
+  type InvoiceLineItem,
   actions,
-  EditIssuerInput,
-  EditIssuerBankInput,
-  EditPayerInput,
-  DeleteLineItemInput,
-  Status,
-  EditStatusInput,
-  EditInvoiceInput,
-  EditIssuerWalletInput,
-} from "../../document-models/invoice";
+  type EditIssuerInput,
+  type EditIssuerBankInput,
+  type EditPayerInput,
+  type DeleteLineItemInput,
+  type Status,
+  type EditStatusInput,
+  type EditInvoiceInput,
+  type EditIssuerWalletInput,
+  type InvoiceDocument,
+} from "../../document-models/invoice/index.js";
 
-import { DateTimeLocalInput } from "./dateTimeLocalInput";
-import { LegalEntityForm } from "./legalEntity";
-import { LineItemsTable } from "./lineItems";
-import { loadUBLFile } from "./ingestUBL";
-import RequestFinance from "./requestFinance";
-import InvoiceToGnosis from "./invoiceToGnosis";
+import { DateTimeLocalInput } from "./dateTimeLocalInput.js";
+import { LegalEntityForm } from "./legalEntity.js";
+import { LineItemsTable } from "./lineItems.js";
+import { loadUBLFile } from "./ingestUBL.js";
+import RequestFinance from "./requestFinance.js";
+import InvoiceToGnosis from "./invoiceToGnosis.js";
 
-export default function Editor(
-  props: EditorProps<InvoiceState, InvoiceAction, InvoiceLocalState>,
-) {
+export type IProps = EditorProps<InvoiceDocument>;
+
+export default function Editor(props: IProps) {
   const { document, dispatch } = props;
   const state = document.state.global;
   console.log("State: ", state);
@@ -302,6 +301,7 @@ export default function Editor(
                   <button
                     className="absolute top-2 right-2 text-white"
                     onClick={handleReset}
+                    type="button"
                   >
                     &times;
                   </button>

@@ -1,4 +1,4 @@
-import { ComponentPropsWithRef, Ref, forwardRef } from "react";
+import { type ComponentPropsWithRef, type Ref, forwardRef } from "react";
 import { twMerge } from "tailwind-merge";
 
 export type DateTimeLocalInputProps = Omit<
