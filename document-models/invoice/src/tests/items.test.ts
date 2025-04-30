@@ -4,18 +4,17 @@
  */
 
 import { generateMock } from "@powerhousedao/codegen";
-import { utils as documentModelUtils } from "document-model/document";
 
 import utils from "../../gen/utils";
 import {
   z,
-  AddLineItemInput,
-  EditLineItemInput,
-  DeleteLineItemInput,
+  type AddLineItemInput,
+  type EditLineItemInput,
+  type DeleteLineItemInput,
 } from "../../gen/schema";
 import { reducer } from "../../gen/reducer";
 import * as creators from "../../gen/items/creators";
-import { InvoiceDocument } from "../../gen/types";
+import { type InvoiceDocument } from "../../gen/types";
 
 describe("Items Operations", () => {
   let document: InvoiceDocument;

@@ -4,21 +4,20 @@
  */
 
 import { generateMock } from "@powerhousedao/codegen";
-import { utils as documentModelUtils } from "document-model/document";
 
 import utils from "../../gen/utils";
 import {
   z,
-  EditIssuerInput,
-  EditIssuerBankInput,
-  EditIssuerWalletInput,
-  EditPayerInput,
-  EditPayerBankInput,
-  EditPayerWalletInput,
+  type EditIssuerInput,
+  type EditIssuerBankInput,
+  type EditIssuerWalletInput,
+  type EditPayerInput,
+  type EditPayerBankInput,
+  type EditPayerWalletInput,
 } from "../../gen/schema";
 import { reducer } from "../../gen/reducer";
 import * as creators from "../../gen/parties/creators";
-import { InvoiceDocument } from "../../gen/types";
+import { type InvoiceDocument } from "../../gen/types";
 
 describe("Parties Operations", () => {
   let document: InvoiceDocument;
