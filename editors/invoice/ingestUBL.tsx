@@ -3,7 +3,7 @@ import {
   InvoiceAction,
   LegalEntity,
   actions,
-} from "../../document-models/invoice";
+} from "../../document-models/invoice/index.js";
 
 interface LoadUBLFileProps {
   file: File;
@@ -42,11 +42,6 @@ export class UBLConverter {
     this.processLineItems(invoice);
   }
 
-  // private getElementText(parent: Element, selector: string): string {
-  //   const element = parent.querySelector(selector);
-  //   return element ? element.textContent || "" : "";
-  // }
-
   getElementText(
     node: Element,
     selector: string,
@@ -80,7 +75,9 @@ export class UBLConverter {
           this.getElementText(
             invoice,
             "ActualDeliveryDate, cbc\\:ActualDeliveryDate",
-          ) || null,
+          ) ||
+          this.getElementText(invoice, "TaxPointDate, cbc\\:TaxPointDate") ||
+          null,
         currency:
           this.getElementText(invoice, "CurrencyCode, cbc\\:CurrencyCode") ||
           this.getElementText(
@@ -89,23 +86,6 @@ export class UBLConverter {
           ),
       }),
     );
-
-    //   // Process document references
-    //   const refs = invoice.querySelectorAll(
-    //     "AdditionalDocumentReference, cac\\:AdditionalDocumentReference",
-    //   );
-    //   refs.forEach((ref) => {
-    //     this.dispatch(
-    //       actions.addRef({
-    //         id: this.getElementText(ref, "ID, cbc\\:ID"),
-    //         value:
-    //           this.getElementText(
-    //             ref,
-    //             "DocumentDescription, cbc\\:DocumentDescription",
-    //           ) || this.getElementText(ref, "ID, cbc\\:ID"),
-    //       }),
-    //     );
-    //   });
   }
 
   private processParties(invoice: Element) {
@@ -159,6 +139,7 @@ export class UBLConverter {
           ),
         }),
       );
+
       const paymentMeans = invoice.querySelector(
         "PaymentMeans, cac\\:PaymentMeans",
       );
@@ -169,31 +150,89 @@ export class UBLConverter {
         );
 
         if (financialAccount) {
-          this.dispatch(
-            actions.editIssuerBank({
-              accountNum:
-                this.getElementText(financialAccount, "cbc\\:ID, ID", "IBAN") ??
-                this.getElementText(financialAccount, "cbc\\:ID, ID"),
-
-              BIC: this.getElementText(financialAccount, "cbc\\:ID, ID", "BIC"),
-
-              SWIFT: this.getElementText(
-                financialAccount,
-                "cbc\\:ID, ID",
-                "SWIFT",
-              ),
-
-              // ABA extraction
-              ABA: this.getElementText(financialAccount, "cbc\\:ID, ID", "ABA"),
-
-              // Name remains unchanged
-              name: this.getElementText(
-                financialAccount,
-                "FinancialInstitutionBranch FinancialInstitution Name, " +
-                  "cac\\:FinancialInstitutionBranch cac\\:FinancialInstitution cbc\\:Name",
-              ),
-            }),
+          const walletAddress = this.getElementText(
+            financialAccount,
+            "cbc\\:ID, ID",
+            "walletAddress",
           );
+          if (walletAddress) {
+            this.dispatch(
+              actions.editIssuerWallet({
+                address: walletAddress,
+                chainName: this.getElementText(
+                  financialAccount,
+                  "cbc\\:ID, ID",
+                  "chainName",
+                ),
+                chainId: this.getElementText(
+                  financialAccount,
+                  "cbc\\:ID, ID",
+                  "chainId",
+                ),
+              }),
+            );
+          } else {
+            this.dispatch(
+              actions.editIssuerBank({
+                accountNum:
+                  this.getElementText(
+                    financialAccount,
+                    "cbc\\:ID, ID",
+                    "IBAN",
+                  ) ?? this.getElementText(financialAccount, "cbc\\:ID, ID"),
+                BIC: this.getElementText(
+                  financialAccount,
+                  "cbc\\:ID, ID",
+                  "BIC",
+                ),
+                SWIFT: this.getElementText(
+                  financialAccount,
+                  "cbc\\:ID, ID",
+                  "SWIFT",
+                ),
+                ABA: this.getElementText(
+                  financialAccount,
+                  "cbc\\:ID, ID",
+                  "ABA",
+                ),
+                name: this.getElementText(
+                  financialAccount,
+                  "FinancialInstitutionBranch FinancialInstitution Name, " +
+                    "cac\\:FinancialInstitutionBranch cac\\:FinancialInstitution cbc\\:Name",
+                ),
+                streetAddress: this.getElementText(
+                  financialAccount,
+                  "cbc\\:StreetName, StreetName",
+                  "streetAddress",
+                ),
+                extendedAddress: this.getElementText(
+                  financialAccount,
+                  "cbc\\:AdditionalStreetName, AdditionalStreetName",
+                  "extendedAddress",
+                ),
+                city: this.getElementText(
+                  financialAccount,
+                  "cbc\\:CityName, CityName",
+                  "city",
+                ),
+                stateProvince: this.getElementText(
+                  financialAccount,
+                  "cbc\\:CountrySubentity, CountrySubentity",
+                  "stateProvince",
+                ),
+                postalCode: this.getElementText(
+                  financialAccount,
+                  "cbc\\:PostalZone, PostalZone",
+                  "postalCode",
+                ),
+                country: this.getElementText(
+                  financialAccount,
+                  "cbc\\:IdentificationCode, IdentificationCode",
+                  "country",
+                ),
+              }),
+            );
+          }
         }
       }
     }
@@ -205,10 +244,15 @@ export class UBLConverter {
     if (customer) {
       this.dispatch(
         actions.editPayer({
-          id: this.getElementText(
-            customer,
-            "PartyIdentification ID, cac\\:PartyIdentification cbc\\:ID",
-          ),
+          id:
+            this.getElementText(
+              customer,
+              "PartyIdentification ID, cac\\:PartyIdentification cbc\\:ID",
+            ) ||
+            this.getElementText(
+              customer,
+              "CompanyID, cac\\:CompanyID cbc\\:ID",
+            ),
           name: this.getElementText(
             customer,
             "PartyName Name, cac\\:PartyName cbc\\:Name",

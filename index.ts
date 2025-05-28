@@ -1,10 +1,8 @@
-import { Manifest } from "document-model/document";
-import * as documentModelsExports from "./document-models";
-import * as editorsExports from "./editors";
-
-export const documentModels = Object.values(documentModelsExports);
-export const editors = Object.values(editorsExports);
-
-import manifestJson from "./powerhouse.manifest.json" assert { type: "json" };
+import { Manifest } from "document-model";
+import manifestJson from "./powerhouse.manifest.json" with { type: "json" };
+import * as documentModelsExports from './document-models/index.js';
+import * as editorsExports from './editors/index.js';
 
 export const manifest: Manifest = manifestJson;
+export const documentModels = Object.values(documentModelsExports);
+export const editors = Object.values(editorsExports);

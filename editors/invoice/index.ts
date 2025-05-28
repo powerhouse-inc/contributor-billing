@@ -1,13 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-import Editor from "./editor";
+import type { EditorModule } from "document-model";
+import Editor from "./editor.js";
+import type { InvoiceDocument } from "../../document-models/invoice/index.js";
 
-export const module = {
+export const module: EditorModule<InvoiceDocument> = {
   Component: Editor,
-  documentTypes: ["Invoice"],
+  documentTypes: ["powerhouse/invoice"],
   config: {
-    id: "invoice-editor",
-    disableExternalControls: false,
+    id: "powerhouse-invoice-editor",
+    disableExternalControls: true,
+    documentToolbarEnabled: true,
+    showSwitchboardLink: true,
   },
 };
 

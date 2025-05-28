@@ -4,7 +4,7 @@
  * - delete the file and run the code generator again to have it reset
  */
 
-import { InvoiceGeneralOperations } from "../../gen/general/operations";
+import type { InvoiceGeneralOperations } from "../../gen/general/operations.js";
 
 export const reducer: InvoiceGeneralOperations = {
   editInvoiceOperation(state, action, dispatch) {
@@ -57,6 +57,14 @@ export const reducer: InvoiceGeneralOperations = {
     try {
       if (!action.input.id) throw new Error("No input.id");
       state.refs = state.refs.filter((r) => r.id !== action.input.id);
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  setPaymentAccountOperation(state, action, dispatch) {
+    try {
+      if (!action.input.paymentAccount) throw new Error("No input.paymentAccount");
+      state.paymentAccount = action.input.paymentAccount;
     } catch (e) {
       console.error(e);
     }

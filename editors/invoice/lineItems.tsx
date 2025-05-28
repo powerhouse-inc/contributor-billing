@@ -2,9 +2,36 @@
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable react/button-has-type */
 import { RWAButton } from "@powerhousedao/design-system";
-import { EditInvoiceInput, DeleteLineItemInput } from "document-models/invoice";
+import { EditInvoiceInput, DeleteLineItemInput } from "../../document-models/invoice/index.js";
 import { forwardRef, useState, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { CurrencyForm } from "./components/currencyForm.js";
+import { NumberForm } from "./components/numberForm.js";
+import { InputField } from "./components/inputField.js";
+
+// Helper function to get precision based on currency
+function getCurrencyPrecision(currency: string): number {
+  return currency === "USDS" || currency === "DAI" ? 6 : 2;
+}
+
+// Helper function to format numbers with appropriate decimal places
+function formatNumber(value: number): string {
+  // Check if the value has decimal places
+  const hasDecimals = value % 1 !== 0;
+
+  // If no decimals or only trailing zeros after 2 decimal places, show 2 decimal places
+  if (!hasDecimals || value.toFixed(5).endsWith("000")) {
+    return value.toFixed(2);
+  }
+
+  // Otherwise, show atual decimal places up to 5
+  const stringValue = value.toString();
+  const decimalPart = stringValue.split(".")[1] || "";
+
+  // Determine how many decimal places to show (up to 5)
+  const decimalPlaces = Math.min(Math.max(2, decimalPart.length), 5);
+  return value.toFixed(decimalPlaces);
+}
 
 type LineItem = {
   currency: string;
@@ -18,6 +45,18 @@ type LineItem = {
   unitPriceTaxIncl: number;
 };
 
+type EditableLineItem = {
+  currency: string;
+  description: string;
+  id: string;
+  quantity: number | string;
+  taxPercent: number | string;
+  totalPriceTaxExcl: number;
+  totalPriceTaxIncl: number;
+  unitPriceTaxExcl: number | string;
+  unitPriceTaxIncl: number;
+};
+
 type EditableLineItemProps = {
   readonly item: Partial<LineItem>;
   readonly onSave: (item: LineItem) => void;
@@ -27,21 +66,38 @@ type EditableLineItemProps = {
 
 const EditableLineItem = forwardRef(function EditableLineItem(
   props: EditableLineItemProps,
-  ref: React.Ref<HTMLTableRowElement>,
+  ref: React.Ref<HTMLTableRowElement>
 ) {
   const { item, onSave, onCancel, currency } = props;
-  const [editedItem, setEditedItem] = useState<Partial<LineItem>>({
+  const [editedItem, setEditedItem] = useState<Partial<EditableLineItem>>({
     ...item,
     currency,
-    quantity: item.quantity ?? 0,
-    taxPercent: item.taxPercent ?? 0,
-    unitPriceTaxExcl: item.unitPriceTaxExcl ?? 0,
+    quantity: item.quantity ?? "",
+    taxPercent: item.taxPercent ?? "",
+    unitPriceTaxExcl: item.unitPriceTaxExcl ?? "",
   });
 
   const calculatedValues = useMemo(() => {
-    const quantity = editedItem.quantity ?? 0;
-    const unitPriceTaxExcl = editedItem.unitPriceTaxExcl ?? 0;
-    const taxPercent = editedItem.taxPercent ?? 0;
+    const quantity =
+      typeof editedItem.quantity === "string"
+        ? editedItem.quantity === ""
+          ? 0
+          : Number(editedItem.quantity)
+        : (editedItem.quantity ?? 0);
+
+    const unitPriceTaxExcl =
+      typeof editedItem.unitPriceTaxExcl === "string"
+        ? editedItem.unitPriceTaxExcl === ""
+          ? 0
+          : Number(editedItem.unitPriceTaxExcl)
+        : (editedItem.unitPriceTaxExcl ?? 0);
+
+    const taxPercent =
+      typeof editedItem.taxPercent === "string"
+        ? editedItem.taxPercent === ""
+          ? 0
+          : Number(editedItem.taxPercent)
+        : (editedItem.taxPercent ?? 0);
 
     const totalPriceTaxExcl = quantity * unitPriceTaxExcl;
     const taxAmount = totalPriceTaxExcl * (taxPercent / 100);
@@ -55,29 +111,77 @@ const EditableLineItem = forwardRef(function EditableLineItem(
     };
   }, [editedItem.quantity, editedItem.unitPriceTaxExcl, editedItem.taxPercent]);
 
-  function handleInputChange(field: keyof LineItem) {
+  function handleInputChange(field: keyof EditableLineItem) {
     return function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
       const value = event.target.value;
-      setEditedItem((prev) => ({
-        ...prev,
-        [field]:
-          field === "description"
-            ? value
-            : value === ""
-              ? 0
-              : parseFloat(value) || 0,
-      }));
+
+      if (field === "description") {
+        setEditedItem((prev) => ({ ...prev, [field]: value }));
+        return;
+      }
+
+      // For numeric fields
+      if (value === "" || value === "0") {
+        setEditedItem((prev) => ({ ...prev, [field]: value }));
+        return;
+      }
+
+      if (field === "quantity") {
+        // Allow only integers for quantity
+        if (/^\d+$/.test(value)) {
+          setEditedItem((prev) => ({ ...prev, [field]: value }));
+        }
+      } else if (field === "taxPercent") {
+        // Allow integers from 0-100 for tax percent, with more permissive validation
+        const numValue = parseInt(value, 10);
+        if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+          setEditedItem((prev) => ({ ...prev, [field]: value }));
+        }
+      } else if (field === "unitPriceTaxExcl") {
+        // For unit price, allow up to dynamic decimal places based on currency
+        const maxDecimals = getCurrencyPrecision(currency);
+        const regex = new RegExp(`^-?\\d*\\.?\\d{0,${maxDecimals}}$`);
+        if (regex.test(value)) {
+          setEditedItem((prev) => ({ ...prev, [field]: value }));
+        }
+      } else {
+        // For other decimal fields
+        if (/^-?\d*\.?\d*$/.test(value)) {
+          setEditedItem((prev) => ({ ...prev, [field]: value }));
+        }
+      }
     };
   }
 
   function handleSave() {
+    const quantity =
+      typeof editedItem.quantity === "string"
+        ? editedItem.quantity === ""
+          ? 0
+          : Number(editedItem.quantity)
+        : (editedItem.quantity ?? 0);
+
+    const unitPriceTaxExcl =
+      typeof editedItem.unitPriceTaxExcl === "string"
+        ? editedItem.unitPriceTaxExcl === ""
+          ? 0
+          : Number(editedItem.unitPriceTaxExcl)
+        : (editedItem.unitPriceTaxExcl ?? 0);
+
+    const taxPercent =
+      typeof editedItem.taxPercent === "string"
+        ? editedItem.taxPercent === ""
+          ? 0
+          : Number(editedItem.taxPercent)
+        : (editedItem.taxPercent ?? 0);
+
     const completeItem: LineItem = {
       id: editedItem.id ?? uuidv4(),
       currency: editedItem.currency!,
       description: editedItem.description ?? "",
-      quantity: editedItem.quantity ?? 0,
-      taxPercent: editedItem.taxPercent ?? 0,
-      unitPriceTaxExcl: editedItem.unitPriceTaxExcl ?? 0,
+      quantity: quantity,
+      taxPercent: taxPercent,
+      unitPriceTaxExcl: unitPriceTaxExcl,
       unitPriceTaxIncl: calculatedValues.unitPriceTaxIncl,
       totalPriceTaxExcl: calculatedValues.totalPriceTaxExcl,
       totalPriceTaxIncl: calculatedValues.totalPriceTaxIncl,
@@ -88,50 +192,46 @@ const EditableLineItem = forwardRef(function EditableLineItem(
   return (
     <tr ref={ref} className="hover:bg-gray-50">
       <td className="border border-gray-200 p-3">
-        <input
-          className="w-full rounded border p-1"
-          onChange={handleInputChange("description")}
-          placeholder="Description"
-          type="text"
+        <InputField 
+          onBlur={() => {}}
+          handleInputChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+            setEditedItem((prev) => ({ ...prev, description: e.target.value }));
+          }}
           value={editedItem.description ?? ""}
+          placeholder="Description"
         />
       </td>
       <td className="border border-gray-200 p-3">
-        <input
-          className="w-full rounded border p-1 text-right"
-          min="0"
-          onChange={handleInputChange("quantity")}
-          step="1"
-          type="number"
-          value={editedItem.quantity ?? ""}
+        <NumberForm
+          number={editedItem.quantity ?? ""}
+          precision={0}
+          handleInputChange={handleInputChange("quantity")}
+          placeholder="Quantity"
         />
       </td>
       <td className="border border-gray-200 p-3">
-        <input
-          className="w-full rounded border p-1 text-right"
-          min="0"
-          onChange={handleInputChange("unitPriceTaxExcl")}
-          step="0.01"
-          type="number"
-          value={editedItem.unitPriceTaxExcl ?? ""}
+        <NumberForm
+          number={editedItem.unitPriceTaxExcl ?? ""}
+          precision={getCurrencyPrecision(currency)}
+          handleInputChange={handleInputChange("unitPriceTaxExcl")}
+          placeholder="Unit Price (excl. tax)"
         />
       </td>
       <td className="border border-gray-200 p-3">
-        <input
-          className="w-full rounded border p-1 text-right"
-          max="100"
-          min="0"
-          onChange={handleInputChange("taxPercent")}
-          step="0.1"
-          type="number"
-          value={editedItem.taxPercent ?? ""}
+        <NumberForm
+          number={editedItem.taxPercent ?? ""}
+          precision={0}
+          min={0}
+          max={100}
+          handleInputChange={handleInputChange("taxPercent")}
+          placeholder="Tax %"
         />
       </td>
       <td className="border border-gray-200 p-3 text-right font-medium">
-        {calculatedValues.totalPriceTaxExcl.toFixed(2)}
+        {formatNumber(calculatedValues.totalPriceTaxExcl)}
       </td>
       <td className="border border-gray-200 p-3 text-right font-medium">
-        {calculatedValues.totalPriceTaxIncl.toFixed(2)}
+        {formatNumber(calculatedValues.totalPriceTaxIncl)}
       </td>
       <td className="border border-gray-200 p-3">
         <div className="flex space-x-2">
@@ -187,31 +287,11 @@ export function LineItemsTable({
     setIsAddingNew(false);
   }
 
-  function handleCurrencyChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    onUpdateCurrency({ currency: event.target.value });
-  }
-
   return (
-    <div>
+    <div className="mt-4">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h4 className="text-xl font-semibold text-gray-900">Line Items</h4>
-          <div className="flex items-center gap-2">
-            <select
-              id="currency"
-              className="rounded border border-gray-200 px-2 py-1"
-              value={currency}
-              onChange={handleCurrencyChange}
-            >
-              <option value="USD">USD</option>
-              <option value="USDS">USDS</option>
-              <option value="EUR">EUR</option>
-              <option value="GBP">GBP</option>
-              <option value="JPY">JPY</option>
-              <option value="CNY">CNY</option>
-              <option value="CHF">CHF</option>
-            </select>
-          </div>
         </div>
 
         <RWAButton
@@ -270,16 +350,19 @@ export function LineItemsTable({
                     {item.quantity}
                   </td>
                   <td className="border-b border-gray-200 p-3 text-right">
-                    {item.unitPriceTaxExcl.toFixed(2)}
+                    {formatNumber(item.unitPriceTaxExcl)}
                   </td>
                   <td className="border-b border-gray-200 p-3 text-right">
-                    {item.taxPercent.toFixed(1)}%
+                    {typeof item.taxPercent === "number"
+                      ? Math.round(item.taxPercent)
+                      : 0}
+                    %
                   </td>
                   <td className="border-b border-gray-200 p-3 text-right font-medium">
-                    {item.totalPriceTaxExcl.toFixed(2)}
+                    {formatNumber(item.totalPriceTaxExcl)}
                   </td>
                   <td className="border-b border-gray-200 p-3 text-right font-medium">
-                    {item.totalPriceTaxIncl.toFixed(2)}
+                    {formatNumber(item.totalPriceTaxIncl)}
                   </td>
                   <td className="border-b border-gray-200 p-3">
                     <div className="flex justify-center space-x-2">
@@ -299,7 +382,7 @@ export function LineItemsTable({
                     </div>
                   </td>
                 </tr>
-              ),
+              )
             )}
             {isAddingNew ? (
               <EditableLineItem

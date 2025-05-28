@@ -10,6 +10,10 @@ scalar OLabel
 scalar Currency
 scalar PHID
 scalar OID
+scalar Amount_Fiat
+scalar Amount_Currency
+scalar Amount_Crypto
+scalar Amount
 type InvoiceState {
   invoiceNo: String!
   dateIssued: String!
@@ -23,6 +27,7 @@ type InvoiceState {
   lineItems: [InvoiceLineItem!]!
   totalPriceTaxExcl: Float!
   totalPriceTaxIncl: Float!
+  paymentAccount: String
 }
 
 type Ref {
@@ -63,7 +68,7 @@ type ContactInfo {
 
 type PaymentRouting {
   bank: Bank
-  wallet: Wallet
+  wallet: InvoiceWallet
 }
 
 type Bank {
@@ -73,7 +78,7 @@ type Bank {
   BIC: String
   SWIFT: String
   accountNum: String!
-  accountType: AccountType
+  accountType: InvoiceAccountType
   beneficiary: String
   intermediaryBank: IntermediaryBank
   memo: String
@@ -86,12 +91,12 @@ type IntermediaryBank {
   BIC: String
   SWIFT: String
   accountNum: String!
-  accountType: AccountType
+  accountType: InvoiceAccountType
   beneficiary: String
   memo: String
 }
 
-type Wallet {
+type InvoiceWallet {
   rpc: String
   chainName: String
   chainId: String
@@ -108,6 +113,13 @@ type InvoiceLineItem {
   unitPriceTaxIncl: Float!
   totalPriceTaxExcl: Float!
   totalPriceTaxIncl: Float!
+  lineItemTag: [InvoiceLineItemTag!]!
+}
+
+type InvoiceLineItemTag {
+  dimension: String!
+  value: String!
+  label: String
 }
 
 union LegalEntityId = LegalEntityTaxId | LegalEntityCorporateRegistrationId
@@ -123,26 +135,41 @@ type LegalEntityCorporateRegistrationId {
 enum Status {
   DRAFT
   ISSUED
+  CANCELLED
   ACCEPTED
   REJECTED
-  PAID
+  AWAITINGPAYMENT
+  PAYMENTSCHEDULED
+  PAYMENTSENT
+  PAYMENTISSUE
+  PAYMENTRECEIVED
 }
 
-enum AccountType {
+enum InvoiceAccountType {
   CHECKING
   SAVINGS
   TRUST
   WALLET
 }
 
+enum InvoiceAccountTypeInput {
+  CHECKING
+  SAVINGS
+  TRUST
+  WALLET
+}
+
+
+
+
 # general
 
 input EditInvoiceInput {
-  invoiceNo: String
-  dateIssued: String
-  dateDue: String
-  dateDelivered: String
-  currency: String
+    invoiceNo: String
+    dateIssued: String
+    dateDue: String
+    dateDelivered: String
+    currency: String
 }
 
 input EditStatusInput {
@@ -150,151 +177,164 @@ input EditStatusInput {
 }
 
 input AddRefInput {
-  id: OID!
-  value: String!
+    id: OID!
+    value: String!
 }
 
 input EditRefInput {
-  id: OID!
-  value: String!
+    id: OID!
+    value: String!
 }
 
 input DeleteRefInput {
   id: OID!
 }
 
+input SetPaymentAccountInput {
+   paymentAccount: String!
+}
+
 # parties
 
 input EditIssuerInput {
-  id: String
-  name: String
-  streetAddress: String
-  extendedAddress: String
-  city: String
-  postalCode: String
-  country: String
-  stateProvince: String
-  tel: String
-  email: String
+    id: String
+    name: String
+    streetAddress: String
+    extendedAddress: String
+    city: String
+    postalCode: String
+    country: String
+    stateProvince: String
+    tel: String
+    email: String
 }
 
 input EditIssuerBankInput {
   name: String
-  streetAddress: String
-  extendedAddress: String
-  city: String
-  postalCode: String
-  country: String
-  stateProvince: String
-  ABA: String
-  BIC: String
-  SWIFT: String
-  accountNum: String
-  accountType: AccountType
-  beneficiary: String
-  memo: String
-  # intermediaryBank
-  nameIntermediary: String
-  streetAddressIntermediary: String
-  extendedAddressIntermediary: String
-  cityIntermediary: String
-  postalCodeIntermediary: String
-  countryIntermediary: String
-  stateProvinceIntermediary: String
-  ABAIntermediary: String
-  BICIntermediary: String
-  SWIFTIntermediary: String
-  accountNumIntermediary: String
-  accountTypeIntermediary: AccountType
-  beneficiaryIntermediary: String
-  memoIntermediary: String
+    streetAddress: String
+    extendedAddress: String
+    city: String
+    postalCode: String
+    country: String
+    stateProvince: String
+    ABA: String
+    BIC: String
+    SWIFT: String
+    accountNum: String
+    accountType: InvoiceAccountTypeInput
+    beneficiary: String
+    memo: String
+    # intermediaryBank
+    nameIntermediary: String
+    streetAddressIntermediary: String
+    extendedAddressIntermediary: String
+    cityIntermediary: String
+    postalCodeIntermediary: String
+    countryIntermediary: String
+    stateProvinceIntermediary: String
+    ABAIntermediary: String
+    BICIntermediary: String
+    SWIFTIntermediary: String
+    accountNumIntermediary: String
+    accountTypeIntermediary: InvoiceAccountTypeInput
+    beneficiaryIntermediary: String
+    memoIntermediary: String
 }
 
 input EditIssuerWalletInput {
-  rpc: String
-  chainName: String
-  chainId: String
-  address: String
+    rpc: String
+    chainName: String
+    chainId: String
+    address: String
 }
 
+
+
 input EditPayerInput {
-  id: String
-  name: String
-  streetAddress: String
-  extendedAddress: String
-  city: String
-  postalCode: String
-  country: String
-  stateProvince: String
-  tel: String
-  email: String
+    id: String
+    name: String
+    streetAddress: String
+    extendedAddress: String
+    city: String
+    postalCode: String
+    country: String
+    stateProvince: String
+    tel: String
+    email: String
 }
 
 input EditPayerBankInput {
-  name: String
-  streetAddress: String
-  extendedAddress: String
-  city: String
-  postalCode: String
-  country: String
-  stateProvince: String
-  ABA: String
-  BIC: String
-  SWIFT: String
-  accountNum: String
-  accountType: AccountType
-  beneficiary: String
-  memo: String
-  # intermediaryBank
-  nameIntermediary: String
-  streetAddressIntermediary: String
-  extendedAddressIntermediary: String
-  cityIntermediary: String
-  postalCodeIntermediary: String
-  countryIntermediary: String
-  stateProvinceIntermediary: String
-  ABAIntermediary: String
-  BICIntermediary: String
-  SWIFTIntermediary: String
-  accountNumIntermediary: String
-  accountTypeIntermediary: AccountType
-  beneficiaryIntermediary: String
-  memoIntermediary: String
+    name: String
+    streetAddress: String
+    extendedAddress: String
+    city: String
+    postalCode: String
+    country: String
+    stateProvince: String
+    ABA: String
+    BIC: String
+    SWIFT: String
+    accountNum: String
+    accountType: InvoiceAccountTypeInput
+    beneficiary: String
+    memo: String
+    # intermediaryBank
+    nameIntermediary: String
+    streetAddressIntermediary: String
+    extendedAddressIntermediary: String
+    cityIntermediary: String
+    postalCodeIntermediary: String
+    countryIntermediary: String
+    stateProvinceIntermediary: String
+    ABAIntermediary: String
+    BICIntermediary: String
+    SWIFTIntermediary: String
+    accountNumIntermediary: String
+    accountTypeIntermediary: InvoiceAccountTypeInput
+    beneficiaryIntermediary: String
+    memoIntermediary: String
 }
 
 input EditPayerWalletInput {
-  rpc: String
-  chainName: String
-  chainId: String
-  address: String
+    rpc: String
+    chainName: String
+    chainId: String
+    address: String
 }
 
 # items
 
 input AddLineItemInput {
-  id: OID!
-  description: String!
-  taxPercent: Float!
-  quantity: Float!
-  currency: String! # Default can be USD
-  unitPriceTaxExcl: Float!
-  unitPriceTaxIncl: Float!
-  totalPriceTaxExcl: Float!
-  totalPriceTaxIncl: Float!
+    id: OID!
+    description: String!
+    taxPercent: Float!
+    quantity: Float!
+    currency: String! # Default can be USD
+    unitPriceTaxExcl: Float!
+    unitPriceTaxIncl: Float!
+    totalPriceTaxExcl: Float!
+    totalPriceTaxIncl: Float!
 }
 
 input EditLineItemInput {
-  id: OID!
-  description: String
-  taxPercent: Float
-  quantity: Float
-  currency: String
-  unitPriceTaxExcl: Float
-  unitPriceTaxIncl: Float
-  totalPriceTaxExcl: Float
-  totalPriceTaxIncl: Float
+    id: OID!
+    description: String
+    taxPercent: Float
+    quantity: Float
+    currency: String
+    unitPriceTaxExcl: Float
+    unitPriceTaxIncl: Float
+    totalPriceTaxExcl: Float
+    totalPriceTaxIncl: Float
 }
 
 input DeleteLineItemInput {
   id: OID!
+}
+
+input SetLineItemTagInput {
+  id: OID!
+  dimension: String!
+  value: String!
+  label: String
 }

@@ -1,3 +1,2 @@
-export { module as Invoice } from "./invoice";
-export { module as ContributorDrive } from "./contributor-drive";
-export { module as AdministratorDrive } from "./administrator-drive";
+export { module as Invoice } from "./invoice/index.js";
+export { module as ContributorBilling } from "./contributor-billing/index.js";
