@@ -356,6 +356,10 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
               <Text style={styles.sectionTitle}>Issuer</Text>
               <Text style={styles.companyName}>{invoice.issuer.name}</Text>
               <Text style={styles.companyInfo}>
+                Tax/Corp ID:{" "}
+                {invoice.issuer.id?.taxId || invoice.issuer.id?.corpRegId || ""}
+              </Text>
+              <Text style={styles.companyInfo}>
                 {invoice.issuer.address?.streetAddress || ""}
               </Text>
               {invoice.issuer.address?.extendedAddress && (
@@ -380,6 +384,10 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
               <Text style={styles.sectionTitle}>Payer</Text>
               <Text style={styles.companyName}>{invoice.payer.name}</Text>
               <Text style={styles.companyInfo}>
+                Tax/Corp ID:{" "}
+                {invoice.payer.id?.taxId || invoice.payer.id?.corpRegId || ""}
+              </Text>
+              <Text style={styles.companyInfo}>
                 {invoice.payer.address?.streetAddress || ""}
               </Text>
               {invoice.payer.address?.extendedAddress && (
@@ -400,24 +408,85 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
             </View>
 
             {/* Invoice details (right) */}
-            <View style={{ width: "30%", alignItems: "flex-end", textAlign: "right" }}>
+            <View
+              style={{
+                width: "30%",
+                alignItems: "flex-end",
+                textAlign: "right",
+              }}
+            >
               <View style={{ marginBottom: 18, width: "100%" }}>
-                <Text style={{ color: "#9ea0a2", fontSize: 14, textAlign: "right", fontFamily: "Helvetica", fontWeight: "normal" }}>Invoice date</Text>
-                <Text style={{ fontWeight: 4, fontSize: 14, textAlign: "right", color: "#000", fontFamily: "Helvetica" }}>
+                <Text
+                  style={{
+                    color: "#9ea0a2",
+                    fontSize: 14,
+                    textAlign: "right",
+                    fontFamily: "Helvetica",
+                    fontWeight: "normal",
+                  }}
+                >
+                  Invoice date
+                </Text>
+                <Text
+                  style={{
+                    fontWeight: 4,
+                    fontSize: 14,
+                    textAlign: "right",
+                    color: "#000",
+                    fontFamily: "Helvetica",
+                  }}
+                >
                   {formatDate(invoice.dateIssued)}
                 </Text>
               </View>
               <View style={{ marginBottom: 18, width: "100%" }}>
-                <Text style={{ color: "#9ea0a2", fontSize: 14, textAlign: "right", fontFamily: "Helvetica", fontWeight: "normal" }}>Due date</Text>
-                <Text style={{ fontWeight: 4, fontSize: 14, textAlign: "right", color: "#000", fontFamily: "Helvetica" }}>
+                <Text
+                  style={{
+                    color: "#9ea0a2",
+                    fontSize: 14,
+                    textAlign: "right",
+                    fontFamily: "Helvetica",
+                    fontWeight: "normal",
+                  }}
+                >
+                  Due date
+                </Text>
+                <Text
+                  style={{
+                    fontWeight: 4,
+                    fontSize: 14,
+                    textAlign: "right",
+                    color: "#000",
+                    fontFamily: "Helvetica",
+                  }}
+                >
                   {formatDate(invoice.dateDue)}
                 </Text>
               </View>
               {fiatMode && (
                 <View style={{ marginBottom: 18, width: "100%" }}>
-                  <Text style={{ color: "#9ea0a2", fontSize: 14, textAlign: "right", fontFamily: "Helvetica", fontWeight: "normal" }}>Account Type:</Text>
-                  <Text style={{ fontWeight: 4, fontSize: 14, textAlign: "right", color: "#000", fontFamily: "Helvetica" }}>
-                    {invoice.issuer.paymentRouting?.bank?.accountType || "CHECKING"}
+                  <Text
+                    style={{
+                      color: "#9ea0a2",
+                      fontSize: 14,
+                      textAlign: "right",
+                      fontFamily: "Helvetica",
+                      fontWeight: "normal",
+                    }}
+                  >
+                    Account Type:
+                  </Text>
+                  <Text
+                    style={{
+                      fontWeight: 4,
+                      fontSize: 14,
+                      textAlign: "right",
+                      color: "#000",
+                      fontFamily: "Helvetica",
+                    }}
+                  >
+                    {invoice.issuer.paymentRouting?.bank?.accountType ||
+                      "CHECKING"}
                   </Text>
                 </View>
               )}
@@ -475,7 +544,10 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
               <Text style={styles.totalValue}>
                 {formatCurrency(
                   invoice.lineItems.reduce(
-                    (sum, item) => sum + item.quantity * (item.unitPriceTaxIncl - item.unitPriceTaxExcl),
+                    (sum, item) =>
+                      sum +
+                      item.quantity *
+                        (item.unitPriceTaxIncl - item.unitPriceTaxExcl),
                     0
                   ),
                   invoice.currency
@@ -499,7 +571,9 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
         {/* Terms & Conditions */}
         <View style={{ marginLeft: 40 }}>
           <Text style={styles.termsTitle}>Terms & Conditions</Text>
-          <Text style={styles.termsText}>Please pay within 30 days of receiving this invoice.</Text>
+          <Text style={styles.termsText}>
+            Please pay within 30 days of receiving this invoice.
+          </Text>
         </View>
       </Page>
     </Document>
@@ -563,20 +637,35 @@ const PaymentSectionFiat: React.FC<{ paymentRouting: any }> = ({
   <View style={[styles.gridContainer, { marginTop: 0 }]}>
     <View style={styles.gridColumn}>
       <Text style={styles.companyName}>{paymentRouting.bank?.name || ""}</Text>
-      <Text style={styles.companyInfo}>{paymentRouting.bank?.address?.streetAddress || ""}</Text>
+      <Text style={styles.companyInfo}>
+        {paymentRouting.bank?.address?.streetAddress || ""}
+      </Text>
       {paymentRouting.bank?.address?.extendedAddress && (
-        <Text style={styles.companyInfo}>{paymentRouting.bank?.address?.extendedAddress}</Text>
+        <Text style={styles.companyInfo}>
+          {paymentRouting.bank?.address?.extendedAddress}
+        </Text>
       )}
       <Text style={styles.companyInfo}>
-        {paymentRouting.bank?.address?.city || ""}, {getCountryName(paymentRouting.bank?.address?.country || "") || ""} - {paymentRouting.bank?.address?.postalCode || ""}
+        {paymentRouting.bank?.address?.city || ""},{" "}
+        {getCountryName(paymentRouting.bank?.address?.country || "") || ""} -{" "}
+        {paymentRouting.bank?.address?.postalCode || ""}
       </Text>
     </View>
     <View style={styles.gridColumn}>
-      <Text style={styles.companyName}>{paymentRouting.bank?.beneficiary || ""}</Text>
-      <Text style={styles.companyInfo}>{paymentRouting.bank?.accountNum || ""}</Text>
-      <Text style={styles.companyInfo}>{paymentRouting.bank?.accountType || ""}</Text>
+      <Text style={styles.companyName}>
+        {paymentRouting.bank?.beneficiary || ""}
+      </Text>
       <Text style={styles.companyInfo}>
-        {paymentRouting.bank?.BIC || paymentRouting.bank?.SWIFT || paymentRouting.bank?.ABA || ""}
+        {paymentRouting.bank?.accountNum || ""}
+      </Text>
+      <Text style={styles.companyInfo}>
+        {paymentRouting.bank?.accountType || ""}
+      </Text>
+      <Text style={styles.companyInfo}>
+        {paymentRouting.bank?.BIC ||
+          paymentRouting.bank?.SWIFT ||
+          paymentRouting.bank?.ABA ||
+          ""}
       </Text>
     </View>
   </View>
@@ -617,8 +706,14 @@ const InvoiceLineItem: React.FC<{ item: any; currency: string }> = ({
       )}
     </View>
     <Text style={styles.tableCol15}>{item.quantity}</Text>
-    <Text style={styles.tableCol15}>{formatCurrency(item.unitPriceTaxExcl, currency)}</Text>
-    <Text style={styles.tableCol15}>{formatCurrency(item.unitPriceTaxIncl - item.unitPriceTaxExcl, currency)}</Text>
-    <Text style={styles.tableCol15}>{formatCurrency(item.quantity * item.unitPriceTaxIncl, currency)}</Text>
+    <Text style={styles.tableCol15}>
+      {formatCurrency(item.unitPriceTaxExcl, currency)}
+    </Text>
+    <Text style={styles.tableCol15}>
+      {formatCurrency(item.unitPriceTaxIncl - item.unitPriceTaxExcl, currency)}
+    </Text>
+    <Text style={styles.tableCol15}>
+      {formatCurrency(item.quantity * item.unitPriceTaxIncl, currency)}
+    </Text>
   </View>
 );
