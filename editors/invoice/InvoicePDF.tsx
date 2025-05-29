@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Image,
 } from "@react-pdf/renderer";
-import { InvoiceState } from "../../document-models/invoice/index.js";
+import { InvoiceState, LegalEntityTaxId, LegalEntityCorporateRegistrationId, Maybe } from "../../document-models/invoice/index.js";
 import powerhouseLogo from "./assets/powerhouseLogo.png";
 import countries from "world-countries";
 
@@ -357,7 +357,8 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
               <Text style={styles.companyName}>{invoice.issuer.name}</Text>
               <Text style={styles.companyInfo}>
                 Tax/Corp ID:{" "}
-                {invoice.issuer.id?.taxId || invoice.issuer.id?.corpRegId || ""}
+                {(invoice.issuer.id as Maybe<LegalEntityTaxId>)?.taxId || 
+                 (invoice.issuer.id as Maybe<LegalEntityCorporateRegistrationId>)?.corpRegId || ""}
               </Text>
               <Text style={styles.companyInfo}>
                 {invoice.issuer.address?.streetAddress || ""}
@@ -385,7 +386,8 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
               <Text style={styles.companyName}>{invoice.payer.name}</Text>
               <Text style={styles.companyInfo}>
                 Tax/Corp ID:{" "}
-                {invoice.payer.id?.taxId || invoice.payer.id?.corpRegId || ""}
+                {(invoice.payer.id as Maybe<LegalEntityTaxId>)?.taxId || 
+                 (invoice.payer.id as Maybe<LegalEntityCorporateRegistrationId>)?.corpRegId || ""}
               </Text>
               <Text style={styles.companyInfo}>
                 {invoice.payer.address?.streetAddress || ""}
