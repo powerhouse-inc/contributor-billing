@@ -309,6 +309,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
   invoice,
   fiatMode,
 }) => {
+  console.log(invoice);
   return (
     <Document>
       <Page size="A4" style={styles.pageBackground}>
@@ -499,9 +500,14 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
           <View style={styles.paymentSection}>
             <Text style={styles.sectionTitle}>Payment Information</Text>
             {fiatMode ? (
-              <PaymentSectionFiat
-                paymentRouting={invoice.issuer.paymentRouting}
-              />
+              <div>
+                <PaymentSectionFiat
+                  paymentRouting={invoice.issuer.paymentRouting}
+                />
+                {invoice.issuer.paymentRouting?.bank?.memo && (
+                  <Text style={styles.companyInfo} >Memo: {invoice.issuer.paymentRouting?.bank?.memo || ""}  </Text>
+                )}
+              </div>
             ) : (
               <PaymentSectionCrypto
                 paymentRouting={invoice.issuer.paymentRouting}
