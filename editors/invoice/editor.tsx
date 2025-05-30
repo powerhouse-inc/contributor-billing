@@ -774,7 +774,7 @@ export default function Editor(props: IProps) {
       )}
 
       {/* Live PDF Preview */}
-      {/* <div className="mt-8 border border-gray-200 rounded-lg overflow-hidden">
+      <div className="mt-8 border border-gray-200 rounded-lg overflow-hidden">
         <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
           <h3 className="text-lg font-semibold">PDF Preview</h3>
         </div>
@@ -783,7 +783,7 @@ export default function Editor(props: IProps) {
             <InvoicePDF invoice={state} fiatMode={fiatMode} />
           </PDFViewer>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 }

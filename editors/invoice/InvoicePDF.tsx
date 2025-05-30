@@ -6,7 +6,12 @@ import {
   StyleSheet,
   Image,
 } from "@react-pdf/renderer";
-import { InvoiceState, LegalEntityTaxId, LegalEntityCorporateRegistrationId, Maybe } from "../../document-models/invoice/index.js";
+import {
+  InvoiceState,
+  LegalEntityTaxId,
+  LegalEntityCorporateRegistrationId,
+  Maybe,
+} from "../../document-models/invoice/index.js";
 import powerhouseLogo from "./assets/powerhouseLogo.png";
 import countries from "world-countries";
 
@@ -64,7 +69,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginBottom: 5,
-    fontSize: 14,
+    fontSize: 12,
     marginRight: 4,
     fontFamily: "Helvetica",
     color: "#9ea0a2",
@@ -72,7 +77,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
-    marginBottom: 8,
+    marginBottom: 0,
   },
   label: {
     width: 70,
@@ -115,12 +120,12 @@ const styles = StyleSheet.create({
   },
   itemName: {
     fontWeight: "bold",
-    fontSize: 12,
+    fontSize: 10,
     color: "#374151",
     marginBottom: 2,
   },
   itemDescription: {
-    fontSize: 12,
+    fontSize: 10,
     color: "#6B7280",
     fontWeight: "normal",
   },
@@ -147,7 +152,7 @@ const styles = StyleSheet.create({
   totalLabel: {
     marginRight: 8,
     color: "#6B7280",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "normal",
     width: 120,
     textAlign: "right",
@@ -155,7 +160,7 @@ const styles = StyleSheet.create({
   totalValue: {
     minWidth: 100,
     textAlign: "right",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "normal",
     color: "#374151",
   },
@@ -171,7 +176,7 @@ const styles = StyleSheet.create({
   totalLabelBold: {
     marginRight: 8,
     color: "#000",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     width: 120,
     textAlign: "right",
@@ -179,7 +184,7 @@ const styles = StyleSheet.create({
   totalValueBold: {
     minWidth: 100,
     textAlign: "right",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     color: "#000",
   },
@@ -190,14 +195,14 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   totalAmount: {
-    fontSize: 25,
+    fontSize: 20,
     paddingTop: 7,
     fontWeight: "bold",
     color: "#black",
   },
   paymentSection: {
-    marginTop: 20,
-    marginBottom: 20,
+    marginTop: 10,
+    marginBottom: 10,
   },
   paymentTitle: {
     fontSize: 12,
@@ -231,12 +236,18 @@ const styles = StyleSheet.create({
     fontWeight: "normal",
   },
   companyInfo: {
-    fontSize: 12,
+    fontSize: 9,
     color: "#4B5563",
     marginBottom: 4,
   },
+  companyInfoLabel: {
+    color: "#9ea0a2",
+    fontSize: 9,
+    marginRight: 5,
+    minWidth: 50,
+  },
   companyName: {
-    fontSize: 12,
+    fontSize: 9,
     fontWeight: "bold",
     marginBottom: 4,
   },
@@ -336,7 +347,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
               <Text
                 style={[
                   styles.invoiceNumber,
-                  { fontSize: 24, fontWeight: "bold" },
+                  { fontSize: 18, fontWeight: "bold" },
                 ]}
               >
                 {formatNumber(invoice.totalPriceTaxIncl)}
@@ -349,64 +360,106 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
-              marginTop: 40,
+              marginTop: 30,
             }}
           >
             {/* Issuer */}
             <View style={{ width: "45%" }}>
               <Text style={styles.sectionTitle}>Issuer</Text>
-              <Text style={styles.companyName}>{invoice.issuer.name}</Text>
-              <Text style={styles.companyInfo}>
-                Tax/Corp ID:{" "}
-                {(invoice.issuer.id as Maybe<LegalEntityTaxId>)?.taxId || 
-                 (invoice.issuer.id as Maybe<LegalEntityCorporateRegistrationId>)?.corpRegId || ""}
-              </Text>
-              <Text style={styles.companyInfo}>
-                {invoice.issuer.address?.streetAddress || ""}
-              </Text>
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Name:</Text>
+                <Text style={styles.companyInfo}>{invoice.issuer.name}</Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Tax/Corp ID:</Text>
+                <Text style={styles.companyInfo}>
+                  {(invoice.issuer.id as Maybe<LegalEntityTaxId>)?.taxId ||
+                    (
+                      invoice.issuer
+                        .id as Maybe<LegalEntityCorporateRegistrationId>
+                    )?.corpRegId ||
+                    ""}
+                </Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Address:</Text>
+                <Text style={styles.companyInfo}>
+                  {invoice.issuer.address?.streetAddress || ""}
+                </Text>
+              </View>
               {invoice.issuer.address?.extendedAddress && (
-                <Text style={styles.companyInfo}>
-                  {invoice.issuer.address?.extendedAddress || ""}
-                </Text>
+                <View style={styles.row}>
+                  <Text style={styles.companyInfoLabel}></Text>
+                  <Text style={styles.companyInfo}>
+                    {invoice.issuer.address?.extendedAddress || ""}
+                  </Text>
+                </View>
               )}
-              <Text style={styles.companyInfo}>
-                {invoice.issuer.address?.city || ""},{" "}
-                {getCountryName(invoice.issuer.address?.country || "") || ""} -{" "}
-                {invoice.issuer.address?.postalCode || "00000"}
-              </Text>
-              {invoice.issuer.contactInfo?.email && (
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}></Text>
                 <Text style={styles.companyInfo}>
-                  {invoice.issuer.contactInfo.email}
+                  {invoice.issuer.address?.city || ""},{" "}
+                  {getCountryName(invoice.issuer.address?.country || "") || ""} -{" "}
+                  {invoice.issuer.address?.postalCode || "00000"}
                 </Text>
+              </View>
+              {invoice.issuer.contactInfo?.email && (
+                <View style={styles.row}>
+                  <Text style={styles.companyInfoLabel}>Email:</Text>
+                  <Text style={styles.companyInfo}>
+                    {invoice.issuer.contactInfo.email}
+                  </Text>
+                </View>
               )}
             </View>
 
             {/* Payer */}
             <View style={{ width: "45%" }}>
               <Text style={styles.sectionTitle}>Payer</Text>
-              <Text style={styles.companyName}>{invoice.payer.name}</Text>
-              <Text style={styles.companyInfo}>
-                Tax/Corp ID:{" "}
-                {(invoice.payer.id as Maybe<LegalEntityTaxId>)?.taxId || 
-                 (invoice.payer.id as Maybe<LegalEntityCorporateRegistrationId>)?.corpRegId || ""}
-              </Text>
-              <Text style={styles.companyInfo}>
-                {invoice.payer.address?.streetAddress || ""}
-              </Text>
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Name:</Text>
+                <Text style={styles.companyInfo}>{invoice.payer.name}</Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Tax/Corp ID:</Text>
+                <Text style={styles.companyInfo}>
+                  {(invoice.payer.id as Maybe<LegalEntityTaxId>)?.taxId ||
+                    (
+                      invoice.payer
+                        .id as Maybe<LegalEntityCorporateRegistrationId>
+                    )?.corpRegId ||
+                    ""}
+                </Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Address:</Text>
+                <Text style={styles.companyInfo}>
+                  {invoice.payer.address?.streetAddress || ""}
+                </Text>
+              </View>
               {invoice.payer.address?.extendedAddress && (
-                <Text style={styles.companyInfo}>
-                  {invoice.payer.address?.extendedAddress || ""}
-                </Text>
+                <View style={styles.row}>
+                  <Text style={styles.companyInfoLabel}></Text>
+                  <Text style={styles.companyInfo}>
+                    {invoice.payer.address?.extendedAddress || ""}
+                  </Text>
+                </View>
               )}
-              <Text style={styles.companyInfo}>
-                {invoice.payer.address?.city || ""},{" "}
-                {getCountryName(invoice.payer.address?.country || "") || ""} -{" "}
-                {invoice.payer.address?.postalCode || "00000"}
-              </Text>
-              {invoice.payer.contactInfo?.email && (
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}></Text>
                 <Text style={styles.companyInfo}>
-                  {invoice.payer.contactInfo.email}
+                  {invoice.payer.address?.city || ""},{" "}
+                  {getCountryName(invoice.payer.address?.country || "") || ""} -{" "}
+                  {invoice.payer.address?.postalCode || "00000"}
                 </Text>
+              </View>
+              {invoice.payer.contactInfo?.email && (
+                <View style={styles.row}>
+                  <Text style={styles.companyInfoLabel}>Email:</Text>
+                  <Text style={styles.companyInfo}>
+                    {invoice.payer.contactInfo.email}
+                  </Text>
+                </View>
               )}
             </View>
 
@@ -422,7 +475,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text
                   style={{
                     color: "#9ea0a2",
-                    fontSize: 14,
+                    fontSize: 12,
                     textAlign: "right",
                     fontFamily: "Helvetica",
                     fontWeight: "normal",
@@ -433,7 +486,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text
                   style={{
                     fontWeight: 4,
-                    fontSize: 14,
+                    fontSize: 12,
                     textAlign: "right",
                     color: "#000",
                     fontFamily: "Helvetica",
@@ -446,7 +499,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text
                   style={{
                     color: "#9ea0a2",
-                    fontSize: 14,
+                    fontSize: 12,
                     textAlign: "right",
                     fontFamily: "Helvetica",
                     fontWeight: "normal",
@@ -457,7 +510,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text
                   style={{
                     fontWeight: 4,
-                    fontSize: 14,
+                    fontSize: 12,
                     textAlign: "right",
                     color: "#000",
                     fontFamily: "Helvetica",
@@ -471,7 +524,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                   <Text
                     style={{
                       color: "#9ea0a2",
-                      fontSize: 14,
+                      fontSize: 12,
                       textAlign: "right",
                       fontFamily: "Helvetica",
                       fontWeight: "normal",
@@ -482,7 +535,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                   <Text
                     style={{
                       fontWeight: 4,
-                      fontSize: 14,
+                      fontSize: 12,
                       textAlign: "right",
                       color: "#000",
                       fontFamily: "Helvetica",
@@ -505,7 +558,9 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                   paymentRouting={invoice.issuer.paymentRouting}
                 />
                 {invoice.issuer.paymentRouting?.bank?.memo && (
-                  <Text style={styles.companyInfo} >Memo: {invoice.issuer.paymentRouting?.bank?.memo || ""}  </Text>
+                  <Text style={[styles.companyInfo, { marginTop: 20 }]}>
+                    Memo: {invoice.issuer.paymentRouting?.bank?.memo || ""}{" "}
+                  </Text>
                 )}
               </div>
             ) : (
@@ -642,39 +697,63 @@ const InvoiceField: React.FC<{ label: string; value: string }> = ({
 const PaymentSectionFiat: React.FC<{ paymentRouting: any }> = ({
   paymentRouting,
 }) => (
-  <View style={[styles.gridContainer, { marginTop: 0 }]}>
+  <View style={[styles.gridContainer, { marginTop: 0, marginLeft: 0 }]}>
     <View style={styles.gridColumn}>
-      <Text style={styles.companyName}>{paymentRouting.bank?.name || ""}</Text>
-      <Text style={styles.companyInfo}>
-        {paymentRouting.bank?.address?.streetAddress || ""}
-      </Text>
-      {paymentRouting.bank?.address?.extendedAddress && (
+      <View style={styles.row}>
+        <Text style={styles.companyInfoLabel}>Bank Name:</Text>
+        <Text style={styles.companyInfo}>{paymentRouting.bank?.name || ""}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.companyInfoLabel}>Address:</Text>
         <Text style={styles.companyInfo}>
-          {paymentRouting.bank?.address?.extendedAddress}
+          {paymentRouting.bank?.address?.streetAddress || ""}
         </Text>
+      </View>
+      {paymentRouting.bank?.address?.extendedAddress && (
+        <View style={styles.row}>
+          <Text style={styles.companyInfoLabel}></Text>
+          <Text style={styles.companyInfo}>
+            {paymentRouting.bank?.address?.extendedAddress}
+          </Text>
+        </View>
       )}
-      <Text style={styles.companyInfo}>
-        {paymentRouting.bank?.address?.city || ""},{" "}
-        {getCountryName(paymentRouting.bank?.address?.country || "") || ""} -{" "}
-        {paymentRouting.bank?.address?.postalCode || ""}
-      </Text>
+      <View style={styles.row}>
+        <Text style={styles.companyInfoLabel}></Text>
+        <Text style={styles.companyInfo}>
+          {paymentRouting.bank?.address?.city || ""},{" "}
+          {getCountryName(paymentRouting.bank?.address?.country || "") || ""} -{" "}
+          {paymentRouting.bank?.address?.postalCode || ""}
+        </Text>
+      </View>
     </View>
     <View style={styles.gridColumn}>
-      <Text style={styles.companyName}>
-        {paymentRouting.bank?.beneficiary || ""}
-      </Text>
-      <Text style={styles.companyInfo}>
-        {paymentRouting.bank?.accountNum || ""}
-      </Text>
-      <Text style={styles.companyInfo}>
-        {paymentRouting.bank?.accountType || ""}
-      </Text>
-      <Text style={styles.companyInfo}>
-        {paymentRouting.bank?.BIC ||
-          paymentRouting.bank?.SWIFT ||
-          paymentRouting.bank?.ABA ||
-          ""}
-      </Text>
+      <View style={styles.row}>
+        <Text style={styles.companyInfoLabel}>Beneficiary:</Text>
+        <Text style={styles.companyInfo}>
+          {paymentRouting.bank?.beneficiary || ""}
+        </Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.companyInfoLabel}>Acc Num:</Text>
+        <Text style={styles.companyInfo}>
+          {paymentRouting.bank?.accountNum || ""}
+        </Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.companyInfoLabel}>Acc Type:</Text>
+        <Text style={styles.companyInfo}>
+          {paymentRouting.bank?.accountType || ""}
+        </Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.companyInfoLabel}>BIC/SWIFT:</Text>
+        <Text style={styles.companyInfo}>
+          {paymentRouting.bank?.BIC ||
+            paymentRouting.bank?.SWIFT ||
+            paymentRouting.bank?.ABA ||
+            ""}
+        </Text>
+      </View>
     </View>
   </View>
 );
@@ -687,14 +766,18 @@ const PaymentSectionCrypto: React.FC<{ paymentRouting: any }> = ({
 }) => (
   <View style={styles.row}>
     <View style={styles.gridColumn}>
-      <InvoiceField
-        label="Chain"
-        value={paymentRouting.wallet?.chainName || ""}
-      />
-      <InvoiceField
-        label="Address"
-        value={paymentRouting.wallet?.address || ""}
-      />
+      <View style={styles.row}>
+        <Text style={styles.companyInfoLabel}>Chain:</Text>
+        <Text style={styles.companyInfo}>
+          {paymentRouting.wallet?.chainName || ""}
+        </Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.companyInfoLabel}>Address:</Text>
+        <Text style={styles.companyInfo}>
+          {paymentRouting.wallet?.address || ""}
+        </Text>
+      </View>
     </View>
   </View>
 );
