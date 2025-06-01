@@ -360,7 +360,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
-              marginTop: 30,
+              marginTop: 20,
             }}
           >
             {/* Issuer */}
@@ -399,7 +399,12 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text style={styles.companyInfoLabel}></Text>
                 <Text style={styles.companyInfo}>
                   {invoice.issuer.address?.city || ""},{" "}
-                  {getCountryName(invoice.issuer.address?.country || "") || ""} -{" "}
+                  {getCountryName(invoice.issuer.address?.country || "") || ""}
+                </Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Postcode:</Text>
+                <Text style={styles.companyInfo}>
                   {invoice.issuer.address?.postalCode || "00000"}
                 </Text>
               </View>
@@ -449,7 +454,12 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text style={styles.companyInfoLabel}></Text>
                 <Text style={styles.companyInfo}>
                   {invoice.payer.address?.city || ""},{" "}
-                  {getCountryName(invoice.payer.address?.country || "") || ""} -{" "}
+                  {getCountryName(invoice.payer.address?.country || "") || ""}
+                </Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Postcode:</Text>
+                <Text style={styles.companyInfo}>
                   {invoice.payer.address?.postalCode || "00000"}
                 </Text>
               </View>
@@ -519,38 +529,11 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                   {formatDate(invoice.dateDue)}
                 </Text>
               </View>
-              {fiatMode && (
-                <View style={{ marginBottom: 18, width: "100%" }}>
-                  <Text
-                    style={{
-                      color: "#9ea0a2",
-                      fontSize: 12,
-                      textAlign: "right",
-                      fontFamily: "Helvetica",
-                      fontWeight: "normal",
-                    }}
-                  >
-                    Account Type:
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: 4,
-                      fontSize: 12,
-                      textAlign: "right",
-                      color: "#000",
-                      fontFamily: "Helvetica",
-                    }}
-                  >
-                    {invoice.issuer.paymentRouting?.bank?.accountType ||
-                      "CHECKING"}
-                  </Text>
-                </View>
-              )}
             </View>
           </View>
 
           {/* Payment Information */}
-          <View style={styles.paymentSection}>
+          <View style={[styles.paymentSection, { marginLeft: 0 }]}>
             <Text style={styles.sectionTitle}>Payment Information</Text>
             {fiatMode ? (
               <div>
@@ -721,12 +704,17 @@ const PaymentSectionFiat: React.FC<{ paymentRouting: any }> = ({
         <Text style={styles.companyInfoLabel}></Text>
         <Text style={styles.companyInfo}>
           {paymentRouting.bank?.address?.city || ""},{" "}
-          {getCountryName(paymentRouting.bank?.address?.country || "") || ""} -{" "}
-          {paymentRouting.bank?.address?.postalCode || ""}
+          {getCountryName(paymentRouting.bank?.address?.country || "") || ""}
+        </Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.companyInfoLabel}>Postcode:</Text>
+        <Text style={styles.companyInfo}>
+          {paymentRouting.bank?.address?.postalCode || "00000"}
         </Text>
       </View>
     </View>
-    <View style={styles.gridColumn}>
+    <View style={[styles.gridColumn]}>
       <View style={styles.row}>
         <Text style={styles.companyInfoLabel}>Beneficiary:</Text>
         <Text style={styles.companyInfo}>
@@ -740,18 +728,18 @@ const PaymentSectionFiat: React.FC<{ paymentRouting: any }> = ({
         </Text>
       </View>
       <View style={styles.row}>
-        <Text style={styles.companyInfoLabel}>Acc Type:</Text>
-        <Text style={styles.companyInfo}>
-          {paymentRouting.bank?.accountType || ""}
-        </Text>
-      </View>
-      <View style={styles.row}>
         <Text style={styles.companyInfoLabel}>BIC/SWIFT:</Text>
         <Text style={styles.companyInfo}>
           {paymentRouting.bank?.BIC ||
             paymentRouting.bank?.SWIFT ||
             paymentRouting.bank?.ABA ||
             ""}
+        </Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.companyInfoLabel}>Acc Type:</Text>
+        <Text style={styles.companyInfo}>
+          {paymentRouting.bank?.accountType || ""}
         </Text>
       </View>
     </View>
