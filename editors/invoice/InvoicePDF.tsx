@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
 });
 
 // Format date to readable string
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: Maybe<string>) => {
   if (!dateString) return "";
   const date = new Date(dateString);
   const day = String(date.getDate()).padStart(2, "0");
@@ -320,308 +320,411 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
   invoice,
   fiatMode,
 }) => {
-  console.log(invoice);
+  const MAX_ITEMS_FIRST_PAGE = 15;
+  const MAX_ITEMS_OTHER_PAGES = 20;
+
+  // Helper to chunk line items with different first page size
+  function chunkLineItems(
+    lineItems: any[],
+    firstPageSize: number,
+    otherPageSize: number
+  ) {
+    if (lineItems.length <= firstPageSize) return [lineItems];
+    const chunks = [lineItems.slice(0, firstPageSize)];
+    let i = firstPageSize;
+    while (i < lineItems.length) {
+      chunks.push(lineItems.slice(i, i + otherPageSize));
+      i += otherPageSize;
+    }
+    return chunks;
+  }
+
+  const lineItemChunks = chunkLineItems(
+    invoice.lineItems,
+    MAX_ITEMS_FIRST_PAGE,
+    MAX_ITEMS_OTHER_PAGES
+  );
+  const totalPages = lineItemChunks.length;
+
   return (
     <Document>
-      <Page size="A4" style={styles.pageBackground}>
-        <View style={styles.page}>
-          {/* Top Row: Logo (left) and Invoice of (right) */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-            }}
-          >
-            <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
-              <Image style={styles.logo} src={powerhouseLogo} />
-              <View>
-                <Text style={styles.invoiceLabel}>Invoice number</Text>
-                <Text style={styles.invoiceNumber}>{invoice.invoiceNo}</Text>
-              </View>
-            </View>
-            <View style={{ alignItems: "flex-end" }}>
-              <Text style={styles.invoiceLabel}>
-                Invoice of ({invoice.currency})
-              </Text>
-              <Text
-                style={[
-                  styles.invoiceNumber,
-                  { fontSize: 18, fontWeight: "bold" },
-                ]}
-              >
-                {formatNumber(invoice.totalPriceTaxIncl)}
-              </Text>
-            </View>
-          </View>
-
-          {/* Issuer and Payer Information */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              marginTop: 20,
-            }}
-          >
-            {/* Issuer */}
-            <View style={{ width: "45%" }}>
-              <Text style={styles.sectionTitle}>Issuer</Text>
-              <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}>Name:</Text>
-                <Text style={styles.companyInfo}>{invoice.issuer.name}</Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}>Tax/Corp ID:</Text>
-                <Text style={styles.companyInfo}>
-                  {(invoice.issuer.id as Maybe<LegalEntityTaxId>)?.taxId ||
-                    (
-                      invoice.issuer
-                        .id as Maybe<LegalEntityCorporateRegistrationId>
-                    )?.corpRegId ||
-                    ""}
-                </Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}>Address:</Text>
-                <Text style={styles.companyInfo}>
-                  {invoice.issuer.address?.streetAddress || ""}
-                </Text>
-              </View>
-              {invoice.issuer.address?.extendedAddress && (
-                <View style={styles.row}>
-                  <Text style={styles.companyInfoLabel}></Text>
-                  <Text style={styles.companyInfo}>
-                    {invoice.issuer.address?.extendedAddress || ""}
-                  </Text>
-                </View>
-              )}
-              <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}></Text>
-                <Text style={styles.companyInfo}>
-                  {invoice.issuer.address?.city || ""},{" "}
-                  {getCountryName(invoice.issuer.address?.country || "") || ""}
-                </Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}>Postcode:</Text>
-                <Text style={styles.companyInfo}>
-                  {invoice.issuer.address?.postalCode || "00000"}
-                </Text>
-              </View>
-              {invoice.issuer.contactInfo?.email && (
-                <View style={styles.row}>
-                  <Text style={styles.companyInfoLabel}>Email:</Text>
-                  <Text style={styles.companyInfo}>
-                    {invoice.issuer.contactInfo.email}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            {/* Payer */}
-            <View style={{ width: "45%" }}>
-              <Text style={styles.sectionTitle}>Payer</Text>
-              <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}>Name:</Text>
-                <Text style={styles.companyInfo}>{invoice.payer.name}</Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}>Tax/Corp ID:</Text>
-                <Text style={styles.companyInfo}>
-                  {(invoice.payer.id as Maybe<LegalEntityTaxId>)?.taxId ||
-                    (
-                      invoice.payer
-                        .id as Maybe<LegalEntityCorporateRegistrationId>
-                    )?.corpRegId ||
-                    ""}
-                </Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}>Address:</Text>
-                <Text style={styles.companyInfo}>
-                  {invoice.payer.address?.streetAddress || ""}
-                </Text>
-              </View>
-              {invoice.payer.address?.extendedAddress && (
-                <View style={styles.row}>
-                  <Text style={styles.companyInfoLabel}></Text>
-                  <Text style={styles.companyInfo}>
-                    {invoice.payer.address?.extendedAddress || ""}
-                  </Text>
-                </View>
-              )}
-              <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}></Text>
-                <Text style={styles.companyInfo}>
-                  {invoice.payer.address?.city || ""},{" "}
-                  {getCountryName(invoice.payer.address?.country || "") || ""}
-                </Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}>Postcode:</Text>
-                <Text style={styles.companyInfo}>
-                  {invoice.payer.address?.postalCode || "00000"}
-                </Text>
-              </View>
-              {invoice.payer.contactInfo?.email && (
-                <View style={styles.row}>
-                  <Text style={styles.companyInfoLabel}>Email:</Text>
-                  <Text style={styles.companyInfo}>
-                    {invoice.payer.contactInfo.email}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            {/* Invoice details (right) */}
-            <View
-              style={{
-                width: "30%",
-                alignItems: "flex-end",
-                textAlign: "right",
-              }}
-            >
-              <View style={{ marginBottom: 18, width: "100%" }}>
-                <Text
+      {lineItemChunks.map((items, pageIndex) => (
+        <Page key={pageIndex} size="A4" style={styles.pageBackground}>
+          <View style={styles.page}>
+            {/* Only show header and info on first page */}
+            {pageIndex === 0 && (
+              <>
+                {/* Top Row: Logo (left) and Invoice of (right) */}
+                <View
                   style={{
-                    color: "#9ea0a2",
-                    fontSize: 12,
-                    textAlign: "right",
-                    fontFamily: "Helvetica",
-                    fontWeight: "normal",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
                   }}
                 >
-                  Invoice date
-                </Text>
-                <Text
-                  style={{
-                    fontWeight: 4,
-                    fontSize: 12,
-                    textAlign: "right",
-                    color: "#000",
-                    fontFamily: "Helvetica",
-                  }}
-                >
-                  {formatDate(invoice.dateIssued)}
-                </Text>
-              </View>
-              <View style={{ marginBottom: 18, width: "100%" }}>
-                <Text
-                  style={{
-                    color: "#9ea0a2",
-                    fontSize: 12,
-                    textAlign: "right",
-                    fontFamily: "Helvetica",
-                    fontWeight: "normal",
-                  }}
-                >
-                  Due date
-                </Text>
-                <Text
-                  style={{
-                    fontWeight: 4,
-                    fontSize: 12,
-                    textAlign: "right",
-                    color: "#000",
-                    fontFamily: "Helvetica",
-                  }}
-                >
-                  {formatDate(invoice.dateDue)}
-                </Text>
-              </View>
-            </View>
-          </View>
+                  <View
+                    style={{
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    {/* <Image style={styles.logo} src={powerhouseLogo} /> */}
+                    <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+                      {invoice.issuer.name}
+                    </Text>
+                    <View>
+                      <Text style={styles.invoiceLabel}>Invoice number</Text>
+                      <Text style={styles.invoiceNumber}>
+                        {invoice.invoiceNo}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={{ alignItems: "flex-end" }}>
+                    <Text style={styles.invoiceLabel}>
+                      Invoice of ({invoice.currency})
+                    </Text>
+                    <Text
+                      style={[
+                        styles.invoiceNumber,
+                        { fontSize: 18, fontWeight: "bold" },
+                      ]}
+                    >
+                      {formatNumber(invoice.totalPriceTaxIncl)}
+                    </Text>
+                  </View>
+                </View>
 
-          {/* Payment Information */}
-          <View style={[styles.paymentSection, { marginLeft: 0 }]}>
-            <Text style={styles.sectionTitle}>Payment Information</Text>
-            {fiatMode ? (
-              <div>
-                <PaymentSectionFiat
-                  paymentRouting={invoice.issuer.paymentRouting}
+                {/* Issuer and Payer Information */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginTop: 20,
+                  }}
+                >
+                  {/* Issuer */}
+                  <View style={{ width: "45%" }}>
+                    <Text style={styles.sectionTitle}>Issuer</Text>
+                    <View style={styles.row}>
+                      <Text style={styles.companyInfoLabel}>Name:</Text>
+                      <Text style={styles.companyInfo}>
+                        {invoice.issuer.name}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.companyInfoLabel}>Tax/Corp ID:</Text>
+                      <Text style={styles.companyInfo}>
+                        {(invoice.issuer.id as Maybe<LegalEntityTaxId>)
+                          ?.taxId ||
+                          (
+                            invoice.issuer
+                              .id as Maybe<LegalEntityCorporateRegistrationId>
+                          )?.corpRegId ||
+                          ""}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.companyInfoLabel}>Address:</Text>
+                      <Text style={styles.companyInfo}>
+                        {invoice.issuer.address?.streetAddress || ""}
+                      </Text>
+                    </View>
+                    {invoice.issuer.address?.extendedAddress && (
+                      <View style={styles.row}>
+                        <Text style={styles.companyInfoLabel}></Text>
+                        <Text style={styles.companyInfo}>
+                          {invoice.issuer.address?.extendedAddress || ""}
+                        </Text>
+                      </View>
+                    )}
+                    <View style={styles.row}>
+                      <Text style={styles.companyInfoLabel}></Text>
+                      <Text style={styles.companyInfo}>
+                        {invoice.issuer.address?.city || ""},{" "}
+                        {getCountryName(
+                          invoice.issuer.address?.country || ""
+                        ) || ""}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.companyInfoLabel}>Postcode:</Text>
+                      <Text style={styles.companyInfo}>
+                        {invoice.issuer.address?.postalCode || "00000"}
+                      </Text>
+                    </View>
+                    {invoice.issuer.contactInfo?.email && (
+                      <View style={styles.row}>
+                        <Text style={styles.companyInfoLabel}>Email:</Text>
+                        <Text style={styles.companyInfo}>
+                          {invoice.issuer.contactInfo.email}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Payer */}
+                  <View style={{ width: "45%" }}>
+                    <Text style={styles.sectionTitle}>Payer</Text>
+                    <View style={styles.row}>
+                      <Text style={styles.companyInfoLabel}>Name:</Text>
+                      <Text style={styles.companyInfo}>
+                        {invoice.payer.name}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.companyInfoLabel}>Tax/Corp ID:</Text>
+                      <Text style={styles.companyInfo}>
+                        {(invoice.payer.id as Maybe<LegalEntityTaxId>)?.taxId ||
+                          (
+                            invoice.payer
+                              .id as Maybe<LegalEntityCorporateRegistrationId>
+                          )?.corpRegId ||
+                          ""}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.companyInfoLabel}>Address:</Text>
+                      <Text style={styles.companyInfo}>
+                        {invoice.payer.address?.streetAddress || ""}
+                      </Text>
+                    </View>
+                    {invoice.payer.address?.extendedAddress && (
+                      <View style={styles.row}>
+                        <Text style={styles.companyInfoLabel}></Text>
+                        <Text style={styles.companyInfo}>
+                          {invoice.payer.address?.extendedAddress || ""}
+                        </Text>
+                      </View>
+                    )}
+                    <View style={styles.row}>
+                      <Text style={styles.companyInfoLabel}></Text>
+                      <Text style={styles.companyInfo}>
+                        {invoice.payer.address?.city || ""},{" "}
+                        {getCountryName(invoice.payer.address?.country || "") ||
+                          ""}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.companyInfoLabel}>Postcode:</Text>
+                      <Text style={styles.companyInfo}>
+                        {invoice.payer.address?.postalCode || "00000"}
+                      </Text>
+                    </View>
+                    {invoice.payer.contactInfo?.email && (
+                      <View style={styles.row}>
+                        <Text style={styles.companyInfoLabel}>Email:</Text>
+                        <Text style={styles.companyInfo}>
+                          {invoice.payer.contactInfo.email}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Invoice details (right) */}
+                  <View
+                    style={{
+                      width: "30%",
+                      alignItems: "flex-end",
+                      textAlign: "right",
+                    }}
+                  >
+                    <View style={{ marginBottom: 5, width: "100%" }}>
+                      <Text
+                        style={{
+                          color: "#9ea0a2",
+                          fontSize: 12,
+                          textAlign: "right",
+                          fontFamily: "Helvetica",
+                          fontWeight: "normal",
+                        }}
+                      >
+                        Invoice date
+                      </Text>
+                      <Text
+                        style={{
+                          fontWeight: 4,
+                          fontSize: 12,
+                          textAlign: "right",
+                          color: "#000",
+                          fontFamily: "Helvetica",
+                        }}
+                      >
+                        {formatDate(invoice.dateIssued)}
+                      </Text>
+                    </View>
+                    {invoice.dateDelivered && (
+                      <View style={{ marginBottom: 5, width: "100%" }}>
+                        <Text
+                          style={{
+                            color: "#9ea0a2",
+                            fontSize: 12,
+                            textAlign: "right",
+                            fontFamily: "Helvetica",
+                            fontWeight: "normal",
+                          }}
+                        >
+                          Delivery date
+                        </Text>
+                        <Text
+                          style={{
+                            fontWeight: 4,
+                            fontSize: 12,
+                            textAlign: "right",
+                            color: "#000",
+                            fontFamily: "Helvetica",
+                          }}
+                        >
+                          {formatDate(invoice.dateDelivered)}
+                        </Text>
+                      </View>
+                    )}
+                    <View style={{ marginBottom: 5, width: "100%" }}>
+                      <Text
+                        style={{
+                          color: "#9ea0a2",
+                          fontSize: 12,
+                          textAlign: "right",
+                          fontFamily: "Helvetica",
+                          fontWeight: "normal",
+                        }}
+                      >
+                        Due date
+                      </Text>
+                      <Text
+                        style={{
+                          fontWeight: 4,
+                          fontSize: 12,
+                          textAlign: "right",
+                          color: "#000",
+                          fontFamily: "Helvetica",
+                        }}
+                      >
+                        {formatDate(invoice.dateDue)}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Payment Information */}
+                <View style={[styles.paymentSection, { marginLeft: 0 }]}>
+                  <Text style={styles.sectionTitle}>Payment Information</Text>
+                  {fiatMode ? (
+                    <div>
+                      <PaymentSectionFiat
+                        paymentRouting={invoice.issuer.paymentRouting}
+                      />
+                      {invoice.issuer.paymentRouting?.bank?.memo && (
+                        <Text style={[styles.companyInfo, { marginTop: 20 }]}>
+                          Memo:{" "}
+                          {invoice.issuer.paymentRouting?.bank?.memo || ""}{" "}
+                        </Text>
+                      )}
+                    </div>
+                  ) : (
+                    <PaymentSectionCrypto
+                      paymentRouting={invoice.issuer.paymentRouting}
+                    />
+                  )}
+                </View>
+              </>
+            )}
+
+            {/* Table header and line items for this page */}
+            <View style={styles.table}>
+              <View style={styles.tableHeader}>
+                <Text style={styles.tableCol40}>Description</Text>
+                <Text style={styles.tableCol15}>Quantity</Text>
+                <Text style={styles.tableCol15}>Unit Price</Text>
+                <Text style={styles.tableCol15}>Tax</Text>
+                <Text style={styles.tableCol15}>Total</Text>
+              </View>
+              {items.map((item, index) => (
+                <InvoiceLineItem
+                  key={index + pageIndex * 1000}
+                  item={item}
+                  currency={invoice.currency}
                 />
-                {invoice.issuer.paymentRouting?.bank?.memo && (
-                  <Text style={[styles.companyInfo, { marginTop: 20 }]}>
-                    Memo: {invoice.issuer.paymentRouting?.bank?.memo || ""}{" "}
-                  </Text>
-                )}
-              </div>
-            ) : (
-              <PaymentSectionCrypto
-                paymentRouting={invoice.issuer.paymentRouting}
-              />
+              ))}
+            </View>
+
+            {/* Totals and terms only on last page */}
+            {pageIndex === totalPages - 1 && (
+              <>
+                <View style={styles.totals}>
+                  <View style={styles.totalRow}>
+                    <Text style={styles.totalLabel}>Subtotal</Text>
+                    <Text style={styles.totalValue}>
+                      {formatCurrency(
+                        invoice.lineItems.reduce(
+                          (sum, item) =>
+                            sum + item.quantity * item.unitPriceTaxExcl,
+                          0
+                        ),
+                        invoice.currency
+                      )}
+                    </Text>
+                  </View>
+                  <View style={styles.totalRow}>
+                    <Text style={styles.totalLabel}>Tax</Text>
+                    <Text style={styles.totalValue}>
+                      {formatCurrency(
+                        invoice.lineItems.reduce(
+                          (sum, item) =>
+                            sum +
+                            item.quantity *
+                              (item.unitPriceTaxIncl - item.unitPriceTaxExcl),
+                          0
+                        ),
+                        invoice.currency
+                      )}
+                    </Text>
+                  </View>
+                  <View style={styles.totalRowBold}>
+                    <Text style={styles.totalLabelBold}>Total</Text>
+                    <Text style={styles.totalValueBold}>
+                      {formatCurrency(
+                        invoice.lineItems.reduce(
+                          (sum, item) =>
+                            sum + item.quantity * item.unitPriceTaxIncl,
+                          0
+                        ),
+                        invoice.currency
+                      )}
+                    </Text>
+                  </View>
+                </View>
+              </>
             )}
           </View>
-
-          {/* Line Items */}
-          <View style={styles.table}>
-            <View style={styles.tableHeader}>
-              <Text style={styles.tableCol40}>Description</Text>
-              <Text style={styles.tableCol15}>Quantity</Text>
-              <Text style={styles.tableCol15}>Unit Price</Text>
-              <Text style={styles.tableCol15}>Tax</Text>
-              <Text style={styles.tableCol15}>Total</Text>
+          {/* Terms & Conditions and page number on every page */}
+          <View
+            style={{
+              marginLeft: 40,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "90%",
+            }}
+          >
+            <View>
+              <Text style={styles.termsTitle}>Terms & Conditions</Text>
+              <Text style={styles.termsText}>
+                Please pay within 30 days of receiving this invoice.
+              </Text>
             </View>
-            {invoice.lineItems.map((item, index) => (
-              <InvoiceLineItem
-                key={index}
-                item={item}
-                currency={invoice.currency}
-              />
-            ))}
+            <Text
+              style={{
+                fontSize: 10,
+                color: "#6B7280",
+                textAlign: "right",
+                flex: 1,
+              }}
+            >
+              {`${pageIndex + 1}/${totalPages}`}
+            </Text>
           </View>
-
-          {/* Totals */}
-          <View style={styles.totals}>
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Subtotal</Text>
-              <Text style={styles.totalValue}>
-                {formatCurrency(
-                  invoice.lineItems.reduce(
-                    (sum, item) => sum + item.quantity * item.unitPriceTaxExcl,
-                    0
-                  ),
-                  invoice.currency
-                )}
-              </Text>
-            </View>
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Tax</Text>
-              <Text style={styles.totalValue}>
-                {formatCurrency(
-                  invoice.lineItems.reduce(
-                    (sum, item) =>
-                      sum +
-                      item.quantity *
-                        (item.unitPriceTaxIncl - item.unitPriceTaxExcl),
-                    0
-                  ),
-                  invoice.currency
-                )}
-              </Text>
-            </View>
-            <View style={styles.totalRowBold}>
-              <Text style={styles.totalLabelBold}>Total</Text>
-              <Text style={styles.totalValueBold}>
-                {formatCurrency(
-                  invoice.lineItems.reduce(
-                    (sum, item) => sum + item.quantity * item.unitPriceTaxIncl,
-                    0
-                  ),
-                  invoice.currency
-                )}
-              </Text>
-            </View>
-          </View>
-        </View>
-        {/* Terms & Conditions */}
-        <View style={{ marginLeft: 40 }}>
-          <Text style={styles.termsTitle}>Terms & Conditions</Text>
-          <Text style={styles.termsText}>
-            Please pay within 30 days of receiving this invoice.
-          </Text>
-        </View>
-      </Page>
+        </Page>
+      ))}
     </Document>
   );
 };
@@ -684,7 +787,9 @@ const PaymentSectionFiat: React.FC<{ paymentRouting: any }> = ({
     <View style={styles.gridColumn}>
       <View style={styles.row}>
         <Text style={styles.companyInfoLabel}>Bank Name:</Text>
-        <Text style={styles.companyInfo}>{paymentRouting.bank?.name || ""}</Text>
+        <Text style={styles.companyInfo}>
+          {paymentRouting.bank?.name || ""}
+        </Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.companyInfoLabel}>Address:</Text>
