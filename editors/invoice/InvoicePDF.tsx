@@ -722,7 +722,7 @@ const PaymentSectionFiat: React.FC<{ paymentRouting: any }> = ({
         </Text>
       </View>
       <View style={styles.row}>
-        <Text style={styles.companyInfoLabel}>Acc Num:</Text>
+        <Text style={styles.companyInfoLabel}>Acct No:</Text>
         <Text style={styles.companyInfo}>
           {paymentRouting.bank?.accountNum || ""}
         </Text>
@@ -737,7 +737,7 @@ const PaymentSectionFiat: React.FC<{ paymentRouting: any }> = ({
         </Text>
       </View>
       <View style={styles.row}>
-        <Text style={styles.companyInfoLabel}>Acc Type:</Text>
+        <Text style={styles.companyInfoLabel}>Acct Type:</Text>
         <Text style={styles.companyInfo}>
           {paymentRouting.bank?.accountType || ""}
         </Text>
