@@ -369,7 +369,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     }}
                   >
                     {/* <Image style={styles.logo} src={powerhouseLogo} /> */}
-                    <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+                    <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>
                       {invoice.issuer.name}
                     </Text>
                     <View>
@@ -728,54 +728,6 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
     </Document>
   );
 };
-
-// New component for issuer and payer sections
-const InvoiceSection: React.FC<{ title: string; data: any }> = ({
-  title,
-  data,
-}) => (
-  <View style={styles.gridColumn}>
-    <Text style={styles.sectionTitle}>{title}</Text>
-    {title === "Issuer" && (
-      <>
-        <InvoiceField label="Issue Date" value={formatDate(data.dateIssued)} />
-        <InvoiceField
-          label="Delivery Date"
-          value={formatDate(data.dateDelivered)}
-        />
-      </>
-    )}
-    {title === "Payer" && (
-      <InvoiceField label="Due Date" value={formatDate(data.dateDue)} />
-    )}
-    <InvoiceField label="Name" value={data.name} />
-    <InvoiceField
-      label={data.id?.taxId ? "Tax ID" : data.id?.corpRegId ? "Corp. Reg" : ""}
-      value={data.id?.taxId || data.id?.corpRegId || ""}
-    />
-    <InvoiceField label="Address" value={data.address?.streetAddress || ""} />
-    <InvoiceField label="City" value={data.address?.city || ""} />
-    <InvoiceField
-      label="Country"
-      value={getCountryName(data.address?.country || "") || ""}
-    />
-    <InvoiceField label="Email" value={data.contactInfo?.email || ""} />
-  </View>
-);
-
-{
-  /* New component for individual fields */
-}
-const InvoiceField: React.FC<{ label: string; value: string }> = ({
-  label,
-  value,
-}) =>
-  value && (
-    <View style={styles.row}>
-      {/* <Text style={styles.label}>{label}:</Text> */}
-      <Text style={styles.value}>{value}</Text>
-    </View>
-  );
 
 {
   /* New component for fiat payment section */
