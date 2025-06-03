@@ -259,7 +259,7 @@ export const schema: DocumentNode = gql`
       paymentData: JSON!
     ): CreateRequestFinancePaymentResult!
     Invoice_processGnosisPayment(
-      payerWallet: JSON!
+      chainName: String!
       paymentDetails: JSON!
       invoiceNo: String!
     ): ProcessGnosisPaymentResult
