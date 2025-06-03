@@ -7,7 +7,7 @@ import * as crypto from "crypto";
 // Store pending transactions for webhook matching
 let pendingTransactions: Record<string, {
     invoiceNo: string,
-    payerWallet: any,
+    chainName: string,
     paymentDetails: any,
     timestamp: number
 }> = {};
@@ -37,18 +37,18 @@ let reactor: any;
 
 export const Invoice_processGnosisPayment = async (_: any, args: any) => {
     try {
-        const { payerWallet, paymentDetails, invoiceNo } = args;
+        const { chainName, paymentDetails, invoiceNo } = args;
         // Cast payerWallet to any to access its properties
-        const typedPayerWallet = payerWallet as any;
+       
 
         console.log("Processing gnosis payment:", {
-            payerWallet,
+            chainName,
             invoiceNo,
             paymentDetails
         });
 
         // Import and call the executeTransferProposal function
-        const result = await executeTransferProposal(payerWallet, paymentDetails);
+        const result = await executeTransferProposal(chainName, paymentDetails);
 
         console.log("Token transfer result:", result);
 
@@ -60,7 +60,7 @@ export const Invoice_processGnosisPayment = async (_: any, args: any) => {
             // Store the transaction with all the details needed for matching
             pendingTransactions[transactionId] = {
                 invoiceNo,
-                payerWallet,
+                chainName,
                 paymentDetails,
                 timestamp: Date.now()
             };

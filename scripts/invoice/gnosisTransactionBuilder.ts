@@ -37,11 +37,40 @@ export interface TransferResult {
   paymentDetails: PaymentDetail[];
 }
 
+const safeAddress = process.env.DEV_STAGING_SAFE_ADDRESS;
+if (!safeAddress) {
+  throw new Error('Missing SAFE_ADDRESS in .env');
+}
+
+const payerWallets: Record<string, PayerWallet> = {
+  BASE: {
+      rpc: "https://base.llamarpc.com",
+      chainName: "Base",
+      chainId: "8453",
+      address: safeAddress, // Safe address
+  },
+  ETHEREUM: {
+      rpc: "https://eth.llamarpc.com",
+      chainName: "Ethereum",
+      chainId: "1",
+      address: safeAddress, // Safe address
+  },
+  "ARBITRUM ONE": {
+      rpc: "https://arb1.arbitrum.io/rpc",
+      chainName: "Arbitrum One",
+      chainId: "42161",
+      address: safeAddress, // Safe address
+  },
+}
+
 // --- Implementation ---
 async function executeTransferProposal(
-  payerWallet: PayerWallet,
+  chainName: string,
   paymentDetailsInput: PaymentDetail | PaymentDetail[],
 ): Promise<TransferResult> {
+
+  const payerWallet = payerWallets[chainName.toUpperCase() as keyof typeof payerWallets];
+
   const paymentDetails = Array.isArray(paymentDetailsInput)
     ? paymentDetailsInput
     : [paymentDetailsInput];
