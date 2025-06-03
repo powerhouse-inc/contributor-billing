@@ -42,27 +42,6 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState }) => {
     // Add more networks as needed
   };
 
-  // Separate payerWallet configuration
-  const payerWallet = {
-    BASE: {
-      rpc: "https://base.llamarpc.com",
-      chainName: "Base",
-      chainId: "8453",
-      address: "0x1FB6bEF04230d67aF0e3455B997a28AFcCe1F45e", // Safe address
-    },
-    ETHEREUM: {
-      rpc: "https://eth.llamarpc.com",
-      chainName: "Ethereum",
-      chainId: "1",
-      address: "0x1FB6bEF04230d67aF0e3455B997a28AFcCe1F45e", // Safe address
-    },
-    "ARBITRUM ONE": {
-      rpc: "https://arb1.arbitrum.io/rpc",
-      chainName: "Arbitrum One",
-      chainId: "42161",
-      address: "0x1FB6bEF04230d67aF0e3455B997a28AFcCe1F45e", // Safe address
-    },
-  };
 
   // Extract payment details from current-state.json
   const paymentDetails = {
@@ -107,8 +86,8 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState }) => {
         },
         body: JSON.stringify({
           query: `
-            mutation Invoice_processGnosisPayment($payerWallet: JSON!, $paymentDetails: JSON!, $invoiceNo: String!) {
-              Invoice_processGnosisPayment(payerWallet: $payerWallet, paymentDetails: $paymentDetails, invoiceNo: $invoiceNo) {
+            mutation Invoice_processGnosisPayment($chainName: String!, $paymentDetails: JSON!, $invoiceNo: String!) {
+              Invoice_processGnosisPayment(chainName: $chainName, paymentDetails: $paymentDetails, invoiceNo: $invoiceNo) {
                 success
                 data
                 error
@@ -116,8 +95,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState }) => {
             }
           `,
           variables: {
-            payerWallet:
-              payerWallet[chainName.toUpperCase() as keyof typeof payerWallet],
+            chainName: chainName,
             paymentDetails: paymentDetails,
             invoiceNo: docState.invoiceNo,
           },
