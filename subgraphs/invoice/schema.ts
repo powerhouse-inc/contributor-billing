@@ -104,7 +104,7 @@ export const schema: DocumentNode = gql`
     unitPriceTaxIncl: Float!
     totalPriceTaxExcl: Float!
     totalPriceTaxIncl: Float!
-    lineItemTag: InvoiceLineItemTag
+    lineItemTag: [InvoiceLineItemTag!]
   }
 
   type InvoiceLineItemTag {

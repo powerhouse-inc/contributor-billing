@@ -375,7 +375,7 @@ export function InvoiceLineItemSchema(): z.ZodObject<
     currency: z.string(),
     description: z.string(),
     id: z.string(),
-    lineItemTag: InvoiceLineItemTagSchema().nullable(),
+    lineItemTag: z.array(InvoiceLineItemTagSchema()).nullable(),
     quantity: z.number(),
     taxPercent: z.number(),
     totalPriceTaxExcl: z.number(),

@@ -12,7 +12,7 @@ export const reducer: InvoiceItemsOperations = {
     try {
       const item: InvoiceLineItem = {
         ...action.input,
-        lineItemTag: null,
+        lineItemTag: [],
       };
 
       if (state.lineItems.find((x) => x.id === item.id))
@@ -74,7 +74,7 @@ export const reducer: InvoiceItemsOperations = {
       };
 
       // Add the new tag
-      stateItem.lineItemTag = newTag;
+      stateItem.lineItemTag?.push(newTag);
     } catch (e) {
       console.error(e);
     }

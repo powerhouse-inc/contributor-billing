@@ -283,7 +283,7 @@ export type InvoiceLineItem = {
   currency: Scalars["String"]["output"];
   description: Scalars["String"]["output"];
   id: Scalars["OID"]["output"];
-  lineItemTag: Maybe<InvoiceLineItemTag>;
+  lineItemTag: Maybe<Array<InvoiceLineItemTag>>;
   quantity: Scalars["Float"]["output"];
   taxPercent: Scalars["Float"]["output"];
   totalPriceTaxExcl: Scalars["Float"]["output"];
