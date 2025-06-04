@@ -25,31 +25,8 @@ import {
 } from "./validation/validationManager.js";
 import { DatePicker } from "./components/datePicker.js";
 import { SelectField } from "./components/selectField.js";
+import { formatNumber } from "./lineItems.js";
 
-// Helper function to format numbers with appropriate decimal places
-function formatNumber(value: number): string {
-  // Check if the value has decimal places
-  const hasDecimals = value % 1 !== 0;
-
-  // If no decimals or only trailing zeros after 2 decimal places, show 2 decimal places
-  if (!hasDecimals || value.toFixed(5).endsWith("000")) {
-    return value.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  }
-
-  // Otherwise, show actual decimal places up to 5
-  const stringValue = value.toString();
-  const decimalPart = stringValue.split(".")[1] || "";
-
-  // Determine how many decimal places to show (up to 5)
-  const decimalPlaces = Math.min(Math.max(2, decimalPart.length), 5);
-  return value.toLocaleString('en-US', {
-    minimumFractionDigits: decimalPlaces,
-    maximumFractionDigits: decimalPlaces
-  });
-}
 
 function isFiatCurrency(currency: string): boolean {
   return currencyList.find((c) => c.ticker === currency)?.crypto === false;

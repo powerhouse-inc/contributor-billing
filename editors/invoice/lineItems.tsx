@@ -24,7 +24,7 @@ function getCurrencyPrecision(currency: string): number {
   return currency === "USDS" || currency === "DAI" ? 6 : 2;
 }
 
-function formatNumber(value: number): string {
+export function formatNumber(value: number): string {
   // Check if the value has decimal places
   const hasDecimals = value % 1 !== 0;
 
