@@ -24,23 +24,28 @@ function getCurrencyPrecision(currency: string): number {
   return currency === "USDS" || currency === "DAI" ? 6 : 2;
 }
 
-// Helper function to format numbers with appropriate decimal places
 function formatNumber(value: number): string {
   // Check if the value has decimal places
   const hasDecimals = value % 1 !== 0;
 
   // If no decimals or only trailing zeros after 2 decimal places, show 2 decimal places
   if (!hasDecimals || value.toFixed(5).endsWith("000")) {
-    return value.toFixed(2);
+    return value.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   }
 
-  // Otherwise, show atual decimal places up to 5
+  // Otherwise, show actual decimal places up to 5
   const stringValue = value.toString();
   const decimalPart = stringValue.split(".")[1] || "";
 
   // Determine how many decimal places to show (up to 5)
   const decimalPlaces = Math.min(Math.max(2, decimalPart.length), 5);
-  return value.toFixed(decimalPlaces);
+  return value.toLocaleString('en-US', {
+    minimumFractionDigits: decimalPlaces,
+    maximumFractionDigits: decimalPlaces
+  });
 }
 
 type LineItem = {
