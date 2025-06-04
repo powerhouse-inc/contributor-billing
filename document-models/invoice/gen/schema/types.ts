@@ -67,6 +67,10 @@ export type AddLineItemInput = {
   unitPriceTaxIncl: Scalars["Float"]["input"];
 };
 
+export type AddPaymentAccountInput = {
+  paymentAccount: Scalars["String"]["input"];
+};
+
 export type AddRefInput = {
   id: Scalars["OID"]["input"];
   value: Scalars["String"]["input"];
@@ -101,6 +105,10 @@ export type ContactInfo = {
 
 export type DeleteLineItemInput = {
   id: Scalars["OID"]["input"];
+};
+
+export type DeletePaymentAccountInput = {
+  paymentAccount: Scalars["String"]["input"];
 };
 
 export type DeleteRefInput = {
@@ -237,6 +245,11 @@ export type EditPayerWalletInput = {
   rpc?: InputMaybe<Scalars["String"]["input"]>;
 };
 
+export type EditPaymentAccountInput = {
+  existingPaymentAccount: Scalars["String"]["input"];
+  newPaymentAccount: Scalars["String"]["input"];
+};
+
 export type EditRefInput = {
   id: Scalars["OID"]["input"];
   value: Scalars["String"]["input"];
@@ -270,7 +283,7 @@ export type InvoiceLineItem = {
   currency: Scalars["String"]["output"];
   description: Scalars["String"]["output"];
   id: Scalars["OID"]["output"];
-  lineItemTag: Array<InvoiceLineItemTag>;
+  lineItemTag: Maybe<InvoiceLineItemTag>;
   quantity: Scalars["Float"]["output"];
   taxPercent: Scalars["Float"]["output"];
   totalPriceTaxExcl: Scalars["Float"]["output"];
@@ -294,7 +307,7 @@ export type InvoiceState = {
   issuer: LegalEntity;
   lineItems: Array<InvoiceLineItem>;
   payer: LegalEntity;
-  paymentAccount: Maybe<Scalars["String"]["output"]>;
+  paymentAccounts: Maybe<Array<Scalars["String"]["output"]>>;
   refs: Array<Ref>;
   status: Status | `${Status}`;
   totalPriceTaxExcl: Scalars["Float"]["output"];
@@ -341,13 +354,9 @@ export type Ref = {
 
 export type SetLineItemTagInput = {
   dimension: Scalars["String"]["input"];
-  id: Scalars["OID"]["input"];
   label?: InputMaybe<Scalars["String"]["input"]>;
+  lineItemId: Scalars["OID"]["input"];
   value: Scalars["String"]["input"];
-};
-
-export type SetPaymentAccountInput = {
-  paymentAccount: Scalars["String"]["input"];
 };
 
 export type Status =

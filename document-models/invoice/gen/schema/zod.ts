@@ -1,11 +1,13 @@
 import { z } from "zod";
 import type {
   AddLineItemInput,
+  AddPaymentAccountInput,
   AddRefInput,
   Address,
   Bank,
   ContactInfo,
   DeleteLineItemInput,
+  DeletePaymentAccountInput,
   DeleteRefInput,
   EditInvoiceInput,
   EditIssuerBankInput,
@@ -15,6 +17,7 @@ import type {
   EditPayerBankInput,
   EditPayerInput,
   EditPayerWalletInput,
+  EditPaymentAccountInput,
   EditRefInput,
   EditStatusInput,
   IntermediaryBank,
@@ -30,7 +33,6 @@ import type {
   PaymentRouting,
   Ref,
   SetLineItemTagInput,
-  SetPaymentAccountInput,
   Status,
   Token,
 } from "./types.js";
@@ -91,6 +93,14 @@ export function AddLineItemInputSchema(): z.ZodObject<
   });
 }
 
+export function AddPaymentAccountInputSchema(): z.ZodObject<
+  Properties<AddPaymentAccountInput>
+> {
+  return z.object({
+    paymentAccount: z.string(),
+  });
+}
+
 export function AddRefInputSchema(): z.ZodObject<Properties<AddRefInput>> {
   return z.object({
     id: z.string(),
@@ -139,6 +149,14 @@ export function DeleteLineItemInputSchema(): z.ZodObject<
 > {
   return z.object({
     id: z.string(),
+  });
+}
+
+export function DeletePaymentAccountInputSchema(): z.ZodObject<
+  Properties<DeletePaymentAccountInput>
+> {
+  return z.object({
+    paymentAccount: z.string(),
   });
 }
 
@@ -308,6 +326,15 @@ export function EditPayerWalletInputSchema(): z.ZodObject<
   });
 }
 
+export function EditPaymentAccountInputSchema(): z.ZodObject<
+  Properties<EditPaymentAccountInput>
+> {
+  return z.object({
+    existingPaymentAccount: z.string(),
+    newPaymentAccount: z.string(),
+  });
+}
+
 export function EditRefInputSchema(): z.ZodObject<Properties<EditRefInput>> {
   return z.object({
     id: z.string(),
@@ -348,7 +375,7 @@ export function InvoiceLineItemSchema(): z.ZodObject<
     currency: z.string(),
     description: z.string(),
     id: z.string(),
-    lineItemTag: z.array(InvoiceLineItemTagSchema()),
+    lineItemTag: InvoiceLineItemTagSchema().nullable(),
     quantity: z.number(),
     taxPercent: z.number(),
     totalPriceTaxExcl: z.number(),
@@ -380,7 +407,7 @@ export function InvoiceStateSchema(): z.ZodObject<Properties<InvoiceState>> {
     issuer: LegalEntitySchema(),
     lineItems: z.array(InvoiceLineItemSchema()),
     payer: LegalEntitySchema(),
-    paymentAccount: z.string().nullable(),
+    paymentAccounts: z.array(z.string()).nullable(),
     refs: z.array(RefSchema()),
     status: StatusSchema,
     totalPriceTaxExcl: z.number(),
@@ -458,17 +485,9 @@ export function SetLineItemTagInputSchema(): z.ZodObject<
 > {
   return z.object({
     dimension: z.string(),
-    id: z.string(),
     label: z.string().nullish(),
+    lineItemId: z.string(),
     value: z.string(),
-  });
-}
-
-export function SetPaymentAccountInputSchema(): z.ZodObject<
-  Properties<SetPaymentAccountInput>
-> {
-  return z.object({
-    paymentAccount: z.string(),
   });
 }
 

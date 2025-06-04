@@ -18,7 +18,7 @@ export const schema: DocumentNode = gql`
     lineItems: [InvoiceLineItem!]!
     totalPriceTaxExcl: Float!
     totalPriceTaxIncl: Float!
-    paymentAccount: String
+    paymentAccounts: [String!]
   }
 
   type Ref {
@@ -104,7 +104,7 @@ export const schema: DocumentNode = gql`
     unitPriceTaxIncl: Float!
     totalPriceTaxExcl: Float!
     totalPriceTaxIncl: Float!
-    lineItemTag: [InvoiceLineItemTag!]!
+    lineItemTag: InvoiceLineItemTag
   }
 
   type InvoiceLineItemTag {
@@ -193,10 +193,20 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: Invoice_DeleteRefInput
     ): Int
-    Invoice_setPaymentAccount(
+    Invoice_addPaymentAccount(
       driveId: String
       docId: PHID
-      input: Invoice_SetPaymentAccountInput
+      input: Invoice_AddPaymentAccountInput
+    ): Int
+    Invoice_editPaymentAccount(
+      driveId: String
+      docId: PHID
+      input: Invoice_EditPaymentAccountInput
+    ): Int
+    Invoice_deletePaymentAccount(
+      driveId: String
+      docId: PHID
+      input: Invoice_DeletePaymentAccountInput
     ): Int
     Invoice_editIssuer(
       driveId: String
@@ -318,7 +328,14 @@ export const schema: DocumentNode = gql`
   input Invoice_DeleteRefInput {
     id: OID!
   }
-  input Invoice_SetPaymentAccountInput {
+  input Invoice_AddPaymentAccountInput {
+    paymentAccount: String!
+  }
+  input Invoice_EditPaymentAccountInput {
+    existingPaymentAccount: String!
+    newPaymentAccount: String!
+  }
+  input Invoice_DeletePaymentAccountInput {
     paymentAccount: String!
   }
 
@@ -454,7 +471,7 @@ export const schema: DocumentNode = gql`
     id: OID!
   }
   input Invoice_SetLineItemTagInput {
-    id: OID!
+    lineItemId: OID!
     dimension: String!
     value: String!
     label: String

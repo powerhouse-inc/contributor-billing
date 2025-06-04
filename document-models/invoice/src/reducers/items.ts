@@ -12,7 +12,7 @@ export const reducer: InvoiceItemsOperations = {
     try {
       const item: InvoiceLineItem = {
         ...action.input,
-        lineItemTag: [],
+        lineItemTag: null,
       };
 
       if (state.lineItems.find((x) => x.id === item.id))
@@ -64,7 +64,7 @@ export const reducer: InvoiceItemsOperations = {
 
   setLineItemTagOperation(state, action, dispatch) {
     try {
-      const stateItem = state.lineItems.find((x) => x.id === action.input.id);
+      const stateItem = state.lineItems.find((x) => x.id === action.input.lineItemId);
       if (!stateItem) throw new Error("Item matching input.id not found");
 
       const newTag: InvoiceLineItemTag = {
@@ -73,13 +73,8 @@ export const reducer: InvoiceItemsOperations = {
         label: action.input.label || null,
       };
 
-      // Remove existing tag with same dimension if it exists
-      stateItem.lineItemTag = stateItem.lineItemTag.filter(
-        (tag) => tag.dimension !== action.input.dimension
-      );
-
       // Add the new tag
-      stateItem.lineItemTag.push(newTag);
+      stateItem.lineItemTag = newTag;
     } catch (e) {
       console.error(e);
     }

@@ -5,7 +5,9 @@ import type {
   AddRefInput,
   EditRefInput,
   DeleteRefInput,
-  SetPaymentAccountInput,
+  AddPaymentAccountInput,
+  EditPaymentAccountInput,
+  DeletePaymentAccountInput,
 } from "../types.js";
 
 export type EditInvoiceAction = BaseAction<
@@ -25,9 +27,19 @@ export type DeleteRefAction = BaseAction<
   DeleteRefInput,
   "global"
 >;
-export type SetPaymentAccountAction = BaseAction<
-  "SET_PAYMENT_ACCOUNT",
-  SetPaymentAccountInput,
+export type AddPaymentAccountAction = BaseAction<
+  "ADD_PAYMENT_ACCOUNT",
+  AddPaymentAccountInput,
+  "global"
+>;
+export type EditPaymentAccountAction = BaseAction<
+  "EDIT_PAYMENT_ACCOUNT",
+  EditPaymentAccountInput,
+  "global"
+>;
+export type DeletePaymentAccountAction = BaseAction<
+  "DELETE_PAYMENT_ACCOUNT",
+  DeletePaymentAccountInput,
   "global"
 >;
 
@@ -37,4 +49,6 @@ export type InvoiceGeneralAction =
   | AddRefAction
   | EditRefAction
   | DeleteRefAction
-  | SetPaymentAccountAction;
+  | AddPaymentAccountAction
+  | EditPaymentAccountAction
+  | DeletePaymentAccountAction;

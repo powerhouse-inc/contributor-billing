@@ -27,7 +27,7 @@ type InvoiceState {
   lineItems: [InvoiceLineItem!]!
   totalPriceTaxExcl: Float!
   totalPriceTaxIncl: Float!
-  paymentAccount: String
+  paymentAccounts: [String!]
 }
 
 type Ref {
@@ -113,7 +113,7 @@ type InvoiceLineItem {
   unitPriceTaxIncl: Float!
   totalPriceTaxExcl: Float!
   totalPriceTaxIncl: Float!
-  lineItemTag: [InvoiceLineItemTag!]!
+  lineItemTag: InvoiceLineItemTag
 }
 
 type InvoiceLineItemTag {
@@ -190,8 +190,17 @@ input DeleteRefInput {
   id: OID!
 }
 
-input SetPaymentAccountInput {
-   paymentAccount: String!
+input AddPaymentAccountInput {
+  paymentAccount: String!
+}
+
+input EditPaymentAccountInput {
+  existingPaymentAccount: String!
+  newPaymentAccount: String!
+}
+
+input DeletePaymentAccountInput {
+  paymentAccount: String!
 }
 
 # parties
@@ -333,7 +342,7 @@ input DeleteLineItemInput {
 }
 
 input SetLineItemTagInput {
-  id: OID!
+  lineItemId: OID!
   dimension: String!
   value: String!
   label: String
