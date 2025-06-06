@@ -206,7 +206,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
 
   return (
     <tr ref={ref} className="hover:bg-gray-50">
-      <td className="border border-gray-200 p-3">
+      <td className="border border-gray-200 p-3" style={{width: '38%'}}>
         <InputField 
           onBlur={() => {}}
           handleInputChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -216,7 +216,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
           placeholder="Description"
         />
       </td>
-      <td className="border border-gray-200 p-3">
+      <td className="border border-gray-200 p-3" style={{width: '8%'}}>
         <NumberForm
           number={editedItem.quantity ?? ""}
           precision={0}
@@ -224,7 +224,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
           placeholder="Quantity"
         />
       </td>
-      <td className="border border-gray-200 p-3">
+      <td className="border border-gray-200 p-3" style={{width: '16%'}}>
         <NumberForm
           number={editedItem.unitPriceTaxExcl ?? ""}
           precision={getCurrencyPrecision(currency)}
@@ -232,7 +232,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
           placeholder="Unit Price (excl. tax)"
         />
       </td>
-      <td className="border border-gray-200 p-3">
+      <td className="border border-gray-200 p-3" style={{width: '8%'}}>
         <NumberForm
           number={editedItem.taxPercent ?? ""}
           precision={0}
@@ -242,10 +242,10 @@ const EditableLineItem = forwardRef(function EditableLineItem(
           placeholder="Tax %"
         />
       </td>
-      <td className="border border-gray-200 p-3 text-right font-medium">
+      <td className="border border-gray-200 p-3 text-right font-medium" style={{width: '14%'}}>
         {formatNumber(calculatedValues.totalPriceTaxExcl)}
       </td>
-      <td className="border border-gray-200 p-3 text-right font-medium">
+      <td className="border border-gray-200 p-3 text-right font-medium" style={{width: '14%'}}>
         {formatNumber(calculatedValues.totalPriceTaxIncl)}
       </td>
       <td className="border border-gray-200 p-3">
@@ -350,23 +350,25 @@ export function LineItemsTable({
         </div>
 
         <div ref={tableContainerRef} className="overflow-x-auto rounded-lg border border-gray-200">
-          <table ref={tableRef} className="w-full border-collapse bg-white">
+          <table ref={tableRef} className="w-full table-fixed border-collapse bg-white">
             <thead>
               <tr className="bg-gray-50">
-                <th className="border-b border-gray-200 p-3 text-left">
+                <th className="border-b border-gray-200 p-3 text-left" style={{width: '38%'}}>
                   Description
                 </th>
-                <th className="border-b border-gray-200 p-3 text-right">
+                <th className="border-b border-gray-200 p-3 text-right" style={{width: '8%'}}>
                   Quantity
                 </th>
-                <th className="border-b border-gray-200 p-3 text-right">
+                <th className="border-b border-gray-200 p-3 text-right" style={{width: '16%'}}>
                   Unit Price (excl. tax)
                 </th>
-                <th className="border-b border-gray-200 p-3 text-right">Tax %</th>
-                <th className="border-b border-gray-200 p-3 text-right">
+                <th className="border-b border-gray-200 p-3 text-right" style={{width: '8%'}}>
+                  Tax %
+                </th>
+                <th className="border-b border-gray-200 p-3 text-right" style={{width: '14%'}}>
                   Total (excl. tax)
                 </th>
-                <th className="border-b border-gray-200 p-3 text-right">
+                <th className="border-b border-gray-200 p-3 text-right" style={{width: '14%'}}>
                   Total (incl. tax)
                 </th>
                 <th className="border-b border-gray-200 p-3 text-center">
