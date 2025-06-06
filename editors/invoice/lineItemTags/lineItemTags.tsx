@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { Dispatch, useState } from "react";
 import { X, Tag } from "lucide-react";
 import { Button } from "@powerhousedao/design-system";
 import { Select } from "@powerhousedao/document-engineering/ui";
 import { expenseAccountOptions } from "./tagMapping.js";
+import { actions } from "../../../document-models/invoice/index.js";
 
 interface TagAssignmentRow {
   id: string;
@@ -19,17 +20,21 @@ interface LineItemTagsTableProps {
     paymentAccount: string
   ) => void;
   onClose: () => void;
+  dispatch: Dispatch<any>;
+  paymentAccounts: string[];
 }
 
 export function LineItemTagsTable({
   lineItems,
   onSave,
   onClose,
+  dispatch,
+  paymentAccounts,
 }: LineItemTagsTableProps) {
   const [taggedItems, setTaggedItems] = useState<TagAssignmentRow[]>(lineItems);
   const [paymentAccount, setPaymentAccount] =
     useState<string>("Powerhouse USD");
-
+  console.log(paymentAccounts);
   const periodOptions = [
     "Jan 2025",
     "Feb 2025",
@@ -38,12 +43,8 @@ export function LineItemTagsTable({
     "May 2025",
     "Jun 2025",
   ];
- 
-  const paymentAccountOptions = [
-    "Powerhouse USD",
-    "Powerhouse EUR",
-    "Bank Account",
-  ];
+
+  const paymentAccountOptions = ["Powerhouse USD", "Powerhouse EUR"];
 
   const handleFieldChange = (
     id: string,
@@ -184,7 +185,7 @@ export function LineItemTagsTable({
           <label className="text-lg font-medium text-gray-900">
             Payment Account
           </label>
-          <select
+          {/* <select
             value={paymentAccount}
             onChange={(e) => setPaymentAccount(e.target.value)}
             className="w-64 rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
@@ -194,7 +195,21 @@ export function LineItemTagsTable({
                 {account}
               </option>
             ))}
-          </select>
+          </select> */}
+          <Select
+            options={[
+              { label: "Powerhouse USD", value: "Powerhouse USD" },
+              { label: "Powerhouse EUR", value: "Powerhouse EUR" },
+            ]}
+            // value={paymentAccounts[0]}
+            placeholder="Select Payment Account"
+            searchable={true}
+            onChange={(value) => {
+              dispatch(
+                actions.addPaymentAccount({ paymentAccount: value as string })
+              );
+            }}
+          />
         </div>
       </div>
       {/* Save Button */}

@@ -720,6 +720,8 @@ export default function Editor(props: IProps) {
             dispatch(actions.editInvoice(input));
           }}
           onUpdateItem={(item) => dispatch(actions.editLineItem(item))}
+          dispatch={dispatch}
+          paymentAccounts={state.paymentAccounts || []}
         />
       </div>
 

@@ -3,7 +3,7 @@
 /* eslint-disable react/button-has-type */
 import { RWAButton } from "@powerhousedao/design-system";
 import { EditInvoiceInput, DeleteLineItemInput } from "../../document-models/invoice/index.js";
-import { forwardRef, useState, useMemo, useRef, useLayoutEffect } from "react";
+import { forwardRef, useState, useMemo, useRef, useLayoutEffect, Dispatch } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Tag } from "lucide-react";
 import { NumberForm } from "./components/numberForm.js";
@@ -276,6 +276,8 @@ type LineItemsTableProps = {
   readonly onUpdateItem: (item: LineItem) => void;
   readonly onDeleteItem: (input: DeleteLineItemInput) => void;
   readonly onUpdateCurrency: (input: EditInvoiceInput) => void;
+  readonly dispatch: Dispatch<any>;
+  readonly paymentAccounts: string[];
 };
 
 export function LineItemsTable({
@@ -285,6 +287,8 @@ export function LineItemsTable({
   onUpdateItem,
   onDeleteItem,
   onUpdateCurrency,
+  dispatch,
+  paymentAccounts
 }: LineItemsTableProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
@@ -327,6 +331,8 @@ export function LineItemsTable({
         lineItems={tagAssignmentRows}
         onSave={handleTagsSave}
         onClose={() => setShowTagTable(false)}
+        dispatch={dispatch}
+        paymentAccounts={paymentAccounts}
       />
     );
   }
