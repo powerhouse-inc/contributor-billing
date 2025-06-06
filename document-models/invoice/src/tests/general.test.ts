@@ -15,7 +15,7 @@ import {
 } from "../../gen/schema/index.js";
 import { reducer } from "../../gen/reducer.js";
 import * as creators from "../../gen/general/creators.js";
-import type { InvoiceDocument, SetPaymentAccountInput } from "../../gen/types.js";
+import type { InvoiceDocument, AddPaymentAccountInput } from "../../gen/types.js";
 
 describe("General Operations", () => {
   let document: InvoiceDocument;
@@ -93,9 +93,9 @@ describe("General Operations", () => {
     // generate a random id
     // const id = documentModelUtils.hashKey();
 
-    const input: SetPaymentAccountInput = generateMock(z.SetPaymentAccountInputSchema());
+    const input: AddPaymentAccountInput = generateMock(z.AddPaymentAccountInputSchema());
 
-    const updatedDocument = reducer(document, creators.setPaymentAccount(input));
+    const updatedDocument = reducer(document, creators.addPaymentAccount(input));
 
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].type).toBe("SET_PAYMENT_ACCOUNT");

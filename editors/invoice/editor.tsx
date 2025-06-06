@@ -712,7 +712,10 @@ export default function Editor(props: IProps) {
       <div className="mb-8">
         <LineItemsTable
           currency={state.currency}
-          lineItems={state.lineItems}
+          lineItems={state.lineItems.map(item => ({
+            ...item,
+            lineItemTag: item.lineItemTag ?? [],
+          }))}
           onAddItem={(item) => dispatch(actions.addLineItem(item))}
           onDeleteItem={(input) => dispatch(actions.deleteLineItem(input))}
           onUpdateCurrency={(input) => {

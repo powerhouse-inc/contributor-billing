@@ -307,7 +307,7 @@ export type InvoiceState = {
   issuer: LegalEntity;
   lineItems: Array<InvoiceLineItem>;
   payer: LegalEntity;
-  paymentAccounts: Maybe<Array<Scalars["String"]["output"]>>;
+  paymentAccounts: Array<Scalars["String"]["output"]>;
   refs: Array<Ref>;
   status: Status | `${Status}`;
   totalPriceTaxExcl: Scalars["Float"]["output"];

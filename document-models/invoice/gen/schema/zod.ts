@@ -407,7 +407,7 @@ export function InvoiceStateSchema(): z.ZodObject<Properties<InvoiceState>> {
     issuer: LegalEntitySchema(),
     lineItems: z.array(InvoiceLineItemSchema()),
     payer: LegalEntitySchema(),
-    paymentAccounts: z.array(z.string()).nullable(),
+    paymentAccounts: z.array(z.string()),
     refs: z.array(RefSchema()),
     status: StatusSchema,
     totalPriceTaxExcl: z.number(),
