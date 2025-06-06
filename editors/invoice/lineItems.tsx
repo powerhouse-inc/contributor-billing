@@ -2,7 +2,7 @@
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable react/button-has-type */
 import { RWAButton } from "@powerhousedao/design-system";
-import { EditInvoiceInput, DeleteLineItemInput } from "../../document-models/invoice/index.js";
+import { EditInvoiceInput, DeleteLineItemInput, InvoiceLineItemTag } from "../../document-models/invoice/index.js";
 import { forwardRef, useState, useMemo, useRef, useLayoutEffect, Dispatch } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Tag } from "lucide-react";
@@ -58,6 +58,7 @@ type LineItem = {
   totalPriceTaxIncl: number;
   unitPriceTaxExcl: number;
   unitPriceTaxIncl: number;
+  lineItemTag: InvoiceLineItemTag[];
 };
 
 type EditableLineItem = {
@@ -200,6 +201,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
       unitPriceTaxIncl: calculatedValues.unitPriceTaxIncl,
       totalPriceTaxExcl: calculatedValues.totalPriceTaxExcl,
       totalPriceTaxIncl: calculatedValues.totalPriceTaxIncl,
+      lineItemTag: [],
     };
     onSave(completeItem);
   }
@@ -318,6 +320,7 @@ export function LineItemsTable({
     period: 'Jan 2025', // Default value
     expenseAccount: '', // Default value
     total: `$${formatNumber(item.totalPriceTaxIncl)}`,
+    lineItemTag: item.lineItemTag,
   }));
 
   const handleTagsSave = (updatedTaggedItems: TagAssignmentRow[], paymentAccount: string) => {

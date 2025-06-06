@@ -67,14 +67,23 @@ export const reducer: InvoiceItemsOperations = {
       const stateItem = state.lineItems.find((x) => x.id === action.input.lineItemId);
       if (!stateItem) throw new Error("Item matching input.id not found");
 
-      const newTag: InvoiceLineItemTag = {
-        dimension: action.input.dimension,
-        value: action.input.value,
-        label: action.input.label || null,
-      };
+      // if tag already exists with the same dimension, update the value and label
+      const existingTag = stateItem.lineItemTag?.find((tag) => tag.dimension === action.input.dimension);
+      if (existingTag) {
+        existingTag.value = action.input.value;
+        existingTag.label = action.input.label || null;
+      } else {
+        // if tag does not exist, add it
+        const newTag: InvoiceLineItemTag = {
+          dimension: action.input.dimension,
+          value: action.input.value,
+          label: action.input.label || null,
+        };
 
-      // Add the new tag
-      stateItem.lineItemTag?.push(newTag);
+        // Add the new tag
+        stateItem.lineItemTag?.push(newTag);
+
+      }
     } catch (e) {
       console.error(e);
     }
@@ -94,7 +103,7 @@ function updateTotals(state: InvoiceState) {
 
 function validatePrices(item: InvoiceLineItem) {
   const EPSILON = 0.00001; // Small value for floating point comparisons
-  
+
   // Calculate total prices from unit prices and quantity
   const calcPriceIncl = item.quantity * item.unitPriceTaxIncl;
   const calcPriceExcl = item.quantity * item.unitPriceTaxExcl;

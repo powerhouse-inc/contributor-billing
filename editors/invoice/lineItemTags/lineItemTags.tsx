@@ -3,7 +3,7 @@ import { X, Tag } from "lucide-react";
 import { Button } from "@powerhousedao/design-system";
 import { Select } from "@powerhousedao/document-engineering/ui";
 import { expenseAccountOptions } from "./tagMapping.js";
-import { actions } from "../../../document-models/invoice/index.js";
+import { actions, InvoiceLineItemTag } from "../../../document-models/invoice/index.js";
 
 interface TagAssignmentRow {
   id: string;
@@ -11,6 +11,7 @@ interface TagAssignmentRow {
   period: string;
   expenseAccount: string;
   total: string;
+  lineItemTag: InvoiceLineItemTag[];
 }
 
 interface LineItemTagsTableProps {
@@ -34,7 +35,6 @@ export function LineItemTagsTable({
   const [taggedItems, setTaggedItems] = useState<TagAssignmentRow[]>(lineItems);
   const [paymentAccount, setPaymentAccount] =
     useState<string>("Powerhouse USD");
-  console.log(paymentAccounts);
   const periodOptions = [
     "Jan 2025",
     "Feb 2025",
@@ -43,18 +43,6 @@ export function LineItemTagsTable({
     "May 2025",
     "Jun 2025",
   ];
-
-  const paymentAccountOptions = ["Powerhouse USD", "Powerhouse EUR"];
-
-  const handleFieldChange = (
-    id: string,
-    field: keyof TagAssignmentRow,
-    value: string
-  ) => {
-    setTaggedItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
-    );
-  };
 
   const handleSave = () => {
     onSave(taggedItems, paymentAccount);
@@ -144,31 +132,23 @@ export function LineItemTagsTable({
                   </select>
                 </td>
                 <td className="border-b border-gray-200 p-3">
-                  {/* <select
-                    value={item.expenseAccount}
-                    onChange={(e) =>
-                      setTaggedItems((prev) =>
-                        prev.map((row) =>
-                          row.id === item.id
-                            ? { ...row, expenseAccount: e.target.value }
-                            : row
-                        )
-                      )
-                    }
-                    className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
-                  >
-                    <option value="">Select Expense Account</option>
-                    {expenseAccountOptions.map((account) => (
-                      <option key={account} value={account}>
-                        {account}
-                      </option>
-                    ))}
-                  </select> */}
                   <Select
                     options={expenseAccountOptions}
-                    value={item.expenseAccount}
+                    value={item.lineItemTag.find((tag) => tag.dimension === "xero-expense-account")?.value || ""}
                     placeholder="Select Expense Account"
                     searchable={true}
+                    onChange={(value) => {
+                      dispatch(
+                        actions.setLineItemTag({
+                          lineItemId: item.id,
+                          dimension: "xero-expense-account",
+                          value: value as string,
+                          label: expenseAccountOptions.find(
+                            (option) => option.value === value
+                          )?.label,
+                        })
+                      );
+                    }}
                   />
                 </td>
                 <td className="border-b border-gray-200 p-3 text-right font-medium">
@@ -185,23 +165,16 @@ export function LineItemTagsTable({
           <label className="text-lg font-medium text-gray-900">
             Payment Account
           </label>
-          {/* <select
-            value={paymentAccount}
-            onChange={(e) => setPaymentAccount(e.target.value)}
-            className="w-64 rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
-          >
-            {paymentAccountOptions.map((account) => (
-              <option key={account} value={account}>
-                {account}
-              </option>
-            ))}
-          </select> */}
           <Select
             options={[
               { label: "Powerhouse USD", value: "Powerhouse USD" },
               { label: "Powerhouse EUR", value: "Powerhouse EUR" },
             ]}
-            // value={paymentAccounts[0]}
+            value={
+              paymentAccounts && paymentAccounts.length > 0
+                ? paymentAccounts[0]
+                : ""
+            }
             placeholder="Select Payment Account"
             searchable={true}
             onChange={(value) => {
