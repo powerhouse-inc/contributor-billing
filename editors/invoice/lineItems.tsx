@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Tag } from "lucide-react";
 import { NumberForm } from "./components/numberForm.js";
 import { InputField } from "./components/inputField.js";
-import { LineItemTagsTable } from "./lineItemTags.js";
+import { LineItemTagsTable } from "./lineItemTags/lineItemTags.js";
 
 // Add TagAssignmentRow interface
 interface TagAssignmentRow {

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { X, Tag } from "lucide-react";
 import { Button } from "@powerhousedao/design-system";
-import { Select, SelectOption } from "@powerhousedao/document-engineering/ui";
+import { Select } from "@powerhousedao/document-engineering/ui";
+import { expenseAccountOptions } from "./tagMapping.js";
 
 interface TagAssignmentRow {
   id: string;
@@ -37,39 +38,7 @@ export function LineItemTagsTable({
     "May 2025",
     "Jun 2025",
   ];
-  const expenseAccountOptions: SelectOption[] = [
-    { label: "Adjustment A/C", value: "Adjustment A/C" },
-    { label: "Admin Expense", value: "Admin Expense" },
-    { label: "Budget", value: "Budget" },
-    { label: "Compensation & Benefits", value: "Compensation & Benefits" },
-    { label: "Cost of Goods Sold", value: "Cost of Goods Sold" },
-    { label: "Current Asset", value: "Current Asset" },
-    { label: "Current Liability", value: "Current Liability" },
-    { label: "Equity", value: "Equity" },
-    { label: "Fixed Asset", value: "Fixed Asset" },
-    { label: "Gas Expense", value: "Gas Expense" },
-    { label: "Income Tax Expense", value: "Income Tax Expense" },
-    { label: "Interest Income", value: "Interest Income" },
-    { label: "Internal Transfers", value: "Internal Transfers" },
-    { label: "Marketing Expense", value: "Marketing Expense" },
-    { label: "Non-Current Asset", value: "Non-Current Asset" },
-    { label: "Non-current Liability", value: "Non-current Liability" },
-    { label: "Other", value: "Other" },
-    { label: "Other Income", value: "Other Income" },
-    {
-      label: "Other Income Expense (Non-operating)",
-      value: "Other Income Expense (Non-operating)",
-    },
-    { label: "Owner Equity", value: "Owner Equity" },
-    { label: "Professional Services", value: "Professional Services" },
-    {
-      label: "Software Development Expense",
-      value: "Software Development Expense",
-    },
-    { label: "Software Expense", value: "Software Expense" },
-    { label: "Temporary Holding Account", value: "Temporary Holding Account" },
-    { label: "Travel & Entertainment", value: "Travel & Entertainment" },
-  ];
+ 
   const paymentAccountOptions = [
     "Powerhouse USD",
     "Powerhouse EUR",
