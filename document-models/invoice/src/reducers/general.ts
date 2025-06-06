@@ -61,10 +61,30 @@ export const reducer: InvoiceGeneralOperations = {
       console.error(e);
     }
   },
-  setPaymentAccountOperation(state, action, dispatch) {
+  addPaymentAccountOperation(state, action, dispatch) {
     try {
       if (!action.input.paymentAccount) throw new Error("No input.paymentAccount");
-      state.paymentAccount = action.input.paymentAccount;
+      if (!state.paymentAccounts) state.paymentAccounts = [];
+      state.paymentAccounts.push(action.input.paymentAccount);
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  editPaymentAccountOperation(state, action, dispatch) {
+    try {
+      if (!action.input.existingPaymentAccount) throw new Error("No input.existingPaymentAccount");
+      if (!action.input.newPaymentAccount) throw new Error("No input.newPaymentAccount");
+      if (!state.paymentAccounts) state.paymentAccounts = [];
+      state.paymentAccounts = state.paymentAccounts.map((paymentAccount) => paymentAccount === action.input.existingPaymentAccount ? action.input.newPaymentAccount : paymentAccount);
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  deletePaymentAccountOperation(state, action, dispatch) {
+    try {
+      if (!action.input.paymentAccount) throw new Error("No input.paymentAccount");
+      if (!state.paymentAccounts) state.paymentAccounts = [];
+      state.paymentAccounts = state.paymentAccounts.filter((paymentAccount) => paymentAccount !== action.input.paymentAccount);
     } catch (e) {
       console.error(e);
     }
