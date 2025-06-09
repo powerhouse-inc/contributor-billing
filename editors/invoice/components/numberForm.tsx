@@ -1,4 +1,5 @@
 import { Form, NumberField } from "@powerhousedao/document-engineering/scalars";
+import { twMerge } from "tailwind-merge";
 
 interface NumberFormProps {
   number: number | string;
@@ -7,6 +8,7 @@ interface NumberFormProps {
   max?: number;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
+  className?: string;
 }
 
 export const NumberForm = ({
@@ -16,6 +18,7 @@ export const NumberForm = ({
   max,
   handleInputChange,
   placeholder,
+  className,
 }: NumberFormProps) => {
   return (
     <Form
@@ -33,6 +36,7 @@ export const NumberForm = ({
         max={max}
         value={Number(number)}
         placeholder={placeholder}
+        className={twMerge(className)}
       />
     </Form>
   );
