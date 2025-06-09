@@ -207,8 +207,8 @@ const EditableLineItem = forwardRef(function EditableLineItem(
   }
 
   return (
-    <tr ref={ref} className="hover:bg-gray-50">
-      <td className="border border-gray-200 p-3" style={{width: '38%'}}>
+    <tr ref={ref} className="hover:bg-gray-50 table-row">
+      <td className="border border-gray-200 p-3 table-cell">
         <InputField 
           onBlur={() => {}}
           handleInputChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -216,25 +216,28 @@ const EditableLineItem = forwardRef(function EditableLineItem(
           }}
           value={editedItem.description ?? ""}
           placeholder="Description"
+          className=""
         />
       </td>
-      <td className="border border-gray-200 p-3" style={{width: '8%'}}>
+      <td className="border border-gray-200 p-3 table-cell">
         <NumberForm
           number={editedItem.quantity ?? ""}
           precision={0}
           handleInputChange={handleInputChange("quantity")}
           placeholder="Quantity"
+          className=""
         />
       </td>
-      <td className="border border-gray-200 p-3" style={{width: '16%'}}>
+      <td className="border border-gray-200 p-3 table-cell">
         <NumberForm
           number={editedItem.unitPriceTaxExcl ?? ""}
           precision={getCurrencyPrecision(currency)}
           handleInputChange={handleInputChange("unitPriceTaxExcl")}
           placeholder="Unit Price (excl. tax)"
+          className=""
         />
       </td>
-      <td className="border border-gray-200 p-3" style={{width: '8%'}}>
+      <td className="border border-gray-200 p-3 table-cell">
         <NumberForm
           number={editedItem.taxPercent ?? ""}
           precision={0}
@@ -242,19 +245,19 @@ const EditableLineItem = forwardRef(function EditableLineItem(
           max={100}
           handleInputChange={handleInputChange("taxPercent")}
           placeholder="Tax %"
+          className=""
         />
       </td>
-      <td className="border border-gray-200 p-3 text-right font-medium" style={{width: '14%'}}>
+      <td className="border border-gray-200 p-3 text-right font-medium table-cell">
         {formatNumber(calculatedValues.totalPriceTaxExcl)}
       </td>
-      <td className="border border-gray-200 p-3 text-right font-medium" style={{width: '14%'}}>
+      <td className="border border-gray-200 p-3 text-right font-medium table-cell">
         {formatNumber(calculatedValues.totalPriceTaxIncl)}
       </td>
-      <td className="border border-gray-200 p-3">
+      <td className="border border-gray-200 p-3 table-cell">
         <div className="flex space-x-2">
           <button
-            style={{ backgroundColor: "blue" }}
-            className="rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-700"
+            className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-700"
             onClick={handleSave}
           >
             Save
@@ -360,28 +363,25 @@ export function LineItemsTable({
 
         <div ref={tableContainerRef} className="overflow-x-auto rounded-lg border border-gray-200">
           <table ref={tableRef} className="w-full table-fixed border-collapse bg-white">
+            <colgroup>
+              <col style={{ width: '30%' }} />
+              <col style={{ width: '8%' }} />
+              <col />
+              <col style={{ width: '8%' }} />
+              <col />
+              <col />
+              <col />
+            </colgroup>
             <thead>
               <tr className="bg-gray-50">
-                <th className="border-b border-gray-200 p-3 text-left" style={{width: '38%'}}>
-                  Description
-                </th>
-                <th className="border-b border-gray-200 p-3 text-right" style={{width: '8%'}}>
-                  Quantity
-                </th>
-                <th className="border-b border-gray-200 p-3 text-right" style={{width: '16%'}}>
-                  Unit Price (excl. tax)
-                </th>
-                <th className="border-b border-gray-200 p-3 text-right" style={{width: '8%'}}>
-                  Tax %
-                </th>
-                <th className="border-b border-gray-200 p-3 text-right" style={{width: '14%'}}>
-                  Total (excl. tax)
-                </th>
-                <th className="border-b border-gray-200 p-3 text-right" style={{width: '14%'}}>
-                  Total (incl. tax)
-                </th>
+                <th className="border-b border-gray-200 p-3 text-left">Description</th>
+                <th className="border-b border-gray-200 p-3 text-right">Quantity</th>
+                <th className="border-b border-gray-200 p-3 text-right">Unit Price (excl. tax)</th>
+                <th className="border-b border-gray-200 p-3 text-right">Tax %</th>
+                <th className="border-b border-gray-200 p-3 text-right">Total (excl. tax)</th>
+                <th className="border-b border-gray-200 p-3 text-right">Total (incl. tax)</th>
                 <th className="border-b border-gray-200 p-3 text-center">
-                  <span className="flex items-center justify-center gap-2">
+                <span className="flex items-center justify-center gap-2">
                     <span className="text-sm">Actions</span>
                     <Tag onClick={() => setShowTagTable(true)} style={{cursor: "pointer", width: 28, height: 28, color: "white", fill: "#475264" }} />
                   </span>
@@ -402,29 +402,14 @@ export function LineItemsTable({
                     }}
                   />
                 ) : (
-                  <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="border-b border-gray-200 p-3">
-                      {item.description}
-                    </td>
-                    <td className="border-b border-gray-200 p-3 text-right">
-                      {item.quantity}
-                    </td>
-                    <td className="border-b border-gray-200 p-3 text-right">
-                      {formatNumber(item.unitPriceTaxExcl)}
-                    </td>
-                    <td className="border-b border-gray-200 p-3 text-right">
-                      {typeof item.taxPercent === "number"
-                        ? Math.round(item.taxPercent)
-                        : 0}
-                      %
-                    </td>
-                    <td className="border-b border-gray-200 p-3 text-right font-medium">
-                      {formatNumber(item.totalPriceTaxExcl)}
-                    </td>
-                    <td className="border-b border-gray-200 p-3 text-right font-medium">
-                      {formatNumber(item.totalPriceTaxIncl)}
-                    </td>
-                    <td className="border-b border-gray-200 p-3">
+                  <tr key={item.id} className="hover:bg-gray-50 table-row">
+                    <td className="border-b border-gray-200 p-3 table-cell">{item.description}</td>
+                    <td className="border-b border-gray-200 p-3 text-right table-cell">{item.quantity}</td>
+                    <td className="border-b border-gray-200 p-3 text-right table-cell">{formatNumber(item.unitPriceTaxExcl)}</td>
+                    <td className="border-b border-gray-200 p-3 text-right table-cell">{typeof item.taxPercent === "number" ? Math.round(item.taxPercent) : 0}%</td>
+                    <td className="border-b border-gray-200 p-3 text-right font-medium table-cell">{formatNumber(item.totalPriceTaxExcl)}</td>
+                    <td className="border-b border-gray-200 p-3 text-right font-medium table-cell">{formatNumber(item.totalPriceTaxIncl)}</td>
+                    <td className="border-b border-gray-200 p-3 table-cell">
                       <div className="flex justify-center space-x-2">
                         <button
                           style={{ backgroundColor: "lightblue" }}

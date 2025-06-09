@@ -468,11 +468,10 @@ export default function Editor(props: IProps) {
 
   return (
     <div
-      className="container mx-auto p-6 max-w-7xl"
+      className="w-screen min-h-screen p-0 lg:container lg:mx-auto lg:w-auto"
       style={{
         transform: "scale(0.9)",
         transformOrigin: "top left",
-        width: "111.11%",
       }}
     >
       <ToastContainer
