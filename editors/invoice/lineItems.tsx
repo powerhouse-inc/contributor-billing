@@ -365,8 +365,8 @@ export function LineItemsTable({
           <table ref={tableRef} className="w-full table-fixed border-collapse bg-white">
             <colgroup>
               <col style={{ width: '30%' }} />
-              <col style={{ width: '8%' }} />
-              <col />
+              <col style={{ width: '10%' }} />
+              <col style={{ width: '12%' }} />
               <col style={{ width: '8%' }} />
               <col />
               <col />

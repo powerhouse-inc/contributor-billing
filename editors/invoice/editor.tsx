@@ -648,7 +648,7 @@ export default function Editor(props: IProps) {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-2 gap-4">
         {/* Issuer Section */}
         <div className="border border-gray-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold mb-4">Issuer</h3>
