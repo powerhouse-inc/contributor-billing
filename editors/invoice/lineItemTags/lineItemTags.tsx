@@ -1,9 +1,13 @@
-import React, { Dispatch, useState } from "react";
+import { Dispatch } from "react";
 import { X, Tag } from "lucide-react";
 import { Button } from "@powerhousedao/design-system";
-import { Select } from "@powerhousedao/document-engineering/ui";
+import { Select, DatePicker } from "@powerhousedao/document-engineering/ui";
 import { expenseAccountOptions } from "./tagMapping.js";
-import { actions, InvoiceLineItemTag } from "../../../document-models/invoice/index.js";
+import {
+  actions,
+  InvoiceLineItemTag,
+} from "../../../document-models/invoice/index.js";
+import { InputField } from "../components/inputField.js";
 
 interface TagAssignmentRow {
   id: string;
@@ -16,10 +20,6 @@ interface TagAssignmentRow {
 
 interface LineItemTagsTableProps {
   lineItems: TagAssignmentRow[];
-  onSave: (
-    updatedLineItems: TagAssignmentRow[],
-    paymentAccount: string
-  ) => void;
   onClose: () => void;
   dispatch: Dispatch<any>;
   paymentAccounts: string[];
@@ -27,32 +27,27 @@ interface LineItemTagsTableProps {
 
 export function LineItemTagsTable({
   lineItems,
-  onSave,
   onClose,
   dispatch,
   paymentAccounts,
 }: LineItemTagsTableProps) {
-  const [taggedItems, setTaggedItems] = useState<TagAssignmentRow[]>(lineItems);
-  const [paymentAccount, setPaymentAccount] =
-    useState<string>("Powerhouse USD");
-  const periodOptions = [
-    "Jan 2025",
-    "Feb 2025",
-    "Mar 2025",
-    "Apr 2025",
-    "May 2025",
-    "Jun 2025",
-  ];
 
-  const handleSave = () => {
-    onSave(taggedItems, paymentAccount);
-    onClose();
-  };
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
+  const handleReset = () => {
+    // Resetting all tags to empty values
+    lineItems.forEach((item) => {
+      item.lineItemTag.forEach((tag) => {
+        dispatch(actions.setLineItemTag({
+          lineItemId: item.id,
+          dimension: tag.dimension,
+          value: "",
+          label: "",
+        }));
+      });
+    });
+    // Resetting payment accounts to empty array
+    paymentAccounts.forEach((paymentAccount) => {
+      dispatch(actions.deletePaymentAccount({ paymentAccount: paymentAccount }));
+    });
   };
 
   return (
@@ -66,7 +61,7 @@ export function LineItemTagsTable({
           />
         </span>
         <div className="flex items-center gap-2">
-          <Button color="light" size="medium">
+          <Button color="light" size="medium" onClick={handleReset}>
             Reset{" "}
           </Button>
           <button
@@ -91,50 +86,69 @@ export function LineItemTagsTable({
             </tr>
           </thead>
           <tbody>
-            {taggedItems.map((item) => (
+            {lineItems.map((item) => (
               <tr key={item.id} className="hover:bg-gray-50">
                 <td className="border-b border-gray-200 p-3">
-                  <input
-                    type="text"
+                  <InputField 
                     value={item.item}
-                    onChange={(e) =>
-                      setTaggedItems((prev) =>
-                        prev.map((row) =>
-                          row.id === item.id
-                            ? { ...row, item: e.target.value }
-                            : row
-                        )
-                      )
-                    }
-                    className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                    handleInputChange={(e) => {
+                      
+                    }}
+                    onBlur={(e) => {
+                      dispatch(
+                        actions.editLineItem({
+                          id: item.id,
+                          description: e.target.value,
+                        })
+                      );
+                    }}
+                    className="w-full"
                   />
                 </td>
-                <td className="border-b border-gray-200 p-3">
-                  <select
-                    value={item.period}
+                <td className="border-b border-gray-200 p-3" style={{ width: "100px" }}>
+                  <DatePicker
+                    name="period"
+                    dateFormat="YYYY-MM-DD"
+                    autoClose={true}
+                    placeholder="Select Period"
+                    value={
+                      item.lineItemTag.find(
+                        (tag) => tag.dimension === "accounting-period"
+                      )?.label || ""
+                    }
                     onChange={(e) =>
-                      setTaggedItems((prev) =>
-                        prev.map((row) =>
-                          row.id === item.id
-                            ? { ...row, period: e.target.value }
-                            : row
-                        )
+                      dispatch(
+                        actions.setLineItemTag({
+                          lineItemId: item.id,
+                          dimension: "accounting-period",
+                          value: new Date(e.target.value)
+                            .toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "numeric",
+                            })
+                            .split("/")
+                            .reverse()
+                            .join("/"),
+                          label: new Date(e.target.value).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "long",
+                              year: "numeric",
+                            }
+                          ),
+                        })
                       )
                     }
-                    className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
-                  >
-                    <option value="">Select Period</option>
-                    {periodOptions.map((period) => (
-                      <option key={period} value={period}>
-                        {period}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </td>
                 <td className="border-b border-gray-200 p-3">
                   <Select
                     options={expenseAccountOptions}
-                    value={item.lineItemTag.find((tag) => tag.dimension === "xero-expense-account")?.value || ""}
+                    value={
+                      item.lineItemTag.find(
+                        (tag) => tag.dimension === "xero-expense-account"
+                      )?.value || ""
+                    }
                     placeholder="Select Expense Account"
                     searchable={true}
                     onChange={(value) => {
@@ -172,7 +186,7 @@ export function LineItemTagsTable({
             ]}
             value={
               paymentAccounts && paymentAccounts.length > 0
-                ? paymentAccounts[0]
+                ? paymentAccounts[paymentAccounts.length - 1]
                 : ""
             }
             placeholder="Select Payment Account"
@@ -182,18 +196,8 @@ export function LineItemTagsTable({
                 actions.addPaymentAccount({ paymentAccount: value as string })
               );
             }}
+            style={{ width: "200px" }}
           />
-        </div>
-      </div>
-      {/* Save Button */}
-      <div className="border-t border-gray-200 p-6">
-        <div className="flex justify-end">
-          <button
-            onClick={handleSave}
-            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            Save Tags
-          </button>
         </div>
       </div>
     </div>

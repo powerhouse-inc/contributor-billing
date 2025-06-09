@@ -320,22 +320,16 @@ export function LineItemsTable({
   const tagAssignmentRows = lineItems.map(item => ({
     id: item.id,
     item: item.description,
-    period: 'Jan 2025', // Default value
+    period: '', // Default value
     expenseAccount: '', // Default value
     total: `$${formatNumber(item.totalPriceTaxIncl)}`,
     lineItemTag: item.lineItemTag,
   }));
 
-  const handleTagsSave = (updatedTaggedItems: TagAssignmentRow[], paymentAccount: string) => {
-    // Handle the saved tags here if needed
-    setShowTagTable(false);
-  };
-
   if (showTagTable) {
     return (
       <LineItemTagsTable
         lineItems={tagAssignmentRows}
-        onSave={handleTagsSave}
         onClose={() => setShowTagTable(false)}
         dispatch={dispatch}
         paymentAccounts={paymentAccounts}
