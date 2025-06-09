@@ -65,6 +65,7 @@ export const reducer: InvoiceGeneralOperations = {
     try {
       if (!action.input.paymentAccount) throw new Error("No input.paymentAccount");
       if (!state.paymentAccounts) state.paymentAccounts = [];
+      if(state.paymentAccounts.includes(action.input.paymentAccount)) throw new Error("Payment account already exists");
       state.paymentAccounts.push(action.input.paymentAccount);
     } catch (e) {
       console.error(e);
