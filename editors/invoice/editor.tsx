@@ -27,7 +27,6 @@ import { DatePicker } from "./components/datePicker.js";
 import { SelectField } from "./components/selectField.js";
 import { formatNumber } from "./lineItems.js";
 
-
 function isFiatCurrency(currency: string): boolean {
   return currencyList.find((c) => c.ticker === currency)?.crypto === false;
 }
@@ -454,7 +453,8 @@ export default function Editor(props: IProps) {
 
   const handleCurrencyChange = (currency: string) => {
     if (
-      (prevStatus.current === "PAYMENTSCHEDULED" || prevStatus.current === "DRAFT") &&
+      (prevStatus.current === "PAYMENTSCHEDULED" ||
+        prevStatus.current === "DRAFT") &&
       !isFiatCurrency(currency) &&
       state.issuer.paymentRouting?.wallet?.chainName === ""
     ) {
@@ -467,7 +467,14 @@ export default function Editor(props: IProps) {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
+    <div
+      className="container mx-auto p-6 max-w-7xl"
+      style={{
+        transform: "scale(0.9)",
+        transformOrigin: "top left",
+        width: "111.11%",
+      }}
+    >
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
@@ -712,7 +719,7 @@ export default function Editor(props: IProps) {
       <div className="mb-8">
         <LineItemsTable
           currency={state.currency}
-          lineItems={state.lineItems.map(item => ({
+          lineItems={state.lineItems.map((item) => ({
             ...item,
             lineItemTag: item.lineItemTag ?? [],
           }))}
