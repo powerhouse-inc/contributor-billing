@@ -26,6 +26,7 @@ import {
 import { DatePicker } from "./components/datePicker.js";
 import { SelectField } from "./components/selectField.js";
 import { formatNumber } from "./lineItems.js";
+import { Textarea } from "@powerhousedao/document-engineering/ui";
 
 function isFiatCurrency(currency: string): boolean {
   return currencyList.find((c) => c.ticker === currency)?.crypto === false;
@@ -44,6 +45,7 @@ export default function Editor(props: IProps) {
   const uploadDropdownRef = useRef<HTMLDivElement>(null);
   const exportDropdownRef = useRef<HTMLDivElement>(null);
   const [isPdfLoading, setIsPdfLoading] = useState(false);
+  const [notes, setNotes] = useState(state.notes || "");
 
   // Validation state
   const [invoiceValidation, setInvoiceValidation] =
@@ -77,34 +79,35 @@ export default function Editor(props: IProps) {
   const prevStatus = useRef(state.status);
 
   const invoiceRootStyle: React.CSSProperties = {
-    width: '100vw',
-    minHeight: '100vh',
+    width: "100vw",
+    minHeight: "100vh",
     margin: 0,
     padding: 0,
-    boxSizing: 'border-box',
-    transform: 'scale(0.9)',
-    transformOrigin: 'top left',
+    boxSizing: "border-box",
+    transform: "scale(0.9)",
+    transformOrigin: "top left",
   };
 
-  const [responsiveStyle, setResponsiveStyle] = useState<React.CSSProperties>(invoiceRootStyle);
+  const [responsiveStyle, setResponsiveStyle] =
+    useState<React.CSSProperties>(invoiceRootStyle);
 
   useEffect(() => {
     function handleResize() {
       if (window.innerWidth >= 1024) {
         setResponsiveStyle({
           ...invoiceRootStyle,
-          maxWidth: '1280px',
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          padding: '1rem',
+          maxWidth: "1280px",
+          marginLeft: "auto",
+          marginRight: "auto",
+          padding: "1rem",
         });
       } else {
         setResponsiveStyle(invoiceRootStyle);
       }
     }
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -759,18 +762,41 @@ export default function Editor(props: IProps) {
         />
       </div>
 
+
       {/* Totals Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="md:col-start-2">
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 shadow-sm">
-            <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+        <div className="col-span-1">
+          <div className="">
+            <Textarea
+              label="Notes"
+              placeholder="Add notes"
+              autoExpand={false}
+              rows={4}
+              multiline={true}
+              value={notes}
+              onBlur={(e) => {
+                const newValue = e.target.value;
+                if (newValue !== state.notes) {
+                  dispatch(actions.editInvoice({ notes: newValue }));
+                }
+              }}
+              onChange={(e) => {
+                setNotes(e.target.value);
+              }}
+              className="p-2 mb-4"
+            />
+          </div>
+        </div>
+        <div className="col-span-1">
+          <div className="rounded-lg border border-gray-200 bg-gray-50 pt-6 pb-5 px-6 shadow-sm h-32">
+            <div className="space-y-6">
               <div className="flex justify-between text-gray-700">
                 <span className="font-medium">Subtotal (excl. tax):</span>
                 <span>
                   {formatNumber(itemsTotalTaxExcl)} {state.currency}
                 </span>
               </div>
-              <div className="flex justify-between border-t border-gray-200 pt-4 text-lg font-bold text-gray-900">
+              <div className="flex justify-between border-t border-gray-200 pt-6 text-lg font-bold text-gray-900">
                 <span>Total (incl. tax):</span>
                 <span>
                   {formatNumber(itemsTotalTaxIncl)} {state.currency}
