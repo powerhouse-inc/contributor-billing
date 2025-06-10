@@ -79,6 +79,9 @@ export const reducer: InvoiceItemsOperations = {
           value: action.input.value,
           label: action.input.label || null,
         };
+        if (!stateItem.lineItemTag) {
+          stateItem.lineItemTag = [];
+        }
 
         // Add the new tag
         stateItem.lineItemTag?.push(newTag);
