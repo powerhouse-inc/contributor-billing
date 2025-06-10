@@ -374,7 +374,15 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     }}
                   >
                     {/* <Image style={styles.logo} src={powerhouseLogo} /> */}
-                    <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10, paddingRight: 65, marginRight: 20 }}>
+                    <Text
+                      style={{
+                        fontSize: 20,
+                        fontWeight: "bold",
+                        marginBottom: 10,
+                        paddingRight: 65,
+                        marginRight: 20,
+                      }}
+                    >
                       {invoice.issuer.name}
                     </Text>
                     <View>
@@ -408,7 +416,14 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                   }}
                 >
                   {/* Issuer */}
-                  <View style={{ width: "50%", minWidth: 0, flexDirection: "column", paddingRight: 65 }}>
+                  <View
+                    style={{
+                      width: "50%",
+                      minWidth: 0,
+                      flexDirection: "column",
+                      paddingRight: 65,
+                    }}
+                  >
                     <Text style={styles.sectionTitle}>Issuer</Text>
                     <View style={styles.row}>
                       <Text style={styles.companyInfoLabel}>Name:</Text>
@@ -468,7 +483,13 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                   </View>
 
                   {/* Payer */}
-                  <View style={{ width: "47%", minWidth: 0, flexDirection: "column" }}>
+                  <View
+                    style={{
+                      width: "47%",
+                      minWidth: 0,
+                      flexDirection: "column",
+                    }}
+                  >
                     <Text style={styles.sectionTitle}>Payer</Text>
                     <View style={styles.row}>
                       <Text style={styles.companyInfoLabel}>Name:</Text>
@@ -618,12 +639,6 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                       <PaymentSectionFiat
                         paymentRouting={invoice.issuer.paymentRouting}
                       />
-                      {invoice.issuer.paymentRouting?.bank?.memo && (
-                        <Text style={[styles.companyInfo, { marginTop: 20 }]}>
-                          Memo:{" "}
-                          {invoice.issuer.paymentRouting?.bank?.memo || ""}{" "}
-                        </Text>
-                      )}
                     </div>
                   ) : (
                     <PaymentSectionCrypto
@@ -655,47 +670,65 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
             {/* Totals and terms only on last page */}
             {pageIndex === totalPages - 1 && (
               <>
-                <View style={styles.totals}>
-                  <View style={styles.totalRow}>
-                    <Text style={styles.totalLabel}>Subtotal</Text>
-                    <Text style={styles.totalValue}>
-                      {formatCurrency(
-                        invoice.lineItems.reduce(
-                          (sum, item) =>
-                            sum + item.quantity * item.unitPriceTaxExcl,
-                          0
-                        ),
-                        invoice.currency
-                      )}
+                <View style={{ flexDirection: "row", gap: 20 }}>
+                  {/* Notes Column */}
+                  <View
+                    style={{
+                      flex: 1,
+                      marginTop: 20,
+                    }}
+                  >
+                    <Text style={[styles.sectionTitle, { marginBottom: 10 }]}>
+                      {invoice.notes ? "Notes" : ""}
+                    </Text>
+                    <Text style={styles.companyInfo}>
+                      {invoice.notes || ""}
                     </Text>
                   </View>
-                  <View style={styles.totalRow}>
-                    <Text style={styles.totalLabel}>Tax</Text>
-                    <Text style={styles.totalValue}>
-                      {formatCurrency(
-                        invoice.lineItems.reduce(
-                          (sum, item) =>
-                            sum +
-                            item.quantity *
-                              (item.unitPriceTaxIncl - item.unitPriceTaxExcl),
-                          0
-                        ),
-                        invoice.currency
-                      )}
-                    </Text>
-                  </View>
-                  <View style={styles.totalRowBold}>
-                    <Text style={styles.totalLabelBold}>Total</Text>
-                    <Text style={styles.totalValueBold}>
-                      {formatCurrency(
-                        invoice.lineItems.reduce(
-                          (sum, item) =>
-                            sum + item.quantity * item.unitPriceTaxIncl,
-                          0
-                        ),
-                        invoice.currency
-                      )}
-                    </Text>
+
+                  {/* Totals Column */}
+                  <View style={[styles.totals, { flex: 1 }]}>
+                    <View style={styles.totalRow}>
+                      <Text style={styles.totalLabel}>Subtotal</Text>
+                      <Text style={styles.totalValue}>
+                        {formatCurrency(
+                          invoice.lineItems.reduce(
+                            (sum, item) =>
+                              sum + item.quantity * item.unitPriceTaxExcl,
+                            0
+                          ),
+                          invoice.currency
+                        )}
+                      </Text>
+                    </View>
+                    <View style={styles.totalRow}>
+                      <Text style={styles.totalLabel}>Tax</Text>
+                      <Text style={styles.totalValue}>
+                        {formatCurrency(
+                          invoice.lineItems.reduce(
+                            (sum, item) =>
+                              sum +
+                              item.quantity *
+                                (item.unitPriceTaxIncl - item.unitPriceTaxExcl),
+                            0
+                          ),
+                          invoice.currency
+                        )}
+                      </Text>
+                    </View>
+                    <View style={styles.totalRowBold}>
+                      <Text style={styles.totalLabelBold}>Total</Text>
+                      <Text style={styles.totalValueBold}>
+                        {formatCurrency(
+                          invoice.lineItems.reduce(
+                            (sum, item) =>
+                              sum + item.quantity * item.unitPriceTaxIncl,
+                            0
+                          ),
+                          invoice.currency
+                        )}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </>
