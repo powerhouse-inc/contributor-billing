@@ -755,7 +755,7 @@ export default function Editor(props: IProps) {
           }}
           onUpdateItem={(item) => dispatch(actions.editLineItem(item))}
           dispatch={dispatch}
-          paymentAccounts={state.paymentAccounts || []}
+          paymentAccounts={state.invoiceTags || []}
         />
       </div>
 

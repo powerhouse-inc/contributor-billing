@@ -62,3 +62,19 @@ export const expenseAccountOptions: SelectOption[] = [
     { label: "Retained Earnings", value: "960" },
     { label: "Owner A Share Capital", value: "970" }
 ];
+
+export const paymentAccountOptions: SelectOption[] = [
+    { label: "Clearing Account USD", value: "USD" },
+    { label: "Clearing Account EUR", value: "EUR" },
+    { label: "Clearing Account DKK", value: "DKK" },
+    { label: "Clearing Account GBP", value: "GBP" },
+    { label: "Clearing Account JPY", value: "JPY" },
+    { label: "Clearing Account CNY", value: "CNY" },
+    { label: "Clearing Account CHF", value: "CHF" },
+    { label: "Wallet USDS", value: "USDS" },
+    { label: "Wallet DAI", value: "DAI" },
+    { label: "Wallet EURe", value: "EURe" },
+    { label: "Wallet SKY", value: "SKY" },
+    { label: "Wallet MKR", value: "MKR" },
+    { label: "Wallet USDC", value: "USDC" },
+];

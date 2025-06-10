@@ -2,11 +2,8 @@ import { Dispatch } from "react";
 import { X, Tag } from "lucide-react";
 import { Button } from "@powerhousedao/design-system";
 import { Select, DatePicker } from "@powerhousedao/document-engineering/ui";
-import { expenseAccountOptions } from "./tagMapping.js";
-import {
-  actions,
-  InvoiceLineItemTag,
-} from "../../../document-models/invoice/index.js";
+import { expenseAccountOptions, paymentAccountOptions } from "./tagMapping.js";
+import { actions, InvoiceTag } from "../../../document-models/invoice/index.js";
 import { InputField } from "../components/inputField.js";
 
 interface TagAssignmentRow {
@@ -15,14 +12,14 @@ interface TagAssignmentRow {
   period: string;
   expenseAccount: string;
   total: string;
-  lineItemTag: InvoiceLineItemTag[];
+  lineItemTag: InvoiceTag[];
 }
 
 interface LineItemTagsTableProps {
   lineItems: TagAssignmentRow[];
   onClose: () => void;
   dispatch: Dispatch<any>;
-  paymentAccounts: string[];
+  paymentAccounts: InvoiceTag[];
 }
 
 export function LineItemTagsTable({
@@ -31,24 +28,39 @@ export function LineItemTagsTable({
   dispatch,
   paymentAccounts,
 }: LineItemTagsTableProps) {
-
   const handleReset = () => {
     // Resetting all tags to empty values
     lineItems.forEach((item) => {
       item.lineItemTag.forEach((tag) => {
-        dispatch(actions.setLineItemTag({
-          lineItemId: item.id,
+        dispatch(
+          actions.setLineItemTag({
+            lineItemId: item.id,
+            dimension: tag.dimension,
+            value: "",
+            label: "",
+          })
+        );
+      });
+    });
+
+    // Reset the payment account to empty value
+    paymentAccounts.forEach((tag) => {
+      dispatch(
+        actions.setInvoiceTag({
           dimension: tag.dimension,
           value: "",
           label: "",
-        }));
-      });
-    });
-    // Resetting payment accounts to empty array
-    paymentAccounts.forEach((paymentAccount) => {
-      dispatch(actions.deletePaymentAccount({ paymentAccount: paymentAccount }));
+        })
+      );
     });
   };
+
+  // Get the last payment account value from the paymentAccounts to display in the payment account select
+  const selectedPaymentAccountValue =
+    paymentAccounts && paymentAccounts.length > 0
+      ? (paymentAccounts[paymentAccounts.length - 1].value ?? "")
+      : "";
+  
 
   return (
     <div className="w-full">
@@ -89,11 +101,9 @@ export function LineItemTagsTable({
             {lineItems.map((item) => (
               <tr key={item.id} className="hover:bg-gray-50">
                 <td className="border-b border-gray-200 p-3">
-                  <InputField 
+                  <InputField
                     value={item.item}
-                    handleInputChange={(e) => {
-                      
-                    }}
+                    handleInputChange={(e) => {}}
                     onBlur={(e) => {
                       dispatch(
                         actions.editLineItem({
@@ -105,7 +115,10 @@ export function LineItemTagsTable({
                     className="w-full"
                   />
                 </td>
-                <td className="border-b border-gray-200 p-3" style={{ width: "100px" }}>
+                <td
+                  className="border-b border-gray-200 p-3"
+                  style={{ width: "100px" }}
+                >
                   <DatePicker
                     name="period"
                     dateFormat="YYYY-MM-DD"
@@ -180,23 +193,24 @@ export function LineItemTagsTable({
             Payment Account
           </label>
           <Select
-            options={[
-              { label: "Powerhouse USD", value: "Powerhouse USD" },
-              { label: "Powerhouse EUR", value: "Powerhouse EUR" },
-            ]}
-            value={
-              paymentAccounts && paymentAccounts.length > 0
-                ? paymentAccounts[paymentAccounts.length - 1]
-                : ""
-            }
+            options={paymentAccountOptions}
+            value={paymentAccountOptions.find((option) => option.value === selectedPaymentAccountValue)?.value ?? ""}
             placeholder="Select Payment Account"
             searchable={true}
             onChange={(value) => {
+              const selectedLabel =
+                paymentAccountOptions.find((option) => option.value === value)
+                  ?.label || "";
+              const cleanLabel = selectedLabel.replace(/\s+\w+$/, "").trim();
               dispatch(
-                actions.addPaymentAccount({ paymentAccount: value as string })
+                actions.setInvoiceTag({
+                  dimension: "xero-payment-account",
+                  value: value as string,
+                  label: cleanLabel,
+                })
               );
             }}
-            style={{ width: "200px" }}
+            style={{ width: "230px" }}
           />
         </div>
       </div>

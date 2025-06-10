@@ -2,7 +2,7 @@
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable react/button-has-type */
 import { RWAButton } from "@powerhousedao/design-system";
-import { EditInvoiceInput, DeleteLineItemInput, InvoiceLineItemTag } from "../../document-models/invoice/index.js";
+import { EditInvoiceInput, DeleteLineItemInput, InvoiceTag } from "../../document-models/invoice/index.js";
 import { forwardRef, useState, useMemo, useRef, useLayoutEffect, Dispatch } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Tag } from "lucide-react";
@@ -58,7 +58,7 @@ type LineItem = {
   totalPriceTaxIncl: number;
   unitPriceTaxExcl: number;
   unitPriceTaxIncl: number;
-  lineItemTag: InvoiceLineItemTag[];
+  lineItemTag: InvoiceTag[];
 };
 
 type EditableLineItem = {
@@ -282,7 +282,7 @@ type LineItemsTableProps = {
   readonly onDeleteItem: (input: DeleteLineItemInput) => void;
   readonly onUpdateCurrency: (input: EditInvoiceInput) => void;
   readonly dispatch: Dispatch<any>;
-  readonly paymentAccounts: string[];
+  readonly paymentAccounts: InvoiceTag[];
 };
 
 export function LineItemsTable({
