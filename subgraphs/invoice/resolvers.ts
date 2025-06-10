@@ -152,48 +152,6 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         return doc.revision.global + 1;
       },
 
-      Invoice_addPaymentAccount: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
-
-        await reactor.addAction(
-          driveId,
-          docId,
-          actions.addPaymentAccount({ ...args.input }),
-        );
-
-        return doc.revision.global + 1;
-      },
-
-      Invoice_editPaymentAccount: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
-
-        await reactor.addAction(
-          driveId,
-          docId,
-          actions.editPaymentAccount({ ...args.input }),
-        );
-
-        return doc.revision.global + 1;
-      },
-
-      Invoice_deletePaymentAccount: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
-
-        await reactor.addAction(
-          driveId,
-          docId,
-          actions.deletePaymentAccount({ ...args.input }),
-        );
-
-        return doc.revision.global + 1;
-      },
-
       Invoice_editIssuer: async (_: any, args: any) => {
         const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
         const docId: string = args.docId || "";
@@ -333,9 +291,24 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
 
         return doc.revision.global + 1;
       },
-      Invoice_uploadInvoicePdfChunk,
-      Invoice_createRequestFinancePayment,
+
+      Invoice_setInvoiceTag: async (_: any, args: any) => {
+        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
+        const docId: string = args.docId || "";
+        const doc = await reactor.getDocument(driveId, docId);
+
+        await reactor.addAction(
+          driveId,
+          docId,
+          actions.setInvoiceTag({ ...args.input }),
+        );
+
+        return doc.revision.global + 1;
+      },
+
       Invoice_processGnosisPayment,
+      Invoice_createRequestFinancePayment,
+      Invoice_uploadInvoicePdfChunk,
     },
   };
 };

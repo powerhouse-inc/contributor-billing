@@ -4,6 +4,7 @@ import {
   type EditLineItemInput,
   type DeleteLineItemInput,
   type SetLineItemTagInput,
+  type SetInvoiceTagInput,
   type InvoiceState,
   type InvoiceLocalState,
 } from "../types.js";
@@ -12,6 +13,7 @@ import {
   editLineItem,
   deleteLineItem,
   setLineItemTag,
+  setInvoiceTag,
 } from "./creators.js";
 import { type InvoiceAction } from "../actions.js";
 
@@ -34,5 +36,9 @@ export default class Invoice_Items extends BaseDocumentClass<
 
   public setLineItemTag(input: SetLineItemTagInput) {
     return this.dispatch(setLineItemTag(input));
+  }
+
+  public setInvoiceTag(input: SetInvoiceTagInput) {
+    return this.dispatch(setInvoiceTag(input));
   }
 }

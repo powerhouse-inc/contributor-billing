@@ -1,13 +1,11 @@
 import { z } from "zod";
 import type {
   AddLineItemInput,
-  AddPaymentAccountInput,
   AddRefInput,
   Address,
   Bank,
   ContactInfo,
   DeleteLineItemInput,
-  DeletePaymentAccountInput,
   DeleteRefInput,
   EditInvoiceInput,
   EditIssuerBankInput,
@@ -17,21 +15,21 @@ import type {
   EditPayerBankInput,
   EditPayerInput,
   EditPayerWalletInput,
-  EditPaymentAccountInput,
   EditRefInput,
   EditStatusInput,
   IntermediaryBank,
   InvoiceAccountType,
   InvoiceAccountTypeInput,
   InvoiceLineItem,
-  InvoiceLineItemTag,
   InvoiceState,
+  InvoiceTag,
   InvoiceWallet,
   LegalEntity,
   LegalEntityCorporateRegistrationId,
   LegalEntityTaxId,
   PaymentRouting,
   Ref,
+  SetInvoiceTagInput,
   SetLineItemTagInput,
   Status,
   Token,
@@ -93,14 +91,6 @@ export function AddLineItemInputSchema(): z.ZodObject<
   });
 }
 
-export function AddPaymentAccountInputSchema(): z.ZodObject<
-  Properties<AddPaymentAccountInput>
-> {
-  return z.object({
-    paymentAccount: z.string(),
-  });
-}
-
 export function AddRefInputSchema(): z.ZodObject<Properties<AddRefInput>> {
   return z.object({
     id: z.string(),
@@ -152,14 +142,6 @@ export function DeleteLineItemInputSchema(): z.ZodObject<
   });
 }
 
-export function DeletePaymentAccountInputSchema(): z.ZodObject<
-  Properties<DeletePaymentAccountInput>
-> {
-  return z.object({
-    paymentAccount: z.string(),
-  });
-}
-
 export function DeleteRefInputSchema(): z.ZodObject<
   Properties<DeleteRefInput>
 > {
@@ -177,6 +159,7 @@ export function EditInvoiceInputSchema(): z.ZodObject<
     dateDue: z.string().nullish(),
     dateIssued: z.string().nullish(),
     invoiceNo: z.string().nullish(),
+    notes: z.string().nullish(),
   });
 }
 
@@ -326,15 +309,6 @@ export function EditPayerWalletInputSchema(): z.ZodObject<
   });
 }
 
-export function EditPaymentAccountInputSchema(): z.ZodObject<
-  Properties<EditPaymentAccountInput>
-> {
-  return z.object({
-    existingPaymentAccount: z.string(),
-    newPaymentAccount: z.string(),
-  });
-}
-
 export function EditRefInputSchema(): z.ZodObject<Properties<EditRefInput>> {
   return z.object({
     id: z.string(),
@@ -375,24 +349,13 @@ export function InvoiceLineItemSchema(): z.ZodObject<
     currency: z.string(),
     description: z.string(),
     id: z.string(),
-    lineItemTag: z.array(InvoiceLineItemTagSchema()).nullable(),
+    lineItemTag: z.array(InvoiceTagSchema()).nullable(),
     quantity: z.number(),
     taxPercent: z.number(),
     totalPriceTaxExcl: z.number(),
     totalPriceTaxIncl: z.number(),
     unitPriceTaxExcl: z.number(),
     unitPriceTaxIncl: z.number(),
-  });
-}
-
-export function InvoiceLineItemTagSchema(): z.ZodObject<
-  Properties<InvoiceLineItemTag>
-> {
-  return z.object({
-    __typename: z.literal("InvoiceLineItemTag").optional(),
-    dimension: z.string(),
-    label: z.string().nullable(),
-    value: z.string(),
   });
 }
 
@@ -404,14 +367,24 @@ export function InvoiceStateSchema(): z.ZodObject<Properties<InvoiceState>> {
     dateDue: z.string(),
     dateIssued: z.string(),
     invoiceNo: z.string(),
+    invoiceTags: z.array(InvoiceTagSchema()),
     issuer: LegalEntitySchema(),
     lineItems: z.array(InvoiceLineItemSchema()),
+    notes: z.string().nullable(),
     payer: LegalEntitySchema(),
-    paymentAccounts: z.array(z.string()),
     refs: z.array(RefSchema()),
     status: StatusSchema,
     totalPriceTaxExcl: z.number(),
     totalPriceTaxIncl: z.number(),
+  });
+}
+
+export function InvoiceTagSchema(): z.ZodObject<Properties<InvoiceTag>> {
+  return z.object({
+    __typename: z.literal("InvoiceTag").optional(),
+    dimension: z.string(),
+    label: z.string().nullable(),
+    value: z.string(),
   });
 }
 
@@ -476,6 +449,16 @@ export function RefSchema(): z.ZodObject<Properties<Ref>> {
   return z.object({
     __typename: z.literal("Ref").optional(),
     id: z.string(),
+    value: z.string(),
+  });
+}
+
+export function SetInvoiceTagInputSchema(): z.ZodObject<
+  Properties<SetInvoiceTagInput>
+> {
+  return z.object({
+    dimension: z.string(),
+    label: z.string().nullish(),
     value: z.string(),
   });
 }

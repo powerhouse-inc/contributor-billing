@@ -5,7 +5,7 @@
  */
 
 import type { InvoiceItemsOperations } from "../../gen/items/operations.js";
-import type { InvoiceLineItem, InvoiceState, InvoiceLineItemTag } from "../../gen/types.js";
+import type { InvoiceLineItem, InvoiceState, InvoiceTag } from "../../gen/types.js";
 
 export const reducer: InvoiceItemsOperations = {
   addLineItemOperation(state, action, dispatch) {
@@ -74,7 +74,7 @@ export const reducer: InvoiceItemsOperations = {
         existingTag.label = action.input.label || null;
       } else {
         // if tag does not exist, add it
-        const newTag: InvoiceLineItemTag = {
+        const newTag: InvoiceTag = {
           dimension: action.input.dimension,
           value: action.input.value,
           label: action.input.label || null,
@@ -82,6 +82,31 @@ export const reducer: InvoiceItemsOperations = {
 
         // Add the new tag
         stateItem.lineItemTag?.push(newTag);
+
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  setInvoiceTagOperation(state, action, dispatch) {
+    try {
+      // if tag already exists with the same dimension, update the value and label
+      const existingTag = state.invoiceTags?.find((tag) => tag.dimension === action.input.dimension);
+      if (existingTag) {
+        existingTag.value = action.input.value;
+        existingTag.label = action.input.label || null;
+      } else {
+        // if tag does not exist, add it
+        const newTag: InvoiceTag = {
+          dimension: action.input.dimension,
+          value: action.input.value,
+          label: action.input.label || null,
+        };
+        if (!state.invoiceTags) {
+          state.invoiceTags = [];
+        }
+        // Add the new tag
+        state.invoiceTags.push(newTag);
 
       }
     } catch (e) {

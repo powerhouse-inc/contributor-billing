@@ -18,7 +18,8 @@ export const schema: DocumentNode = gql`
     lineItems: [InvoiceLineItem!]!
     totalPriceTaxExcl: Float!
     totalPriceTaxIncl: Float!
-    paymentAccounts: [String!]
+    invoiceTags: [InvoiceTag!]! # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}
+    notes: String
   }
 
   type Ref {
@@ -104,13 +105,13 @@ export const schema: DocumentNode = gql`
     unitPriceTaxIncl: Float!
     totalPriceTaxExcl: Float!
     totalPriceTaxIncl: Float!
-    lineItemTag: [InvoiceLineItemTag!]
+    lineItemTag: [InvoiceTag!]
   }
 
-  type InvoiceLineItemTag {
-    dimension: String!
-    value: String!
-    label: String
+  type InvoiceTag {
+    dimension: String! # "xero-expense-account", "xero-payment-account", "accounting-period", ...
+    value: String! # "627", ..., "090", ..., "2025/05", "2025/Q1", ...
+    label: String # "Marketing", ..., "Business Bank", ..., "May 2025"
   }
 
   union LegalEntityId = LegalEntityTaxId | LegalEntityCorporateRegistrationId
@@ -193,21 +194,6 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: Invoice_DeleteRefInput
     ): Int
-    Invoice_addPaymentAccount(
-      driveId: String
-      docId: PHID
-      input: Invoice_AddPaymentAccountInput
-    ): Int
-    Invoice_editPaymentAccount(
-      driveId: String
-      docId: PHID
-      input: Invoice_EditPaymentAccountInput
-    ): Int
-    Invoice_deletePaymentAccount(
-      driveId: String
-      docId: PHID
-      input: Invoice_DeletePaymentAccountInput
-    ): Int
     Invoice_editIssuer(
       driveId: String
       docId: PHID
@@ -257,6 +243,11 @@ export const schema: DocumentNode = gql`
       driveId: String
       docId: PHID
       input: Invoice_SetLineItemTagInput
+    ): Int
+    Invoice_setInvoiceTag(
+      driveId: String
+      docId: PHID
+      input: Invoice_SetInvoiceTagInput
     ): Int
     Invoice_uploadInvoicePdfChunk(
       chunk: String!
@@ -313,6 +304,7 @@ export const schema: DocumentNode = gql`
     dateDue: String
     dateDelivered: String
     currency: String
+    notes: String
   }
   input Invoice_EditStatusInput {
     status: Status!
@@ -327,16 +319,6 @@ export const schema: DocumentNode = gql`
   }
   input Invoice_DeleteRefInput {
     id: OID!
-  }
-  input Invoice_AddPaymentAccountInput {
-    paymentAccount: String!
-  }
-  input Invoice_EditPaymentAccountInput {
-    existingPaymentAccount: String!
-    newPaymentAccount: String!
-  }
-  input Invoice_DeletePaymentAccountInput {
-    paymentAccount: String!
   }
 
   """
@@ -472,6 +454,11 @@ export const schema: DocumentNode = gql`
   }
   input Invoice_SetLineItemTagInput {
     lineItemId: OID!
+    dimension: String!
+    value: String!
+    label: String
+  }
+  input Invoice_SetInvoiceTagInput {
     dimension: String!
     value: String!
     label: String

@@ -6,9 +6,6 @@ import {
   type AddRefInput,
   type EditRefInput,
   type DeleteRefInput,
-  type AddPaymentAccountInput,
-  type EditPaymentAccountInput,
-  type DeletePaymentAccountInput,
 } from "../types.js";
 import {
   type EditInvoiceAction,
@@ -16,9 +13,6 @@ import {
   type AddRefAction,
   type EditRefAction,
   type DeleteRefAction,
-  type AddPaymentAccountAction,
-  type EditPaymentAccountAction,
-  type DeletePaymentAccountAction,
 } from "./actions.js";
 
 export const editInvoice = (input: EditInvoiceInput) =>
@@ -63,32 +57,5 @@ export const deleteRef = (input: DeleteRefInput) =>
     { ...input },
     undefined,
     z.DeleteRefInputSchema,
-    "global",
-  );
-
-export const addPaymentAccount = (input: AddPaymentAccountInput) =>
-  createAction<AddPaymentAccountAction>(
-    "ADD_PAYMENT_ACCOUNT",
-    { ...input },
-    undefined,
-    z.AddPaymentAccountInputSchema,
-    "global",
-  );
-
-export const editPaymentAccount = (input: EditPaymentAccountInput) =>
-  createAction<EditPaymentAccountAction>(
-    "EDIT_PAYMENT_ACCOUNT",
-    { ...input },
-    undefined,
-    z.EditPaymentAccountInputSchema,
-    "global",
-  );
-
-export const deletePaymentAccount = (input: DeletePaymentAccountInput) =>
-  createAction<DeletePaymentAccountAction>(
-    "DELETE_PAYMENT_ACCOUNT",
-    { ...input },
-    undefined,
-    z.DeletePaymentAccountInputSchema,
     "global",
   );

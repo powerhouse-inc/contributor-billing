@@ -17,6 +17,7 @@ export const reducer: InvoiceGeneralOperations = {
       newState.dateDue = action.input.dateDue ?? state.dateDue;
       newState.dateIssued = action.input.dateIssued ?? state.dateIssued;
       newState.invoiceNo = action.input.invoiceNo ?? state.invoiceNo;
+      newState.notes = action.input.notes ?? state.notes;
 
       state = Object.assign(state, newState);
     } catch (e) {
@@ -57,35 +58,6 @@ export const reducer: InvoiceGeneralOperations = {
     try {
       if (!action.input.id) throw new Error("No input.id");
       state.refs = state.refs.filter((r) => r.id !== action.input.id);
-    } catch (e) {
-      console.error(e);
-    }
-  },
-  addPaymentAccountOperation(state, action, dispatch) {
-    try {
-      if (!action.input.paymentAccount) throw new Error("No input.paymentAccount");
-      if (!state.paymentAccounts) state.paymentAccounts = [];
-      if(state.paymentAccounts.includes(action.input.paymentAccount)) throw new Error("Payment account already exists");
-      state.paymentAccounts.push(action.input.paymentAccount);
-    } catch (e) {
-      console.error(e);
-    }
-  },
-  editPaymentAccountOperation(state, action, dispatch) {
-    try {
-      if (!action.input.existingPaymentAccount) throw new Error("No input.existingPaymentAccount");
-      if (!action.input.newPaymentAccount) throw new Error("No input.newPaymentAccount");
-      if (!state.paymentAccounts) state.paymentAccounts = [];
-      state.paymentAccounts = state.paymentAccounts.map((paymentAccount) => paymentAccount === action.input.existingPaymentAccount ? action.input.newPaymentAccount : paymentAccount);
-    } catch (e) {
-      console.error(e);
-    }
-  },
-  deletePaymentAccountOperation(state, action, dispatch) {
-    try {
-      if (!action.input.paymentAccount) throw new Error("No input.paymentAccount");
-      if (!state.paymentAccounts) state.paymentAccounts = [];
-      state.paymentAccounts = state.paymentAccounts.filter((paymentAccount) => paymentAccount !== action.input.paymentAccount);
     } catch (e) {
       console.error(e);
     }
