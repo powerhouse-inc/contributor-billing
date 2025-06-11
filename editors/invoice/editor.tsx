@@ -788,8 +788,8 @@ export default function Editor(props: IProps) {
           </div>
         </div>
         <div className="col-span-1">
-          <div className="rounded-lg border border-gray-200 bg-gray-50 pt-6 pb-5 px-6 shadow-sm h-32">
-            <div className="space-y-6">
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 shadow-sm h-32">
+            <div className="">
               <div className="flex justify-between text-gray-700">
                 <span className="font-medium">Subtotal (excl. tax):</span>
                 <span>
