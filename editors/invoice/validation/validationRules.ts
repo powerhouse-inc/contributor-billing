@@ -100,13 +100,38 @@ export const currencyRule: ValidationRule = {
     }
 };
 
-export const countryRule: ValidationRule = {
-    field: 'country',
+export const mainCountryRule: ValidationRule = {
+    field: 'mainCountry',
     validate: (value: string) => {
         if (!value || value.trim() === '') {
             return {
                 isValid: false,
                 message: 'Country is required',
+                severity: 'warning'
+            };
+        }
+        return {
+            isValid: true,
+            message: '',
+            severity: 'none'
+        };
+    },
+    appliesTo: {
+        currencies: ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'CHF'],
+        statusTransitions: {
+            from: ['DRAFT'],
+            to: ['ISSUED']
+        }
+    }
+};
+
+export const bankCountryRule: ValidationRule = {
+    field: 'bankCountry',
+    validate: (value: string) => {
+        if (!value || value.trim() === '') {
+            return {
+                isValid: false,
+                message: 'Bank country is required',
                 severity: 'warning'
             };
         }

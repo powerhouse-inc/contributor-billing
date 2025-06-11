@@ -54,8 +54,6 @@ export default function Editor(props: IProps) {
     useState<ValidationResult | null>(null);
   const [currencyValidation, setCurrencyValidation] =
     useState<ValidationResult | null>(null);
-  const [countryValidation, setCountryValidation] =
-    useState<ValidationResult | null>(null);
   const [ibanValidation, setIbanValidation] = useState<ValidationResult | null>(
     null
   );
@@ -74,6 +72,10 @@ export default function Editor(props: IProps) {
   const [payerEmailValidation, setPayerEmailValidation] =
     useState<ValidationResult | null>(null);
   const [lineItemValidation, setLineItemValidation] =
+    useState<ValidationResult | null>(null);
+  const [mainCountryValidation, setMainCountryValidation] =
+    useState<ValidationResult | null>(null);
+  const [bankCountryValidation, setBankCountryValidation] =
     useState<ValidationResult | null>(null);
 
   const prevStatus = useRef(state.status);
@@ -359,16 +361,20 @@ export default function Editor(props: IProps) {
         validationErrors.push(currencyValidation);
       }
 
-      // Validate country
-      const country =
-        state.issuer.paymentRouting?.bank?.address?.country &&
-        state.issuer.country
-          ? state.issuer.paymentRouting?.bank?.address?.country
-          : "";
-      const countryValidation = validateField("country", country, context);
-      setCountryValidation(countryValidation);
-      if (countryValidation && !countryValidation.isValid) {
-        validationErrors.push(countryValidation);
+      // Validate main country
+      const mainCountry = state.issuer.country ?? "";
+      const mainCountryValidation = validateField("mainCountry", mainCountry, context);
+      setMainCountryValidation(mainCountryValidation);
+      if (mainCountryValidation && !mainCountryValidation.isValid) {
+        validationErrors.push(mainCountryValidation);
+      }
+
+      // Validate bank country
+      const bankCountry = state.issuer.paymentRouting?.bank?.address?.country ?? "";
+      const bankCountryValidation = validateField("bankCountry", bankCountry, context);
+      setBankCountryValidation(bankCountryValidation);
+      if (bankCountryValidation && !bankCountryValidation.isValid) {
+        validationErrors.push(bankCountryValidation);
       }
 
       // Validate EUR&GBP IBAN account number
@@ -693,23 +699,26 @@ export default function Editor(props: IProps) {
           </div>
           <LegalEntityForm
             legalEntity={state.issuer}
-            onChangeBank={(input) => dispatch(actions.editIssuerBank(input))}
             onChangeInfo={(input) => dispatch(actions.editIssuer(input))}
+            onChangeBank={(input) => dispatch(actions.editIssuerBank(input))}
             onChangeWallet={(input) =>
               dispatch(actions.editIssuerWallet(input))
             }
+            basicInfoDisabled={false}
             bankDisabled={!fiatMode}
             walletDisabled={fiatMode}
             currency={state.currency}
             status={state.status}
             walletvalidation={walletValidation}
-            countryvalidation={countryValidation}
+            mainCountryValidation={mainCountryValidation}
+            bankCountryValidation={bankCountryValidation}
             ibanvalidation={ibanValidation}
             bicvalidation={bicValidation}
             banknamevalidation={bankNameValidation}
             streetaddressvalidation={streetAddressValidation}
             cityvalidation={cityValidation}
             postalcodevalidation={postalCodeValidation}
+            payeremailvalidation={payerEmailValidation}
           />
         </div>
 

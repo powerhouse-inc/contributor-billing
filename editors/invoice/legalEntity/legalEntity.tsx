@@ -7,18 +7,9 @@ import {
   EditPayerBankInput,
   EditPayerInput,
   EditPayerWalletInput,
-  InputMaybe,
   LegalEntity,
-  LegalEntityCorporateRegistrationId,
-  LegalEntityTaxId,
 } from "../../../document-models/invoice/index.js";
-import {
-  EditIssuerInputSchema,
-  EditIssuerWalletInputSchema,
-} from "../../../document-models/invoice/gen/schema/zod.js";
-
-import React, { ComponentProps, useEffect, useState } from "react";
-import { ComponentPropsWithRef, Ref } from "react";
+import React, { ComponentPropsWithRef } from "react";
 import { twMerge } from "tailwind-merge";
 import { LegalEntityWalletSection } from "./walletSection.js";
 import { LegalEntityBankSection } from "./bankSection.js";
@@ -44,7 +35,8 @@ export type LegalEntityMainSectionProps = Omit<
   readonly value: EditLegalEntityInput;
   readonly onChange: (value: EditLegalEntityInput) => void;
   readonly disabled?: boolean;
-  readonly countryvalidation?: ValidationResult | null;
+  readonly mainCountryValidation?: ValidationResult | null;
+  readonly bankCountryValidation?: ValidationResult | null;
   readonly streetaddressvalidation?: ValidationResult | null;
   readonly cityvalidation?: ValidationResult | null;
   readonly postalcodevalidation?: ValidationResult | null;
@@ -52,7 +44,18 @@ export type LegalEntityMainSectionProps = Omit<
 };
 
 export const LegalEntityMainSection = (props: LegalEntityMainSectionProps) => {
-  const { value, onChange, disabled, countryvalidation, streetaddressvalidation, cityvalidation, postalcodevalidation, payeremailvalidation, ...divProps } = props;
+  const {
+    value,
+    onChange,
+    disabled,
+    mainCountryValidation,
+    bankCountryValidation,
+    streetaddressvalidation,
+    cityvalidation,
+    postalcodevalidation,
+    payeremailvalidation,
+    ...divProps
+  } = props;
 
   const handleInputChange =
     (field: keyof EditLegalEntityInput) =>
@@ -179,7 +182,7 @@ export const LegalEntityMainSection = (props: LegalEntityMainSectionProps) => {
                 handleInputChange={handleInputChange("country")}
                 handleBlur={handleBlur("country")}
                 className="h-10 w-full text-md mb-2"
-                validation={countryvalidation}
+                validation={mainCountryValidation}
               />
             </div>
           </div>
@@ -224,7 +227,8 @@ type LegalEntityFormProps = {
   readonly currency: string;
   readonly status: string;
   readonly walletvalidation?: ValidationResult | null;
-  readonly countryvalidation?: ValidationResult | null;
+  readonly mainCountryValidation?: ValidationResult | null;
+  readonly bankCountryValidation?: ValidationResult | null;
   readonly ibanvalidation?: ValidationResult | null;
   readonly bicvalidation?: ValidationResult | null;
   readonly banknamevalidation?: ValidationResult | null;
@@ -274,14 +278,15 @@ export function LegalEntityForm({
   currency,
   status,
   walletvalidation,
-  countryvalidation,
+  mainCountryValidation,
+  bankCountryValidation,
   ibanvalidation,
   bicvalidation,
   banknamevalidation,
   streetaddressvalidation,
   cityvalidation,
   postalcodevalidation,
-  payeremailvalidation
+  payeremailvalidation,
 }: LegalEntityFormProps) {
   // Handler for main info section
   const handleChangeInfo = (update: Partial<EditLegalEntityInput>) => {
@@ -295,7 +300,7 @@ export function LegalEntityForm({
         <LegalEntityMainSection
           onChange={handleChangeInfo}
           value={flattenLegalEntityToEditInput(legalEntity)}
-          countryvalidation={countryvalidation}
+          mainCountryValidation={mainCountryValidation}
           streetaddressvalidation={streetaddressvalidation}
           cityvalidation={cityvalidation}
           postalcodevalidation={postalcodevalidation}
@@ -315,7 +320,7 @@ export function LegalEntityForm({
         <LegalEntityBankSection
           onChange={onChangeBank}
           value={legalEntity.paymentRouting?.bank || {}}
-          countryvalidation={countryvalidation}
+          countryvalidation={bankCountryValidation}
           ibanvalidation={ibanvalidation}
           bicvalidation={bicvalidation}
           banknamevalidation={banknamevalidation}
