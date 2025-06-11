@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Select } from "@powerhousedao/document-engineering";
+import { exportInvoicesToXeroCSV } from "../../../invoice/xeroCsv.js";
 
 export const HeaderControls = ({
   contributorOptions = [],
@@ -9,6 +10,7 @@ export const HeaderControls = ({
   onSearchChange,
   onExport,
   onBatchAction,
+  selectedInvoices,
 }: {
   contributorOptions?: { label: string; value: string }[];
   statusOptions?: { label: string; value: string }[];
@@ -17,12 +19,23 @@ export const HeaderControls = ({
   onSearchChange?: (value: string) => void;
   onExport?: () => void;
   onBatchAction?: (action: string) => void;
+  selected: Record<string, boolean>;
+  selectedInvoices: any[];
 }) => {
   const batchOptions = [
     { label: "$ Pay Selected", value: "pay" },
     { label: "Approve Selected", value: "approve" },
     { label: "Reject Selected", value: "reject" },
   ];
+
+  console.log('selectedInvoices:', selectedInvoices);
+
+  const handleExport = () => {
+    const selectedInvoiceStates = (selectedInvoices || []).map(inv => inv.global);
+    console.log('Selected invoice global states:', selectedInvoiceStates);
+
+    exportInvoicesToXeroCSV(selectedInvoiceStates);
+  };
 
   return (
     <div className="flex flex-col gap-4 mb-4">
@@ -31,7 +44,7 @@ export const HeaderControls = ({
         <div className="flex gap-2 items-center">
           <button
             className="bg-white border border-gray-300 rounded px-3 py-1 text-sm hover:bg-gray-100"
-            onClick={onExport}
+            onClick={handleExport}
           >
             Export to CSV
           </button>

@@ -87,12 +87,26 @@ export const InvoiceTable = ({
   const paid = getInvoicesByStatus("PAYMENTRECEIVED");
   const rejected = getInvoicesByStatus("REJECTED");
 
+  const selectedIds = Object.entries(selected)
+    .filter(([_, isSelected]) => isSelected)
+    .map(([id]) => id);
+
+  const selectedInvoices = selectedIds.map(id => state[id]);
+
+  const handleExport = () => {
+    const selectedInvoices = selectedIds.map(id => state[id]);
+    console.log('Selected invoices:', selectedInvoices);
+  };
+
   return (
     <div className="w-full h-full bg-white rounded-lg p-4 border border-gray-200 shadow-md overflow-y-auto max-h-[500px] mt-4">
       <HeaderControls
         statusOptions={statusOptions}
         onStatusChange={handleStatusChange}
         onBatchAction={onBatchAction}
+        selected={selected}
+        selectedInvoices={selectedInvoices}
+        onExport={handleExport}
       />
       {shouldShowSection("AWAITINGAPPROVAL") && (
         <InvoiceTableSection
