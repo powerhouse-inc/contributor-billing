@@ -363,15 +363,24 @@ export default function Editor(props: IProps) {
 
       // Validate main country
       const mainCountry = state.issuer.country ?? "";
-      const mainCountryValidation = validateField("mainCountry", mainCountry, context);
+      const mainCountryValidation = validateField(
+        "mainCountry",
+        mainCountry,
+        context
+      );
       setMainCountryValidation(mainCountryValidation);
       if (mainCountryValidation && !mainCountryValidation.isValid) {
         validationErrors.push(mainCountryValidation);
       }
 
       // Validate bank country
-      const bankCountry = state.issuer.paymentRouting?.bank?.address?.country ?? "";
-      const bankCountryValidation = validateField("bankCountry", bankCountry, context);
+      const bankCountry =
+        state.issuer.paymentRouting?.bank?.address?.country ?? "";
+      const bankCountryValidation = validateField(
+        "bankCountry",
+        bankCountry,
+        context
+      );
       setBankCountryValidation(bankCountryValidation);
       if (bankCountryValidation && !bankCountryValidation.isValid) {
         validationErrors.push(bankCountryValidation);
@@ -659,14 +668,14 @@ export default function Editor(props: IProps) {
       {/* Main Content Grid */}
       <div className="grid grid-cols-2 gap-4">
         {/* Issuer Section */}
-        <div className="border border-gray-200 rounded-lg p-6">
+        <div className="border border-gray-200 rounded-lg p-4">
           <h3 className="text-lg font-semibold mb-4">Issuer</h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="mb-2">
               <label className="block mb-1 text-sm">Issue Date:</label>
               <DatePicker
                 name="issueDate"
-                className="w-full"
+                className={String.raw`w-full p-0`}
                 onChange={(e) => {
                   const newDate = e.target.value.split("T")[0];
                   dispatch(
@@ -682,7 +691,7 @@ export default function Editor(props: IProps) {
               <label className="block mb-1 text-sm">Delivery Date:</label>
               <DatePicker
                 name="deliveryDate"
-                className="w-full"
+                className={String.raw`w-full p-0`}
                 onChange={(e) => {
                   const newValue = e.target.value.split("T")[0];
                   if (newValue !== state.dateDelivered) {
@@ -723,13 +732,13 @@ export default function Editor(props: IProps) {
         </div>
 
         {/* Payer Section */}
-        <div className="border border-gray-200 rounded-lg p-6">
+        <div className="border border-gray-200 rounded-lg p-4">
           <h3 className="text-lg font-semibold mb-4">Payer</h3>
           <div className="mb-2">
             <label className="block mb-1 text-sm">Due Date:</label>
             <DatePicker
               name="dateDue"
-              className="w-full"
+              className={String.raw`w-full p-0`}
               onChange={(e) =>
                 dispatch(
                   actions.editInvoice({
@@ -770,7 +779,6 @@ export default function Editor(props: IProps) {
           paymentAccounts={state.invoiceTags || []}
         />
       </div>
-
 
       {/* Totals Section */}
       <div className="grid grid-cols-2 md:grid-cols-2 gap-4">

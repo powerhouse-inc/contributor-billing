@@ -2,8 +2,19 @@
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable react/button-has-type */
 import { RWAButton } from "@powerhousedao/design-system";
-import { EditInvoiceInput, DeleteLineItemInput, InvoiceTag } from "../../document-models/invoice/index.js";
-import { forwardRef, useState, useMemo, useRef, useLayoutEffect, Dispatch } from "react";
+import {
+  EditInvoiceInput,
+  DeleteLineItemInput,
+  InvoiceTag,
+} from "../../document-models/invoice/index.js";
+import {
+  forwardRef,
+  useState,
+  useMemo,
+  useRef,
+  useLayoutEffect,
+  Dispatch,
+} from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Tag } from "lucide-react";
 import { NumberForm } from "./components/numberForm.js";
@@ -30,9 +41,9 @@ export function formatNumber(value: number): string {
 
   // If no decimals or only trailing zeros after 2 decimal places, show 2 decimal places
   if (!hasDecimals || value.toFixed(5).endsWith("000")) {
-    return value.toLocaleString('en-US', {
+    return value.toLocaleString("en-US", {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     });
   }
 
@@ -42,9 +53,9 @@ export function formatNumber(value: number): string {
 
   // Determine how many decimal places to show (up to 5)
   const decimalPlaces = Math.min(Math.max(2, decimalPart.length), 5);
-  return value.toLocaleString('en-US', {
+  return value.toLocaleString("en-US", {
     minimumFractionDigits: decimalPlaces,
-    maximumFractionDigits: decimalPlaces
+    maximumFractionDigits: decimalPlaces,
   });
 }
 
@@ -209,7 +220,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
   return (
     <tr ref={ref} className="hover:bg-gray-50 table-row">
       <td className="border border-gray-200 p-3 table-cell">
-        <InputField 
+        <InputField
           onBlur={() => {}}
           handleInputChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
             setEditedItem((prev) => ({ ...prev, description: e.target.value }));
@@ -293,7 +304,7 @@ export function LineItemsTable({
   onDeleteItem,
   onUpdateCurrency,
   dispatch,
-  paymentAccounts
+  paymentAccounts,
 }: LineItemsTableProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
@@ -301,7 +312,12 @@ export function LineItemsTable({
   const containerRef = useRef<HTMLDivElement>(null);
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
-  const [modalRect, setModalRect] = useState<{left: number, top: number, width: number, height: number} | null>(null);
+  const [modalRect, setModalRect] = useState<{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  } | null>(null);
 
   function handleAddClick() {
     setIsAddingNew(true);
@@ -317,11 +333,11 @@ export function LineItemsTable({
   }
 
   // Transform line items to TagAssignmentRow format for the tag table
-  const tagAssignmentRows = lineItems.map(item => ({
+  const tagAssignmentRows = lineItems.map((item) => ({
     id: item.id,
     item: item.description,
-    period: '', // Default value
-    expenseAccount: '', // Default value
+    period: "", // Default value
+    expenseAccount: "", // Default value
     total: `$${formatNumber(item.totalPriceTaxIncl)}`,
     lineItemTag: item.lineItemTag,
   }));
@@ -355,29 +371,56 @@ export function LineItemsTable({
           </RWAButton>
         </div>
 
-        <div ref={tableContainerRef} className="overflow-x-auto rounded-lg border border-gray-200">
-          <table ref={tableRef} className="w-full table-fixed border-collapse bg-white">
+        <div
+          ref={tableContainerRef}
+          className="overflow-x-auto rounded-lg border border-gray-200"
+        >
+          <table
+            ref={tableRef}
+            className="w-full table-fixed border-collapse bg-white"
+          >
             <colgroup>
-              <col style={{ width: '30%' }} />
-              <col style={{ width: '10%' }} />
-              <col style={{ width: '12%' }} />
-              <col style={{ width: '8%' }} />
+              <col style={{ width: "30%" }} />
+              <col style={{ width: "10%" }} />
+              <col style={{ width: "12%" }} />
+              <col style={{ width: "8%" }} />
               <col />
               <col />
               <col />
             </colgroup>
             <thead>
               <tr className="bg-gray-50">
-                <th className="border-b border-gray-200 p-3 text-left">Description</th>
-                <th className="border-b border-gray-200 p-3 text-right">Quantity</th>
-                <th className="border-b border-gray-200 p-3 text-right">Unit Price (excl. tax)</th>
-                <th className="border-b border-gray-200 p-3 text-right">Tax %</th>
-                <th className="border-b border-gray-200 p-3 text-right">Total (excl. tax)</th>
-                <th className="border-b border-gray-200 p-3 text-right">Total (incl. tax)</th>
+                <th className="border-b border-gray-200 p-3 text-left">
+                  Description
+                </th>
+                <th className="border-b border-gray-200 p-3 text-right">
+                  Quantity
+                </th>
+                <th className="border-b border-gray-200 p-3 text-right">
+                  Unit Price (excl. tax)
+                </th>
+                <th className="border-b border-gray-200 p-3 text-right">
+                  Tax %
+                </th>
+                <th className="border-b border-gray-200 p-3 text-right">
+                  Total (excl. tax)
+                </th>
+                <th className="border-b border-gray-200 p-3 text-right">
+                  Total (incl. tax)
+                </th>
                 <th className="border-b border-gray-200 p-3 text-center">
-                <span className="flex items-center justify-center gap-2">
+                  <span className="flex items-center justify-center gap-2">
                     <span className="text-sm">Actions</span>
-                    <Tag onClick={() => setShowTagTable(true)} style={{cursor: "pointer", width: 28, height: 28, color: "white", fill: "#475264" }} />
+                    <Tag
+                      onClick={() => setShowTagTable(true)}
+                      style={{
+                        cursor: "pointer",
+                        width: 28,
+                        height: 28,
+                        color: "white",
+                        fill: "#475264",
+                      }}
+                    />
                   </span>
                 </th>
               </tr>
@@ -397,17 +440,31 @@ export function LineItemsTable({
                   />
                 ) : (
                   <tr key={item.id} className="hover:bg-gray-50 table-row">
-                    <td className="border-b border-gray-200 p-3 table-cell">{item.description}</td>
-                    <td className="border-b border-gray-200 p-3 text-right table-cell">{item.quantity}</td>
-                    <td className="border-b border-gray-200 p-3 text-right table-cell">{formatNumber(item.unitPriceTaxExcl)}</td>
-                    <td className="border-b border-gray-200 p-3 text-right table-cell">{typeof item.taxPercent === "number" ? Math.round(item.taxPercent) : 0}%</td>
-                    <td className="border-b border-gray-200 p-3 text-right font-medium table-cell">{formatNumber(item.totalPriceTaxExcl)}</td>
-                    <td className="border-b border-gray-200 p-3 text-right font-medium table-cell">{formatNumber(item.totalPriceTaxIncl)}</td>
+                    <td className="border-b border-gray-200 p-3 table-cell">
+                      {item.description}
+                    </td>
+                    <td className="border-b border-gray-200 p-3 text-right table-cell">
+                      {item.quantity}
+                    </td>
+                    <td className="border-b border-gray-200 p-3 text-right table-cell">
+                      {formatNumber(item.unitPriceTaxExcl)}
+                    </td>
+                    <td className="border-b border-gray-200 p-3 text-right table-cell">
+                      {typeof item.taxPercent === "number"
+                        ? Math.round(item.taxPercent)
+                        : 0}
+                      %
+                    </td>
+                    <td className="border-b border-gray-200 p-3 text-right font-medium table-cell">
+                      {formatNumber(item.totalPriceTaxExcl)}
+                    </td>
+                    <td className="border-b border-gray-200 p-3 text-right font-medium table-cell">
+                      {formatNumber(item.totalPriceTaxIncl)}
+                    </td>
                     <td className="border-b border-gray-200 p-3 table-cell">
                       <div className="flex justify-center space-x-2">
                         <button
-                          style={{ backgroundColor: "lightblue" }}
-                          className="rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-700"
+                          className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-200"
                           onClick={() => setEditingId(item.id)}
                         >
                           Edit
