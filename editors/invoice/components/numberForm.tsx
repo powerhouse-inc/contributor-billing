@@ -6,6 +6,7 @@ interface NumberFormProps {
   precision?: number;
   min?: number;
   max?: number;
+  pattern?: string;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   className?: string;
@@ -16,6 +17,7 @@ export const NumberForm = ({
   precision,
   min,
   max,
+  pattern,
   handleInputChange,
   placeholder,
   className,
@@ -32,9 +34,7 @@ export const NumberForm = ({
           handleInputChange(e);
         }}
         precision={precision}
-        min={min}
-        max={max}
-        value={Number(number)}
+        value={number === "-" ? -1 : Number(number)}
         placeholder={placeholder}
         className={twMerge(className)}
       />

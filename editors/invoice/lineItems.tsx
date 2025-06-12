@@ -167,6 +167,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
       } else if (field === "unitPriceTaxExcl") {
         // For unit price, allow up to dynamic decimal places based on currency
         const maxDecimals = getCurrencyPrecision(currency);
+        // Allow negative numbers with optional minus sign at start
         const regex = new RegExp(`^-?\\d*\\.?\\d{0,${maxDecimals}}$`);
         if (regex.test(value)) {
           setEditedItem((prev) => ({ ...prev, [field]: value }));
@@ -244,6 +245,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
           number={editedItem.unitPriceTaxExcl ?? ""}
           precision={getCurrencyPrecision(currency)}
           handleInputChange={handleInputChange("unitPriceTaxExcl")}
+          pattern="^-?\d*\.?\d*$"
           placeholder="Unit Price (excl. tax)"
           className=""
         />
@@ -252,8 +254,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
         <NumberForm
           number={editedItem.taxPercent ?? ""}
           precision={0}
-          min={0}
-          max={100}
+          pattern="^(100|[1-9]?[0-9])$"
           handleInputChange={handleInputChange("taxPercent")}
           placeholder="Tax %"
           className=""
