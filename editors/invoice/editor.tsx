@@ -34,9 +34,47 @@ function isFiatCurrency(currency: string): boolean {
 
 export type IProps = EditorProps<InvoiceDocument>;
 
+const useResponsiveEditorStyle = (options = { scale: 0.9, maxWidth: "1280px" }) => {
+  const baseStyle: React.CSSProperties = {
+    width: "100vw",
+    minHeight: "100vh",
+    margin: 0,
+    padding: 0,
+    boxSizing: "border-box",
+    transform: `scale(${options.scale})`,
+    transformOrigin: "top left",
+  };
+
+  const [responsiveStyle, setResponsiveStyle] = useState<React.CSSProperties>(baseStyle);
+
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth >= 1024) {
+        setResponsiveStyle({
+          ...baseStyle,
+          maxWidth: options.maxWidth,
+          marginLeft: "auto",
+          marginRight: "auto",
+          padding: "1rem",
+        });
+      } else {
+        setResponsiveStyle(baseStyle);
+      }
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [options.scale, options.maxWidth]);
+
+  return responsiveStyle;
+};
+
 export default function Editor(props: IProps) {
   const { document: doc, dispatch } = props;
   const state = doc.state.global;
+  
+  // Only use the hook if you need custom scaling or maxWidth
+  const customStyle = useResponsiveEditorStyle({ scale: 0.9, maxWidth: "1280px" });
 
   const [fiatMode, setFiatMode] = useState(isFiatCurrency(state.currency));
   const [uploadDropdownOpen, setUploadDropdownOpen] = useState(false);
@@ -79,38 +117,6 @@ export default function Editor(props: IProps) {
     useState<ValidationResult | null>(null);
 
   const prevStatus = useRef(state.status);
-
-  const invoiceRootStyle: React.CSSProperties = {
-    width: "100vw",
-    minHeight: "100vh",
-    margin: 0,
-    padding: 0,
-    boxSizing: "border-box",
-    transform: "scale(0.9)",
-    transformOrigin: "top left",
-  };
-
-  const [responsiveStyle, setResponsiveStyle] =
-    useState<React.CSSProperties>(invoiceRootStyle);
-
-  useEffect(() => {
-    function handleResize() {
-      if (window.innerWidth >= 1024) {
-        setResponsiveStyle({
-          ...invoiceRootStyle,
-          maxWidth: "1280px",
-          marginLeft: "auto",
-          marginRight: "auto",
-          padding: "1rem",
-        });
-      } else {
-        setResponsiveStyle(invoiceRootStyle);
-      }
-    }
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   useEffect(() => {
     setFiatMode(isFiatCurrency(state.currency));
@@ -516,7 +522,7 @@ export default function Editor(props: IProps) {
   };
 
   return (
-    <div style={responsiveStyle}>
+    <div className="editor-container" >
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
