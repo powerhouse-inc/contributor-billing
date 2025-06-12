@@ -60,6 +60,7 @@ export type AddLineItemInput = {
   quantity: Scalars["Float"]["input"];
   totalPriceCash: Scalars["Float"]["input"];
   totalPricePwt: Scalars["Float"]["input"];
+  unit: BillingStatementUnitInput | `${BillingStatementUnitInput}`;
   unitPriceCash: Scalars["Float"]["input"];
   unitPricePwt: Scalars["Float"]["input"];
 };
@@ -71,6 +72,7 @@ export type BillingStatementLineItem = {
   quantity: Scalars["Float"]["output"];
   totalPriceCash: Scalars["Float"]["output"];
   totalPricePwt: Scalars["Float"]["output"];
+  unit: BillingStatementUnit | `${BillingStatementUnit}`;
   unitPriceCash: Scalars["Float"]["output"];
   unitPricePwt: Scalars["Float"]["output"];
 };
@@ -107,6 +109,10 @@ export type BillingStatementTag = {
   value: Scalars["String"]["output"];
 };
 
+export type BillingStatementUnit = "DAY" | "HOUR" | "MINUTE" | "UNIT";
+
+export type BillingStatementUnitInput = "DAY" | "HOUR" | "MINUTE" | "UNIT";
+
 export type EditBillingStatementInput = {
   currency?: InputMaybe<Scalars["String"]["input"]>;
   dateDue?: InputMaybe<Scalars["DateTime"]["input"]>;
@@ -124,6 +130,7 @@ export type EditLineItemInput = {
   quantity?: InputMaybe<Scalars["Float"]["input"]>;
   totalPriceCash?: InputMaybe<Scalars["Float"]["input"]>;
   totalPricePwt?: InputMaybe<Scalars["Float"]["input"]>;
+  unit: BillingStatementUnitInput | `${BillingStatementUnitInput}`;
   unitPriceCash?: InputMaybe<Scalars["Float"]["input"]>;
   unitPricePwt?: InputMaybe<Scalars["Float"]["input"]>;
 };

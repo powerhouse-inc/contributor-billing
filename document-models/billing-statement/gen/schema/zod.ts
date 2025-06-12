@@ -6,6 +6,8 @@ import type {
   BillingStatementStatus,
   BillingStatementStatusInput,
   BillingStatementTag,
+  BillingStatementUnit,
+  BillingStatementUnitInput,
   EditBillingStatementInput,
   EditContributorInput,
   EditLineItemInput,
@@ -42,6 +44,20 @@ export const BillingStatementStatusInputSchema = z.enum([
   "REJECTED",
 ]);
 
+export const BillingStatementUnitSchema = z.enum([
+  "DAY",
+  "HOUR",
+  "MINUTE",
+  "UNIT",
+]);
+
+export const BillingStatementUnitInputSchema = z.enum([
+  "DAY",
+  "HOUR",
+  "MINUTE",
+  "UNIT",
+]);
+
 export function AddLineItemInputSchema(): z.ZodObject<
   Properties<AddLineItemInput>
 > {
@@ -50,6 +66,7 @@ export function AddLineItemInputSchema(): z.ZodObject<
     quantity: z.number(),
     totalPriceCash: z.number(),
     totalPricePwt: z.number(),
+    unit: z.lazy(() => BillingStatementUnitInputSchema),
     unitPriceCash: z.number(),
     unitPricePwt: z.number(),
   });
@@ -66,6 +83,7 @@ export function BillingStatementLineItemSchema(): z.ZodObject<
     quantity: z.number(),
     totalPriceCash: z.number(),
     totalPricePwt: z.number(),
+    unit: BillingStatementUnitSchema,
     unitPriceCash: z.number(),
     unitPricePwt: z.number(),
   });
@@ -127,6 +145,7 @@ export function EditLineItemInputSchema(): z.ZodObject<
     quantity: z.number().nullish(),
     totalPriceCash: z.number().nullish(),
     totalPricePwt: z.number().nullish(),
+    unit: z.lazy(() => BillingStatementUnitInputSchema),
     unitPriceCash: z.number().nullish(),
     unitPricePwt: z.number().nullish(),
   });

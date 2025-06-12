@@ -21,6 +21,7 @@ export const schema: DocumentNode = gql`
     id: OID!
     description: String!
     quantity: Float!
+    unit: BillingStatementUnit!
     unitPricePwt: Float!
     unitPriceCash: Float!
     totalPricePwt: Float!
@@ -48,6 +49,20 @@ export const schema: DocumentNode = gql`
     ACCEPTED
     REJECTED
     PAID
+  }
+
+  enum BillingStatementUnit {
+    MINUTE
+    HOUR
+    DAY
+    UNIT
+  }
+
+  enum BillingStatementUnitInput {
+    MINUTE
+    HOUR
+    DAY
+    UNIT
   }
 
   """
@@ -122,6 +137,7 @@ export const schema: DocumentNode = gql`
   input BillingStatement_AddLineItemInput {
     description: String!
     quantity: Float!
+    unit: BillingStatementUnitInput!
     unitPricePwt: Float!
     unitPriceCash: Float!
     totalPricePwt: Float!
@@ -131,6 +147,7 @@ export const schema: DocumentNode = gql`
     id: OID!
     description: String
     quantity: Float
+    unit: BillingStatementUnitInput!
     unitPricePwt: Float
     unitPriceCash: Float
     totalPricePwt: Float

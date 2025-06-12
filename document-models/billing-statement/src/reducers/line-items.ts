@@ -15,6 +15,7 @@ export const reducer: BillingStatementLineItemsOperations = {
         id: generateId(),
         description: action.input.description,
         quantity: action.input.quantity,
+        unit: action.input.unit,
         unitPricePwt: action.input.unitPricePwt,
         unitPriceCash: action.input.unitPriceCash,
         totalPricePwt: action.input.totalPricePwt,
