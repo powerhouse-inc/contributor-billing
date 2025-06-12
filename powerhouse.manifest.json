@@ -16,7 +16,16 @@
         {
             "id": "powerhouse/invoice-editor",
             "name": "Invoice",
-            "documentTypes": ["powerhouse/invoice"]
+            "documentTypes": [
+                "powerhouse/invoice"
+            ]
+        },
+        {
+            "id": "powerhouse/billing-statement-editor",
+            "name": "Billing Statement",
+            "documentTypes": [
+                "powerhouse/billing-statement"
+            ]
         }
     ],
     "apps": [
