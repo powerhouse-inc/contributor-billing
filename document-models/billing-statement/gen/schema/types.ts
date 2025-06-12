@@ -57,6 +57,7 @@ export type Scalars = {
 
 export type AddLineItemInput = {
   description: Scalars["String"]["input"];
+  id: Scalars["OID"]["input"];
   quantity: Scalars["Float"]["input"];
   totalPriceCash: Scalars["Float"]["input"];
   totalPricePwt: Scalars["Float"]["input"];

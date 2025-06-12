@@ -63,6 +63,7 @@ export function AddLineItemInputSchema(): z.ZodObject<
 > {
   return z.object({
     description: z.string(),
+    id: z.string(),
     quantity: z.number(),
     totalPriceCash: z.number(),
     totalPricePwt: z.number(),

@@ -11,6 +11,7 @@ import {
 import { reducer } from "../../gen/reducer.js";
 import * as creators from "../../gen/line-items/creators.js";
 import type { BillingStatementDocument } from "../../gen/types.js";
+import { generateId } from "document-model";
 
 describe("Billing Statement Line Items Operations", () => {
   let document: BillingStatementDocument;
@@ -22,8 +23,10 @@ describe("Billing Statement Line Items Operations", () => {
   describe("addLineItem", () => {
     it("should add a new line item and update totals", () => {
       const input: AddLineItemInput = {
+        id: generateId(),
         description: "Test Line Item",
         quantity: 2,
+        unit: "HOUR",
         unitPricePwt: 10,
         unitPriceCash: 20,
         totalPricePwt: 20,
@@ -61,8 +64,10 @@ describe("Billing Statement Line Items Operations", () => {
     it("should edit an existing line item and update totals", () => {
       // First, add a line item
       const addInput: AddLineItemInput = {
+        id: generateId(),
         description: "Original Line Item",
         quantity: 1,
+        unit: "HOUR",
         unitPricePwt: 10,
         unitPriceCash: 20,
         totalPricePwt: 10,
@@ -81,6 +86,7 @@ describe("Billing Statement Line Items Operations", () => {
         id: lineItemId,
         description: "Updated Line Item",
         quantity: 3,
+        unit: "HOUR",
         unitPricePwt: 15,
         unitPriceCash: 25,
         totalPricePwt: 45,
@@ -115,8 +121,10 @@ describe("Billing Statement Line Items Operations", () => {
     it("should handle partial updates to a line item", () => {
       // First, add a line item
       const addInput: AddLineItemInput = {
+        id: generateId(),
         description: "Original Line Item",
         quantity: 1,
+        unit: "HOUR",
         unitPricePwt: 10,
         unitPriceCash: 20,
         totalPricePwt: 10,
@@ -135,6 +143,7 @@ describe("Billing Statement Line Items Operations", () => {
         id: lineItemId,
         description: "Updated Description",
         quantity: 2,
+        unit: "UNIT",
       };
 
       updatedDocument = reducer(

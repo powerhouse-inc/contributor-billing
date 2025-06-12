@@ -82,7 +82,7 @@ export const documentModel: DocumentModelState = {
               description:
                 "BillingStatementState.totalCash / .totalPowt will be a sum of the line item values.",
               schema:
-                "input AddLineItemInput {\n  description: String!\n  quantity: Float!\n  unit: BillingStatementUnitInput!\n  unitPricePwt: Float!\n  unitPriceCash: Float!\n  totalPricePwt: Float!\n  totalPriceCash: Float!\n}",
+                "input AddLineItemInput {\n  id: OID!\n  description: String!\n  quantity: Float!\n  unit: BillingStatementUnitInput!\n  unitPricePwt: Float!\n  unitPriceCash: Float!\n  totalPricePwt: Float!\n  totalPriceCash: Float!\n}",
               template: "",
               reducer: "",
               errors: [],

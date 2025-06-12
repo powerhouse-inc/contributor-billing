@@ -12,16 +12,14 @@ export const reducer: BillingStatementLineItemsOperations = {
   addLineItemOperation(state, action, dispatch) {
     try {
       const newLineItem: BillingStatementLineItem = {
-        id: generateId(),
-        description: action.input.description,
-        quantity: action.input.quantity,
-        unit: action.input.unit,
-        unitPricePwt: action.input.unitPricePwt,
-        unitPriceCash: action.input.unitPriceCash,
-        totalPricePwt: action.input.totalPricePwt,
-        totalPriceCash: action.input.totalPriceCash,
+        ...action.input,
         lineItemTag: [],
       };
+
+      // Check for duplicate ID
+      if (state.lineItems.find((x) => x.id === newLineItem.id)) {
+        throw new Error("Duplicate line item ID");
+      }
 
       state.lineItems.push(newLineItem);
       updateTotals(state);

@@ -98,6 +98,7 @@ input EditStatusInput {
 # line_items
 
 input AddLineItemInput {
+  id: OID!
   description: String!
   quantity: Float!
   unit: BillingStatementUnitInput!

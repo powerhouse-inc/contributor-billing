@@ -135,6 +135,7 @@ export const schema: DocumentNode = gql`
   Module: LineItems
   """
   input BillingStatement_AddLineItemInput {
+    id: OID!
     description: String!
     quantity: Float!
     unit: BillingStatementUnitInput!

@@ -9,6 +9,7 @@ import { reducer } from "../../gen/reducer.js";
 import * as creators from "../../gen/tags/creators.js";
 import * as lineItemCreators from "../../gen/line-items/creators.js";
 import type { BillingStatementDocument } from "../../gen/types.js";
+import { generateId } from "document-model";
 
 describe("Billing Statement Tags Operations", () => {
   let document: BillingStatementDocument;
@@ -21,8 +22,10 @@ describe("Billing Statement Tags Operations", () => {
     it("should edit a line item tag", () => {
       // First, add a line item
       const addInput: AddLineItemInput = {
+        id: generateId(),
         description: "Test Line Item",
         quantity: 1,
+        unit: "HOUR",
         unitPricePwt: 10,
         unitPriceCash: 20,
         totalPricePwt: 10,
