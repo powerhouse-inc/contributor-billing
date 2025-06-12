@@ -6,7 +6,7 @@ export const module: EditorModule<BillingStatementDocument> = {
   Component: Editor,
   documentTypes: ["powerhouse/billing-statement"],
   config: {
-    id: "editor-id",
+    id: "powerhouse-billing-statement-editor",
     disableExternalControls: true,
     documentToolbarEnabled: true,
     showSwitchboardLink: true,
