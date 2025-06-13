@@ -151,21 +151,21 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
         <table className="w-full border border-gray-300 text-sm">
           <thead>
             <tr className="bg-gray-100">
-              <th className="border px-2 py-1">#</th>
+              <th className="border px-2 py-1 w-10">#</th>
               <th className="border px-2 py-1">Desc</th>
               <th className="border px-2 py-1 w-40">Unit</th>
               <th className="border px-2 py-1 w-16">Qty</th>
               <th className="border px-2 py-1 w-16">FIAT/Uni</th>
               <th className="border px-2 py-1 w-16">POWT/Uni</th>
               <th className="border px-2 py-1 w-16">Total Fiat</th>
-              <th className="border px-2 py-1 w-16">Total POW</th>
+              <th className="border px-2 py-1 w-16">Total POWT</th>
             </tr>
           </thead>
           <tbody>
             {state.lineItems.map((item: any, idx: number) => (
               editingRow === idx ? (
                 <tr key={item.id} className="bg-yellow-50">
-                  <td className="border px-2 py-1 text-center">{idx + 1}</td>
+                  <td className="border px-2 py-1 text-center w-10">{idx + 1}</td>
                   <td className="border px-2 py-1 w-40">
                     <InputField
                       input={localLineItem.description}
@@ -224,7 +224,7 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
                     setLocalLineItem({ ...item });
                   }}
                 >
-                  <td className="border px-2 py-2 text-center">{idx + 1}</td>
+                  <td className="border px-2 py-2 text-center w-10">{idx + 1}</td>
                   <td className="border px-2 py-2">{item.description}</td>
                   <td className="border px-2 py-2 w-40 text-center">{item.unit}</td>
                   <td className="border px-2 py-2 w-16 text-center">{item.quantity}</td>

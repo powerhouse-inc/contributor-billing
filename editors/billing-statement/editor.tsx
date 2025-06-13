@@ -104,7 +104,7 @@ export default function Editor(props: IProps) {
             <thead>
               <tr className="bg-gray-100">
                 <th className="border px-4 py-2">Total Fiat</th>
-                <th className="border px-4 py-2">Total POW</th>
+                <th className="border px-4 py-2">Total POWT</th>
               </tr>
             </thead>
             <tbody>
