@@ -127,7 +127,7 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
   }
 
   return (
-    <div className="mt-2 overflow-x-auto" ref={tableRef}>
+    <div className="mt-2 overflow-x-auto" >
       {/* Heading */}
       <div className="flex justify-between mt-6">
         <div className="flex items-center">
@@ -147,12 +147,12 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
         </div>
       </div>
       {/* Table */}
-      <div className="mt-4 min-w-[900px]">
+      <div className="mt-4 min-w-[900px]" ref={tableRef}>
         <table className="w-full border border-gray-300 text-sm">
-          <thead>
-            <tr className="bg-gray-100">
+          <thead className="h-12">
+            <tr className="bg-gray-100 h-10">
               <th className="border px-2 py-1 w-10">#</th>
-              <th className="border px-2 py-1">Desc</th>
+              <th className="border px-2 py-1 w-72">Desc</th>
               <th className="border px-2 py-1 w-40">Unit</th>
               <th className="border px-2 py-1 w-16">Qty</th>
               <th className="border px-2 py-1 w-16">FIAT/Unit</th>
@@ -164,9 +164,9 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
           <tbody>
             {state.lineItems.map((item: any, idx: number) => (
               editingRow === idx ? (
-                <tr key={item.id} className="bg-yellow-50">
+                <tr key={item.id} className="bg-yellow-100">
                   <td className="border px-2 py-1 text-center w-10">{idx + 1}</td>
-                  <td className="border px-2 py-1 w-40">
+                  <td className="border px-2 py-1 w-72">
                     <InputField
                       input={localLineItem.description}
                       value={localLineItem.description}
