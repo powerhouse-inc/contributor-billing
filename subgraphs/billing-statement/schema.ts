@@ -148,7 +148,7 @@ export const schema: DocumentNode = gql`
     id: OID!
     description: String
     quantity: Float
-    unit: BillingStatementUnitInput!
+    unit: BillingStatementUnitInput
     unitPricePwt: Float
     unitPriceCash: Float
     totalPricePwt: Float

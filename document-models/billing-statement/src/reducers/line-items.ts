@@ -4,7 +4,6 @@
  * - delete the file and run the code generator again to have it reset
  */
 
-import { generateId } from "document-model";
 import type { BillingStatementLineItemsOperations } from "../../gen/line-items/operations.js";
 import { BillingStatementLineItem, BillingStatementState } from "document-models/billing-statement/gen/types.js";
 

@@ -146,7 +146,7 @@ export function EditLineItemInputSchema(): z.ZodObject<
     quantity: z.number().nullish(),
     totalPriceCash: z.number().nullish(),
     totalPricePwt: z.number().nullish(),
-    unit: z.lazy(() => BillingStatementUnitInputSchema),
+    unit: z.lazy(() => BillingStatementUnitInputSchema.nullish()),
     unitPriceCash: z.number().nullish(),
     unitPricePwt: z.number().nullish(),
   });

@@ -131,7 +131,7 @@ export type EditLineItemInput = {
   quantity?: InputMaybe<Scalars["Float"]["input"]>;
   totalPriceCash?: InputMaybe<Scalars["Float"]["input"]>;
   totalPricePwt?: InputMaybe<Scalars["Float"]["input"]>;
-  unit: BillingStatementUnitInput | `${BillingStatementUnitInput}`;
+  unit?: InputMaybe<BillingStatementUnitInput | `${BillingStatementUnitInput}`>;
   unitPriceCash?: InputMaybe<Scalars["Float"]["input"]>;
   unitPricePwt?: InputMaybe<Scalars["Float"]["input"]>;
 };
