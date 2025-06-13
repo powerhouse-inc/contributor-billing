@@ -9,6 +9,7 @@ import { CurrencyForm } from "../invoice/components/currencyForm.js";
 import { Textarea } from "@powerhousedao/document-engineering";
 import LineItemsTable from "./components/lineItemsTable.js";
 import { formatNumber } from "../invoice/lineItems.js";
+import { Tag } from "lucide-react";
 
 export type IProps = EditorProps<BillingStatementDocument>;
 
@@ -48,6 +49,24 @@ export default function Editor(props: IProps) {
               dispatch(
                 actions.editBillingStatement({ currency: e.target.value })
               );
+            }}
+          />
+        </div>
+      </div>
+      {/* Tables */}
+      {/* Heading */}
+      <div className="flex justify-between mt-6">
+        <div className="flex items-center">
+          <h1 className="text-1xl font-bold">Line Items</h1>
+        </div>
+        <div className="flex items-center">
+          <Tag
+            style={{
+              cursor: "pointer",
+              width: 28,
+              height: 28,
+              color: "white",
+              fill: "#475264",
             }}
           />
         </div>

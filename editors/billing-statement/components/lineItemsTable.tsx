@@ -116,28 +116,7 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
   };
 
   return (
-    <div className="mt-6 overflow-x-auto" ref={tableRef}>
-      {/* Heading */}
-      <div className="flex justify-between">
-        <div className="flex items-center">
-          <h1 className="text-1xl font-bold px-2">Line Items</h1>
-        </div>
-        <div className="flex items-center">
-          <Tag
-            onClick={() => {
-              setEditingRow(state.lineItems.length);
-              setLocalLineItem(initialLineItem);
-            }}
-            style={{
-              cursor: "pointer",
-              width: 28,
-              height: 28,
-              color: "white",
-              fill: "#475264",
-            }}
-          />
-        </div>
-      </div>
+    <div className="mt-2 overflow-x-auto" ref={tableRef}>
       {/* Table */}
       <div className="mt-4 min-w-[900px]">
         <table className="w-full border border-gray-300 text-sm">
