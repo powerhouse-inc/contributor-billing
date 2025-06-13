@@ -8,6 +8,7 @@ import {
 } from "../../../document-models/billing-statement/index.js";
 import { useState, useRef, useEffect } from "react";
 import { formatNumber } from "../../invoice/lineItems.js";
+import { LineItemTagsTable } from "../lineItemTags/lineItemTags.js";
 
 const initialLineItem = {
   description: "",
@@ -21,6 +22,7 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
   const { state, dispatch } = props;
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [localLineItem, setLocalLineItem] = useState<any>(initialLineItem);
+  const [showTagTable, setShowTagTable] = useState(false);
   const tableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,8 +47,6 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [editingRow, localLineItem]);
-
-  // console.log("lineItems", state.lineItems);
 
   const units = [
     { label: "Minute", value: "MINUTE" },
@@ -115,8 +115,37 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
     }
   };
 
+
+  if (showTagTable) {
+    return (
+      <LineItemTagsTable
+        lineItems={state.lineItems}
+        onClose={() => setShowTagTable(false)}
+        dispatch={dispatch}
+      />
+    );
+  }
+
   return (
     <div className="mt-2 overflow-x-auto" ref={tableRef}>
+      {/* Heading */}
+      <div className="flex justify-between mt-6">
+        <div className="flex items-center">
+          <h1 className="text-1xl font-bold">Line Items</h1>
+        </div>
+        <div className="flex items-center">
+          <Tag
+            style={{
+              cursor: "pointer",
+              width: 28,
+              height: 28,
+              color: "white",
+              fill: "#475264",
+            }}
+            onClick={() => setShowTagTable(!showTagTable)}
+          />
+        </div>
+      </div>
       {/* Table */}
       <div className="mt-4 min-w-[900px]">
         <table className="w-full border border-gray-300 text-sm">
