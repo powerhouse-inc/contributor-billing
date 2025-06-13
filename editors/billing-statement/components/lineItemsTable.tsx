@@ -155,8 +155,8 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
               <th className="border px-2 py-1">Desc</th>
               <th className="border px-2 py-1 w-40">Unit</th>
               <th className="border px-2 py-1 w-16">Qty</th>
-              <th className="border px-2 py-1 w-16">FIAT/Uni</th>
-              <th className="border px-2 py-1 w-16">POWT/Uni</th>
+              <th className="border px-2 py-1 w-16">FIAT/Unit</th>
+              <th className="border px-2 py-1 w-16">POWT/Unit</th>
               <th className="border px-2 py-1 w-16">Total Fiat</th>
               <th className="border px-2 py-1 w-16">Total POWT</th>
             </tr>
