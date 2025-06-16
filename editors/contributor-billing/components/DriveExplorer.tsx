@@ -237,13 +237,13 @@ export function DriveExplorer({
         ) : (
           <div {...dropProps}
               className={twMerge(
-                'rounded-md border-2 border-transparent ',
+                'editor-container rounded-md border-2 border-transparent ',
                 isDropTarget && 'border-dashed border-blue-100'
               )}>
               {/* <h2 className="text-lg font-semibold mb-4">Contents</h2> */}
 
               {/* Folders Section */}
-              <FolderItemsGrid
+              {/* <FolderItemsGrid
                 folders={selectedFolderChildren.folders}
                 onSelectNode={handleNodeSelect}
                 onRenameNode={renameNode}
@@ -258,21 +258,21 @@ export function DriveExplorer({
                 onMoveNode={dummyMoveNode}
                 isAllowedToCreateDocuments={true}
                 onAddFolder={onAddFolder}
-                parentFolderId={selectedNodeId} />
+                parentFolderId={selectedNodeId} /> */}
 
               {/* Files Section */}
-              <FileItemsGrid
+              {/* <FileItemsGrid
                 files={selectedFolderChildren.files}
                 onSelectNode={handleFileSelect}
                 onRenameNode={renameNode}
                 onDuplicateNode={dummyDuplicateNode}
                 onDeleteNode={onDeleteNode}
-                isAllowedToCreateDocuments={true} />
+                isAllowedToCreateDocuments={true} /> */}
 
               {/* Create Document Section */}
-              <CreateDocument
+              {/* <CreateDocument
                 createDocument={onSelectDocumentModel}
-                documentModels={filteredDocumentModels} />
+                documentModels={filteredDocumentModels} /> */}
               <InvoiceTable
                 setActiveDocumentId={setActiveDocumentId}
                 files={files}
@@ -280,7 +280,11 @@ export function DriveExplorer({
                 getDispatch={() => dispatchMap[activeDocumentId || ""]}
                 selected={selected}
                 setSelected={setSelected}
-                onBatchAction={handleBatchAction} />
+                onBatchAction={handleBatchAction} 
+                onDeleteNode={onDeleteNode}
+                renameNode={renameNode}
+                />
+
             </div>
         )}
       </div>

@@ -1,25 +1,34 @@
 import { useState, useRef } from "react";
 import { RowActionMenu } from "./RowActionMenu.js";
-import { UiFileNode } from "@powerhousedao/design-system";
+import {
+  FileItem,
+  type UiFileNode,
+  type BaseUiFileNode,
+} from "@powerhousedao/design-system";
 
 export const InvoiceTableRow = ({
+  file,
   row,
   isSelected,
   onSelect,
   menuOptions,
   onMenuAction,
-  setActiveDocumentId
+  setActiveDocumentId,
+  onDeleteNode,
+  renameNode
 }: {
+  file?: UiFileNode;
   row: any;
   isSelected: boolean;
   onSelect: (checked: boolean) => void;
   menuOptions: { label: string; value: string }[];
   onMenuAction: (action: string) => void;
   setActiveDocumentId: (id: string) => void;
+  onDeleteNode: (nodeId: string) => void;
+  renameNode: (nodeId: string, name: string) => void;
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLTableCellElement>(null);
-
   return (
     <tr className="hover:bg-gray-50">
       <td className="px-2 py-2">
@@ -30,13 +39,26 @@ export const InvoiceTableRow = ({
           className="size-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
         />
       </td>
-      <td className="px-2 py-2">{row.issuer}</td>
+      <td className="py-1 w-10">
+        {file && (
+          <FileItem
+            key={row.id}
+            uiNode={file as BaseUiFileNode}
+            onSelectNode={() => setActiveDocumentId(row.id)}
+            onRenameNode={(name) => renameNode(row.id, name)}
+            onDuplicateNode={() => {}}
+            onDeleteNode={() => onDeleteNode(row.id)}
+            isAllowedToCreateDocuments={true}
+            className="h-10"
+          />
+        )}
+      </td>
       <td className="px-2 py-2">{row.invoiceNo}</td>
       <td className="px-2 py-2">{row.issueDate}</td>
       <td className="px-2 py-2">{row.dueDate}</td>
       <td className="px-2 py-2">{row.currency}</td>
       <td className="px-2 py-2">{row.amount}</td>
-      <td className="px-2 py-2 text-right relative" ref={menuRef}>
+      {/* <td className="px-2 py-2 text-right relative" ref={menuRef}>
         <div className="relative inline-block">
           <button
             className="px-2 py-1 hover:bg-gray-200 rounded"
@@ -46,7 +68,6 @@ export const InvoiceTableRow = ({
           </button>
           {menuOpen && (
             <>
-              {/* Overlay to catch outside clicks */}
               <div
                 className="fixed inset-0 z-40"
                 onClick={() => setMenuOpen(false)}
@@ -62,7 +83,7 @@ export const InvoiceTableRow = ({
             </>
           )}
         </div>
-      </td>
+      </td> */}
     </tr>
   );
 }; 
