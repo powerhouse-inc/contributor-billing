@@ -239,6 +239,11 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: "#4B5563",
     marginBottom: 4,
+    flexShrink: 1,
+    flexGrow: 1,
+    minWidth: 0,
+    paddingRight: 1,
+    wordBreak: "break-all",
   },
   companyInfoLabel: {
     color: "#9ea0a2",
@@ -369,7 +374,15 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     }}
                   >
                     {/* <Image style={styles.logo} src={powerhouseLogo} /> */}
-                    <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>
+                    <Text
+                      style={{
+                        fontSize: 20,
+                        fontWeight: "bold",
+                        marginBottom: 10,
+                        paddingRight: 65,
+                        marginRight: 20,
+                      }}
+                    >
                       {invoice.issuer.name}
                     </Text>
                     <View>
@@ -403,11 +416,18 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                   }}
                 >
                   {/* Issuer */}
-                  <View style={{ width: "45%" }}>
+                  <View
+                    style={{
+                      width: "50%",
+                      minWidth: 0,
+                      flexDirection: "column",
+                      paddingRight: 65,
+                    }}
+                  >
                     <Text style={styles.sectionTitle}>Issuer</Text>
                     <View style={styles.row}>
                       <Text style={styles.companyInfoLabel}>Name:</Text>
-                      <Text style={styles.companyInfo}>
+                      <Text style={styles.companyInfo} wrap>
                         {invoice.issuer.name}
                       </Text>
                     </View>
@@ -425,21 +445,21 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     </View>
                     <View style={styles.row}>
                       <Text style={styles.companyInfoLabel}>Address:</Text>
-                      <Text style={styles.companyInfo}>
+                      <Text style={styles.companyInfo} wrap>
                         {invoice.issuer.address?.streetAddress || ""}
                       </Text>
                     </View>
                     {invoice.issuer.address?.extendedAddress && (
                       <View style={styles.row}>
                         <Text style={styles.companyInfoLabel}></Text>
-                        <Text style={styles.companyInfo}>
+                        <Text style={styles.companyInfo} wrap>
                           {invoice.issuer.address?.extendedAddress || ""}
                         </Text>
                       </View>
                     )}
                     <View style={styles.row}>
                       <Text style={styles.companyInfoLabel}></Text>
-                      <Text style={styles.companyInfo}>
+                      <Text style={styles.companyInfo} wrap>
                         {invoice.issuer.address?.city || ""},{" "}
                         {getCountryName(
                           invoice.issuer.address?.country || ""
@@ -455,7 +475,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     {invoice.issuer.contactInfo?.email && (
                       <View style={styles.row}>
                         <Text style={styles.companyInfoLabel}>Email:</Text>
-                        <Text style={styles.companyInfo}>
+                        <Text style={styles.companyInfo} wrap>
                           {invoice.issuer.contactInfo.email}
                         </Text>
                       </View>
@@ -463,11 +483,17 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                   </View>
 
                   {/* Payer */}
-                  <View style={{ width: "45%" }}>
+                  <View
+                    style={{
+                      width: "47%",
+                      minWidth: 0,
+                      flexDirection: "column",
+                    }}
+                  >
                     <Text style={styles.sectionTitle}>Payer</Text>
                     <View style={styles.row}>
                       <Text style={styles.companyInfoLabel}>Name:</Text>
-                      <Text style={styles.companyInfo}>
+                      <Text style={styles.companyInfo} wrap>
                         {invoice.payer.name}
                       </Text>
                     </View>
@@ -484,21 +510,21 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     </View>
                     <View style={styles.row}>
                       <Text style={styles.companyInfoLabel}>Address:</Text>
-                      <Text style={styles.companyInfo}>
+                      <Text style={styles.companyInfo} wrap>
                         {invoice.payer.address?.streetAddress || ""}
                       </Text>
                     </View>
                     {invoice.payer.address?.extendedAddress && (
                       <View style={styles.row}>
                         <Text style={styles.companyInfoLabel}></Text>
-                        <Text style={styles.companyInfo}>
+                        <Text style={styles.companyInfo} wrap>
                           {invoice.payer.address?.extendedAddress || ""}
                         </Text>
                       </View>
                     )}
                     <View style={styles.row}>
                       <Text style={styles.companyInfoLabel}></Text>
-                      <Text style={styles.companyInfo}>
+                      <Text style={styles.companyInfo} wrap>
                         {invoice.payer.address?.city || ""},{" "}
                         {getCountryName(invoice.payer.address?.country || "") ||
                           ""}
@@ -513,7 +539,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     {invoice.payer.contactInfo?.email && (
                       <View style={styles.row}>
                         <Text style={styles.companyInfoLabel}>Email:</Text>
-                        <Text style={styles.companyInfo}>
+                        <Text style={styles.companyInfo} wrap>
                           {invoice.payer.contactInfo.email}
                         </Text>
                       </View>
@@ -613,12 +639,6 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                       <PaymentSectionFiat
                         paymentRouting={invoice.issuer.paymentRouting}
                       />
-                      {invoice.issuer.paymentRouting?.bank?.memo && (
-                        <Text style={[styles.companyInfo, { marginTop: 20 }]}>
-                          Memo:{" "}
-                          {invoice.issuer.paymentRouting?.bank?.memo || ""}{" "}
-                        </Text>
-                      )}
                     </div>
                   ) : (
                     <PaymentSectionCrypto
@@ -650,47 +670,65 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
             {/* Totals and terms only on last page */}
             {pageIndex === totalPages - 1 && (
               <>
-                <View style={styles.totals}>
-                  <View style={styles.totalRow}>
-                    <Text style={styles.totalLabel}>Subtotal</Text>
-                    <Text style={styles.totalValue}>
-                      {formatCurrency(
-                        invoice.lineItems.reduce(
-                          (sum, item) =>
-                            sum + item.quantity * item.unitPriceTaxExcl,
-                          0
-                        ),
-                        invoice.currency
-                      )}
+                <View style={{ flexDirection: "row", gap: 20 }}>
+                  {/* Notes Column */}
+                  <View
+                    style={{
+                      flex: 1,
+                      marginTop: 20,
+                    }}
+                  >
+                    <Text style={[styles.sectionTitle, { marginBottom: 10 }]}>
+                      {invoice.notes ? "Notes" : ""}
+                    </Text>
+                    <Text style={styles.companyInfo}>
+                      {invoice.notes || ""}
                     </Text>
                   </View>
-                  <View style={styles.totalRow}>
-                    <Text style={styles.totalLabel}>Tax</Text>
-                    <Text style={styles.totalValue}>
-                      {formatCurrency(
-                        invoice.lineItems.reduce(
-                          (sum, item) =>
-                            sum +
-                            item.quantity *
-                              (item.unitPriceTaxIncl - item.unitPriceTaxExcl),
-                          0
-                        ),
-                        invoice.currency
-                      )}
-                    </Text>
-                  </View>
-                  <View style={styles.totalRowBold}>
-                    <Text style={styles.totalLabelBold}>Total</Text>
-                    <Text style={styles.totalValueBold}>
-                      {formatCurrency(
-                        invoice.lineItems.reduce(
-                          (sum, item) =>
-                            sum + item.quantity * item.unitPriceTaxIncl,
-                          0
-                        ),
-                        invoice.currency
-                      )}
-                    </Text>
+
+                  {/* Totals Column */}
+                  <View style={[styles.totals, { flex: 1 }]}>
+                    <View style={styles.totalRow}>
+                      <Text style={styles.totalLabel}>Subtotal</Text>
+                      <Text style={styles.totalValue}>
+                        {formatCurrency(
+                          invoice.lineItems.reduce(
+                            (sum, item) =>
+                              sum + item.quantity * item.unitPriceTaxExcl,
+                            0
+                          ),
+                          invoice.currency
+                        )}
+                      </Text>
+                    </View>
+                    <View style={styles.totalRow}>
+                      <Text style={styles.totalLabel}>Tax</Text>
+                      <Text style={styles.totalValue}>
+                        {formatCurrency(
+                          invoice.lineItems.reduce(
+                            (sum, item) =>
+                              sum +
+                              item.quantity *
+                                (item.unitPriceTaxIncl - item.unitPriceTaxExcl),
+                            0
+                          ),
+                          invoice.currency
+                        )}
+                      </Text>
+                    </View>
+                    <View style={styles.totalRowBold}>
+                      <Text style={styles.totalLabelBold}>Total</Text>
+                      <Text style={styles.totalValueBold}>
+                        {formatCurrency(
+                          invoice.lineItems.reduce(
+                            (sum, item) =>
+                              sum + item.quantity * item.unitPriceTaxIncl,
+                            0
+                          ),
+                          invoice.currency
+                        )}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </>
@@ -707,7 +745,6 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
             }}
           >
             <View>
-              <Text style={styles.termsTitle}>Terms & Conditions</Text>
               <Text style={styles.termsText}>
                 Please pay within 30 days of receiving this invoice.
               </Text>

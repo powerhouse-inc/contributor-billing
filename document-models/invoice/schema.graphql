@@ -27,7 +27,8 @@ type InvoiceState {
   lineItems: [InvoiceLineItem!]!
   totalPriceTaxExcl: Float!
   totalPriceTaxIncl: Float!
-  paymentAccount: String
+  invoiceTags: [InvoiceTag!]!   # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}
+  notes: String
 }
 
 type Ref {
@@ -113,13 +114,13 @@ type InvoiceLineItem {
   unitPriceTaxIncl: Float!
   totalPriceTaxExcl: Float!
   totalPriceTaxIncl: Float!
-  lineItemTag: [InvoiceLineItemTag!]!
+  lineItemTag: [InvoiceTag!]
 }
 
-type InvoiceLineItemTag {
-  dimension: String!
-  value: String!
-  label: String
+type InvoiceTag {
+  dimension: String!  # "xero-expense-account", "xero-payment-account", "accounting-period", ...
+  value: String!      # "627", ..., "090", ..., "2025/05", "2025/Q1", ...
+  label: String       # "Marketing", ..., "Business Bank", ..., "May 2025"
 }
 
 union LegalEntityId = LegalEntityTaxId | LegalEntityCorporateRegistrationId
@@ -170,6 +171,7 @@ input EditInvoiceInput {
     dateDue: String
     dateDelivered: String
     currency: String
+    notes: String
 }
 
 input EditStatusInput {
@@ -188,10 +190,6 @@ input EditRefInput {
 
 input DeleteRefInput {
   id: OID!
-}
-
-input SetPaymentAccountInput {
-   paymentAccount: String!
 }
 
 # parties
@@ -333,7 +331,13 @@ input DeleteLineItemInput {
 }
 
 input SetLineItemTagInput {
-  id: OID!
+  lineItemId: OID!
+  dimension: String!
+  value: String!
+  label: String
+}
+
+input SetInvoiceTagInput {
   dimension: String!
   value: String!
   label: String

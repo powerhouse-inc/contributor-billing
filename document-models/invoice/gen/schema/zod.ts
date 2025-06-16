@@ -21,16 +21,16 @@ import type {
   InvoiceAccountType,
   InvoiceAccountTypeInput,
   InvoiceLineItem,
-  InvoiceLineItemTag,
   InvoiceState,
+  InvoiceTag,
   InvoiceWallet,
   LegalEntity,
   LegalEntityCorporateRegistrationId,
   LegalEntityTaxId,
   PaymentRouting,
   Ref,
+  SetInvoiceTagInput,
   SetLineItemTagInput,
-  SetPaymentAccountInput,
   Status,
   Token,
 } from "./types.js";
@@ -159,6 +159,7 @@ export function EditInvoiceInputSchema(): z.ZodObject<
     dateDue: z.string().nullish(),
     dateIssued: z.string().nullish(),
     invoiceNo: z.string().nullish(),
+    notes: z.string().nullish(),
   });
 }
 
@@ -348,24 +349,13 @@ export function InvoiceLineItemSchema(): z.ZodObject<
     currency: z.string(),
     description: z.string(),
     id: z.string(),
-    lineItemTag: z.array(InvoiceLineItemTagSchema()),
+    lineItemTag: z.array(InvoiceTagSchema()).nullable(),
     quantity: z.number(),
     taxPercent: z.number(),
     totalPriceTaxExcl: z.number(),
     totalPriceTaxIncl: z.number(),
     unitPriceTaxExcl: z.number(),
     unitPriceTaxIncl: z.number(),
-  });
-}
-
-export function InvoiceLineItemTagSchema(): z.ZodObject<
-  Properties<InvoiceLineItemTag>
-> {
-  return z.object({
-    __typename: z.literal("InvoiceLineItemTag").optional(),
-    dimension: z.string(),
-    label: z.string().nullable(),
-    value: z.string(),
   });
 }
 
@@ -377,14 +367,24 @@ export function InvoiceStateSchema(): z.ZodObject<Properties<InvoiceState>> {
     dateDue: z.string(),
     dateIssued: z.string(),
     invoiceNo: z.string(),
+    invoiceTags: z.array(InvoiceTagSchema()),
     issuer: LegalEntitySchema(),
     lineItems: z.array(InvoiceLineItemSchema()),
+    notes: z.string().nullable(),
     payer: LegalEntitySchema(),
-    paymentAccount: z.string().nullable(),
     refs: z.array(RefSchema()),
     status: StatusSchema,
     totalPriceTaxExcl: z.number(),
     totalPriceTaxIncl: z.number(),
+  });
+}
+
+export function InvoiceTagSchema(): z.ZodObject<Properties<InvoiceTag>> {
+  return z.object({
+    __typename: z.literal("InvoiceTag").optional(),
+    dimension: z.string(),
+    label: z.string().nullable(),
+    value: z.string(),
   });
 }
 
@@ -453,22 +453,24 @@ export function RefSchema(): z.ZodObject<Properties<Ref>> {
   });
 }
 
-export function SetLineItemTagInputSchema(): z.ZodObject<
-  Properties<SetLineItemTagInput>
+export function SetInvoiceTagInputSchema(): z.ZodObject<
+  Properties<SetInvoiceTagInput>
 > {
   return z.object({
     dimension: z.string(),
-    id: z.string(),
     label: z.string().nullish(),
     value: z.string(),
   });
 }
 
-export function SetPaymentAccountInputSchema(): z.ZodObject<
-  Properties<SetPaymentAccountInput>
+export function SetLineItemTagInputSchema(): z.ZodObject<
+  Properties<SetLineItemTagInput>
 > {
   return z.object({
-    paymentAccount: z.string(),
+    dimension: z.string(),
+    label: z.string().nullish(),
+    lineItemId: z.string(),
+    value: z.string(),
   });
 }
 

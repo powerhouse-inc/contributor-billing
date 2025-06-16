@@ -113,6 +113,7 @@ export type EditInvoiceInput = {
   dateDue?: InputMaybe<Scalars["String"]["input"]>;
   dateIssued?: InputMaybe<Scalars["String"]["input"]>;
   invoiceNo?: InputMaybe<Scalars["String"]["input"]>;
+  notes?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type EditIssuerBankInput = {
@@ -270,7 +271,7 @@ export type InvoiceLineItem = {
   currency: Scalars["String"]["output"];
   description: Scalars["String"]["output"];
   id: Scalars["OID"]["output"];
-  lineItemTag: Array<InvoiceLineItemTag>;
+  lineItemTag: Maybe<Array<InvoiceTag>>;
   quantity: Scalars["Float"]["output"];
   taxPercent: Scalars["Float"]["output"];
   totalPriceTaxExcl: Scalars["Float"]["output"];
@@ -279,26 +280,27 @@ export type InvoiceLineItem = {
   unitPriceTaxIncl: Scalars["Float"]["output"];
 };
 
-export type InvoiceLineItemTag = {
-  dimension: Scalars["String"]["output"];
-  label: Maybe<Scalars["String"]["output"]>;
-  value: Scalars["String"]["output"];
-};
-
 export type InvoiceState = {
   currency: Scalars["String"]["output"];
   dateDelivered: Maybe<Scalars["String"]["output"]>;
   dateDue: Scalars["String"]["output"];
   dateIssued: Scalars["String"]["output"];
   invoiceNo: Scalars["String"]["output"];
+  invoiceTags: Array<InvoiceTag>;
   issuer: LegalEntity;
   lineItems: Array<InvoiceLineItem>;
+  notes: Maybe<Scalars["String"]["output"]>;
   payer: LegalEntity;
-  paymentAccount: Maybe<Scalars["String"]["output"]>;
   refs: Array<Ref>;
   status: Status | `${Status}`;
   totalPriceTaxExcl: Scalars["Float"]["output"];
   totalPriceTaxIncl: Scalars["Float"]["output"];
+};
+
+export type InvoiceTag = {
+  dimension: Scalars["String"]["output"];
+  label: Maybe<Scalars["String"]["output"]>;
+  value: Scalars["String"]["output"];
 };
 
 export type InvoiceWallet = {
@@ -339,15 +341,17 @@ export type Ref = {
   value: Scalars["String"]["output"];
 };
 
-export type SetLineItemTagInput = {
+export type SetInvoiceTagInput = {
   dimension: Scalars["String"]["input"];
-  id: Scalars["OID"]["input"];
   label?: InputMaybe<Scalars["String"]["input"]>;
   value: Scalars["String"]["input"];
 };
 
-export type SetPaymentAccountInput = {
-  paymentAccount: Scalars["String"]["input"];
+export type SetLineItemTagInput = {
+  dimension: Scalars["String"]["input"];
+  label?: InputMaybe<Scalars["String"]["input"]>;
+  lineItemId: Scalars["OID"]["input"];
+  value: Scalars["String"]["input"];
 };
 
 export type Status =

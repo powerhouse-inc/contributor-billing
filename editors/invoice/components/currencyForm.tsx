@@ -33,9 +33,6 @@ export const CurrencyForm = ({
       resetOnSuccessfulSubmit
     >
       <CurrencyCodeField
-        style={{
-          width: "100px",
-        }}
         name="currency"
         placeholder="Currency"
         currencies={currencyList}
@@ -50,6 +47,7 @@ export const CurrencyForm = ({
           handleInputChange(syntheticEvent);
         }}
         warnings={warnings}
+        className="w-32"
       />
     </Form>
   );

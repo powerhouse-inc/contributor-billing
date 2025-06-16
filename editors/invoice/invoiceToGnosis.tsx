@@ -135,6 +135,19 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState }) => {
     return null;
   }
 
+  const parseChainName = (chainName: string) => {
+    switch (chainName) {
+      case "Base":
+        return "base";
+      case "Ethereum":
+        return "eth";
+      case "Arbitrum One":
+        return "arb";
+    }
+  };
+
+  const urlChainName = parseChainName(chainName);
+
   return (
     <div className="space-y-4">
       {currency && chainName && currency !== "" && chainName !== "" && (
@@ -160,7 +173,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState }) => {
             </span>
           </p>
           <a
-            href={`https://app.safe.global/transactions/queue?safe=base:0x1FB6bEF04230d67aF0e3455B997a28AFcCe1F45e`}
+            href={`https://app.safe.global/transactions/queue?safe=${urlChainName}:0x1FB6bEF04230d67aF0e3455B997a28AFcCe1F45e`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-500 hover:text-blue-600 underline block"

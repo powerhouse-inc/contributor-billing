@@ -1,5 +1,5 @@
 import { Status } from "../../../document-models/invoice/index.js";
-import { accountNumberRule, bicNumberRule, bankNameRule, countryRule, currencyRule, ethereumAddressRule, invoiceNumberRule, issuerPostalCodeRule, issuerStreetAddressRule, issuerCityRule, payerEmailRule, lineItemRule } from "./validationRules.js";
+import { accountNumberRule, bicNumberRule, bankNameRule, currencyRule, ethereumAddressRule, invoiceNumberRule, issuerPostalCodeRule, issuerStreetAddressRule, issuerCityRule, payerEmailRule, lineItemRule, mainCountryRule, bankCountryRule } from "./validationRules.js";
 
 // Types for validation
 export type ValidationSeverity = 'error' | 'warning' | 'none';
@@ -35,7 +35,8 @@ const validationRules: ValidationRule[] = [];
 validationRules.push(invoiceNumberRule);
 validationRules.push(ethereumAddressRule);
 validationRules.push(currencyRule);
-validationRules.push(countryRule);
+validationRules.push(mainCountryRule);
+validationRules.push(bankCountryRule);
 validationRules.push(accountNumberRule);
 validationRules.push(bicNumberRule);
 validationRules.push(bankNameRule);
