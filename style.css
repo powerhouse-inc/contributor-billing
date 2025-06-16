@@ -60,13 +60,8 @@
   }
 }
 
-/* Responsive grid adjustments */
-@media (max-width: 768px) {
-  .editor-grid {
-    grid-template-columns: 1fr !important;
-  }
-  
-  .editor-grid-item {
-    width: 100% !important;
+@media (min-width: 640px) {
+  .two-column-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
