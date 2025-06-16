@@ -17,6 +17,7 @@ export const reducer: InvoiceGeneralOperations = {
       newState.dateDue = action.input.dateDue ?? state.dateDue;
       newState.dateIssued = action.input.dateIssued ?? state.dateIssued;
       newState.invoiceNo = action.input.invoiceNo ?? state.invoiceNo;
+      newState.notes = action.input.notes ?? state.notes;
 
       state = Object.assign(state, newState);
     } catch (e) {
@@ -57,14 +58,6 @@ export const reducer: InvoiceGeneralOperations = {
     try {
       if (!action.input.id) throw new Error("No input.id");
       state.refs = state.refs.filter((r) => r.id !== action.input.id);
-    } catch (e) {
-      console.error(e);
-    }
-  },
-  setPaymentAccountOperation(state, action, dispatch) {
-    try {
-      if (!action.input.paymentAccount) throw new Error("No input.paymentAccount");
-      state.paymentAccount = action.input.paymentAccount;
     } catch (e) {
       console.error(e);
     }

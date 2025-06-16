@@ -147,7 +147,8 @@ export const initialGlobalState: InvoiceState = {
   lineItems: [],
   totalPriceTaxExcl: 0,
   totalPriceTaxIncl: 0,
-  paymentAccount: "",
+  invoiceTags: [],
+  notes: "",
 };
 export const initialLocalState: InvoiceLocalState = {};
 

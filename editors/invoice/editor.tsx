@@ -25,25 +25,8 @@ import {
 } from "./validation/validationManager.js";
 import { DatePicker } from "./components/datePicker.js";
 import { SelectField } from "./components/selectField.js";
-
-// Helper function to format numbers with appropriate decimal places
-function formatNumber(value: number): string {
-  // Check if the value has decimal places
-  const hasDecimals = value % 1 !== 0;
-
-  // If no decimals or only trailing zeros after 2 decimal places, show 2 decimal places
-  if (!hasDecimals || value.toFixed(5).endsWith("000")) {
-    return value.toFixed(2);
-  }
-
-  // Otherwise, show actual decimal places up to 5
-  const stringValue = value.toString();
-  const decimalPart = stringValue.split(".")[1] || "";
-
-  // Determine how many decimal places to show (up to 5)
-  const decimalPlaces = Math.min(Math.max(2, decimalPart.length), 5);
-  return value.toFixed(decimalPlaces);
-}
+import { formatNumber } from "./lineItems.js";
+import { Textarea } from "@powerhousedao/document-engineering/ui";
 
 function isFiatCurrency(currency: string): boolean {
   return currencyList.find((c) => c.ticker === currency)?.crypto === false;
@@ -51,9 +34,47 @@ function isFiatCurrency(currency: string): boolean {
 
 export type IProps = EditorProps<InvoiceDocument>;
 
+const useResponsiveEditorStyle = (options = { scale: 0.9, maxWidth: "1280px" }) => {
+  const baseStyle: React.CSSProperties = {
+    width: "100vw",
+    minHeight: "100vh",
+    margin: 0,
+    padding: 0,
+    boxSizing: "border-box",
+    transform: `scale(${options.scale})`,
+    transformOrigin: "top left",
+  };
+
+  const [responsiveStyle, setResponsiveStyle] = useState<React.CSSProperties>(baseStyle);
+
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth >= 1024) {
+        setResponsiveStyle({
+          ...baseStyle,
+          maxWidth: options.maxWidth,
+          marginLeft: "auto",
+          marginRight: "auto",
+          padding: "1rem",
+        });
+      } else {
+        setResponsiveStyle(baseStyle);
+      }
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [options.scale, options.maxWidth]);
+
+  return responsiveStyle;
+};
+
 export default function Editor(props: IProps) {
   const { document: doc, dispatch } = props;
   const state = doc.state.global;
+  
+  // Only use the hook if you need custom scaling or maxWidth
+  const customStyle = useResponsiveEditorStyle({ scale: 0.9, maxWidth: "1280px" });
 
   const [fiatMode, setFiatMode] = useState(isFiatCurrency(state.currency));
   const [uploadDropdownOpen, setUploadDropdownOpen] = useState(false);
@@ -62,6 +83,7 @@ export default function Editor(props: IProps) {
   const uploadDropdownRef = useRef<HTMLDivElement>(null);
   const exportDropdownRef = useRef<HTMLDivElement>(null);
   const [isPdfLoading, setIsPdfLoading] = useState(false);
+  const [notes, setNotes] = useState(state.notes || "");
 
   // Validation state
   const [invoiceValidation, setInvoiceValidation] =
@@ -69,8 +91,6 @@ export default function Editor(props: IProps) {
   const [walletValidation, setWalletValidation] =
     useState<ValidationResult | null>(null);
   const [currencyValidation, setCurrencyValidation] =
-    useState<ValidationResult | null>(null);
-  const [countryValidation, setCountryValidation] =
     useState<ValidationResult | null>(null);
   const [ibanValidation, setIbanValidation] = useState<ValidationResult | null>(
     null
@@ -90,6 +110,10 @@ export default function Editor(props: IProps) {
   const [payerEmailValidation, setPayerEmailValidation] =
     useState<ValidationResult | null>(null);
   const [lineItemValidation, setLineItemValidation] =
+    useState<ValidationResult | null>(null);
+  const [mainCountryValidation, setMainCountryValidation] =
+    useState<ValidationResult | null>(null);
+  const [bankCountryValidation, setBankCountryValidation] =
     useState<ValidationResult | null>(null);
 
   const prevStatus = useRef(state.status);
@@ -343,16 +367,29 @@ export default function Editor(props: IProps) {
         validationErrors.push(currencyValidation);
       }
 
-      // Validate country
-      const country =
-        state.issuer.paymentRouting?.bank?.address?.country &&
-        state.issuer.country
-          ? state.issuer.paymentRouting?.bank?.address?.country
-          : "";
-      const countryValidation = validateField("country", country, context);
-      setCountryValidation(countryValidation);
-      if (countryValidation && !countryValidation.isValid) {
-        validationErrors.push(countryValidation);
+      // Validate main country
+      const mainCountry = state.issuer.country ?? "";
+      const mainCountryValidation = validateField(
+        "mainCountry",
+        mainCountry,
+        context
+      );
+      setMainCountryValidation(mainCountryValidation);
+      if (mainCountryValidation && !mainCountryValidation.isValid) {
+        validationErrors.push(mainCountryValidation);
+      }
+
+      // Validate bank country
+      const bankCountry =
+        state.issuer.paymentRouting?.bank?.address?.country ?? "";
+      const bankCountryValidation = validateField(
+        "bankCountry",
+        bankCountry,
+        context
+      );
+      setBankCountryValidation(bankCountryValidation);
+      if (bankCountryValidation && !bankCountryValidation.isValid) {
+        validationErrors.push(bankCountryValidation);
       }
 
       // Validate EUR&GBP IBAN account number
@@ -471,7 +508,8 @@ export default function Editor(props: IProps) {
 
   const handleCurrencyChange = (currency: string) => {
     if (
-      (prevStatus.current === "PAYMENTSCHEDULED" || prevStatus.current === "DRAFT") &&
+      (prevStatus.current === "PAYMENTSCHEDULED" ||
+        prevStatus.current === "DRAFT") &&
       !isFiatCurrency(currency) &&
       state.issuer.paymentRouting?.wallet?.chainName === ""
     ) {
@@ -484,7 +522,7 @@ export default function Editor(props: IProps) {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
+    <div className="editor-container" >
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
@@ -634,16 +672,16 @@ export default function Editor(props: IProps) {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-2 gap-4">
         {/* Issuer Section */}
-        <div className="border border-gray-200 rounded-lg p-6">
+        <div className="border border-gray-200 rounded-lg p-4">
           <h3 className="text-lg font-semibold mb-4">Issuer</h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="mb-2">
               <label className="block mb-1 text-sm">Issue Date:</label>
               <DatePicker
                 name="issueDate"
-                className="w-full"
+                className={String.raw`w-full p-0`}
                 onChange={(e) => {
                   const newDate = e.target.value.split("T")[0];
                   dispatch(
@@ -659,7 +697,7 @@ export default function Editor(props: IProps) {
               <label className="block mb-1 text-sm">Delivery Date:</label>
               <DatePicker
                 name="deliveryDate"
-                className="w-full"
+                className={String.raw`w-full p-0`}
                 onChange={(e) => {
                   const newValue = e.target.value.split("T")[0];
                   if (newValue !== state.dateDelivered) {
@@ -676,34 +714,37 @@ export default function Editor(props: IProps) {
           </div>
           <LegalEntityForm
             legalEntity={state.issuer}
-            onChangeBank={(input) => dispatch(actions.editIssuerBank(input))}
             onChangeInfo={(input) => dispatch(actions.editIssuer(input))}
+            onChangeBank={(input) => dispatch(actions.editIssuerBank(input))}
             onChangeWallet={(input) =>
               dispatch(actions.editIssuerWallet(input))
             }
+            basicInfoDisabled={false}
             bankDisabled={!fiatMode}
             walletDisabled={fiatMode}
             currency={state.currency}
             status={state.status}
             walletvalidation={walletValidation}
-            countryvalidation={countryValidation}
+            mainCountryValidation={mainCountryValidation}
+            bankCountryValidation={bankCountryValidation}
             ibanvalidation={ibanValidation}
             bicvalidation={bicValidation}
             banknamevalidation={bankNameValidation}
             streetaddressvalidation={streetAddressValidation}
             cityvalidation={cityValidation}
             postalcodevalidation={postalCodeValidation}
+            payeremailvalidation={payerEmailValidation}
           />
         </div>
 
         {/* Payer Section */}
-        <div className="border border-gray-200 rounded-lg p-6">
+        <div className="border border-gray-200 rounded-lg p-4">
           <h3 className="text-lg font-semibold mb-4">Payer</h3>
           <div className="mb-2">
             <label className="block mb-1 text-sm">Due Date:</label>
             <DatePicker
               name="dateDue"
-              className="w-full"
+              className={String.raw`w-full p-0`}
               onChange={(e) =>
                 dispatch(
                   actions.editInvoice({
@@ -729,7 +770,10 @@ export default function Editor(props: IProps) {
       <div className="mb-8">
         <LineItemsTable
           currency={state.currency}
-          lineItems={state.lineItems}
+          lineItems={state.lineItems.map((item) => ({
+            ...item,
+            lineItemTag: item.lineItemTag ?? [],
+          }))}
           onAddItem={(item) => dispatch(actions.addLineItem(item))}
           onDeleteItem={(input) => dispatch(actions.deleteLineItem(input))}
           onUpdateCurrency={(input) => {
@@ -737,21 +781,45 @@ export default function Editor(props: IProps) {
             dispatch(actions.editInvoice(input));
           }}
           onUpdateItem={(item) => dispatch(actions.editLineItem(item))}
+          dispatch={dispatch}
+          paymentAccounts={state.invoiceTags || []}
         />
       </div>
 
       {/* Totals Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="md:col-start-2">
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 shadow-sm">
-            <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+        <div className="col-span-1">
+          <div className="">
+            <Textarea
+              label="Notes"
+              placeholder="Add notes"
+              autoExpand={false}
+              rows={4}
+              multiline={true}
+              value={notes}
+              onBlur={(e) => {
+                const newValue = e.target.value;
+                if (newValue !== state.notes) {
+                  dispatch(actions.editInvoice({ notes: newValue }));
+                }
+              }}
+              onChange={(e) => {
+                setNotes(e.target.value);
+              }}
+              className="p-2 mb-4"
+            />
+          </div>
+        </div>
+        <div className="col-span-1">
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 shadow-sm h-32">
+            <div className="">
               <div className="flex justify-between text-gray-700">
                 <span className="font-medium">Subtotal (excl. tax):</span>
                 <span>
                   {formatNumber(itemsTotalTaxExcl)} {state.currency}
                 </span>
               </div>
-              <div className="flex justify-between border-t border-gray-200 pt-4 text-lg font-bold text-gray-900">
+              <div className="flex justify-between border-t border-gray-200 pt-6 text-lg font-bold text-gray-900">
                 <span>Total (incl. tax):</span>
                 <span>
                   {formatNumber(itemsTotalTaxIncl)} {state.currency}

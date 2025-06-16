@@ -37,9 +37,6 @@ export const InputField = (props: InputFieldProps) => {
       resetOnSuccessfulSubmit={true}
     >
       <StringField
-        style={{
-          color: "black",
-        }}
         label={label}
         placeholder={placeholder}
         name="input"
