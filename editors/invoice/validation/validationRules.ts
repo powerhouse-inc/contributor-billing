@@ -8,7 +8,18 @@ function isValidEthereumAddress(address: string): boolean {
 
 function isValidIBAN(iban: string): boolean {
     const ibanRegex = /^([A-Z]{2}[0-9]{2})(?=(?:[A-Z0-9]){9,30}$)((?:[A-Z0-9]{3,5}){2,7})([A-Z0-9]{1,3})?$/;
-    return ibanRegex.test(iban);
+    const hasNumbers = /\d/.test(iban);
+    
+    // Extract country code from IBAN (first 2 letters)
+    const countryCode = iban.substring(0, 2).toUpperCase();
+    
+    // If IBAN starts with a valid country code (2 letters), validate full IBAN format
+    if (/^[A-Z]{2}$/.test(countryCode)) {
+        return ibanRegex.test(iban);
+    }
+    
+    // Otherwise just check if it's not empty and has numbers
+    return iban.trim() !== '' && hasNumbers;
 }
 
 function isValidEmail(email: string): boolean {
@@ -152,7 +163,7 @@ export const bankCountryRule: ValidationRule = {
 
 export const accountNumberRule: ValidationRule = {
     field: 'accountNum',
-    validate: (value: string) => {
+    validate: (value: string, document?: any) => {
         if (!value || value.trim() === '') {
             return {
                 isValid: false,
@@ -163,7 +174,7 @@ export const accountNumberRule: ValidationRule = {
         if (!isValidIBAN(value)) {
             return {
                 isValid: false,
-                message: 'Invalid IBAN format - Remove spaces and/or dashes',
+                message: 'Invalid account number format - For IBAN, ensure it starts with country code and follows IBAN format',
                 severity: 'warning'
             };
         }
