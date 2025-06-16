@@ -56,6 +56,7 @@ export const CountryForm = ({
         className={twMerge(className)}
         label={label}
         warnings={warnings}
+        includeDependentAreas={true}
       />
     </Form>
   );

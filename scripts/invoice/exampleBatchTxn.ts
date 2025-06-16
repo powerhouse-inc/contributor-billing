@@ -36,7 +36,7 @@ async function testBatchTransfer() {
       },
     ];
 
-    const result = await executeTransferProposal(payerWallet, paymentDetails);
+    const result = await executeTransferProposal(payerWallet.chainName, paymentDetails);
     console.log('\n✅ Batch transaction proposed successfully:');
     console.log(result);
   } catch (err) {

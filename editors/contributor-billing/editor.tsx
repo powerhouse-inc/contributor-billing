@@ -80,7 +80,7 @@ export function BaseEditor(props: IProps) {
   );
 
   return (
-    <div className="new-drive-explorer" style={{ height: "100%" }}>
+    <div className="new-drive-explorer">
       <DriveExplorer
         key={nodes.length}
         driveId={props.document.state.global.id}

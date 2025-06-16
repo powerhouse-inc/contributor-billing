@@ -5,7 +5,7 @@
  */
 
 import type { InvoiceItemsOperations } from "../../gen/items/operations.js";
-import type { InvoiceLineItem, InvoiceState, InvoiceLineItemTag } from "../../gen/types.js";
+import type { InvoiceLineItem, InvoiceState, InvoiceTag } from "../../gen/types.js";
 
 export const reducer: InvoiceItemsOperations = {
   addLineItemOperation(state, action, dispatch) {
@@ -64,22 +64,54 @@ export const reducer: InvoiceItemsOperations = {
 
   setLineItemTagOperation(state, action, dispatch) {
     try {
-      const stateItem = state.lineItems.find((x) => x.id === action.input.id);
+      const stateItem = state.lineItems.find((x) => x.id === action.input.lineItemId);
       if (!stateItem) throw new Error("Item matching input.id not found");
 
-      const newTag: InvoiceLineItemTag = {
-        dimension: action.input.dimension,
-        value: action.input.value,
-        label: action.input.label || null,
-      };
+      // if tag already exists with the same dimension, update the value and label
+      const existingTag = stateItem.lineItemTag?.find((tag) => tag.dimension === action.input.dimension);
+      if (existingTag) {
+        existingTag.value = action.input.value;
+        existingTag.label = action.input.label || null;
+      } else {
+        // if tag does not exist, add it
+        const newTag: InvoiceTag = {
+          dimension: action.input.dimension,
+          value: action.input.value,
+          label: action.input.label || null,
+        };
+        if (!stateItem.lineItemTag) {
+          stateItem.lineItemTag = [];
+        }
 
-      // Remove existing tag with same dimension if it exists
-      stateItem.lineItemTag = stateItem.lineItemTag.filter(
-        (tag) => tag.dimension !== action.input.dimension
-      );
+        // Add the new tag
+        stateItem.lineItemTag?.push(newTag);
 
-      // Add the new tag
-      stateItem.lineItemTag.push(newTag);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  setInvoiceTagOperation(state, action, dispatch) {
+    try {
+      // if tag already exists with the same dimension, update the value and label
+      const existingTag = state.invoiceTags?.find((tag) => tag.dimension === action.input.dimension);
+      if (existingTag) {
+        existingTag.value = action.input.value;
+        existingTag.label = action.input.label || null;
+      } else {
+        // if tag does not exist, add it
+        const newTag: InvoiceTag = {
+          dimension: action.input.dimension,
+          value: action.input.value,
+          label: action.input.label || null,
+        };
+        if (!state.invoiceTags) {
+          state.invoiceTags = [];
+        }
+        // Add the new tag
+        state.invoiceTags.push(newTag);
+
+      }
     } catch (e) {
       console.error(e);
     }
@@ -99,7 +131,7 @@ function updateTotals(state: InvoiceState) {
 
 function validatePrices(item: InvoiceLineItem) {
   const EPSILON = 0.00001; // Small value for floating point comparisons
-  
+
   // Calculate total prices from unit prices and quantity
   const calcPriceIncl = item.quantity * item.unitPriceTaxIncl;
   const calcPriceExcl = item.quantity * item.unitPriceTaxExcl;

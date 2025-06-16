@@ -5,12 +5,14 @@ import {
   type EditLineItemInput,
   type DeleteLineItemInput,
   type SetLineItemTagInput,
+  type SetInvoiceTagInput,
 } from "../types.js";
 import {
   type AddLineItemAction,
   type EditLineItemAction,
   type DeleteLineItemAction,
   type SetLineItemTagAction,
+  type SetInvoiceTagAction,
 } from "./actions.js";
 
 export const addLineItem = (input: AddLineItemInput) =>
@@ -46,5 +48,14 @@ export const setLineItemTag = (input: SetLineItemTagInput) =>
     { ...input },
     undefined,
     z.SetLineItemTagInputSchema,
+    "global",
+  );
+
+export const setInvoiceTag = (input: SetInvoiceTagInput) =>
+  createAction<SetInvoiceTagAction>(
+    "SET_INVOICE_TAG",
+    { ...input },
+    undefined,
+    z.SetInvoiceTagInputSchema,
     "global",
   );

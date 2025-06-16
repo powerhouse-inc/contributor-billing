@@ -2,35 +2,61 @@
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable react/button-has-type */
 import { RWAButton } from "@powerhousedao/design-system";
-import { EditInvoiceInput, DeleteLineItemInput } from "../../document-models/invoice/index.js";
-import { forwardRef, useState, useMemo } from "react";
+import {
+  EditInvoiceInput,
+  DeleteLineItemInput,
+  InvoiceTag,
+} from "../../document-models/invoice/index.js";
+import {
+  forwardRef,
+  useState,
+  useMemo,
+  useRef,
+  useLayoutEffect,
+  Dispatch,
+} from "react";
 import { v4 as uuidv4 } from "uuid";
-import { CurrencyForm } from "./components/currencyForm.js";
+import { Tag } from "lucide-react";
 import { NumberForm } from "./components/numberForm.js";
 import { InputField } from "./components/inputField.js";
+import { LineItemTagsTable } from "./lineItemTags/lineItemTags.js";
+
+// Add TagAssignmentRow interface
+interface TagAssignmentRow {
+  id: string;
+  item: string;
+  period: string;
+  expenseAccount: string;
+  total: string;
+}
 
 // Helper function to get precision based on currency
 function getCurrencyPrecision(currency: string): number {
   return currency === "USDS" || currency === "DAI" ? 6 : 2;
 }
 
-// Helper function to format numbers with appropriate decimal places
-function formatNumber(value: number): string {
+export function formatNumber(value: number): string {
   // Check if the value has decimal places
   const hasDecimals = value % 1 !== 0;
 
   // If no decimals or only trailing zeros after 2 decimal places, show 2 decimal places
   if (!hasDecimals || value.toFixed(5).endsWith("000")) {
-    return value.toFixed(2);
+    return value.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
 
-  // Otherwise, show atual decimal places up to 5
+  // Otherwise, show actual decimal places up to 5
   const stringValue = value.toString();
   const decimalPart = stringValue.split(".")[1] || "";
 
   // Determine how many decimal places to show (up to 5)
   const decimalPlaces = Math.min(Math.max(2, decimalPart.length), 5);
-  return value.toFixed(decimalPlaces);
+  return value.toLocaleString("en-US", {
+    minimumFractionDigits: decimalPlaces,
+    maximumFractionDigits: decimalPlaces,
+  });
 }
 
 type LineItem = {
@@ -43,6 +69,7 @@ type LineItem = {
   totalPriceTaxIncl: number;
   unitPriceTaxExcl: number;
   unitPriceTaxIncl: number;
+  lineItemTag: InvoiceTag[];
 };
 
 type EditableLineItem = {
@@ -140,6 +167,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
       } else if (field === "unitPriceTaxExcl") {
         // For unit price, allow up to dynamic decimal places based on currency
         const maxDecimals = getCurrencyPrecision(currency);
+        // Allow negative numbers with optional minus sign at start
         const regex = new RegExp(`^-?\\d*\\.?\\d{0,${maxDecimals}}$`);
         if (regex.test(value)) {
           setEditedItem((prev) => ({ ...prev, [field]: value }));
@@ -185,59 +213,63 @@ const EditableLineItem = forwardRef(function EditableLineItem(
       unitPriceTaxIncl: calculatedValues.unitPriceTaxIncl,
       totalPriceTaxExcl: calculatedValues.totalPriceTaxExcl,
       totalPriceTaxIncl: calculatedValues.totalPriceTaxIncl,
+      lineItemTag: [],
     };
     onSave(completeItem);
   }
 
   return (
-    <tr ref={ref} className="hover:bg-gray-50">
-      <td className="border border-gray-200 p-3">
-        <InputField 
+    <tr ref={ref} className="hover:bg-gray-50 table-row">
+      <td className="border border-gray-200 p-3 table-cell">
+        <InputField
           onBlur={() => {}}
           handleInputChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
             setEditedItem((prev) => ({ ...prev, description: e.target.value }));
           }}
           value={editedItem.description ?? ""}
           placeholder="Description"
+          className=""
         />
       </td>
-      <td className="border border-gray-200 p-3">
+      <td className="border border-gray-200 p-3 table-cell">
         <NumberForm
           number={editedItem.quantity ?? ""}
           precision={0}
           handleInputChange={handleInputChange("quantity")}
           placeholder="Quantity"
+          className=""
         />
       </td>
-      <td className="border border-gray-200 p-3">
+      <td className="border border-gray-200 p-3 table-cell">
         <NumberForm
           number={editedItem.unitPriceTaxExcl ?? ""}
           precision={getCurrencyPrecision(currency)}
           handleInputChange={handleInputChange("unitPriceTaxExcl")}
+          pattern="^-?\d*\.?\d*$"
           placeholder="Unit Price (excl. tax)"
+          className=""
         />
       </td>
-      <td className="border border-gray-200 p-3">
+      <td className="border border-gray-200 p-3 table-cell">
         <NumberForm
           number={editedItem.taxPercent ?? ""}
           precision={0}
-          min={0}
-          max={100}
+          pattern="^(100|[1-9]?[0-9])$"
           handleInputChange={handleInputChange("taxPercent")}
           placeholder="Tax %"
+          className=""
         />
       </td>
-      <td className="border border-gray-200 p-3 text-right font-medium">
+      <td className="border border-gray-200 p-3 text-right font-medium table-cell">
         {formatNumber(calculatedValues.totalPriceTaxExcl)}
       </td>
-      <td className="border border-gray-200 p-3 text-right font-medium">
+      <td className="border border-gray-200 p-3 text-right font-medium table-cell">
         {formatNumber(calculatedValues.totalPriceTaxIncl)}
       </td>
-      <td className="border border-gray-200 p-3">
+      <td className="border border-gray-200 p-3 table-cell">
         <div className="flex space-x-2">
           <button
-            style={{ backgroundColor: "blue" }}
-            className="rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-700"
+            className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-700"
             onClick={handleSave}
           >
             Save
@@ -261,6 +293,8 @@ type LineItemsTableProps = {
   readonly onUpdateItem: (item: LineItem) => void;
   readonly onDeleteItem: (input: DeleteLineItemInput) => void;
   readonly onUpdateCurrency: (input: EditInvoiceInput) => void;
+  readonly dispatch: Dispatch<any>;
+  readonly paymentAccounts: InvoiceTag[];
 };
 
 export function LineItemsTable({
@@ -270,9 +304,21 @@ export function LineItemsTable({
   onUpdateItem,
   onDeleteItem,
   onUpdateCurrency,
+  dispatch,
+  paymentAccounts,
 }: LineItemsTableProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
+  const [showTagTable, setShowTagTable] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLTableElement>(null);
+  const [modalRect, setModalRect] = useState<{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  } | null>(null);
 
   function handleAddClick() {
     setIsAddingNew(true);
@@ -287,113 +333,165 @@ export function LineItemsTable({
     setIsAddingNew(false);
   }
 
+  // Transform line items to TagAssignmentRow format for the tag table
+  const tagAssignmentRows = lineItems.map((item) => ({
+    id: item.id,
+    item: item.description,
+    period: "", // Default value
+    expenseAccount: "", // Default value
+    total: `$${formatNumber(item.totalPriceTaxIncl)}`,
+    lineItemTag: item.lineItemTag,
+  }));
+
+  if (showTagTable) {
+    return (
+      <LineItemTagsTable
+        lineItems={tagAssignmentRows}
+        onClose={() => setShowTagTable(false)}
+        dispatch={dispatch}
+        paymentAccounts={paymentAccounts}
+      />
+    );
+  }
+
   return (
-    <div className="mt-4">
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h4 className="text-xl font-semibold text-gray-900">Line Items</h4>
+    <div ref={containerRef} className="relative w-full">
+      {/* Line Items Table */}
+      <div className="mt-4">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h4 className="text-xl font-semibold text-gray-900">Line Items</h4>
+          </div>
+
+          <RWAButton
+            className="mb-2"
+            disabled={isAddingNew}
+            onClick={handleAddClick}
+          >
+            Add Line Item
+          </RWAButton>
         </div>
 
-        <RWAButton
-          className="mb-2"
-          disabled={isAddingNew}
-          onClick={handleAddClick}
+        <div
+          ref={tableContainerRef}
+          className="overflow-x-auto rounded-lg border border-gray-200"
         >
-          Add Line Item
-        </RWAButton>
-      </div>
-
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
-        <table className="w-full border-collapse bg-white">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="border-b border-gray-200 p-3 text-left">
-                Description
-              </th>
-              <th className="border-b border-gray-200 p-3 text-right">
-                Quantity
-              </th>
-              <th className="border-b border-gray-200 p-3 text-right">
-                Unit Price (excl. tax)
-              </th>
-              <th className="border-b border-gray-200 p-3 text-right">Tax %</th>
-              <th className="border-b border-gray-200 p-3 text-right">
-                Total (excl. tax)
-              </th>
-              <th className="border-b border-gray-200 p-3 text-right">
-                Total (incl. tax)
-              </th>
-              <th className="border-b border-gray-200 p-3 text-center">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {lineItems.map((item) =>
-              editingId === item.id ? (
+          <table
+            ref={tableRef}
+            className="w-full table-fixed border-collapse bg-white"
+          >
+            <colgroup>
+              <col style={{ width: "30%" }} />
+              <col style={{ width: "10%" }} />
+              <col style={{ width: "12%" }} />
+              <col style={{ width: "8%" }} />
+              <col />
+              <col />
+              <col />
+            </colgroup>
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="border-b border-gray-200 p-3 text-left">
+                  Description
+                </th>
+                <th className="border-b border-gray-200 p-3 text-right">
+                  Quantity
+                </th>
+                <th className="border-b border-gray-200 p-3 text-right">
+                  Unit Price (excl. tax)
+                </th>
+                <th className="border-b border-gray-200 p-3 text-right">
+                  Tax %
+                </th>
+                <th className="border-b border-gray-200 p-3 text-right">
+                  Total (excl. tax)
+                </th>
+                <th className="border-b border-gray-200 p-3 text-right">
+                  Total (incl. tax)
+                </th>
+                <th className="border-b border-gray-200 p-3 text-center">
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="text-sm">Actions</span>
+                    <Tag
+                      onClick={() => setShowTagTable(true)}
+                      style={{
+                        cursor: "pointer",
+                        width: 28,
+                        height: 28,
+                        color: "white",
+                        fill: "#475264",
+                      }}
+                    />
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {lineItems.map((item) =>
+                editingId === item.id ? (
+                  <EditableLineItem
+                    currency={currency}
+                    item={item}
+                    key={item.id}
+                    onCancel={() => setEditingId(null)}
+                    onSave={(updatedItem) => {
+                      onUpdateItem(updatedItem);
+                      setEditingId(null);
+                    }}
+                  />
+                ) : (
+                  <tr key={item.id} className="hover:bg-gray-50 table-row">
+                    <td className="border-b border-gray-200 p-3 table-cell">
+                      {item.description}
+                    </td>
+                    <td className="border-b border-gray-200 p-3 text-right table-cell">
+                      {item.quantity}
+                    </td>
+                    <td className="border-b border-gray-200 p-3 text-right table-cell">
+                      {formatNumber(item.unitPriceTaxExcl)}
+                    </td>
+                    <td className="border-b border-gray-200 p-3 text-right table-cell">
+                      {typeof item.taxPercent === "number"
+                        ? Math.round(item.taxPercent)
+                        : 0}
+                      %
+                    </td>
+                    <td className="border-b border-gray-200 p-3 text-right font-medium table-cell">
+                      {formatNumber(item.totalPriceTaxExcl)}
+                    </td>
+                    <td className="border-b border-gray-200 p-3 text-right font-medium table-cell">
+                      {formatNumber(item.totalPriceTaxIncl)}
+                    </td>
+                    <td className="border-b border-gray-200 p-3 table-cell">
+                      <div className="flex justify-center space-x-2">
+                        <button
+                          className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-200"
+                          onClick={() => setEditingId(item.id)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700"
+                          onClick={() => onDeleteItem({ id: item.id })}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              )}
+              {isAddingNew ? (
                 <EditableLineItem
                   currency={currency}
-                  item={item}
-                  key={item.id}
-                  onCancel={() => setEditingId(null)}
-                  onSave={(updatedItem) => {
-                    onUpdateItem(updatedItem);
-                    setEditingId(null);
-                  }}
+                  item={{}}
+                  onCancel={handleCancelNewItem}
+                  onSave={handleSaveNewItem}
                 />
-              ) : (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="border-b border-gray-200 p-3">
-                    {item.description}
-                  </td>
-                  <td className="border-b border-gray-200 p-3 text-right">
-                    {item.quantity}
-                  </td>
-                  <td className="border-b border-gray-200 p-3 text-right">
-                    {formatNumber(item.unitPriceTaxExcl)}
-                  </td>
-                  <td className="border-b border-gray-200 p-3 text-right">
-                    {typeof item.taxPercent === "number"
-                      ? Math.round(item.taxPercent)
-                      : 0}
-                    %
-                  </td>
-                  <td className="border-b border-gray-200 p-3 text-right font-medium">
-                    {formatNumber(item.totalPriceTaxExcl)}
-                  </td>
-                  <td className="border-b border-gray-200 p-3 text-right font-medium">
-                    {formatNumber(item.totalPriceTaxIncl)}
-                  </td>
-                  <td className="border-b border-gray-200 p-3">
-                    <div className="flex justify-center space-x-2">
-                      <button
-                        style={{ backgroundColor: "lightblue" }}
-                        className="rounded bg-blue-600 px-3 py-1 text-white hover:bg-blue-700"
-                        onClick={() => setEditingId(item.id)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700"
-                        onClick={() => onDeleteItem({ id: item.id })}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )
-            )}
-            {isAddingNew ? (
-              <EditableLineItem
-                currency={currency}
-                item={{}}
-                onCancel={handleCancelNewItem}
-                onSave={handleSaveNewItem}
-              />
-            ) : null}
-          </tbody>
-        </table>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
