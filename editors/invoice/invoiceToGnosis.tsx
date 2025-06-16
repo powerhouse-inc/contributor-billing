@@ -173,7 +173,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState }) => {
             </span>
           </p>
           <a
-            href={`https://app.safe.global/transactions/queue?safe=${urlChainName}:0x1FB6bEF04230d67aF0e3455B997a28AFcCe1F45e`}
+            href={`https://app.safe.global/transactions/queue?safe=${urlChainName}:0xF130f741d4E3185b29412c65397363f8c23A0460`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-500 hover:text-blue-600 underline block"
