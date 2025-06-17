@@ -102,8 +102,7 @@ export function LineItemTagsTable({
                   />
                 </td>
                 <td
-                  className="border-b border-gray-200 p-2"
-                  style={{ width: "100px" }}
+                  className="border-b border-gray-200 p-2 w-50"
                 >
                   <DatePicker
                     name="period"
