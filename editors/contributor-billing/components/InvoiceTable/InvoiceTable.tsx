@@ -89,6 +89,7 @@ export const InvoiceTable = ({
       .map(([id, doc]) => ({
         id,
         issuer: doc.global.issuer?.name || "Unknown",
+        status: doc.global.status,
         invoiceNo: doc.global.invoiceNo,
         issueDate: doc.global.dateIssued,
         dueDate: doc.global.dateDue,
@@ -112,6 +113,7 @@ export const InvoiceTable = ({
       .map(([id, doc]) => ({
         id,
         issuer: doc.global.issuer?.name || "Unknown",
+        status: doc.global.status,
         invoiceNo: doc.global.invoiceNo,
         issueDate: doc.global.dateIssued,
         dueDate: doc.global.dateDue,

@@ -15,7 +15,7 @@ export const InvoiceTableRow = ({
   onMenuAction,
   setActiveDocumentId,
   onDeleteNode,
-  renameNode
+  renameNode,
 }: {
   file?: UiFileNode;
   row: any;
@@ -35,7 +35,7 @@ export const InvoiceTableRow = ({
         <input
           type="checkbox"
           checked={isSelected}
-          onChange={e => onSelect(e.target.checked)}
+          onChange={(e) => onSelect(e.target.checked)}
           className="size-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
         />
       </td>
@@ -58,6 +58,16 @@ export const InvoiceTableRow = ({
       <td className="px-2 py-2 text-center">{row.dueDate}</td>
       <td className="px-2 py-2 text-center">{row.currency}</td>
       <td className="px-2 py-2 text-center">{row.amount}</td>
+      {row.status === "ISSUED" && (
+        <td className="px-2 py-2 text-center">
+          <button
+            className="bg-white border border-gray-300 rounded px-3 py-1 text-sm hover:bg-gray-100 col-span-1 justify-self-end"
+            onClick={() => {}}
+          >
+            Create Billing Statement
+          </button>
+        </td>
+      )}
       {/* <td className="px-2 py-2 text-right relative" ref={menuRef}>
         <div className="relative inline-block">
           <button
@@ -86,4 +96,4 @@ export const InvoiceTableRow = ({
       </td> */}
     </tr>
   );
-}; 
+};
