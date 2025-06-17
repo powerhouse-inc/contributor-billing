@@ -7,9 +7,10 @@ import {
   type DriveEditorContext,
   useDriveContext,
 } from "@powerhousedao/reactor-browser";
-import { type InvoiceState } from "document-models/invoice/index.js";
-import { PHDocument } from "document-model";
+import { type InvoiceState, type InvoiceLineItem } from "document-models/invoice/index.js";
+import { EditorDispatch, PHDocument } from "document-model";
 import { DocumentModelModule } from "document-model";
+import { DocumentDriveAction } from "document-drive";
 
 type Invoice = {
   id: string;
@@ -46,6 +47,7 @@ interface InvoiceTableProps {
   renameNode: (nodeId: string, name: string) => void;
   filteredDocumentModels: DocumentModelModule[];
   onSelectDocumentModel: (model: DocumentModelModule) => void;
+  dispatchMap: Record<string, EditorDispatch<DocumentDriveAction>>;
 }
 
 export const InvoiceTable = ({
@@ -60,8 +62,23 @@ export const InvoiceTable = ({
   renameNode,
   filteredDocumentModels,
   onSelectDocumentModel,
+  dispatchMap,
 }: InvoiceTableProps) => {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const {
+    addDocument,
+    addFile,
+    documentModels,
+    useDriveDocumentStates,
+    selectedNode,
+  } = useDriveContext();
+
+  const billingDocStates = Object.entries(state)
+    .filter(([_, doc]) => doc.documentType === "powerhouse/billing-statement")
+    .map(([id, doc]) => ({
+      id,
+      contributor: doc.global.contributor,
+    }));
 
   const getMenuOptions = () => {
     return [
@@ -69,7 +86,6 @@ export const InvoiceTable = ({
       // { label: "View Payment Transaction", value: "view-payment" },
     ];
   };
-
 
   const handleStatusChange = (value: string | string[]) => {
     setSelectedStatuses(Array.isArray(value) ? value : [value]);
@@ -97,6 +113,8 @@ export const InvoiceTable = ({
         amount: doc.global.totalPriceTaxIncl?.toString() ?? "",
       }));
   };
+
+  // console.log('filteredDocumentModels', filteredDocumentModels)
 
   const getOtherInvoices = () => {
     return Object.entries(state)
@@ -133,7 +151,76 @@ export const InvoiceTable = ({
   const handleDelete = (id: string) => {
     onDeleteNode(id);
     // Clear selection for deleted item
-   
+  };
+
+  const handleCreateBillingStatement = async (id: string) => {
+    const driveId = selectedNode?.id;
+    if (!driveId) return;
+    const invoiceFile = files.find((file) => file.id === id);
+    const invoiceState = state[id];
+
+    const billingDoc = await addDocument(
+      driveId,
+      `bill-${invoiceFile?.name}`,
+      "powerhouse/billing-statement",
+      undefined,
+      {
+        name: `bill-${invoiceFile?.name}`,
+        created: new Date().toISOString(),
+        lastModified: new Date().toISOString(),
+        documentType: "powerhouse/billing-statement",
+        state: {
+          global: {
+            contributor: id,
+            dateIssued: invoiceState.global.dateIssued,
+            dateDue: invoiceState.global.dateDue,
+            lineItems: invoiceState.global.lineItems.map((item: InvoiceLineItem) => {
+              return {
+                id: item.id,
+                description: item.description,
+                quantity: item.quantity,
+                unit: 'UNIT',
+                unitPricePwt: 0,
+                unitPriceCash: item.unitPriceTaxIncl,
+                totalPricePwt: 0,
+                totalPriceCash: item.totalPriceTaxIncl,
+                lineItemTag: item.lineItemTag?.filter((tag) => tag.dimension === "accounting-period"),
+              }
+            }),
+            status: invoiceState.global.status,
+            currency: invoiceState.global.currency,
+            totalCash: invoiceState.global.lineItems.reduce((acc: number, item: InvoiceLineItem) => acc + item.totalPriceTaxIncl, 0),
+            totalPowt: 0,
+            notes: invoiceState.global.notes,
+          },
+          local: {},
+        },
+        revision: {
+          global: 0,
+          local: 0,
+        },
+        operations: {
+          global: [],
+          local: [],
+        },
+        initialState: {
+          name: `bill-${invoiceFile?.name}`,
+          documentType: "powerhouse/billing-statement",
+          created: new Date().toISOString(),
+          lastModified: new Date().toISOString(),
+          revision: {
+            global: 0,
+            local: 0,
+          },
+          state: {
+            global: {},
+            local: {},
+          },
+        },
+        clipboard: [],
+      }
+    );
+
   };
 
   return (
@@ -147,7 +234,12 @@ export const InvoiceTable = ({
         onBatchAction={onBatchAction}
       />
       {shouldShowSection("DRAFT") && (
-        <InvoiceTableSection title="Draft" count={draft.length} onSelectDocumentModel={onSelectDocumentModel} filteredDocumentModels={filteredDocumentModels}>
+        <InvoiceTableSection
+          title="Draft"
+          count={draft.length}
+          onSelectDocumentModel={onSelectDocumentModel}
+          filteredDocumentModels={filteredDocumentModels}
+        >
           <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
             <thead>
               <tr className="bg-gray-50">
@@ -164,7 +256,7 @@ export const InvoiceTable = ({
             <tbody>
               {draft.map((row) => (
                 <InvoiceTableRow
-                  file={files?.find((file) => file.id === row.id) as UiFileNode}
+                  files={files}
                   key={row.id}
                   row={row}
                   isSelected={!!selected[row.id]}
@@ -207,7 +299,7 @@ export const InvoiceTable = ({
             <tbody>
               {awaitingApproval.map((row) => (
                 <InvoiceTableRow
-                  file={files?.find((file) => file.id === row.id) as UiFileNode}
+                  files={files}
                   key={row.id}
                   row={row}
                   isSelected={!!selected[row.id]}
@@ -222,6 +314,8 @@ export const InvoiceTable = ({
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
+                  onCreateBillingStatement={handleCreateBillingStatement}
+                  billingDocStates={billingDocStates}
                 />
               ))}
             </tbody>
@@ -250,7 +344,7 @@ export const InvoiceTable = ({
             <tbody>
               {awaitingPayment.map((row) => (
                 <InvoiceTableRow
-                  file={files.find((file) => file.id === row.id) as UiFileNode}
+                  files={files}
                   key={row.id}
                   row={row}
                   isSelected={!!selected[row.id]}
@@ -293,7 +387,7 @@ export const InvoiceTable = ({
             <tbody>
               {paid.map((row) => (
                 <InvoiceTableRow
-                  file={files.find((file) => file.id === row.id) as UiFileNode}
+                  files={files}
                   key={row.id}
                   row={row}
                   isSelected={!!selected[row.id]}
@@ -336,7 +430,7 @@ export const InvoiceTable = ({
             <tbody>
               {rejected.map((row) => (
                 <InvoiceTableRow
-                  file={files.find((file) => file.id === row.id) as UiFileNode}
+                  files={files}
                   key={row.id}
                   row={row}
                   isSelected={!!selected[row.id]}
@@ -375,7 +469,7 @@ export const InvoiceTable = ({
             <tbody>
               {otherInvoices.map((row) => (
                 <InvoiceTableRow
-                  file={files.find((file) => file.id === row.id) as UiFileNode}
+                  files={files}
                   key={row.id}
                   row={row}
                   isSelected={!!selected[row.id]}

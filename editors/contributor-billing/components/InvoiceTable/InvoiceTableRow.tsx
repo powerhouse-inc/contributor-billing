@@ -7,7 +7,7 @@ import {
 } from "@powerhousedao/design-system";
 
 export const InvoiceTableRow = ({
-  file,
+  files,
   row,
   isSelected,
   onSelect,
@@ -16,8 +16,10 @@ export const InvoiceTableRow = ({
   setActiveDocumentId,
   onDeleteNode,
   renameNode,
+  onCreateBillingStatement,
+  billingDocStates,
 }: {
-  file?: UiFileNode;
+  files?: UiFileNode[];
   row: any;
   isSelected: boolean;
   onSelect: (checked: boolean) => void;
@@ -26,9 +28,20 @@ export const InvoiceTableRow = ({
   setActiveDocumentId: (id: string) => void;
   onDeleteNode: (nodeId: string) => void;
   renameNode: (nodeId: string, name: string) => void;
+  onCreateBillingStatement?: (id: string) => void;
+  billingDocStates?: { id: string; contributor: string }[];
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLTableCellElement>(null);
+
+  const billingDoc = billingDocStates?.find(
+    (doc) => doc.contributor === row.id
+  );
+  const billingFile = files?.find((file) => file.id === billingDoc?.id);
+ 
+
+  const file = files?.find((file) => file.id === row.id);
+
   return (
     <tr className="hover:bg-gray-50">
       <td className="px-2 py-2">
@@ -58,14 +71,28 @@ export const InvoiceTableRow = ({
       <td className="px-2 py-2 text-center">{row.dueDate}</td>
       <td className="px-2 py-2 text-center">{row.currency}</td>
       <td className="px-2 py-2 text-center">{row.amount}</td>
-      {row.status === "ISSUED" && (
+      {row.status === "ISSUED" && !billingFile && (
         <td className="px-2 py-2 text-center">
           <button
             className="bg-white border border-gray-300 rounded px-3 py-1 text-sm hover:bg-gray-100 col-span-1 justify-self-end"
-            onClick={() => {}}
+            onClick={() => onCreateBillingStatement?.(row.id)}
           >
-            Create Billing Statement
+            Generate Billing Statement
           </button>
+        </td>
+      )}
+      {billingFile && (
+        <td className="px-2 py-2 text-center">
+          <FileItem
+            key={billingDoc?.id}
+            uiNode={billingFile as BaseUiFileNode}
+            onSelectNode={() => setActiveDocumentId(billingDoc?.id as string)}
+            onRenameNode={(name) => renameNode(billingDoc?.id as string, name)}
+            onDuplicateNode={() => {}}
+            onDeleteNode={() => onDeleteNode(billingDoc?.id as string)}
+            isAllowedToCreateDocuments={true}
+            className="h-10"
+          />
         </td>
       )}
       {/* <td className="px-2 py-2 text-right relative" ref={menuRef}>
