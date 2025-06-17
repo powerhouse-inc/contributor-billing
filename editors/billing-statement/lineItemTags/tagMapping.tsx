@@ -44,5 +44,6 @@ export const expenseAccountOptions: SelectOption[] = Array.from(new Set(billingT
 })
 
 export const budgetOptions: SelectOption[] = [
-    { label: "powerhouse", value: "PH-001" },
+    { label: "Powerhouse", value: "PH-001" },
+    { label: "Jetstream", value: "JTS-001" },
 ]
