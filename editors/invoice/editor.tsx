@@ -744,7 +744,7 @@ export default function Editor(props: IProps) {
             <label className="block mb-1 text-sm">Due Date:</label>
             <DatePicker
               name="dateDue"
-              className={String.raw`w-full p-0`}
+              className='w-64'
               onChange={(e) =>
                 dispatch(
                   actions.editInvoice({
