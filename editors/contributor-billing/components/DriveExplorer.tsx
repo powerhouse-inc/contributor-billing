@@ -283,6 +283,8 @@ export function DriveExplorer({
                 onBatchAction={handleBatchAction} 
                 onDeleteNode={onDeleteNode}
                 renameNode={renameNode}
+                filteredDocumentModels={filteredDocumentModels}
+                onSelectDocumentModel={onSelectDocumentModel}
                 />
 
             </div>

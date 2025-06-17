@@ -44,6 +44,8 @@ interface InvoiceTableProps {
   onBatchAction: (action: string) => void;
   onDeleteNode: (nodeId: string) => void;
   renameNode: (nodeId: string, name: string) => void;
+  filteredDocumentModels: DocumentModelModule[];
+  onSelectDocumentModel: (model: DocumentModelModule) => void;
 }
 
 export const InvoiceTable = ({
@@ -56,6 +58,8 @@ export const InvoiceTable = ({
   onBatchAction,
   onDeleteNode,
   renameNode,
+  filteredDocumentModels,
+  onSelectDocumentModel,
 }: InvoiceTableProps) => {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
 
@@ -141,18 +145,17 @@ export const InvoiceTable = ({
         onBatchAction={onBatchAction}
       />
       {shouldShowSection("DRAFT") && (
-        <InvoiceTableSection title="Draft" count={draft.length}>
+        <InvoiceTableSection title="Draft" count={draft.length} onSelectDocumentModel={onSelectDocumentModel} filteredDocumentModels={filteredDocumentModels}>
           <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
             <thead>
               <tr className="bg-gray-50">
                 <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-left">Invoice</th>
-                <th className="px-2 py-2 text-left">Invoice No.</th>
-                <th className="px-2 py-2 text-left">Issue Date</th>
-                <th className="px-2 py-2 text-left">Due Date</th>
-                <th className="px-2 py-2 text-left">Currency</th>
-                <th className="px-2 py-2 text-left">Amount</th>
-                <th className="px-2 py-2 text-left">Billing Statement</th>
+                <th className="px-2 py-2 text-center">Invoice</th>
+                <th className="px-2 py-2 text-center">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Issue Date</th>
+                <th className="px-2 py-2 text-center">Due Date</th>
+                <th className="px-2 py-2 text-center">Currency</th>
+                <th className="px-2 py-2 text-center">Amount</th>
                 <th className="px-2 py-2 w-8"></th>
               </tr>
             </thead>
@@ -189,12 +192,13 @@ export const InvoiceTable = ({
             <thead>
               <tr className="bg-gray-50">
                 <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-left">Issuer</th>
-                <th className="px-2 py-2 text-left">Invoice No.</th>
-                <th className="px-2 py-2 text-left">Issue Date</th>
-                <th className="px-2 py-2 text-left">Due Date</th>
-                <th className="px-2 py-2 text-left">Currency</th>
-                <th className="px-2 py-2 text-left">Amount</th>
+                <th className="px-2 py-2 text-center">Issuer</th>
+                <th className="px-2 py-2 text-center">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Issue Date</th>
+                <th className="px-2 py-2 text-center">Due Date</th>
+                <th className="px-2 py-2 text-center">Currency</th>
+                <th className="px-2 py-2 text-center">Amount</th>
+                <th className="px-2 py-2 text-center">Billing Statement</th>
                 <th className="px-2 py-2 w-8"></th>
               </tr>
             </thead>
@@ -232,12 +236,12 @@ export const InvoiceTable = ({
             <thead>
               <tr className="bg-gray-50">
                 <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-left">Issuer</th>
-                <th className="px-2 py-2 text-left">Invoice No.</th>
-                <th className="px-2 py-2 text-left">Issue Date</th>
-                <th className="px-2 py-2 text-left">Due Date</th>
-                <th className="px-2 py-2 text-left">Currency</th>
-                <th className="px-2 py-2 text-left">Amount</th>
+                <th className="px-2 py-2 text-center">Issuer</th>
+                <th className="px-2 py-2 text-center">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Issue Date</th>
+                <th className="px-2 py-2 text-center">Due Date</th>
+                <th className="px-2 py-2 text-center">Currency</th>
+                <th className="px-2 py-2 text-center">Amount</th>
                 <th className="px-2 py-2 w-8"></th>
               </tr>
             </thead>
@@ -275,12 +279,12 @@ export const InvoiceTable = ({
             <thead>
               <tr className="bg-gray-50">
                 <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-left">Issuer</th>
-                <th className="px-2 py-2 text-left">Invoice No.</th>
-                <th className="px-2 py-2 text-left">Issue Date</th>
-                <th className="px-2 py-2 text-left">Due Date</th>
-                <th className="px-2 py-2 text-left">Currency</th>
-                <th className="px-2 py-2 text-left">Amount</th>
+                <th className="px-2 py-2 text-center">Issuer</th>
+                <th className="px-2 py-2 text-center">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Issue Date</th>
+                <th className="px-2 py-2 text-center">Due Date</th>
+                <th className="px-2 py-2 text-center">Currency</th>
+                <th className="px-2 py-2 text-center">Amount</th>
                 <th className="px-2 py-2 w-8"></th>
               </tr>
             </thead>
@@ -318,12 +322,12 @@ export const InvoiceTable = ({
             <thead>
               <tr className="bg-gray-50">
                 <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-left">Issuer</th>
-                <th className="px-2 py-2 text-left">Invoice No.</th>
-                <th className="px-2 py-2 text-left">Issue Date</th>
-                <th className="px-2 py-2 text-left">Due Date</th>
-                <th className="px-2 py-2 text-left">Currency</th>
-                <th className="px-2 py-2 text-left">Amount</th>
+                <th className="px-2 py-2 text-center">Issuer</th>
+                <th className="px-2 py-2 text-centert">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Issue Date</th>
+                <th className="px-2 py-2 text-center">Due Date</th>
+                <th className="px-2 py-2 text-center">Currency</th>
+                <th className="px-2 py-2 text-center">Amount</th>
                 <th className="px-2 py-2 w-8"></th>
               </tr>
             </thead>
@@ -357,12 +361,12 @@ export const InvoiceTable = ({
             <thead>
               <tr className="bg-gray-50">
                 <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-left">Issuer</th>
-                <th className="px-2 py-2 text-left">Invoice No.</th>
-                <th className="px-2 py-2 text-left">Issue Date</th>
-                <th className="px-2 py-2 text-left">Due Date</th>
-                <th className="px-2 py-2 text-left">Currency</th>
-                <th className="px-2 py-2 text-left">Amount</th>
+                <th className="px-2 py-2 text-center">Issuer</th>
+                <th className="px-2 py-2 text-center">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Issue Date</th>
+                <th className="px-2 py-2 text-center">Due Date</th>
+                <th className="px-2 py-2 text-center">Currency</th>
+                <th className="px-2 py-2 text-center">Amount</th>
                 <th className="px-2 py-2 w-8"></th>
               </tr>
             </thead>

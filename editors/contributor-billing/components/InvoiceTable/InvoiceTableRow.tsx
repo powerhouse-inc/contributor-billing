@@ -53,11 +53,11 @@ export const InvoiceTableRow = ({
           />
         )}
       </td>
-      <td className="px-2 py-2">{row.invoiceNo}</td>
-      <td className="px-2 py-2">{row.issueDate}</td>
-      <td className="px-2 py-2">{row.dueDate}</td>
-      <td className="px-2 py-2">{row.currency}</td>
-      <td className="px-2 py-2">{row.amount}</td>
+      <td className="px-2 py-2 text-center">{row.invoiceNo}</td>
+      <td className="px-2 py-2 text-center">{row.issueDate}</td>
+      <td className="px-2 py-2 text-center">{row.dueDate}</td>
+      <td className="px-2 py-2 text-center">{row.currency}</td>
+      <td className="px-2 py-2 text-center">{row.amount}</td>
       {/* <td className="px-2 py-2 text-right relative" ref={menuRef}>
         <div className="relative inline-block">
           <button
