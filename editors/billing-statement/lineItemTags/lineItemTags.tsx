@@ -146,7 +146,7 @@ export function LineItemTagsTable({
                     value={
                       item.lineItemTag.find(
                         (tag) => tag.dimension === "expense-account"
-                      )?.label || ""
+                      )?.value || ""
                     }
                     placeholder="Select Expense Account"
                     searchable={true}
