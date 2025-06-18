@@ -151,14 +151,15 @@ export function LineItemTagsTable({
                     placeholder="Select Expense Account"
                     searchable={true}
                     onChange={(value) => {
+                      const selectedOption = expenseAccountOptions.find(
+                        (option) => option.value === value
+                      )
                       dispatch(
                         actions.editLineItemTag({
                           lineItemId: item.id,
                           dimension: "expense-account",
-                          value: "fusion",
-                          label: expenseAccountOptions.find(
-                            (option) => option.value === value
-                          )?.label,
+                          value: selectedOption?.value || "",
+                          label: selectedOption?.label
                         })
                       );
                     }}
@@ -195,3 +196,4 @@ export function LineItemTagsTable({
     </div>
   );
 }
+
