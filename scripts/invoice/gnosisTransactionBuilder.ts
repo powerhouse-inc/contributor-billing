@@ -94,6 +94,9 @@ async function executeTransferProposal(
     chainId: Number(payerWallet.chainId),
   });
 
+  const nextNonce = await safeApiKit.getNextNonce(safeAddress)
+  console.log("Next Nonce: ",nextNonce)
+
   // @ts-ignore - Ignoring constructor error as per requirements
   const protocolKit = await Safe.init({
     provider: payerWallet.rpc,
@@ -132,7 +135,12 @@ async function executeTransferProposal(
   });
 
   console.log('\n=== Creating Safe transaction ===');
-  const safeTx = await protocolKit.createTransaction({ transactions });
+  const safeTx = await protocolKit.createTransaction({ 
+    transactions,
+    options: {
+      nonce: nextNonce
+    }
+  });
 
   console.log('\n=== Signing & proposing ===');
   const safeTxHash = await protocolKit.getTransactionHash(safeTx);
