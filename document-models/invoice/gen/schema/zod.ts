@@ -15,6 +15,7 @@ import type {
   EditPayerBankInput,
   EditPayerInput,
   EditPayerWalletInput,
+  EditPaymentDataInput,
   EditRefInput,
   EditStatusInput,
   IntermediaryBank,
@@ -29,6 +30,7 @@ import type {
   LegalEntityTaxId,
   PaymentRouting,
   Ref,
+  SetExportedInput,
   SetInvoiceTagInput,
   SetLineItemTagInput,
   Status,
@@ -309,6 +311,15 @@ export function EditPayerWalletInputSchema(): z.ZodObject<
   });
 }
 
+export function EditPaymentDataInputSchema(): z.ZodObject<
+  Properties<EditPaymentDataInput>
+> {
+  return z.object({
+    paymentDate: z.string().nullish(),
+    txnHash: z.string().nullish(),
+  });
+}
+
 export function EditRefInputSchema(): z.ZodObject<Properties<EditRefInput>> {
   return z.object({
     id: z.string(),
@@ -366,16 +377,19 @@ export function InvoiceStateSchema(): z.ZodObject<Properties<InvoiceState>> {
     dateDelivered: z.string().nullable(),
     dateDue: z.string(),
     dateIssued: z.string(),
+    exported: z.boolean().nullable(),
     invoiceNo: z.string(),
     invoiceTags: z.array(InvoiceTagSchema()),
     issuer: LegalEntitySchema(),
     lineItems: z.array(InvoiceLineItemSchema()),
     notes: z.string().nullable(),
     payer: LegalEntitySchema(),
+    paymentDate: z.string().nullable(),
     refs: z.array(RefSchema()),
     status: StatusSchema,
     totalPriceTaxExcl: z.number(),
     totalPriceTaxIncl: z.number(),
+    txnHash: z.string().nullable(),
   });
 }
 
@@ -450,6 +464,14 @@ export function RefSchema(): z.ZodObject<Properties<Ref>> {
     __typename: z.literal("Ref").optional(),
     id: z.string(),
     value: z.string(),
+  });
+}
+
+export function SetExportedInputSchema(): z.ZodObject<
+  Properties<SetExportedInput>
+> {
+  return z.object({
+    exported: z.boolean().nullish(),
   });
 }
 

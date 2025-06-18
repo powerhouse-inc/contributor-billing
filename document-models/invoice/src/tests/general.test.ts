@@ -89,4 +89,23 @@ describe("General Operations", () => {
     expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
+  it("should handle editPaymentData operation", () => {
+    const invoice = utils.createDocument();
+    const paymentDate = new Date().toISOString();
+    const updatedDocument = reducer(invoice, creators.editPaymentData({ paymentDate: paymentDate, txnHash: "0x123" }));
+
+    expect(updatedDocument.operations.global).toHaveLength(1);
+    expect(updatedDocument.operations.global[0].type).toBe("EDIT_PAYMENT_DATA");
+    expect(updatedDocument.operations.global[0].input).toStrictEqual({ paymentDate: paymentDate, txnHash: "0x123" });
+    expect(updatedDocument.operations.global[0].index).toEqual(0);
+  });
+  it("should handle setExported operation", () => {
+    const invoice = utils.createDocument();
+    const updatedDocument = reducer(invoice, creators.setExported({ exported: true }));
+
+    expect(updatedDocument.operations.global).toHaveLength(1);
+    expect(updatedDocument.operations.global[0].type).toBe("SET_EXPORTED");
+    expect(updatedDocument.operations.global[0].input).toStrictEqual({ exported: true });
+    expect(updatedDocument.operations.global[0].index).toEqual(0);
+  });
 });

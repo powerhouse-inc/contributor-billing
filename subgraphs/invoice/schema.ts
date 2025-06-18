@@ -20,6 +20,9 @@ export const schema: DocumentNode = gql`
     totalPriceTaxIncl: Float!
     invoiceTags: [InvoiceTag!]! # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}
     notes: String
+    paymentDate: String
+    txnHash: String
+    exported: Boolean
   }
 
   type Ref {
@@ -194,6 +197,16 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: Invoice_DeleteRefInput
     ): Int
+    Invoice_editPaymentData(
+      driveId: String
+      docId: PHID
+      input: Invoice_EditPaymentDataInput
+    ): Int
+    Invoice_setExported(
+      driveId: String
+      docId: PHID
+      input: Invoice_SetExportedInput
+    ): Int
     Invoice_editIssuer(
       driveId: String
       docId: PHID
@@ -319,6 +332,13 @@ export const schema: DocumentNode = gql`
   }
   input Invoice_DeleteRefInput {
     id: OID!
+  }
+  input Invoice_EditPaymentDataInput {
+    paymentDate: String
+    txnHash: String
+  }
+  input Invoice_SetExportedInput {
+    exported: Boolean
   }
 
   """

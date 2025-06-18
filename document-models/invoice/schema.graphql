@@ -29,6 +29,9 @@ type InvoiceState {
   totalPriceTaxIncl: Float!
   invoiceTags: [InvoiceTag!]!   # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}
   notes: String
+  paymentDate: String
+  txnHash: String
+  exported: Boolean
 }
 
 type Ref {
@@ -162,7 +165,6 @@ enum InvoiceAccountTypeInput {
 
 
 
-
 # general
 
 input EditInvoiceInput {
@@ -190,6 +192,15 @@ input EditRefInput {
 
 input DeleteRefInput {
   id: OID!
+}
+
+input EditPaymentDataInput {
+  paymentDate: String
+  txnHash: String
+}
+
+input SetExportedInput {
+  exported: Boolean
 }
 
 # parties

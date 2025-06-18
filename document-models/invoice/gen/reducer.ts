@@ -48,6 +48,24 @@ const stateReducer: StateReducer<InvoiceDocument> = (
       GeneralReducer.deleteRefOperation(state[action.scope], action, dispatch);
       break;
 
+    case "EDIT_PAYMENT_DATA":
+      z.EditPaymentDataInputSchema().parse(action.input);
+      GeneralReducer.editPaymentDataOperation(
+        state[action.scope],
+        action,
+        dispatch,
+      );
+      break;
+
+    case "SET_EXPORTED":
+      z.SetExportedInputSchema().parse(action.input);
+      GeneralReducer.setExportedOperation(
+        state[action.scope],
+        action,
+        dispatch,
+      );
+      break;
+
     case "EDIT_ISSUER":
       z.EditIssuerInputSchema().parse(action.input);
       PartiesReducer.editIssuerOperation(state[action.scope], action, dispatch);
