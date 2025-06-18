@@ -11,6 +11,7 @@ import { type InvoiceState, type InvoiceLineItem } from "document-models/invoice
 import { EditorDispatch, PHDocument } from "document-model";
 import { DocumentModelModule } from "document-model";
 import { DocumentDriveAction } from "document-drive";
+import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 
 type Invoice = {
   id: string;
@@ -184,7 +185,7 @@ export const InvoiceTable = ({
                 unitPriceCash: item.unitPriceTaxIncl,
                 totalPricePwt: 0,
                 totalPriceCash: item.totalPriceTaxIncl,
-                lineItemTag: item.lineItemTag?.filter((tag) => tag.dimension === "accounting-period"),
+                lineItemTag: mapTags(item.lineItemTag || []),
               }
             }),
             status: invoiceState.global.status,
