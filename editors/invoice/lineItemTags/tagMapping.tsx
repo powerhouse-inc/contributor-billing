@@ -16,7 +16,7 @@ export const expenseAccountOptions: SelectOption[] = [
     { label: "Legal Fees Abroad", value: "4001" },
     { label: "Legal Fees Switzerland", value: "4002" },
     { label: "Finance Team Fees Abroad", value: "4003" },
-    { label: "Fnance and Accounting Fees Switzerland", value: "4004" },
+    { label: "Finance and Accounting Fees Switzerland", value: "4004" },
     { label: "Software Development Team Fees", value: "4005" },
     { label: "Research Team Fees", value: "4006" },
     { label: "Marketing Team Fees", value: "4007" },
