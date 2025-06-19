@@ -71,7 +71,7 @@ export const InvoiceTableRow = ({
       <td className="px-2 py-2 text-center">{row.dueDate}</td>
       <td className="px-2 py-2 text-center">{row.currency}</td>
       <td className="px-2 py-2 text-center">{row.amount}</td>
-      {row.status === "ISSUED" && !billingFile && (
+      {(row.status === "ISSUED" || row.status === "PAYMENTSCHEDULED" || row.status === "PAYMENTRECEIVED") && !billingFile && (
         <td className="px-2 py-2 text-center">
           <button
             className="bg-white border border-gray-300 rounded px-3 py-1 text-sm hover:bg-gray-100 col-span-1 justify-self-end"
