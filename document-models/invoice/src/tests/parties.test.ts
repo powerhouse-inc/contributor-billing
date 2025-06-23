@@ -26,9 +26,6 @@ describe("Parties Operations", () => {
   });
 
   it("should handle editIssuer operation", () => {
-    // generate a random id
-    // const id = documentModelUtils.hashKey();
-
     const input: EditIssuerInput = generateMock(z.EditIssuerInputSchema());
 
     const updatedDocument = reducer(document, creators.editIssuer(input));
@@ -39,9 +36,6 @@ describe("Parties Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editIssuerBank operation", () => {
-    // generate a random id
-    // const id = documentModelUtils.hashKey();
-
     const input: EditIssuerBankInput = generateMock(
       z.EditIssuerBankInputSchema(),
     );
@@ -54,9 +48,6 @@ describe("Parties Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editIssuerWallet operation", () => {
-    // generate a random id
-    // const id = documentModelUtils.hashKey();
-
     const input: EditIssuerWalletInput = generateMock(
       z.EditIssuerWalletInputSchema(),
     );
@@ -71,9 +62,6 @@ describe("Parties Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editPayer operation", () => {
-    // generate a random id
-    // const id = documentModelUtils.hashKey();
-
     const input: EditPayerInput = generateMock(z.EditPayerInputSchema());
 
     const updatedDocument = reducer(document, creators.editPayer(input));
@@ -84,9 +72,6 @@ describe("Parties Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editPayerBank operation", () => {
-    // generate a random id
-    // const id = documentModelUtils.hashKey();
-
     const input: EditPayerBankInput = generateMock(
       z.EditPayerBankInputSchema(),
     );
@@ -99,9 +84,6 @@ describe("Parties Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editPayerWallet operation", () => {
-    // generate a random id
-    // const id = documentModelUtils.hashKey();
-
     const input: EditPayerWalletInput = generateMock(
       z.EditPayerWalletInputSchema(),
     );

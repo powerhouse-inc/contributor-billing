@@ -10,46 +10,52 @@
 // Simple in-memory cache: { '2024-06-10|USD|CHF': 0.91 }
 const exchangeRateCache: Record<string, number> = {};
 
-//const FREECURRENCY_API_KEY = process.env.FREECURRENCY_API_KEY; // Replace with your actual API key
-
-// Commented out the Free Currency API logic
-enum HardcodedRates {
-  DEFAULT = 1
+function getFreeCurrencyApiKey(): string {
+  try {
+    const key = process.env.FREECURRENCY_API_KEY || 'YOUR_API_KEY_HERE';
+    if (!key || key === 'YOUR_API_KEY_HERE') {
+      throw new Error('Free Currency API key is missing or not set.');
+    }
+    return key;
+  } catch (err) {
+    console.error('Error retrieving Free Currency API key:', err);
+    // Optionally, you can throw or return a fallback value
+    throw err;
+  }
 }
 
 /**
  * Fetches the historical exchange rate from `from` currency to `to` currency on a given date,
  * using Free Currency API, with in-memory caching for efficiency.
- *
- * Temporarily overridden to always return 1 (1:1 with CHF for all currencies)
  */
-// export async function getExchangeRate(date: string, from: string, to: string): Promise<number> {
-//   if (from === to) return 1;
-//   const formattedDate = date.split('T')[0];
-//   const cacheKey = `${formattedDate}|${from}|${to}`;
-//   // Check cache first
-//   if (exchangeRateCache[cacheKey] !== undefined) {
-//     return exchangeRateCache[cacheKey];
-//   }
-//   // Fetch from API
-//   const url = `https://api.freecurrencyapi.com/v1/historical?apikey=${FREECURRENCY_API_KEY}&base_currency=${from}&currencies=${to}&date=${formattedDate}`;
-//   const res = await fetch(url);
-//   if (!res.ok) {
-//     throw new Error(`Failed to fetch exchange rate: ${res.status} ${res.statusText}`);
-//   }
-//   const data = await res.json();
-//   const rate = data?.data?.[formattedDate]?.[to];
-//   if (typeof rate !== 'number') {
-//     throw new Error(`Exchange rate for ${to} on ${formattedDate} not found in response`);
-//   }
-//   // Store in cache
-//   exchangeRateCache[cacheKey] = rate;
-//   return rate;
-// }
-
-// Temporary override: all currencies are 1:1 with CHF for now
 export async function getExchangeRate(date: string, from: string, to: string): Promise<number> {
-  return 1;
+  if (!date || !from || !to || from === to) return 1;
+  const formattedDate = date.split('T')[0];
+  const cacheKey = `${formattedDate}|${from}|${to}`;
+  // Check cache first
+  if (exchangeRateCache[cacheKey] !== undefined) {
+    return exchangeRateCache[cacheKey];
+  }
+  try {
+    const FREECURRENCY_API_KEY = getFreeCurrencyApiKey();
+    const url = `https://api.freecurrencyapi.com/v1/historical?apikey=${FREECURRENCY_API_KEY}&base_currency=${from}&currencies=${to}&date=${formattedDate}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch exchange rate: ${res.status} ${res.statusText}`);
+    }
+    const data = await res.json();
+    const rate = data?.data?.[formattedDate]?.[to];
+    if (typeof rate !== 'number') {
+      throw new Error(`Exchange rate for ${to} on ${formattedDate} not found in response`);
+    }
+    // Store in cache
+    exchangeRateCache[cacheKey] = rate;
+    return rate;
+  } catch (err) {
+    console.error('ForEx API error:', err);
+    // Fallback: 1:1
+    return 1;
+  }
 }
 
 export async function exportInvoicesToXeroCSV(invoiceStates: any[]): Promise<void> {
