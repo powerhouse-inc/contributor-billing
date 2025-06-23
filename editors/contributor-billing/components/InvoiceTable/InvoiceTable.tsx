@@ -12,6 +12,7 @@ import { EditorDispatch, PHDocument } from "document-model";
 import { DocumentModelModule } from "document-model";
 import { DocumentDriveAction } from "document-drive";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
+import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js"
 
 type Invoice = {
   id: string;
@@ -227,8 +228,16 @@ export const InvoiceTable = ({
   };
 
   const handleCSVExport = () => {
-    console.log('exporting...', selected);
+    
+    const selectedInvoiceIds = Object.keys(selected).filter(id => selected[id]);
+    const selectedInvoices = selectedInvoiceIds.map(id => state[id]);
+    
+    console.log('exporting...', selectedInvoices);
+    exportInvoicesToXeroCSV(selectedInvoices)
+
   }
+
+  
 
   return (
     <div
