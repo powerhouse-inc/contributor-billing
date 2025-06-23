@@ -2,12 +2,8 @@ import React, { useState } from "react";
 
 let GRAPHQL_URL = "http://localhost:4001/graphql/invoice";
 
-if (window.document.baseURI !== "http://localhost:3000/") {
-  GRAPHQL_URL = "https://switchboard-dev.powerhouse.xyz/graphql/invoice";
-}
-
-if (window.document.baseURI !== "http://localhost:3001/") {
-  GRAPHQL_URL = "https://switchboard-dev.powerhouse.xyz/graphql/invoice";
+if (!window.document.baseURI.includes('localhost')) {
+  GRAPHQL_URL = 'https://switchboard-dev.powerhouse.xyz/graphql/invoice'
 }
 
 interface InvoiceToGnosisProps {
