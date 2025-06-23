@@ -8,7 +8,7 @@ import {
   useDriveContext,
 } from "@powerhousedao/reactor-browser";
 import { type InvoiceState, type InvoiceLineItem } from "document-models/invoice/index.js";
-import { EditorDispatch, PHDocument } from "document-model";
+import { EditorDispatch, generateId, PHDocument } from "document-model";
 import { DocumentModelModule } from "document-model";
 import { DocumentDriveAction } from "document-drive";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
@@ -156,19 +156,31 @@ export const InvoiceTable = ({
     // Clear selection for deleted item
   };
 
+  const cleanName = (name: string) => {
+    const dotIndex = name.lastIndexOf(".");
+    if (dotIndex > 0) {
+      return name.substring(0, dotIndex);
+    }
+    return name;
+  }
+
   const handleCreateBillingStatement = async (id: string) => {
     const driveId = selectedNode?.id;
     if (!driveId) return;
     const invoiceFile = files.find((file) => file.id === id);
     const invoiceState = state[id];
 
-    const billingDoc = await addDocument(
+    const newDocumentId = generateId();
+
+    await addDocument(
       driveId,
       `bill-${invoiceFile?.name}`,
       "powerhouse/billing-statement",
       undefined,
       {
-        name: `bill-${invoiceFile?.name}`,
+        id: newDocumentId,
+        slug: `bill-${cleanName(invoiceFile?.name || "")}`,
+        name: `bill-${cleanName(invoiceFile?.name || "")}`,
         created: new Date().toISOString(),
         lastModified: new Date().toISOString(),
         documentType: "powerhouse/billing-statement",
@@ -207,7 +219,9 @@ export const InvoiceTable = ({
           local: [],
         },
         initialState: {
-          name: `bill-${invoiceFile?.name}`,
+          id: newDocumentId,
+          slug: `bill-${cleanName(invoiceFile?.name || "")}`,
+          name: `bill-${cleanName(invoiceFile?.name || "")}`,
           documentType: "powerhouse/billing-statement",
           created: new Date().toISOString(),
           lastModified: new Date().toISOString(),
@@ -216,7 +230,29 @@ export const InvoiceTable = ({
             local: 0,
           },
           state: {
-            global: {},
+            global: {
+              contributor: id,
+              dateIssued: invoiceState.global.dateIssued,
+              dateDue: invoiceState.global.dateDue,
+              lineItems: invoiceState.global.lineItems.map((item: InvoiceLineItem) => {
+                return {
+                  id: item.id,
+                  description: item.description,
+                  quantity: item.quantity,
+                  unit: 'UNIT',
+                  unitPricePwt: 0,
+                  unitPriceCash: item.unitPriceTaxIncl,
+                  totalPricePwt: 0,
+                  totalPriceCash: item.totalPriceTaxIncl,
+                  lineItemTag: mapTags(item.lineItemTag || []),
+                }
+              }),
+              status: invoiceState.global.status,
+              currency: invoiceState.global.currency,
+              totalCash: invoiceState.global.lineItems.reduce((acc: number, item: InvoiceLineItem) => acc + item.totalPriceTaxIncl, 0),
+              totalPowt: 0,
+              notes: invoiceState.global.notes,
+            },
             local: {},
           },
         },
