@@ -834,7 +834,7 @@ export default function Editor(props: IProps) {
       {state.status === "PAYMENTSCHEDULED" && (
         <div className="mt-8">
           {!isFiatCurrency(state.currency) ? (
-            <InvoiceToGnosis docState={state} />
+            <InvoiceToGnosis docState={state} dispatch={dispatch} />
           ) : (
             <RequestFinance docState={state} />
           )}
