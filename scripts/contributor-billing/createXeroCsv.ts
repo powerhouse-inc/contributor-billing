@@ -68,6 +68,8 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[]): Promise<voi
     'AccountCode',
     'TaxRate',
     'Amount',
+    'Invoice currency', // NEW COLUMN
+    'FX Rate Used',     // NEW COLUMN
     'TrackingName1',
     'TrackingOption1',
     'TrackingName2',
@@ -115,7 +117,9 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[]): Promise<voi
           '802',
           'Tax Exempt (0%)',
           `-${amountAtIssue.toFixed(2)}`,
-          '', '', '', '' // TrackingOption1 is empty
+          currency,
+          rateOnIssue.toString(),
+          '', '', '', ''
         ]);
       }
       items.forEach((item: any) => {
@@ -133,6 +137,8 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[]): Promise<voi
           accountCode,
           taxRate,
           itemAmount.toFixed(2),
+          currency,
+          rateOnIssue.toString(),
           '', '', '', ''
         ]);
       });
@@ -146,7 +152,9 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[]): Promise<voi
           '802',
           'Tax Exempt (0%)',
           `-${amountAtPayment.toFixed(2)}`,
-          '', '', state.txnHash || '', '' // TrackingOption1 = txnHash
+          currency,
+          rateOnPayment.toString(),
+          '', '', state.txnHash || '', ''
         ]);
       }
       items.forEach((item: any) => {
@@ -164,6 +172,8 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[]): Promise<voi
           accountCode,
           taxRate,
           itemAmount.toFixed(2),
+          currency,
+          rateOnPayment.toString(),
           '', '', state.txnHash || '', ''
         ]);
       });
@@ -175,7 +185,9 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[]): Promise<voi
           '499',
           'Tax Exempt (0%)',
           realisedGain.toFixed(2),
-          '', '', state.txnHash || '', '' // TrackingOption1 = txnHash
+          currency,
+          rateOnPayment.toString(),
+          '', '', state.txnHash || '', ''
         ]);
       }
     }
