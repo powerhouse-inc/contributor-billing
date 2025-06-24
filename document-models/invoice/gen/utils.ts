@@ -148,7 +148,10 @@ export const initialGlobalState: InvoiceState = {
   totalPriceTaxExcl: 0,
   totalPriceTaxIncl: 0,
   invoiceTags: [],
+  exported: false,
   notes: "",
+  paymentDate: "",
+  txnHash: "",
 };
 export const initialLocalState: InvoiceLocalState = {};
 

@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss" source("./");
 @import './node_modules/@powerhousedao/design-system/dist/style.css';
 
 /* Uses .dark class for dark mode */
@@ -57,11 +57,5 @@
     margin-right: auto;
     padding: 1rem;
     transform: none;
-  }
-}
-
-@media (min-width: 640px) {
-  .two-column-grid {
-    grid-template-columns: 1fr 1fr;
   }
 }

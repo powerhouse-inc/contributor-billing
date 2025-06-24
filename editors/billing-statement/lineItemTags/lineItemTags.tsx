@@ -102,8 +102,7 @@ export function LineItemTagsTable({
                   />
                 </td>
                 <td
-                  className="border-b border-gray-200 p-2"
-                  style={{ width: "100px" }}
+                  className="border-b border-gray-200 p-2 w-50"
                 >
                   <DatePicker
                     name="period"
@@ -147,19 +146,20 @@ export function LineItemTagsTable({
                     value={
                       item.lineItemTag.find(
                         (tag) => tag.dimension === "expense-account"
-                      )?.label || ""
+                      )?.value || ""
                     }
                     placeholder="Select Expense Account"
                     searchable={true}
                     onChange={(value) => {
+                      const selectedOption = expenseAccountOptions.find(
+                        (option) => option.value === value
+                      )
                       dispatch(
                         actions.editLineItemTag({
                           lineItemId: item.id,
                           dimension: "expense-account",
-                          value: "fusion",
-                          label: expenseAccountOptions.find(
-                            (option) => option.value === value
-                          )?.label,
+                          value: selectedOption?.value || "",
+                          label: selectedOption?.label
                         })
                       );
                     }}
@@ -196,3 +196,4 @@ export function LineItemTagsTable({
     </div>
   );
 }
+

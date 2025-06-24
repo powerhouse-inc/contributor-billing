@@ -62,4 +62,20 @@ export const reducer: InvoiceGeneralOperations = {
       console.error(e);
     }
   },
+  editPaymentDataOperation(state, action, dispatch) {
+    try {
+      if(!action.input.paymentDate || !action.input.txnHash) throw new Error("No input.paymentDate or input.txnHash");
+      state.paymentDate = action.input.paymentDate;
+      state.txnHash = action.input.txnHash;
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  setExportedOperation(state, action, dispatch) {
+    try {
+      state.exported = action.input.exported ?? false;
+    } catch (e) {
+      console.error(e);
+    }
+  }
 };

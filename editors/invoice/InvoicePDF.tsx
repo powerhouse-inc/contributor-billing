@@ -4,7 +4,6 @@ import {
   Text,
   View,
   StyleSheet,
-  Image,
 } from "@react-pdf/renderer";
 import {
   InvoiceState,
@@ -12,7 +11,6 @@ import {
   LegalEntityCorporateRegistrationId,
   Maybe,
 } from "../../document-models/invoice/index.js";
-import powerhouseLogo from "./assets/powerhouseLogo.png";
 import countries from "world-countries";
 
 type Country = {

@@ -5,6 +5,8 @@ import {
   type AddRefAction,
   type EditRefAction,
   type DeleteRefAction,
+  type EditPaymentDataAction,
+  type SetExportedAction,
 } from "./actions.js";
 import { type InvoiceState } from "../types.js";
 
@@ -32,6 +34,16 @@ export interface InvoiceGeneralOperations {
   deleteRefOperation: (
     state: InvoiceState,
     action: DeleteRefAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  editPaymentDataOperation: (
+    state: InvoiceState,
+    action: EditPaymentDataAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  setExportedOperation: (
+    state: InvoiceState,
+    action: SetExportedAction,
     dispatch?: SignalDispatch,
   ) => void;
 }
