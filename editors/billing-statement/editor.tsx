@@ -4,12 +4,10 @@ import {
   type BillingStatementDocument,
   actions,
 } from "../../document-models/billing-statement/index.js";
-import { generateId } from "document-model";
 import { CurrencyForm } from "../invoice/components/currencyForm.js";
 import { Textarea } from "@powerhousedao/document-engineering";
 import LineItemsTable from "./components/lineItemsTable.js";
 import { formatNumber } from "../invoice/lineItems.js";
-import { Tag } from "lucide-react";
 
 export type IProps = EditorProps<BillingStatementDocument>;
 

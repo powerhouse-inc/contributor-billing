@@ -12,7 +12,6 @@ import {
   useState,
   useMemo,
   useRef,
-  useLayoutEffect,
   Dispatch,
 } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -21,14 +20,6 @@ import { NumberForm } from "./components/numberForm.js";
 import { InputField } from "./components/inputField.js";
 import { LineItemTagsTable } from "./lineItemTags/lineItemTags.js";
 
-// Add TagAssignmentRow interface
-interface TagAssignmentRow {
-  id: string;
-  item: string;
-  period: string;
-  expenseAccount: string;
-  total: string;
-}
 
 // Helper function to get precision based on currency
 function getCurrencyPrecision(currency: string): number {
