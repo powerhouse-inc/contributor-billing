@@ -88,7 +88,12 @@ export const EditorContainer: React.FC<EditorContainerProps> = (props) => {
         title={title}
       />
       <EditorComponent
-        context={context}
+        context={{
+          ...context,
+          getDocumentRevision: context.getDocumentRevision
+            ? (options) => context.getDocumentRevision!(documentId, options)
+            : undefined,
+        }}
         dispatch={dispatch}
         document={document}
         error={error}

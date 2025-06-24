@@ -744,7 +744,7 @@ export default function Editor(props: IProps) {
             <label className="block mb-1 text-sm">Due Date:</label>
             <DatePicker
               name="dateDue"
-              className={String.raw`w-full p-0`}
+              className='w-64'
               onChange={(e) =>
                 dispatch(
                   actions.editInvoice({
@@ -834,7 +834,7 @@ export default function Editor(props: IProps) {
       {state.status === "PAYMENTSCHEDULED" && (
         <div className="mt-8">
           {!isFiatCurrency(state.currency) ? (
-            <InvoiceToGnosis docState={state} />
+            <InvoiceToGnosis docState={state} dispatch={dispatch} />
           ) : (
             <RequestFinance docState={state} />
           )}

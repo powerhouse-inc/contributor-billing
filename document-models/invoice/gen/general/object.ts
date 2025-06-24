@@ -5,6 +5,8 @@ import {
   type AddRefInput,
   type EditRefInput,
   type DeleteRefInput,
+  type EditPaymentDataInput,
+  type SetExportedInput,
   type InvoiceState,
   type InvoiceLocalState,
 } from "../types.js";
@@ -14,6 +16,8 @@ import {
   addRef,
   editRef,
   deleteRef,
+  editPaymentData,
+  setExported,
 } from "./creators.js";
 import { type InvoiceAction } from "../actions.js";
 
@@ -40,5 +44,13 @@ export default class Invoice_General extends BaseDocumentClass<
 
   public deleteRef(input: DeleteRefInput) {
     return this.dispatch(deleteRef(input));
+  }
+
+  public editPaymentData(input: EditPaymentDataInput) {
+    return this.dispatch(editPaymentData(input));
+  }
+
+  public setExported(input: SetExportedInput) {
+    return this.dispatch(setExported(input));
   }
 }

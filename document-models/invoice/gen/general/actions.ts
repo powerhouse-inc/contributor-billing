@@ -5,6 +5,8 @@ import type {
   AddRefInput,
   EditRefInput,
   DeleteRefInput,
+  EditPaymentDataInput,
+  SetExportedInput,
 } from "../types.js";
 
 export type EditInvoiceAction = BaseAction<
@@ -24,10 +26,22 @@ export type DeleteRefAction = BaseAction<
   DeleteRefInput,
   "global"
 >;
+export type EditPaymentDataAction = BaseAction<
+  "EDIT_PAYMENT_DATA",
+  EditPaymentDataInput,
+  "global"
+>;
+export type SetExportedAction = BaseAction<
+  "SET_EXPORTED",
+  SetExportedInput,
+  "global"
+>;
 
 export type InvoiceGeneralAction =
   | EditInvoiceAction
   | EditStatusAction
   | AddRefAction
   | EditRefAction
-  | DeleteRefAction;
+  | DeleteRefAction
+  | EditPaymentDataAction
+  | SetExportedAction;

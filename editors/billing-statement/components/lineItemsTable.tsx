@@ -1,9 +1,8 @@
 import { Tag } from "lucide-react";
-import { Select, StringField } from "@powerhousedao/document-engineering";
+import { Select } from "@powerhousedao/document-engineering";
 import { InputField } from "../../invoice/components/inputField.js";
 import { NumberForm } from "../../invoice/components/numberForm.js";
 import {
-  type BillingStatementDocument,
   actions,
 } from "../../../document-models/billing-statement/index.js";
 import { useState, useRef, useEffect } from "react";

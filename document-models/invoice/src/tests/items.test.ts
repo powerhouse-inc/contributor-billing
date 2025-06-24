@@ -23,9 +23,6 @@ describe("Items Operations", () => {
   });
 
   it("should handle addLineItem operation", () => {
-    // generate a random id
-    // const id = documentModelUtils.hashKey();
-
     const input: AddLineItemInput = generateMock(z.AddLineItemInputSchema());
 
     const updatedDocument = reducer(document, creators.addLineItem(input));
@@ -36,9 +33,6 @@ describe("Items Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editLineItem operation", () => {
-    // generate a random id
-    // const id = documentModelUtils.hashKey();
-
     const input: EditLineItemInput = generateMock(z.EditLineItemInputSchema());
 
     const updatedDocument = reducer(document, creators.editLineItem(input));
@@ -49,9 +43,6 @@ describe("Items Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle deleteLineItem operation", () => {
-    // generate a random id
-    // const id = documentModelUtils.hashKey();
-
     const input: DeleteLineItemInput = generateMock(
       z.DeleteLineItemInputSchema(),
     );

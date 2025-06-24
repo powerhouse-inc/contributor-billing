@@ -1,7 +1,5 @@
 import {
-  InvoiceState,
   InvoiceAction,
-  LegalEntity,
   actions,
 } from "../../document-models/invoice/index.js";
 
