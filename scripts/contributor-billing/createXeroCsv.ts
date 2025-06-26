@@ -1,93 +1,44 @@
-/**
- * Fetches the historical exchange rate from `from` currency to `to` currency on a given date
- * using Free Currency API (https://freecurrencyapi.com/).
- * @param date - Date string in YYYY-MM-DD format
- * @param from - Source currency (e.g., 'USD')
- * @param to - Target currency (e.g., 'CHF')
- * @returns The exchange rate as a number
- */
-
 // Simple in-memory cache: { '2024-06-10|USD|CHF': 0.91 }
 const exchangeRateCache: Record<string, number> = {};
 
-function getFreeCurrencyApiKey(): string {
-  try {
-    const key = process.env.FREECURRENCY_API_KEY || '';
-    if (!key || key === 'YOUR_API_KEY_HERE') {
-      throw new Error('Free Currency API key is missing or not set.');
-    }
-    return key;
-  } catch (err) {
-    console.error('Error retrieving Free Currency API key:', err);
-    // Optionally, you can throw or return a fallback value
-    throw err;
-  }
-}
-
 /**
- * Fetches the exchange rate from `from` currency to `to` currency for a given date.
- * Uses the /latest endpoint for today's date and /historical for past dates.
+ * Fetches the exchange rate from `from` currency to `to` currency for a given date using Frankfurter API.
+ * Returns 1 for unsupported currencies or errors.
+ * See: https://frankfurter.dev/
  */
 export async function getExchangeRate(date: string, from: string, to: string): Promise<number> {
   if (!date || !from || !to || from === to) return 1;
 
-  const formattedDate = date.split('T')[0];
-  
-  const today = new Date();
-  const requestDate = new Date(formattedDate);
-  
-  today.setHours(0, 0, 0, 0);
-  requestDate.setHours(0, 0, 0, 0);
-
-  console.log(today,requestDate)
-
-  // Prevent API calls for future dates
-  if (requestDate > today) {
-    console.warn(`Attempted to fetch exchange rate for a future date (${formattedDate}). Returning 1.`);
-    return 1;
+  // Use the invoice currency as base, CHF as symbol
+  let effectiveTo = from;
+  if (from === 'DAI' || from === 'USDS') {
+    effectiveTo = 'USD';
   }
-  
-  const isToday = requestDate.getTime() === today.getTime();
-  const cacheKey = isToday ? `latest|${from}|${to}` : `${formattedDate}|${from}|${to}`;
 
+  const formattedDate = date.split('T')[0];
+  const cacheKey = `${formattedDate}|${effectiveTo}|CHF`;
   if (exchangeRateCache[cacheKey] !== undefined) {
     return exchangeRateCache[cacheKey];
   }
 
   try {
-    const FREECURRENCY_API_KEY = getFreeCurrencyApiKey();
-    let url = '';
-
-    if (isToday) {
-      url = `https://api.freecurrencyapi.com/v1/latest?apikey=${FREECURRENCY_API_KEY}&base_currency=${from}&currencies=${to}`;
-    } else {
-      url = `https://api.freecurrencyapi.com/v1/historical?apikey=${FREECURRENCY_API_KEY}&base_currency=${from}&currencies=${to}&date=${formattedDate}`;
-    }
-
-    console.log('Fetching from URL:', url);
+    // base=effectiveTo (invoice currency), symbols=CHF
+    const url = `https://api.frankfurter.dev/v1/${formattedDate}?base=${effectiveTo}&symbols=CHF`;
+    console.log('Fetching from Frankfurter URL:', url);
     const res = await fetch(url);
-
     if (!res.ok) {
-      throw new Error(`Failed to fetch exchange rate for ${formattedDate}: ${res.status} ${res.statusText}`);
+      throw new Error(`Failed to fetch Frankfurter exchange rate: ${res.status} ${res.statusText}`);
     }
-
     const data = await res.json();
-    let rate: number | undefined;
-
-    if (isToday) {
-      rate = data?.data?.[to];
-    } else {
-      rate = data?.data?.[formattedDate]?.[to];
-    }
-
+    // The rate is in data.rates.CHF
+    const rate = data?.rates?.CHF;
     if (typeof rate !== 'number') {
-      throw new Error(`Exchange rate for ${to} on ${formattedDate} not found in response`);
+      throw new Error(`Frankfurter exchange rate for ${effectiveTo} to CHF on ${formattedDate} not found in response`);
     }
-
     exchangeRateCache[cacheKey] = rate;
     return rate;
   } catch (err) {
-    console.error('ForEx API error:', err);
+    console.error('Frankfurter ForEx API error:', err);
     return 1; // Fallback to 1:1 on error
   }
 }
@@ -148,14 +99,16 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[]): Promise<voi
     }
 
     // Fetch exchange rates
-    const [rateOnIssue, rateOnPayment] = await Promise.all([
+    const [rateOnIssue, 
+      //rateOnPayment
+      ] = await Promise.all([
       getExchangeRate(dateIssued, effectiveCurrency, 'CHF'),
-      getExchangeRate(datePaid, effectiveCurrency, 'CHF')
+      //getExchangeRate(datePaid, effectiveCurrency, 'CHF')
     ]);
 
     const amountAtIssue = invoiceAmount * rateOnIssue;
-    const amountAtPayment = invoiceAmount * rateOnPayment;
-    const realisedGain = amountAtPayment - amountAtIssue;
+    //const amountAtPayment = invoiceAmount * rateOnPayment;
+    //const realisedGain = amountAtPayment - amountAtIssue;
 
     // Collect rows for this invoice
     const invoiceRows: string[][] = [];
@@ -257,8 +210,8 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[]): Promise<voi
     console.log('Currency:', currency);
     console.log('Invoice Amount:', invoiceAmount);
     console.log('Date Issued:', dateIssued, 'Rate on Issue:', rateOnIssue, 'Amount at Issue (CHF):', amountAtIssue);
-    console.log('Date Paid:', datePaid, 'Rate on Payment:', rateOnPayment, 'Amount at Payment (CHF):', amountAtPayment);
-    console.log('Realised Gain:', realisedGain);
+    //console.log('Date Paid:', datePaid, 'Rate on Payment:', rateOnPayment, 'Amount at Payment (CHF):', amountAtPayment);
+    //console.log('Realised Gain:', realisedGain);
   }
 
   // If any invoices are missing expense tags, throw an error
@@ -282,6 +235,9 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[]): Promise<voi
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+
+  // This is the data to be added to ExportData in the state of each invoice
+  console.log(exportDataByInvoice)
 
   // Return or assign exportDataByInvoice as needed
   // For example, return it if you want to use it elsewhere:
