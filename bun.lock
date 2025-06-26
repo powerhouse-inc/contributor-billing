@@ -5,9 +5,9 @@
       "name": "document-model-boilerplate",
       "dependencies": {
         "@google-cloud/documentai": "^8.12.0",
-        "@powerhousedao/builder-tools": "^3.1.2",
-        "@powerhousedao/common": "^3.1.2",
-        "@powerhousedao/design-system": "^3.1.2",
+        "@powerhousedao/builder-tools": "latest",
+        "@powerhousedao/common": "latest",
+        "@powerhousedao/design-system": "latest",
         "@powerhousedao/document-engineering": "^1.13.0",
         "@react-pdf/renderer": "^4.3.0",
         "@safe-global/api-kit": "^3.0.1",
@@ -18,7 +18,7 @@
         "@types/cors": "^2.8.17",
         "axios": "^1.9.0",
         "cors": "^2.8.5",
-        "document-model": "^3.1.2",
+        "document-model": "latest",
         "dotenv": "^16.5.0",
         "error": "^10.4.0",
         "ethers": "^6.14.0",
@@ -31,19 +31,19 @@
       },
       "devDependencies": {
         "@eslint/js": "^9.25.0",
-        "@powerhousedao/analytics-engine-core": "^0.4.0",
-        "@powerhousedao/codegen": "^3.1.2",
-        "@powerhousedao/ph-cli": "^3.1.2",
-        "@powerhousedao/reactor-api": "^3.1.2",
-        "@powerhousedao/reactor-browser": "^3.1.2",
-        "@powerhousedao/reactor-local": "^3.1.2",
-        "@powerhousedao/scalars": "^2.0.1",
+        "@powerhousedao/analytics-engine-core": "^0.5.0",
+        "@powerhousedao/codegen": "latest",
+        "@powerhousedao/ph-cli": "latest",
+        "@powerhousedao/reactor-api": "latest",
+        "@powerhousedao/reactor-browser": "latest",
+        "@powerhousedao/reactor-local": "latest",
+        "@powerhousedao/scalars": "latest",
         "@tailwindcss/cli": "^4.1.8",
         "@types/node": "^22.15.17",
         "@types/react": "^19.1.4",
         "@vitejs/plugin-react": "^4.4.1",
         "bun-types": "^1.2.11",
-        "document-drive": "^3.1.2",
+        "document-drive": "latest",
         "eslint": "^9.25.0",
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^5.2.0",
@@ -888,7 +888,7 @@
 
     "@powerhousedao/analytics-engine-browser": ["@powerhousedao/analytics-engine-browser@0.6.0", "", { "dependencies": { "@electric-sql/pglite": "^0.2.12", "date-fns": "^3.6.0", "events": "^3.3.0", "knex": "^3.1.0", "luxon": "^3.5.0", "util": "^0.12.5" }, "peerDependencies": { "@powerhousedao/analytics-engine-core": "0.5.0", "@powerhousedao/analytics-engine-knex": "0.5.1" } }, "sha512-5udsfPoi0g7Wt689BR1bU/R2aRIDfDixPQrlcYi46BDv5MfFGpriqffbROeE0NExXRWnwu3CbUmi32DuqyZDeQ=="],
 
-    "@powerhousedao/analytics-engine-core": ["@powerhousedao/analytics-engine-core@0.4.0", "", { "dependencies": { "date-fns": "^3.6.0" } }, "sha512-PxbASaW64xe2fX0wCcYJTK8bZUt+aAGI7OPLcd9UE5rHZ26cQhV4ysPfXrBzlmHlPdmo/3ELAl7g4E4nO4t7Fw=="],
+    "@powerhousedao/analytics-engine-core": ["@powerhousedao/analytics-engine-core@0.5.0", "", { "dependencies": { "date-fns": "^3.6.0" } }, "sha512-4TCFpaDSB7VJLv0NFVOmNiFYy+DhdN1Mxi0c5ff70vPCKeRI00O2Mnb35/FqM6F1PT/WTkIlJ7LqzipzDnCFfQ=="],
 
     "@powerhousedao/analytics-engine-graphql": ["@powerhousedao/analytics-engine-graphql@0.4.0", "", { "dependencies": { "luxon": "^3.5.0" }, "peerDependencies": { "@powerhousedao/analytics-engine-core": "0.5.0" } }, "sha512-vbJZhOom8ePu68QbMTEk4AvH7blX4Q/axvz+dsZ9MITnW+iZa+spY0lknIA3d2yncV13jBvTFOgzHTCnOHCehg=="],
 
@@ -4556,17 +4556,11 @@
 
     "@powerhousedao/document-engineering/document-model": ["document-model@2.28.1-staging.5", "", { "dependencies": { "change-case": "^5.4.4", "jszip": "^3.10.1", "mime": "^4.0.4", "mutative": "^1.0.5", "safe-stable-stringify": "^2.4.3", "sha1-uint8array": "^0.10.7", "zod": "^3.24.2" } }, "sha512-CWDTB4kRxBJvwzzsY/Zw8m48bMuCDxmV6aosOBXozKiGM8GMt4T4p/bailm+2LwZileA09HRTZQ6qM7tYcc5Wg=="],
 
-    "@powerhousedao/reactor-api/@powerhousedao/analytics-engine-core": ["@powerhousedao/analytics-engine-core@0.5.0", "", { "dependencies": { "date-fns": "^3.6.0" } }, "sha512-4TCFpaDSB7VJLv0NFVOmNiFYy+DhdN1Mxi0c5ff70vPCKeRI00O2Mnb35/FqM6F1PT/WTkIlJ7LqzipzDnCFfQ=="],
-
     "@powerhousedao/reactor-api/change-case": ["change-case@5.4.4", "", {}, "sha512-HRQyTk2/YPEkt9TnUPbOpr64Uw3KOicFWPVBb+xiHvd6eBx/qPr9xqfBFDT8P2vWsvvz4jbEkfDe71W3VyNu2w=="],
-
-    "@powerhousedao/reactor-browser/@powerhousedao/analytics-engine-core": ["@powerhousedao/analytics-engine-core@0.5.0", "", { "dependencies": { "date-fns": "^3.6.0" } }, "sha512-4TCFpaDSB7VJLv0NFVOmNiFYy+DhdN1Mxi0c5ff70vPCKeRI00O2Mnb35/FqM6F1PT/WTkIlJ7LqzipzDnCFfQ=="],
 
     "@powerhousedao/reactor-local/change-case": ["change-case@5.4.4", "", {}, "sha512-HRQyTk2/YPEkt9TnUPbOpr64Uw3KOicFWPVBb+xiHvd6eBx/qPr9xqfBFDT8P2vWsvvz4jbEkfDe71W3VyNu2w=="],
 
     "@powerhousedao/reactor-local/uuid": ["uuid@11.1.0", "", { "bin": { "uuid": "dist/esm/bin/uuid" } }, "sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A=="],
-
-    "@powerhousedao/switchboard/@powerhousedao/analytics-engine-core": ["@powerhousedao/analytics-engine-core@0.5.0", "", { "dependencies": { "date-fns": "^3.6.0" } }, "sha512-4TCFpaDSB7VJLv0NFVOmNiFYy+DhdN1Mxi0c5ff70vPCKeRI00O2Mnb35/FqM6F1PT/WTkIlJ7LqzipzDnCFfQ=="],
 
     "@pyroscope/nodejs/regenerator-runtime": ["regenerator-runtime@0.13.11", "", {}, "sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg=="],
 
