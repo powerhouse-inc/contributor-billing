@@ -268,7 +268,7 @@ export const InvoiceTable = ({
   const selectedInvoiceStatuses = selectedInvoices.map(inv => inv?.global?.status || inv?.status);
     
 
-  const handleCSVExport = () => {
+  const handleCSVExport = (baseCurrency: string) => {
     
     console.log(
       'Exporting selected invoices:',
@@ -277,7 +277,7 @@ export const InvoiceTable = ({
         state: selectedInvoices[idx],
       }))
     );
-    exportInvoicesToXeroCSV(selectedInvoices)
+    exportInvoicesToXeroCSV(selectedInvoices, baseCurrency)
 
   }
 

@@ -16,22 +16,21 @@ export async function getExchangeRate(date: string, from: string, to: string): P
   }
 
   const formattedDate = date.split('T')[0];
-  const cacheKey = `${formattedDate}|${effectiveTo}|CHF`;
+  const cacheKey = `${formattedDate}|${effectiveTo}|${to}`;
   if (exchangeRateCache[cacheKey] !== undefined) {
     return exchangeRateCache[cacheKey];
   }
 
   try {
     // base=effectiveTo (invoice currency), symbols=CHF
-    const url = `https://api.frankfurter.dev/v1/${formattedDate}?base=${effectiveTo}&symbols=CHF`;
+    const url = `https://api.frankfurter.dev/v1/${formattedDate}?base=${effectiveTo}&symbols=${to}`;
     console.log('Fetching from Frankfurter URL:', url);
     const res = await fetch(url);
     if (!res.ok) {
       throw new Error(`Failed to fetch Frankfurter exchange rate: ${res.status} ${res.statusText}`);
     }
     const data = await res.json();
-    // The rate is in data.rates.CHF
-    const rate = data?.rates?.CHF;
+    const rate = data?.rates?.[to];
     if (typeof rate !== 'number') {
       throw new Error(`Frankfurter exchange rate for ${effectiveTo} to CHF on ${formattedDate} not found in response`);
     }
@@ -43,7 +42,7 @@ export async function getExchangeRate(date: string, from: string, to: string): P
   }
 }
 
-export async function exportInvoicesToXeroCSV(invoiceStates: any[]): Promise<void> {
+export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency: string): Promise<void> {
   const headers = [
     'Narration',
     'Date',
@@ -101,7 +100,7 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[]): Promise<voi
     const [rateOnIssue, 
       //rateOnPayment
       ] = await Promise.all([
-      getExchangeRate(dateIssued, effectiveCurrency, 'CHF'),
+      getExchangeRate(dateIssued, effectiveCurrency, baseCurrency),
       //getExchangeRate(datePaid, effectiveCurrency, 'CHF')
     ]);
 

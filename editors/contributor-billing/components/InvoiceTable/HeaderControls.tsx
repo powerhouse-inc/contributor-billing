@@ -1,6 +1,14 @@
 import { useState, useRef } from "react";
 import { Select } from "@powerhousedao/document-engineering";
 
+const currencyOptions = [
+  { label: "CHF", value: "CHF" },
+  { label: "USD", value: "USD" },
+  { label: "EUR", value: "EUR" },
+  { label: "GBP", value: "GBP" },
+  { label: "JPY", value: "JPY" },
+];
+
 export const HeaderControls = ({
   contributorOptions = [],
   statusOptions = [],
@@ -16,7 +24,7 @@ export const HeaderControls = ({
   onContributorChange?: (value: string | string[]) => void;
   onStatusChange?: (value: string | string[]) => void;
   onSearchChange?: (value: string) => void;
-  onExport?: () => void;
+  onExport?: (baseCurrency: string) => void;
   onBatchAction?: (action: string) => void;
   selectedStatuses?: string[];
 }) => {
@@ -30,6 +38,9 @@ export const HeaderControls = ({
   const allowedStatuses = ["ACCEPTED", "AWAITINGPAYMENT", "PAYMENTSCHEDULED", "PAYMENTSENT", "PAYMENTRECEIVED"];
   const canExport = selectedStatuses.length > 0 && selectedStatuses.every(status => allowedStatuses.includes(status));
 
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState("CHF");
+
   return (
     <div className="flex flex-col gap-4 mb-4">
       <div className="flex justify-between items-center">
@@ -37,7 +48,7 @@ export const HeaderControls = ({
         <div className="flex gap-2 items-center">
           <button
             className={`bg-white border border-gray-300 rounded px-3 py-1 text-sm hover:bg-gray-100 ${!canExport ? "opacity-50 cursor-not-allowed" : ""}`}
-            onClick={onExport}
+            onClick={() => setShowCurrencyModal(true)}
             disabled={!canExport}
           >
             Export to CSV
@@ -78,6 +89,37 @@ export const HeaderControls = ({
           onChange={(e) => onSearchChange?.(e.target.value)}
         />
       </div>
+      {showCurrencyModal && (
+        <div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded shadow-lg p-6 min-w-[300px] flex flex-col items-center">
+          <h3 className="text-lg font-semibold mb-4">Select Base Currency</h3>
+          <select
+            className="border border-gray-300 rounded px-2 py-1 mb-4"
+            value={selectedCurrency}
+            onChange={e => setSelectedCurrency(e.target.value)}
+          >
+            {currencyOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          <div className="flex gap-2">
+            <button
+              className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+              onClick={() => {
+                setShowCurrencyModal(false);
+                onExport?.(selectedCurrency);
+              }}
+            >
+              Export
+            </button>
+            <button
+              className="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300"
+              onClick={() => setShowCurrencyModal(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
