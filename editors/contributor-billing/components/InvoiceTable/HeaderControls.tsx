@@ -9,6 +9,7 @@ export const HeaderControls = ({
   onSearchChange,
   onExport,
   onBatchAction,
+  selectedStatuses = [],
 }: {
   contributorOptions?: { label: string; value: string }[];
   statusOptions?: { label: string; value: string }[];
@@ -17,6 +18,7 @@ export const HeaderControls = ({
   onSearchChange?: (value: string) => void;
   onExport?: () => void;
   onBatchAction?: (action: string) => void;
+  selectedStatuses?: string[];
 }) => {
   const batchOptions = [
     { label: "$ Pay Selected", value: "pay" },
@@ -24,14 +26,19 @@ export const HeaderControls = ({
     { label: "Reject Selected", value: "reject" },
   ];
 
+  // Only enable if all selected statuses are in the allowed set
+  const allowedStatuses = ["ACCEPTED", "AWAITINGPAYMENT", "PAYMENTSCHEDULED", "PAYMENTSENT", "PAYMENTRECEIVED"];
+  const canExport = selectedStatuses.length > 0 && selectedStatuses.every(status => allowedStatuses.includes(status));
+
   return (
     <div className="flex flex-col gap-4 mb-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-bold">Powerhouse OH Admin Drive</h3>
         <div className="flex gap-2 items-center">
           <button
-            className="bg-white border border-gray-300 rounded px-3 py-1 text-sm hover:bg-gray-100"
+            className={`bg-white border border-gray-300 rounded px-3 py-1 text-sm hover:bg-gray-100 ${!canExport ? "opacity-50 cursor-not-allowed" : ""}`}
             onClick={onExport}
+            disabled={!canExport}
           >
             Export to CSV
           </button>

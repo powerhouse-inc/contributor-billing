@@ -263,12 +263,20 @@ export const InvoiceTable = ({
 
   };
 
+  const selectedInvoiceIds = Object.keys(selected).filter(id => selected[id]);
+  const selectedInvoices = selectedInvoiceIds.map(id => state[id]);
+  const selectedInvoiceStatuses = selectedInvoices.map(inv => inv?.global?.status || inv?.status);
+    
+
   const handleCSVExport = () => {
     
-    const selectedInvoiceIds = Object.keys(selected).filter(id => selected[id]);
-    const selectedInvoices = selectedInvoiceIds.map(id => state[id]);
-    
-    console.log('exporting...', selectedInvoices);
+    console.log(
+      'Exporting selected invoices:',
+      selectedInvoiceIds.map((id, idx) => ({
+        id,
+        state: selectedInvoices[idx],
+      }))
+    );
     exportInvoicesToXeroCSV(selectedInvoices)
 
   }
@@ -285,6 +293,7 @@ export const InvoiceTable = ({
         onStatusChange={handleStatusChange}
         onBatchAction={onBatchAction}
         onExport={handleCSVExport}
+        selectedStatuses={selectedInvoiceStatuses}
       />
       {shouldShowSection("DRAFT") && (
         <InvoiceTableSection

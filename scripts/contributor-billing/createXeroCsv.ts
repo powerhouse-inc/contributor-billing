@@ -65,9 +65,8 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[]): Promise<voi
   const missingExpenseTagInvoices: string[] = [];
 
   for (let state of invoiceStates) {
-    console.log(state);
+    
     state = state.global;
-    console.log(state);
     const invoiceId = state.id || Math.random().toString(36).slice(2); // fallback if no id
     const invoiceName = state.invoiceNo || state.name || invoiceId;
     const items = state.lineItems || [];
@@ -204,14 +203,7 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[]): Promise<voi
     // Optionally, assign to the invoice state here if you want to mutate it directly:
     // state.exportData = exportDataByInvoice[invoiceId];
 
-    // Debug logs
-    console.log('--- Currency Gain Calculation ---');
-    console.log('Invoice No:', state.invoiceNo);
-    console.log('Currency:', currency);
-    console.log('Invoice Amount:', invoiceAmount);
-    console.log('Date Issued:', dateIssued, 'Rate on Issue:', rateOnIssue, 'Amount at Issue (CHF):', amountAtIssue);
-    //console.log('Date Paid:', datePaid, 'Rate on Payment:', rateOnPayment, 'Amount at Payment (CHF):', amountAtPayment);
-    //console.log('Realised Gain:', realisedGain);
+
   }
 
   // If any invoices are missing expense tags, throw an error
