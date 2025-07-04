@@ -67,7 +67,7 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
     
     state = state.global;
     const invoiceId = state.id || Math.random().toString(36).slice(2); // fallback if no id
-    const invoiceName = state.invoiceNo || state.name || invoiceId;
+    const invoiceName = state.name || invoiceId;
     const items = state.lineItems || [];
     const dateIssued = state.dateIssued || '';
     let datePaid = state.paymentDate || '';
