@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { Select } from "@powerhousedao/document-engineering";
+import { Input, Select } from "@powerhousedao/document-engineering";
+import { Button, Label, ModalFormInputs } from "@powerhousedao/design-system";
 
 const currencyOptions = [
   { label: "CHF", value: "CHF" },
@@ -35,8 +36,16 @@ export const HeaderControls = ({
   ];
 
   // Only enable if all selected statuses are in the allowed set
-  const allowedStatuses = ["ACCEPTED", "AWAITINGPAYMENT", "PAYMENTSCHEDULED", "PAYMENTSENT", "PAYMENTRECEIVED"];
-  const canExport = selectedStatuses.length > 0 && selectedStatuses.every(status => allowedStatuses.includes(status));
+  const allowedStatuses = [
+    "ACCEPTED",
+    "AWAITINGPAYMENT",
+    "PAYMENTSCHEDULED",
+    "PAYMENTSENT",
+    "PAYMENTRECEIVED",
+  ];
+  const canExport =
+    selectedStatuses.length > 0 &&
+    selectedStatuses.every((status) => allowedStatuses.includes(status));
 
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState("CHF");
@@ -90,33 +99,37 @@ export const HeaderControls = ({
         />
       </div>
       {showCurrencyModal && (
-        <div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded shadow-lg p-6 min-w-[300px] flex flex-col items-center">
-          <h3 className="text-lg font-semibold mb-4">Select Base Currency</h3>
-          <select
-            className="border border-gray-300 rounded px-2 py-1 mb-4"
-            value={selectedCurrency}
-            onChange={e => setSelectedCurrency(e.target.value)}
-          >
-            {currencyOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-          <div className="flex gap-2">
-            <button
-              className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
-              onClick={() => {
-                setShowCurrencyModal(false);
-                onExport?.(selectedCurrency);
-              }}
+        <div className="fixed inset-0">
+          <div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded shadow-lg p-6 min-w-[300px] flex flex-col items-center">
+            <h3 className="text-lg font-semibold mb-4">Select Base Currency</h3>
+            <select
+              className="border border-gray-300 rounded px-2 py-1 mb-4"
+              value={selectedCurrency}
+              onChange={(e) => setSelectedCurrency(e.target.value)}
             >
-              Export
-            </button>
-            <button
-              className="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300"
-              onClick={() => setShowCurrencyModal(false)}
-            >
-              Cancel
-            </button>
+              {currencyOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <div className="flex gap-2">
+              <button
+                className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+                onClick={() => {
+                  setShowCurrencyModal(false);
+                  onExport?.(selectedCurrency);
+                }}
+              >
+                Export
+              </button>
+              <button
+                className="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300"
+                onClick={() => setShowCurrencyModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
