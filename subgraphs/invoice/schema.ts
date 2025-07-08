@@ -7,27 +7,43 @@ export const schema: DocumentNode = gql`
   """
   type InvoiceState {
     invoiceNo: String!
-    dateIssued: String!
-    dateDue: String!
-    dateDelivered: String
+    dateIssued: Date!
+    dateDue: Date!
+    dateDelivered: Date
+    payAfter: DateTime
     status: Status!
-    refs: [Ref!]!
     issuer: LegalEntity!
     payer: LegalEntity!
     currency: String!
     lineItems: [InvoiceLineItem!]!
     totalPriceTaxExcl: Float!
     totalPriceTaxIncl: Float!
-    invoiceTags: [InvoiceTag!]! # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}
     notes: String
-    paymentDate: String
-    txnHash: String
-    exported: Boolean
+    invoiceTags: [InvoiceTag!]! # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}
+    rejections: [Rejection!]!
+    payments: [Payment!]!
+    exported: [ExportedData!]!
   }
 
-  type Ref {
+  type Rejection {
     id: OID!
-    value: String!
+    reason: String!
+    final: Boolean!
+  }
+
+  type ExportedData {
+    id: OID!
+    timestamp: DateTime! # ISO 8601 timestamp of the export
+    exportedLineItems: [[String!]!]! # CSV Format
+  }
+
+  type Payment {
+    id: OID!
+    processorRef: String
+    paymentDate: DateTime
+    txnRef: String
+    confirmed: Boolean!
+    issue: String
   }
 
   type Token {
@@ -133,11 +149,11 @@ export const schema: DocumentNode = gql`
     CANCELLED
     ACCEPTED
     REJECTED
-    AWAITINGPAYMENT
     PAYMENTSCHEDULED
     PAYMENTSENT
     PAYMENTISSUE
     PAYMENTRECEIVED
+    PAYMENTCANCELLED
   }
 
   enum InvoiceAccountType {
@@ -182,30 +198,15 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: Invoice_EditStatusInput
     ): Int
-    Invoice_addRef(
-      driveId: String
-      docId: PHID
-      input: Invoice_AddRefInput
-    ): Int
-    Invoice_editRef(
-      driveId: String
-      docId: PHID
-      input: Invoice_EditRefInput
-    ): Int
-    Invoice_deleteRef(
-      driveId: String
-      docId: PHID
-      input: Invoice_DeleteRefInput
-    ): Int
     Invoice_editPaymentData(
       driveId: String
       docId: PHID
       input: Invoice_EditPaymentDataInput
     ): Int
-    Invoice_setExported(
+    Invoice_setExportedData(
       driveId: String
       docId: PHID
-      input: Invoice_SetExportedInput
+      input: Invoice_SetExportedDataInput
     ): Int
     Invoice_editIssuer(
       driveId: String
@@ -262,21 +263,73 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: Invoice_SetInvoiceTagInput
     ): Int
-    Invoice_uploadInvoicePdfChunk(
-      chunk: String!
-      chunkIndex: Int!
-      totalChunks: Int!
-      fileName: String!
-      sessionId: String!
-    ): UploadInvoicePdfChunkResult!
-    Invoice_createRequestFinancePayment(
-      paymentData: JSON!
-    ): CreateRequestFinancePaymentResult!
+    Invoice_cancel(
+      driveId: String
+      docId: PHID
+      input: Invoice_CancelInput
+    ): Int
+    Invoice_issue(driveId: String, docId: PHID, input: Invoice_IssueInput): Int
+    Invoice_reset(driveId: String, docId: PHID, input: Invoice_ResetInput): Int
+    Invoice_reject(
+      driveId: String
+      docId: PHID
+      input: Invoice_RejectInput
+    ): Int
+    Invoice_accept(
+      driveId: String
+      docId: PHID
+      input: Invoice_AcceptInput
+    ): Int
+    Invoice_reinstate(
+      driveId: String
+      docId: PHID
+      input: Invoice_ReinstateInput
+    ): Int
+    Invoice_schedulePayment(
+      driveId: String
+      docId: PHID
+      input: Invoice_SchedulePaymentInput
+    ): Int
+    Invoice_reapprovePayment(
+      driveId: String
+      docId: PHID
+      input: Invoice_ReapprovePaymentInput
+    ): Int
+    Invoice_registerPaymentTx(
+      driveId: String
+      docId: PHID
+      input: Invoice_RegisterPaymentTxInput
+    ): Int
+    Invoice_reportPaymentIssue(
+      driveId: String
+      docId: PHID
+      input: Invoice_ReportPaymentIssueInput
+    ): Int
+    Invoice_confirmPayment(
+      driveId: String
+      docId: PHID
+      input: Invoice_ConfirmPaymentInput
+    ): Int
+    Invoice_cancelPayment(
+      driveId: String
+      docId: PHID
+      input: Invoice_CancelPaymentInput
+    ): Int
     Invoice_processGnosisPayment(
-      chainName: String!
-      paymentDetails: JSON!
-      invoiceNo: String!
-    ): ProcessGnosisPaymentResult
+      driveId: String
+      docId: PHID
+      input: ProcessGnosisPaymentResult
+    ): Int
+    Invoice_createRequestFinancePayment(  
+      driveId: String
+      docId: PHID
+      input: CreateRequestFinancePaymentResult
+    ): Int
+    Invoice_uploadInvoicePdfChunk(
+      driveId: String
+      docId: PHID
+      input: UploadInvoicePdfChunkResult
+    ): Int
   }
 
   """
@@ -315,30 +368,20 @@ export const schema: DocumentNode = gql`
     invoiceNo: String
     dateIssued: String
     dateDue: String
-    dateDelivered: String
     currency: String
     notes: String
   }
   input Invoice_EditStatusInput {
     status: Status!
   }
-  input Invoice_AddRefInput {
-    id: OID!
-    value: String!
-  }
-  input Invoice_EditRefInput {
-    id: OID!
-    value: String!
-  }
-  input Invoice_DeleteRefInput {
-    id: OID!
-  }
   input Invoice_EditPaymentDataInput {
     paymentDate: String
     txnHash: String
   }
-  input Invoice_SetExportedInput {
-    exported: Boolean
+  input Invoice_SetExportedDataInput {
+    id: OID!
+    timestamp: String!
+    exportedLineItems: [[String!]!]!
   }
 
   """
@@ -482,5 +525,65 @@ export const schema: DocumentNode = gql`
     dimension: String!
     value: String!
     label: String
+  }
+
+  """
+  Module: Transitions
+  """
+  input Invoice_CancelInput {
+    "Add your inputs here"
+    _placeholder: String
+  }
+  input Invoice_IssueInput {
+    invoiceNo: String!
+    dateIssued: String!
+  }
+  input Invoice_ResetInput {
+    "Add your inputs here"
+    _placeholder: String
+  }
+  input Invoice_RejectInput {
+    reason: String!
+    final: Boolean!
+  }
+  input Invoice_AcceptInput {
+    payAfter: DateTime
+  }
+  input Invoice_ReinstateInput {
+    "Add your inputs here"
+    _placeholder: String
+  }
+  input Invoice_SchedulePaymentInput {
+    id: OID! # New Payment ID
+    processorRef: String!
+  }
+  input Invoice_ReapprovePaymentInput {
+    "Add your inputs here"
+    _placeholder: String
+  }
+  input Invoice_RegisterPaymentTxInput {
+    id: OID! # Payment ID
+    timestamp: DateTime!
+    txRef: String!
+  }
+  input Invoice_ReportPaymentIssueInput {
+    id: OID! # Payment ID
+    issue: String!
+  }
+  input Invoice_ConfirmPaymentInput {
+    id: OID! # Payment ID
+  }
+  input Invoice_CancelPaymentInput {
+    "Add your inputs here"
+    _placeholder: String
+  }
+  input Invoice_ProcessGnosisPaymentInput {
+    id: OID! # Payment ID
+  }
+  input Invoice_CreateRequestFinancePaymentInput {
+    id: OID! # Payment ID
+  }
+  input Invoice_UploadInvoicePdfChunkInput {
+    id: OID! # Payment ID
   }
 `;

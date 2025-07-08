@@ -55,6 +55,10 @@ export type Scalars = {
   URL: { input: string; output: string };
 };
 
+export type AcceptInput = {
+  payAfter?: InputMaybe<Scalars["DateTime"]["input"]>;
+};
+
 export type AddLineItemInput = {
   currency: Scalars["String"]["input"];
   description: Scalars["String"]["input"];
@@ -65,11 +69,6 @@ export type AddLineItemInput = {
   totalPriceTaxIncl: Scalars["Float"]["input"];
   unitPriceTaxExcl: Scalars["Float"]["input"];
   unitPriceTaxIncl: Scalars["Float"]["input"];
-};
-
-export type AddRefInput = {
-  id: Scalars["OID"]["input"];
-  value: Scalars["String"]["input"];
 };
 
 export type Address = {
@@ -94,6 +93,20 @@ export type Bank = {
   name: Scalars["String"]["output"];
 };
 
+export type CancelInput = {
+  /** Add your inputs here */
+  _placeholder?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+export type CancelPaymentInput = {
+  /** Add your inputs here */
+  _placeholder?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+export type ConfirmPaymentInput = {
+  id: Scalars["OID"]["input"];
+};
+
 export type ContactInfo = {
   email: Maybe<Scalars["String"]["output"]>;
   tel: Maybe<Scalars["String"]["output"]>;
@@ -103,13 +116,8 @@ export type DeleteLineItemInput = {
   id: Scalars["OID"]["input"];
 };
 
-export type DeleteRefInput = {
-  id: Scalars["OID"]["input"];
-};
-
 export type EditInvoiceInput = {
   currency?: InputMaybe<Scalars["String"]["input"]>;
-  dateDelivered?: InputMaybe<Scalars["String"]["input"]>;
   dateDue?: InputMaybe<Scalars["String"]["input"]>;
   dateIssued?: InputMaybe<Scalars["String"]["input"]>;
   invoiceNo?: InputMaybe<Scalars["String"]["input"]>;
@@ -243,13 +251,14 @@ export type EditPaymentDataInput = {
   txnHash?: InputMaybe<Scalars["String"]["input"]>;
 };
 
-export type EditRefInput = {
-  id: Scalars["OID"]["input"];
-  value: Scalars["String"]["input"];
-};
-
 export type EditStatusInput = {
   status: Status | `${Status}`;
+};
+
+export type ExportedData = {
+  exportedLineItems: Array<Array<Scalars["String"]["output"]>>;
+  id: Scalars["OID"]["output"];
+  timestamp: Scalars["DateTime"]["output"];
 };
 
 export type IntermediaryBank = {
@@ -287,22 +296,22 @@ export type InvoiceLineItem = {
 
 export type InvoiceState = {
   currency: Scalars["String"]["output"];
-  dateDelivered: Maybe<Scalars["String"]["output"]>;
-  dateDue: Scalars["String"]["output"];
-  dateIssued: Scalars["String"]["output"];
-  exported: Maybe<Scalars["Boolean"]["output"]>;
+  dateDelivered: Maybe<Scalars["Date"]["output"]>;
+  dateDue: Scalars["Date"]["output"];
+  dateIssued: Scalars["Date"]["output"];
+  exported: Array<ExportedData>;
   invoiceNo: Scalars["String"]["output"];
   invoiceTags: Array<InvoiceTag>;
   issuer: LegalEntity;
   lineItems: Array<InvoiceLineItem>;
   notes: Maybe<Scalars["String"]["output"]>;
+  payAfter: Maybe<Scalars["DateTime"]["output"]>;
   payer: LegalEntity;
-  paymentDate: Maybe<Scalars["String"]["output"]>;
-  refs: Array<Ref>;
+  payments: Array<Payment>;
+  rejections: Array<Rejection>;
   status: Status | `${Status}`;
   totalPriceTaxExcl: Scalars["Float"]["output"];
   totalPriceTaxIncl: Scalars["Float"]["output"];
-  txnHash: Maybe<Scalars["String"]["output"]>;
 };
 
 export type InvoiceTag = {
@@ -316,6 +325,11 @@ export type InvoiceWallet = {
   chainId: Maybe<Scalars["String"]["output"]>;
   chainName: Maybe<Scalars["String"]["output"]>;
   rpc: Maybe<Scalars["String"]["output"]>;
+};
+
+export type IssueInput = {
+  dateIssued: Scalars["String"]["input"];
+  invoiceNo: Scalars["String"]["input"];
 };
 
 export type LegalEntity = {
@@ -339,18 +353,66 @@ export type LegalEntityTaxId = {
   taxId: Scalars["String"]["output"];
 };
 
+export type Payment = {
+  confirmed: Scalars["Boolean"]["output"];
+  id: Scalars["OID"]["output"];
+  issue: Maybe<Scalars["String"]["output"]>;
+  paymentDate: Maybe<Scalars["DateTime"]["output"]>;
+  processorRef: Maybe<Scalars["String"]["output"]>;
+  txnRef: Maybe<Scalars["String"]["output"]>;
+};
+
 export type PaymentRouting = {
   bank: Maybe<Bank>;
   wallet: Maybe<InvoiceWallet>;
 };
 
-export type Ref = {
-  id: Scalars["OID"]["output"];
-  value: Scalars["String"]["output"];
+export type ReapprovePaymentInput = {
+  /** Add your inputs here */
+  _placeholder?: InputMaybe<Scalars["String"]["input"]>;
 };
 
-export type SetExportedInput = {
-  exported?: InputMaybe<Scalars["Boolean"]["input"]>;
+export type RegisterPaymentTxInput = {
+  id: Scalars["OID"]["input"];
+  timestamp: Scalars["DateTime"]["input"];
+  txRef: Scalars["String"]["input"];
+};
+
+export type ReinstateInput = {
+  /** Add your inputs here */
+  _placeholder?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+export type RejectInput = {
+  final: Scalars["Boolean"]["input"];
+  reason: Scalars["String"]["input"];
+};
+
+export type Rejection = {
+  final: Scalars["Boolean"]["output"];
+  id: Scalars["OID"]["output"];
+  reason: Scalars["String"]["output"];
+};
+
+export type ReportPaymentIssueInput = {
+  id: Scalars["OID"]["input"];
+  issue: Scalars["String"]["input"];
+};
+
+export type ResetInput = {
+  /** Add your inputs here */
+  _placeholder?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+export type SchedulePaymentInput = {
+  id: Scalars["OID"]["input"];
+  processorRef: Scalars["String"]["input"];
+};
+
+export type SetExportedDataInput = {
+  exportedLineItems: Array<Array<Scalars["String"]["input"]>>;
+  id: Scalars["OID"]["input"];
+  timestamp: Scalars["String"]["input"];
 };
 
 export type SetInvoiceTagInput = {
@@ -368,10 +430,10 @@ export type SetLineItemTagInput = {
 
 export type Status =
   | "ACCEPTED"
-  | "AWAITINGPAYMENT"
   | "CANCELLED"
   | "DRAFT"
   | "ISSUED"
+  | "PAYMENTCANCELLED"
   | "PAYMENTISSUE"
   | "PAYMENTRECEIVED"
   | "PAYMENTSCHEDULED"

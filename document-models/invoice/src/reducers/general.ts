@@ -12,8 +12,6 @@ export const reducer: InvoiceGeneralOperations = {
       const newState = { ...state };
 
       newState.currency = action.input.currency ?? state.currency;
-      newState.dateDelivered =
-        action.input.dateDelivered ?? state.dateDelivered;
       newState.dateDue = action.input.dateDue ?? state.dateDue;
       newState.dateIssued = action.input.dateIssued ?? state.dateIssued;
       newState.invoiceNo = action.input.invoiceNo ?? state.invoiceNo;
@@ -33,31 +31,21 @@ export const reducer: InvoiceGeneralOperations = {
   },
   addRefOperation(state, action, dispatch) {
     try {
-      if (!action.input.id) throw new Error("No input.id");
-      if (!action.input.value) throw new Error("No input.value");
-      if (state.refs.find((r) => r.id == action.input.id))
-        throw new Error("Ref already exists with provided input.id");
-      state.refs.push(action.input);
+     
     } catch (e) {
       console.error(e);
     }
   },
   editRefOperation(state, action, dispatch) {
     try {
-      if (!action.input.id) throw new Error("No input.id");
-      if (!action.input.value) throw new Error("No input.value");
-
-      let ref = state.refs.find((r) => r.id == action.input.id);
-      if (!ref) throw new Error("Ref not found with provided input.id");
-      ref = action.input;
+     
     } catch (e) {
       console.error(e);
     }
   },
   deleteRefOperation(state, action, dispatch) {
     try {
-      if (!action.input.id) throw new Error("No input.id");
-      state.refs = state.refs.filter((r) => r.id !== action.input.id);
+      
     } catch (e) {
       console.error(e);
     }
@@ -65,15 +53,14 @@ export const reducer: InvoiceGeneralOperations = {
   editPaymentDataOperation(state, action, dispatch) {
     try {
       if(!action.input.paymentDate || !action.input.txnHash) throw new Error("No input.paymentDate or input.txnHash");
-      state.paymentDate = action.input.paymentDate;
-      state.txnHash = action.input.txnHash;
+      // TODO
     } catch (e) {
       console.error(e);
     }
   },
-  setExportedOperation(state, action, dispatch) {
+  setExportedDataOperation(state, action, dispatch) {
     try {
-      state.exported = action.input.exported ?? false;
+      //TODO
     } catch (e) {
       console.error(e);
     }

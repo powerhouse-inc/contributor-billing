@@ -1,12 +1,14 @@
 import { z } from "zod";
 import type {
+  AcceptInput,
   AddLineItemInput,
-  AddRefInput,
   Address,
   Bank,
+  CancelInput,
+  CancelPaymentInput,
+  ConfirmPaymentInput,
   ContactInfo,
   DeleteLineItemInput,
-  DeleteRefInput,
   EditInvoiceInput,
   EditIssuerBankInput,
   EditIssuerInput,
@@ -16,8 +18,8 @@ import type {
   EditPayerInput,
   EditPayerWalletInput,
   EditPaymentDataInput,
-  EditRefInput,
   EditStatusInput,
+  ExportedData,
   IntermediaryBank,
   InvoiceAccountType,
   InvoiceAccountTypeInput,
@@ -25,12 +27,21 @@ import type {
   InvoiceState,
   InvoiceTag,
   InvoiceWallet,
+  IssueInput,
   LegalEntity,
   LegalEntityCorporateRegistrationId,
   LegalEntityTaxId,
+  Payment,
   PaymentRouting,
-  Ref,
-  SetExportedInput,
+  ReapprovePaymentInput,
+  RegisterPaymentTxInput,
+  ReinstateInput,
+  RejectInput,
+  Rejection,
+  ReportPaymentIssueInput,
+  ResetInput,
+  SchedulePaymentInput,
+  SetExportedDataInput,
   SetInvoiceTagInput,
   SetLineItemTagInput,
   Status,
@@ -66,16 +77,22 @@ export const InvoiceAccountTypeInputSchema = z.enum([
 
 export const StatusSchema = z.enum([
   "ACCEPTED",
-  "AWAITINGPAYMENT",
   "CANCELLED",
   "DRAFT",
   "ISSUED",
+  "PAYMENTCANCELLED",
   "PAYMENTISSUE",
   "PAYMENTRECEIVED",
   "PAYMENTSCHEDULED",
   "PAYMENTSENT",
   "REJECTED",
 ]);
+
+export function AcceptInputSchema(): z.ZodObject<Properties<AcceptInput>> {
+  return z.object({
+    payAfter: z.string().datetime().nullish(),
+  });
+}
 
 export function AddLineItemInputSchema(): z.ZodObject<
   Properties<AddLineItemInput>
@@ -90,13 +107,6 @@ export function AddLineItemInputSchema(): z.ZodObject<
     totalPriceTaxIncl: z.number(),
     unitPriceTaxExcl: z.number(),
     unitPriceTaxIncl: z.number(),
-  });
-}
-
-export function AddRefInputSchema(): z.ZodObject<Properties<AddRefInput>> {
-  return z.object({
-    id: z.string(),
-    value: z.string(),
   });
 }
 
@@ -128,6 +138,28 @@ export function BankSchema(): z.ZodObject<Properties<Bank>> {
   });
 }
 
+export function CancelInputSchema(): z.ZodObject<Properties<CancelInput>> {
+  return z.object({
+    _placeholder: z.string().nullish(),
+  });
+}
+
+export function CancelPaymentInputSchema(): z.ZodObject<
+  Properties<CancelPaymentInput>
+> {
+  return z.object({
+    _placeholder: z.string().nullish(),
+  });
+}
+
+export function ConfirmPaymentInputSchema(): z.ZodObject<
+  Properties<ConfirmPaymentInput>
+> {
+  return z.object({
+    id: z.string(),
+  });
+}
+
 export function ContactInfoSchema(): z.ZodObject<Properties<ContactInfo>> {
   return z.object({
     __typename: z.literal("ContactInfo").optional(),
@@ -144,20 +176,11 @@ export function DeleteLineItemInputSchema(): z.ZodObject<
   });
 }
 
-export function DeleteRefInputSchema(): z.ZodObject<
-  Properties<DeleteRefInput>
-> {
-  return z.object({
-    id: z.string(),
-  });
-}
-
 export function EditInvoiceInputSchema(): z.ZodObject<
   Properties<EditInvoiceInput>
 > {
   return z.object({
     currency: z.string().nullish(),
-    dateDelivered: z.string().nullish(),
     dateDue: z.string().nullish(),
     dateIssued: z.string().nullish(),
     invoiceNo: z.string().nullish(),
@@ -320,18 +343,20 @@ export function EditPaymentDataInputSchema(): z.ZodObject<
   });
 }
 
-export function EditRefInputSchema(): z.ZodObject<Properties<EditRefInput>> {
-  return z.object({
-    id: z.string(),
-    value: z.string(),
-  });
-}
-
 export function EditStatusInputSchema(): z.ZodObject<
   Properties<EditStatusInput>
 > {
   return z.object({
     status: StatusSchema,
+  });
+}
+
+export function ExportedDataSchema(): z.ZodObject<Properties<ExportedData>> {
+  return z.object({
+    __typename: z.literal("ExportedData").optional(),
+    exportedLineItems: z.array(z.array(z.string())),
+    id: z.string(),
+    timestamp: z.string().datetime(),
   });
 }
 
@@ -374,22 +399,22 @@ export function InvoiceStateSchema(): z.ZodObject<Properties<InvoiceState>> {
   return z.object({
     __typename: z.literal("InvoiceState").optional(),
     currency: z.string(),
-    dateDelivered: z.string().nullable(),
-    dateDue: z.string(),
-    dateIssued: z.string(),
-    exported: z.boolean().nullable(),
+    dateDelivered: z.string().datetime().nullable(),
+    dateDue: z.string().datetime(),
+    dateIssued: z.string().datetime(),
+    exported: z.array(ExportedDataSchema()),
     invoiceNo: z.string(),
     invoiceTags: z.array(InvoiceTagSchema()),
     issuer: LegalEntitySchema(),
     lineItems: z.array(InvoiceLineItemSchema()),
     notes: z.string().nullable(),
+    payAfter: z.string().datetime().nullable(),
     payer: LegalEntitySchema(),
-    paymentDate: z.string().nullable(),
-    refs: z.array(RefSchema()),
+    payments: z.array(PaymentSchema()),
+    rejections: z.array(RejectionSchema()),
     status: StatusSchema,
     totalPriceTaxExcl: z.number(),
     totalPriceTaxIncl: z.number(),
-    txnHash: z.string().nullable(),
   });
 }
 
@@ -409,6 +434,13 @@ export function InvoiceWalletSchema(): z.ZodObject<Properties<InvoiceWallet>> {
     chainId: z.string().nullable(),
     chainName: z.string().nullable(),
     rpc: z.string().nullable(),
+  });
+}
+
+export function IssueInputSchema(): z.ZodObject<Properties<IssueInput>> {
+  return z.object({
+    dateIssued: z.string(),
+    invoiceNo: z.string(),
   });
 }
 
@@ -449,6 +481,18 @@ export function LegalEntityTaxIdSchema(): z.ZodObject<
   });
 }
 
+export function PaymentSchema(): z.ZodObject<Properties<Payment>> {
+  return z.object({
+    __typename: z.literal("Payment").optional(),
+    confirmed: z.boolean(),
+    id: z.string(),
+    issue: z.string().nullable(),
+    paymentDate: z.string().datetime().nullable(),
+    processorRef: z.string().nullable(),
+    txnRef: z.string().nullable(),
+  });
+}
+
 export function PaymentRoutingSchema(): z.ZodObject<
   Properties<PaymentRouting>
 > {
@@ -459,19 +503,79 @@ export function PaymentRoutingSchema(): z.ZodObject<
   });
 }
 
-export function RefSchema(): z.ZodObject<Properties<Ref>> {
+export function ReapprovePaymentInputSchema(): z.ZodObject<
+  Properties<ReapprovePaymentInput>
+> {
   return z.object({
-    __typename: z.literal("Ref").optional(),
-    id: z.string(),
-    value: z.string(),
+    _placeholder: z.string().nullish(),
   });
 }
 
-export function SetExportedInputSchema(): z.ZodObject<
-  Properties<SetExportedInput>
+export function RegisterPaymentTxInputSchema(): z.ZodObject<
+  Properties<RegisterPaymentTxInput>
 > {
   return z.object({
-    exported: z.boolean().nullish(),
+    id: z.string(),
+    timestamp: z.string().datetime(),
+    txRef: z.string(),
+  });
+}
+
+export function ReinstateInputSchema(): z.ZodObject<
+  Properties<ReinstateInput>
+> {
+  return z.object({
+    _placeholder: z.string().nullish(),
+  });
+}
+
+export function RejectInputSchema(): z.ZodObject<Properties<RejectInput>> {
+  return z.object({
+    final: z.boolean(),
+    reason: z.string(),
+  });
+}
+
+export function RejectionSchema(): z.ZodObject<Properties<Rejection>> {
+  return z.object({
+    __typename: z.literal("Rejection").optional(),
+    final: z.boolean(),
+    id: z.string(),
+    reason: z.string(),
+  });
+}
+
+export function ReportPaymentIssueInputSchema(): z.ZodObject<
+  Properties<ReportPaymentIssueInput>
+> {
+  return z.object({
+    id: z.string(),
+    issue: z.string(),
+  });
+}
+
+export function ResetInputSchema(): z.ZodObject<Properties<ResetInput>> {
+  return z.object({
+    _placeholder: z.string().nullish(),
+  });
+}
+
+export function SchedulePaymentInputSchema(): z.ZodObject<
+  Properties<SchedulePaymentInput>
+> {
+  return z.object({
+    id: z.string(),
+    processorRef: z.string(),
+  });
+}
+
+export function SetExportedDataInputSchema(): z.ZodObject<
+  Properties<SetExportedDataInput>
+> {
+  return z.object({
+    exportedLineItems: z.array(z.array(z.string())),
+    id: z.string(),
+    timestamp: z.string(),
   });
 }
 

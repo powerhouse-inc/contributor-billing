@@ -18,9 +18,8 @@ export const initialGlobalState: InvoiceState = {
   invoiceNo: "",
   dateIssued: "",
   dateDue: "",
-  dateDelivered: "",
+  dateDelivered: null,
   status: "DRAFT",
-  refs: [],
   issuer: {
     id: null,
     name: "",
@@ -147,11 +146,12 @@ export const initialGlobalState: InvoiceState = {
   lineItems: [],
   totalPriceTaxExcl: 0,
   totalPriceTaxIncl: 0,
+  notes: null,
   invoiceTags: [],
-  exported: false,
-  notes: "",
-  paymentDate: "",
-  txnHash: "",
+  rejections: [],
+  payAfter: null,
+  payments: [],
+  exported: [],
 };
 export const initialLocalState: InvoiceLocalState = {};
 

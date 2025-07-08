@@ -2,11 +2,8 @@ import { type SignalDispatch } from "document-model";
 import {
   type EditInvoiceAction,
   type EditStatusAction,
-  type AddRefAction,
-  type EditRefAction,
-  type DeleteRefAction,
   type EditPaymentDataAction,
-  type SetExportedAction,
+  type SetExportedDataAction,
 } from "./actions.js";
 import { type InvoiceState } from "../types.js";
 
@@ -21,29 +18,14 @@ export interface InvoiceGeneralOperations {
     action: EditStatusAction,
     dispatch?: SignalDispatch,
   ) => void;
-  addRefOperation: (
-    state: InvoiceState,
-    action: AddRefAction,
-    dispatch?: SignalDispatch,
-  ) => void;
-  editRefOperation: (
-    state: InvoiceState,
-    action: EditRefAction,
-    dispatch?: SignalDispatch,
-  ) => void;
-  deleteRefOperation: (
-    state: InvoiceState,
-    action: DeleteRefAction,
-    dispatch?: SignalDispatch,
-  ) => void;
   editPaymentDataOperation: (
     state: InvoiceState,
     action: EditPaymentDataAction,
     dispatch?: SignalDispatch,
   ) => void;
-  setExportedOperation: (
+  setExportedDataOperation: (
     state: InvoiceState,
-    action: SetExportedAction,
+    action: SetExportedDataAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

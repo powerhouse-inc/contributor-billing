@@ -1,28 +1,15 @@
 {
-    "id": "powerhouse/invoice",
-    "name": "Invoice",
-    "extension": ".phdm",
-    "description": "The Invoice document model that allows a contributor to request compensation based on their contributions",
     "author": {
         "name": "Powerhouse",
         "website": "https://powerhouse.inc"
     },
+    "description": "The Invoice document model that allows a contributor to request compensation based on their contributions",
+    "extension": ".phdm",
+    "id": "powerhouse/invoice",
+    "name": "Invoice",
     "specifications": [
         {
-            "version": 1,
             "changeLog": [],
-            "state": {
-                "global": {
-                    "schema": "type InvoiceState {\n  invoiceNo: String!\n  dateIssued: String!\n  dateDue: String!\n  dateDelivered: String\n  status: Status!\n  refs: [Ref!]!\n  issuer: LegalEntity!\n  payer: LegalEntity!\n  currency: String!\n  lineItems: [InvoiceLineItem!]!\n  totalPriceTaxExcl: Float!\n  totalPriceTaxIncl: Float!\n  invoiceTags: [InvoiceTag!]!   # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}\n  notes: String\n  paymentDate: String\n  txnHash: String\n  exported: Boolean\n}\n\ntype Ref {\n  id: OID!\n  value: String!\n}\n\ntype Token {\n  evmAddress: String\n  symbol: String\n  chainName: String\n  chainId: String\n  rpc: String\n}\n\ntype LegalEntity {\n  id: LegalEntityId\n  name: String\n  address: Address\n  contactInfo: ContactInfo\n  country: String\n  paymentRouting: PaymentRouting\n}\n\ntype Address {\n  streetAddress: String\n  extendedAddress: String\n  city: String\n  postalCode: String\n  country: String\n  stateProvince: String\n}\n\ntype ContactInfo {\n  tel: String\n  email: String\n}\n\ntype PaymentRouting {\n  bank: Bank\n  wallet: InvoiceWallet\n}\n\ntype Bank {\n  name: String!\n  address: Address!\n  ABA: String\n  BIC: String\n  SWIFT: String\n  accountNum: String!\n  accountType: InvoiceAccountType\n  beneficiary: String\n  intermediaryBank: IntermediaryBank\n  memo: String\n}\n\ntype IntermediaryBank {\n  name: String!\n  address: Address!\n  ABA: String\n  BIC: String\n  SWIFT: String\n  accountNum: String!\n  accountType: InvoiceAccountType\n  beneficiary: String\n  memo: String\n}\n\ntype InvoiceWallet {\n  rpc: String\n  chainName: String\n  chainId: String\n  address: String\n}\n\ntype InvoiceLineItem {\n  id: OID!\n  description: String!\n  taxPercent: Float!\n  quantity: Float!\n  currency: String!\n  unitPriceTaxExcl: Float!\n  unitPriceTaxIncl: Float!\n  totalPriceTaxExcl: Float!\n  totalPriceTaxIncl: Float!\n  lineItemTag: [InvoiceTag!]\n}\n\ntype InvoiceTag {\n  dimension: String!  # \"xero-expense-account\", \"xero-payment-account\", \"accounting-period\", ...\n  value: String!      # \"627\", ..., \"090\", ..., \"2025/05\", \"2025/Q1\", ...\n  label: String       # \"Marketing\", ..., \"Business Bank\", ..., \"May 2025\"\n}\n\nunion LegalEntityId = LegalEntityTaxId | LegalEntityCorporateRegistrationId\n\ntype LegalEntityTaxId {\n  taxId: String!\n}\n\ntype LegalEntityCorporateRegistrationId {\n  corpRegId: String!\n}\n\nenum Status {\n  DRAFT\n  ISSUED\n  CANCELLED\n  ACCEPTED\n  REJECTED\n  AWAITINGPAYMENT\n  PAYMENTSCHEDULED\n  PAYMENTSENT\n  PAYMENTISSUE\n  PAYMENTRECEIVED\n}\n\nenum InvoiceAccountType {\n  CHECKING\n  SAVINGS\n  TRUST\n  WALLET\n}\n\nenum InvoiceAccountTypeInput {\n  CHECKING\n  SAVINGS\n  TRUST\n  WALLET\n}",
-                    "initialValue": "{\n  \"invoiceNo\": \"\",\n  \"dateIssued\": \"\",\n  \"dateDue\": \"\",\n  \"dateDelivered\": \"\",\n  \"status\": \"DRAFT\",\n  \"refs\": [],\n  \"issuer\": {\n    \"id\": null,\n    \"name\": \"\",\n    \"address\": {\n      \"streetAddress\": \"\",\n      \"extendedAddress\": \"\",\n      \"city\": \"\",\n      \"postalCode\": \"\",\n      \"country\": \"\",\n      \"stateProvince\": \"\"\n    },\n    \"contactInfo\": {\n      \"tel\": \"\",\n      \"email\": \"\"\n    },\n    \"country\": \"\",\n    \"paymentRouting\": {\n      \"bank\": {\n        \"name\": \"\",\n        \"address\": {\n          \"streetAddress\": \"\",\n          \"extendedAddress\": \"\",\n          \"city\": \"\",\n          \"postalCode\": \"\",\n          \"country\": \"\",\n          \"stateProvince\": \"\"\n        },\n        \"ABA\": \"\",\n        \"BIC\": \"\",\n        \"SWIFT\": \"\",\n        \"accountNum\": \"\",\n        \"accountType\": \"CHECKING\",\n        \"beneficiary\": \"\",\n        \"intermediaryBank\": {\n          \"name\": \"\",\n          \"address\": {\n            \"streetAddress\": \"\",\n            \"extendedAddress\": \"\",\n            \"city\": \"\",\n            \"postalCode\": \"\",\n            \"country\": \"\",\n            \"stateProvince\": \"\"\n          },\n          \"ABA\": \"\",\n          \"BIC\": \"\",\n          \"SWIFT\": \"\",\n          \"accountNum\": \"\",\n          \"accountType\": \"CHECKING\",\n          \"beneficiary\": \"\",\n          \"memo\": \"\"\n        },\n        \"memo\": \"\"\n      },\n      \"wallet\": {\n        \"rpc\": \"\",\n        \"chainName\": \"\",\n        \"chainId\": \"\",\n        \"address\": \"\"\n      }\n    }\n  },\n  \"payer\": {\n    \"id\": null,\n    \"name\": \"\",\n    \"address\": {\n      \"streetAddress\": \"\",\n      \"extendedAddress\": \"\",\n      \"city\": \"\",\n      \"postalCode\": \"\",\n      \"country\": \"\",\n      \"stateProvince\": \"\"\n    },\n    \"contactInfo\": {\n      \"tel\": \"\",\n      \"email\": \"\"\n    },\n    \"country\": \"\",\n    \"paymentRouting\": {\n      \"bank\": {\n        \"name\": \"\",\n        \"address\": {\n          \"streetAddress\": \"\",\n          \"extendedAddress\": \"\",\n          \"city\": \"\",\n          \"postalCode\": \"\",\n          \"country\": \"\",\n          \"stateProvince\": \"\"\n        },\n        \"ABA\": \"\",\n        \"BIC\": \"\",\n        \"SWIFT\": \"\",\n        \"accountNum\": \"\",\n        \"accountType\": \"CHECKING\",\n        \"beneficiary\": \"\",\n        \"intermediaryBank\": {\n          \"name\": \"\",\n          \"address\": {\n            \"streetAddress\": \"\",\n            \"extendedAddress\": \"\",\n            \"city\": \"\",\n            \"postalCode\": \"\",\n            \"country\": \"\",\n            \"stateProvince\": \"\"\n          },\n          \"ABA\": \"\",\n          \"BIC\": \"\",\n          \"SWIFT\": \"\",\n          \"accountNum\": \"\",\n          \"accountType\": \"CHECKING\",\n          \"beneficiary\": \"\",\n          \"memo\": \"\"\n        },\n        \"memo\": \"\"\n      },\n      \"wallet\": {\n        \"rpc\": \"\",\n        \"chainName\": \"\",\n        \"chainId\": \"\",\n        \"address\": \"\"\n      }\n    }\n  },\n  \"currency\": \"\",\n  \"lineItems\": [],\n  \"totalPriceTaxExcl\": 0,\n  \"totalPriceTaxIncl\": 0,\n  \"invoiceTags\": []\n}",
-                    "examples": []
-                },
-                "local": {
-                    "schema": "",
-                    "initialValue": "",
-                    "examples": []
-                }
-            },
             "modules": [
                 {
                     "id": "WDJ7NWCy8TEDk1TWvr0F+VXvIqc=",
@@ -33,7 +20,7 @@
                             "id": "8Ld7B60Upub1CNmVrx3TMzmyl54=",
                             "name": "EDIT_INVOICE",
                             "description": "",
-                            "schema": "input EditInvoiceInput {\n    invoiceNo: String\n    dateIssued: String\n    dateDue: String\n    dateDelivered: String\n    currency: String\n    notes: String\n}",
+                            "schema": "input EditInvoiceInput {\n    invoiceNo: String\n    dateIssued: String\n    dateDue: String\n    currency: String\n    notes: String\n}",
                             "template": "",
                             "reducer": "",
                             "errors": [],
@@ -45,39 +32,6 @@
                             "name": "EDIT_STATUS",
                             "description": "",
                             "schema": "input EditStatusInput {\n  status: Status!\n}",
-                            "template": "",
-                            "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
-                        },
-                        {
-                            "id": "1OkChgHSA5jIpjIGS6MVVxGyfM8=",
-                            "name": "ADD_REF",
-                            "description": "",
-                            "schema": "input AddRefInput {\n    id: OID!\n    value: String!\n}",
-                            "template": "",
-                            "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
-                        },
-                        {
-                            "id": "581o1DMt70KKGjJ2r71DvorNcXA=",
-                            "name": "EDIT_REF",
-                            "description": "",
-                            "schema": "input EditRefInput {\n    id: OID!\n    value: String!\n}",
-                            "template": "",
-                            "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
-                        },
-                        {
-                            "id": "1a8Gp073BABmS4Qg7ydVPhHQYoA=",
-                            "name": "DELETE_REF",
-                            "description": "",
-                            "schema": "input DeleteRefInput {\n  id: OID!\n}",
                             "template": "",
                             "reducer": "",
                             "errors": [],
@@ -97,9 +51,9 @@
                         },
                         {
                             "id": "GcKc8GFnD3w7M1fdwxBXrGBwCRM=",
-                            "name": "SET_EXPORTED",
-                            "description": "Set to true once payment data has been exported through a csv export",
-                            "schema": "input SetExportedInput {\n  exported: Boolean\n}",
+                            "name": "SET_EXPORTED_DATA",
+                            "description": "Set exported line items in CSV format with timestamp to track exports",
+                            "schema": "input SetExportedDataInput {\n  id: OID!\n  timestamp: String!\n  exportedLineItems: [[String!]!]! \n}",
                             "template": "",
                             "reducer": "",
                             "errors": [],
@@ -242,8 +196,160 @@
                             "scope": "global"
                         }
                     ]
+                },
+                {
+                    "id": "0af3e43f-8233-4d95-862f-70f1d54fe1dd",
+                    "name": "transitions",
+                    "description": "",
+                    "operations": [
+                        {
+                            "id": "f516b9e3-4b47-4b49-955c-6e907778e186",
+                            "name": "CANCEL",
+                            "description": "",
+                            "schema": "input CancelInput {\n  \"Add your inputs here\"\n  _placeholder: String\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "261d8f6d-6d70-4c99-99aa-7717d22d08c3",
+                            "name": "ISSUE",
+                            "description": "",
+                            "schema": "input IssueInput {\n  invoiceNo: String!\n  dateIssued: String!\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "05bf4cc9-7772-481a-8d0f-1471ffaa4287",
+                            "name": "RESET",
+                            "description": "",
+                            "schema": "input ResetInput {\n  \"Add your inputs here\"\n  _placeholder: String\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "0ae43a1e-e4a8-4a2e-aedc-e5e10a426de5",
+                            "name": "REJECT",
+                            "description": "",
+                            "schema": "input RejectInput {\n  reason: String!\n  final: Boolean!\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "54a3fd38-abac-48d7-9cd1-2def01a15f93",
+                            "name": "ACCEPT",
+                            "description": "",
+                            "schema": "input AcceptInput {\n  payAfter: DateTime\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "14566620-08db-4f56-84e7-96c30049dd33",
+                            "name": "REINSTATE",
+                            "description": "",
+                            "schema": "input ReinstateInput {\n  \"Add your inputs here\"\n  _placeholder: String\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "e5df6e79-1398-4e9b-baeb-11957882f47d",
+                            "name": "SCHEDULE_PAYMENT",
+                            "description": "",
+                            "schema": "input SchedulePaymentInput {\n  id: OID!           # New Payment ID\n  processorRef: String!\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "96849e73-c8ed-4726-b523-29e03cd3fd29",
+                            "name": "REAPPROVE_PAYMENT",
+                            "description": "",
+                            "schema": "input ReapprovePaymentInput {\n  \"Add your inputs here\"\n  _placeholder: String\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "f5dabccc-4055-4c0a-b650-c5b2e7f37ac5",
+                            "name": "REGISTER_PAYMENT_TX",
+                            "description": "",
+                            "schema": "input RegisterPaymentTxInput {\n  id: OID!       # Payment ID\n  timestamp: DateTime!\n  txRef: String!\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "562df495-9d22-4293-be78-e5258713d620",
+                            "name": "REPORT_PAYMENT_ISSUE",
+                            "description": "",
+                            "schema": "input ReportPaymentIssueInput {\n  id: OID!       # Payment ID\n  issue: String!\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "8f374198-3588-487d-8833-b29790caeab0",
+                            "name": "CONFIRM_PAYMENT",
+                            "description": "",
+                            "schema": "input ConfirmPaymentInput {\n  id: OID!       # Payment ID\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "3e737341-8b98-4adb-9cfc-0e237fe2dee0",
+                            "name": "CANCEL_PAYMENT",
+                            "description": "",
+                            "schema": "input CancelPaymentInput {\n  \"Add your inputs here\"\n  _placeholder: String\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        }
+                    ]
                 }
-            ]
+            ],
+            "state": {
+                "global": {
+                    "examples": [],
+                    "initialValue": "{\n  \"invoiceNo\": \"\",\n  \"dateIssued\": \"\",\n  \"dateDue\": \"\",\n  \"dateDelivered\": null,\n  \"status\": \"DRAFT\",\n  \"issuer\": {\n    \"id\": null,\n    \"name\": \"\",\n    \"address\": {\n      \"streetAddress\": \"\",\n      \"extendedAddress\": \"\",\n      \"city\": \"\",\n      \"postalCode\": \"\",\n      \"country\": \"\",\n      \"stateProvince\": \"\"\n    },\n    \"contactInfo\": {\n      \"tel\": \"\",\n      \"email\": \"\"\n    },\n    \"country\": \"\",\n    \"paymentRouting\": {\n      \"bank\": {\n        \"name\": \"\",\n        \"address\": {\n          \"streetAddress\": \"\",\n          \"extendedAddress\": \"\",\n          \"city\": \"\",\n          \"postalCode\": \"\",\n          \"country\": \"\",\n          \"stateProvince\": \"\"\n        },\n        \"ABA\": \"\",\n        \"BIC\": \"\",\n        \"SWIFT\": \"\",\n        \"accountNum\": \"\",\n        \"accountType\": \"CHECKING\",\n        \"beneficiary\": \"\",\n        \"intermediaryBank\": {\n          \"name\": \"\",\n          \"address\": {\n            \"streetAddress\": \"\",\n            \"extendedAddress\": \"\",\n            \"city\": \"\",\n            \"postalCode\": \"\",\n            \"country\": \"\",\n            \"stateProvince\": \"\"\n          },\n          \"ABA\": \"\",\n          \"BIC\": \"\",\n          \"SWIFT\": \"\",\n          \"accountNum\": \"\",\n          \"accountType\": \"CHECKING\",\n          \"beneficiary\": \"\",\n          \"memo\": \"\"\n        },\n        \"memo\": \"\"\n      },\n      \"wallet\": {\n        \"rpc\": \"\",\n        \"chainName\": \"\",\n        \"chainId\": \"\",\n        \"address\": \"\"\n      }\n    }\n  },\n  \"payer\": {\n    \"id\": null,\n    \"name\": \"\",\n    \"address\": {\n      \"streetAddress\": \"\",\n      \"extendedAddress\": \"\",\n      \"city\": \"\",\n      \"postalCode\": \"\",\n      \"country\": \"\",\n      \"stateProvince\": \"\"\n    },\n    \"contactInfo\": {\n      \"tel\": \"\",\n      \"email\": \"\"\n    },\n    \"country\": \"\",\n    \"paymentRouting\": {\n      \"bank\": {\n        \"name\": \"\",\n        \"address\": {\n          \"streetAddress\": \"\",\n          \"extendedAddress\": \"\",\n          \"city\": \"\",\n          \"postalCode\": \"\",\n          \"country\": \"\",\n          \"stateProvince\": \"\"\n        },\n        \"ABA\": \"\",\n        \"BIC\": \"\",\n        \"SWIFT\": \"\",\n        \"accountNum\": \"\",\n        \"accountType\": \"CHECKING\",\n        \"beneficiary\": \"\",\n        \"intermediaryBank\": {\n          \"name\": \"\",\n          \"address\": {\n            \"streetAddress\": \"\",\n            \"extendedAddress\": \"\",\n            \"city\": \"\",\n            \"postalCode\": \"\",\n            \"country\": \"\",\n            \"stateProvince\": \"\"\n          },\n          \"ABA\": \"\",\n          \"BIC\": \"\",\n          \"SWIFT\": \"\",\n          \"accountNum\": \"\",\n          \"accountType\": \"CHECKING\",\n          \"beneficiary\": \"\",\n          \"memo\": \"\"\n        },\n        \"memo\": \"\"\n      },\n      \"wallet\": {\n        \"rpc\": \"\",\n        \"chainName\": \"\",\n        \"chainId\": \"\",\n        \"address\": \"\"\n      }\n    }\n  },\n  \"currency\": \"\",\n  \"lineItems\": [],\n  \"totalPriceTaxExcl\": 0,\n  \"totalPriceTaxIncl\": 0,\n  \"notes\": null,\n  \"invoiceTags\": [],\n  \"rejections\": [],\n  \"payAfter\": null,\n  \"payments\": [],\n  \"exported\": []\n}",
+                    "schema": "type InvoiceState {\n  invoiceNo: String!\n  dateIssued: Date!\n  dateDue: Date!\n  dateDelivered: Date\n  payAfter: DateTime\n  status: Status!\n  issuer: LegalEntity!\n  payer: LegalEntity!\n  currency: String!\n  lineItems: [InvoiceLineItem!]!\n  totalPriceTaxExcl: Float!\n  totalPriceTaxIncl: Float!\n  notes: String\n  invoiceTags: [InvoiceTag!]!   # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}\n  rejections: [Rejection!]!\n  payments: [Payment!]!\n  exported: [ExportedData!]!\n}\n\ntype Rejection {\n  id: OID!\n  reason: String!\n  final: Boolean!\n}\n\ntype ExportedData {\n  id: OID!\n  timestamp: DateTime!        # ISO 8601 timestamp of the export\n  exportedLineItems: [[String!]!]!   # CSV Format\n}\n\ntype Payment {\n  id: OID!\n  processorRef: String\n  paymentDate: DateTime\n  txnRef: String\n  confirmed: Boolean!\n  issue: String\n}\n\ntype Token {\n  evmAddress: String\n  symbol: String\n  chainName: String\n  chainId: String\n  rpc: String\n}\n\ntype LegalEntity {\n  id: LegalEntityId\n  name: String\n  address: Address\n  contactInfo: ContactInfo\n  country: String\n  paymentRouting: PaymentRouting\n}\n\ntype Address {\n  streetAddress: String\n  extendedAddress: String\n  city: String\n  postalCode: String\n  country: String\n  stateProvince: String\n}\n\ntype ContactInfo {\n  tel: String\n  email: String\n}\n\ntype PaymentRouting {\n  bank: Bank\n  wallet: InvoiceWallet\n}\n\ntype Bank {\n  name: String!\n  address: Address!\n  ABA: String\n  BIC: String\n  SWIFT: String\n  accountNum: String!\n  accountType: InvoiceAccountType\n  beneficiary: String\n  intermediaryBank: IntermediaryBank\n  memo: String\n}\n\ntype IntermediaryBank {\n  name: String!\n  address: Address!\n  ABA: String\n  BIC: String\n  SWIFT: String\n  accountNum: String!\n  accountType: InvoiceAccountType\n  beneficiary: String\n  memo: String\n}\n\ntype InvoiceWallet {\n  rpc: String\n  chainName: String\n  chainId: String\n  address: String\n}\n\ntype InvoiceLineItem {\n  id: OID!\n  description: String!\n  taxPercent: Float!\n  quantity: Float!\n  currency: String!\n  unitPriceTaxExcl: Float!\n  unitPriceTaxIncl: Float!\n  totalPriceTaxExcl: Float!\n  totalPriceTaxIncl: Float!\n  lineItemTag: [InvoiceTag!]\n}\n\ntype InvoiceTag {\n  dimension: String!  # \"xero-expense-account\", \"xero-payment-account\", \"accounting-period\", ...\n  value: String!      # \"627\", ..., \"090\", ..., \"2025/05\", \"2025/Q1\", ...\n  label: String       # \"Marketing\", ..., \"Business Bank\", ..., \"May 2025\"\n}\n\nunion LegalEntityId = LegalEntityTaxId | LegalEntityCorporateRegistrationId\n\ntype LegalEntityTaxId {\n  taxId: String!\n}\n\ntype LegalEntityCorporateRegistrationId {\n  corpRegId: String!\n}\n\nenum Status {\n  DRAFT\n  ISSUED\n  CANCELLED\n  ACCEPTED\n  REJECTED\n  PAYMENTSCHEDULED\n  PAYMENTSENT\n  PAYMENTISSUE\n  PAYMENTRECEIVED\n  PAYMENTCANCELLED\n}\n\nenum InvoiceAccountType {\n  CHECKING\n  SAVINGS\n  TRUST\n  WALLET\n}\n\nenum InvoiceAccountTypeInput {\n  CHECKING\n  SAVINGS\n  TRUST\n  WALLET\n}"
+                },
+                "local": {
+                    "examples": [],
+                    "initialValue": "",
+                    "schema": ""
+                }
+            },
+            "version": 1
         }
     ]
 }
