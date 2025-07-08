@@ -160,7 +160,7 @@ export const schema: DocumentNode = gql`
     PAYMENTSENT
     PAYMENTISSUE
     PAYMENTRECEIVED
-    PAYMENTCANCELLED
+    PAYMENTCLOSED
   }
 
   enum InvoiceAccountType {
@@ -347,7 +347,7 @@ export const schema: DocumentNode = gql`
   """
   Result type for PDF chunk upload
   """
-  type UploadInvoicePdfChunkResult {
+  input UploadInvoicePdfChunkResult {
     success: Boolean!
     data: JSON
     error: String
@@ -356,7 +356,7 @@ export const schema: DocumentNode = gql`
   """
   Result type for request finance payment request
   """
-  type CreateRequestFinancePaymentResult {
+  input CreateRequestFinancePaymentResult {
     success: Boolean!
     data: JSON
     error: String
@@ -365,7 +365,7 @@ export const schema: DocumentNode = gql`
   """
   Result type for process gnosis payment
   """
-  type ProcessGnosisPaymentResult {
+  input ProcessGnosisPaymentResult {
     success: Boolean!
     data: JSON
     error: String
