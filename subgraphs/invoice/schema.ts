@@ -6,12 +6,11 @@ export const schema: DocumentNode = gql`
   Subgraph definition for Invoice (powerhouse/invoice)
   """
   type InvoiceState {
+    status: Status!
     invoiceNo: String!
     dateIssued: Date!
     dateDue: Date!
     dateDelivered: Date
-    payAfter: DateTime
-    status: Status!
     issuer: LegalEntity!
     payer: LegalEntity!
     currency: String!
@@ -19,10 +18,18 @@ export const schema: DocumentNode = gql`
     totalPriceTaxExcl: Float!
     totalPriceTaxIncl: Float!
     notes: String
-    invoiceTags: [InvoiceTag!]! # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}
     rejections: [Rejection!]!
     payments: [Payment!]!
-    exported: [ExportedData!]!
+    payAfter: DateTime
+    invoiceTags: [InvoiceTag!]! # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}
+    exported: ExportedData
+    closureReason: ClosureReason
+  }
+
+  enum ClosureReason {
+    UNDERPAID
+    OVERPAID
+    CANCELLED
   }
 
   type Rejection {
@@ -32,7 +39,6 @@ export const schema: DocumentNode = gql`
   }
 
   type ExportedData {
-    id: OID!
     timestamp: DateTime! # ISO 8601 timestamp of the export
     exportedLineItems: [[String!]!]! # CSV Format
   }
@@ -44,6 +50,7 @@ export const schema: DocumentNode = gql`
     txnRef: String
     confirmed: Boolean!
     issue: String
+    amount: Float
   }
 
   type Token {
@@ -208,6 +215,11 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: Invoice_SetExportedDataInput
     ): Int
+    Invoice_addPayment(
+      driveId: String
+      docId: PHID
+      input: Invoice_AddPaymentInput
+    ): Int
     Invoice_editIssuer(
       driveId: String
       docId: PHID
@@ -310,10 +322,10 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: Invoice_ConfirmPaymentInput
     ): Int
-    Invoice_cancelPayment(
+    Invoice_closePayment(
       driveId: String
       docId: PHID
-      input: Invoice_CancelPaymentInput
+      input: Invoice_ClosePaymentInput
     ): Int
     Invoice_processGnosisPayment(
       driveId: String
@@ -375,13 +387,25 @@ export const schema: DocumentNode = gql`
     status: Status!
   }
   input Invoice_EditPaymentDataInput {
-    paymentDate: String
-    txnHash: String
+    id: OID!
+    processorRef: String
+    paymentDate: DateTime
+    txnRef: String
+    confirmed: Boolean!
+    issue: String
   }
   input Invoice_SetExportedDataInput {
     id: OID!
     timestamp: String!
     exportedLineItems: [[String!]!]!
+  }
+  input Invoice_AddPaymentInput {
+    id: OID!
+    processorRef: String
+    paymentDate: DateTime
+    txnRef: String
+    confirmed: Boolean!
+    issue: String
   }
 
   """
@@ -572,18 +596,15 @@ export const schema: DocumentNode = gql`
   }
   input Invoice_ConfirmPaymentInput {
     id: OID! # Payment ID
+    amount: Float!
   }
-  input Invoice_CancelPaymentInput {
-    "Add your inputs here"
-    _placeholder: String
+  input Invoice_ClosePaymentInput {
+    closureReason: ClosureReasonInput
   }
-  input Invoice_ProcessGnosisPaymentInput {
-    id: OID! # Payment ID
-  }
-  input Invoice_CreateRequestFinancePaymentInput {
-    id: OID! # Payment ID
-  }
-  input Invoice_UploadInvoicePdfChunkInput {
-    id: OID! # Payment ID
+
+  enum ClosureReasonInput {
+    UNDERPAID
+    OVERPAID
+    CANCELLED
   }
 `;
