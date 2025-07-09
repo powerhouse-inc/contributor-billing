@@ -567,6 +567,7 @@ export const schema: DocumentNode = gql`
     _placeholder: String
   }
   input Invoice_RejectInput {
+    id: OID! # New Rejection ID
     reason: String!
     final: Boolean!
   }
