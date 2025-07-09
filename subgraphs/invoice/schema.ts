@@ -395,8 +395,7 @@ export const schema: DocumentNode = gql`
     issue: String
   }
   input Invoice_SetExportedDataInput {
-    id: OID!
-    timestamp: String!
+    timestamp: DateTime!
     exportedLineItems: [[String!]!]!
   }
   input Invoice_AddPaymentInput {
