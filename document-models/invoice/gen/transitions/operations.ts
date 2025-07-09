@@ -11,7 +11,7 @@ import {
   type RegisterPaymentTxAction,
   type ReportPaymentIssueAction,
   type ConfirmPaymentAction,
-  type CancelPaymentAction,
+  type ClosePaymentAction,
 } from "./actions.js";
 import { type InvoiceState } from "../types.js";
 
@@ -71,9 +71,9 @@ export interface InvoiceTransitionsOperations {
     action: ConfirmPaymentAction,
     dispatch?: SignalDispatch,
   ) => void;
-  cancelPaymentOperation: (
+  closePaymentOperation: (
     state: InvoiceState,
-    action: CancelPaymentAction,
+    action: ClosePaymentAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

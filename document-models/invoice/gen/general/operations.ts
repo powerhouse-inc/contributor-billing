@@ -4,6 +4,7 @@ import {
   type EditStatusAction,
   type EditPaymentDataAction,
   type SetExportedDataAction,
+  type AddPaymentAction,
 } from "./actions.js";
 import { type InvoiceState } from "../types.js";
 
@@ -26,6 +27,11 @@ export interface InvoiceGeneralOperations {
   setExportedDataOperation: (
     state: InvoiceState,
     action: SetExportedDataAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  addPaymentOperation: (
+    state: InvoiceState,
+    action: AddPaymentAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

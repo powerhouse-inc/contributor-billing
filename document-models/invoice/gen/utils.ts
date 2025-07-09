@@ -19,6 +19,7 @@ export const initialGlobalState: InvoiceState = {
   dateIssued: "",
   dateDue: "",
   dateDelivered: null,
+  payAfter: null,
   status: "DRAFT",
   issuer: {
     id: null,
@@ -149,7 +150,6 @@ export const initialGlobalState: InvoiceState = {
   notes: null,
   invoiceTags: [],
   rejections: [],
-  payAfter: null,
   payments: [],
   exported: [],
 };

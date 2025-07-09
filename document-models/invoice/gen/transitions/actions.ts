@@ -11,7 +11,7 @@ import type {
   RegisterPaymentTxInput,
   ReportPaymentIssueInput,
   ConfirmPaymentInput,
-  CancelPaymentInput,
+  ClosePaymentInput,
 } from "../types.js";
 
 export type CancelAction = BaseAction<"CANCEL", CancelInput, "global">;
@@ -45,9 +45,9 @@ export type ConfirmPaymentAction = BaseAction<
   ConfirmPaymentInput,
   "global"
 >;
-export type CancelPaymentAction = BaseAction<
-  "CANCEL_PAYMENT",
-  CancelPaymentInput,
+export type ClosePaymentAction = BaseAction<
+  "CLOSE_PAYMENT",
+  ClosePaymentInput,
   "global"
 >;
 
@@ -63,4 +63,4 @@ export type InvoiceTransitionsAction =
   | RegisterPaymentTxAction
   | ReportPaymentIssueAction
   | ConfirmPaymentAction
-  | CancelPaymentAction;
+  | ClosePaymentAction;

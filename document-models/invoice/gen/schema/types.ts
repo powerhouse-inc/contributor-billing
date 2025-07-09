@@ -71,6 +71,15 @@ export type AddLineItemInput = {
   unitPriceTaxIncl: Scalars["Float"]["input"];
 };
 
+export type AddPaymentInput = {
+  confirmed: Scalars["Boolean"]["input"];
+  id: Scalars["OID"]["input"];
+  issue?: InputMaybe<Scalars["String"]["input"]>;
+  paymentDate?: InputMaybe<Scalars["DateTime"]["input"]>;
+  processorRef?: InputMaybe<Scalars["String"]["input"]>;
+  txnRef?: InputMaybe<Scalars["String"]["input"]>;
+};
+
 export type Address = {
   city: Maybe<Scalars["String"]["output"]>;
   country: Maybe<Scalars["String"]["output"]>;
@@ -98,12 +107,16 @@ export type CancelInput = {
   _placeholder?: InputMaybe<Scalars["String"]["input"]>;
 };
 
-export type CancelPaymentInput = {
-  /** Add your inputs here */
-  _placeholder?: InputMaybe<Scalars["String"]["input"]>;
+export type ClosePaymentInput = {
+  closureReason?: InputMaybe<ClosureReasonInput | `${ClosureReasonInput}`>;
 };
 
+export type ClosureReason = "CANCELLED" | "OVERPAID" | "UNDERPAID";
+
+export type ClosureReasonInput = "CANCELLED" | "OVERPAID" | "UNDERPAID";
+
 export type ConfirmPaymentInput = {
+  amount: Scalars["Float"]["input"];
   id: Scalars["OID"]["input"];
 };
 
@@ -247,8 +260,12 @@ export type EditPayerWalletInput = {
 };
 
 export type EditPaymentDataInput = {
-  paymentDate?: InputMaybe<Scalars["String"]["input"]>;
-  txnHash?: InputMaybe<Scalars["String"]["input"]>;
+  confirmed: Scalars["Boolean"]["input"];
+  id: Scalars["OID"]["input"];
+  issue?: InputMaybe<Scalars["String"]["input"]>;
+  paymentDate?: InputMaybe<Scalars["DateTime"]["input"]>;
+  processorRef?: InputMaybe<Scalars["String"]["input"]>;
+  txnRef?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type EditStatusInput = {
@@ -257,7 +274,6 @@ export type EditStatusInput = {
 
 export type ExportedData = {
   exportedLineItems: Array<Array<Scalars["String"]["output"]>>;
-  id: Scalars["OID"]["output"];
   timestamp: Scalars["DateTime"]["output"];
 };
 
@@ -295,11 +311,12 @@ export type InvoiceLineItem = {
 };
 
 export type InvoiceState = {
+  closureReason: Maybe<ClosureReason | `${ClosureReason}`>;
   currency: Scalars["String"]["output"];
   dateDelivered: Maybe<Scalars["Date"]["output"]>;
   dateDue: Scalars["Date"]["output"];
   dateIssued: Scalars["Date"]["output"];
-  exported: Array<ExportedData>;
+  exported: Maybe<ExportedData>;
   invoiceNo: Scalars["String"]["output"];
   invoiceTags: Array<InvoiceTag>;
   issuer: LegalEntity;
@@ -354,6 +371,7 @@ export type LegalEntityTaxId = {
 };
 
 export type Payment = {
+  amount: Maybe<Scalars["Float"]["output"]>;
   confirmed: Scalars["Boolean"]["output"];
   id: Scalars["OID"]["output"];
   issue: Maybe<Scalars["String"]["output"]>;
@@ -385,6 +403,7 @@ export type ReinstateInput = {
 
 export type RejectInput = {
   final: Scalars["Boolean"]["input"];
+  id: Scalars["OID"]["input"];
   reason: Scalars["String"]["input"];
 };
 
@@ -411,8 +430,7 @@ export type SchedulePaymentInput = {
 
 export type SetExportedDataInput = {
   exportedLineItems: Array<Array<Scalars["String"]["input"]>>;
-  id: Scalars["OID"]["input"];
-  timestamp: Scalars["String"]["input"];
+  timestamp: Scalars["DateTime"]["input"];
 };
 
 export type SetInvoiceTagInput = {
@@ -433,7 +451,7 @@ export type Status =
   | "CANCELLED"
   | "DRAFT"
   | "ISSUED"
-  | "PAYMENTCANCELLED"
+  | "PAYMENTCLOSED"
   | "PAYMENTISSUE"
   | "PAYMENTRECEIVED"
   | "PAYMENTSCHEDULED"

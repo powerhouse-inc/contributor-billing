@@ -12,7 +12,7 @@ import {
   type RegisterPaymentTxInput,
   type ReportPaymentIssueInput,
   type ConfirmPaymentInput,
-  type CancelPaymentInput,
+  type ClosePaymentInput,
 } from "../types.js";
 import {
   type CancelAction,
@@ -26,7 +26,7 @@ import {
   type RegisterPaymentTxAction,
   type ReportPaymentIssueAction,
   type ConfirmPaymentAction,
-  type CancelPaymentAction,
+  type ClosePaymentAction,
 } from "./actions.js";
 
 export const cancel = (input: CancelInput) =>
@@ -128,11 +128,11 @@ export const confirmPayment = (input: ConfirmPaymentInput) =>
     "global",
   );
 
-export const cancelPayment = (input: CancelPaymentInput) =>
-  createAction<CancelPaymentAction>(
-    "CANCEL_PAYMENT",
+export const closePayment = (input: ClosePaymentInput) =>
+  createAction<ClosePaymentAction>(
+    "CLOSE_PAYMENT",
     { ...input },
     undefined,
-    z.CancelPaymentInputSchema,
+    z.ClosePaymentInputSchema,
     "global",
   );

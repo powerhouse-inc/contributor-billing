@@ -15,12 +15,11 @@ scalar Amount_Currency
 scalar Amount_Crypto
 scalar Amount
 type InvoiceState {
+  status: Status!
   invoiceNo: String!
   dateIssued: Date!
   dateDue: Date!
   dateDelivered: Date
-  payAfter: DateTime
-  status: Status!
   issuer: LegalEntity!
   payer: LegalEntity!
   currency: String!
@@ -28,10 +27,18 @@ type InvoiceState {
   totalPriceTaxExcl: Float!
   totalPriceTaxIncl: Float!
   notes: String
-  invoiceTags: [InvoiceTag!]!   # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}
   rejections: [Rejection!]!
   payments: [Payment!]!
-  exported: [ExportedData!]!
+  payAfter: DateTime
+  invoiceTags: [InvoiceTag!]!   # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}
+  exported: ExportedData
+  closureReason: ClosureReason
+}
+
+enum ClosureReason {
+  UNDERPAID
+  OVERPAID
+  CANCELLED
 }
 
 type Rejection {
@@ -41,7 +48,6 @@ type Rejection {
 }
 
 type ExportedData {
-  id: OID!
   timestamp: DateTime!        # ISO 8601 timestamp of the export
   exportedLineItems: [[String!]!]!   # CSV Format
 }
@@ -53,6 +59,7 @@ type Payment {
   txnRef: String
   confirmed: Boolean!
   issue: String
+  amount: Float
 }
 
 type Token {
@@ -162,7 +169,7 @@ enum Status {
   PAYMENTSENT
   PAYMENTISSUE
   PAYMENTRECEIVED
-  PAYMENTCANCELLED
+  PAYMENTCLOSED
 }
 
 enum InvoiceAccountType {
@@ -196,14 +203,26 @@ input EditStatusInput {
 }
 
 input EditPaymentDataInput {
-  paymentDate: String
-  txnHash: String
+  id: OID!
+  processorRef: String
+  paymentDate: DateTime
+  txnRef: String
+  confirmed: Boolean!
+  issue: String
 }
 
 input SetExportedDataInput {
-  id: OID!
-  timestamp: String!
+  timestamp: DateTime!
   exportedLineItems: [[String!]!]! 
+}
+
+input AddPaymentInput {
+  id: OID!
+  processorRef: String
+  paymentDate: DateTime
+  txnRef: String
+  confirmed: Boolean!
+  issue: String
 }
 
 # parties
@@ -375,6 +394,7 @@ input ResetInput {
 }
 
 input RejectInput {
+  id: OID! # New Rejection ID
   reason: String!
   final: Boolean!
 }
@@ -411,9 +431,15 @@ input ReportPaymentIssueInput {
 
 input ConfirmPaymentInput {
   id: OID!       # Payment ID
+  amount: Float!
 }
 
-input CancelPaymentInput {
-  "Add your inputs here"
-  _placeholder: String
+input ClosePaymentInput {
+  closureReason: ClosureReasonInput
+}
+
+enum ClosureReasonInput {
+  UNDERPAID
+  OVERPAID
+  CANCELLED
 }

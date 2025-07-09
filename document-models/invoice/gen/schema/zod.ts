@@ -2,10 +2,13 @@ import { z } from "zod";
 import type {
   AcceptInput,
   AddLineItemInput,
+  AddPaymentInput,
   Address,
   Bank,
   CancelInput,
-  CancelPaymentInput,
+  ClosePaymentInput,
+  ClosureReason,
+  ClosureReasonInput,
   ConfirmPaymentInput,
   ContactInfo,
   DeleteLineItemInput,
@@ -61,6 +64,18 @@ export const definedNonNullAnySchema = z
   .any()
   .refine((v) => isDefinedNonNullAny(v));
 
+export const ClosureReasonSchema = z.enum([
+  "CANCELLED",
+  "OVERPAID",
+  "UNDERPAID",
+]);
+
+export const ClosureReasonInputSchema = z.enum([
+  "CANCELLED",
+  "OVERPAID",
+  "UNDERPAID",
+]);
+
 export const InvoiceAccountTypeSchema = z.enum([
   "CHECKING",
   "SAVINGS",
@@ -80,7 +95,7 @@ export const StatusSchema = z.enum([
   "CANCELLED",
   "DRAFT",
   "ISSUED",
-  "PAYMENTCANCELLED",
+  "PAYMENTCLOSED",
   "PAYMENTISSUE",
   "PAYMENTRECEIVED",
   "PAYMENTSCHEDULED",
@@ -107,6 +122,19 @@ export function AddLineItemInputSchema(): z.ZodObject<
     totalPriceTaxIncl: z.number(),
     unitPriceTaxExcl: z.number(),
     unitPriceTaxIncl: z.number(),
+  });
+}
+
+export function AddPaymentInputSchema(): z.ZodObject<
+  Properties<AddPaymentInput>
+> {
+  return z.object({
+    confirmed: z.boolean(),
+    id: z.string(),
+    issue: z.string().nullish(),
+    paymentDate: z.string().datetime().nullish(),
+    processorRef: z.string().nullish(),
+    txnRef: z.string().nullish(),
   });
 }
 
@@ -144,11 +172,11 @@ export function CancelInputSchema(): z.ZodObject<Properties<CancelInput>> {
   });
 }
 
-export function CancelPaymentInputSchema(): z.ZodObject<
-  Properties<CancelPaymentInput>
+export function ClosePaymentInputSchema(): z.ZodObject<
+  Properties<ClosePaymentInput>
 > {
   return z.object({
-    _placeholder: z.string().nullish(),
+    closureReason: z.lazy(() => ClosureReasonInputSchema.nullish()),
   });
 }
 
@@ -156,6 +184,7 @@ export function ConfirmPaymentInputSchema(): z.ZodObject<
   Properties<ConfirmPaymentInput>
 > {
   return z.object({
+    amount: z.number(),
     id: z.string(),
   });
 }
@@ -338,8 +367,12 @@ export function EditPaymentDataInputSchema(): z.ZodObject<
   Properties<EditPaymentDataInput>
 > {
   return z.object({
-    paymentDate: z.string().nullish(),
-    txnHash: z.string().nullish(),
+    confirmed: z.boolean(),
+    id: z.string(),
+    issue: z.string().nullish(),
+    paymentDate: z.string().datetime().nullish(),
+    processorRef: z.string().nullish(),
+    txnRef: z.string().nullish(),
   });
 }
 
@@ -355,7 +388,6 @@ export function ExportedDataSchema(): z.ZodObject<Properties<ExportedData>> {
   return z.object({
     __typename: z.literal("ExportedData").optional(),
     exportedLineItems: z.array(z.array(z.string())),
-    id: z.string(),
     timestamp: z.string().datetime(),
   });
 }
@@ -398,11 +430,12 @@ export function InvoiceLineItemSchema(): z.ZodObject<
 export function InvoiceStateSchema(): z.ZodObject<Properties<InvoiceState>> {
   return z.object({
     __typename: z.literal("InvoiceState").optional(),
+    closureReason: ClosureReasonSchema.nullable(),
     currency: z.string(),
     dateDelivered: z.string().datetime().nullable(),
     dateDue: z.string().datetime(),
     dateIssued: z.string().datetime(),
-    exported: z.array(ExportedDataSchema()),
+    exported: ExportedDataSchema().nullable(),
     invoiceNo: z.string(),
     invoiceTags: z.array(InvoiceTagSchema()),
     issuer: LegalEntitySchema(),
@@ -484,6 +517,7 @@ export function LegalEntityTaxIdSchema(): z.ZodObject<
 export function PaymentSchema(): z.ZodObject<Properties<Payment>> {
   return z.object({
     __typename: z.literal("Payment").optional(),
+    amount: z.number().nullable(),
     confirmed: z.boolean(),
     id: z.string(),
     issue: z.string().nullable(),
@@ -532,6 +566,7 @@ export function ReinstateInputSchema(): z.ZodObject<
 export function RejectInputSchema(): z.ZodObject<Properties<RejectInput>> {
   return z.object({
     final: z.boolean(),
+    id: z.string(),
     reason: z.string(),
   });
 }
@@ -574,8 +609,7 @@ export function SetExportedDataInputSchema(): z.ZodObject<
 > {
   return z.object({
     exportedLineItems: z.array(z.array(z.string())),
-    id: z.string(),
-    timestamp: z.string(),
+    timestamp: z.string().datetime(),
   });
 }
 

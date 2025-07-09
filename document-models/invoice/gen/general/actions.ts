@@ -4,6 +4,7 @@ import type {
   EditStatusInput,
   EditPaymentDataInput,
   SetExportedDataInput,
+  AddPaymentInput,
 } from "../types.js";
 
 export type EditInvoiceAction = BaseAction<
@@ -26,9 +27,15 @@ export type SetExportedDataAction = BaseAction<
   SetExportedDataInput,
   "global"
 >;
+export type AddPaymentAction = BaseAction<
+  "ADD_PAYMENT",
+  AddPaymentInput,
+  "global"
+>;
 
 export type InvoiceGeneralAction =
   | EditInvoiceAction
   | EditStatusAction
   | EditPaymentDataAction
-  | SetExportedDataAction;
+  | SetExportedDataAction
+  | AddPaymentAction;

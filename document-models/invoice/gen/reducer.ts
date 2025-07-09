@@ -52,6 +52,11 @@ const stateReducer: StateReducer<InvoiceDocument> = (
       );
       break;
 
+    case "ADD_PAYMENT":
+      z.AddPaymentInputSchema().parse(action.input);
+      GeneralReducer.addPaymentOperation(state[action.scope], action, dispatch);
+      break;
+
     case "EDIT_ISSUER":
       z.EditIssuerInputSchema().parse(action.input);
       PartiesReducer.editIssuerOperation(state[action.scope], action, dispatch);
@@ -214,9 +219,9 @@ const stateReducer: StateReducer<InvoiceDocument> = (
       );
       break;
 
-    case "CANCEL_PAYMENT":
-      z.CancelPaymentInputSchema().parse(action.input);
-      TransitionsReducer.cancelPaymentOperation(
+    case "CLOSE_PAYMENT":
+      z.ClosePaymentInputSchema().parse(action.input);
+      TransitionsReducer.closePaymentOperation(
         state[action.scope],
         action,
         dispatch,

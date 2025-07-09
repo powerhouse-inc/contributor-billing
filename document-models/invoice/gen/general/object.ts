@@ -4,6 +4,7 @@ import {
   type EditStatusInput,
   type EditPaymentDataInput,
   type SetExportedDataInput,
+  type AddPaymentInput,
   type InvoiceState,
   type InvoiceLocalState,
 } from "../types.js";
@@ -12,6 +13,7 @@ import {
   editStatus,
   editPaymentData,
   setExportedData,
+  addPayment,
 } from "./creators.js";
 import { type InvoiceAction } from "../actions.js";
 
@@ -34,5 +36,9 @@ export default class Invoice_General extends BaseDocumentClass<
 
   public setExportedData(input: SetExportedDataInput) {
     return this.dispatch(setExportedData(input));
+  }
+
+  public addPayment(input: AddPaymentInput) {
+    return this.dispatch(addPayment(input));
   }
 }

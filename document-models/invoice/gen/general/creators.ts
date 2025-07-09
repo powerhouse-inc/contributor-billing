@@ -5,12 +5,14 @@ import {
   type EditStatusInput,
   type EditPaymentDataInput,
   type SetExportedDataInput,
+  type AddPaymentInput,
 } from "../types.js";
 import {
   type EditInvoiceAction,
   type EditStatusAction,
   type EditPaymentDataAction,
   type SetExportedDataAction,
+  type AddPaymentAction,
 } from "./actions.js";
 
 export const editInvoice = (input: EditInvoiceInput) =>
@@ -46,5 +48,14 @@ export const setExportedData = (input: SetExportedDataInput) =>
     { ...input },
     undefined,
     z.SetExportedDataInputSchema,
+    "global",
+  );
+
+export const addPayment = (input: AddPaymentInput) =>
+  createAction<AddPaymentAction>(
+    "ADD_PAYMENT",
+    { ...input },
+    undefined,
+    z.AddPaymentInputSchema,
     "global",
   );

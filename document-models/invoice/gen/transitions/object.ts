@@ -11,7 +11,7 @@ import {
   type RegisterPaymentTxInput,
   type ReportPaymentIssueInput,
   type ConfirmPaymentInput,
-  type CancelPaymentInput,
+  type ClosePaymentInput,
   type InvoiceState,
   type InvoiceLocalState,
 } from "../types.js";
@@ -27,7 +27,7 @@ import {
   registerPaymentTx,
   reportPaymentIssue,
   confirmPayment,
-  cancelPayment,
+  closePayment,
 } from "./creators.js";
 import { type InvoiceAction } from "../actions.js";
 
@@ -80,7 +80,7 @@ export default class Invoice_Transitions extends BaseDocumentClass<
     return this.dispatch(confirmPayment(input));
   }
 
-  public cancelPayment(input: CancelPaymentInput) {
-    return this.dispatch(cancelPayment(input));
+  public closePayment(input: ClosePaymentInput) {
+    return this.dispatch(closePayment(input));
   }
 }
