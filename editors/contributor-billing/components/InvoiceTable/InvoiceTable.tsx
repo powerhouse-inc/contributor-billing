@@ -264,7 +264,10 @@ export const InvoiceTable = ({
   };
 
   const selectedInvoiceIds = Object.keys(selected).filter(id => selected[id]);
-  const selectedInvoices = selectedInvoiceIds.map(id => state[id]);
+  const selectedInvoices = selectedInvoiceIds.map(id => ({
+    ...state[id],
+    id, // add the id explicitly
+  }));
   const selectedInvoiceStatuses = selectedInvoices.map(inv => inv?.global?.status || inv?.status);
     
 

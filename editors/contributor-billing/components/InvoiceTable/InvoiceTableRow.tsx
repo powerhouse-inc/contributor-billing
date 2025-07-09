@@ -95,7 +95,11 @@ export const InvoiceTableRow = ({
           />
         </td>
       )}
-      <td className="px-2 py-2 text-center">{row.exported ? <span className="text-green-500">Yes</span> : <span className="text-red-500">No</span>}</td>
+      <td className="px-2 py-2 text-center">
+        {row.exported && row.exported.exportTimestamp
+          ? <span className="text-green-500">Yes</span>
+          : <span className="text-red-500">No</span>}
+      </td>
       {/* <td className="px-2 py-2 text-right relative" ref={menuRef}>
         <div className="relative inline-block">
           <button

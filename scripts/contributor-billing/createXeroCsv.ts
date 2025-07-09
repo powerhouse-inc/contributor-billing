@@ -65,8 +65,8 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
 
   for (let state of invoiceStates) {
     
+    const invoiceId = state.id
     state = state.global;
-    const invoiceId = state.id || Math.random().toString(36).slice(2); // fallback if no id
     const invoiceName = state.name || invoiceId;
     const items = state.lineItems || [];
     const dateIssued = state.dateIssued || '';
@@ -199,9 +199,8 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
       exportedLines: [headers, ...invoiceRows]
     };
 
-    // Optionally, assign to the invoice state here if you want to mutate it directly:
-    // state.exportData = exportDataByInvoice[invoiceId];
-
+    // Assign exported data to the invoice state 
+    state.exported = exportDataByInvoice[invoiceId]; // This line is moved after download
 
   }
 
@@ -227,11 +226,19 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
   link.click();
   document.body.removeChild(link);
 
-  // This is the data to be added to ExportData in the state of each invoice
-  console.log(exportDataByInvoice)
+  // Only set export data after download is triggered
+  
+  /*invoiceStates.forEach(state => {
+    console.log("State:",state)
+    console.log(state.id)
+    console.log(exportDataByInvoice)
+    console.log(exportDataByInvoice[state.id])
+    if (state.global && exportDataByInvoice[state.id]) {
+      state.global.exported = exportDataByInvoice[state.id];
+    }
+    console.log(state)
+  });*/
 
-  // Return or assign exportDataByInvoice as needed
-  // For example, return it if you want to use it elsewhere:
-  // return exportDataByInvoice;
+
 }
 
