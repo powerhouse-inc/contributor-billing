@@ -868,7 +868,7 @@ export default function Editor(props: IProps) {
       )}
 
       {/* Finance Request Section */}
-      {/* {state.status === "PAYMENTSCHEDULED" && (
+      {(state.status === "ACCEPTED" || state.status === "PAYMENTSCHEDULED") && (
         <div className="mt-8">
           {!isFiatCurrency(state.currency) ? (
             <InvoiceToGnosis docState={state} dispatch={dispatch} />
@@ -876,7 +876,7 @@ export default function Editor(props: IProps) {
             <RequestFinance docState={state} />
           )}
         </div>
-      )} */}
+      )}
 
       {/* Live PDF Preview */}
       {/* <div className="mt-8 border border-gray-200 rounded-lg overflow-hidden">

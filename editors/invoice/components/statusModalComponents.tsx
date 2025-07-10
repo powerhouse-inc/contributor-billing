@@ -281,17 +281,17 @@ export function ConfirmPaymentModalContent({
         <label className="block mb-1 text-sm font-bold">
           Processor Reference :
         </label>
-        <span>{payments[payments.length - 1].processorRef}</span>
+        <span className="break-all max-w-full">{payments[payments.length - 1].processorRef}</span>
       </div>
       <div className="flex flex-col gap-2 mt-4">
         <label className="block mb-1 text-sm font-bold">Payment Date :</label>
-        <span>{payments[payments.length - 1].paymentDate}</span>
+        <span className="break-all max-w-full">{payments[payments.length - 1].paymentDate}</span>
       </div>
       <div className="flex flex-col gap-2 mt-4">
         <label className="block mb-1 text-sm font-bold">
           Transaction Reference :
         </label>
-        <span>{payments[payments.length - 1].txnRef}</span>
+        <span className="break-all max-w-full">{payments[payments.length - 1].txnRef}</span>
       </div>
       <div className="mt-4">
         <label className="block mb-1 text-sm font-bold">Payment Amount:</label>
