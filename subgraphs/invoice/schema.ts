@@ -328,44 +328,44 @@ export const schema: DocumentNode = gql`
       input: Invoice_ClosePaymentInput
     ): Int
     Invoice_processGnosisPayment(
-      driveId: String
-      docId: PHID
-      input: ProcessGnosisPaymentResult
-    ): Int
+      chainName: String!
+      paymentDetails: JSON!
+      invoiceNo: String!
+    ): ProcessGnosisPaymentOutput
     Invoice_createRequestFinancePayment(  
-      driveId: String
-      docId: PHID
-      input: CreateRequestFinancePaymentResult
-    ): Int
+      paymentData: JSON!
+    ): CreateRequestFinancePaymentOutput
     Invoice_uploadInvoicePdfChunk(
-      driveId: String
-      docId: PHID
-      input: UploadInvoicePdfChunkResult
-    ): Int
+      chunk: String!
+      chunkIndex: Int!
+      totalChunks: Int!
+      fileName: String!
+      sessionId: String!
+    ): UploadInvoicePdfChunkOutput
   }
 
   """
-  Result type for PDF chunk upload
+  Output type for PDF chunk upload
   """
-  input UploadInvoicePdfChunkResult {
+  type UploadInvoicePdfChunkOutput {
     success: Boolean!
     data: JSON
     error: String
   }
 
   """
-  Result type for request finance payment request
+  Output type for request finance payment
   """
-  input CreateRequestFinancePaymentResult {
+  type CreateRequestFinancePaymentOutput {
     success: Boolean!
     data: JSON
     error: String
   }
 
   """
-  Result type for process gnosis payment
+  Output type for process gnosis payment
   """
-  input ProcessGnosisPaymentResult {
+  type ProcessGnosisPaymentOutput {
     success: Boolean!
     data: JSON
     error: String

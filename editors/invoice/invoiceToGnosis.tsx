@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   actions,
 } from "../../document-models/invoice/index.js";
+import { generateId } from "document-model";
 
 let GRAPHQL_URL = "http://localhost:4001/graphql/invoice";
 
@@ -115,10 +116,12 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState, dispatch })
         setsafeTxHash(dataObj.txHash);
 
         // add gnosis tx hash to invoice
-        dispatch(actions.editPaymentData({
-          txnHash: dataObj.txHash,
-          paymentDate: new Date().toISOString(),
-        }));
+        dispatch(
+          actions.schedulePayment({
+            id: generateId(),
+            processorRef: dataObj.txHash,
+          })
+        );
 
         if (dataObj.paymentDetails) {
           // Format the payment details for better readability
