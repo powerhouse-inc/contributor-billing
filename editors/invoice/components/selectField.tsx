@@ -303,7 +303,7 @@ export const SelectField = (props: SelectFieldProps) => {
         if (value === "REJECT_INVOICE") onChange("REJECTED");
         else if (value === "ACCEPT_INVOICE") onChange("ACCEPTED");
       } else if (status === 'REJECTED') {
-        if (value === "RE_INSTATE_INVOICE") onChange("DRAFT");
+        if (value === "RE_INSTATE_INVOICE") onChange("ISSUED");
       } else if (status === 'ACCEPTED') {
         if (value === "SCHEDULE_PAYMENT") onChange("PAYMENTSCHEDULED");
         else if (value === "CLOSE_PAYMENT") onChange("PAYMENTCLOSED");

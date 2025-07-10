@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { EditorProps } from "document-model";
+import { generateId, type EditorProps } from "document-model";
 import {
   type InvoiceDocument,
+  type ClosureReason,
   Status,
   actions,
 } from "../../document-models/invoice/index.js";
@@ -32,14 +33,14 @@ import { SelectField } from "./components/selectField.js";
 import { formatNumber } from "./lineItems.js";
 import { Textarea } from "@powerhousedao/document-engineering/ui";
 import ConfirmationModal from "./components/confirmationModal.js";
-import { IssueInvoiceModalContent } from "./components/statusModalComponents.js";
+import { ClosePaymentModalContent, ConfirmPaymentModalContent, FinalRejectionModalContent, IssueInvoiceModalContent, RegisterPaymentTxModalContent, RejectInvoiceModalContent, ReportPaymentIssueModalContent, SchedulePaymentModalContent } from "./components/statusModalComponents.js";
+import { PaymentSchema } from "document-models/invoice/gen/schema/zod.js";
 
 function isFiatCurrency(currency: string): boolean {
   return currencyList.find((c) => c.ticker === currency)?.crypto === false;
 }
 
 export type IProps = EditorProps<InvoiceDocument>;
-
 
 export default function Editor(props: IProps) {
   const { document: doc, dispatch } = props;
@@ -87,11 +88,28 @@ export default function Editor(props: IProps) {
 
   // Replace showConfirmationModal and pendingStatus with a single modal state
   const [activeModal, setActiveModal] = useState<
-    null | "issueInvoice" | "cancelInvoice" | "otherModalType"
+    | null
+    | "issueInvoice"
+    | "cancelInvoice"
+    | "rejectInvoice"
+    | "schedulePayment"
+    | "registerPayment"
+    | "reportPaymentIssue"
+    | "confirmPayment"
+    | "closePayment"
+    | "finalRejection"
   >(null);
 
   // Track warning state for modal
   const [modalWarning, setModalWarning] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [finalReason, setFinalReason] = useState(false);
+  const [paymentRef, setPaymentRef] = useState('');
+  const [closureReason, setClosureReason] = useState('');
+  const [paymentDate, setPaymentDate] = useState('');
+  const [txnRef, setTxnRef] = useState('');
+  const [paymentIssue, setPaymentIssue] = useState('');
+  const [paymentAmount, setPaymentAmount] = useState('');
 
   const prevStatus = useRef(state.status);
 
@@ -300,7 +318,54 @@ export default function Editor(props: IProps) {
   // Replace handleStatusChange logic for opening modals
   const handleStatusChange = (newStatus: Status) => {
     if (newStatus === "ISSUED") {
+      const trueRejection = state.rejections.find(rejection => rejection.final === true);
+      if(state.status === "REJECTED" && trueRejection) {
+        setRejectReason(trueRejection.reason);
+        setFinalReason(trueRejection.final);
+        setActiveModal("finalRejection");
+        return;
+      }
       setActiveModal("issueInvoice");
+      return;
+    }
+    if (newStatus === "CANCELLED") {
+      dispatch(actions.cancel({}));
+      return;
+    }
+    if (newStatus === "ACCEPTED") {
+      if(state.status === 'PAYMENTCLOSED') {
+        dispatch(actions.reapprovePayment({}));
+        return;
+      }
+      dispatch(actions.accept({ payAfter: new Date().toISOString() }));
+      return;
+    }
+    if (newStatus === "REJECTED") {
+      setActiveModal("rejectInvoice");
+      return;
+    }
+    if(newStatus === 'DRAFT') {
+      dispatch(actions.reset({}));
+      return;
+    }
+    if(newStatus === 'PAYMENTSCHEDULED'){
+      setActiveModal("schedulePayment");
+      return;
+    }
+    if(newStatus === 'PAYMENTCLOSED') {
+      setActiveModal('closePayment');
+      return;
+    }
+    if(newStatus === 'PAYMENTSENT') {
+      setActiveModal('registerPayment');
+      return;
+    }
+    if(newStatus === 'PAYMENTISSUE') {
+      setActiveModal('reportPaymentIssue');
+      return;
+    }
+    if(newStatus === 'PAYMENTRECEIVED') {
+      setActiveModal('confirmPayment');
       return;
     }
     // Add more status checks for other modals as needed
@@ -321,16 +386,77 @@ export default function Editor(props: IProps) {
         setWarning={setModalWarning}
       />
     ),
+    rejectInvoice: (
+      <RejectInvoiceModalContent
+        state={state}
+        dispatch={dispatch}
+        setWarning={setModalWarning}
+        setRejectReason={setRejectReason}
+        rejectReason={rejectReason}
+        setFinalReason={setFinalReason}
+        finalReason={finalReason}
+      />
+    ),
+    finalRejection: (
+      <FinalRejectionModalContent
+        rejectReason={rejectReason}
+      />
+    ),
+    schedulePayment: (
+      <SchedulePaymentModalContent
+        paymentRef={paymentRef}
+        setPaymentRef={setPaymentRef}
+      />
+    ),
+    closePayment: (
+      <ClosePaymentModalContent
+        closureReason={closureReason}
+        setClosureReason={setClosureReason}
+      />
+    ),
+    registerPayment: (
+      <RegisterPaymentTxModalContent
+        paymentDate={paymentDate}
+        setPaymentDate={setPaymentDate}
+        txnRef={txnRef}
+        setTxnRef={setTxnRef}
+      />
+    ),
+    reportPaymentIssue: (
+      <ReportPaymentIssueModalContent
+        paymentIssue={paymentIssue}
+        setPaymentIssue={setPaymentIssue}
+      />
+    ),
+    confirmPayment: (
+      <ConfirmPaymentModalContent
+        paymentAmount={paymentAmount}
+        setPaymentAmount={setPaymentAmount}
+        payments={state.payments}
+      />
+    ),
     // Add more modal content mappings here
   };
 
   const modalHeaders: Record<string, React.ReactNode> = {
     issueInvoice: <div>Issue Invoice</div>,
+    rejectInvoice: <div>Reject Invoice</div>,
+    finalRejection: <div>Invoice Rejected</div>,
+    schedulePayment: <div>Schedule Payment</div>,
+    closePayment: <div>Close Payment</div>,
+    registerPayment: <div>Register Payment</div>,
+    reportPaymentIssue: <div>Report Payment Issue</div>,
+    confirmPayment: <div>Confirm Payment</div>,
     // Add more headers as needed
   };
 
   const modalContinueLabels: Record<string, string> = {
     issueInvoice: "Confirm",
+    rejectInvoice: "Confirm",
+    schedulePayment: "Confirm",
+    closePayment: "Confirm",
+    registerPayment: "Confirm",
+    reportPaymentIssue: "Confirm",
     // Add more labels as needed
   };
 
@@ -647,9 +773,48 @@ export default function Editor(props: IProps) {
           onCancel={() => setActiveModal(null)}
           onContinue={() => {
             if (activeModal === "issueInvoice") {
-              dispatch(actions.issue({
-                invoiceNo: invoiceNoInput,
-                dateIssued: state.dateIssued,
+              dispatch(
+                actions.issue({
+                  invoiceNo: invoiceNoInput,
+                  dateIssued: state.dateIssued,
+                })
+              );
+            }
+            if (activeModal === "rejectInvoice") {
+              dispatch(actions.reject({
+                final: finalReason,
+                id: generateId(),
+                reason: rejectReason,
+              }));
+            }
+            if(activeModal === "schedulePayment") {
+              dispatch(actions.schedulePayment({
+                id: generateId(),
+                processorRef: paymentRef,
+              }));
+            }
+            if(activeModal === "closePayment") {
+              dispatch(actions.closePayment({
+                closureReason: closureReason as ClosureReason,
+              }));
+            }
+            if(activeModal === "registerPayment") {
+              dispatch(actions.registerPaymentTx({
+                id: state.payments[state.payments.length - 1].id,
+                timestamp: paymentDate,
+                txRef: txnRef,
+              }));
+            }
+            if(activeModal === "reportPaymentIssue") {
+              dispatch(actions.reportPaymentIssue({
+                id: state.payments[state.payments.length - 1].id,
+                issue: paymentIssue,
+              }));
+            }
+            if(activeModal === "confirmPayment") {
+              dispatch(actions.confirmPayment({
+                id: state.payments[state.payments.length - 1].id,
+                amount: parseFloat(paymentAmount) || 0,
               }));
             }
             setActiveModal(null);
