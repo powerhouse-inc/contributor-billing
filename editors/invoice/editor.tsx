@@ -33,8 +33,18 @@ import { SelectField } from "./components/selectField.js";
 import { formatNumber } from "./lineItems.js";
 import { Textarea } from "@powerhousedao/document-engineering/ui";
 import ConfirmationModal from "./components/confirmationModal.js";
-import { ClosePaymentModalContent, ConfirmPaymentModalContent, FinalRejectionModalContent, IssueInvoiceModalContent, RegisterPaymentTxModalContent, RejectInvoiceModalContent, ReportPaymentIssueModalContent, SchedulePaymentModalContent } from "./components/statusModalComponents.js";
+import {
+  ClosePaymentModalContent,
+  ConfirmPaymentModalContent,
+  FinalRejectionModalContent,
+  IssueInvoiceModalContent,
+  RegisterPaymentTxModalContent,
+  RejectInvoiceModalContent,
+  ReportPaymentIssueModalContent,
+  SchedulePaymentModalContent,
+} from "./components/statusModalComponents.js";
 import { PaymentSchema } from "document-models/invoice/gen/schema/zod.js";
+import validateStatusBeforeContinue from "./validation/validationHandler.js";
 
 function isFiatCurrency(currency: string): boolean {
   return currencyList.find((c) => c.ticker === currency)?.crypto === false;
@@ -102,14 +112,14 @@ export default function Editor(props: IProps) {
 
   // Track warning state for modal
   const [modalWarning, setModalWarning] = useState(false);
-  const [rejectReason, setRejectReason] = useState('');
+  const [rejectReason, setRejectReason] = useState("");
   const [finalReason, setFinalReason] = useState(false);
-  const [paymentRef, setPaymentRef] = useState('');
-  const [closureReason, setClosureReason] = useState('');
-  const [paymentDate, setPaymentDate] = useState('');
-  const [txnRef, setTxnRef] = useState('');
-  const [paymentIssue, setPaymentIssue] = useState('');
-  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentRef, setPaymentRef] = useState("");
+  const [closureReason, setClosureReason] = useState("");
+  const [paymentDate, setPaymentDate] = useState("");
+  const [txnRef, setTxnRef] = useState("");
+  const [paymentIssue, setPaymentIssue] = useState("");
+  const [paymentAmount, setPaymentAmount] = useState("");
 
   const prevStatus = useRef(state.status);
 
@@ -317,9 +327,32 @@ export default function Editor(props: IProps) {
 
   // Replace handleStatusChange logic for opening modals
   const handleStatusChange = (newStatus: Status) => {
+    const validationResult = validateStatusBeforeContinue(
+      newStatus,
+      state,
+      setInvoiceValidation,
+      setWalletValidation,
+      setCurrencyValidation,
+      setMainCountryValidation,
+      setBankCountryValidation,
+      setIbanValidation,
+      setBicValidation,
+      setBankNameValidation,
+      setStreetAddressValidation,
+      setCityValidation,
+      setPostalCodeValidation,
+      setPayerEmailValidation,
+      setLineItemValidation,
+      isFiatCurrency
+    );
+    if (validationResult) {
+      return;
+    }
     if (newStatus === "ISSUED") {
-      const trueRejection = state.rejections.find(rejection => rejection.final === true);
-      if(state.status === "REJECTED" && trueRejection) {
+      const trueRejection = state.rejections.find(
+        (rejection) => rejection.final === true
+      );
+      if (state.status === "REJECTED" && trueRejection) {
         setRejectReason(trueRejection.reason);
         setFinalReason(trueRejection.final);
         setActiveModal("finalRejection");
@@ -333,7 +366,7 @@ export default function Editor(props: IProps) {
       return;
     }
     if (newStatus === "ACCEPTED") {
-      if(state.status === 'PAYMENTCLOSED') {
+      if (state.status === "PAYMENTCLOSED") {
         dispatch(actions.reapprovePayment({}));
         return;
       }
@@ -344,28 +377,28 @@ export default function Editor(props: IProps) {
       setActiveModal("rejectInvoice");
       return;
     }
-    if(newStatus === 'DRAFT') {
+    if (newStatus === "DRAFT") {
       dispatch(actions.reset({}));
       return;
     }
-    if(newStatus === 'PAYMENTSCHEDULED'){
+    if (newStatus === "PAYMENTSCHEDULED") {
       setActiveModal("schedulePayment");
       return;
     }
-    if(newStatus === 'PAYMENTCLOSED') {
-      setActiveModal('closePayment');
+    if (newStatus === "PAYMENTCLOSED") {
+      setActiveModal("closePayment");
       return;
     }
-    if(newStatus === 'PAYMENTSENT') {
-      setActiveModal('registerPayment');
+    if (newStatus === "PAYMENTSENT") {
+      setActiveModal("registerPayment");
       return;
     }
-    if(newStatus === 'PAYMENTISSUE') {
-      setActiveModal('reportPaymentIssue');
+    if (newStatus === "PAYMENTISSUE") {
+      setActiveModal("reportPaymentIssue");
       return;
     }
-    if(newStatus === 'PAYMENTRECEIVED') {
-      setActiveModal('confirmPayment');
+    if (newStatus === "PAYMENTRECEIVED") {
+      setActiveModal("confirmPayment");
       return;
     }
     // Add more status checks for other modals as needed
@@ -397,11 +430,7 @@ export default function Editor(props: IProps) {
         finalReason={finalReason}
       />
     ),
-    finalRejection: (
-      <FinalRejectionModalContent
-        rejectReason={rejectReason}
-      />
-    ),
+    finalRejection: <FinalRejectionModalContent rejectReason={rejectReason} />,
     schedulePayment: (
       <SchedulePaymentModalContent
         paymentRef={paymentRef}
@@ -781,41 +810,53 @@ export default function Editor(props: IProps) {
               );
             }
             if (activeModal === "rejectInvoice") {
-              dispatch(actions.reject({
-                final: finalReason,
-                id: generateId(),
-                reason: rejectReason,
-              }));
+              dispatch(
+                actions.reject({
+                  final: finalReason,
+                  id: generateId(),
+                  reason: rejectReason,
+                })
+              );
             }
-            if(activeModal === "schedulePayment") {
-              dispatch(actions.schedulePayment({
-                id: generateId(),
-                processorRef: paymentRef,
-              }));
+            if (activeModal === "schedulePayment") {
+              dispatch(
+                actions.schedulePayment({
+                  id: generateId(),
+                  processorRef: paymentRef,
+                })
+              );
             }
-            if(activeModal === "closePayment") {
-              dispatch(actions.closePayment({
-                closureReason: closureReason as ClosureReason,
-              }));
+            if (activeModal === "closePayment") {
+              dispatch(
+                actions.closePayment({
+                  closureReason: closureReason as ClosureReason,
+                })
+              );
             }
-            if(activeModal === "registerPayment") {
-              dispatch(actions.registerPaymentTx({
-                id: state.payments[state.payments.length - 1].id,
-                timestamp: paymentDate,
-                txRef: txnRef,
-              }));
+            if (activeModal === "registerPayment") {
+              dispatch(
+                actions.registerPaymentTx({
+                  id: state.payments[state.payments.length - 1].id,
+                  timestamp: paymentDate,
+                  txRef: txnRef,
+                })
+              );
             }
-            if(activeModal === "reportPaymentIssue") {
-              dispatch(actions.reportPaymentIssue({
-                id: state.payments[state.payments.length - 1].id,
-                issue: paymentIssue,
-              }));
+            if (activeModal === "reportPaymentIssue") {
+              dispatch(
+                actions.reportPaymentIssue({
+                  id: state.payments[state.payments.length - 1].id,
+                  issue: paymentIssue,
+                })
+              );
             }
-            if(activeModal === "confirmPayment") {
-              dispatch(actions.confirmPayment({
-                id: state.payments[state.payments.length - 1].id,
-                amount: parseFloat(paymentAmount) || 0,
-              }));
+            if (activeModal === "confirmPayment") {
+              dispatch(
+                actions.confirmPayment({
+                  id: state.payments[state.payments.length - 1].id,
+                  amount: parseFloat(paymentAmount) || 0,
+                })
+              );
             }
             setActiveModal(null);
           }}
