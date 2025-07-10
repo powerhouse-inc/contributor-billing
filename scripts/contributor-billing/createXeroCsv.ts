@@ -62,6 +62,7 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
   const exportDataByInvoice: Record<string, { exportTimestamp: string, exportedLines: string[][] }> = {};
   const exportTimestamp = new Date().toISOString();
   const missingExpenseTagInvoices: string[] = [];
+  const missingDateIssuedInvoices: string[] = [];
 
   for (let state of invoiceStates) {
     
@@ -69,7 +70,7 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
     state = state.global;
     const invoiceName = state.name || invoiceId;
     const items = state.lineItems || [];
-    const dateIssued = state.dateIssued || '';
+    const dateIssued = state.dateIssued;
     let datePaid = state.paymentDate || '';
     if (datePaid.includes('T')) {
       datePaid = datePaid.split('T')[0];
@@ -81,6 +82,11 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
     let effectiveCurrency = currency;
     if (currency === 'DAI' || currency === 'USDS') {
       effectiveCurrency = 'USD';
+    }
+
+    if (!dateIssued) {
+      missingDateIssuedInvoices.push(invoiceName);
+      continue;
     }
 
     // Check if any line item is missing a valid xero-expense-account tag
@@ -208,6 +214,12 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
   if (missingExpenseTagInvoices.length > 0) {
     throw new Error(
       `The following invoices have line items missing a 'xero-expense-account' tag: ${[...new Set(missingExpenseTagInvoices)].join(', ')}`
+    );
+  }
+
+  if (missingDateIssuedInvoices.length > 0) {
+    throw new Error(
+      `The following invoices are missing a 'dateIssued' value: ${[...new Set(missingDateIssuedInvoices)].join(', ')}`
     );
   }
 
