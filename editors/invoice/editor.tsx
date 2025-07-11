@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { EditorProps } from "document-model";
+import { generateId, type EditorProps } from "document-model";
 import {
   type InvoiceDocument,
+  type ClosureReason,
   Status,
   actions,
 } from "../../document-models/invoice/index.js";
@@ -11,7 +12,11 @@ import { loadUBLFile } from "./ingestUBL.js";
 import PDFUploader from "./ingestPDF.js";
 import RequestFinance from "./requestFinance.js";
 import InvoiceToGnosis from "./invoiceToGnosis.js";
-import { toast, ToastContainer } from "@powerhousedao/design-system";
+import {
+  ConnectConfirmationModal,
+  toast,
+  ToastContainer,
+} from "@powerhousedao/design-system";
 import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
 import { InvoicePDF } from "./InvoicePDF.js";
 import { createRoot } from "react-dom/client";
@@ -27,6 +32,19 @@ import { DatePicker } from "./components/datePicker.js";
 import { SelectField } from "./components/selectField.js";
 import { formatNumber } from "./lineItems.js";
 import { Textarea } from "@powerhousedao/document-engineering/ui";
+import ConfirmationModal from "./components/confirmationModal.js";
+import {
+  ClosePaymentModalContent,
+  ConfirmPaymentModalContent,
+  FinalRejectionModalContent,
+  IssueInvoiceModalContent,
+  RegisterPaymentTxModalContent,
+  RejectInvoiceModalContent,
+  ReportPaymentIssueModalContent,
+  SchedulePaymentModalContent,
+} from "./components/statusModalComponents.js";
+import { PaymentSchema } from "document-models/invoice/gen/schema/zod.js";
+import validateStatusBeforeContinue from "./validation/validationHandler.js";
 
 function isFiatCurrency(currency: string): boolean {
   return currencyList.find((c) => c.ticker === currency)?.crypto === false;
@@ -34,47 +52,9 @@ function isFiatCurrency(currency: string): boolean {
 
 export type IProps = EditorProps<InvoiceDocument>;
 
-const useResponsiveEditorStyle = (options = { scale: 0.9, maxWidth: "1280px" }) => {
-  const baseStyle: React.CSSProperties = {
-    width: "100vw",
-    minHeight: "100vh",
-    margin: 0,
-    padding: 0,
-    boxSizing: "border-box",
-    transform: `scale(${options.scale})`,
-    transformOrigin: "top left",
-  };
-
-  const [responsiveStyle, setResponsiveStyle] = useState<React.CSSProperties>(baseStyle);
-
-  useEffect(() => {
-    function handleResize() {
-      if (window.innerWidth >= 1024) {
-        setResponsiveStyle({
-          ...baseStyle,
-          maxWidth: options.maxWidth,
-          marginLeft: "auto",
-          marginRight: "auto",
-          padding: "1rem",
-        });
-      } else {
-        setResponsiveStyle(baseStyle);
-      }
-    }
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [options.scale, options.maxWidth]);
-
-  return responsiveStyle;
-};
-
 export default function Editor(props: IProps) {
   const { document: doc, dispatch } = props;
   const state = doc.state.global;
-  
-  // Only use the hook if you need custom scaling or maxWidth
-  const customStyle = useResponsiveEditorStyle({ scale: 0.9, maxWidth: "1280px" });
 
   const [fiatMode, setFiatMode] = useState(isFiatCurrency(state.currency));
   const [uploadDropdownOpen, setUploadDropdownOpen] = useState(false);
@@ -115,6 +95,31 @@ export default function Editor(props: IProps) {
     useState<ValidationResult | null>(null);
   const [bankCountryValidation, setBankCountryValidation] =
     useState<ValidationResult | null>(null);
+
+  // Replace showConfirmationModal and pendingStatus with a single modal state
+  const [activeModal, setActiveModal] = useState<
+    | null
+    | "issueInvoice"
+    | "cancelInvoice"
+    | "rejectInvoice"
+    | "schedulePayment"
+    | "registerPayment"
+    | "reportPaymentIssue"
+    | "confirmPayment"
+    | "closePayment"
+    | "finalRejection"
+  >(null);
+
+  // Track warning state for modal
+  const [modalWarning, setModalWarning] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [finalReason, setFinalReason] = useState(false);
+  const [paymentRef, setPaymentRef] = useState("");
+  const [closureReason, setClosureReason] = useState("");
+  const [paymentDate, setPaymentDate] = useState("");
+  const [txnRef, setTxnRef] = useState("");
+  const [paymentIssue, setPaymentIssue] = useState("");
+  const [paymentAmount, setPaymentAmount] = useState("");
 
   const prevStatus = useRef(state.status);
 
@@ -163,11 +168,11 @@ export default function Editor(props: IProps) {
     "CANCELLED",
     "ACCEPTED",
     "REJECTED",
-    "AWAITINGPAYMENT",
     "PAYMENTSCHEDULED",
     "PAYMENTSENT",
     "PAYMENTISSUE",
     "PAYMENTRECEIVED",
+    "PAYMENTCLOSED",
   ];
 
   const handleFileUpload = async (
@@ -320,209 +325,172 @@ export default function Editor(props: IProps) {
     });
   }
 
-  // Add validation check when status changes
+  // Replace handleStatusChange logic for opening modals
   const handleStatusChange = (newStatus: Status) => {
-    if (newStatus === "PAYMENTSCHEDULED" || newStatus === "ISSUED") {
-      const context: ValidationContext = {
-        currency: state.currency,
-        currentStatus: state.status,
-        targetStatus: newStatus === "PAYMENTSCHEDULED" ? "ISSUED" : "ISSUED",
-      };
-
-      // Collect all validation errors
-      const validationErrors: ValidationResult[] = [];
-
-      // Validate invoice number
-      const invoiceValidation = validateField(
-        "invoiceNo",
-        state.invoiceNo,
-        context
+    const validationResult = validateStatusBeforeContinue(
+      newStatus,
+      state,
+      setInvoiceValidation,
+      setWalletValidation,
+      setCurrencyValidation,
+      setMainCountryValidation,
+      setBankCountryValidation,
+      setIbanValidation,
+      setBicValidation,
+      setBankNameValidation,
+      setStreetAddressValidation,
+      setCityValidation,
+      setPostalCodeValidation,
+      setPayerEmailValidation,
+      setLineItemValidation,
+      isFiatCurrency
+    );
+    if (validationResult) {
+      return;
+    }
+    if (newStatus === "ISSUED") {
+      const trueRejection = state.rejections.find(
+        (rejection) => rejection.final === true
       );
-      setInvoiceValidation(invoiceValidation);
-      if (invoiceValidation && !invoiceValidation.isValid) {
-        validationErrors.push(invoiceValidation);
-      }
-
-      // Validate wallet address if currency is crypto
-      if (!isFiatCurrency(state.currency)) {
-        const walletValidation = validateField(
-          "address",
-          state.issuer.paymentRouting?.wallet?.address ?? "",
-          context
-        );
-        setWalletValidation(walletValidation);
-        if (walletValidation && !walletValidation.isValid) {
-          validationErrors.push(walletValidation);
-        }
-      }
-
-      // Validate currency
-      const currencyValidation = validateField(
-        "currency",
-        state.currency,
-        context
-      );
-      setCurrencyValidation(currencyValidation);
-      if (currencyValidation && !currencyValidation.isValid) {
-        validationErrors.push(currencyValidation);
-      }
-
-      // Validate main country
-      const mainCountry = state.issuer.country ?? "";
-      const mainCountryValidation = validateField(
-        "mainCountry",
-        mainCountry,
-        context
-      );
-      setMainCountryValidation(mainCountryValidation);
-      if (mainCountryValidation && !mainCountryValidation.isValid) {
-        validationErrors.push(mainCountryValidation);
-      }
-
-      // Validate bank country
-      const bankCountry =
-        state.issuer.paymentRouting?.bank?.address?.country ?? "";
-      const bankCountryValidation = validateField(
-        "bankCountry",
-        bankCountry,
-        context
-      );
-      setBankCountryValidation(bankCountryValidation);
-      if (bankCountryValidation && !bankCountryValidation.isValid) {
-        validationErrors.push(bankCountryValidation);
-      }
-
-      // Validate EUR&GBP IBAN account number
-      const ibanValidation = validateField(
-        "accountNum",
-        state.issuer.paymentRouting?.bank?.accountNum,
-        context
-      );
-      setIbanValidation(ibanValidation);
-      if (ibanValidation && !ibanValidation.isValid) {
-        validationErrors.push(ibanValidation);
-      }
-
-      // Validate BIC number
-      const bicValidation = validateField(
-        "bicNumber",
-        state.issuer.paymentRouting?.bank?.BIC,
-        context
-      );
-      setBicValidation(bicValidation);
-      if (bicValidation && !bicValidation.isValid) {
-        validationErrors.push(bicValidation);
-      }
-
-      // Validate bank name
-      const bankNameValidation = validateField(
-        "bankName",
-        state.issuer.paymentRouting?.bank?.name,
-        context
-      );
-      setBankNameValidation(bankNameValidation);
-      if (bankNameValidation && !bankNameValidation.isValid) {
-        validationErrors.push(bankNameValidation);
-      }
-
-      // Validate street address
-      const streetAddressValidation = validateField(
-        "streetAddress",
-        state.issuer.address?.streetAddress,
-        context
-      );
-      setStreetAddressValidation(streetAddressValidation);
-      if (streetAddressValidation && !streetAddressValidation.isValid) {
-        validationErrors.push(streetAddressValidation);
-      }
-
-      // Validate city
-      const cityValidation = validateField(
-        "city",
-        state.issuer.address?.city,
-        context
-      );
-      setCityValidation(cityValidation);
-      if (cityValidation && !cityValidation.isValid) {
-        validationErrors.push(cityValidation);
-      }
-
-      // Validate postal code
-      const postalCodeValidation = validateField(
-        "postalCode",
-        state.issuer.address?.postalCode,
-        context
-      );
-      setPostalCodeValidation(postalCodeValidation);
-      if (postalCodeValidation && !postalCodeValidation.isValid) {
-        validationErrors.push(postalCodeValidation);
-      }
-
-      // Validate payer email
-      const payerEmailValidation = validateField(
-        "email",
-        state.payer.contactInfo?.email,
-        context
-      );
-      setPayerEmailValidation(payerEmailValidation);
-      if (payerEmailValidation && !payerEmailValidation.isValid) {
-        validationErrors.push(payerEmailValidation);
-      }
-
-      // Validate line items
-      const lineItemValidation = validateField(
-        "lineItem",
-        state.lineItems,
-        context
-      );
-      setLineItemValidation(lineItemValidation);
-      if (lineItemValidation && !lineItemValidation.isValid) {
-        validationErrors.push(lineItemValidation);
-      }
-
-      if (
-        newStatus === "PAYMENTSCHEDULED" &&
-        !isFiatCurrency(state.currency) &&
-        state.issuer.paymentRouting?.wallet?.chainName === ""
-      ) {
-        validationErrors.push({
-          message: "Select currency and chain before accepting invoice",
-          severity: "warning",
-          isValid: false,
-        });
-      }
-
-      // If there are any validation errors, show them and return
-      if (validationErrors.length > 0) {
-        validationErrors.forEach((error) => {
-          toast(error.message, {
-            type: error.severity === "error" ? "error" : "warning",
-          });
-        });
+      if (state.status === "REJECTED" && trueRejection) {
+        setRejectReason(trueRejection.reason);
+        setFinalReason(trueRejection.final);
+        setActiveModal("finalRejection");
         return;
       }
+      setActiveModal("issueInvoice");
+      return;
     }
-
-    dispatch(actions.editStatus({ status: newStatus }));
+    if (newStatus === "CANCELLED") {
+      dispatch(actions.cancel({}));
+      return;
+    }
+    if (newStatus === "ACCEPTED") {
+      if (state.status === "PAYMENTCLOSED") {
+        dispatch(actions.reapprovePayment({}));
+        return;
+      }
+      dispatch(actions.accept({ payAfter: new Date().toISOString() }));
+      return;
+    }
+    if (newStatus === "REJECTED") {
+      setActiveModal("rejectInvoice");
+      return;
+    }
+    if (newStatus === "DRAFT") {
+      dispatch(actions.reset({}));
+      return;
+    }
+    if (newStatus === "PAYMENTSCHEDULED") {
+      setActiveModal("schedulePayment");
+      return;
+    }
+    if (newStatus === "PAYMENTCLOSED") {
+      setActiveModal("closePayment");
+      return;
+    }
+    if (newStatus === "PAYMENTSENT") {
+      setActiveModal("registerPayment");
+      return;
+    }
+    if (newStatus === "PAYMENTISSUE") {
+      setActiveModal("reportPaymentIssue");
+      return;
+    }
+    if (newStatus === "PAYMENTRECEIVED") {
+      setActiveModal("confirmPayment");
+      return;
+    }
+    // Add more status checks for other modals as needed
   };
 
   const handleCurrencyChange = (currency: string) => {
-    if (
-      (prevStatus.current === "PAYMENTSCHEDULED" ||
-        prevStatus.current === "DRAFT") &&
-      !isFiatCurrency(currency) &&
-      state.issuer.paymentRouting?.wallet?.chainName === ""
-    ) {
-      dispatch(actions.editStatus({ status: "DRAFT" }));
-      toast("Select currency and chain before accepting invoice", {
-        type: "warning",
-      });
-    }
     dispatch(actions.editInvoice({ currency }));
   };
 
+  // Modal content map
+  const modalContentMap: Record<string, React.ReactNode> = {
+    issueInvoice: (
+      <IssueInvoiceModalContent
+        invoiceNoInput={invoiceNoInput}
+        setInvoiceNoInput={setInvoiceNoInput}
+        state={state}
+        dispatch={dispatch}
+        setWarning={setModalWarning}
+      />
+    ),
+    rejectInvoice: (
+      <RejectInvoiceModalContent
+        state={state}
+        dispatch={dispatch}
+        setWarning={setModalWarning}
+        setRejectReason={setRejectReason}
+        rejectReason={rejectReason}
+        setFinalReason={setFinalReason}
+        finalReason={finalReason}
+      />
+    ),
+    finalRejection: <FinalRejectionModalContent rejectReason={rejectReason} />,
+    schedulePayment: (
+      <SchedulePaymentModalContent
+        paymentRef={paymentRef}
+        setPaymentRef={setPaymentRef}
+      />
+    ),
+    closePayment: (
+      <ClosePaymentModalContent
+        closureReason={closureReason}
+        setClosureReason={setClosureReason}
+      />
+    ),
+    registerPayment: (
+      <RegisterPaymentTxModalContent
+        paymentDate={paymentDate}
+        setPaymentDate={setPaymentDate}
+        txnRef={txnRef}
+        setTxnRef={setTxnRef}
+      />
+    ),
+    reportPaymentIssue: (
+      <ReportPaymentIssueModalContent
+        paymentIssue={paymentIssue}
+        setPaymentIssue={setPaymentIssue}
+      />
+    ),
+    confirmPayment: (
+      <ConfirmPaymentModalContent
+        paymentAmount={paymentAmount}
+        setPaymentAmount={setPaymentAmount}
+        payments={state.payments}
+      />
+    ),
+    // Add more modal content mappings here
+  };
+
+  const modalHeaders: Record<string, React.ReactNode> = {
+    issueInvoice: <div>Issue Invoice</div>,
+    rejectInvoice: <div>Reject Invoice</div>,
+    finalRejection: <div>Invoice Rejected</div>,
+    schedulePayment: <div>Schedule Payment</div>,
+    closePayment: <div>Close Payment</div>,
+    registerPayment: <div>Register Payment</div>,
+    reportPaymentIssue: <div>Report Payment Issue</div>,
+    confirmPayment: <div>Confirm Payment</div>,
+    // Add more headers as needed
+  };
+
+  const modalContinueLabels: Record<string, string> = {
+    issueInvoice: "Confirm",
+    rejectInvoice: "Confirm",
+    schedulePayment: "Confirm",
+    closePayment: "Confirm",
+    registerPayment: "Confirm",
+    reportPaymentIssue: "Confirm",
+    // Add more labels as needed
+  };
+
   return (
-    <div className="editor-container" >
+    <div className="editor-container">
       <ToastContainer
         position="bottom-right"
         autoClose={5000}
@@ -701,11 +669,9 @@ export default function Editor(props: IProps) {
                 onChange={(e) => {
                   const newValue = e.target.value.split("T")[0];
                   if (newValue !== state.dateDelivered) {
-                    dispatch(
-                      actions.editInvoice({
-                        dateDelivered: newValue,
-                      })
-                    );
+                    // Remove dateDelivered from editInvoice, as it's not a valid property
+                    // dispatch(actions.editInvoice({ dateDelivered: newValue }));
+                    // If you need to update delivery date, implement the correct action here
                   }
                 }}
                 value={state.dateDelivered || ""}
@@ -744,7 +710,7 @@ export default function Editor(props: IProps) {
             <label className="block mb-1 text-sm">Due Date:</label>
             <DatePicker
               name="dateDue"
-              className='w-64'
+              className="w-64"
               onChange={(e) =>
                 dispatch(
                   actions.editInvoice({
@@ -829,14 +795,85 @@ export default function Editor(props: IProps) {
           </div>
         </div>
       </div>
+      {activeModal && (
+        <ConfirmationModal
+          open={!!activeModal}
+          header={modalHeaders[activeModal]}
+          onCancel={() => setActiveModal(null)}
+          onContinue={() => {
+            if (activeModal === "issueInvoice") {
+              dispatch(
+                actions.issue({
+                  invoiceNo: invoiceNoInput,
+                  dateIssued: state.dateIssued,
+                })
+              );
+            }
+            if (activeModal === "rejectInvoice") {
+              dispatch(
+                actions.reject({
+                  final: finalReason,
+                  id: generateId(),
+                  reason: rejectReason,
+                })
+              );
+            }
+            if (activeModal === "schedulePayment") {
+              dispatch(
+                actions.schedulePayment({
+                  id: generateId(),
+                  processorRef: paymentRef,
+                })
+              );
+            }
+            if (activeModal === "closePayment") {
+              dispatch(
+                actions.closePayment({
+                  closureReason: closureReason as ClosureReason,
+                })
+              );
+            }
+            if (activeModal === "registerPayment") {
+              dispatch(
+                actions.registerPaymentTx({
+                  id: state.payments[state.payments.length - 1].id,
+                  timestamp: paymentDate,
+                  txRef: txnRef,
+                })
+              );
+            }
+            if (activeModal === "reportPaymentIssue") {
+              dispatch(
+                actions.reportPaymentIssue({
+                  id: state.payments[state.payments.length - 1].id,
+                  issue: paymentIssue,
+                })
+              );
+            }
+            if (activeModal === "confirmPayment") {
+              dispatch(
+                actions.confirmPayment({
+                  id: state.payments[state.payments.length - 1].id,
+                  amount: parseFloat(paymentAmount) || 0,
+                })
+              );
+            }
+            setActiveModal(null);
+          }}
+          continueLabel={modalContinueLabels[activeModal]}
+          continueDisabled={modalWarning}
+        >
+          {modalContentMap[activeModal]}
+        </ConfirmationModal>
+      )}
 
       {/* Finance Request Section */}
-      {state.status === "PAYMENTSCHEDULED" && (
+      {(state.status === "ACCEPTED" || state.status === "PAYMENTSCHEDULED") && (
         <div className="mt-8">
           {!isFiatCurrency(state.currency) ? (
             <InvoiceToGnosis docState={state} dispatch={dispatch} />
           ) : (
-            <RequestFinance docState={state} />
+            <RequestFinance docState={state} dispatch={dispatch} />
           )}
         </div>
       )}

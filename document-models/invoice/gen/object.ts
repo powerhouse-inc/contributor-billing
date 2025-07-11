@@ -12,13 +12,19 @@ import utils from "./utils.js";
 import Invoice_General from "./general/object.js";
 import Invoice_Parties from "./parties/object.js";
 import Invoice_Items from "./items/object.js";
+import Invoice_Transitions from "./transitions/object.js";
 
 export * from "./general/object.js";
 export * from "./parties/object.js";
 export * from "./items/object.js";
+export * from "./transitions/object.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-interface Invoice extends Invoice_General, Invoice_Parties, Invoice_Items {}
+interface Invoice
+  extends Invoice_General,
+    Invoice_Parties,
+    Invoice_Items,
+    Invoice_Transitions {}
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 class Invoice extends BaseDocumentClass<
@@ -52,6 +58,11 @@ class Invoice extends BaseDocumentClass<
   }
 }
 
-applyMixins(Invoice, [Invoice_General, Invoice_Parties, Invoice_Items]);
+applyMixins(Invoice, [
+  Invoice_General,
+  Invoice_Parties,
+  Invoice_Items,
+  Invoice_Transitions,
+]);
 
 export { Invoice };
