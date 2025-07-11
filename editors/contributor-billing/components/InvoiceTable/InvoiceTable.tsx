@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useMemo, useEffect } from "react";
 import { HeaderControls } from "./HeaderControls.js";
 import { InvoiceTableSection } from "./InvoiceTableSection.js";
@@ -7,12 +8,19 @@ import {
   type DriveEditorContext,
   useDriveContext,
 } from "@powerhousedao/reactor-browser";
-import { type InvoiceState, type InvoiceLineItem } from "document-models/invoice/index.js";
-import { EditorDispatch, generateId, PHDocument } from "document-model";
+import {
+  type InvoiceState,
+  type InvoiceLineItem,
+} from "document-models/invoice/index.js";
+import { EditorDispatch, generateId, PHDocument, User } from "document-model";
 import { DocumentModelModule } from "document-model";
-import { DocumentDriveAction } from "document-drive";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
-import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js"
+import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
+import { toast } from "@powerhousedao/design-system";
+import {
+  actions,
+  type InvoiceAction,
+} from "../../../../document-models/invoice/index.js";
 
 type Invoice = {
   id: string;
@@ -49,7 +57,8 @@ interface InvoiceTableProps {
   renameNode: (nodeId: string, name: string) => void;
   filteredDocumentModels: DocumentModelModule[];
   onSelectDocumentModel: (model: DocumentModelModule) => void;
-  dispatchMap: Record<string, EditorDispatch<DocumentDriveAction>>;
+  dispatchMap: Record<string, (action: InvoiceAction) => void>;
+  driveId: string;
 }
 
 export const InvoiceTable = ({
@@ -65,6 +74,7 @@ export const InvoiceTable = ({
   filteredDocumentModels,
   onSelectDocumentModel,
   dispatchMap,
+  driveId,
 }: InvoiceTableProps) => {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const {
@@ -73,6 +83,7 @@ export const InvoiceTable = ({
     documentModels,
     useDriveDocumentStates,
     selectedNode,
+    useDocumentEditorProps,
   } = useDriveContext();
 
   const billingDocStates = Object.entries(state)
@@ -163,7 +174,7 @@ export const InvoiceTable = ({
       return name.substring(0, dotIndex);
     }
     return name;
-  }
+  };
 
   const handleCreateBillingStatement = async (id: string) => {
     const driveId = selectedNode?.id;
@@ -190,22 +201,28 @@ export const InvoiceTable = ({
             contributor: id,
             dateIssued: invoiceState.global.dateIssued,
             dateDue: invoiceState.global.dateDue,
-            lineItems: invoiceState.global.lineItems.map((item: InvoiceLineItem) => {
-              return {
-                id: item.id,
-                description: item.description,
-                quantity: item.quantity,
-                unit: 'UNIT',
-                unitPricePwt: 0,
-                unitPriceCash: item.unitPriceTaxIncl,
-                totalPricePwt: 0,
-                totalPriceCash: item.totalPriceTaxIncl,
-                lineItemTag: mapTags(item.lineItemTag || []),
+            lineItems: invoiceState.global.lineItems.map(
+              (item: InvoiceLineItem) => {
+                return {
+                  id: item.id,
+                  description: item.description,
+                  quantity: item.quantity,
+                  unit: "UNIT",
+                  unitPricePwt: 0,
+                  unitPriceCash: item.unitPriceTaxIncl,
+                  totalPricePwt: 0,
+                  totalPriceCash: item.totalPriceTaxIncl,
+                  lineItemTag: mapTags(item.lineItemTag || []),
+                };
               }
-            }),
+            ),
             status: invoiceState.global.status,
             currency: invoiceState.global.currency,
-            totalCash: invoiceState.global.lineItems.reduce((acc: number, item: InvoiceLineItem) => acc + item.totalPriceTaxIncl, 0),
+            totalCash: invoiceState.global.lineItems.reduce(
+              (acc: number, item: InvoiceLineItem) =>
+                acc + item.totalPriceTaxIncl,
+              0
+            ),
             totalPowt: 0,
             notes: invoiceState.global.notes,
           },
@@ -235,22 +252,28 @@ export const InvoiceTable = ({
               contributor: id,
               dateIssued: invoiceState.global.dateIssued,
               dateDue: invoiceState.global.dateDue,
-              lineItems: invoiceState.global.lineItems.map((item: InvoiceLineItem) => {
-                return {
-                  id: item.id,
-                  description: item.description,
-                  quantity: item.quantity,
-                  unit: 'UNIT',
-                  unitPricePwt: 0,
-                  unitPriceCash: item.unitPriceTaxIncl,
-                  totalPricePwt: 0,
-                  totalPriceCash: item.totalPriceTaxIncl,
-                  lineItemTag: mapTags(item.lineItemTag || []),
+              lineItems: invoiceState.global.lineItems.map(
+                (item: InvoiceLineItem) => {
+                  return {
+                    id: item.id,
+                    description: item.description,
+                    quantity: item.quantity,
+                    unit: "UNIT",
+                    unitPricePwt: 0,
+                    unitPriceCash: item.unitPriceTaxIncl,
+                    totalPricePwt: 0,
+                    totalPriceCash: item.totalPriceTaxIncl,
+                    lineItemTag: mapTags(item.lineItemTag || []),
+                  };
                 }
-              }),
+              ),
               status: invoiceState.global.status,
               currency: invoiceState.global.currency,
-              totalCash: invoiceState.global.lineItems.reduce((acc: number, item: InvoiceLineItem) => acc + item.totalPriceTaxIncl, 0),
+              totalCash: invoiceState.global.lineItems.reduce(
+                (acc: number, item: InvoiceLineItem) =>
+                  acc + item.totalPriceTaxIncl,
+                0
+              ),
               totalPowt: 0,
               notes: invoiceState.global.notes,
             },
@@ -260,28 +283,82 @@ export const InvoiceTable = ({
         clipboard: [],
       }
     );
-
   };
 
-  const selectedInvoiceIds = Object.keys(selected).filter(id => selected[id]);
-  const selectedInvoices = selectedInvoiceIds.map(id => state[id]);
-  const selectedInvoiceStatuses = selectedInvoices.map(inv => inv?.global?.status || inv?.status);
-    
+  const selectedInvoiceIds = Object.keys(selected).filter((id) => selected[id]);
+  const selectedInvoices = selectedInvoiceIds.map((id) => ({
+    ...state[id],
+    id,
+  }));
+  const selectedInvoiceStatuses = selectedInvoices.map(
+    (inv) => inv?.global?.status || inv?.status
+  );
 
-  const handleCSVExport = (baseCurrency: string) => {
-    
+  // Create dispatch map for selected invoices using the existing dispatchMap prop
+  const selectedInvoiceDispatchMap = useMemo(() => {
+    const map: Record<string, any> = {};
+    selectedInvoiceIds.forEach((invoiceId) => {
+      if (dispatchMap[invoiceId]) {
+        map[invoiceId] = dispatchMap[invoiceId];
+      }
+    });
+    return map;
+  }, [selectedInvoiceIds, dispatchMap]);
+
+  const handleCSVExport = async (baseCurrency: string) => {
     console.log(
-      'Exporting selected invoices:',
+      "Exporting selected invoices:",
       selectedInvoiceIds.map((id, idx) => ({
         id,
         state: selectedInvoices[idx],
       }))
     );
-    exportInvoicesToXeroCSV(selectedInvoices, baseCurrency)
-
-  }
-
-  
+    try {
+      const exportedInvoices = await exportInvoicesToXeroCSV(
+        selectedInvoices,
+        baseCurrency
+      );
+      // Object.entries(exportedInvoices).forEach(
+      //   ([invoiceId, invoiceData]: [string, any]) => {        
+      //     const dispatch = selectedInvoiceDispatchMap[invoiceId];
+      //     if (dispatch) {
+      //       dispatch(
+      //         actions.setExportedData({
+      //           timestamp: invoiceData.exportTimestamp as string,
+      //           exportedLineItems: invoiceData.exportedLines as string[][],
+      //         })
+      //       );
+      //     } else {
+      //       console.warn(`No dispatch function found for invoice ${invoiceId}`);
+      //     }
+      //   }
+      // );
+      toast("Invoices exported successfully", {
+        type: "success",
+      });
+    } catch (error: any) {
+      console.error("Error exporting invoices:", error);
+      const missingExpenseTagInvoices = error.missingExpenseTagInvoices || [];
+      const missingExpenseTagInvoicesList = missingExpenseTagInvoices.map((invoiceId: string) => {
+        const invoice = files.find((file) => file.id === invoiceId);
+        return invoice?.name || invoiceId;
+      });
+      console.log("missingExpenseTagInvoicesList", missingExpenseTagInvoicesList);
+      toast(
+        <>
+          Invoice Line Item Tags need to be set for:
+          <br />
+          {missingExpenseTagInvoicesList.map((name:any, idx:any) => (
+            <React.Fragment key={name}>
+              - {name}
+              <br />
+            </React.Fragment>
+          ))}
+        </>,
+        { type: "error" }
+      );
+    }
+  };
 
   return (
     <div

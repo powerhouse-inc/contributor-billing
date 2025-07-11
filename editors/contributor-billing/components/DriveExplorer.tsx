@@ -43,6 +43,7 @@ import {
 import { InvoiceTable } from "./InvoiceTable/InvoiceTable.js";
 import { actions, Status } from "../../../document-models/invoice/index.js";
 import { useDrop } from "../hooks/useDrop.js";
+import {ToastContainer} from '@powerhousedao/design-system'
 
 interface DriveExplorerProps {
   driveId: string;
@@ -228,6 +229,18 @@ export function DriveExplorer({
 
   return (
     <div className="flex h-full">
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       {/* Hidden DocumentDispatch components for each node */}
       {nodes.map((node) => (
         <DocumentDispatch
@@ -318,6 +331,7 @@ export function DriveExplorer({
               filteredDocumentModels={filteredDocumentModels}
               onSelectDocumentModel={onSelectDocumentModel}
               dispatchMap={dispatchMap}
+              driveId={driveId}
             />
           </div>
         )}

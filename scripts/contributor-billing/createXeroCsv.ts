@@ -42,7 +42,7 @@ export async function getExchangeRate(date: string, from: string, to: string): P
   }
 }
 
-export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency: string): Promise<void> {
+export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency: string): Promise<any> {
   const headers = [
     'Narration',
     'Date',
@@ -63,10 +63,9 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
   const exportTimestamp = new Date().toISOString();
   const missingExpenseTagInvoices: string[] = [];
 
-  for (let state of invoiceStates) {
-    
-    state = state.global;
-    const invoiceId = state.id || Math.random().toString(36).slice(2); // fallback if no id
+  for (let invoiceState of invoiceStates) {
+    const state = invoiceState.global;
+    const invoiceId = invoiceState.id;
     const invoiceName = state.name || invoiceId;
     const items = state.lineItems || [];
     const dateIssued = state.dateIssued || '';
@@ -207,9 +206,10 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
 
   // If any invoices are missing expense tags, throw an error
   if (missingExpenseTagInvoices.length > 0) {
-    throw new Error(
-      `The following invoices have line items missing a 'xero-expense-account' tag: ${[...new Set(missingExpenseTagInvoices)].join(', ')}`
-    );
+    throw {
+      message: `The following invoices have line items missing a 'xero-expense-account' tag: ${[...new Set(missingExpenseTagInvoices)].join(', ')}`,
+      missingExpenseTagInvoices: missingExpenseTagInvoices
+    }
   }
 
   // Download CSV for all invoices
@@ -228,10 +228,10 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
   document.body.removeChild(link);
 
   // This is the data to be added to ExportData in the state of each invoice
-  console.log(exportDataByInvoice)
+  // console.log(exportDataByInvoice)
 
   // Return or assign exportDataByInvoice as needed
   // For example, return it if you want to use it elsewhere:
-  // return exportDataByInvoice;
+  return exportDataByInvoice;
 }
 
