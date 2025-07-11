@@ -96,7 +96,7 @@ export function DriveExplorer({
           if (action === "approve" && dispatchMap[id]) {
             dispatchMap[id](
               actions.editStatus({
-                status: "AWAITINGPAYMENT",
+                status: "ACCEPTED",
               })
             );
           } else if (action === "reject" && dispatchMap[id]) {
