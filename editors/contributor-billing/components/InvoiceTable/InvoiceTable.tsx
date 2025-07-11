@@ -34,9 +34,12 @@ type Invoice = {
 
 const statusOptions = [
   { label: "Draft", value: "DRAFT" },
-  { label: "Awaiting Approval", value: "AWAITINGAPPROVAL" },
-  { label: "Awaiting Payment", value: "AWAITINGPAYMENT" },
-  { label: "Payment Received", value: "PAYMENTRECEIVED" },
+  { label: "Issued", value: "ISSUED" },
+  { label: "Accepted", value: "ACCEPTED" },
+  { label: "Payment Scheduled", value: "PAYMENTSCHEDULED" },
+  { label: "Payment Sent", value: "PAYMENTSENT" },
+  { label: "Payment Issue", value: "PAYMENTISSUE" },
+  { label: "Payment Closed", value: "PAYMENTCLOSED" },
   { label: "Rejected", value: "REJECTED" },
   { label: "Other", value: "OTHER" },
 ];
@@ -137,9 +140,11 @@ export const InvoiceTable = ({
           doc.documentType === "powerhouse/invoice" &&
           doc.global.status !== "DRAFT" &&
           doc.global.status !== "ISSUED" &&
-          doc.global.status !== "AWAITINGAPPROVAL" &&
+          doc.global.status !== "ACCEPTED" &&
           doc.global.status !== "PAYMENTSCHEDULED" &&
-          doc.global.status !== "PAYMENTRECEIVED" &&
+          doc.global.status !== "PAYMENTSENT" &&
+          doc.global.status !== "PAYMENTISSUE" &&
+          doc.global.status !== "PAYMENTCLOSED" &&
           doc.global.status !== "REJECTED"
       )
       .map(([id, doc]) => ({
@@ -157,9 +162,12 @@ export const InvoiceTable = ({
   };
 
   const draft = getInvoicesByStatus("DRAFT");
-  const awaitingApproval = getInvoicesByStatus("ISSUED");
-  const awaitingPayment = getInvoicesByStatus("PAYMENTSCHEDULED");
-  const paid = getInvoicesByStatus("PAYMENTRECEIVED");
+  const issued = getInvoicesByStatus("ISSUED");
+  const accepted = getInvoicesByStatus("ACCEPTED");
+  const paymentScheduled = getInvoicesByStatus("PAYMENTSCHEDULED");
+  const paymentSent = getInvoicesByStatus("PAYMENTSENT");
+  const paymentIssue = getInvoicesByStatus("PAYMENTISSUE");
+  const paymentClosed = getInvoicesByStatus("PAYMENTCLOSED");
   const rejected = getInvoicesByStatus("REJECTED");
   const otherInvoices = getOtherInvoices();
 
@@ -319,7 +327,7 @@ export const InvoiceTable = ({
         baseCurrency
       );
       // Object.entries(exportedInvoices).forEach(
-      //   ([invoiceId, invoiceData]: [string, any]) => {        
+      //   ([invoiceId, invoiceData]: [string, any]) => {
       //     const dispatch = selectedInvoiceDispatchMap[invoiceId];
       //     if (dispatch) {
       //       dispatch(
@@ -339,16 +347,21 @@ export const InvoiceTable = ({
     } catch (error: any) {
       console.error("Error exporting invoices:", error);
       const missingExpenseTagInvoices = error.missingExpenseTagInvoices || [];
-      const missingExpenseTagInvoicesList = missingExpenseTagInvoices.map((invoiceId: string) => {
-        const invoice = files.find((file) => file.id === invoiceId);
-        return invoice?.name || invoiceId;
-      });
-      console.log("missingExpenseTagInvoicesList", missingExpenseTagInvoicesList);
+      const missingExpenseTagInvoicesList = missingExpenseTagInvoices.map(
+        (invoiceId: string) => {
+          const invoice = files.find((file) => file.id === invoiceId);
+          return invoice?.name || invoiceId;
+        }
+      );
+      console.log(
+        "missingExpenseTagInvoicesList",
+        missingExpenseTagInvoicesList
+      );
       toast(
         <>
           Invoice Line Item Tags need to be set for:
           <br />
-          {missingExpenseTagInvoicesList.map((name:any, idx:any) => (
+          {missingExpenseTagInvoicesList.map((name: any, idx: any) => (
             <React.Fragment key={name}>
               - {name}
               <br />
@@ -416,11 +429,8 @@ export const InvoiceTable = ({
           </table>
         </InvoiceTableSection>
       )}
-      {shouldShowSection("AWAITINGAPPROVAL") && (
-        <InvoiceTableSection
-          title="Awaiting Approval"
-          count={awaitingApproval.length}
-        >
+      {shouldShowSection("ISSUED") && (
+        <InvoiceTableSection title="Issued" count={issued.length}>
           <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
             <thead>
               <tr className="bg-gray-50">
@@ -436,7 +446,7 @@ export const InvoiceTable = ({
               </tr>
             </thead>
             <tbody>
-              {awaitingApproval.map((row) => (
+              {issued.map((row) => (
                 <InvoiceTableRow
                   files={files}
                   key={row.id}
@@ -461,56 +471,10 @@ export const InvoiceTable = ({
           </table>
         </InvoiceTableSection>
       )}
-      {shouldShowSection("AWAITINGPAYMENT") && (
+      {shouldShowSection("ACCEPTED") && (
         <InvoiceTableSection
-          title="Awaiting Payment"
-          count={awaitingPayment.length}
-          color="bg-yellow-100 text-yellow-600"
-        >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-center">Invoice No.</th>
-                <th className="px-2 py-2 text-center">Issue Date</th>
-                <th className="px-2 py-2 text-center">Due Date</th>
-                <th className="px-2 py-2 text-center">Currency</th>
-                <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2 text-center">Billing Statement</th>
-                <th className="px-2 py-2">Exported</th>
-              </tr>
-            </thead>
-            <tbody>
-              {awaitingPayment.map((row) => (
-                <InvoiceTableRow
-                  files={files}
-                  key={row.id}
-                  row={row}
-                  isSelected={!!selected[row.id]}
-                  onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
-                  }
-                  menuOptions={getMenuOptions()}
-                  onMenuAction={(action) => {}}
-                  setActiveDocumentId={setActiveDocumentId}
-                  onDeleteNode={handleDelete}
-                  renameNode={renameNode}
-                  onCreateBillingStatement={handleCreateBillingStatement}
-                  billingDocStates={billingDocStates}
-                />
-              ))}
-            </tbody>
-          </table>
-        </InvoiceTableSection>
-      )}
-      {shouldShowSection("PAYMENTRECEIVED") && (
-        <InvoiceTableSection
-          title="Payment Received"
-          count={paid.length}
+          title="Accepted"
+          count={accepted.length}
           color="bg-green-100 text-green-600"
         >
           <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
@@ -518,17 +482,16 @@ export const InvoiceTable = ({
               <tr className="bg-gray-50">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-center">Invoice No.</th>
+                <th className="px-2 py-2 text-centert">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
                 <th className="px-2 py-2 text-center">Due Date</th>
                 <th className="px-2 py-2 text-center">Currency</th>
                 <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2 text-center">Billing Statement</th>
-                <th className="px-2 py-2 text-center">Exported</th>
+                <th className="px-2 py-2">Exported</th>
               </tr>
             </thead>
             <tbody>
-              {paid.map((row) => (
+              {accepted.map((row) => (
                 <InvoiceTableRow
                   files={files}
                   key={row.id}
@@ -547,6 +510,184 @@ export const InvoiceTable = ({
                   renameNode={renameNode}
                   onCreateBillingStatement={handleCreateBillingStatement}
                   billingDocStates={billingDocStates}
+                />
+              ))}
+            </tbody>
+          </table>
+        </InvoiceTableSection>
+      )}
+      {shouldShowSection("PAYMENTSCHEDULED") && (
+        <InvoiceTableSection
+          title="Payment Scheduled"
+          count={paymentScheduled.length}
+          color="bg-green-100 text-green-600"
+        >
+          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="px-2 py-2 w-8"></th>
+                <th className="px-2 py-2 text-center">Issuer</th>
+                <th className="px-2 py-2 text-centert">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Issue Date</th>
+                <th className="px-2 py-2 text-center">Due Date</th>
+                <th className="px-2 py-2 text-center">Currency</th>
+                <th className="px-2 py-2 text-center">Amount</th>
+                <th className="px-2 py-2">Exported</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paymentScheduled.map((row) => (
+                <InvoiceTableRow
+                  files={files}
+                  key={row.id}
+                  row={row}
+                  isSelected={!!selected[row.id]}
+                  onSelect={(checked) =>
+                    setSelected((prev: { [id: string]: boolean }) => ({
+                      ...prev,
+                      [row.id]: checked,
+                    }))
+                  }
+                  menuOptions={getMenuOptions()}
+                  onMenuAction={(action) => {}}
+                  setActiveDocumentId={setActiveDocumentId}
+                  onDeleteNode={handleDelete}
+                  renameNode={renameNode}
+                  onCreateBillingStatement={handleCreateBillingStatement}
+                  billingDocStates={billingDocStates}
+                />
+              ))}
+            </tbody>
+          </table>
+        </InvoiceTableSection>
+      )}
+      {shouldShowSection("PAYMENTSENT") && (
+        <InvoiceTableSection
+          title="Payment Sent"
+          count={paymentSent.length}
+          color="bg-green-100 text-green-600"
+        >
+          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="px-2 py-2 w-8"></th>
+                <th className="px-2 py-2 text-center">Issuer</th>
+                <th className="px-2 py-2 text-centert">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Issue Date</th>
+                <th className="px-2 py-2 text-center">Due Date</th>
+                <th className="px-2 py-2 text-center">Currency</th>
+                <th className="px-2 py-2 text-center">Amount</th>
+                <th className="px-2 py-2">Exported</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paymentSent.map((row) => (
+                <InvoiceTableRow
+                  files={files}
+                  key={row.id}
+                  row={row}
+                  isSelected={!!selected[row.id]}
+                  onSelect={(checked) =>
+                    setSelected((prev: { [id: string]: boolean }) => ({
+                      ...prev,
+                      [row.id]: checked,
+                    }))
+                  }
+                  menuOptions={getMenuOptions()}
+                  onMenuAction={(action) => {}}
+                  setActiveDocumentId={setActiveDocumentId}
+                  onDeleteNode={handleDelete}
+                  renameNode={renameNode}
+                  onCreateBillingStatement={handleCreateBillingStatement}
+                  billingDocStates={billingDocStates}
+                />
+              ))}
+            </tbody>
+          </table>
+        </InvoiceTableSection>
+      )}
+      {shouldShowSection("PAYMENTISSUE") && (
+        <InvoiceTableSection
+          title="Payment Issue"
+          count={paymentIssue.length}
+          color="bg-yellow-100 text-yellow-600"
+        >
+          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="px-2 py-2 w-8"></th>
+                <th className="px-2 py-2 text-center">Issuer</th>
+                <th className="px-2 py-2 text-centert">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Issue Date</th>
+                <th className="px-2 py-2 text-center">Due Date</th>
+                <th className="px-2 py-2 text-center">Currency</th>
+                <th className="px-2 py-2 text-center">Amount</th>
+                <th className="px-2 py-2">Exported</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paymentIssue.map((row) => (
+                <InvoiceTableRow
+                  files={files}
+                  key={row.id}
+                  row={row}
+                  isSelected={!!selected[row.id]}
+                  onSelect={(checked) =>
+                    setSelected((prev: { [id: string]: boolean }) => ({
+                      ...prev,
+                      [row.id]: checked,
+                    }))
+                  }
+                  menuOptions={getMenuOptions()}
+                  onMenuAction={(action) => {}}
+                  setActiveDocumentId={setActiveDocumentId}
+                  onDeleteNode={handleDelete}
+                  renameNode={renameNode}
+                  onCreateBillingStatement={handleCreateBillingStatement}
+                  billingDocStates={billingDocStates}
+                />
+              ))}
+            </tbody>
+          </table>
+        </InvoiceTableSection>
+      )}
+      {shouldShowSection("PAYMENTCLOSED") && (
+        <InvoiceTableSection
+          title="Payment Closed"
+          count={paymentClosed.length}
+          color="bg-red-500 text-black-600"
+        >
+          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="px-2 py-2 w-8"></th>
+                <th className="px-2 py-2 text-center">Issuer</th>
+                <th className="px-2 py-2 text-centert">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Issue Date</th>
+                <th className="px-2 py-2 text-center">Due Date</th>
+                <th className="px-2 py-2 text-center">Currency</th>
+                <th className="px-2 py-2 text-center">Amount</th>
+                <th className="px-2 py-2">Exported</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paymentClosed.map((row) => (
+                <InvoiceTableRow
+                  files={files}
+                  key={row.id}
+                  row={row}
+                  isSelected={!!selected[row.id]}
+                  onSelect={(checked) =>
+                    setSelected((prev: { [id: string]: boolean }) => ({
+                      ...prev,
+                      [row.id]: checked,
+                    }))
+                  }
+                  menuOptions={getMenuOptions()}
+                  onMenuAction={(action) => {}}
+                  setActiveDocumentId={setActiveDocumentId}
+                  onDeleteNode={handleDelete}
+                  renameNode={renameNode}
                 />
               ))}
             </tbody>
