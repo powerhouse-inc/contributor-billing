@@ -12,8 +12,6 @@ export const reducer: InvoiceGeneralOperations = {
       const newState = { ...state };
 
       newState.currency = action.input.currency ?? state.currency;
-      newState.dateDelivered =
-        action.input.dateDelivered ?? state.dateDelivered;
       newState.dateDue = action.input.dateDue ?? state.dateDue;
       newState.dateIssued = action.input.dateIssued ?? state.dateIssued;
       newState.invoiceNo = action.input.invoiceNo ?? state.invoiceNo;
@@ -31,49 +29,45 @@ export const reducer: InvoiceGeneralOperations = {
       console.error(e);
     }
   },
-  addRefOperation(state, action, dispatch) {
-    try {
-      if (!action.input.id) throw new Error("No input.id");
-      if (!action.input.value) throw new Error("No input.value");
-      if (state.refs.find((r) => r.id == action.input.id))
-        throw new Error("Ref already exists with provided input.id");
-      state.refs.push(action.input);
-    } catch (e) {
-      console.error(e);
-    }
-  },
-  editRefOperation(state, action, dispatch) {
-    try {
-      if (!action.input.id) throw new Error("No input.id");
-      if (!action.input.value) throw new Error("No input.value");
-
-      let ref = state.refs.find((r) => r.id == action.input.id);
-      if (!ref) throw new Error("Ref not found with provided input.id");
-      ref = action.input;
-    } catch (e) {
-      console.error(e);
-    }
-  },
-  deleteRefOperation(state, action, dispatch) {
-    try {
-      if (!action.input.id) throw new Error("No input.id");
-      state.refs = state.refs.filter((r) => r.id !== action.input.id);
-    } catch (e) {
-      console.error(e);
-    }
-  },
   editPaymentDataOperation(state, action, dispatch) {
     try {
-      if(!action.input.paymentDate || !action.input.txnHash) throw new Error("No input.paymentDate or input.txnHash");
-      state.paymentDate = action.input.paymentDate;
-      state.txnHash = action.input.txnHash;
+      const payment = state.payments.find(
+        (payment) => payment.id === action.input.id
+      );
+      if (payment) {
+        payment.processorRef = action.input.processorRef ?? payment.processorRef;
+        payment.paymentDate = action.input.paymentDate ?? payment.paymentDate;
+        payment.txnRef = action.input.txnRef ?? payment.txnRef;
+        payment.confirmed = action.input.confirmed ?? payment.confirmed;
+        payment.issue = action.input.issue ?? payment.issue;
+      }
     } catch (e) {
       console.error(e);
     }
   },
-  setExportedOperation(state, action, dispatch) {
+  addPaymentOperation(state, action, dispatch) {
     try {
-      state.exported = action.input.exported ?? false;
+      const payment = {
+        id: action.input.id,
+        processorRef: action.input.processorRef ?? "",
+        paymentDate: action.input.paymentDate ?? "",
+        txnRef: action.input.txnRef ?? "",
+        confirmed: action.input.confirmed ?? false,
+        issue: action.input.issue ?? "",
+        amount: 0,
+      };
+      state.payments.push(payment);
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  setExportedDataOperation(state, action, dispatch) {
+    try {
+      const exportedData = {
+        timestamp: action.input.timestamp,
+        exportedLineItems: action.input.exportedLineItems,
+      };
+      state.exported = exportedData;
     } catch (e) {
       console.error(e);
     }

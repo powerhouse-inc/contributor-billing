@@ -69,13 +69,6 @@ export class UBLConverter {
           invoice,
           "PaymentDueDate, cbc\\:PaymentDueDate",
         ),
-        dateDelivered:
-          this.getElementText(
-            invoice,
-            "ActualDeliveryDate, cbc\\:ActualDeliveryDate",
-          ) ||
-          this.getElementText(invoice, "TaxPointDate, cbc\\:TaxPointDate") ||
-          null,
         currency:
           this.getElementText(invoice, "CurrencyCode, cbc\\:CurrencyCode") ||
           this.getElementText(

@@ -1,0 +1,207 @@
+import { InvoiceDocument } from "document-models/invoice/gen/types.js";
+import { ValidationResult, ValidationContext, validateField } from "./validationManager.js";
+import { toast } from "@powerhousedao/design-system";
+
+const validateStatusBeforeContinue = (
+    newStatus: string,
+    state: any,
+    setInvoiceValidation: (validation: ValidationResult) => void,
+    setWalletValidation: (validation: ValidationResult) => void,
+    setCurrencyValidation: (validation: ValidationResult) => void,
+    setMainCountryValidation: (validation: ValidationResult) => void,
+    setBankCountryValidation: (validation: ValidationResult) => void,
+    setIbanValidation: (validation: ValidationResult) => void,
+    setBicValidation: (validation: ValidationResult) => void,
+    setBankNameValidation: (validation: ValidationResult) => void,
+    setStreetAddressValidation: (validation: ValidationResult) => void,
+    setCityValidation: (validation: ValidationResult) => void,
+    setPostalCodeValidation: (validation: ValidationResult) => void,
+    setPayerEmailValidation: (validation: ValidationResult) => void,
+    setLineItemValidation: (validation: ValidationResult) => void,
+    isFiatCurrency: (currency: string) => boolean,
+) => {
+    if (newStatus === "PAYMENTSCHEDULED" || newStatus === "ISSUED") {
+        const context: ValidationContext = {
+            currency: state.currency,
+            currentStatus: state.status,
+            targetStatus: newStatus === "PAYMENTSCHEDULED" ? "ISSUED" : "ISSUED",
+        };
+
+        // Collect all validation errors
+        const validationErrors: ValidationResult[] = [];
+
+        // Validate invoice number
+        const invoiceValidation = validateField(
+            "invoiceNo",
+            state.invoiceNo,
+            context
+        );
+        setInvoiceValidation(invoiceValidation as any);
+        if (invoiceValidation && !invoiceValidation.isValid) {
+            validationErrors.push(invoiceValidation);
+        }
+
+        // Validate wallet address if currency is crypto
+        if (!isFiatCurrency(state.currency)) {
+            const walletValidation = validateField(
+                "address",
+                state.issuer.paymentRouting?.wallet?.address ?? "",
+                context
+            );
+            setWalletValidation(walletValidation as any);
+            if (walletValidation && !walletValidation.isValid) {
+                validationErrors.push(walletValidation);
+            }
+        }
+
+        // Validate currency
+        const currencyValidation = validateField(
+            "currency",
+            state.currency,
+            context
+        );
+        setCurrencyValidation(currencyValidation as any);
+        if (currencyValidation && !currencyValidation.isValid) {
+            validationErrors.push(currencyValidation);
+        }
+
+        // Validate main country
+        const mainCountry = state.issuer.country ?? "";
+        const mainCountryValidation = validateField(
+            "mainCountry",
+            mainCountry,
+            context
+        );
+        setMainCountryValidation(mainCountryValidation as any);
+        if (mainCountryValidation && !mainCountryValidation.isValid) {
+            validationErrors.push(mainCountryValidation);
+        }
+
+        // Validate bank country
+        const bankCountry =
+            state.issuer.paymentRouting?.bank?.address?.country ?? "";
+        const bankCountryValidation = validateField(
+            "bankCountry",
+            bankCountry,
+            context
+        );
+        setBankCountryValidation(bankCountryValidation as any);
+        if (bankCountryValidation && !bankCountryValidation.isValid) {
+            validationErrors.push(bankCountryValidation);
+        }
+
+        // Validate EUR&GBP IBAN account number
+        const ibanValidation = validateField(
+            "accountNum",
+            state.issuer.paymentRouting?.bank?.accountNum,
+            context
+        );
+        setIbanValidation(ibanValidation as any);
+        if (ibanValidation && !ibanValidation.isValid) {
+            validationErrors.push(ibanValidation);
+        }
+
+        // Validate BIC number
+        const bicValidation = validateField(
+            "bicNumber",
+            state.issuer.paymentRouting?.bank?.BIC,
+            context
+        );
+        setBicValidation(bicValidation as any);
+        if (bicValidation && !bicValidation.isValid) {
+            validationErrors.push(bicValidation);
+        }
+
+        // Validate bank name
+        const bankNameValidation = validateField(
+            "bankName",
+            state.issuer.paymentRouting?.bank?.name,
+            context
+        );
+        setBankNameValidation(bankNameValidation as any);
+        if (bankNameValidation && !bankNameValidation.isValid) {
+            validationErrors.push(bankNameValidation);
+        }
+
+        // Validate street address
+        const streetAddressValidation = validateField(
+            "streetAddress",
+            state.issuer.address?.streetAddress,
+            context
+        );
+        setStreetAddressValidation(streetAddressValidation as any);
+        if (streetAddressValidation && !streetAddressValidation.isValid) {
+            validationErrors.push(streetAddressValidation);
+        }
+
+        // Validate city
+        const cityValidation = validateField(
+            "city",
+            state.issuer.address?.city,
+            context
+        );
+        setCityValidation(cityValidation as any);
+        if (cityValidation && !cityValidation.isValid) {
+            validationErrors.push(cityValidation);
+        }
+
+        // Validate postal code
+        const postalCodeValidation = validateField(
+            "postalCode",
+            state.issuer.address?.postalCode,
+            context
+        );
+        setPostalCodeValidation(postalCodeValidation as any);
+        if (postalCodeValidation && !postalCodeValidation.isValid) {
+            validationErrors.push(postalCodeValidation);
+        }
+
+        // Validate payer email
+        const payerEmailValidation = validateField(
+            "email",
+            state.payer.contactInfo?.email,
+            context
+        );
+        setPayerEmailValidation(payerEmailValidation as any);
+        if (payerEmailValidation && !payerEmailValidation.isValid) {
+            validationErrors.push(payerEmailValidation);
+        }
+
+        // Validate line items
+        const lineItemValidation = validateField(
+            "lineItem",
+            state.lineItems,
+            context
+        );
+        setLineItemValidation(lineItemValidation as any);
+        if (lineItemValidation && !lineItemValidation.isValid) {
+            validationErrors.push(lineItemValidation);
+        }
+
+        if (
+            newStatus === "PAYMENTSCHEDULED" &&
+            !isFiatCurrency(state.currency) &&
+            state.issuer.paymentRouting?.wallet?.chainName === ""
+        ) {
+            validationErrors.push({
+                message: "Select currency and chain before accepting invoice",
+                severity: "warning",
+                isValid: false,
+            });
+        }
+
+        // If there are any validation errors, show them and return
+        if (validationErrors.length > 0) {
+            validationErrors.forEach((error) => {
+                toast(error.message, {
+                    type: error.severity === "error" ? "error" : "warning",
+                });
+            });
+            return true
+        } else {
+            return false
+        }
+    }
+}
+
+export default validateStatusBeforeContinue;

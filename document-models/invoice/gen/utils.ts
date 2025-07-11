@@ -15,12 +15,13 @@ import {
 import { reducer } from "./reducer.js";
 
 export const initialGlobalState: InvoiceState = {
+  closureReason: null,
   invoiceNo: "",
   dateIssued: "",
   dateDue: "",
-  dateDelivered: "",
+  dateDelivered: null,
+  payAfter: null,
   status: "DRAFT",
-  refs: [],
   issuer: {
     id: null,
     name: "",
@@ -147,11 +148,14 @@ export const initialGlobalState: InvoiceState = {
   lineItems: [],
   totalPriceTaxExcl: 0,
   totalPriceTaxIncl: 0,
+  notes: null,
   invoiceTags: [],
-  exported: false,
-  notes: "",
-  paymentDate: "",
-  txnHash: "",
+  rejections: [],
+  payments: [],
+  exported: {
+    timestamp: "",
+    exportedLineItems: [],
+  },
 };
 export const initialLocalState: InvoiceLocalState = {};
 
