@@ -42,6 +42,16 @@ export const InvoiceTableRow = ({
 
   const file = files?.find((file) => file.id === row.id);
 
+  const hasExportedData =
+    row.exported != null &&
+    (
+      (Array.isArray(row.exported.exportedLineItems) &&
+       row.exported.exportedLineItems.length > 0)
+      ||
+      Boolean(row.exported.timestamp?.trim())
+    );
+
+
   return (
     <tr className="hover:bg-gray-50">
       <td className="px-2 py-2">
@@ -95,7 +105,13 @@ export const InvoiceTableRow = ({
           />
         </td>
       )}
-      <td className="px-2 py-2 text-center">{row.exported ? <span className="text-green-500">Yes</span> : <span className="text-red-500">No</span>}</td>
+      <td className="px-2 py-2 text-center">
+        {hasExportedData ? (
+          <span className="text-green-500">Yes</span>
+        ) : (
+          <span className="text-red-500">No</span>
+        )}
+      </td>
       {/* <td className="px-2 py-2 text-right relative" ref={menuRef}>
         <div className="relative inline-block">
           <button

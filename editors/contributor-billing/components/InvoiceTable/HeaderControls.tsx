@@ -141,23 +141,29 @@ export const HeaderControls = ({
   </div>
 )}
 
-      <ConfirmationModal
-        open={showCurrencyModal}
-        onCancel={() => setShowCurrencyModal(false)}
-        onContinue={() => {
-          setShowCurrencyModal(false);
-          onExport?.(selectedCurrency);
-        }}
-        header="Select Base Currency"
-        continueLabel="Export"
-        cancelLabel="Cancel"
-      >
-        <Select
-          options={currencyOptions}
-          onChange={(value) => setSelectedCurrency(value as string)}
-          placeholder="Select Base Currency"
-        />
-      </ConfirmationModal>
+<ConfirmationModal
+      open={showCurrencyModal}
+      onCancel={() => setShowCurrencyModal(false)}
+      onContinue={() => {
+        setShowCurrencyModal(false);
+        onExport?.(selectedCurrency);
+      }}
+      header="Select Base Currency"
+      continueLabel="Export"
+      cancelLabel="Cancel"
+    >
+      {/* Warning: Ensure the selected currency matches your system's base currency */}
+      <p style={{ color: 'red', marginTop: '1rem', marginBottom: '1rem', fontWeight: 500 }}>
+        ⚠ Warning: the chosen currency should match the base currency of the accounting system.
+      </p>
+      
+      <Select
+        options={currencyOptions}
+        onChange={(value) => setSelectedCurrency(value as string)}
+        placeholder="Select Base Currency"
+      />
+      
+    </ConfirmationModal>
     </div>
   );
 };
