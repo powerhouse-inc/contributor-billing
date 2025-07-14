@@ -873,7 +873,7 @@ export default function Editor(props: IProps) {
           {!isFiatCurrency(state.currency) ? (
             <InvoiceToGnosis docState={state} dispatch={dispatch} />
           ) : (
-            <RequestFinance docState={state} />
+            <RequestFinance docState={state} dispatch={dispatch} />
           )}
         </div>
       )}

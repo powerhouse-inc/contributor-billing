@@ -42,7 +42,7 @@ export async function getExchangeRate(date: string, from: string, to: string): P
   }
 }
 
-export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency: string): Promise<void> {
+export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency: string): Promise<any> {
   const headers = [
     'Narration',
     'Date',
@@ -64,10 +64,16 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
   const missingExpenseTagInvoices: string[] = [];
   const missingDateIssuedInvoices: string[] = [];
 
+<<<<<<< HEAD
   for (let state of invoiceStates) {
     
     const invoiceId = state.id
     state = state.global;
+=======
+  for (let invoiceState of invoiceStates) {
+    const state = invoiceState.global;
+    const invoiceId = invoiceState.id;
+>>>>>>> origin/dev
     const invoiceName = state.name || invoiceId;
     const items = state.lineItems || [];
     const dateIssued = state.dateIssued;
@@ -212,9 +218,10 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
 
   // If any invoices are missing expense tags, throw an error
   if (missingExpenseTagInvoices.length > 0) {
-    throw new Error(
-      `The following invoices have line items missing a 'xero-expense-account' tag: ${[...new Set(missingExpenseTagInvoices)].join(', ')}`
-    );
+    throw {
+      message: `The following invoices have line items missing a 'xero-expense-account' tag: ${[...new Set(missingExpenseTagInvoices)].join(', ')}`,
+      missingExpenseTagInvoices: missingExpenseTagInvoices
+    }
   }
 
   if (missingDateIssuedInvoices.length > 0) {
@@ -238,6 +245,7 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
   link.click();
   document.body.removeChild(link);
 
+<<<<<<< HEAD
   // Only set export data after download is triggered
   
   /*invoiceStates.forEach(state => {
@@ -252,5 +260,13 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
   });*/
 
 
+=======
+  // This is the data to be added to ExportData in the state of each invoice
+  // console.log(exportDataByInvoice)
+
+  // Return or assign exportDataByInvoice as needed
+  // For example, return it if you want to use it elsewhere:
+  return exportDataByInvoice;
+>>>>>>> origin/dev
 }
 
