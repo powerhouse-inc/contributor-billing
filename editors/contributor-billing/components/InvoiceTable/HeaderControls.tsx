@@ -98,6 +98,49 @@ export const HeaderControls = ({
           onChange={(e) => onSearchChange?.(e.target.value)}
         />
       </div>
+      {showCurrencyModal && (
+  <div className="fixed inset-0">
+    <div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded shadow-lg p-6 min-w-[300px] flex flex-col items-center">
+      <h3 className="text-lg font-semibold mb-4">Select Base Currency</h3>
+
+      {/* Warning above the selector */}
+      <p className="text-red-600 text-sm mb-2">
+        Chosen currency should match the base currency of the accounting.
+      </p>
+
+      <select
+        className="border border-gray-300 rounded px-2 py-1 mb-4"
+        value={selectedCurrency}
+        onChange={(e) => setSelectedCurrency(e.target.value)}
+      >
+        {currencyOptions.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+
+      <div className="flex gap-2">
+        <button
+          className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+          onClick={() => {
+            setShowCurrencyModal(false);
+            onExport?.(selectedCurrency);
+          }}
+        >
+          Export
+        </button>
+        <button
+          className="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300"
+          onClick={() => setShowCurrencyModal(false)}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       <ConfirmationModal
         open={showCurrencyModal}
         onCancel={() => setShowCurrencyModal(false)}
