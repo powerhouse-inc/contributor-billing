@@ -42,6 +42,7 @@ export const HeaderControls = ({
     "PAYMENTSCHEDULED",
     "PAYMENTSENT",
     "PAYMENTRECEIVED",
+    "PAYMENTCLOSED"
   ];
   const canExport =
     selectedStatuses.length > 0 &&

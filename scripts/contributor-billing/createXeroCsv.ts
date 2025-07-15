@@ -59,7 +59,7 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
   ];
 
   const allRows: string[][] = [];
-  const exportDataByInvoice: Record<string, { exportTimestamp: string, exportedLines: string[][] }> = {};
+  const exportDataByInvoice: Record<string, { timestamp: string, exportedLineItems: string[][] }> = {};
   const exportTimestamp = new Date().toISOString();
   const missingExpenseTagInvoices: string[] = [];
   const missingDateIssuedInvoices: string[] = [];
@@ -200,12 +200,9 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
 
     // Store export data for this invoice
     exportDataByInvoice[invoiceId] = {
-      exportTimestamp,
-      exportedLines: [headers, ...invoiceRows]
+      timestamp: exportTimestamp,
+      exportedLineItems: [headers, ...invoiceRows]
     };
-
-    // Assign exported data to the invoice state 
-    state.exported = exportDataByInvoice[invoiceId]; // This line is moved after download
 
   }
 
@@ -245,4 +242,3 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
   // For example, return it if you want to use it elsewhere:
   return exportDataByInvoice;
 }
-
