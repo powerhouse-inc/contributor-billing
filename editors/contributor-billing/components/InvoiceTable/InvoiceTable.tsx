@@ -12,8 +12,8 @@ import {
   type InvoiceState,
   type InvoiceLineItem,
 } from "document-models/invoice/index.js";
-import { EditorDispatch, generateId, PHDocument, User } from "document-model";
-import { DocumentModelModule } from "document-model";
+import { createPresignedHeader, EditorDispatch, generateId, PHDocument, User } from "document-model";
+import { type DocumentModelModule } from "document-model";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
 import { toast } from "@powerhousedao/design-system";
@@ -191,19 +191,20 @@ export const InvoiceTable = ({
     const invoiceState = state[id];
 
     const newDocumentId = generateId();
-
+    
     await addDocument(
       driveId,
       `bill-${invoiceFile?.name}`,
       "powerhouse/billing-statement",
       undefined,
       {
-        id: newDocumentId,
-        slug: `bill-${cleanName(invoiceFile?.name || "")}`,
-        name: `bill-${cleanName(invoiceFile?.name || "")}`,
-        created: new Date().toISOString(),
-        lastModified: new Date().toISOString(),
-        documentType: "powerhouse/billing-statement",
+        header: { ...createPresignedHeader(),
+                    ...{
+          id: newDocumentId,
+          slug: `bill-${cleanName(invoiceFile?.name || "")}`,
+          name: `bill-${cleanName(invoiceFile?.name || "")}`,
+          documentType: "powerhouse/billing-statement",
+        }},
         state: {
           global: {
             contributor: id,
@@ -236,25 +237,15 @@ export const InvoiceTable = ({
           },
           local: {},
         },
-        revision: {
-          global: 0,
-          local: 0,
-        },
         operations: {
           global: [],
           local: [],
         },
+        history: {
+          global: [],
+          local: [],
+        },
         initialState: {
-          id: newDocumentId,
-          slug: `bill-${cleanName(invoiceFile?.name || "")}`,
-          name: `bill-${cleanName(invoiceFile?.name || "")}`,
-          documentType: "powerhouse/billing-statement",
-          created: new Date().toISOString(),
-          lastModified: new Date().toISOString(),
-          revision: {
-            global: 0,
-            local: 0,
-          },
           state: {
             global: {
               contributor: id,

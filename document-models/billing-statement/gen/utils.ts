@@ -6,6 +6,7 @@ import {
   baseSaveToFileHandle,
   baseLoadFromFile,
   baseLoadFromInput,
+  generateId,
 } from "document-model";
 import {
   type BillingStatementDocument,
@@ -36,16 +37,20 @@ const utils: DocumentModelUtils<BillingStatementDocument> = {
     };
   },
   createExtendedState(extendedState) {
-    return baseCreateExtendedState(
-      { ...extendedState, documentType: "powerhouse/billing-statement" },
-      utils.createState,
-    );
+    return baseCreateExtendedState({ ...extendedState }, utils.createState);
   },
   createDocument(state) {
-    return baseCreateDocument(
+    const document = baseCreateDocument(
       utils.createExtendedState(state),
       utils.createState,
     );
+
+    document.header.documentType = "powerhouse/billing-statement";
+
+    // for backwards compatibility, but this is NOT a valid signed document id
+    document.header.id = generateId();
+
+    return document;
   },
   saveToFile(document, path, name) {
     return baseSaveToFile(document, path, ".phdm", name);
