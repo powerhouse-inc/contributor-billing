@@ -184,6 +184,15 @@ export const InvoiceTable = ({
     return name;
   };
 
+  // Remove all non-alphanumeric, non-hyphen, non-underscore chars for slug safety
+  const makeSlug = (name: string) => {
+    return name
+      .replace(/\./g, "") // remove dots
+      .replace(/\s+/g, "-") // replace spaces with hyphens
+      .replace(/[^\w-]/g, "") // remove all non-word chars except hyphen/underscore
+      .toLowerCase();
+  };
+
   const handleCreateBillingStatement = async (id: string) => {
     const driveId = selectedNode?.id;
     if (!driveId) return;
@@ -199,7 +208,7 @@ export const InvoiceTable = ({
       undefined,
       {
         id: newDocumentId,
-        slug: `bill-${cleanName(invoiceFile?.name || "")}`,
+        slug: `bill-${makeSlug(invoiceFile?.name || "")}`,
         name: `bill-${cleanName(invoiceFile?.name || "")}`,
         created: new Date().toISOString(),
         lastModified: new Date().toISOString(),
