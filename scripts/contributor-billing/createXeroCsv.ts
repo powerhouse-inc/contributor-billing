@@ -59,16 +59,17 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
   ];
 
   const allRows: string[][] = [];
-  const exportDataByInvoice: Record<string, { exportTimestamp: string, exportedLines: string[][] }> = {};
+  const exportDataByInvoice: Record<string, { timestamp: string, exportedLineItems: string[][] }> = {};
   const exportTimestamp = new Date().toISOString();
   const missingExpenseTagInvoices: string[] = [];
+  const missingDateIssuedInvoices: string[] = [];
 
   for (let invoiceState of invoiceStates) {
     const state = invoiceState.global;
     const invoiceId = invoiceState.id;
     const invoiceName = state.name || invoiceId;
     const items = state.lineItems || [];
-    const dateIssued = state.dateIssued || '';
+    const dateIssued = state.dateIssued;
     let datePaid = state.paymentDate || '';
     if (datePaid.includes('T')) {
       datePaid = datePaid.split('T')[0];
@@ -80,6 +81,11 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
     let effectiveCurrency = currency;
     if (currency === 'DAI' || currency === 'USDS') {
       effectiveCurrency = 'USD';
+    }
+
+    if (!dateIssued) {
+      missingDateIssuedInvoices.push(invoiceName);
+      continue;
     }
 
     // Check if any line item is missing a valid xero-expense-account tag
@@ -194,13 +200,9 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
 
     // Store export data for this invoice
     exportDataByInvoice[invoiceId] = {
-      exportTimestamp,
-      exportedLines: [headers, ...invoiceRows]
+      timestamp: exportTimestamp,
+      exportedLineItems: [headers, ...invoiceRows]
     };
-
-    // Optionally, assign to the invoice state here if you want to mutate it directly:
-    // state.exportData = exportDataByInvoice[invoiceId];
-
 
   }
 
@@ -210,6 +212,12 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
       message: `The following invoices have line items missing a 'xero-expense-account' tag: ${[...new Set(missingExpenseTagInvoices)].join(', ')}`,
       missingExpenseTagInvoices: missingExpenseTagInvoices
     }
+  }
+
+  if (missingDateIssuedInvoices.length > 0) {
+    throw new Error(
+      `The following invoices are missing a 'dateIssued' value: ${[...new Set(missingDateIssuedInvoices)].join(', ')}`
+    );
   }
 
   // Download CSV for all invoices
@@ -234,4 +242,3 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
   // For example, return it if you want to use it elsewhere:
   return exportDataByInvoice;
 }
-
