@@ -111,7 +111,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({ docState, dispatch }) =
         invoiceNumber: docState.invoiceNo,
         buyerInfo: {
           // email: docState.payer.contactInfo.email,
-          email: 'prometheus@powerhouse.inc',
+          email: '',
           firstName: docState.payer.name,
           // lastName: docState.payer.name.split(" ")[1] || "Liberty",
           businessName: docState.payer.name,
