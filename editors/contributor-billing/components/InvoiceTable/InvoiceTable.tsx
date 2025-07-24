@@ -1,24 +1,12 @@
 import React from "react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { HeaderControls } from "./HeaderControls.js";
 import { InvoiceTableSection } from "./InvoiceTableSection.js";
 import { InvoiceTableRow } from "./InvoiceTableRow.js";
 import { type UiFileNode } from "@powerhousedao/design-system";
-import {
-  type DriveEditorContext,
-  useDriveContext,
-} from "@powerhousedao/reactor-browser";
-import {
-  type InvoiceState,
-  type InvoiceLineItem,
-} from "document-models/invoice/index.js";
-import {
-  createPresignedHeader,
-  EditorDispatch,
-  generateId,
-  PHDocument,
-  User,
-} from "document-model";
+import { useDriveContext } from "@powerhousedao/reactor-browser";
+import { type InvoiceLineItem } from "document-models/invoice/index.js";
+import { createPresignedHeader } from "document-model";
 import { type DocumentModelModule } from "document-model";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
@@ -27,16 +15,6 @@ import {
   actions,
   type InvoiceAction,
 } from "../../../../document-models/invoice/index.js";
-
-type Invoice = {
-  id: string;
-  issuer: string;
-  invoiceNo: string;
-  issueDate: string;
-  dueDate: string;
-  currency: string;
-  amount: string;
-};
 
 const statusOptions = [
   { label: "Draft", value: "DRAFT" },
@@ -327,25 +305,7 @@ export const InvoiceTable = ({
       }))
     );
     try {
-      const exportedInvoices = await exportInvoicesToXeroCSV(
-        selectedInvoices,
-        baseCurrency
-      );
-      // Object.entries(exportedInvoices).forEach(
-      //   ([invoiceId, invoiceData]: [string, any]) => {
-      //     const dispatch = selectedInvoiceDispatchMap[invoiceId];
-      //     if (dispatch) {
-      //       dispatch(
-      //         actions.setExportedData({
-      //           timestamp: invoiceData.exportTimestamp as string,
-      //           exportedLineItems: invoiceData.exportedLines as string[][],
-      //         })
-      //       );
-      //     } else {
-      //       console.warn(`No dispatch function found for invoice ${invoiceId}`);
-      //     }
-      //   }
-      // );
+      await exportInvoicesToXeroCSV(selectedInvoices, baseCurrency);
       toast("Invoices exported successfully", {
         type: "success",
       });
@@ -423,8 +383,6 @@ export const InvoiceTable = ({
                       [row.id]: checked,
                     }))
                   }
-                  menuOptions={getMenuOptions()}
-                  onMenuAction={(action) => {}}
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
@@ -463,8 +421,6 @@ export const InvoiceTable = ({
                       [row.id]: checked,
                     }))
                   }
-                  menuOptions={getMenuOptions()}
-                  onMenuAction={(action) => {}}
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
@@ -509,8 +465,6 @@ export const InvoiceTable = ({
                       [row.id]: checked,
                     }))
                   }
-                  menuOptions={getMenuOptions()}
-                  onMenuAction={(action) => {}}
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
@@ -555,8 +509,6 @@ export const InvoiceTable = ({
                       [row.id]: checked,
                     }))
                   }
-                  menuOptions={getMenuOptions()}
-                  onMenuAction={(action) => {}}
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
@@ -601,8 +553,6 @@ export const InvoiceTable = ({
                       [row.id]: checked,
                     }))
                   }
-                  menuOptions={getMenuOptions()}
-                  onMenuAction={(action) => {}}
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
@@ -647,8 +597,6 @@ export const InvoiceTable = ({
                       [row.id]: checked,
                     }))
                   }
-                  menuOptions={getMenuOptions()}
-                  onMenuAction={(action) => {}}
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
@@ -692,8 +640,6 @@ export const InvoiceTable = ({
                       [row.id]: checked,
                     }))
                   }
-                  menuOptions={getMenuOptions()}
-                  onMenuAction={(action) => {}}
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
@@ -735,8 +681,6 @@ export const InvoiceTable = ({
                       [row.id]: checked,
                     }))
                   }
-                  menuOptions={getMenuOptions()}
-                  onMenuAction={(action) => {}}
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
@@ -774,8 +718,6 @@ export const InvoiceTable = ({
                       [row.id]: checked,
                     }))
                   }
-                  menuOptions={getMenuOptions()}
-                  onMenuAction={(action) => {}}
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
