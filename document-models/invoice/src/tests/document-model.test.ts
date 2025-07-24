@@ -13,7 +13,7 @@ describe("Invoice Document Model", () => {
     const document = utils.createDocument();
 
     expect(document).toBeDefined();
-    expect(document.documentType).toBe("powerhouse/invoice");
+    expect(document.header?.documentType).toBe("powerhouse/invoice");
   });
 
   it("should create a new Invoice document with a valid initial state", () => {

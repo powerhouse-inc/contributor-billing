@@ -6,6 +6,7 @@ import {
   baseSaveToFileHandle,
   baseLoadFromFile,
   baseLoadFromInput,
+  generateId,
 } from "document-model";
 import {
   type InvoiceDocument,
@@ -15,7 +16,6 @@ import {
 import { reducer } from "./reducer.js";
 
 export const initialGlobalState: InvoiceState = {
-  closureReason: null,
   invoiceNo: "",
   dateIssued: "",
   dateDue: "",
@@ -152,10 +152,7 @@ export const initialGlobalState: InvoiceState = {
   invoiceTags: [],
   rejections: [],
   payments: [],
-  exported: {
-    timestamp: "",
-    exportedLineItems: [],
-  },
+  exported: [],
 };
 export const initialLocalState: InvoiceLocalState = {};
 
@@ -168,16 +165,20 @@ const utils: DocumentModelUtils<InvoiceDocument> = {
     };
   },
   createExtendedState(extendedState) {
-    return baseCreateExtendedState(
-      { ...extendedState, documentType: "powerhouse/invoice" },
-      utils.createState,
-    );
+    return baseCreateExtendedState({ ...extendedState }, utils.createState);
   },
   createDocument(state) {
-    return baseCreateDocument(
+    const document = baseCreateDocument(
       utils.createExtendedState(state),
       utils.createState,
     );
+
+    document.header.documentType = "powerhouse/invoice";
+
+    // for backwards compatibility, but this is NOT a valid signed document id
+    document.header.id = generateId();
+
+    return document;
   },
   saveToFile(document, path, name) {
     return baseSaveToFile(document, path, ".phdm", name);

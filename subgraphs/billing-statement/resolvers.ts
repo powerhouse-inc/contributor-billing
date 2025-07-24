@@ -22,29 +22,29 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
             return {
               ...doc,
               driveId: driveId,
-              state: doc.state.global,
-              stateJSON: doc.state.global,
-              revision: doc.revision.global,
+              state: doc?.state?.global ?? "",
+              stateJSON: doc?.state?.global,
+              revision: doc?.header?.revision?.global,
             };
           },
           getDocuments: async (args: any) => {
             const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
             const docsIds = await reactor.getDocuments(driveId);
             const docs = await Promise.all(
-              docsIds.map(async (docId) => {
+              (docsIds ?? []).map(async (docId) => {
                 const doc = await reactor.getDocument(driveId, docId);
                 return {
                   ...doc,
                   driveId: driveId,
-                  state: doc.state.global,
-                  stateJSON: doc.state.global,
-                  revision: doc.revision.global,
+                  state: doc?.state?.global ?? "",
+                  stateJSON: doc?.state?.global,
+                  revision: doc?.header?.revision?.global,
                 };
               }),
             );
 
             return docs.filter(
-              (doc) => doc.documentType === "powerhouse/billing-statement",
+              (doc) => doc.header?.documentType === "powerhouse/billing-statement",
             );
           },
         };
@@ -90,7 +90,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
           actions.editBillingStatement({ ...args.input }),
         );
 
-        return doc.revision.global + 1;
+        return (doc?.header?.revision.global ?? 0) + 1;
       },
 
       BillingStatement_editContributor: async (_: any, args: any) => {
@@ -104,7 +104,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
           actions.editContributor({ ...args.input }),
         );
 
-        return doc.revision.global + 1;
+        return (doc?.header?.revision.global ?? 0) + 1;
       },
 
       BillingStatement_editStatus: async (_: any, args: any) => {
@@ -118,7 +118,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
           actions.editStatus({ ...args.input }),
         );
 
-        return doc.revision.global + 1;
+        return (doc?.header?.revision.global ?? 0) + 1;
       },
 
       BillingStatement_addLineItem: async (_: any, args: any) => {
@@ -132,7 +132,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
           actions.addLineItem({ ...args.input }),
         );
 
-        return doc.revision.global + 1;
+        return (doc?.header?.revision.global ?? 0) + 1;
       },
 
       BillingStatement_editLineItem: async (_: any, args: any) => {
@@ -146,7 +146,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
           actions.editLineItem({ ...args.input }),
         );
 
-        return doc.revision.global + 1;
+        return (doc?.header?.revision.global ?? 0) + 1;
       },
 
       BillingStatement_editLineItemTag: async (_: any, args: any) => {
@@ -160,7 +160,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
           actions.editLineItemTag({ ...args.input }),
         );
 
-        return doc.revision.global + 1;
+        return (doc?.header?.revision.global ?? 0) + 1;
       },
     },
   };
