@@ -152,7 +152,11 @@ export const initialGlobalState: InvoiceState = {
   invoiceTags: [],
   rejections: [],
   payments: [],
-  exported: [],
+  exported: {
+    exportedLineItems: [],
+    timestamp: "",
+  },
+  closureReason: null,
 };
 export const initialLocalState: InvoiceLocalState = {};
 
