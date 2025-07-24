@@ -57,7 +57,7 @@ export const EditorContainer: React.FC<EditorContainerProps> = (props) => {
       const ext = documentModelModule.documentModel.extension;
       await exportDocument(document, title, ext);
     }
-  }, [document?.revision.global, document?.revision.local]);
+  }, [document?.header?.revision?.global, document?.header?.revision?.local]);
 
   const loadingContent = (
     <div className="flex-1 flex justify-center items-center h-full">

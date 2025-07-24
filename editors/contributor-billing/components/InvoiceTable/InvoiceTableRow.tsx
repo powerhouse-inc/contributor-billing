@@ -11,8 +11,6 @@ export const InvoiceTableRow = ({
   row,
   isSelected,
   onSelect,
-  menuOptions,
-  onMenuAction,
   setActiveDocumentId,
   onDeleteNode,
   renameNode,
@@ -23,8 +21,6 @@ export const InvoiceTableRow = ({
   row: any;
   isSelected: boolean;
   onSelect: (checked: boolean) => void;
-  menuOptions: { label: string; value: string }[];
-  onMenuAction: (action: string) => void;
   setActiveDocumentId: (id: string) => void;
   onDeleteNode: (nodeId: string) => void;
   renameNode: (nodeId: string, name: string) => void;

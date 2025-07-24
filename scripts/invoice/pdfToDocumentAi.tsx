@@ -1,11 +1,12 @@
 import { DocumentProcessorServiceClient } from '@google-cloud/documentai';
 import { GoogleAuth } from 'google-auth-library';
 import {
-    InvoiceState,
+    type InvoiceState,
     InvoiceAction,
     actions,
   } from "../../document-models/invoice/index.js";
 import crypto from 'crypto';
+import { generateId } from 'document-model';
 
 interface DocumentAIEntity {
     type: string;
@@ -322,7 +323,7 @@ function normalizeAccountType(accountType: string): 'CHECKING' | 'SAVINGS' {
 
 function parseAddress(addressText: string): ParsedAddress {
     // Split into lines and clean each line
-    let addressLines = addressText.split(/[,\n]/).map(line => line.trim()).filter(Boolean);
+    const addressLines = addressText.split(/[,\n]/).map(line => line.trim()).filter(Boolean);
 
     const addressData = {
         streetAddress: '',
@@ -708,7 +709,7 @@ function mapDocumentAiToInvoice(
                                 totalPriceTaxExcl: parsedQuantity * parsedUnitPrice,
                                 totalPriceTaxIncl: parsedQuantity * parsedUnitPrice,
                                 currency: invoiceData.currency || 'USD',
-                                id: crypto.randomUUID(),
+                                id: generateId(),
                                 taxPercent: 0
                             });
                         }

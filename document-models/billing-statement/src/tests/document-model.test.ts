@@ -13,7 +13,7 @@ describe("Billing Statement Document Model", () => {
     const document = utils.createDocument();
 
     expect(document).toBeDefined();
-    expect(document.documentType).toBe("powerhouse/billing-statement");
+    expect(document.header.documentType).toBe("powerhouse/billing-statement");
   });
 
   it("should create a new Billing Statement document with a valid initial state", () => {

@@ -30,12 +30,12 @@ export type Scalars = {
     output: { unit?: string; value?: number };
   };
   Amount_Crypto: {
-    input: { unit: string; value: number };
-    output: { unit: string; value: number };
+    input: { unit: string; value: string };
+    output: { unit: string; value: string };
   };
   Amount_Currency: {
-    input: { unit: string; value: number };
-    output: { unit: string; value: number };
+    input: { unit: string; value: string };
+    output: { unit: string; value: string };
   };
   Amount_Fiat: {
     input: { unit: string; value: number };
