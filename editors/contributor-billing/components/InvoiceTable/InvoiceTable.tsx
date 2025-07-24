@@ -12,7 +12,13 @@ import {
   type InvoiceState,
   type InvoiceLineItem,
 } from "document-models/invoice/index.js";
-import { createPresignedHeader, EditorDispatch, generateId, PHDocument, User } from "document-model";
+import {
+  createPresignedHeader,
+  EditorDispatch,
+  generateId,
+  PHDocument,
+  User,
+} from "document-model";
 import { type DocumentModelModule } from "document-model";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
@@ -191,20 +197,22 @@ export const InvoiceTable = ({
     const invoiceState = state[id];
 
     const newDocumentId = generateId();
-    
+
     await addDocument(
       driveId,
       `bill-${invoiceFile?.name}`,
       "powerhouse/billing-statement",
       undefined,
       {
-        header: { ...createPresignedHeader(),
-                    ...{
-          id: newDocumentId,
-          slug: `bill-${cleanName(invoiceFile?.name || "")}`,
-          name: `bill-${cleanName(invoiceFile?.name || "")}`,
-          documentType: "powerhouse/billing-statement",
-        }},
+        header: {
+          ...createPresignedHeader(),
+          ...{
+            id: newDocumentId,
+            slug: `bill-${cleanName(invoiceFile?.name || "")}`,
+            name: `bill-${cleanName(invoiceFile?.name || "")}`,
+            documentType: "powerhouse/billing-statement",
+          },
+        },
         state: {
           global: {
             contributor: id,
