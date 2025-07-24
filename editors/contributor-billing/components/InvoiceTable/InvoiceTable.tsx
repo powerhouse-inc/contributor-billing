@@ -214,7 +214,7 @@ export const InvoiceTable = ({
         header: {
           ...createPresignedHeader(),
           ...{
-            slug: `bill-${cleanName(invoiceFile?.name || "")}`,
+            slug: `bill-${makeSlug(invoiceFile?.name || "")}`,
             name: `bill-${cleanName(invoiceFile?.name || "")}`,
             documentType: "powerhouse/billing-statement",
           },
