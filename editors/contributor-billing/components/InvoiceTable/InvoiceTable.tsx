@@ -196,8 +196,6 @@ export const InvoiceTable = ({
     const invoiceFile = files.find((file) => file.id === id);
     const invoiceState = state[id];
 
-    const newDocumentId = generateId();
-
     await addDocument(
       driveId,
       `bill-${invoiceFile?.name}`,
@@ -207,7 +205,6 @@ export const InvoiceTable = ({
         header: {
           ...createPresignedHeader(),
           ...{
-            id: newDocumentId,
             slug: `bill-${cleanName(invoiceFile?.name || "")}`,
             name: `bill-${cleanName(invoiceFile?.name || "")}`,
             documentType: "powerhouse/billing-statement",

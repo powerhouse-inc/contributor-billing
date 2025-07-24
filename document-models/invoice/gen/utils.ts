@@ -16,7 +16,6 @@ import {
 import { reducer } from "./reducer.js";
 
 export const initialGlobalState: InvoiceState = {
-  closureReason: null,
   invoiceNo: "",
   dateIssued: "",
   dateDue: "",
@@ -153,10 +152,7 @@ export const initialGlobalState: InvoiceState = {
   invoiceTags: [],
   rejections: [],
   payments: [],
-  exported: {
-    timestamp: "",
-    exportedLineItems: [],
-  },
+  exported: [],
 };
 export const initialLocalState: InvoiceLocalState = {};
 
