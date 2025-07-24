@@ -190,6 +190,15 @@ export const InvoiceTable = ({
     return name;
   };
 
+  // Remove all non-alphanumeric, non-hyphen, non-underscore chars for slug safety
+  const makeSlug = (name: string) => {
+    return name
+      .replace(/\./g, "") // remove dots
+      .replace(/\s+/g, "-") // replace spaces with hyphens
+      .replace(/[^\w-]/g, "") // remove all non-word chars except hyphen/underscore
+      .toLowerCase();
+  };
+
   const handleCreateBillingStatement = async (id: string) => {
     const driveId = selectedNode?.id;
     if (!driveId) return;
@@ -478,11 +487,12 @@ export const InvoiceTable = ({
               <tr className="bg-gray-50">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-centert">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
                 <th className="px-2 py-2 text-center">Due Date</th>
                 <th className="px-2 py-2 text-center">Currency</th>
                 <th className="px-2 py-2 text-center">Amount</th>
+                <th className="px-2 py-2 text-center">Billing Statement</th>
                 <th className="px-2 py-2">Exported</th>
               </tr>
             </thead>
@@ -523,11 +533,12 @@ export const InvoiceTable = ({
               <tr className="bg-gray-50">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-centert">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
                 <th className="px-2 py-2 text-center">Due Date</th>
                 <th className="px-2 py-2 text-center">Currency</th>
                 <th className="px-2 py-2 text-center">Amount</th>
+                <th className="px-2 py-2 text-center">Billing Statement</th>
                 <th className="px-2 py-2">Exported</th>
               </tr>
             </thead>
@@ -568,11 +579,12 @@ export const InvoiceTable = ({
               <tr className="bg-gray-50">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-centert">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
                 <th className="px-2 py-2 text-center">Due Date</th>
                 <th className="px-2 py-2 text-center">Currency</th>
                 <th className="px-2 py-2 text-center">Amount</th>
+                <th className="px-2 py-2 text-center">Billing Statement</th>
                 <th className="px-2 py-2">Exported</th>
               </tr>
             </thead>
@@ -613,11 +625,12 @@ export const InvoiceTable = ({
               <tr className="bg-gray-50">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-centert">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
                 <th className="px-2 py-2 text-center">Due Date</th>
                 <th className="px-2 py-2 text-center">Currency</th>
                 <th className="px-2 py-2 text-center">Amount</th>
+                <th className="px-2 py-2 text-center">Billing Statement</th>
                 <th className="px-2 py-2">Exported</th>
               </tr>
             </thead>
@@ -658,7 +671,7 @@ export const InvoiceTable = ({
               <tr className="bg-gray-50">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-centert">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
                 <th className="px-2 py-2 text-center">Due Date</th>
                 <th className="px-2 py-2 text-center">Currency</th>
@@ -701,7 +714,7 @@ export const InvoiceTable = ({
               <tr className="bg-gray-50">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-centert">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
                 <th className="px-2 py-2 text-center">Due Date</th>
                 <th className="px-2 py-2 text-center">Currency</th>

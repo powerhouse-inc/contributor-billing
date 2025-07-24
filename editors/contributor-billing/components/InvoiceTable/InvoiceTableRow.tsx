@@ -42,6 +42,13 @@ export const InvoiceTableRow = ({
 
   const file = files?.find((file) => file.id === row.id);
 
+  const hasExportedData =
+    row.exported != null &&
+    (
+      Boolean(row.exported.timestamp?.trim())
+    );
+
+
   return (
     <tr className="hover:bg-gray-50">
       <td className="px-2 py-2">
@@ -71,7 +78,7 @@ export const InvoiceTableRow = ({
       <td className="px-2 py-2 text-center">{row.dueDate}</td>
       <td className="px-2 py-2 text-center">{row.currency}</td>
       <td className="px-2 py-2 text-center">{row.amount}</td>
-      {(row.status === "ISSUED" || row.status === "PAYMENTSCHEDULED" || row.status === "PAYMENTRECEIVED") && !billingFile && (
+      {(row.status === "ISSUED" || row.status === "ACCEPTED" || row.status === "PAYMENTSCHEDULED" || row.status === "PAYMENTRECEIVED" || row.status === "PAYMENTSENT") && !billingFile && (
         <td className="px-2 py-2 text-center">
           <button
             className="bg-white border border-gray-300 rounded px-3 py-1 text-sm hover:bg-gray-100 col-span-1 justify-self-end"
@@ -95,7 +102,13 @@ export const InvoiceTableRow = ({
           />
         </td>
       )}
-      <td className="px-2 py-2 text-center">{row.exported?.timestamp ? <span className="text-green-500">Yes</span> : <span className="text-red-500">No</span>}</td>
+      <td className="px-2 py-2 text-center">
+        {hasExportedData ? (
+          <span className="text-green-500">Yes</span>
+        ) : (
+          <span className="text-red-500">No</span>
+        )}
+      </td>
       {/* <td className="px-2 py-2 text-right relative" ref={menuRef}>
         <div className="relative inline-block">
           <button

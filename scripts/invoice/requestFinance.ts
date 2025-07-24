@@ -2,8 +2,10 @@ import axios from 'axios';
 
 const API_URL = 'https://api.request.finance/invoices';
 const API_KEY = process.env.REQUEST_FINANCE_API_KEY; // Store in .env file
+const REQUEST_FINANCE_EMAIL = process.env.REQUEST_FINANCE_EMAIL;
 
 export const requestDirectPayment = async (invoiceData: any) => {
+    invoiceData.buyerInfo.email = REQUEST_FINANCE_EMAIL
     console.log('Getting a request to create an invoice', invoiceData.invoiceNumber);
     try {
         // First API call to create the invoice
