@@ -83,7 +83,7 @@ export function BaseEditor(props: IProps) {
     <div className="new-drive-explorer">
       <DriveExplorer
         key={nodes.length}
-        driveId={props.document.id}
+        driveId={props.document.header.id}
         nodes={nodes}
         onAddFolder={onAddFolder}
         onDeleteNode={onDeleteNode}
