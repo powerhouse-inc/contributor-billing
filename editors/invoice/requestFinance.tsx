@@ -1,16 +1,21 @@
 import React, { useState } from "react";
+import {
+  actions,
+} from "../../document-models/invoice/index.js";
+import { generateId } from "document-model";
 
 let GRAPHQL_URL = 'http://localhost:4001/graphql/invoice'
 
-if (window.document.baseURI !== 'http://localhost:3000/') {
+if (!window.document.baseURI.includes('localhost')) {
   GRAPHQL_URL = 'https://switchboard.powerhouse.xyz/graphql/invoice'
 }
 
 interface RequestFinanceProps {
   docState: any; // Replace 'any' with the appropriate type if available
+  dispatch: any;
 }
 
-const RequestFinance: React.FC<RequestFinanceProps> = ({ docState }) => {
+const RequestFinance: React.FC<RequestFinanceProps> = ({ docState, dispatch }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [responseData, setResponseData] = useState<any>(null);
@@ -105,7 +110,8 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({ docState }) => {
         })),
         invoiceNumber: docState.invoiceNo,
         buyerInfo: {
-          email: docState.payer.contactInfo.email,
+          // email: docState.payer.contactInfo.email,
+          email: '',
           firstName: docState.payer.name,
           // lastName: docState.payer.name.split(" ")[1] || "Liberty",
           businessName: docState.payer.name,
@@ -159,6 +165,10 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({ docState }) => {
       // Process the response
       if (directPaymentResult?.response?.invoiceLinks?.pay) {
         setInvoiceLink(directPaymentResult.response.invoiceLinks.pay);
+        dispatch(actions.schedulePayment({
+          id: generateId(),
+          processorRef: directPaymentResult.response.invoiceLinks.pay,
+        }));
       }
 
       setResponseData(directPaymentResult);

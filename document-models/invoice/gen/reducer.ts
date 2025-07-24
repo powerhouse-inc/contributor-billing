@@ -8,6 +8,7 @@ import { type InvoiceDocument, z } from "./types.js";
 import { reducer as GeneralReducer } from "../src/reducers/general.js";
 import { reducer as PartiesReducer } from "../src/reducers/parties.js";
 import { reducer as ItemsReducer } from "../src/reducers/items.js";
+import { reducer as TransitionsReducer } from "../src/reducers/transitions.js";
 
 const stateReducer: StateReducer<InvoiceDocument> = (
   state,
@@ -33,19 +34,27 @@ const stateReducer: StateReducer<InvoiceDocument> = (
       GeneralReducer.editStatusOperation(state[action.scope], action, dispatch);
       break;
 
-    case "ADD_REF":
-      z.AddRefInputSchema().parse(action.input);
-      GeneralReducer.addRefOperation(state[action.scope], action, dispatch);
+    case "EDIT_PAYMENT_DATA":
+      z.EditPaymentDataInputSchema().parse(action.input);
+      GeneralReducer.editPaymentDataOperation(
+        state[action.scope],
+        action,
+        dispatch,
+      );
       break;
 
-    case "EDIT_REF":
-      z.EditRefInputSchema().parse(action.input);
-      GeneralReducer.editRefOperation(state[action.scope], action, dispatch);
+    case "SET_EXPORTED_DATA":
+      z.SetExportedDataInputSchema().parse(action.input);
+      GeneralReducer.setExportedDataOperation(
+        state[action.scope],
+        action,
+        dispatch,
+      );
       break;
 
-    case "DELETE_REF":
-      z.DeleteRefInputSchema().parse(action.input);
-      GeneralReducer.deleteRefOperation(state[action.scope], action, dispatch);
+    case "ADD_PAYMENT":
+      z.AddPaymentInputSchema().parse(action.input);
+      GeneralReducer.addPaymentOperation(state[action.scope], action, dispatch);
       break;
 
     case "EDIT_ISSUER":
@@ -125,6 +134,94 @@ const stateReducer: StateReducer<InvoiceDocument> = (
     case "SET_INVOICE_TAG":
       z.SetInvoiceTagInputSchema().parse(action.input);
       ItemsReducer.setInvoiceTagOperation(
+        state[action.scope],
+        action,
+        dispatch,
+      );
+      break;
+
+    case "CANCEL":
+      z.CancelInputSchema().parse(action.input);
+      TransitionsReducer.cancelOperation(state[action.scope], action, dispatch);
+      break;
+
+    case "ISSUE":
+      z.IssueInputSchema().parse(action.input);
+      TransitionsReducer.issueOperation(state[action.scope], action, dispatch);
+      break;
+
+    case "RESET":
+      z.ResetInputSchema().parse(action.input);
+      TransitionsReducer.resetOperation(state[action.scope], action, dispatch);
+      break;
+
+    case "REJECT":
+      z.RejectInputSchema().parse(action.input);
+      TransitionsReducer.rejectOperation(state[action.scope], action, dispatch);
+      break;
+
+    case "ACCEPT":
+      z.AcceptInputSchema().parse(action.input);
+      TransitionsReducer.acceptOperation(state[action.scope], action, dispatch);
+      break;
+
+    case "REINSTATE":
+      z.ReinstateInputSchema().parse(action.input);
+      TransitionsReducer.reinstateOperation(
+        state[action.scope],
+        action,
+        dispatch,
+      );
+      break;
+
+    case "SCHEDULE_PAYMENT":
+      z.SchedulePaymentInputSchema().parse(action.input);
+      TransitionsReducer.schedulePaymentOperation(
+        state[action.scope],
+        action,
+        dispatch,
+      );
+      break;
+
+    case "REAPPROVE_PAYMENT":
+      z.ReapprovePaymentInputSchema().parse(action.input);
+      TransitionsReducer.reapprovePaymentOperation(
+        state[action.scope],
+        action,
+        dispatch,
+      );
+      break;
+
+    case "REGISTER_PAYMENT_TX":
+      z.RegisterPaymentTxInputSchema().parse(action.input);
+      TransitionsReducer.registerPaymentTxOperation(
+        state[action.scope],
+        action,
+        dispatch,
+      );
+      break;
+
+    case "REPORT_PAYMENT_ISSUE":
+      z.ReportPaymentIssueInputSchema().parse(action.input);
+      TransitionsReducer.reportPaymentIssueOperation(
+        state[action.scope],
+        action,
+        dispatch,
+      );
+      break;
+
+    case "CONFIRM_PAYMENT":
+      z.ConfirmPaymentInputSchema().parse(action.input);
+      TransitionsReducer.confirmPaymentOperation(
+        state[action.scope],
+        action,
+        dispatch,
+      );
+      break;
+
+    case "CLOSE_PAYMENT":
+      z.ClosePaymentInputSchema().parse(action.input);
+      TransitionsReducer.closePaymentOperation(
         state[action.scope],
         action,
         dispatch,

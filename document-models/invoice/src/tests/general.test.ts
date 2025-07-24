@@ -9,9 +9,6 @@ import {
   z,
   type EditInvoiceInput,
   type EditStatusInput,
-  type AddRefInput,
-  type EditRefInput,
-  type DeleteRefInput,
 } from "../../gen/schema/index.js";
 import { reducer } from "../../gen/reducer.js";
 import * as creators from "../../gen/general/creators.js";
@@ -25,9 +22,6 @@ describe("General Operations", () => {
   });
 
   it("should handle editInvoice operation", () => {
-    // generate a random id
-    // const id = documentModelUtils.hashKey();
-
     const input: EditInvoiceInput = generateMock(z.EditInvoiceInputSchema());
 
     const updatedDocument = reducer(document, creators.editInvoice(input));
@@ -38,9 +32,6 @@ describe("General Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editStatus operation", () => {
-    // generate a random id
-    // const id = documentModelUtils.hashKey();
-
     const input: EditStatusInput = generateMock(z.EditStatusInputSchema());
 
     const updatedDocument = reducer(document, creators.editStatus(input));
@@ -50,42 +41,27 @@ describe("General Operations", () => {
     expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
-  it("should handle addRef operation", () => {
-    // generate a random id
-    // const id = documentModelUtils.hashKey();
-
-    const input: AddRefInput = generateMock(z.AddRefInputSchema());
-
-    const updatedDocument = reducer(document, creators.addRef(input));
+  it("should handle editPaymentData operation", () => {
+    const invoice = utils.createDocument();
+    const paymentDate = new Date().toISOString();
+    const updatedDocument = reducer(invoice, creators.editPaymentData({ paymentDate: paymentDate, txnRef: "0x123", confirmed: true, id: "123" }));
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe("ADD_REF");
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].type).toBe("EDIT_PAYMENT_DATA");
+    expect(updatedDocument.operations.global[0].input).toEqual({ paymentDate: paymentDate, txnRef: "0x123", confirmed: true, id: "123" });
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
-  it("should handle editRef operation", () => {
-    // generate a random id
-    // const id = documentModelUtils.hashKey();
+  it("should handle setExportedData operation", () => {
+    
+    const input = {
+      timestamp: '2025-01-01T00:00:00Z',
+      exportedLineItems: [['1', '2', '3'], ['4', '5', '6']]
+    }
 
-    const input: EditRefInput = generateMock(z.EditRefInputSchema());
-
-    const updatedDocument = reducer(document, creators.editRef(input));
-
-    expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe("EDIT_REF");
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
-  });
-  it("should handle deleteRef operation", () => {
-    // generate a random id
-    // const id = documentModelUtils.hashKey();
-
-    const input: DeleteRefInput = generateMock(z.DeleteRefInputSchema());
-
-    const updatedDocument = reducer(document, creators.deleteRef(input));
+    const updatedDocument = reducer(document, creators.setExportedData(input));
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe("DELETE_REF");
+    expect(updatedDocument.operations.global[0].type).toBe("SET_EXPORTED_DATA");
     expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });

@@ -1,16 +1,21 @@
 import React, { useState } from "react";
+import {
+  actions,
+} from "../../document-models/invoice/index.js";
+import { generateId } from "document-model";
 
 let GRAPHQL_URL = "http://localhost:4001/graphql/invoice";
 
-if (window.document.baseURI !== "http://localhost:3000/") {
-  GRAPHQL_URL = "https://switchboard.powerhouse.xyz/graphql/invoice";
+if (!window.document.baseURI.includes('localhost')) {
+  GRAPHQL_URL = 'https://switchboard.powerhouse.xyz/graphql/invoice'
 }
 
 interface InvoiceToGnosisProps {
   docState: any; // Replace 'any' with the appropriate type if available
+  dispatch: any;
 }
 
-const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState }) => {
+const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState, dispatch }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [responseData, setResponseData] = useState<any>(null);
@@ -109,6 +114,14 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState }) => {
         const dataObj =
           typeof data.data === "string" ? JSON.parse(data.data) : data.data;
         setsafeTxHash(dataObj.txHash);
+
+        // add gnosis tx hash to invoice
+        dispatch(
+          actions.schedulePayment({
+            id: generateId(),
+            processorRef: dataObj.txHash,
+          })
+        );
 
         if (dataObj.paymentDetails) {
           // Format the payment details for better readability

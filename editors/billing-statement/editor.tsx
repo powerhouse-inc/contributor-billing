@@ -4,12 +4,10 @@ import {
   type BillingStatementDocument,
   actions,
 } from "../../document-models/billing-statement/index.js";
-import { generateId } from "document-model";
 import { CurrencyForm } from "../invoice/components/currencyForm.js";
 import { Textarea } from "@powerhousedao/document-engineering";
 import LineItemsTable from "./components/lineItemsTable.js";
 import { formatNumber } from "../invoice/lineItems.js";
-import { Tag } from "lucide-react";
 
 export type IProps = EditorProps<BillingStatementDocument>;
 
@@ -78,7 +76,7 @@ export default function Editor(props: IProps) {
         Add Dummy Line Item
       </button> */}
       {/* Text Area and Totals Table */}
-      <div className="grid sm:grid-cols-2 two-column-grid">
+      <div className="grid sm:grid-cols-2">
         <div className="mt-6 p-2 two-column-grid:mt-2">
           <Textarea
             label="Notes"
@@ -99,7 +97,7 @@ export default function Editor(props: IProps) {
             className="p-2 mb-4"
           />
         </div>
-        <div className="mt-6 p-2 flex justify-center items-center">
+        <div className="p-2 flex justify-center items-center sm:mt-6">
           <table className="border border-gray-300">
             <thead>
               <tr className="bg-gray-100">

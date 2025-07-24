@@ -6,6 +6,7 @@ import {
   baseSaveToFileHandle,
   baseLoadFromFile,
   baseLoadFromInput,
+  generateId,
 } from "document-model";
 import {
   type InvoiceDocument,
@@ -18,9 +19,9 @@ export const initialGlobalState: InvoiceState = {
   invoiceNo: "",
   dateIssued: "",
   dateDue: "",
-  dateDelivered: "",
+  dateDelivered: null,
+  payAfter: null,
   status: "DRAFT",
-  refs: [],
   issuer: {
     id: null,
     name: "",
@@ -147,8 +148,15 @@ export const initialGlobalState: InvoiceState = {
   lineItems: [],
   totalPriceTaxExcl: 0,
   totalPriceTaxIncl: 0,
+  notes: null,
   invoiceTags: [],
-  notes: "",
+  rejections: [],
+  payments: [],
+  exported: {
+    exportedLineItems: [],
+    timestamp: "",
+  },
+  closureReason: null,
 };
 export const initialLocalState: InvoiceLocalState = {};
 
@@ -161,16 +169,20 @@ const utils: DocumentModelUtils<InvoiceDocument> = {
     };
   },
   createExtendedState(extendedState) {
-    return baseCreateExtendedState(
-      { ...extendedState, documentType: "powerhouse/invoice" },
-      utils.createState,
-    );
+    return baseCreateExtendedState({ ...extendedState }, utils.createState);
   },
   createDocument(state) {
-    return baseCreateDocument(
+    const document = baseCreateDocument(
       utils.createExtendedState(state),
       utils.createState,
     );
+
+    document.header.documentType = "powerhouse/invoice";
+
+    // for backwards compatibility, but this is NOT a valid signed document id
+    document.header.id = generateId();
+
+    return document;
   },
   saveToFile(document, path, name) {
     return baseSaveToFile(document, path, ".phdm", name);

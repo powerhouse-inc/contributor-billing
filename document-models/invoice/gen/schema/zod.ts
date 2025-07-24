@@ -1,12 +1,17 @@
 import { z } from "zod";
 import type {
+  AcceptInput,
   AddLineItemInput,
-  AddRefInput,
+  AddPaymentInput,
   Address,
   Bank,
+  CancelInput,
+  ClosePaymentInput,
+  ClosureReason,
+  ClosureReasonInput,
+  ConfirmPaymentInput,
   ContactInfo,
   DeleteLineItemInput,
-  DeleteRefInput,
   EditInvoiceInput,
   EditIssuerBankInput,
   EditIssuerInput,
@@ -15,8 +20,9 @@ import type {
   EditPayerBankInput,
   EditPayerInput,
   EditPayerWalletInput,
-  EditRefInput,
+  EditPaymentDataInput,
   EditStatusInput,
+  ExportedData,
   IntermediaryBank,
   InvoiceAccountType,
   InvoiceAccountTypeInput,
@@ -24,11 +30,21 @@ import type {
   InvoiceState,
   InvoiceTag,
   InvoiceWallet,
+  IssueInput,
   LegalEntity,
   LegalEntityCorporateRegistrationId,
   LegalEntityTaxId,
+  Payment,
   PaymentRouting,
-  Ref,
+  ReapprovePaymentInput,
+  RegisterPaymentTxInput,
+  ReinstateInput,
+  RejectInput,
+  Rejection,
+  ReportPaymentIssueInput,
+  ResetInput,
+  SchedulePaymentInput,
+  SetExportedDataInput,
   SetInvoiceTagInput,
   SetLineItemTagInput,
   Status,
@@ -48,6 +64,18 @@ export const definedNonNullAnySchema = z
   .any()
   .refine((v) => isDefinedNonNullAny(v));
 
+export const ClosureReasonSchema = z.enum([
+  "CANCELLED",
+  "OVERPAID",
+  "UNDERPAID",
+]);
+
+export const ClosureReasonInputSchema = z.enum([
+  "CANCELLED",
+  "OVERPAID",
+  "UNDERPAID",
+]);
+
 export const InvoiceAccountTypeSchema = z.enum([
   "CHECKING",
   "SAVINGS",
@@ -64,16 +92,22 @@ export const InvoiceAccountTypeInputSchema = z.enum([
 
 export const StatusSchema = z.enum([
   "ACCEPTED",
-  "AWAITINGPAYMENT",
   "CANCELLED",
   "DRAFT",
   "ISSUED",
+  "PAYMENTCLOSED",
   "PAYMENTISSUE",
   "PAYMENTRECEIVED",
   "PAYMENTSCHEDULED",
   "PAYMENTSENT",
   "REJECTED",
 ]);
+
+export function AcceptInputSchema(): z.ZodObject<Properties<AcceptInput>> {
+  return z.object({
+    payAfter: z.string().datetime().nullish(),
+  });
+}
 
 export function AddLineItemInputSchema(): z.ZodObject<
   Properties<AddLineItemInput>
@@ -91,10 +125,16 @@ export function AddLineItemInputSchema(): z.ZodObject<
   });
 }
 
-export function AddRefInputSchema(): z.ZodObject<Properties<AddRefInput>> {
+export function AddPaymentInputSchema(): z.ZodObject<
+  Properties<AddPaymentInput>
+> {
   return z.object({
+    confirmed: z.boolean(),
     id: z.string(),
-    value: z.string(),
+    issue: z.string().nullish(),
+    paymentDate: z.string().datetime().nullish(),
+    processorRef: z.string().nullish(),
+    txnRef: z.string().nullish(),
   });
 }
 
@@ -126,6 +166,29 @@ export function BankSchema(): z.ZodObject<Properties<Bank>> {
   });
 }
 
+export function CancelInputSchema(): z.ZodObject<Properties<CancelInput>> {
+  return z.object({
+    _placeholder: z.string().nullish(),
+  });
+}
+
+export function ClosePaymentInputSchema(): z.ZodObject<
+  Properties<ClosePaymentInput>
+> {
+  return z.object({
+    closureReason: z.lazy(() => ClosureReasonInputSchema.nullish()),
+  });
+}
+
+export function ConfirmPaymentInputSchema(): z.ZodObject<
+  Properties<ConfirmPaymentInput>
+> {
+  return z.object({
+    amount: z.number(),
+    id: z.string(),
+  });
+}
+
 export function ContactInfoSchema(): z.ZodObject<Properties<ContactInfo>> {
   return z.object({
     __typename: z.literal("ContactInfo").optional(),
@@ -142,20 +205,11 @@ export function DeleteLineItemInputSchema(): z.ZodObject<
   });
 }
 
-export function DeleteRefInputSchema(): z.ZodObject<
-  Properties<DeleteRefInput>
-> {
-  return z.object({
-    id: z.string(),
-  });
-}
-
 export function EditInvoiceInputSchema(): z.ZodObject<
   Properties<EditInvoiceInput>
 > {
   return z.object({
     currency: z.string().nullish(),
-    dateDelivered: z.string().nullish(),
     dateDue: z.string().nullish(),
     dateIssued: z.string().nullish(),
     invoiceNo: z.string().nullish(),
@@ -309,10 +363,16 @@ export function EditPayerWalletInputSchema(): z.ZodObject<
   });
 }
 
-export function EditRefInputSchema(): z.ZodObject<Properties<EditRefInput>> {
+export function EditPaymentDataInputSchema(): z.ZodObject<
+  Properties<EditPaymentDataInput>
+> {
   return z.object({
+    confirmed: z.boolean(),
     id: z.string(),
-    value: z.string(),
+    issue: z.string().nullish(),
+    paymentDate: z.string().datetime().nullish(),
+    processorRef: z.string().nullish(),
+    txnRef: z.string().nullish(),
   });
 }
 
@@ -321,6 +381,14 @@ export function EditStatusInputSchema(): z.ZodObject<
 > {
   return z.object({
     status: StatusSchema,
+  });
+}
+
+export function ExportedDataSchema(): z.ZodObject<Properties<ExportedData>> {
+  return z.object({
+    __typename: z.literal("ExportedData").optional(),
+    exportedLineItems: z.array(z.array(z.string())),
+    timestamp: z.string().datetime(),
   });
 }
 
@@ -362,17 +430,21 @@ export function InvoiceLineItemSchema(): z.ZodObject<
 export function InvoiceStateSchema(): z.ZodObject<Properties<InvoiceState>> {
   return z.object({
     __typename: z.literal("InvoiceState").optional(),
+    closureReason: ClosureReasonSchema.nullable(),
     currency: z.string(),
-    dateDelivered: z.string().nullable(),
-    dateDue: z.string(),
-    dateIssued: z.string(),
+    dateDelivered: z.string().datetime().nullable(),
+    dateDue: z.string().datetime(),
+    dateIssued: z.string().datetime(),
+    exported: ExportedDataSchema().nullable(),
     invoiceNo: z.string(),
     invoiceTags: z.array(InvoiceTagSchema()),
     issuer: LegalEntitySchema(),
     lineItems: z.array(InvoiceLineItemSchema()),
     notes: z.string().nullable(),
+    payAfter: z.string().datetime().nullable(),
     payer: LegalEntitySchema(),
-    refs: z.array(RefSchema()),
+    payments: z.array(PaymentSchema()),
+    rejections: z.array(RejectionSchema()),
     status: StatusSchema,
     totalPriceTaxExcl: z.number(),
     totalPriceTaxIncl: z.number(),
@@ -395,6 +467,13 @@ export function InvoiceWalletSchema(): z.ZodObject<Properties<InvoiceWallet>> {
     chainId: z.string().nullable(),
     chainName: z.string().nullable(),
     rpc: z.string().nullable(),
+  });
+}
+
+export function IssueInputSchema(): z.ZodObject<Properties<IssueInput>> {
+  return z.object({
+    dateIssued: z.string(),
+    invoiceNo: z.string(),
   });
 }
 
@@ -435,6 +514,19 @@ export function LegalEntityTaxIdSchema(): z.ZodObject<
   });
 }
 
+export function PaymentSchema(): z.ZodObject<Properties<Payment>> {
+  return z.object({
+    __typename: z.literal("Payment").optional(),
+    amount: z.number().nullable(),
+    confirmed: z.boolean(),
+    id: z.string(),
+    issue: z.string().nullable(),
+    paymentDate: z.string().datetime().nullable(),
+    processorRef: z.string().nullable(),
+    txnRef: z.string().nullable(),
+  });
+}
+
 export function PaymentRoutingSchema(): z.ZodObject<
   Properties<PaymentRouting>
 > {
@@ -445,11 +537,79 @@ export function PaymentRoutingSchema(): z.ZodObject<
   });
 }
 
-export function RefSchema(): z.ZodObject<Properties<Ref>> {
+export function ReapprovePaymentInputSchema(): z.ZodObject<
+  Properties<ReapprovePaymentInput>
+> {
   return z.object({
-    __typename: z.literal("Ref").optional(),
+    _placeholder: z.string().nullish(),
+  });
+}
+
+export function RegisterPaymentTxInputSchema(): z.ZodObject<
+  Properties<RegisterPaymentTxInput>
+> {
+  return z.object({
     id: z.string(),
-    value: z.string(),
+    timestamp: z.string().datetime(),
+    txRef: z.string(),
+  });
+}
+
+export function ReinstateInputSchema(): z.ZodObject<
+  Properties<ReinstateInput>
+> {
+  return z.object({
+    _placeholder: z.string().nullish(),
+  });
+}
+
+export function RejectInputSchema(): z.ZodObject<Properties<RejectInput>> {
+  return z.object({
+    final: z.boolean(),
+    id: z.string(),
+    reason: z.string(),
+  });
+}
+
+export function RejectionSchema(): z.ZodObject<Properties<Rejection>> {
+  return z.object({
+    __typename: z.literal("Rejection").optional(),
+    final: z.boolean(),
+    id: z.string(),
+    reason: z.string(),
+  });
+}
+
+export function ReportPaymentIssueInputSchema(): z.ZodObject<
+  Properties<ReportPaymentIssueInput>
+> {
+  return z.object({
+    id: z.string(),
+    issue: z.string(),
+  });
+}
+
+export function ResetInputSchema(): z.ZodObject<Properties<ResetInput>> {
+  return z.object({
+    _placeholder: z.string().nullish(),
+  });
+}
+
+export function SchedulePaymentInputSchema(): z.ZodObject<
+  Properties<SchedulePaymentInput>
+> {
+  return z.object({
+    id: z.string(),
+    processorRef: z.string(),
+  });
+}
+
+export function SetExportedDataInputSchema(): z.ZodObject<
+  Properties<SetExportedDataInput>
+> {
+  return z.object({
+    exportedLineItems: z.array(z.array(z.string())),
+    timestamp: z.string().datetime(),
   });
 }
 

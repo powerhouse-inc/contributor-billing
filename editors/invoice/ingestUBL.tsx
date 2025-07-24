@@ -1,7 +1,5 @@
 import {
-  InvoiceState,
   InvoiceAction,
-  LegalEntity,
   actions,
 } from "../../document-models/invoice/index.js";
 
@@ -71,13 +69,6 @@ export class UBLConverter {
           invoice,
           "PaymentDueDate, cbc\\:PaymentDueDate",
         ),
-        dateDelivered:
-          this.getElementText(
-            invoice,
-            "ActualDeliveryDate, cbc\\:ActualDeliveryDate",
-          ) ||
-          this.getElementText(invoice, "TaxPointDate, cbc\\:TaxPointDate") ||
-          null,
         currency:
           this.getElementText(invoice, "CurrencyCode, cbc\\:CurrencyCode") ||
           this.getElementText(

@@ -1,34 +1,25 @@
-/* eslint-disable react/jsx-max-depth */
-/* eslint-disable react/jsx-no-bind */
-/* eslint-disable react/button-has-type */
+ 
+ 
+ 
 import { RWAButton } from "@powerhousedao/design-system";
 import {
-  EditInvoiceInput,
-  DeleteLineItemInput,
-  InvoiceTag,
+  type EditInvoiceInput,
+  type DeleteLineItemInput,
+  type InvoiceTag,
 } from "../../document-models/invoice/index.js";
 import {
   forwardRef,
   useState,
   useMemo,
   useRef,
-  useLayoutEffect,
-  Dispatch,
+  type Dispatch,
 } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { generateId } from "document-model";
 import { Tag } from "lucide-react";
 import { NumberForm } from "./components/numberForm.js";
 import { InputField } from "./components/inputField.js";
 import { LineItemTagsTable } from "./lineItemTags/lineItemTags.js";
 
-// Add TagAssignmentRow interface
-interface TagAssignmentRow {
-  id: string;
-  item: string;
-  period: string;
-  expenseAccount: string;
-  total: string;
-}
 
 // Helper function to get precision based on currency
 function getCurrencyPrecision(currency: string): number {
@@ -204,7 +195,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
         : (editedItem.taxPercent ?? 0);
 
     const completeItem: LineItem = {
-      id: editedItem.id ?? uuidv4(),
+      id: editedItem.id ?? generateId(),
       currency: editedItem.currency!,
       description: editedItem.description ?? "",
       quantity: quantity,
