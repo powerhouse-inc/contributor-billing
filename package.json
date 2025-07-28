@@ -60,7 +60,7 @@
     "@powerhousedao/builder-tools": "^4.0.1",
     "@powerhousedao/common": "^4.0.1",
     "@powerhousedao/design-system": "^4.0.1",
-    "@powerhousedao/document-engineering": "^1.13.0",
+    "@powerhousedao/document-engineering": "^1.22.0",
     "@react-pdf/renderer": "^4.3.0",
     "@safe-global/api-kit": "^3.0.1",
     "@safe-global/protocol-kit": "^6.0.3",
