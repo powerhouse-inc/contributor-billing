@@ -338,6 +338,16 @@ export const InvoiceTable = ({
     }
   };
 
+  // check if integrations document exists
+  const integrationsDoc = files.find(file => file.documentType === "powerhouse/integrations");
+  const createIntegrationsDocument = () => {
+
+    const integrationsDocument = filteredDocumentModels?.find(model => model.documentModel.id === "powerhouse/integrations");
+    if (integrationsDocument) {	
+      onSelectDocumentModel(integrationsDocument);
+    }
+  }
+
   return (
     <div
       className="w-full h-full bg-white rounded-lg p-4 border border-gray-200 shadow-md mt-4 overflow-x-auto"
@@ -349,6 +359,9 @@ export const InvoiceTable = ({
         onBatchAction={onBatchAction}
         onExport={handleCSVExport}
         selectedStatuses={selectedInvoiceStatuses}
+        createIntegrationsDocument={createIntegrationsDocument}
+        integrationsDoc={integrationsDoc}
+        setActiveDocumentId={setActiveDocumentId}
       />
       {shouldShowSection("DRAFT") && (
         <InvoiceTableSection
