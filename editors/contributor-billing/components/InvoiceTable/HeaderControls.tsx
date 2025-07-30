@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import { Input, Select } from "@powerhousedao/document-engineering";
 import ConfirmationModal from "../../../invoice/components/confirmationModal.js";
+import { Icon, UiFileNode } from "@powerhousedao/design-system";
+
 
 const currencyOptions = [
   { label: "CHF", value: "CHF" },
@@ -19,6 +21,9 @@ export const HeaderControls = ({
   onExport,
   onBatchAction,
   selectedStatuses = [],
+  createIntegrationsDocument,
+  integrationsDoc,
+  setActiveDocumentId
 }: {
   contributorOptions?: { label: string; value: string }[];
   statusOptions?: { label: string; value: string }[];
@@ -28,6 +33,9 @@ export const HeaderControls = ({
   onExport?: (baseCurrency: string) => void;
   onBatchAction?: (action: string) => void;
   selectedStatuses?: string[];
+  createIntegrationsDocument?: () => void;
+  integrationsDoc?: UiFileNode | null;
+  setActiveDocumentId?: (id: string) => void;
 }) => {
   const batchOptions = [
     { label: "$ Pay Selected", value: "pay" },
@@ -42,7 +50,7 @@ export const HeaderControls = ({
     "PAYMENTSCHEDULED",
     "PAYMENTSENT",
     "PAYMENTRECEIVED",
-    "PAYMENTCLOSED"
+    "PAYMENTCLOSED",
   ];
   const canExport =
     selectedStatuses.length > 0 &&
@@ -73,6 +81,20 @@ export const HeaderControls = ({
             placeholder="Batch Action"
             selectionIcon="checkmark"
           />
+          <div className="cursor-pointer">
+            <Icon 
+            name="Settings" 
+            className="hover:text-blue-300" 
+            onClick={() => {
+              console.log("Settings");
+              if (!integrationsDoc) {
+                createIntegrationsDocument?.();
+              } else {
+                setActiveDocumentId?.(integrationsDoc.id);
+              }
+            }}
+            />
+          </div>
         </div>
       </div>
       <div className="flex gap-2 items-center">
@@ -100,71 +122,78 @@ export const HeaderControls = ({
         />
       </div>
       {showCurrencyModal && (
-  <div className="fixed inset-0">
-    <div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded shadow-lg p-6 min-w-[300px] flex flex-col items-center">
-      <h3 className="text-lg font-semibold mb-4">Select Base Currency</h3>
+        <div className="fixed inset-0">
+          <div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded shadow-lg p-6 min-w-[300px] flex flex-col items-center">
+            <h3 className="text-lg font-semibold mb-4">Select Base Currency</h3>
 
-      {/* Warning above the selector */}
-      <p className="text-red-600 text-sm mb-2">
-        Chosen currency should match the base currency of the accounting.
-      </p>
+            {/* Warning above the selector */}
+            <p className="text-red-600 text-sm mb-2">
+              Chosen currency should match the base currency of the accounting.
+            </p>
 
-      <select
-        className="border border-gray-300 rounded px-2 py-1 mb-4"
-        value={selectedCurrency}
-        onChange={(e) => setSelectedCurrency(e.target.value)}
+            <select
+              className="border border-gray-300 rounded px-2 py-1 mb-4"
+              value={selectedCurrency}
+              onChange={(e) => setSelectedCurrency(e.target.value)}
+            >
+              {currencyOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+
+            <div className="flex gap-2">
+              <button
+                className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+                onClick={() => {
+                  setShowCurrencyModal(false);
+                  onExport?.(selectedCurrency);
+                }}
+              >
+                Export
+              </button>
+              <button
+                className="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300"
+                onClick={() => setShowCurrencyModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ConfirmationModal
+        open={showCurrencyModal}
+        onCancel={() => setShowCurrencyModal(false)}
+        onContinue={() => {
+          setShowCurrencyModal(false);
+          onExport?.(selectedCurrency);
+        }}
+        header="Select Base Currency"
+        continueLabel="Export"
+        cancelLabel="Cancel"
       >
-        {currencyOptions.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-
-      <div className="flex gap-2">
-        <button
-          className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
-          onClick={() => {
-            setShowCurrencyModal(false);
-            onExport?.(selectedCurrency);
+        {/* Warning: Ensure the selected currency matches your system's base currency */}
+        <p
+          style={{
+            color: "red",
+            marginTop: "1rem",
+            marginBottom: "1rem",
+            fontWeight: 500,
           }}
         >
-          Export
-        </button>
-        <button
-          className="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300"
-          onClick={() => setShowCurrencyModal(false)}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+          ⚠ Warning: the chosen currency should match the base currency of the
+          accounting system.
+        </p>
 
-<ConfirmationModal
-      open={showCurrencyModal}
-      onCancel={() => setShowCurrencyModal(false)}
-      onContinue={() => {
-        setShowCurrencyModal(false);
-        onExport?.(selectedCurrency);
-      }}
-      header="Select Base Currency"
-      continueLabel="Export"
-      cancelLabel="Cancel"
-    >
-      {/* Warning: Ensure the selected currency matches your system's base currency */}
-      <p style={{ color: 'red', marginTop: '1rem', marginBottom: '1rem', fontWeight: 500 }}>
-        ⚠ Warning: the chosen currency should match the base currency of the accounting system.
-      </p>
-      
-      <Select
-        options={currencyOptions}
-        onChange={(value) => setSelectedCurrency(value as string)}
-        placeholder="Select Base Currency"
-      />
-      
-    </ConfirmationModal>
+        <Select
+          options={currencyOptions}
+          onChange={(value) => setSelectedCurrency(value as string)}
+          placeholder="Select Base Currency"
+        />
+      </ConfirmationModal>
     </div>
   );
 };
