@@ -706,11 +706,11 @@ export default function Editor(props: IProps) {
         {/* Payer Section */}
         <div className="border border-gray-200 rounded-lg p-4">
           <h3 className="text-lg font-semibold mb-4">Payer</h3>
-          <div className="mb-2">
+          <div className="mb-2 w-64">
             <label className="block mb-1 text-sm">Due Date:</label>
             <DatePicker
               name="dateDue"
-              className="w-64"
+              className={String.raw`w-full p-0`}
               onChange={(e) =>
                 dispatch(
                   actions.editInvoice({
