@@ -10,21 +10,36 @@
         {
             "id": "powerhouse/invoice",
             "name": "Invoice"
+        },
+        {
+            "id": "powerhouse/integrations",
+            "name": "Integrations"
+        },
+        {
+            "id": "powerhouse/billing-statement",
+            "name": "Billing Statement"
         }
     ],
     "editors": [
         {
-            "id": "powerhouse/invoice-editor",
+            "id": "powerhouse-invoice-editor",
             "name": "Invoice",
             "documentTypes": [
                 "powerhouse/invoice"
             ]
         },
         {
-            "id": "powerhouse/billing-statement-editor",
+            "id": "powerhouse-billing-statement-editor",
             "name": "Billing Statement",
             "documentTypes": [
                 "powerhouse/billing-statement"
+            ]
+        },
+        {
+            "id": "integrations-editor",
+            "name": "Integrations",
+            "documentTypes": [
+                "powerhouse/integrations"
             ]
         }
     ],
