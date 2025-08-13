@@ -6,7 +6,7 @@ export const module: EditorModule<IntegrationsDocument> = {
   Component: Editor,
   documentTypes: ["powerhouse/integrations"],
   config: {
-    id: "editor-id",
+    id: "integrations-editor",
     disableExternalControls: true,
     documentToolbarEnabled: true,
     showSwitchboardLink: true,
