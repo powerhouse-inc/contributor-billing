@@ -3,7 +3,6 @@ import { Tag } from "lucide-react";
 import { ObjectSetTable, Select } from "@powerhousedao/document-engineering";
 import { useMemo, useRef, useEffect } from "react";
 import type {
-  TableApiBase,
   ObjectSetTableConfig,
   ColumnDef,
 } from "@powerhousedao/document-engineering";
@@ -22,7 +21,6 @@ interface CellContext<T> {
 
 const ObjectSetTableComponent = (props: { state: any; dispatch: any }) => {
   const { state, dispatch } = props;
-  const tableApiRef = useRef<TableApiBase>(null);
 
   // console.log("lineItems", state.lineItems);
 
@@ -171,7 +169,6 @@ const ObjectSetTableComponent = (props: { state: any; dispatch: any }) => {
           key={state.lineItems.length}
           columns={columns as any}
           data={state.lineItems}
-          apiRef={tableApiRef}
           //   onRowClick={() => {}}
           //   onRowDoubleClick={() => {}}
           //   onRowContextMenu={() => {}}
