@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import {
-  actions,
-} from "../../document-models/invoice/index.js";
+import { actions } from "../../document-models/invoice/index.js";
 import { generateId } from "document-model";
 
 let GRAPHQL_URL = "http://localhost:4001/graphql/invoice";
@@ -15,7 +13,10 @@ interface InvoiceToGnosisProps {
   dispatch: any;
 }
 
-const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState, dispatch }) => {
+const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
+  docState,
+  dispatch,
+}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [responseData, setResponseData] = useState<any>(null);
@@ -24,6 +25,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState, dispatch })
 
   const currency = docState.currency;
   const chainName = docState.issuer.paymentRouting.wallet.chainName;
+  const invoiceStatus = docState.status;
 
   const TOKEN_ADDRESSES = {
     BASE: {
@@ -46,7 +48,6 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState, dispatch })
     },
     // Add more networks as needed
   };
-
 
   // Extract payment details from current-state.json
   const paymentDetails = {
@@ -109,19 +110,27 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState, dispatch })
 
       const result = await response.json();
       const data = result.data.Invoice_processGnosisPayment;
-
       if (data.success) {
         const dataObj =
           typeof data.data === "string" ? JSON.parse(data.data) : data.data;
         setsafeTxHash(dataObj.txHash);
 
-        // add gnosis tx hash to invoice
-        dispatch(
-          actions.schedulePayment({
-            id: generateId(),
-            processorRef: dataObj.txHash,
-          })
-        );
+        if (invoiceStatus === "ACCEPTED") {
+          dispatch(
+            actions.schedulePayment({
+              id: generateId(),
+              processorRef: dataObj.txHash,
+            })
+          );
+        } else {
+          dispatch(
+            actions.addPayment({
+              id: generateId(),
+              processorRef: dataObj.txHash,
+              confirmed: false,
+            })
+          );
+        }
 
         if (dataObj.paymentDetails) {
           // Format the payment details for better readability
@@ -136,11 +145,27 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState, dispatch })
         }
       } else {
         setError(data.error);
+        dispatch(
+          actions.addPayment({
+            id: generateId(),
+            processorRef: "",
+            confirmed: false,
+            issue: data.error.message,
+          })
+        );
       }
       setIsLoading(false);
-    } catch (error) {
-      console.error("Error during transfer:", error);
+    } catch (error: any) {
       setIsLoading(false);
+      console.error("Error during transfer:", error);
+      dispatch(
+        actions.addPayment({
+          id: generateId(),
+          processorRef: "",
+          confirmed: false,
+          issue: error.message,
+        })
+      );
     }
   };
 
@@ -161,6 +186,8 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState, dispatch })
 
   const urlChainName = parseChainName(chainName);
 
+  const linkText = "Gnosis Safe [>]";
+
   return (
     <div className="space-y-4">
       {currency && chainName && currency !== "" && chainName !== "" && (
@@ -169,7 +196,11 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState, dispatch })
           onClick={handleInvoiceToGnosis}
           disabled={isLoading}
         >
-          {isLoading ? "Processing..." : "Send Payment to Gnosis >"}
+          {isLoading
+            ? "Processing..."
+            : invoiceStatus === "ACCEPTED"
+              ? "Schedule Payment in Gnosis Safe"
+              : "Reschedule Payment in Gnosis Safe"}
         </button>
       )}
 
@@ -178,23 +209,60 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({ docState, dispatch })
       )}
 
       {safeTxHash && (
-        <div className="bg-gray-50 p-4 rounded-md space-y-2">
-          <p className="font-medium">
-            Safe Transaction Hash:
-            <span className="font-mono text-sm ml-2 break-all">
-              {safeTxHash}
-            </span>
-          </p>
+        <div className="bg-gray-50 mt-4 rounded-md space-y-2">
           <a
             href={`https://app.safe.global/transactions/queue?safe=${urlChainName}:0xF130f741d4E3185b29412c65397363f8c23A0460`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-500 hover:text-blue-600 underline block"
           >
-            View Transaction
+            {linkText}
           </a>
+          <p className="font-medium">
+            Safe Transaction Hash:
+            <span className="font-mono text-sm ml-2 break-all">
+              {safeTxHash}
+            </span>
+          </p>
         </div>
       )}
+
+      {!safeTxHash &&
+        !error &&
+        invoiceStatus === "PAYMENTSCHEDULED" &&
+        docState.payments.length > 0 && (
+          <>
+            {docState.payments[docState.payments.length - 1].issue !== "" ? (
+              <div className="mt-4">
+                <p className="text-red-700 font-medium">
+                  Issue: {docState.payments[docState.payments.length - 1].issue}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-4">
+                <div className="invoice-link text-blue-900 hover:text-blue-600">
+                  <a
+                    className="view-invoice-button"
+                    href={`https://app.safe.global/transactions/queue?safe=${urlChainName}:0x1FB6bEF04230d67aF0e3455B997a28AFcCe1F45e`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {linkText}
+                  </a>
+                </div>
+                <p className="mt-4 font-medium">
+                  Safe Transaction Hash:
+                  <span className="font-mono text-sm ml-2 break-all">
+                    {
+                      docState.payments[docState.payments.length - 1]
+                        .processorRef
+                    }
+                  </span>
+                </p>
+              </div>
+            )}
+          </>
+        )}
 
       {invoiceStatusResponse && (
         <div className="bg-gray-50 p-4 rounded-md">

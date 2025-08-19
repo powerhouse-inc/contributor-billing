@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import {
-  actions,
-} from "../../document-models/invoice/index.js";
+import { actions } from "../../document-models/invoice/index.js";
 import { generateId } from "document-model";
 
-let GRAPHQL_URL = 'http://localhost:4001/graphql/invoice'
+let GRAPHQL_URL = "http://localhost:4001/graphql/invoice";
 
 if (!window.document.baseURI.includes('localhost')) {
   GRAPHQL_URL = 'https://switchboard.powerhouse.xyz/graphql/invoice'
@@ -15,14 +13,18 @@ interface RequestFinanceProps {
   dispatch: any;
 }
 
-const RequestFinance: React.FC<RequestFinanceProps> = ({ docState, dispatch }) => {
+const RequestFinance: React.FC<RequestFinanceProps> = ({
+  docState,
+  dispatch,
+}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [responseData, setResponseData] = useState<any>(null);
   const [invoiceLink, setInvoiceLink] = useState<string | null>(null);
   const [directPaymentStatus, setDirectPaymentStatus] = useState<string | null>(
-    null,
+    null
   );
+  const invoiceStatus = docState.status;
 
   // Function to call the createDirectPayment mutation
   const createDirectPayment = async (paymentData: any) => {
@@ -60,13 +62,14 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({ docState, dispatch }) =
         return result.data.Invoice_createRequestFinancePayment.data;
       } else {
         throw new Error(
-          result.data?.Invoice_createRequestFinancePayment?.error || "Unknown error",
+          result.data?.Invoice_createRequestFinancePayment?.error ||
+            "Unknown error"
         );
       }
     } catch (err) {
       console.error("Error creating direct payment:", err);
       setDirectPaymentStatus(
-        `Error creating direct payment: ${err instanceof Error ? err.message : "Unknown error"}`,
+        `Error creating direct payment: ${err instanceof Error ? err.message : "Unknown error"}`
       );
       throw err;
     }
@@ -81,8 +84,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({ docState, dispatch }) =
 
     const bankDetails = {
       currency: docState.currency,
-      accountNumber:
-        docState.issuer.paymentRouting.bank.accountNum,
+      accountNumber: docState.issuer.paymentRouting.bank.accountNum,
       country:
         docState.issuer.paymentRouting.bank.address.country.toUpperCase(),
       bankName: docState.issuer.paymentRouting.bank.name,
@@ -111,7 +113,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({ docState, dispatch }) =
         invoiceNumber: docState.invoiceNo,
         buyerInfo: {
           // email: docState.payer.contactInfo.email,
-          email: '',
+          email: "",
           firstName: docState.payer.name,
           // lastName: docState.payer.name.split(" ")[1] || "Liberty",
           businessName: docState.payer.name,
@@ -124,15 +126,13 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({ docState, dispatch }) =
           },
         },
         sellerInfo: {
-          email:
-            docState.issuer.contactInfo.email,
+          email: docState.issuer.contactInfo.email,
           firstName: docState.issuer.name,
-          lastName: '',
+          lastName: "",
           address: {
             country: docState.issuer.address.country,
             city: docState.issuer.address.city,
-            streetAddress:
-              docState.issuer.address.streetAddress,
+            streetAddress: docState.issuer.address.streetAddress,
             extendedAddress: docState.issuer.address.extendedAddress,
             postalCode: docState.issuer.address.postalCode,
           },
@@ -165,10 +165,22 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({ docState, dispatch }) =
       // Process the response
       if (directPaymentResult?.response?.invoiceLinks?.pay) {
         setInvoiceLink(directPaymentResult.response.invoiceLinks.pay);
-        dispatch(actions.schedulePayment({
-          id: generateId(),
-          processorRef: directPaymentResult.response.invoiceLinks.pay,
-        }));
+        if (invoiceStatus === "ACCEPTED") {
+          dispatch(
+            actions.schedulePayment({
+              id: generateId(),
+              processorRef: directPaymentResult.response.invoiceLinks.pay,
+            })
+          );
+        } else {
+          dispatch(
+            actions.addPayment({
+              id: generateId(),
+              processorRef: directPaymentResult.response.invoiceLinks.pay,
+              confirmed: false,
+            })
+          );
+        }
       }
 
       setResponseData(directPaymentResult);
@@ -182,11 +194,19 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({ docState, dispatch }) =
       }
 
       setError(errorMessage);
+      dispatch(
+        actions.addPayment({
+          id: generateId(),
+          processorRef: "",
+          confirmed: false,
+          issue: errorMessage,
+        })
+      );
     } finally {
       setIsLoading(false);
     }
   };
-
+  const liktText = "Request Finance [>]";
   return (
     <div>
       <button
@@ -194,33 +214,59 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({ docState, dispatch }) =
         onClick={handleRequestFinance}
         disabled={isLoading}
       >
-        {isLoading ? "Processing..." : "Send Payment to Request Finance >"}
+        {isLoading
+          ? "Processing..."
+          : invoiceStatus === "ACCEPTED"
+            ? "Schedule Payment in Request Finance"
+            : "Reschedule Payment in Request Finance"}
       </button>
-
-      {error && (
-        <div className="error-message" style={{ color: "red" }}>
-          {error}
-        </div>
-      )}
 
       {invoiceLink && (
         <div>
           <div className="direct-payment-status">
             <p>{directPaymentStatus}</p>
           </div>
-          <div className="invoice-link">
+          <div className="invoice-link text-blue-900 hover:text-blue-600">
             <a
-              style={{ color: "blue" }}
               href={invoiceLink}
               target="_blank"
               rel="noopener noreferrer"
               className="view-invoice-button"
             >
-              View Invoice
+              {liktText}
             </a>
           </div>
         </div>
       )}
+      {!invoiceLink &&
+        invoiceStatus === "PAYMENTSCHEDULED" &&
+        docState.payments.length > 0 && (
+          <>
+            {docState.payments[docState.payments.length - 1].issue !== "" ? (
+              <div className="mt-4">
+                <p className="text-red-700 font-medium">
+                  Issue: {docState.payments[docState.payments.length - 1].issue}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-4">
+                <div className="invoice-link text-blue-900 hover:text-blue-600">
+                  <a
+                    className="view-invoice-button"
+                    href={
+                      docState.payments[docState.payments.length - 1]
+                        .processorRef
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {liktText}
+                  </a>
+                </div>
+              </div>
+            )}
+          </>
+        )}
     </div>
   );
 };
