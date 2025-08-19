@@ -1,25 +1,15 @@
- 
- 
- 
 import { RWAButton } from "@powerhousedao/design-system";
 import {
   type EditInvoiceInput,
   type DeleteLineItemInput,
   type InvoiceTag,
 } from "../../document-models/invoice/index.js";
-import {
-  forwardRef,
-  useState,
-  useMemo,
-  useRef,
-  type Dispatch,
-} from "react";
+import { forwardRef, useState, useMemo, useRef, type Dispatch } from "react";
 import { generateId } from "document-model";
 import { Tag } from "lucide-react";
 import { NumberForm } from "./components/numberForm.js";
 import { InputField } from "./components/inputField.js";
 import { LineItemTagsTable } from "./lineItemTags/lineItemTags.js";
-
 
 // Helper function to get precision based on currency
 function getCurrencyPrecision(currency: string): number {
@@ -69,10 +59,9 @@ type EditableLineItem = {
   id: string;
   quantity: number | string;
   taxPercent: number | string;
-  totalPriceTaxExcl: number;
-  totalPriceTaxIncl: number;
+  totalPriceTaxExcl: number | string;
+  totalPriceTaxIncl: number | string;
   unitPriceTaxExcl: number | string;
-  unitPriceTaxIncl: number;
 };
 
 type EditableLineItemProps = {
@@ -93,6 +82,8 @@ const EditableLineItem = forwardRef(function EditableLineItem(
     quantity: item.quantity ?? "",
     taxPercent: item.taxPercent ?? "",
     unitPriceTaxExcl: item.unitPriceTaxExcl ?? "",
+    totalPriceTaxExcl: item.totalPriceTaxExcl ?? "",
+    totalPriceTaxIncl: item.totalPriceTaxIncl ?? "",
   });
 
   const calculatedValues = useMemo(() => {
@@ -117,21 +108,78 @@ const EditableLineItem = forwardRef(function EditableLineItem(
           : Number(editedItem.taxPercent)
         : (editedItem.taxPercent ?? 0);
 
-    const totalPriceTaxExcl = quantity * unitPriceTaxExcl;
-    const taxAmount = totalPriceTaxExcl * (taxPercent / 100);
-    const totalPriceTaxIncl = totalPriceTaxExcl + taxAmount;
-    const unitPriceTaxIncl = unitPriceTaxExcl * (1 + taxPercent / 100);
+    const totalPriceTaxExcl =
+      typeof editedItem.totalPriceTaxExcl === "string"
+        ? editedItem.totalPriceTaxExcl === ""
+          ? 0
+          : Number(editedItem.totalPriceTaxExcl)
+        : (editedItem.totalPriceTaxExcl ?? 0);
+
+    const totalPriceTaxIncl =
+      typeof editedItem.totalPriceTaxIncl === "string"
+        ? editedItem.totalPriceTaxIncl === ""
+          ? 0
+          : Number(editedItem.totalPriceTaxIncl)
+        : (editedItem.totalPriceTaxIncl ?? 0);
+
+    const taxRate = taxPercent / 100;
+    const EPSILON = 0.00001;
+
+    // Helper function to compare floating point numbers
+    const isClose = (a: number, b: number) => Math.abs(a - b) < EPSILON;
+
+    // Check if user explicitly edited any fields
+    const userEditedQuantity = editedItem.quantity !== undefined && editedItem.quantity !== item.quantity;
+    const userEditedUnitPriceTaxExcl = editedItem.unitPriceTaxExcl !== undefined && editedItem.unitPriceTaxExcl !== item.unitPriceTaxExcl;
+    const userEditedTotalPriceTaxExcl = editedItem.totalPriceTaxExcl !== undefined && editedItem.totalPriceTaxExcl !== item.totalPriceTaxExcl;
+    const userEditedTotalPriceTaxIncl = editedItem.totalPriceTaxIncl !== undefined && editedItem.totalPriceTaxIncl !== item.totalPriceTaxIncl;
+
+    let finalUnitPriceTaxExcl = unitPriceTaxExcl;
+    let finalUnitPriceTaxIncl = unitPriceTaxExcl * (1 + taxRate);
+    let finalTotalPriceTaxExcl = quantity * unitPriceTaxExcl;
+    let finalTotalPriceTaxIncl = quantity * finalUnitPriceTaxIncl;
+
+    // If user explicitly edited totalPriceTaxExcl, use that value and calculate unit price
+    if (userEditedTotalPriceTaxExcl && totalPriceTaxExcl !== 0) {
+      finalTotalPriceTaxExcl = totalPriceTaxExcl;
+      finalUnitPriceTaxExcl = totalPriceTaxExcl / quantity;
+      finalUnitPriceTaxIncl = finalUnitPriceTaxExcl * (1 + taxRate);
+      finalTotalPriceTaxIncl = quantity * finalUnitPriceTaxIncl;
+    }
+    // If user explicitly edited totalPriceTaxIncl, use that value and calculate unit price
+    else if (userEditedTotalPriceTaxIncl && totalPriceTaxIncl !== 0) {
+      finalTotalPriceTaxIncl = totalPriceTaxIncl;
+      finalUnitPriceTaxIncl = totalPriceTaxIncl / quantity;
+      finalUnitPriceTaxExcl = finalUnitPriceTaxIncl / (1 + taxRate);
+      finalTotalPriceTaxExcl = quantity * finalUnitPriceTaxExcl;
+    }
+    // If user explicitly edited unitPriceTaxExcl, use that value and calculate totals
+    else if (userEditedUnitPriceTaxExcl && unitPriceTaxExcl !== 0) {
+      finalUnitPriceTaxExcl = unitPriceTaxExcl;
+      finalUnitPriceTaxIncl = unitPriceTaxExcl * (1 + taxRate);
+      finalTotalPriceTaxExcl = quantity * finalUnitPriceTaxExcl;
+      finalTotalPriceTaxIncl = quantity * finalUnitPriceTaxIncl;
+    }
+    // If user explicitly edited quantity, recalculate totals
+    else if (userEditedQuantity) {
+      finalTotalPriceTaxExcl = quantity * finalUnitPriceTaxExcl;
+      finalTotalPriceTaxIncl = quantity * finalUnitPriceTaxIncl;
+    }
 
     return {
-      totalPriceTaxExcl,
-      totalPriceTaxIncl,
-      unitPriceTaxIncl,
+      quantity: quantity,
+      taxPercent: taxPercent,
+      totalPriceTaxExcl: finalTotalPriceTaxExcl,
+      totalPriceTaxIncl: finalTotalPriceTaxIncl,
+      unitPriceTaxIncl: finalUnitPriceTaxIncl,
+      unitPriceTaxExcl: finalUnitPriceTaxExcl,
     };
-  }, [editedItem.quantity, editedItem.unitPriceTaxExcl, editedItem.taxPercent]);
+  }, [editedItem.quantity, editedItem.unitPriceTaxExcl, editedItem.taxPercent, editedItem.totalPriceTaxExcl, editedItem.totalPriceTaxIncl, item.quantity, item.unitPriceTaxExcl, item.totalPriceTaxExcl, item.totalPriceTaxIncl]);
 
   function handleInputChange(field: keyof EditableLineItem) {
     return function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
       const value = event.target.value;
+      console.log(`handleInputChange called for ${field} with value:`, value);
 
       if (field === "description") {
         setEditedItem((prev) => ({ ...prev, [field]: value }));
@@ -163,6 +211,22 @@ const EditableLineItem = forwardRef(function EditableLineItem(
         if (regex.test(value)) {
           setEditedItem((prev) => ({ ...prev, [field]: value }));
         }
+      } else if (field === "totalPriceTaxExcl") {
+        // For total price, allow up to dynamic decimal places based on currency
+        const maxDecimals = getCurrencyPrecision(currency);
+        // Allow negative numbers with optional minus sign at start
+        const regex = new RegExp(`^-?\\d*\\.?\\d{0,${maxDecimals}}$`);
+        if (regex.test(value)) {
+          setEditedItem((prev) => ({ ...prev, [field]: Number(value) }));
+        }
+      } else if (field === "totalPriceTaxIncl") {
+        // For total price, allow up to dynamic decimal places based on currency
+        const maxDecimals = getCurrencyPrecision(currency);
+        // Allow negative numbers with optional minus sign at start
+        const regex = new RegExp(`^-?\\d*\\.?\\d{0,${maxDecimals}}$`);
+        if (regex.test(value)) {
+          setEditedItem((prev) => ({ ...prev, [field]: value }));
+        }
       } else {
         // For other decimal fields
         if (/^-?\d*\.?\d*$/.test(value)) {
@@ -173,40 +237,91 @@ const EditableLineItem = forwardRef(function EditableLineItem(
   }
 
   function handleSave() {
-    const quantity =
-      typeof editedItem.quantity === "string"
-        ? editedItem.quantity === ""
-          ? 0
-          : Number(editedItem.quantity)
-        : (editedItem.quantity ?? 0);
-
-    const unitPriceTaxExcl =
-      typeof editedItem.unitPriceTaxExcl === "string"
-        ? editedItem.unitPriceTaxExcl === ""
-          ? 0
-          : Number(editedItem.unitPriceTaxExcl)
-        : (editedItem.unitPriceTaxExcl ?? 0);
-
-    const taxPercent =
-      typeof editedItem.taxPercent === "string"
-        ? editedItem.taxPercent === ""
-          ? 0
-          : Number(editedItem.taxPercent)
-        : (editedItem.taxPercent ?? 0);
-
-    const completeItem: LineItem = {
+    console.log("handleSave called");
+    console.log("original item:", item);
+    console.log("editedItem:", editedItem);
+    console.log("calculatedValues:", calculatedValues);
+    
+    // Helper function for floating point comparison
+    const isClose = (a: number, b: number) => Math.abs(a - b) < 0.00001;
+    
+    // Create an object with only the fields that have changed
+    const updateInput: any = {
       id: editedItem.id ?? generateId(),
-      currency: editedItem.currency!,
-      description: editedItem.description ?? "",
-      quantity: quantity,
-      taxPercent: taxPercent,
-      unitPriceTaxExcl: unitPriceTaxExcl,
-      unitPriceTaxIncl: calculatedValues.unitPriceTaxIncl,
-      totalPriceTaxExcl: calculatedValues.totalPriceTaxExcl,
-      totalPriceTaxIncl: calculatedValues.totalPriceTaxIncl,
-      lineItemTag: [],
     };
-    onSave(completeItem);
+
+    // Check if any field was explicitly edited by the user
+    const hasEditedDescription = editedItem.description !== undefined && editedItem.description !== item.description;
+    const hasEditedQuantity = editedItem.quantity !== undefined && editedItem.quantity !== item.quantity;
+    const hasEditedTaxPercent = editedItem.taxPercent !== undefined && editedItem.taxPercent !== item.taxPercent;
+    const hasEditedUnitPriceTaxExcl = editedItem.unitPriceTaxExcl !== undefined && editedItem.unitPriceTaxExcl !== item.unitPriceTaxExcl;
+    const hasEditedTotalPriceTaxExcl = editedItem.totalPriceTaxExcl !== undefined && editedItem.totalPriceTaxExcl !== item.totalPriceTaxExcl;
+    const hasEditedTotalPriceTaxIncl = editedItem.totalPriceTaxIncl !== undefined && editedItem.totalPriceTaxIncl !== item.totalPriceTaxIncl;
+
+    // Always include fields that were explicitly edited
+    if (hasEditedDescription) {
+      updateInput.description = editedItem.description ?? "";
+      console.log("description explicitly edited:", editedItem.description);
+    }
+    
+    if (hasEditedQuantity) {
+      updateInput.quantity = calculatedValues.quantity;
+      console.log("quantity explicitly edited:", calculatedValues.quantity);
+    }
+    
+    if (hasEditedTaxPercent) {
+      updateInput.taxPercent = calculatedValues.taxPercent;
+      console.log("taxPercent explicitly edited:", calculatedValues.taxPercent);
+    }
+    
+    if (hasEditedUnitPriceTaxExcl) {
+      updateInput.unitPriceTaxExcl = calculatedValues.unitPriceTaxExcl;
+      console.log("unitPriceTaxExcl explicitly edited:", calculatedValues.unitPriceTaxExcl);
+    }
+    
+    if (hasEditedTotalPriceTaxExcl) {
+      updateInput.totalPriceTaxExcl = calculatedValues.totalPriceTaxExcl;
+      console.log("totalPriceTaxExcl explicitly edited:", calculatedValues.totalPriceTaxExcl);
+    }
+    
+    if (hasEditedTotalPriceTaxIncl) {
+      updateInput.totalPriceTaxIncl = calculatedValues.totalPriceTaxIncl;
+      console.log("totalPriceTaxIncl explicitly edited:", calculatedValues.totalPriceTaxIncl);
+    }
+
+    // Also include fields that changed due to calculations (even if not explicitly edited)
+    if (!hasEditedQuantity && !isClose(calculatedValues.quantity, item.quantity ?? 0)) {
+      updateInput.quantity = calculatedValues.quantity;
+      console.log("quantity changed by calculation:", calculatedValues.quantity);
+    }
+    
+    if (!hasEditedTaxPercent && !isClose(calculatedValues.taxPercent, item.taxPercent ?? 0)) {
+      updateInput.taxPercent = calculatedValues.taxPercent;
+      console.log("taxPercent changed by calculation:", calculatedValues.taxPercent);
+    }
+    
+    if (!hasEditedUnitPriceTaxExcl && !isClose(calculatedValues.unitPriceTaxExcl, item.unitPriceTaxExcl ?? 0)) {
+      updateInput.unitPriceTaxExcl = calculatedValues.unitPriceTaxExcl;
+      console.log("unitPriceTaxExcl changed by calculation:", calculatedValues.unitPriceTaxExcl);
+    }
+    
+    if (!isClose(calculatedValues.unitPriceTaxIncl, item.unitPriceTaxIncl ?? 0)) {
+      updateInput.unitPriceTaxIncl = calculatedValues.unitPriceTaxIncl;
+      console.log("unitPriceTaxIncl changed by calculation:", calculatedValues.unitPriceTaxIncl);
+    }
+    
+    if (!hasEditedTotalPriceTaxExcl && !isClose(calculatedValues.totalPriceTaxExcl, item.totalPriceTaxExcl ?? 0)) {
+      updateInput.totalPriceTaxExcl = calculatedValues.totalPriceTaxExcl;
+      console.log("totalPriceTaxExcl changed by calculation:", calculatedValues.totalPriceTaxExcl);
+    }
+    
+    if (!hasEditedTotalPriceTaxIncl && !isClose(calculatedValues.totalPriceTaxIncl, item.totalPriceTaxIncl ?? 0)) {
+      updateInput.totalPriceTaxIncl = calculatedValues.totalPriceTaxIncl;
+      console.log("totalPriceTaxIncl changed by calculation:", calculatedValues.totalPriceTaxIncl);
+    }
+
+    console.log("final updateInput:", updateInput);
+    onSave(updateInput);
   }
 
   return (
@@ -233,7 +348,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
       </td>
       <td className="border border-gray-200 p-3 table-cell">
         <NumberForm
-          number={editedItem.unitPriceTaxExcl ?? ""}
+          number={editedItem.unitPriceTaxExcl ?? calculatedValues.unitPriceTaxExcl}
           precision={getCurrencyPrecision(currency)}
           handleInputChange={handleInputChange("unitPriceTaxExcl")}
           pattern="^-?\d*\.?\d*$"
@@ -252,10 +367,24 @@ const EditableLineItem = forwardRef(function EditableLineItem(
         />
       </td>
       <td className="border border-gray-200 p-3 text-right font-medium table-cell">
-        {formatNumber(calculatedValues.totalPriceTaxExcl)}
+        <NumberForm
+          number={editedItem.totalPriceTaxExcl ?? calculatedValues.totalPriceTaxExcl}
+          precision={getCurrencyPrecision(currency)}
+          handleInputChange={handleInputChange("totalPriceTaxExcl")}
+          pattern="^-?\d*\.?\d*$"
+          placeholder="Total (excl. tax)"
+          className=""
+        />
       </td>
       <td className="border border-gray-200 p-3 text-right font-medium table-cell">
-        {formatNumber(calculatedValues.totalPriceTaxIncl)}
+        <NumberForm
+          number={editedItem.totalPriceTaxIncl ?? calculatedValues.totalPriceTaxIncl}
+          precision={getCurrencyPrecision(currency)}
+          handleInputChange={handleInputChange("totalPriceTaxIncl")}
+          pattern="^-?\d*\.?\d*$"
+          placeholder="Total (incl. tax)"
+          className=""
+        />
       </td>
       <td className="border border-gray-200 p-3 table-cell">
         <div className="flex space-x-2">
