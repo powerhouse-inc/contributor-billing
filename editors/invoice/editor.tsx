@@ -121,6 +121,13 @@ export default function Editor(props: IProps) {
   const [paymentIssue, setPaymentIssue] = useState("");
   const [paymentAmount, setPaymentAmount] = useState("");
 
+  const [editingItemValues, setEditingItemValues] = useState<{
+    id: string;
+    quantity: number;
+    unitPriceTaxExcl: number;
+    unitPriceTaxIncl: number;
+  } | null>(null);
+
   const prevStatus = useRef(state.status);
 
   useEffect(() => {
@@ -151,16 +158,40 @@ export default function Editor(props: IProps) {
   }, []);
 
   const itemsTotalTaxExcl = useMemo(() => {
-    return state.lineItems.reduce((total, lineItem) => {
-      return total + lineItem.quantity * lineItem.unitPriceTaxExcl;
+    let total = state.lineItems.reduce((sum, lineItem) => {
+      return sum + lineItem.quantity * lineItem.unitPriceTaxExcl;
     }, 0.0);
-  }, [state.lineItems]);
+
+    // If there's an item being edited, replace its contribution with the edited values
+    if (editingItemValues) {
+      const originalItem = state.lineItems.find(item => item.id === editingItemValues.id);
+      if (originalItem) {
+        // Subtract the original contribution and add the edited contribution
+        total = total - (originalItem.quantity * originalItem.unitPriceTaxExcl) + 
+                (editingItemValues.quantity * editingItemValues.unitPriceTaxExcl);
+      }
+    }
+
+    return total;
+  }, [state.lineItems, editingItemValues]);
 
   const itemsTotalTaxIncl = useMemo(() => {
-    return state.lineItems.reduce((total, lineItem) => {
-      return total + lineItem.quantity * lineItem.unitPriceTaxIncl;
+    let total = state.lineItems.reduce((sum, lineItem) => {
+      return sum + lineItem.quantity * lineItem.unitPriceTaxIncl;
     }, 0.0);
-  }, [state.lineItems]);
+
+    // If there's an item being edited, replace its contribution with the edited values
+    if (editingItemValues) {
+      const originalItem = state.lineItems.find(item => item.id === editingItemValues.id);
+      if (originalItem) {
+        // Subtract the original contribution and add the edited contribution
+        total = total - (originalItem.quantity * originalItem.unitPriceTaxIncl) + 
+                (editingItemValues.quantity * editingItemValues.unitPriceTaxIncl);
+      }
+    }
+
+    return total;
+  }, [state.lineItems, editingItemValues]);
 
   const STATUS_OPTIONS: Status[] = [
     "DRAFT",
@@ -747,6 +778,7 @@ export default function Editor(props: IProps) {
             dispatch(actions.editInvoice(input));
           }}
           onUpdateItem={(item) => dispatch(actions.editLineItem(item))}
+          onEditingItemChange={setEditingItemValues}
           dispatch={dispatch}
           paymentAccounts={state.invoiceTags || []}
         />

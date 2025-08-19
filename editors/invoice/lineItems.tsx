@@ -4,7 +4,14 @@ import {
   type DeleteLineItemInput,
   type InvoiceTag,
 } from "../../document-models/invoice/index.js";
-import { forwardRef, useState, useMemo, useRef, type Dispatch } from "react";
+import {
+  forwardRef,
+  useState,
+  useMemo,
+  useRef,
+  type Dispatch,
+  useEffect,
+} from "react";
 import { generateId } from "document-model";
 import { Tag } from "lucide-react";
 import { NumberForm } from "./components/numberForm.js";
@@ -17,26 +24,9 @@ function getCurrencyPrecision(currency: string): number {
 }
 
 export function formatNumber(value: number): string {
-  // Check if the value has decimal places
-  const hasDecimals = value % 1 !== 0;
-
-  // If no decimals or only trailing zeros after 2 decimal places, show 2 decimal places
-  if (!hasDecimals || value.toFixed(5).endsWith("000")) {
-    return value.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  }
-
-  // Otherwise, show actual decimal places up to 5
-  const stringValue = value.toString();
-  const decimalPart = stringValue.split(".")[1] || "";
-
-  // Determine how many decimal places to show (up to 5)
-  const decimalPlaces = Math.min(Math.max(2, decimalPart.length), 5);
   return value.toLocaleString("en-US", {
-    minimumFractionDigits: decimalPlaces,
-    maximumFractionDigits: decimalPlaces,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 }
 
@@ -69,13 +59,21 @@ type EditableLineItemProps = {
   readonly onSave: (item: LineItem) => void;
   readonly onCancel: () => void;
   readonly currency: string;
+  readonly onEditingItemChange?: (
+    values: {
+      id: string;
+      quantity: number;
+      unitPriceTaxExcl: number;
+      unitPriceTaxIncl: number;
+    } | null
+  ) => void;
 };
 
 const EditableLineItem = forwardRef(function EditableLineItem(
   props: EditableLineItemProps,
   ref: React.Ref<HTMLTableRowElement>
 ) {
-  const { item, onSave, onCancel, currency } = props;
+  const { item, onSave, onCancel, currency, onEditingItemChange } = props;
   const [editedItem, setEditedItem] = useState<Partial<EditableLineItem>>({
     ...item,
     currency,
@@ -129,10 +127,18 @@ const EditableLineItem = forwardRef(function EditableLineItem(
     const isClose = (a: number, b: number) => Math.abs(a - b) < EPSILON;
 
     // Check if user explicitly edited any fields
-    const userEditedQuantity = editedItem.quantity !== undefined && editedItem.quantity !== item.quantity;
-    const userEditedUnitPriceTaxExcl = editedItem.unitPriceTaxExcl !== undefined && editedItem.unitPriceTaxExcl !== item.unitPriceTaxExcl;
-    const userEditedTotalPriceTaxExcl = editedItem.totalPriceTaxExcl !== undefined && editedItem.totalPriceTaxExcl !== item.totalPriceTaxExcl;
-    const userEditedTotalPriceTaxIncl = editedItem.totalPriceTaxIncl !== undefined && editedItem.totalPriceTaxIncl !== item.totalPriceTaxIncl;
+    const userEditedQuantity =
+      editedItem.quantity !== undefined &&
+      editedItem.quantity !== item.quantity;
+    const userEditedUnitPriceTaxExcl =
+      editedItem.unitPriceTaxExcl !== undefined &&
+      editedItem.unitPriceTaxExcl !== item.unitPriceTaxExcl;
+    const userEditedTotalPriceTaxExcl =
+      editedItem.totalPriceTaxExcl !== undefined &&
+      editedItem.totalPriceTaxExcl !== item.totalPriceTaxExcl;
+    const userEditedTotalPriceTaxIncl =
+      editedItem.totalPriceTaxIncl !== undefined &&
+      editedItem.totalPriceTaxIncl !== item.totalPriceTaxIncl;
 
     let finalUnitPriceTaxExcl = unitPriceTaxExcl;
     let finalUnitPriceTaxIncl = unitPriceTaxExcl * (1 + taxRate);
@@ -174,12 +180,48 @@ const EditableLineItem = forwardRef(function EditableLineItem(
       unitPriceTaxIncl: finalUnitPriceTaxIncl,
       unitPriceTaxExcl: finalUnitPriceTaxExcl,
     };
-  }, [editedItem.quantity, editedItem.unitPriceTaxExcl, editedItem.taxPercent, editedItem.totalPriceTaxExcl, editedItem.totalPriceTaxIncl, item.quantity, item.unitPriceTaxExcl, item.totalPriceTaxExcl, item.totalPriceTaxIncl]);
+  }, [
+    editedItem.quantity,
+    editedItem.unitPriceTaxExcl,
+    editedItem.taxPercent,
+    editedItem.totalPriceTaxExcl,
+    editedItem.totalPriceTaxIncl,
+    item.quantity,
+    item.unitPriceTaxExcl,
+    item.totalPriceTaxExcl,
+    item.totalPriceTaxIncl,
+  ]);
+
+  // Update parent component with current editing values for live totals
+  useEffect(() => {
+    if (onEditingItemChange && item.id) {
+      onEditingItemChange({
+        id: item.id,
+        quantity: calculatedValues.quantity,
+        unitPriceTaxExcl: calculatedValues.unitPriceTaxExcl,
+        unitPriceTaxIncl: calculatedValues.unitPriceTaxIncl,
+      });
+    }
+  }, [
+    calculatedValues.quantity,
+    calculatedValues.unitPriceTaxExcl,
+    calculatedValues.unitPriceTaxIncl,
+    onEditingItemChange,
+    item.id,
+  ]);
+
+  // Clean up when component unmounts
+  useEffect(() => {
+    return () => {
+      if (onEditingItemChange && item.id) {
+        onEditingItemChange(null);
+      }
+    };
+  }, [onEditingItemChange, item.id]);
 
   function handleInputChange(field: keyof EditableLineItem) {
     return function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
       const value = event.target.value;
-      console.log(`handleInputChange called for ${field} with value:`, value);
 
       if (field === "description") {
         setEditedItem((prev) => ({ ...prev, [field]: value }));
@@ -237,90 +279,102 @@ const EditableLineItem = forwardRef(function EditableLineItem(
   }
 
   function handleSave() {
-    console.log("handleSave called");
-    console.log("original item:", item);
-    console.log("editedItem:", editedItem);
-    console.log("calculatedValues:", calculatedValues);
-    
     // Helper function for floating point comparison
     const isClose = (a: number, b: number) => Math.abs(a - b) < 0.00001;
-    
+
     // Create an object with only the fields that have changed
     const updateInput: any = {
       id: editedItem.id ?? generateId(),
+      currency,
     };
 
     // Check if any field was explicitly edited by the user
-    const hasEditedDescription = editedItem.description !== undefined && editedItem.description !== item.description;
-    const hasEditedQuantity = editedItem.quantity !== undefined && editedItem.quantity !== item.quantity;
-    const hasEditedTaxPercent = editedItem.taxPercent !== undefined && editedItem.taxPercent !== item.taxPercent;
-    const hasEditedUnitPriceTaxExcl = editedItem.unitPriceTaxExcl !== undefined && editedItem.unitPriceTaxExcl !== item.unitPriceTaxExcl;
-    const hasEditedTotalPriceTaxExcl = editedItem.totalPriceTaxExcl !== undefined && editedItem.totalPriceTaxExcl !== item.totalPriceTaxExcl;
-    const hasEditedTotalPriceTaxIncl = editedItem.totalPriceTaxIncl !== undefined && editedItem.totalPriceTaxIncl !== item.totalPriceTaxIncl;
+    const hasEditedDescription =
+      editedItem.description !== undefined &&
+      editedItem.description !== item.description;
+    const hasEditedQuantity =
+      editedItem.quantity !== undefined &&
+      editedItem.quantity !== item.quantity;
+    const hasEditedTaxPercent =
+      editedItem.taxPercent !== undefined &&
+      editedItem.taxPercent !== item.taxPercent;
+    const hasEditedUnitPriceTaxExcl =
+      editedItem.unitPriceTaxExcl !== undefined &&
+      editedItem.unitPriceTaxExcl !== item.unitPriceTaxExcl;
+    const hasEditedTotalPriceTaxExcl =
+      editedItem.totalPriceTaxExcl !== undefined &&
+      editedItem.totalPriceTaxExcl !== item.totalPriceTaxExcl;
+    const hasEditedTotalPriceTaxIncl =
+      editedItem.totalPriceTaxIncl !== undefined &&
+      editedItem.totalPriceTaxIncl !== item.totalPriceTaxIncl;
 
     // Always include fields that were explicitly edited
     if (hasEditedDescription) {
       updateInput.description = editedItem.description ?? "";
-      console.log("description explicitly edited:", editedItem.description);
     }
-    
+
     if (hasEditedQuantity) {
       updateInput.quantity = calculatedValues.quantity;
-      console.log("quantity explicitly edited:", calculatedValues.quantity);
     }
-    
+
     if (hasEditedTaxPercent) {
       updateInput.taxPercent = calculatedValues.taxPercent;
-      console.log("taxPercent explicitly edited:", calculatedValues.taxPercent);
     }
-    
+
     if (hasEditedUnitPriceTaxExcl) {
       updateInput.unitPriceTaxExcl = calculatedValues.unitPriceTaxExcl;
-      console.log("unitPriceTaxExcl explicitly edited:", calculatedValues.unitPriceTaxExcl);
     }
-    
+
     if (hasEditedTotalPriceTaxExcl) {
       updateInput.totalPriceTaxExcl = calculatedValues.totalPriceTaxExcl;
-      console.log("totalPriceTaxExcl explicitly edited:", calculatedValues.totalPriceTaxExcl);
     }
-    
+
     if (hasEditedTotalPriceTaxIncl) {
       updateInput.totalPriceTaxIncl = calculatedValues.totalPriceTaxIncl;
-      console.log("totalPriceTaxIncl explicitly edited:", calculatedValues.totalPriceTaxIncl);
     }
 
     // Also include fields that changed due to calculations (even if not explicitly edited)
-    if (!hasEditedQuantity && !isClose(calculatedValues.quantity, item.quantity ?? 0)) {
+    if (
+      !hasEditedQuantity &&
+      !isClose(calculatedValues.quantity, item.quantity ?? 0)
+    ) {
       updateInput.quantity = calculatedValues.quantity;
-      console.log("quantity changed by calculation:", calculatedValues.quantity);
-    }
-    
-    if (!hasEditedTaxPercent && !isClose(calculatedValues.taxPercent, item.taxPercent ?? 0)) {
-      updateInput.taxPercent = calculatedValues.taxPercent;
-      console.log("taxPercent changed by calculation:", calculatedValues.taxPercent);
-    }
-    
-    if (!hasEditedUnitPriceTaxExcl && !isClose(calculatedValues.unitPriceTaxExcl, item.unitPriceTaxExcl ?? 0)) {
-      updateInput.unitPriceTaxExcl = calculatedValues.unitPriceTaxExcl;
-      console.log("unitPriceTaxExcl changed by calculation:", calculatedValues.unitPriceTaxExcl);
-    }
-    
-    if (!isClose(calculatedValues.unitPriceTaxIncl, item.unitPriceTaxIncl ?? 0)) {
-      updateInput.unitPriceTaxIncl = calculatedValues.unitPriceTaxIncl;
-      console.log("unitPriceTaxIncl changed by calculation:", calculatedValues.unitPriceTaxIncl);
-    }
-    
-    if (!hasEditedTotalPriceTaxExcl && !isClose(calculatedValues.totalPriceTaxExcl, item.totalPriceTaxExcl ?? 0)) {
-      updateInput.totalPriceTaxExcl = calculatedValues.totalPriceTaxExcl;
-      console.log("totalPriceTaxExcl changed by calculation:", calculatedValues.totalPriceTaxExcl);
-    }
-    
-    if (!hasEditedTotalPriceTaxIncl && !isClose(calculatedValues.totalPriceTaxIncl, item.totalPriceTaxIncl ?? 0)) {
-      updateInput.totalPriceTaxIncl = calculatedValues.totalPriceTaxIncl;
-      console.log("totalPriceTaxIncl changed by calculation:", calculatedValues.totalPriceTaxIncl);
     }
 
-    console.log("final updateInput:", updateInput);
+    if (
+      !hasEditedTaxPercent &&
+      !isClose(calculatedValues.taxPercent, item.taxPercent ?? 0)
+    ) {
+      updateInput.taxPercent = calculatedValues.taxPercent;
+    }
+
+    if (
+      !hasEditedUnitPriceTaxExcl &&
+      !isClose(calculatedValues.unitPriceTaxExcl, item.unitPriceTaxExcl ?? 0)
+    ) {
+      updateInput.unitPriceTaxExcl = calculatedValues.unitPriceTaxExcl;
+    }
+
+    if (
+      !isClose(calculatedValues.unitPriceTaxIncl, item.unitPriceTaxIncl ?? 0)
+    ) {
+      updateInput.unitPriceTaxIncl = calculatedValues.unitPriceTaxIncl;
+    }
+
+    if (
+      !hasEditedTotalPriceTaxExcl &&
+      !isClose(calculatedValues.totalPriceTaxExcl, item.totalPriceTaxExcl ?? 0)
+    ) {
+      updateInput.totalPriceTaxExcl = calculatedValues.totalPriceTaxExcl;
+    }
+
+    if (
+      !hasEditedTotalPriceTaxIncl &&
+      !isClose(calculatedValues.totalPriceTaxIncl, item.totalPriceTaxIncl ?? 0)
+    ) {
+      updateInput.totalPriceTaxIncl = calculatedValues.totalPriceTaxIncl;
+    }
+
     onSave(updateInput);
   }
 
@@ -339,7 +393,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
       </td>
       <td className="border border-gray-200 p-3 table-cell">
         <NumberForm
-          number={editedItem.quantity ?? ""}
+          number={calculatedValues.quantity}
           precision={0}
           handleInputChange={handleInputChange("quantity")}
           placeholder="Quantity"
@@ -348,8 +402,12 @@ const EditableLineItem = forwardRef(function EditableLineItem(
       </td>
       <td className="border border-gray-200 p-3 table-cell">
         <NumberForm
-          number={editedItem.unitPriceTaxExcl ?? calculatedValues.unitPriceTaxExcl}
-          precision={getCurrencyPrecision(currency)}
+          number={
+            calculatedValues.unitPriceTaxExcl % 1 === 0
+              ? calculatedValues.unitPriceTaxExcl.toString()
+              : calculatedValues.unitPriceTaxExcl.toFixed(2)
+          }
+          precision={2}
           handleInputChange={handleInputChange("unitPriceTaxExcl")}
           pattern="^-?\d*\.?\d*$"
           placeholder="Unit Price (excl. tax)"
@@ -358,7 +416,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
       </td>
       <td className="border border-gray-200 p-3 table-cell">
         <NumberForm
-          number={editedItem.taxPercent ?? ""}
+          number={calculatedValues.taxPercent}
           precision={0}
           pattern="^(100|[1-9]?[0-9])$"
           handleInputChange={handleInputChange("taxPercent")}
@@ -368,8 +426,12 @@ const EditableLineItem = forwardRef(function EditableLineItem(
       </td>
       <td className="border border-gray-200 p-3 text-right font-medium table-cell">
         <NumberForm
-          number={editedItem.totalPriceTaxExcl ?? calculatedValues.totalPriceTaxExcl}
-          precision={getCurrencyPrecision(currency)}
+          number={
+            calculatedValues.totalPriceTaxExcl % 1 === 0
+              ? calculatedValues.totalPriceTaxExcl.toString()
+              : calculatedValues.totalPriceTaxExcl.toFixed(2)
+          }
+          precision={2}
           handleInputChange={handleInputChange("totalPriceTaxExcl")}
           pattern="^-?\d*\.?\d*$"
           placeholder="Total (excl. tax)"
@@ -378,8 +440,12 @@ const EditableLineItem = forwardRef(function EditableLineItem(
       </td>
       <td className="border border-gray-200 p-3 text-right font-medium table-cell">
         <NumberForm
-          number={editedItem.totalPriceTaxIncl ?? calculatedValues.totalPriceTaxIncl}
-          precision={getCurrencyPrecision(currency)}
+          number={
+            calculatedValues.totalPriceTaxIncl % 1 === 0
+              ? calculatedValues.totalPriceTaxIncl.toString()
+              : calculatedValues.totalPriceTaxIncl.toFixed(2)
+          }
+          precision={2}
           handleInputChange={handleInputChange("totalPriceTaxIncl")}
           pattern="^-?\d*\.?\d*$"
           placeholder="Total (incl. tax)"
@@ -413,6 +479,14 @@ type LineItemsTableProps = {
   readonly onUpdateItem: (item: LineItem) => void;
   readonly onDeleteItem: (input: DeleteLineItemInput) => void;
   readonly onUpdateCurrency: (input: EditInvoiceInput) => void;
+  readonly onEditingItemChange?: (
+    values: {
+      id: string;
+      quantity: number;
+      unitPriceTaxExcl: number;
+      unitPriceTaxIncl: number;
+    } | null
+  ) => void;
   readonly dispatch: Dispatch<any>;
   readonly paymentAccounts: InvoiceTag[];
 };
@@ -424,6 +498,7 @@ export function LineItemsTable({
   onUpdateItem,
   onDeleteItem,
   onUpdateCurrency,
+  onEditingItemChange,
   dispatch,
   paymentAccounts,
 }: LineItemsTableProps) {
@@ -558,6 +633,7 @@ export function LineItemsTable({
                       onUpdateItem(updatedItem);
                       setEditingId(null);
                     }}
+                    onEditingItemChange={onEditingItemChange}
                   />
                 ) : (
                   <tr key={item.id} className="hover:bg-gray-50 table-row">
@@ -607,6 +683,7 @@ export function LineItemsTable({
                   item={{}}
                   onCancel={handleCancelNewItem}
                   onSave={handleSaveNewItem}
+                  onEditingItemChange={onEditingItemChange}
                 />
               ) : null}
             </tbody>
