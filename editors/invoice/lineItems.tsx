@@ -1,4 +1,4 @@
-import { RWAButton } from "@powerhousedao/design-system";
+import { RWAButton, toast } from "@powerhousedao/design-system";
 import {
   type EditInvoiceInput,
   type DeleteLineItemInput,
@@ -77,7 +77,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
   const [editedItem, setEditedItem] = useState<Partial<EditableLineItem>>({
     ...item,
     currency,
-    quantity: item.quantity ?? "",
+    quantity: item.quantity ?? 1,
     taxPercent: item.taxPercent ?? "",
     unitPriceTaxExcl: item.unitPriceTaxExcl ?? "",
     totalPriceTaxExcl: item.totalPriceTaxExcl ?? "",
@@ -88,9 +88,9 @@ const EditableLineItem = forwardRef(function EditableLineItem(
     const quantity =
       typeof editedItem.quantity === "string"
         ? editedItem.quantity === ""
-          ? 0
-          : Number(editedItem.quantity)
-        : (editedItem.quantity ?? 0);
+          ? 1
+          : Number(editedItem.quantity) || 1
+        : (editedItem.quantity ?? 1);
 
     const unitPriceTaxExcl =
       typeof editedItem.unitPriceTaxExcl === "string"
@@ -228,16 +228,21 @@ const EditableLineItem = forwardRef(function EditableLineItem(
         return;
       }
 
-      // For numeric fields
-      if (value === "" || value === "0") {
+      // For numeric fields (except quantity which is handled separately)
+      if (field !== "quantity" && (value === "" || value === "0")) {
         setEditedItem((prev) => ({ ...prev, [field]: value }));
         return;
       }
 
       if (field === "quantity") {
-        // Allow only integers for quantity
-        if (/^\d+$/.test(value)) {
-          setEditedItem((prev) => ({ ...prev, [field]: value }));
+        // Allow up to 2 decimal places for quantity, default to 1 if empty or invalid
+        if (value === "" || value === "0") {
+          setEditedItem((prev) => ({ ...prev, [field]: 1 }));
+        } else if (/^\d*\.?\d{0,2}$/.test(value)) {
+          setEditedItem((prev) => ({
+            ...prev,
+            [field]: parseFloat(value) || 1,
+          }));
         }
       } else if (field === "taxPercent") {
         // Allow integers from 0-100 for tax percent, with more permissive validation
@@ -393,8 +398,8 @@ const EditableLineItem = forwardRef(function EditableLineItem(
       </td>
       <td className="border border-gray-200 p-3 table-cell">
         <NumberForm
-          number={calculatedValues.quantity}
-          precision={0}
+          number={calculatedValues.quantity || 1}
+          precision={2}
           handleInputChange={handleInputChange("quantity")}
           placeholder="Quantity"
           className=""
@@ -414,7 +419,7 @@ const EditableLineItem = forwardRef(function EditableLineItem(
           className=""
         />
       </td>
-      <td className="border border-gray-200 p-3 table-cell">
+      <td className="border border-gray-200 p-3 text-right font-medium table-cell">
         <NumberForm
           number={calculatedValues.taxPercent}
           precision={0}
@@ -520,7 +525,52 @@ export function LineItemsTable({
   }
 
   function handleSaveNewItem(item: LineItem) {
-    onAddItem(item);
+    try {
+      onAddItem(item);
+    } catch (error: any) {
+      if (error?.message?.includes("Invalid action input:")) {
+        try {
+          const errorPart = error.message.split("Invalid action input: ")[1];
+          const zodError = JSON.parse(errorPart);
+          if (Array.isArray(zodError) && zodError.length > 0) {
+            const firstError = zodError[0];
+            const errorJSX = (
+              <div>
+                <p className="font-semibold">Failed to add line item</p>
+                <p>{firstError.message}: </p>
+                {zodError.map((err: any, index: number) => (
+                  <ul key={index}>
+                    <li className="text-red-500 font-semibold">
+                      - {err.path.join(".")}
+                    </li>
+                  </ul>
+                ))}
+              </div>
+            );
+
+            toast(errorJSX, {
+              type: "error",
+            });
+            return;
+          }
+        } catch (parseError) {
+          console.error("Failed to parse Zod error:", parseError);
+          toast("Invalid input data", {
+            type: "error",
+          });
+          return;
+        }
+      } else if (error?.message) {
+        toast(error.message, {
+          type: "error",
+        });
+        return;
+      }
+
+      toast("Failed to add line item", {
+        type: "error",
+      });
+    }
     setIsAddingNew(false);
   }
 
@@ -630,8 +680,64 @@ export function LineItemsTable({
                     key={item.id}
                     onCancel={() => setEditingId(null)}
                     onSave={(updatedItem) => {
-                      onUpdateItem(updatedItem);
-                      setEditingId(null);
+                      try {
+                        onUpdateItem(updatedItem);
+                        setEditingId(null);
+                      } catch (error: any) {
+                        console.error(error);
+
+                        if (error?.message?.includes("Invalid action input:")) {
+                          try {
+                            const zodError = JSON.parse(
+                              error.message.split("Invalid action input: ")[1]
+                            );
+                            if (
+                              Array.isArray(zodError) &&
+                              zodError.length > 0
+                            ) {
+                              const firstError = zodError[0];
+                              const errorJSX = (
+                                <div>
+                                  <p className="font-semibold">
+                                    Failed to update line item
+                                  </p>
+                                  <p>{firstError.message}: </p>
+                                  {zodError.map((err: any, index: number) => (
+                                    <ul key={index}>
+                                      <li className="text-red-500 font-semibold">
+                                        - {err.path.join(".")}
+                                      </li>
+                                    </ul>
+                                  ))}
+                                </div>
+                              );
+
+                              toast(errorJSX, {
+                                type: "error",
+                              });
+                              return;
+                            }
+                          } catch (parseError) {
+                            console.error(
+                              "Failed to parse Zod error:",
+                              parseError
+                            );
+                            toast("Invalid input data", {
+                              type: "error",
+                            });
+                            return;
+                          }
+                        } else if (error?.message) {
+                          toast(error.message, {
+                            type: "error",
+                          });
+                          return;
+                        }
+
+                        toast("Failed to update line item", {
+                          type: "error",
+                        });
+                      }
                     }}
                     onEditingItemChange={onEditingItemChange}
                   />
@@ -641,7 +747,9 @@ export function LineItemsTable({
                       {item.description}
                     </td>
                     <td className="border-b border-gray-200 p-3 text-right table-cell">
-                      {item.quantity}
+                      {item.quantity % 1 === 0
+                        ? item.quantity.toString()
+                        : item.quantity.toFixed(2)}
                     </td>
                     <td className="border-b border-gray-200 p-3 text-right table-cell">
                       {formatNumber(item.unitPriceTaxExcl)}
