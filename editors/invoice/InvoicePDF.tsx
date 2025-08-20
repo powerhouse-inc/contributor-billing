@@ -876,7 +876,7 @@ const InvoiceLineItem: React.FC<{ item: any; currency: string }> = ({
         <Text style={styles.itemDescription}>{item.longDescription}</Text>
       )}
     </View>
-    <Text style={styles.tableCol15}>{item.quantity}</Text>
+    <Text style={styles.tableCol15}>{item.quantity % 1 === 0 ? item.quantity.toString() : item.quantity.toFixed(2)}</Text>
     <Text style={styles.tableCol15}>
       {formatCurrency(item.unitPriceTaxExcl, currency)}
     </Text>

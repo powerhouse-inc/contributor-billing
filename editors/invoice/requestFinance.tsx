@@ -97,6 +97,15 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
       bicSwift: docState.issuer.paymentRouting.bank.BIC,
     };
 
+    const getDecimalPlaces = (currency: string): number => {
+      const formatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency,
+        minimumFractionDigits: 0, // Ensure we get the default for the currency
+      });
+      return formatter.resolvedOptions().maximumFractionDigits ?? 2;
+    };
+
     try {
       const invoiceData = {
         meta: {
@@ -104,12 +113,19 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
           version: "0.0.3",
         },
         creationDate: docState.dateIssued,
-        invoiceItems: docState.lineItems.map((item: any) => ({
-          currency: bankDetails.currency,
-          name: item.description,
-          quantity: item.quantity,
-          unitPrice: item.totalPriceTaxIncl * 100,
-        })),
+        invoiceItems: docState.lineItems.map((item: any) => {
+          const currency = bankDetails.currency;
+          const decimalPlaces = getDecimalPlaces(currency);
+          const multiplier = Math.pow(10, decimalPlaces);
+          const unitPriceInt = Math.round(item.unitPriceTaxIncl * multiplier);
+
+          return {
+            currency,
+            name: item.description,
+            quantity: item.quantity,
+            unitPrice: unitPriceInt,
+          };
+        }),
         invoiceNumber: docState.invoiceNo,
         buyerInfo: {
           // email: docState.payer.contactInfo.email,
@@ -160,7 +176,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
 
       // Instead of calling the API endpoint directly, use the createDirectPayment function
       const directPaymentResult = await createDirectPayment(invoiceData);
-      console.log("Direct payment created:", directPaymentResult);
+      console.log("Direct payment created: (unitPrice in cents)", directPaymentResult);
 
       // Process the response
       if (directPaymentResult?.response?.invoiceLinks?.pay) {
