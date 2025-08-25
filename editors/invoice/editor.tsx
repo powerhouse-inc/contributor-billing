@@ -56,6 +56,8 @@ export default function Editor(props: IProps) {
   const { document: doc, dispatch } = props;
   const state = doc.state.global;
 
+  console.log("state", state.issuer.paymentRouting?.bank);
+
   const [fiatMode, setFiatMode] = useState(isFiatCurrency(state.currency));
   const [uploadDropdownOpen, setUploadDropdownOpen] = useState(false);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
@@ -94,6 +96,8 @@ export default function Editor(props: IProps) {
   const [mainCountryValidation, setMainCountryValidation] =
     useState<ValidationResult | null>(null);
   const [bankCountryValidation, setBankCountryValidation] =
+    useState<ValidationResult | null>(null);
+  const [routingNumberValidation, setRoutingNumberValidation] =
     useState<ValidationResult | null>(null);
 
   // Replace showConfirmationModal and pendingStatus with a single modal state
@@ -374,6 +378,7 @@ export default function Editor(props: IProps) {
       setPostalCodeValidation,
       setPayerEmailValidation,
       setLineItemValidation,
+      setRoutingNumberValidation,
       isFiatCurrency
     );
     if (validationResult) {
@@ -731,6 +736,7 @@ export default function Editor(props: IProps) {
             cityvalidation={cityValidation}
             postalcodevalidation={postalCodeValidation}
             payeremailvalidation={payerEmailValidation}
+            routingNumbervalidation={routingNumberValidation}
           />
         </div>
 
