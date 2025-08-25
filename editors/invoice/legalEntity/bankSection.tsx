@@ -167,6 +167,8 @@ export const LegalEntityBankSection = forwardRef(
       };
     }
 
+    const SEPA_SWIFT_CURRENCIES = ["EUR", "DKK", "GBP", "CHF", "JPY"	];
+
     return (
       <div
         {...divProps}
@@ -221,7 +223,7 @@ export const LegalEntityBankSection = forwardRef(
                   />
                 </div>
                 <div className="space-y-2">
-                  {currency === "EUR" ? (
+                  {SEPA_SWIFT_CURRENCIES.includes(currency) ? (
                     <InputField
                       value={(localState.BIC || localState.SWIFT) ?? ""}
                       label="SWIFT/BIC"
@@ -421,7 +423,7 @@ export const LegalEntityBankSection = forwardRef(
                         />
                       </div>
                       <div className="space-y-2">
-                        {currency === "EUR" ? (
+                        {SEPA_SWIFT_CURRENCIES.includes(currency) ? (
                           <InputField
                             value={
                               (localState.BICIntermediary ||
