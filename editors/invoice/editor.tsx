@@ -56,8 +56,6 @@ export default function Editor(props: IProps) {
   const { document: doc, dispatch } = props;
   const state = doc.state.global;
 
-  console.log("state", state.issuer.paymentRouting?.bank);
-
   const [fiatMode, setFiatMode] = useState(isFiatCurrency(state.currency));
   const [uploadDropdownOpen, setUploadDropdownOpen] = useState(false);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
@@ -168,11 +166,15 @@ export default function Editor(props: IProps) {
 
     // If there's an item being edited, replace its contribution with the edited values
     if (editingItemValues) {
-      const originalItem = state.lineItems.find(item => item.id === editingItemValues.id);
+      const originalItem = state.lineItems.find(
+        (item) => item.id === editingItemValues.id
+      );
       if (originalItem) {
         // Subtract the original contribution and add the edited contribution
-        total = total - (originalItem.quantity * originalItem.unitPriceTaxExcl) + 
-                (editingItemValues.quantity * editingItemValues.unitPriceTaxExcl);
+        total =
+          total -
+          originalItem.quantity * originalItem.unitPriceTaxExcl +
+          editingItemValues.quantity * editingItemValues.unitPriceTaxExcl;
       }
     }
 
@@ -186,11 +188,15 @@ export default function Editor(props: IProps) {
 
     // If there's an item being edited, replace its contribution with the edited values
     if (editingItemValues) {
-      const originalItem = state.lineItems.find(item => item.id === editingItemValues.id);
+      const originalItem = state.lineItems.find(
+        (item) => item.id === editingItemValues.id
+      );
       if (originalItem) {
         // Subtract the original contribution and add the edited contribution
-        total = total - (originalItem.quantity * originalItem.unitPriceTaxIncl) + 
-                (editingItemValues.quantity * editingItemValues.unitPriceTaxIncl);
+        total =
+          total -
+          originalItem.quantity * originalItem.unitPriceTaxIncl +
+          editingItemValues.quantity * editingItemValues.unitPriceTaxIncl;
       }
     }
 
