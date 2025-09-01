@@ -1,7 +1,7 @@
 {
   "name": "@powerhousedao/contributor-billing",
   "description": "Document models that help contributors of open organisations get paid anonymously for their work on a monthly basis.",
-  "version": "0.0.70",
+  "version": "0.0.75",
   "license": "AGPL-3.0-only",
   "type": "module",
   "files": [
@@ -60,7 +60,7 @@
     "@powerhousedao/builder-tools": "^4.0.5",
     "@powerhousedao/common": "^4.0.5",
     "@powerhousedao/design-system": "^4.0.5",
-    "@powerhousedao/document-engineering": "^1.27.0",
+    "@powerhousedao/document-engineering": "^1.30.0",
     "@react-pdf/renderer": "^4.3.0",
     "@safe-global/api-kit": "^3.0.1",
     "@safe-global/protocol-kit": "^6.0.3",

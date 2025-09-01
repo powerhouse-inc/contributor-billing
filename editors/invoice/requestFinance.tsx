@@ -82,7 +82,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
     setInvoiceLink(null);
     setDirectPaymentStatus(null);
 
-    const bankDetails = {
+    let bankDetails: any = {
       currency: docState.currency,
       accountNumber: docState.issuer.paymentRouting.bank.accountNum,
       country:
@@ -94,8 +94,16 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
       lastName:
         docState.issuer.paymentRouting.bank.beneficiary.split(" ")[1] ||
         "Liberty",
-      bicSwift: docState.issuer.paymentRouting.bank.BIC,
+      bicSwift:
+        docState.issuer.paymentRouting.bank.BIC ||
+        docState.issuer.paymentRouting.bank.SWIFT,
     };
+    if (
+      docState.issuer.paymentRouting.bank.ABA &&
+      docState.issuer.paymentRouting.bank.ABA.trim() !== ""
+    ) {
+      bankDetails.routingNumber  = docState.issuer.paymentRouting.bank.ABA;
+    }
 
     const getDecimalPlaces = (currency: string): number => {
       const formatter = new Intl.NumberFormat("en-US", {
@@ -160,13 +168,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
               currency: bankDetails.currency,
               paymentInformation: {
                 bankAccountDetails: {
-                  accountNumber: bankDetails.accountNumber, // the IBAN
-                  country: bankDetails.country,
-                  currency: bankDetails.currency,
-                  bankName: bankDetails.bankName,
-                  firstName: bankDetails.firstName,
-                  lastName: bankDetails.lastName,
-                  bicSwift: bankDetails.bicSwift,
+                  ...bankDetails,
                 },
               },
             },
@@ -176,7 +178,10 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
 
       // Instead of calling the API endpoint directly, use the createDirectPayment function
       const directPaymentResult = await createDirectPayment(invoiceData);
-      console.log("Direct payment created: (unitPrice in cents)", directPaymentResult);
+      console.log(
+        "Direct payment created: (unitPrice in cents)",
+        directPaymentResult
+      );
 
       // Process the response
       if (directPaymentResult?.response?.invoiceLinks?.pay) {
@@ -256,7 +261,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
       )}
       {!invoiceLink &&
         invoiceStatus === "PAYMENTSCHEDULED" &&
-        docState.payments.length > 0 && (
+        docState.payments?.length > 0 && (
           <>
             {docState.payments[docState.payments.length - 1].issue !== "" ? (
               <div className="mt-4">

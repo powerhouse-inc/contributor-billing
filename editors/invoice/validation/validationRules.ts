@@ -199,7 +199,7 @@ export const bicNumberRule: ValidationRule = {
         if (!value || value.trim() === '') {
             return {
                 isValid: false,
-                message: 'BIC number is required',
+                message: 'BIC/SWIFT number is required',
                 severity: 'warning'
             };
         }
@@ -208,7 +208,7 @@ export const bicNumberRule: ValidationRule = {
             if (!bicRegex.test(value)) {
                 return {
                     isValid: false,
-                    message: 'Invalid BIC number format',
+                    message: 'Invalid BIC/SWIFT number format',
                     severity: 'warning'
                 };
             }
@@ -221,7 +221,7 @@ export const bicNumberRule: ValidationRule = {
 
     },
     appliesTo: {
-        currencies: ['EUR', 'GBP'],
+        currencies: ['EUR', 'GBP', 'USD'],
         statusTransitions: {
             from: ['DRAFT'],
             to: ['ISSUED']
@@ -386,3 +386,41 @@ export const lineItemRule: ValidationRule = {
     }
 };
 
+export const routingNumberRule: ValidationRule = {
+    field: 'routingNumber',
+    validate: (value: string) => {
+        if (!value || value.trim() === '') {
+            return {
+                isValid: false,
+                message: 'Routing number is required',
+                severity: 'warning'
+            };
+        }
+        if (value.length !== 9) {
+            return {
+                isValid: false,
+                message: 'Routing number must be 9 digits',
+                severity: 'warning'
+            };
+        }
+        if (!/^[0-9]+$/.test(value)) {
+            return {
+                isValid: false,
+                message: 'Routing number must contain only digits',
+                severity: 'warning'
+            };
+        }
+        return {
+            isValid: true,
+            message: '',
+            severity: 'none'
+        };
+    },
+    appliesTo: {
+        currencies: ['USD'],
+        statusTransitions: {
+            from: ['DRAFT'],
+            to: ['ISSUED']
+        }
+    }
+};

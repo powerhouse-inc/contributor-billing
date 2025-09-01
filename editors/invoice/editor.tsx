@@ -12,22 +12,14 @@ import { loadUBLFile } from "./ingestUBL.js";
 import PDFUploader from "./ingestPDF.js";
 import RequestFinance from "./requestFinance.js";
 import InvoiceToGnosis from "./invoiceToGnosis.js";
-import {
-  ConnectConfirmationModal,
-  toast,
-  ToastContainer,
-} from "@powerhousedao/design-system";
+import { toast, ToastContainer } from "@powerhousedao/design-system";
 import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
 import { InvoicePDF } from "./InvoicePDF.js";
 import { createRoot } from "react-dom/client";
 import { downloadUBL } from "./exportUBL.js";
 import { CurrencyForm, currencyList } from "./components/currencyForm.js";
 import { InputField } from "./components/inputField.js";
-import {
-  validateField,
-  ValidationContext,
-  ValidationResult,
-} from "./validation/validationManager.js";
+import { ValidationResult } from "./validation/validationManager.js";
 import { DatePicker } from "./components/datePicker.js";
 import { SelectField } from "./components/selectField.js";
 import { formatNumber } from "./lineItems.js";
@@ -43,7 +35,7 @@ import {
   ReportPaymentIssueModalContent,
   SchedulePaymentModalContent,
 } from "./components/statusModalComponents.js";
-import { PaymentSchema } from "document-models/invoice/gen/schema/zod.js";
+import { InvoiceStateSchema } from "../../document-models/invoice/gen/schema/zod.js";
 import validateStatusBeforeContinue from "./validation/validationHandler.js";
 
 function isFiatCurrency(currency: string): boolean {
@@ -55,6 +47,62 @@ export type IProps = EditorProps<InvoiceDocument>;
 export default function Editor(props: IProps) {
   const { document: doc, dispatch } = props;
   const state = doc.state.global;
+
+  // Dynamic property check based on the actual schema
+  try {
+    const schema = InvoiceStateSchema();
+    const expectedProperties = Object.keys(schema.shape).filter(
+      (prop) => prop !== "__typename"
+    );
+    const missingProperties = expectedProperties.filter(
+      (prop) => !(prop in state)
+    );
+    if (missingProperties.length > 0) {
+      // Show error message for missing properties
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+          <div className="max-w-md mx-auto text-center p-8 bg-white rounded-lg shadow-lg border border-red-200">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+              <svg
+                className="w-8 h-8 text-red-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                ></path>
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              Document Schema Mismatch
+            </h2>
+            <p className="text-gray-600 mb-4">
+              The current document structure doesn't match the expected schema.
+              This usually happens when using an outdated document model.
+            </p>
+            <p className="text-sm text-gray-500 mb-4">
+              Please create a new document using the latest document model to
+              ensure compatibility.
+            </p>
+            <details className="text-left text-xs text-gray-600">
+              <summary className="cursor-pointer hover:text-gray-800">
+                View missing properties
+              </summary>
+              <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto max-h-32">
+                {JSON.stringify(missingProperties, null, 2)}
+              </pre>
+            </details>
+          </div>
+        </div>
+      );
+    }
+  } catch (error) {
+    console.error("Error checking schema properties:", error);
+  }
 
   const [fiatMode, setFiatMode] = useState(isFiatCurrency(state.currency));
   const [uploadDropdownOpen, setUploadDropdownOpen] = useState(false);
@@ -94,6 +142,8 @@ export default function Editor(props: IProps) {
   const [mainCountryValidation, setMainCountryValidation] =
     useState<ValidationResult | null>(null);
   const [bankCountryValidation, setBankCountryValidation] =
+    useState<ValidationResult | null>(null);
+  const [routingNumberValidation, setRoutingNumberValidation] =
     useState<ValidationResult | null>(null);
 
   // Replace showConfirmationModal and pendingStatus with a single modal state
@@ -164,11 +214,15 @@ export default function Editor(props: IProps) {
 
     // If there's an item being edited, replace its contribution with the edited values
     if (editingItemValues) {
-      const originalItem = state.lineItems.find(item => item.id === editingItemValues.id);
+      const originalItem = state.lineItems.find(
+        (item) => item.id === editingItemValues.id
+      );
       if (originalItem) {
         // Subtract the original contribution and add the edited contribution
-        total = total - (originalItem.quantity * originalItem.unitPriceTaxExcl) + 
-                (editingItemValues.quantity * editingItemValues.unitPriceTaxExcl);
+        total =
+          total -
+          originalItem.quantity * originalItem.unitPriceTaxExcl +
+          editingItemValues.quantity * editingItemValues.unitPriceTaxExcl;
       }
     }
 
@@ -182,11 +236,15 @@ export default function Editor(props: IProps) {
 
     // If there's an item being edited, replace its contribution with the edited values
     if (editingItemValues) {
-      const originalItem = state.lineItems.find(item => item.id === editingItemValues.id);
+      const originalItem = state.lineItems.find(
+        (item) => item.id === editingItemValues.id
+      );
       if (originalItem) {
         // Subtract the original contribution and add the edited contribution
-        total = total - (originalItem.quantity * originalItem.unitPriceTaxIncl) + 
-                (editingItemValues.quantity * editingItemValues.unitPriceTaxIncl);
+        total =
+          total -
+          originalItem.quantity * originalItem.unitPriceTaxIncl +
+          editingItemValues.quantity * editingItemValues.unitPriceTaxIncl;
       }
     }
 
@@ -374,6 +432,7 @@ export default function Editor(props: IProps) {
       setPostalCodeValidation,
       setPayerEmailValidation,
       setLineItemValidation,
+      setRoutingNumberValidation,
       isFiatCurrency
     );
     if (validationResult) {
@@ -731,6 +790,7 @@ export default function Editor(props: IProps) {
             cityvalidation={cityValidation}
             postalcodevalidation={postalCodeValidation}
             payeremailvalidation={payerEmailValidation}
+            routingNumbervalidation={routingNumberValidation}
           />
         </div>
 

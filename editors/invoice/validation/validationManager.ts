@@ -1,5 +1,5 @@
 import { Status } from "../../../document-models/invoice/index.js";
-import { accountNumberRule, bicNumberRule, bankNameRule, currencyRule, ethereumAddressRule, invoiceNumberRule, issuerPostalCodeRule, issuerStreetAddressRule, issuerCityRule, payerEmailRule, lineItemRule, mainCountryRule, bankCountryRule } from "./validationRules.js";
+import { accountNumberRule, bicNumberRule, bankNameRule, currencyRule, ethereumAddressRule, invoiceNumberRule, issuerPostalCodeRule, issuerStreetAddressRule, issuerCityRule, payerEmailRule, lineItemRule, mainCountryRule, bankCountryRule, routingNumberRule } from "./validationRules.js";
 
 // Types for validation
 export type ValidationSeverity = 'error' | 'warning' | 'none';
@@ -45,6 +45,7 @@ validationRules.push(issuerCityRule);
 validationRules.push(issuerPostalCodeRule);
 validationRules.push(payerEmailRule);
 validationRules.push(lineItemRule);
+validationRules.push(routingNumberRule);
 
 // Helper to check if a rule applies to the current context
 function ruleAppliesToContext(rule: ValidationRule, context: ValidationContext): boolean {
