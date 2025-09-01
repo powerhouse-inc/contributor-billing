@@ -236,6 +236,7 @@ type LegalEntityFormProps = {
   readonly cityvalidation?: ValidationResult | null;
   readonly postalcodevalidation?: ValidationResult | null;
   readonly payeremailvalidation?: ValidationResult | null;
+  readonly routingNumbervalidation?: ValidationResult | null;
 };
 
 // Helper to flatten LegalEntity to EditLegalEntityInput
@@ -287,6 +288,7 @@ export function LegalEntityForm({
   cityvalidation,
   postalcodevalidation,
   payeremailvalidation,
+  routingNumbervalidation,
 }: LegalEntityFormProps) {
   // Handler for main info section
   const handleChangeInfo = (update: Partial<EditLegalEntityInput>) => {
@@ -319,10 +321,12 @@ export function LegalEntityForm({
       {!bankDisabled && !!onChangeBank && (
         <LegalEntityBankSection
           onChange={onChangeBank}
+          currency={currency}
           value={legalEntity.paymentRouting?.bank || {}}
           countryvalidation={bankCountryValidation}
           ibanvalidation={ibanvalidation}
           bicvalidation={bicvalidation}
+          routingNumbervalidation={routingNumbervalidation}
           banknamevalidation={banknamevalidation}
         />
       )}

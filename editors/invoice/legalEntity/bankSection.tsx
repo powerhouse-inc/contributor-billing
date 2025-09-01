@@ -11,12 +11,11 @@ import { EditLegalEntityBankInput } from "./legalEntity.js";
 import { CountryForm } from "../components/countryForm.js";
 import { InputField } from "../components/inputField.js";
 import { ValidationResult } from "../validation/validationManager.js";
-
+import { Select } from "@powerhousedao/document-engineering";
 
 const FieldLabel = ({ children }: { readonly children: React.ReactNode }) => (
   <label className="block text-sm font-medium text-gray-700">{children}</label>
 );
-
 
 const ACCOUNT_TYPES = ["CHECKING", "SAVINGS", "TRUST"] as const;
 
@@ -53,7 +52,9 @@ export type LegalEntityBankSectionProps = Omit<
   readonly countryvalidation?: ValidationResult | null;
   readonly ibanvalidation?: ValidationResult | null;
   readonly bicvalidation?: ValidationResult | null;
+  readonly routingNumbervalidation?: ValidationResult | null;
   readonly banknamevalidation?: ValidationResult | null;
+  readonly currency: string;
 };
 
 function flattenBankInput(value: any) {
@@ -67,6 +68,22 @@ function flattenBankInput(value: any) {
       country: value.address.country ?? "",
       stateProvince: value.address.stateProvince ?? "",
     }),
+    ...(value.intermediaryBank && {
+      ABAIntermediary: value.intermediaryBank.ABA ?? "",
+      BICIntermediary: value.intermediaryBank.BIC ?? "",
+      SWIFTIntermediary: value.intermediaryBank.SWIFT ?? "",
+      accountNumIntermediary: value.intermediaryBank.accountNum ?? "",
+      accountTypeIntermediary: value.intermediaryBank.accountType ?? "",
+      beneficiaryIntermediary: value.intermediaryBank.beneficiary ?? "",
+      memoIntermediary: value.intermediaryBank.memo ?? "",
+      nameIntermediary: value.intermediaryBank.name ?? "",
+      streetAddressIntermediary: value.intermediaryBank.address?.streetAddress ?? "",
+      extendedAddressIntermediary: value.intermediaryBank.address?.extendedAddress ?? "",
+      cityIntermediary: value.intermediaryBank.address?.city ?? "",
+      postalCodeIntermediary: value.intermediaryBank.address?.postalCode ?? "",
+      countryIntermediary: value.intermediaryBank.address?.country ?? "",
+      stateProvinceIntermediary: value.intermediaryBank.address?.stateProvince ?? "",
+    }),
   };
 }
 
@@ -75,29 +92,37 @@ export const LegalEntityBankSection = forwardRef(
     props: LegalEntityBankSectionProps,
     ref: Ref<HTMLDivElement>
   ) {
-    const { value, onChange, disabled, countryvalidation, ibanvalidation, bicvalidation, banknamevalidation, ...divProps } = props;
+    const {
+      value,
+      onChange,
+      disabled,
+      countryvalidation,
+      ibanvalidation,
+      bicvalidation,
+      routingNumbervalidation,
+      banknamevalidation,
+      currency,
+      ...divProps
+    } = props;
     const [showIntermediary, setShowIntermediary] = useState(false);
-    
+
     const [localState, setLocalState] = useState(flattenBankInput(value));
 
     useEffect(() => {
       setLocalState(flattenBankInput(value));
     }, [value]);
 
-    const handleInputChange = useCallback(
-      function handleInputChange(
-        field: keyof EditLegalEntityBankInput,
-        event: React.ChangeEvent<
-          HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-        >
-      ) {
-        setLocalState((prevState: ReturnType<typeof flattenBankInput>) => ({
-          ...prevState,
-          [field]: event.target.value,
-        }));
-      },
-      []
-    );
+    const handleInputChange = useCallback(function handleInputChange(
+      field: keyof EditLegalEntityBankInput,
+      event: React.ChangeEvent<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >
+    ) {
+      setLocalState((prevState: ReturnType<typeof flattenBankInput>) => ({
+        ...prevState,
+        [field]: event.target.value,
+      }));
+    }, []);
 
     const handleBlur = useCallback(
       function handleBlur(
@@ -142,6 +167,8 @@ export const LegalEntityBankSection = forwardRef(
       };
     }
 
+    const SEPA_SWIFT_CURRENCIES = ["EUR", "DKK", "GBP", "CHF", "JPY"	];
+
     return (
       <div
         {...divProps}
@@ -172,31 +199,62 @@ export const LegalEntityBankSection = forwardRef(
             <div className="space-y-2">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <FieldLabel>Account Details</FieldLabel>
-                  <AccountTypeSelect
-                    disabled={disabled}
-                    onChange={createInputHandler("accountType")}
-                    onBlur={createBlurHandler("accountType")}
+                  <Select
+                    className="h-10 w-full text-md mb-2"
+                    label="Account Type"
+                    options={ACCOUNT_TYPES.map((type) => ({
+                      label: type,
+                      value: type,
+                    }))}
                     value={localState.accountType ?? ""}
+                    onChange={(value) => {
+                      // Update local state
+                      setLocalState(
+                        (prevState: ReturnType<typeof flattenBankInput>) => ({
+                          ...prevState,
+                          accountType: value as string,
+                        })
+                      );
+                      // Dispatch to parent component
+                      onChange({
+                        accountType: value as string,
+                      } as Partial<EditLegalEntityBankInput>);
+                    }}
                   />
                 </div>
                 <div className="space-y-2">
-                  <InputField
-                    // input={
-                    //   (localState.ABA || localState.BIC || localState.SWIFT) ??
-                    //   ""
-                    // }
-                    value={
-                      (localState.ABA || localState.BIC || localState.SWIFT) ??
-                      ""
-                    }
-                    label="ABA/BIC/SWIFT No."
-                    placeholder="ABA/BIC/SWIFT No."
-                    onBlur={createBlurHandler("BIC")}
-                    handleInputChange={createInputHandler("BIC")}
-                    className="h-10 w-full text-md mb-2"
-                    validation={bicvalidation}
-                  />
+                  {SEPA_SWIFT_CURRENCIES.includes(currency) ? (
+                    <InputField
+                      value={(localState.BIC || localState.SWIFT) ?? ""}
+                      label="SWIFT/BIC"
+                      placeholder="SWIFT/BIC"
+                      onBlur={createBlurHandler("BIC")}
+                      handleInputChange={createInputHandler("BIC")}
+                      className="h-10 w-full text-md mb-2"
+                      validation={bicvalidation}
+                    />
+                  ) : (
+                    <div>
+                      <InputField
+                        value={localState.ABA ?? ""}
+                        label="Routing Number (ABA/ACH)"
+                        placeholder="Routing Number (ABA/ACH)"
+                        onBlur={createBlurHandler("ABA")}
+                        handleInputChange={createInputHandler("ABA")}
+                        className="h-10 w-full text-md mb-2"
+                        validation={routingNumbervalidation}
+                      />
+                      <InputField
+                        value={(localState.BIC || localState.SWIFT) ?? ""}
+                        label="SWIFT/BIC"
+                        placeholder="SWIFT/BIC"
+                        onBlur={createBlurHandler("SWIFT")}
+                        handleInputChange={createInputHandler("SWIFT")}
+                        className="h-10 w-full text-md mb-2"
+                        validation={bicvalidation}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -329,7 +387,9 @@ export const LegalEntityBankSection = forwardRef(
                       label="Account Number"
                       placeholder="Intermediary Account Number"
                       onBlur={createBlurHandler("accountNumIntermediary")}
-                      handleInputChange={createInputHandler("accountNumIntermediary")}
+                      handleInputChange={createInputHandler(
+                        "accountNumIntermediary"
+                      )}
                       className="h-10 w-full text-md mb-2"
                     />
                   </div>
@@ -337,38 +397,72 @@ export const LegalEntityBankSection = forwardRef(
                   <div className="space-y-2">
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-2">
-                        <FieldLabel>Account Details</FieldLabel>
-                        <AccountTypeSelect
-                          disabled={disabled}
-                          onChange={createInputHandler(
-                            "accountTypeIntermediary"
-                          )}
-                          onBlur={createBlurHandler("accountTypeIntermediary")}
-                          value={localState.accountTypeIntermediary ?? ""}
+                        <Select
+                          className="h-10 w-full text-md mb-2"
+                          label="Account Type"
+                          options={ACCOUNT_TYPES.map((type) => ({
+                            label: type,
+                            value: type,
+                          }))}
+                          value={localState.accountType ?? ""}
+                          onChange={(value) => {
+                            // Update local state
+                            setLocalState(
+                              (
+                                prevState: ReturnType<typeof flattenBankInput>
+                              ) => ({
+                                ...prevState,
+                                accountType: value as string,
+                              })
+                            );
+                            // Dispatch to parent component
+                            onChange({
+                              accountType: value as string,
+                            } as Partial<EditLegalEntityBankInput>);
+                          }}
                         />
                       </div>
                       <div className="space-y-2">
-                        <InputField
-                          // input={
-                          //   (localState.ABAIntermediary ||
-                          //     localState.BICIntermediary ||
-                          //     localState.SWIFTIntermediary) ??
-                          //   ""
-                          // }
-                          value={
-                            (localState.ABAIntermediary ||
-                              localState.BICIntermediary ||
-                              localState.SWIFTIntermediary) ??
-                            ""
-                          }
-                          label="ABA/BIC/SWIFT No."
-                          placeholder="ABA/BIC/SWIFT No."
-                          onBlur={createBlurHandler("BICIntermediary")}
-                          handleInputChange={createInputHandler(
-                            "BICIntermediary"
-                          )}
-                          className="h-10 w-full text-md mb-2"
-                        />
+                        {SEPA_SWIFT_CURRENCIES.includes(currency) ? (
+                          <InputField
+                            value={
+                              (localState.BICIntermediary ||
+                                localState.SWIFTIntermediary) ??
+                              ""
+                            }
+                            label="SWIFT/BIC"
+                            placeholder="SWIFT/BIC"
+                            onBlur={createBlurHandler("BICIntermediary")}
+                            handleInputChange={createInputHandler(
+                              "BICIntermediary"
+                            )}
+                            className="h-10 w-full text-md mb-2"
+                            validation={bicvalidation}
+                          />
+                        ) : (
+                          <div>
+                            <InputField
+                              value={localState.ABAIntermediary ?? ""}
+                              label="Routing Number (ABA/ACH)"
+                              placeholder="Routing Number (ABA/ACH)"
+                              onBlur={createBlurHandler("ABAIntermediary")}
+                              handleInputChange={createInputHandler(
+                                "ABAIntermediary"
+                              )}
+                              className="h-10 w-full text-md mb-2"
+                            />
+                            <InputField
+                              value={
+                                localState.SWIFTIntermediary ?? ""
+                              }
+                              label="SWIFT/BIC"
+                              placeholder="SWIFT/BIC"
+                              onBlur={createBlurHandler("SWIFTIntermediary")}
+                              handleInputChange={createInputHandler("SWIFTIntermediary")}
+                              className="h-10 w-full text-md mb-2"
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -430,7 +524,9 @@ export const LegalEntityBankSection = forwardRef(
                         label="City"
                         placeholder="City"
                         onBlur={createBlurHandler("cityIntermediary")}
-                        handleInputChange={createInputHandler("cityIntermediary")}
+                        handleInputChange={createInputHandler(
+                          "cityIntermediary"
+                        )}
                         className="h-10 w-full text-md mb-2"
                       />
                       <InputField
