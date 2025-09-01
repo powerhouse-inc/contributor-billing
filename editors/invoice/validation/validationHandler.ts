@@ -18,6 +18,7 @@ const validateStatusBeforeContinue = (
     setPostalCodeValidation: (validation: ValidationResult) => void,
     setPayerEmailValidation: (validation: ValidationResult) => void,
     setLineItemValidation: (validation: ValidationResult) => void,
+    setRoutingNumberValidation: (validation: ValidationResult) => void,
     isFiatCurrency: (currency: string) => boolean,
 ) => {
     if (newStatus === "PAYMENTSCHEDULED" || newStatus === "ISSUED") {
@@ -101,15 +102,26 @@ const validateStatusBeforeContinue = (
             validationErrors.push(ibanValidation);
         }
 
-        // Validate BIC number
+        // Validate BIC/SWIFT number
         const bicValidation = validateField(
             "bicNumber",
-            state.issuer.paymentRouting?.bank?.BIC,
+            state.issuer.paymentRouting?.bank?.BIC || state.issuer.paymentRouting?.bank?.SWIFT,
             context
         );
         setBicValidation(bicValidation as any);
         if (bicValidation && !bicValidation.isValid) {
             validationErrors.push(bicValidation);
+        }
+
+        // Validate routing number
+        const routingNumberValidation = validateField(
+            "routingNumber",
+            state.issuer.paymentRouting?.bank?.ABA,
+            context
+        );
+        setRoutingNumberValidation(routingNumberValidation as any);
+        if (routingNumberValidation && !routingNumberValidation.isValid) {
+            validationErrors.push(routingNumberValidation);
         }
 
         // Validate bank name

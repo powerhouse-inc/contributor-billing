@@ -1,10 +1,4 @@
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-} from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import {
   InvoiceState,
   LegalEntityTaxId,
@@ -769,74 +763,168 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
 }
 const PaymentSectionFiat: React.FC<{ paymentRouting: any }> = ({
   paymentRouting,
-}) => (
-  <View style={[styles.gridContainer, { marginTop: 0, marginLeft: 0 }]}>
-    <View style={styles.gridColumn}>
-      <View style={styles.row}>
-        <Text style={styles.companyInfoLabel}>Bank Name:</Text>
-        <Text style={styles.companyInfo}>
-          {paymentRouting.bank?.name || ""}
-        </Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.companyInfoLabel}>Address:</Text>
-        <Text style={styles.companyInfo}>
-          {paymentRouting.bank?.address?.streetAddress || ""}
-        </Text>
-      </View>
-      {paymentRouting.bank?.address?.extendedAddress && (
+}) => {
+  console.log("paymentRouting", paymentRouting.bank);
+  return (
+    <View style={[styles.gridContainer, { marginTop: 0, marginLeft: 0 }]}>
+      <View style={styles.gridColumn}>
+        <View style={styles.row}>
+          <Text style={styles.companyInfoLabel}>Bank Name:</Text>
+          <Text style={styles.companyInfo}>
+            {paymentRouting.bank?.name || ""}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.companyInfoLabel}>Address:</Text>
+          <Text style={styles.companyInfo}>
+            {paymentRouting.bank?.address?.streetAddress || ""}
+          </Text>
+        </View>
+        {paymentRouting.bank?.address?.extendedAddress && (
+          <View style={styles.row}>
+            <Text style={styles.companyInfoLabel}></Text>
+            <Text style={styles.companyInfo}>
+              {paymentRouting.bank?.address?.extendedAddress}
+            </Text>
+          </View>
+        )}
         <View style={styles.row}>
           <Text style={styles.companyInfoLabel}></Text>
           <Text style={styles.companyInfo}>
-            {paymentRouting.bank?.address?.extendedAddress}
+            {paymentRouting.bank?.address?.city || ""},{" "}
+            {getCountryName(paymentRouting.bank?.address?.country || "") || ""}
           </Text>
         </View>
-      )}
-      <View style={styles.row}>
-        <Text style={styles.companyInfoLabel}></Text>
-        <Text style={styles.companyInfo}>
-          {paymentRouting.bank?.address?.city || ""},{" "}
-          {getCountryName(paymentRouting.bank?.address?.country || "") || ""}
-        </Text>
+        <View style={styles.row}>
+          <Text style={styles.companyInfoLabel}>Postcode:</Text>
+          <Text style={styles.companyInfo}>
+            {paymentRouting.bank?.address?.postalCode || "00000"}
+          </Text>
+        </View>
       </View>
-      <View style={styles.row}>
-        <Text style={styles.companyInfoLabel}>Postcode:</Text>
-        <Text style={styles.companyInfo}>
-          {paymentRouting.bank?.address?.postalCode || "00000"}
-        </Text>
+      <View style={[styles.gridColumn]}>
+        <View style={styles.row}>
+          <Text style={styles.companyInfoLabel}>Beneficiary:</Text>
+          <Text style={styles.companyInfo}>
+            {paymentRouting.bank?.beneficiary || ""}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.companyInfoLabel}>Acct No:</Text>
+          <Text style={styles.companyInfo}>
+            {paymentRouting.bank?.accountNum || ""}
+          </Text>
+        </View>
+        {paymentRouting.bank?.ABA && (
+          <View style={styles.row}>
+            <Text style={styles.companyInfoLabel}>ABA/ACH:</Text>
+            <Text style={styles.companyInfo}>{paymentRouting.bank?.ABA}</Text>
+          </View>
+        )}
+        <View style={styles.row}>
+          <Text style={styles.companyInfoLabel}>BIC/SWIFT:</Text>
+          <Text style={styles.companyInfo}>
+            {paymentRouting.bank?.BIC || paymentRouting.bank?.SWIFT || ""}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.companyInfoLabel}>Acct Type:</Text>
+          <Text style={styles.companyInfo}>
+            {paymentRouting.bank?.accountType || ""}
+          </Text>
+        </View>
+        {paymentRouting.bank?.intermediaryBank?.accountNum && (
+          <>
+            <View style={styles.row}>
+              <Text style={styles.companyInfoLabel}>Intermediary Bank:</Text>
+              <Text style={styles.companyInfo}>
+                {paymentRouting.bank?.intermediaryBank?.name}
+              </Text>
+            </View>
+            {paymentRouting.bank?.intermediaryBank?.accountNum && (
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Intermediary Acct:</Text>
+                <Text style={styles.companyInfo}>
+                  {paymentRouting.bank?.intermediaryBank?.accountNum}
+                </Text>
+              </View>
+            )}
+            {paymentRouting.bank?.intermediaryBank?.accountType && (
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Intermediary Type:</Text>
+                <Text style={styles.companyInfo}>
+                  {paymentRouting.bank?.intermediaryBank?.accountType}
+                </Text>
+              </View>
+            )}
+            {paymentRouting.bank?.intermediaryBank?.beneficiary && (
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Intermediary Beneficiary:</Text>
+                <Text style={styles.companyInfo}>
+                  {paymentRouting.bank?.intermediaryBank?.beneficiary}
+                </Text>
+              </View>
+            )}
+            {paymentRouting.bank?.intermediaryBank?.ABA && (
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Intermediary ABA:</Text>
+                <Text style={styles.companyInfo}>
+                  {paymentRouting.bank?.intermediaryBank?.ABA}
+                </Text>
+              </View>
+            )}
+            {(paymentRouting.bank?.intermediaryBank?.BIC || paymentRouting.bank?.intermediaryBank?.SWIFT) && (
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Intermediary BIC/SWIFT:</Text>
+                <Text style={styles.companyInfo}>
+                  {paymentRouting.bank?.intermediaryBank?.BIC || paymentRouting.bank?.intermediaryBank?.SWIFT}
+                </Text>
+              </View>
+            )}
+            {paymentRouting.bank?.intermediaryBank?.address?.streetAddress && (
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Intermediary Address:</Text>
+                <Text style={styles.companyInfo}>
+                  {paymentRouting.bank?.intermediaryBank?.address?.streetAddress}
+                  {paymentRouting.bank?.intermediaryBank?.address?.extendedAddress && 
+                    `, ${paymentRouting.bank?.intermediaryBank?.address?.extendedAddress}`}
+                </Text>
+              </View>
+            )}
+            {(paymentRouting.bank?.intermediaryBank?.address?.city || paymentRouting.bank?.intermediaryBank?.address?.stateProvince || paymentRouting.bank?.intermediaryBank?.address?.postalCode) && (
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Intermediary Location:</Text>
+                <Text style={styles.companyInfo}>
+                  {[
+                    paymentRouting.bank?.intermediaryBank?.address?.city,
+                    paymentRouting.bank?.intermediaryBank?.address?.stateProvince,
+                    paymentRouting.bank?.intermediaryBank?.address?.postalCode
+                  ].filter(Boolean).join(', ')}
+                </Text>
+              </View>
+            )}
+            {paymentRouting.bank?.intermediaryBank?.address?.country && (
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Intermediary Country:</Text>
+                <Text style={styles.companyInfo}>
+                  {paymentRouting.bank?.intermediaryBank?.address?.country}
+                </Text>
+              </View>
+            )}
+            {paymentRouting.bank?.intermediaryBank?.memo && (
+              <View style={styles.row}>
+                <Text style={styles.companyInfoLabel}>Intermediary Memo:</Text>
+                <Text style={styles.companyInfo}>
+                  {paymentRouting.bank?.intermediaryBank?.memo}
+                </Text>
+              </View>
+            )}
+          </>
+        )}
       </View>
     </View>
-    <View style={[styles.gridColumn]}>
-      <View style={styles.row}>
-        <Text style={styles.companyInfoLabel}>Beneficiary:</Text>
-        <Text style={styles.companyInfo}>
-          {paymentRouting.bank?.beneficiary || ""}
-        </Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.companyInfoLabel}>Acct No:</Text>
-        <Text style={styles.companyInfo}>
-          {paymentRouting.bank?.accountNum || ""}
-        </Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.companyInfoLabel}>BIC/SWIFT:</Text>
-        <Text style={styles.companyInfo}>
-          {paymentRouting.bank?.BIC ||
-            paymentRouting.bank?.SWIFT ||
-            paymentRouting.bank?.ABA ||
-            ""}
-        </Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.companyInfoLabel}>Acct Type:</Text>
-        <Text style={styles.companyInfo}>
-          {paymentRouting.bank?.accountType || ""}
-        </Text>
-      </View>
-    </View>
-  </View>
-);
+  );
+};
 
 {
   /* New component for crypto payment section */
@@ -876,7 +964,11 @@ const InvoiceLineItem: React.FC<{ item: any; currency: string }> = ({
         <Text style={styles.itemDescription}>{item.longDescription}</Text>
       )}
     </View>
-    <Text style={styles.tableCol15}>{item.quantity % 1 === 0 ? item.quantity.toString() : item.quantity.toFixed(2)}</Text>
+    <Text style={styles.tableCol15}>
+      {item.quantity % 1 === 0
+        ? item.quantity.toString()
+        : item.quantity.toFixed(2)}
+    </Text>
     <Text style={styles.tableCol15}>
       {formatCurrency(item.unitPriceTaxExcl, currency)}
     </Text>
