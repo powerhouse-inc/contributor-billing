@@ -261,7 +261,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
       )}
       {!invoiceLink &&
         invoiceStatus === "PAYMENTSCHEDULED" &&
-        docState.payments.length > 0 && (
+        docState.payments?.length > 0 && (
           <>
             {docState.payments[docState.payments.length - 1].issue !== "" ? (
               <div className="mt-4">
