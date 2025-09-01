@@ -102,7 +102,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
       docState.issuer.paymentRouting.bank.ABA &&
       docState.issuer.paymentRouting.bank.ABA.trim() !== ""
     ) {
-      bankDetails.achRoutingNumber = docState.issuer.paymentRouting.bank.ABA;
+      bankDetails.routingNumber  = docState.issuer.paymentRouting.bank.ABA;
     }
 
     const getDecimalPlaces = (currency: string): number => {
