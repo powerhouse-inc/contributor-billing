@@ -1,17 +1,12 @@
 import {
   BaseDocumentClass,
-  type ExtendedState,
-  type PartialState,
   applyMixins,
   type SignalDispatch,
 } from "document-model";
-import {
-  type IntegrationsState,
-  type IntegrationsLocalState,
-} from "./types.js";
+import { IntegrationsPHState } from "./ph-factories.js";
 import { type IntegrationsAction } from "./actions.js";
 import { reducer } from "./reducer.js";
-import utils from "./utils.js";
+import { createDocument } from "./utils.js";
 import Integrations_Integrations from "./integrations/object.js";
 
 export * from "./integrations/object.js";
@@ -20,23 +15,14 @@ export * from "./integrations/object.js";
 interface Integrations extends Integrations_Integrations {}
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-class Integrations extends BaseDocumentClass<
-  IntegrationsState,
-  IntegrationsLocalState,
-  IntegrationsAction
-> {
+class Integrations extends BaseDocumentClass<IntegrationsPHState> {
   static fileExtension = ".phdm";
 
   constructor(
-    initialState?: Partial<
-      ExtendedState<
-        PartialState<IntegrationsState>,
-        PartialState<IntegrationsLocalState>
-      >
-    >,
+    initialState?: Partial<IntegrationsPHState>,
     dispatch?: SignalDispatch,
   ) {
-    super(reducer, utils.createDocument(initialState), dispatch);
+    super(reducer, createDocument(initialState), dispatch);
   }
 
   public saveToFile(path: string, name?: string) {

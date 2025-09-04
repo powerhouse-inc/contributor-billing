@@ -181,8 +181,8 @@ export const schema: DocumentNode = gql`
   Queries: Invoice
   """
   type InvoiceQueries {
-    getDocument(driveId: String, docId: PHID): Invoice
-    getDocuments: [Invoice!]
+    getDocument(docId: PHID!, driveId: PHID): Invoice
+    getDocuments(driveId: String!): [Invoice!]
   }
 
   type Query {
@@ -193,7 +193,7 @@ export const schema: DocumentNode = gql`
   Mutations: Invoice
   """
   type Mutation {
-    Invoice_createDocument(driveId: String, name: String): String
+    Invoice_createDocument(name: String!, driveId: String): String
 
     Invoice_editInvoice(
       driveId: String

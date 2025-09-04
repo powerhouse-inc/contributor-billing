@@ -1,166 +1,237 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { type Subgraph } from "@powerhousedao/reactor-api";
 import { addFile } from "document-drive";
-import { actions } from "../../document-models/billing-statement/index.js";
-import { generateId } from "document-model";
+import {
+  actions,
+  type EditBillingStatementInput,
+  type EditContributorInput,
+  type EditStatusInput,
+  type AddLineItemInput,
+  type EditLineItemInput,
+  type EditLineItemTagInput,
+  type BillingStatementDocument,
+} from "../../document-models/billing-statement/index.js";
+import { setName } from "document-model";
 
-const DEFAULT_DRIVE_ID = "powerhouse";
-
-export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
+export const getResolvers = (subgraph: Subgraph) => {
   const reactor = subgraph.reactor;
 
   return {
     Query: {
-      BillingStatement: async (_: any, args: any, ctx: any) => {
+      BillingStatement: async () => {
         return {
-          getDocument: async (args: any) => {
-            const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-            const docId: string = args.docId || "";
-            const doc = await reactor.getDocument(driveId, docId);
+          getDocument: async (args: { docId: string; driveId: string }) => {
+            const { docId, driveId } = args;
+
+            if (!docId) {
+              throw new Error("Document id is required");
+            }
+
+            if (driveId) {
+              const docIds = await reactor.getDocuments(driveId);
+              if (!docIds.includes(docId)) {
+                throw new Error(
+                  `Document with id ${docId} is not part of ${driveId}`,
+                );
+              }
+            }
+
+            const doc =
+              await reactor.getDocument<BillingStatementDocument>(docId);
             return {
-              ...doc,
               driveId: driveId,
-              state: doc?.state?.global ?? "",
-              stateJSON: doc?.state?.global,
-              revision: doc?.header?.revision?.global,
+              ...doc,
+              ...doc.header,
+              state: doc.state.global,
+              stateJSON: doc.state.global,
+              revision: doc.header?.revision?.global ?? 0,
             };
           },
-          getDocuments: async (args: any) => {
-            const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
+          getDocuments: async (args: { driveId: string }) => {
+            const { driveId } = args;
             const docsIds = await reactor.getDocuments(driveId);
             const docs = await Promise.all(
-              (docsIds ?? []).map(async (docId) => {
-                const doc = await reactor.getDocument(driveId, docId);
+              docsIds.map(async (docId) => {
+                const doc =
+                  await reactor.getDocument<BillingStatementDocument>(docId);
                 return {
-                  ...doc,
                   driveId: driveId,
-                  state: doc?.state?.global ?? "",
-                  stateJSON: doc?.state?.global,
-                  revision: doc?.header?.revision?.global,
+                  ...doc,
+                  ...doc.header,
+                  state: doc.state.global,
+                  stateJSON: doc.state.global,
+                  revision: doc.header?.revision?.global ?? 0,
                 };
               }),
             );
 
             return docs.filter(
-              (doc) => doc.header?.documentType === "powerhouse/billing-statement",
+              (doc) =>
+                doc.header.documentType === "powerhouse/billing-statement",
             );
           },
         };
       },
     },
     Mutation: {
-      BillingStatement_createDocument: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId = generateId();
-
-        await reactor.addDriveAction(
-          driveId,
-          addFile({
-            id: docId,
-            name: args.name,
-            documentType: "powerhouse/billing-statement",
-            synchronizationUnits: [
-              {
-                branch: "main",
-                scope: "global",
-                syncId: generateId(),
-              },
-              {
-                branch: "main",
-                scope: "local",
-                syncId: generateId(),
-              },
-            ],
-          }),
+      BillingStatement_createDocument: async (
+        _: unknown,
+        args: { name: string; driveId?: string },
+      ) => {
+        const { driveId, name } = args;
+        const document = await reactor.addDocument(
+          "powerhouse/billing-statement",
         );
 
-        return docId;
+        if (driveId) {
+          await reactor.addAction(
+            driveId,
+            addFile({
+              name,
+              id: document.header.id,
+              documentType: "powerhouse/billing-statement",
+            }),
+          );
+        }
+
+        if (name) {
+          await reactor.addAction(document.header.id, setName(name));
+        }
+
+        return document.header.id;
       },
 
-      BillingStatement_editBillingStatement: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      BillingStatement_editBillingStatement: async (
+        _: unknown,
+        args: { docId: string; input: EditBillingStatementInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<BillingStatementDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.editBillingStatement({ ...args.input }),
+          actions.editBillingStatement(input),
         );
 
-        return (doc?.header?.revision.global ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to editBillingStatement",
+          );
+        }
+
+        return true;
       },
 
-      BillingStatement_editContributor: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      BillingStatement_editContributor: async (
+        _: unknown,
+        args: { docId: string; input: EditContributorInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<BillingStatementDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.editContributor({ ...args.input }),
+          actions.editContributor(input),
         );
 
-        return (doc?.header?.revision.global ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to editContributor");
+        }
+
+        return true;
       },
 
-      BillingStatement_editStatus: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      BillingStatement_editStatus: async (
+        _: unknown,
+        args: { docId: string; input: EditStatusInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<BillingStatementDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.editStatus({ ...args.input }),
+          actions.editStatus(input),
         );
 
-        return (doc?.header?.revision.global ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to editStatus");
+        }
+
+        return true;
       },
 
-      BillingStatement_addLineItem: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      BillingStatement_addLineItem: async (
+        _: unknown,
+        args: { docId: string; input: AddLineItemInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<BillingStatementDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.addLineItem({ ...args.input }),
+          actions.addLineItem(input),
         );
 
-        return (doc?.header?.revision.global ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to addLineItem");
+        }
+
+        return true;
       },
 
-      BillingStatement_editLineItem: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      BillingStatement_editLineItem: async (
+        _: unknown,
+        args: { docId: string; input: EditLineItemInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<BillingStatementDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.editLineItem({ ...args.input }),
+          actions.editLineItem(input),
         );
 
-        return (doc?.header?.revision.global ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to editLineItem");
+        }
+
+        return true;
       },
 
-      BillingStatement_editLineItemTag: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      BillingStatement_editLineItemTag: async (
+        _: unknown,
+        args: { docId: string; input: EditLineItemTagInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<BillingStatementDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.editLineItemTag({ ...args.input }),
+          actions.editLineItemTag(input),
         );
 
-        return (doc?.header?.revision.global ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to editLineItemTag");
+        }
+
+        return true;
       },
     },
   };

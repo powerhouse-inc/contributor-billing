@@ -1,4 +1,5 @@
 import { BaseDocumentClass } from "document-model";
+import { InvoicePHState } from "../ph-factories.js";
 import {
   type CancelInput,
   type IssueInput,
@@ -12,8 +13,6 @@ import {
   type ReportPaymentIssueInput,
   type ConfirmPaymentInput,
   type ClosePaymentInput,
-  type InvoiceState,
-  type InvoiceLocalState,
 } from "../types.js";
 import {
   cancel,
@@ -31,11 +30,7 @@ import {
 } from "./creators.js";
 import { type InvoiceAction } from "../actions.js";
 
-export default class Invoice_Transitions extends BaseDocumentClass<
-  InvoiceState,
-  InvoiceLocalState,
-  InvoiceAction
-> {
+export default class Invoice_Transitions extends BaseDocumentClass<InvoicePHState> {
   public cancel(input: CancelInput) {
     return this.dispatch(cancel(input));
   }

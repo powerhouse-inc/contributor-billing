@@ -1,10 +1,9 @@
 import { BaseDocumentClass } from "document-model";
+import { BillingStatementPHState } from "../ph-factories.js";
 import {
   type EditBillingStatementInput,
   type EditContributorInput,
   type EditStatusInput,
-  type BillingStatementState,
-  type BillingStatementLocalState,
 } from "../types.js";
 import {
   editBillingStatement,
@@ -13,11 +12,7 @@ import {
 } from "./creators.js";
 import { type BillingStatementAction } from "../actions.js";
 
-export default class BillingStatement_General extends BaseDocumentClass<
-  BillingStatementState,
-  BillingStatementLocalState,
-  BillingStatementAction
-> {
+export default class BillingStatement_General extends BaseDocumentClass<BillingStatementPHState> {
   public editBillingStatement(input: EditBillingStatementInput) {
     return this.dispatch(editBillingStatement(input));
   }

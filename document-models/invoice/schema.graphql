@@ -14,6 +14,7 @@ scalar Amount_Fiat
 scalar Amount_Currency
 scalar Amount_Crypto
 scalar Amount
+scalar Upload
 type InvoiceState {
   status: Status!
   invoiceNo: String!

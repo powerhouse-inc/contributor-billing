@@ -35,8 +35,8 @@ describe("Billing Statement Operations", () => {
 
       // Verify operation was recorded
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("EDIT_BILLING_STATEMENT");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_BILLING_STATEMENT");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
       expect(updatedDocument.operations.global[0].index).toEqual(0);
 
       // Verify state was updated
@@ -59,8 +59,8 @@ describe("Billing Statement Operations", () => {
 
       // Verify operation was recorded
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("EDIT_BILLING_STATEMENT");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_BILLING_STATEMENT");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
 
       // Verify only specified fields were updated
       expect(updatedDocument.state.global.dateIssued).toBe(input.dateIssued);
@@ -84,8 +84,8 @@ describe("Billing Statement Operations", () => {
 
       // Verify operation was recorded
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("EDIT_CONTRIBUTOR");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_CONTRIBUTOR");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
 
       // Verify state was updated
       expect(updatedDocument.state.global.contributor).toBe(input.contributor);
@@ -105,8 +105,8 @@ describe("Billing Statement Operations", () => {
 
       // Verify operation was recorded
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("EDIT_STATUS");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_STATUS");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
 
       // Verify state was updated
       expect(updatedDocument.state.global.status).toBe(input.status);

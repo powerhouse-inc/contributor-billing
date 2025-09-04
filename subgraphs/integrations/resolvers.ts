@@ -1,46 +1,61 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { type Subgraph } from "@powerhousedao/reactor-api";
 import { addFile } from "document-drive";
-import { actions } from "../../document-models/integrations/index.js";
-import { generateId } from "document-model";
+import {
+  actions,
+  type SetRequestFinanceInput,
+  type SetGnosisSafeInput,
+  type SetGoogleCloudInput,
+  type IntegrationsDocument,
+} from "../../document-models/integrations/index.js";
+import { setName } from "document-model";
 
-const DEFAULT_DRIVE_ID = "powerhouse";
-
-export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
+export const getResolvers = (subgraph: Subgraph) => {
   const reactor = subgraph.reactor;
 
   return {
     Query: {
-      Integrations: async (_: any, args: any, ctx: any) => {
+      Integrations: async () => {
         return {
-          getDocument: async (args: any) => {
-            const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-            const docId: string = args.docId || "";
-            const doc = await reactor.getDocument(driveId, docId);
+          getDocument: async (args: { docId: string; driveId: string }) => {
+            const { docId, driveId } = args;
+
+            if (!docId) {
+              throw new Error("Document id is required");
+            }
+
+            if (driveId) {
+              const docIds = await reactor.getDocuments(driveId);
+              if (!docIds.includes(docId)) {
+                throw new Error(
+                  `Document with id ${docId} is not part of ${driveId}`,
+                );
+              }
+            }
+
+            const doc = await reactor.getDocument<IntegrationsDocument>(docId);
             return {
               driveId: driveId,
               ...doc,
               ...doc.header,
               state: doc.state.global,
               stateJSON: doc.state.global,
-              revision: doc.header.revision["global"] ?? 0,
+              revision: doc.header?.revision?.global ?? 0,
             };
           },
-          getDocuments: async (args: any) => {
-            const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
+          getDocuments: async (args: { driveId: string }) => {
+            const { driveId } = args;
             const docsIds = await reactor.getDocuments(driveId);
             const docs = await Promise.all(
               docsIds.map(async (docId) => {
-                const doc = await reactor.getDocument(driveId, docId);
+                const doc =
+                  await reactor.getDocument<IntegrationsDocument>(docId);
                 return {
                   driveId: driveId,
                   ...doc,
                   ...doc.header,
                   state: doc.state.global,
                   stateJSON: doc.state.global,
-                  revision: doc.header.revision["global"] ?? 0,
+                  revision: doc.header?.revision?.global ?? 0,
                 };
               }),
             );
@@ -53,74 +68,97 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
       },
     },
     Mutation: {
-      Integrations_createDocument: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId = generateId();
+      Integrations_createDocument: async (
+        _: unknown,
+        args: { name: string; driveId?: string },
+      ) => {
+        const { driveId, name } = args;
+        const document = await reactor.addDocument("powerhouse/integrations");
 
-        await reactor.addDriveAction(
-          driveId,
-          addFile({
-            id: docId,
-            name: args.name,
-            documentType: "powerhouse/integrations",
-            synchronizationUnits: [
-              {
-                branch: "main",
-                scope: "global",
-                syncId: generateId(),
-              },
-              {
-                branch: "main",
-                scope: "local",
-                syncId: generateId(),
-              },
-            ],
-          }),
-        );
+        if (driveId) {
+          await reactor.addAction(
+            driveId,
+            addFile({
+              name,
+              id: document.header.id,
+              documentType: "powerhouse/integrations",
+            }),
+          );
+        }
 
-        return docId;
+        if (name) {
+          await reactor.addAction(document.header.id, setName(name));
+        }
+
+        return document.header.id;
       },
 
-      Integrations_setRequestFinance: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      Integrations_setRequestFinance: async (
+        _: unknown,
+        args: { docId: string; input: SetRequestFinanceInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<IntegrationsDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.setRequestFinance({ ...args.input }),
+          actions.setRequestFinance(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to setRequestFinance",
+          );
+        }
+
+        return true;
       },
 
-      Integrations_setGnosisSafe: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      Integrations_setGnosisSafe: async (
+        _: unknown,
+        args: { docId: string; input: SetGnosisSafeInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<IntegrationsDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.setGnosisSafe({ ...args.input }),
+          actions.setGnosisSafe(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setGnosisSafe");
+        }
+
+        return true;
       },
 
-      Integrations_setGoogleCloud: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      Integrations_setGoogleCloud: async (
+        _: unknown,
+        args: { docId: string; input: SetGoogleCloudInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<IntegrationsDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.setGoogleCloud({ ...args.input }),
+          actions.setGoogleCloud(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setGoogleCloud");
+        }
+
+        return true;
       },
     },
   };
