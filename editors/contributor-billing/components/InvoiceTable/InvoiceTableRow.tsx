@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { RowActionMenu } from "./RowActionMenu.js";
 import { FileItem } from "@powerhousedao/design-system";
+import { useDriveContext } from "@powerhousedao/reactor-browser";
 
 export const InvoiceTableRow = ({
   files,
@@ -36,6 +37,16 @@ export const InvoiceTableRow = ({
   const hasExportedData =
     row.exported != null && Boolean(row.exported.timestamp?.trim());
 
+  const {
+    onAddFile,
+    onAddFolder,
+    onCopyNode,
+    onDuplicateNode,
+    onMoveNode,
+    onRenameNode,
+    showDeleteNodeModal,
+  } = useDriveContext();
+
   return (
     <tr className="hover:bg-gray-50">
       <td className="px-2 py-2">
@@ -52,18 +63,20 @@ export const InvoiceTableRow = ({
             key={row.id}
             fileNode={file as any}
             sharingType="PUBLIC"
-            onRenameNode={() => new Promise((resolve) => resolve(undefined))}
+            onRenameNode={onRenameNode}
             onDuplicateNode={() => new Promise((resolve) => resolve(undefined))}
-            showDeleteNodeModal={() => onDeleteNode(row.id)}
+            showDeleteNodeModal={showDeleteNodeModal}
             isAllowedToCreateDocuments={true}
             className="h-10"
             onAddFile={() => new Promise((resolve) => resolve(undefined))}
             onAddFolder={() => new Promise((resolve) => resolve(undefined))}
             onCopyNode={() => new Promise((resolve) => resolve(undefined))}
             onMoveNode={() => new Promise((resolve) => resolve(undefined))}
-            onAddAndSelectNewFolder={() => new Promise((resolve) => resolve(undefined))}
+            onAddAndSelectNewFolder={() =>
+              new Promise((resolve) => resolve(undefined))
+            }
             getSyncStatusSync={() => undefined}
-            setSelectedNode={() => {}}
+            setSelectedNode={() => setActiveDocumentId(row.id)}
           />
         )}
       </td>
@@ -93,18 +106,22 @@ export const InvoiceTableRow = ({
             key={billingDoc?.id}
             fileNode={billingFile as any}
             sharingType="PUBLIC"
-            onRenameNode={() => new Promise((resolve) => resolve(undefined))}
+            onRenameNode={onRenameNode}
             onDuplicateNode={() => new Promise((resolve) => resolve(undefined))}
-            showDeleteNodeModal={() => onDeleteNode(billingDoc?.id as string)}
+            showDeleteNodeModal={showDeleteNodeModal}
             isAllowedToCreateDocuments={true}
             className="h-10"
             onAddFile={() => new Promise((resolve) => resolve(undefined))}
             onAddFolder={() => new Promise((resolve) => resolve(undefined))}
             onCopyNode={() => new Promise((resolve) => resolve(undefined))}
             onMoveNode={() => new Promise((resolve) => resolve(undefined))}
-            onAddAndSelectNewFolder={() => new Promise((resolve) => resolve(undefined))}
+            onAddAndSelectNewFolder={() =>
+              new Promise((resolve) => resolve(undefined))
+            }
             getSyncStatusSync={() => undefined}
-            setSelectedNode={() => {}}
+            setSelectedNode={() =>
+              setActiveDocumentId(billingDoc?.id as string)
+            }
           />
         </td>
       )}

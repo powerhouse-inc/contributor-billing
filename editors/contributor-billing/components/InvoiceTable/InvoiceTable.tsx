@@ -45,7 +45,7 @@ const statusOptions = [
 
 interface InvoiceTableProps {
   files: any[];
-  state: Record<string, any>;
+  state: Record<string, any>[];
   setActiveDocumentId: (id: string) => void;
   selected: { [id: string]: boolean };
   setSelected: (
@@ -76,19 +76,12 @@ export const InvoiceTable = ({
 
   const [selectedDrive] = useSelectedDrive();
 
-  const billingDocStates = Object.entries(state)
-    .filter(([_, doc]) => doc.documentType === "powerhouse/billing-statement")
-    .map(([id, doc]) => ({
-      id,
-      contributor: doc.global.contributor,
+  const billingDocStates = state
+    .filter((doc) => doc.header.documentType === "powerhouse/billing-statement")
+    .map((doc) => ({
+      id: doc.header.id,
+      contributor: doc.state.global.contributor,
     }));
-
-  const getMenuOptions = () => {
-    return [
-      { label: "View Invoice", value: "view-invoice" },
-      // { label: "View Payment Transaction", value: "view-payment" },
-    ];
-  };
 
   const handleStatusChange = (value: string | string[]) => {
     setSelectedStatuses(Array.isArray(value) ? value : [value]);
@@ -99,52 +92,50 @@ export const InvoiceTable = ({
   };
 
   const getInvoicesByStatus = (status: string) => {
-    return Object.entries(state)
+    return state
       .filter(
-        ([_, doc]) =>
-          doc.documentType === "powerhouse/invoice" &&
-          doc.global.status === status
+        (doc) =>
+          doc.header.documentType === "powerhouse/invoice" &&
+          doc.state.global.status === status
       )
-      .map(([id, doc]) => ({
-        id,
-        issuer: doc.global.issuer?.name || "Unknown",
-        status: doc.global.status,
-        invoiceNo: doc.global.invoiceNo,
-        issueDate: doc.global.dateIssued,
-        dueDate: doc.global.dateDue,
-        currency: doc.global.currency,
-        amount: doc.global.totalPriceTaxIncl?.toString() ?? "",
-        exported: doc.global.exported,
+      .map((doc) => ({
+        id: doc.header.id,
+        issuer: doc.state.global.issuer?.name || "Unknown",
+        status: doc.state.global.status,
+        invoiceNo: doc.state.global.invoiceNo,
+        issueDate: doc.state.global.dateIssued,
+        dueDate: doc.state.global.dateDue,
+        currency: doc.state.global.currency,
+        amount: doc.state.global.totalPriceTaxIncl?.toString() ?? "",
+        exported: doc.state.global.exported,
       }));
   };
 
-  // console.log('filteredDocumentModels', filteredDocumentModels)
-
   const getOtherInvoices = () => {
-    return Object.entries(state)
+    return state
       .filter(
-        ([_, doc]) =>
-          doc.documentType === "powerhouse/invoice" &&
-          doc.global.status !== "DRAFT" &&
-          doc.global.status !== "ISSUED" &&
-          doc.global.status !== "ACCEPTED" &&
-          doc.global.status !== "PAYMENTSCHEDULED" &&
-          doc.global.status !== "PAYMENTSENT" &&
-          doc.global.status !== "PAYMENTISSUE" &&
-          doc.global.status !== "PAYMENTCLOSED" &&
-          doc.global.status !== "REJECTED"
+        (doc) =>
+          doc.header.documentType === "powerhouse/invoice" &&
+          doc.state.global.status !== "DRAFT" &&
+          doc.state.global.status !== "ISSUED" &&
+          doc.state.global.status !== "ACCEPTED" &&
+          doc.state.global.status !== "PAYMENTSCHEDULED" &&
+          doc.state.global.status !== "PAYMENTSENT" &&
+          doc.state.global.status !== "PAYMENTISSUE" &&
+          doc.state.global.status !== "PAYMENTCLOSED" &&
+          doc.state.global.status !== "REJECTED"
       )
-      .map(([id, doc]) => ({
-        id,
-        issuer: doc.global.issuer?.name || "Unknown",
-        status: doc.global.status,
-        invoiceNo: doc.global.invoiceNo,
-        issueDate: doc.global.dateIssued,
-        dueDate: doc.global.dateDue,
-        currency: doc.global.currency,
-        amount: doc.global.totalPriceTaxIncl?.toString() ?? "",
-        documentType: doc.documentType,
-        exported: doc.global.exported,
+      .map((doc) => ({
+        id: doc.header.id,
+        issuer: doc.state.global.issuer?.name || "Unknown",
+        status: doc.state.global.status,
+        invoiceNo: doc.state.global.invoiceNo,
+        issueDate: doc.state.global.dateIssued,
+        dueDate: doc.state.global.dateDue,
+        currency: doc.state.global.currency,
+        amount: doc.state.global.totalPriceTaxIncl?.toString() ?? "",
+        documentType: doc.header.documentType,
+        exported: doc.state.global.exported,
       }));
   };
 
@@ -182,7 +173,12 @@ export const InvoiceTable = ({
 
   const handleCreateBillingStatement = async (id: string) => {
     const invoiceFile = files.find((file) => file.id === id);
-    const invoiceState = state[id];
+    const invoiceState = state.find((doc) => doc.header.id === id);
+    console.log("invoiceFile", invoiceFile);
+    console.log("invoiceState", invoiceState);
+    if (!invoiceState) {
+      return;
+    }
 
     await addDocument(
       selectedDrive?.header.id || "",
@@ -206,9 +202,9 @@ export const InvoiceTable = ({
           ...({
             global: {
               contributor: id,
-              dateIssued: invoiceState.global.dateIssued,
-              dateDue: invoiceState.global.dateDue,
-              lineItems: invoiceState.global.lineItems.map(
+              dateIssued: invoiceState.state.global.dateIssued,
+              dateDue: invoiceState.state.global.dateDue,
+              lineItems: invoiceState.state.global.lineItems.map(
                 (item: InvoiceLineItem) => {
                   return {
                     id: item.id,
@@ -223,15 +219,15 @@ export const InvoiceTable = ({
                   };
                 }
               ),
-              status: invoiceState.global.status,
-              currency: invoiceState.global.currency,
-              totalCash: invoiceState.global.lineItems.reduce(
+              status: invoiceState.state.global.status,
+              currency: invoiceState.state.global.currency,
+              totalCash: invoiceState.state.global.lineItems.reduce(
                 (acc: number, item: InvoiceLineItem) =>
                   acc + item.totalPriceTaxIncl,
                 0
               ),
               totalPowt: 0,
-              notes: invoiceState.global.notes,
+              notes: invoiceState.state.global.notes,
             },
             local: {},
           } as any),
@@ -249,9 +245,9 @@ export const InvoiceTable = ({
             state: {
               global: {
                 contributor: id,
-                dateIssued: invoiceState.global.dateIssued,
-                dateDue: invoiceState.global.dateDue,
-                lineItems: invoiceState.global.lineItems.map(
+                dateIssued: invoiceState.state.global.dateIssued,
+                dateDue: invoiceState.state.global.dateDue,
+                lineItems: invoiceState.state.global.lineItems.map(
                   (item: InvoiceLineItem) => {
                     return {
                       id: item.id,
@@ -266,15 +262,15 @@ export const InvoiceTable = ({
                     };
                   }
                 ),
-                status: invoiceState.global.status,
-                currency: invoiceState.global.currency,
-                totalCash: invoiceState.global.lineItems.reduce(
+                status: invoiceState.state.global.status,
+                currency: invoiceState.state.global.currency,
+                totalCash: invoiceState.state.global.lineItems.reduce(
                   (acc: number, item: InvoiceLineItem) =>
                     acc + item.totalPriceTaxIncl,
                   0
                 ),
                 totalPowt: 0,
-                notes: invoiceState.global.notes,
+                notes: invoiceState.state.global.notes,
               },
               local: {},
             },
@@ -288,12 +284,13 @@ export const InvoiceTable = ({
   };
 
   const selectedInvoiceIds = Object.keys(selected).filter((id) => selected[id]);
+  console.log("selectedInvoiceIds", selectedInvoiceIds);
   const selectedInvoices = selectedInvoiceIds.map((id) => ({
-    ...state[id],
+    ...state.find((doc) => doc.header.id === id),
     id,
   }));
   const selectedInvoiceStatuses = selectedInvoices.map(
-    (inv) => inv?.global?.status || inv?.status
+    (inv: any) => inv?.state.global?.status || inv?.state.global?.status
   );
 
   const handleCSVExport = async (baseCurrency: string) => {

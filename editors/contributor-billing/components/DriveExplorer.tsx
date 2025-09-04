@@ -19,6 +19,7 @@ import {
   useFileChildNodes,
   useFolderChildNodes,
   useSelectedDrive,
+  useSelectedDriveDocuments,
   useSelectedFolder,
   useSelectedNodePath,
   useUserPermissions,
@@ -36,7 +37,6 @@ import { InvoiceTable } from "./InvoiceTable/InvoiceTable.jsx";
  */
 export function DriveExplorer(props: DriveEditorProps) {
   const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
-  
 
   // === DOCUMENT EDITOR STATE ===
   // Customize document opening/closing behavior here
@@ -80,8 +80,8 @@ export function DriveExplorer(props: DriveEditorProps) {
   const allFolders = useAllFolderNodes();
 
   // All document states
-  const allDocuments = useAllDocuments();
-  const state = allDocuments?.map((doc) => doc.state);
+  const allDocuments = useSelectedDriveDocuments();
+  const state = allDocuments;
 
   // === EVENT HANDLERS ===
 
@@ -120,7 +120,10 @@ export function DriveExplorer(props: DriveEditorProps) {
           selectedDrive.header.id,
           fileName,
           documentModel.documentModel.id,
-          selectedFolder?.id
+          selectedFolder?.id,
+          undefined,
+          undefined,
+          "powerhouse-invoice-editor"
         );
 
         selectedDocumentModel.current = null;
@@ -167,44 +170,30 @@ export function DriveExplorer(props: DriveEditorProps) {
 
   // === RENDER ===
   return (
-    <div className="flex h-full">
-      {/* === LEFT SIDEBAR: Folder Navigation === */}
-      {/* Customize sidebar width by changing w-64 */}
-      <div className="w-64 overflow-y-auto border-r border-gray-200 bg-white">
-        <div className="p-4">
-          {/* Customize sidebar title here */}
-          {/* <h2 className="mb-4 text-lg font-semibold text-gray-700">
-            Drive Explorer
-          </h2> */}
-
-          {/* Folder tree navigation component */}
-          {/* <FolderTree folders={allFolders} onSelectNode={setSelectedNode} /> */}
-        </div>
-      </div>
-
+    <div className="flex h-full editor-container">
       {/* === RIGHT CONTENT AREA: Files/Folders or Document Editor === */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 p-4">
         {/* Conditional rendering: Document editor or folder contents */}
         {activeDocument && documentModelModule && editorModule ? (
           // Document editor view
-          <EditorContainer handleClose={() => setActiveDocumentId(undefined)} />
+          <EditorContainer
+            handleClose={() => setActiveDocumentId(undefined)}
+            activeDocumentId={activeDocumentId || ""}
+          />
         ) : (
-          <div>
-            <h1>Contributor Billing</h1>
-          </div>
+          <InvoiceTable
+            setActiveDocumentId={setActiveDocumentId}
+            files={fileChildren}
+            state={state || []}
+            selected={selected}
+            setSelected={setSelected}
+            onBatchAction={() => {}}
+            onDeleteNode={() => {}}
+            renameNode={() => {}}
+            filteredDocumentModels={documentModelModules}
+            onSelectDocumentModel={onSelectDocumentModel}
+          />
         )}
-        <InvoiceTable
-          setActiveDocumentId={setActiveDocumentId}
-          files={fileChildren}
-          state={state || {}}
-          selected={selected}
-          setSelected={setSelected}
-          onBatchAction={() => {}}
-          onDeleteNode={()=> {}}
-          renameNode={()=> {}}
-          filteredDocumentModels={documentModelModules}
-          onSelectDocumentModel={onSelectDocumentModel}
-        />
       </div>
 
       {/* === DOCUMENT CREATION MODAL === */}

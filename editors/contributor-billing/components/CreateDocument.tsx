@@ -17,6 +17,7 @@ export const CreateDocument = () => {
   const documentModelModules = useDocumentModelModules();
 
   async function handleAddDocument(module: VetraDocumentModelModule) {
+    console.log("create document module", module);
     if (!selectedDriveId) {
       return;
     }
@@ -25,6 +26,9 @@ export const CreateDocument = () => {
       `New ${module.documentModel.name} document`,
       module.documentModel.id,
       selectedFolder?.id,
+      undefined,
+      undefined,
+      "powerhouse-invoice-editor"
     );
   }
 

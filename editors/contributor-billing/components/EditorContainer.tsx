@@ -7,10 +7,12 @@ import {
 } from "@powerhousedao/design-system";
 import {
   exportFile,
+  useDocumentById,
   useEditorModuleById,
   useSelectedDocument,
   useSelectedDrive,
 } from "@powerhousedao/reactor-browser";
+import { Action, PHDocument } from "document-model";
 import { Suspense, useCallback, useState } from "react";
 
 /**
@@ -18,24 +20,31 @@ import { Suspense, useCallback, useState } from "react";
  * Handles document loading, toolbar, revision history, and dynamic editor loading.
  * Customize toolbar actions and editor context here.
  */
-export const EditorContainer = (props: { handleClose: () => void }) => {
+export const EditorContainer = (props: {
+  handleClose: () => void;
+  activeDocumentId: string;
+}) => {
   const { handleClose } = props;
   // UI state for revision history and timeline
   const [selectedTimelineItem, setSelectedTimelineItem] =
     useState<TimelineItem | null>(null);
   const [showRevisionHistory, setShowRevisionHistory] = useState(false);
-  const [selectedDocument, dispatch] = useSelectedDocument();
+  const [selectedDocument, dispatch] = useDocumentById(
+    props.activeDocumentId
+  ) as [
+    PHDocument | undefined,
+    (actionOrActions: Action | Action[] | undefined) => void,
+  ];
   const [selectedDrive] = useSelectedDrive();
   // Timeline data for revision history
   const timelineItems = useTimelineItems(
     selectedDocument?.header.id,
     selectedDocument?.header.createdAtUtcIso,
-    selectedDrive?.header.id,
+    selectedDrive?.header.id
   );
   const editorModule = useEditorModuleById(
-    selectedDocument?.header.meta?.preferredEditor,
+    selectedDocument?.header.meta?.preferredEditor
   );
-
   // Document export functionality - customize export behavior here
   const onExport = useCallback(async () => {
     if (selectedDocument) {
@@ -46,7 +55,7 @@ export const EditorContainer = (props: { handleClose: () => void }) => {
   // Loading state component
   const loadingContent = (
     <div className="flex h-full flex-1 items-center justify-center">
-      <DefaultEditorLoader />
+      Sth wrong with the document
     </div>
   );
 
@@ -87,11 +96,11 @@ export const EditorContainer = (props: { handleClose: () => void }) => {
           selectedTimelineRevision: getRevisionFromDate(
             selectedTimelineItem?.startDate,
             selectedTimelineItem?.endDate,
-            selectedDocument.operations.global,
+            selectedDocument.operations.global
           ),
         }}
         dispatch={dispatch}
-        document={document}
+        document={selectedDocument}
         error={console.error}
       />
     </Suspense>
