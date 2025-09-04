@@ -268,20 +268,22 @@ export const InvoiceTable = ({
   };
 
   const selectedInvoiceIds = Object.keys(selected).filter((id) => selected[id]);
-  const selectedInvoices = selectedInvoiceIds.map((id) => ({
-    ...state.find((doc) => doc.header.id === id),
-    id,
-  }));
+  const selectedInvoices = selectedInvoiceIds
+    .map((id) => {
+      const doc = state.find((doc) => doc.header.id === id);
+      return doc ? { ...doc, id } : null;
+    })
+    .filter((inv) => inv !== null); // Filter out null/undefined invoices
   const selectedInvoiceStatuses = selectedInvoices.map(
-    (inv: any) => inv?.state.global?.status || inv?.state.global?.status
+    (inv: any) => inv?.state?.global?.status || inv?.state?.global?.status
   );
 
   const handleCSVExport = async (baseCurrency: string) => {
     console.log(
       "Exporting selected invoices:",
-      selectedInvoiceIds.map((id, idx) => ({
-        id,
-        state: selectedInvoices[idx],
+      selectedInvoices.map((inv) => ({
+        id: inv.id,
+        state: inv,
       }))
     );
     try {
@@ -292,10 +294,10 @@ export const InvoiceTable = ({
       toast("Invoices exported successfully", {
         type: "success",
       });
-      selectedInvoiceIds.forEach((id) => {
-        const invoiceDoc = getDocDispatcher(id);
-        const exportedInvoiceData = exportedData[id];
-        if (!invoiceDoc) {
+      selectedInvoices.forEach((invoice) => {
+        const invoiceDoc = getDocDispatcher(invoice.id);
+        const exportedInvoiceData = exportedData[invoice.id];
+        if (!invoiceDoc || !exportedInvoiceData) {
           return;
         }
         const invoiceDispatcher = invoiceDoc[1];
