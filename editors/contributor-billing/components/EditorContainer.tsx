@@ -37,14 +37,17 @@ export const EditorContainer = (props: {
   ];
   const [selectedDrive] = useSelectedDrive();
   // Timeline data for revision history
-  const timelineItems = useTimelineItems(
+  const timelineItems = useTimelineItems(   
     selectedDocument?.header.id,
     selectedDocument?.header.createdAtUtcIso,
     selectedDrive?.header.id
   );
+
+  const preferredEditor = selectedDocument?.header.meta?.preferredEditor ?? "powerhouse-invoice-editor";
   const editorModule = useEditorModuleById(
-    selectedDocument?.header.meta?.preferredEditor
+    preferredEditor
   );
+
   // Document export functionality - customize export behavior here
   const onExport = useCallback(async () => {
     if (selectedDocument) {

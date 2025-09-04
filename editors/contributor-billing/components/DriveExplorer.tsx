@@ -4,11 +4,15 @@ import {
   FileItem,
   FolderItem,
   useBreadcrumbs,
+  useDrop,
 } from "@powerhousedao/design-system";
 import {
   addDocument,
+  addFile,
+  copyNode,
   type DriveEditorProps,
   getSyncStatusSync,
+  moveNode,
   setSelectedNode,
   useAllDocuments,
   useAllFolderNodes,
@@ -24,12 +28,14 @@ import {
   useSelectedNodePath,
   useUserPermissions,
 } from "@powerhousedao/reactor-browser";
+import { type Node } from "document-drive";
 import type { DocumentModelModule } from "document-model";
 import { useCallback, useRef, useState } from "react";
 import { CreateDocument } from "./CreateDocument.jsx";
 import { EditorContainer } from "./EditorContainer.jsx";
 import { FolderTree } from "./FolderTree.jsx";
 import { InvoiceTable } from "./InvoiceTable/InvoiceTable.jsx";
+import { twMerge } from "tailwind-merge";
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
@@ -65,6 +71,17 @@ export function DriveExplorer(props: DriveEditorProps) {
   const selectedFolder = useSelectedFolder(); // Currently selected folder
   const selectedNodePath = useSelectedNodePath();
   const sharingType = useDriveSharingType(selectedDrive?.header.id);
+
+  // === DROP HOOKS ===
+  const { isDropTarget, dropProps } = useDrop({
+    node:
+      selectedNodePath?.length > 0
+        ? (selectedNodePath[selectedNodePath.length - 1] as Node)
+        : undefined,
+    onAddFile,
+    onCopyNode,
+    onMoveNode,
+  });
 
   // === NAVIGATION SETUP ===
   // Breadcrumbs for folder navigation
@@ -115,7 +132,10 @@ export function DriveExplorer(props: DriveEditorProps) {
       const documentModel = selectedDocumentModel.current;
       if (!documentModel || !selectedDrive?.header.id) return;
 
-      const editorType = documentModel.documentModel.id === "powerhouse/invoice" ? "powerhouse-invoice-editor" : "integrations-editor";
+      const editorType =
+        documentModel.documentModel.id === "powerhouse/invoice"
+          ? "powerhouse-invoice-editor"
+          : "integrations-editor";
 
       try {
         const node = await addDocument(
@@ -172,42 +192,52 @@ export function DriveExplorer(props: DriveEditorProps) {
 
   // === RENDER ===
 
-  console.log("files", fileChildren);
-  console.log("state", state);
+  // console.log("files", fileChildren);
+  // console.log("state", state);
+  // console.log("isDropTarget", isDropTarget);
+  // console.log("dropProps", dropProps);
   return (
     <div className="flex h-full editor-container">
-      {/* === RIGHT CONTENT AREA: Files/Folders or Document Editor === */}
-      <div className="flex-1 p-4">
-        {/* Conditional rendering: Document editor or folder contents */}
-        {activeDocument && documentModelModule && editorModule ? (
-          // Document editor view
-          <EditorContainer
-            handleClose={() => setActiveDocumentId(undefined)}
-            activeDocumentId={activeDocumentId || ""}
-          />
-        ) : (
-          <InvoiceTable
-            setActiveDocumentId={setActiveDocumentId}
-            files={fileChildren}
-            state={state || []}
-            selected={selected}
-            setSelected={setSelected}
-            onBatchAction={() => {}}
-            onDeleteNode={() => {}}
-            renameNode={() => {}}
-            filteredDocumentModels={documentModelModules}
-            onSelectDocumentModel={onSelectDocumentModel}
-          />
+      <div
+        {...dropProps}
+        className={twMerge(
+          "editor-container rounded-md border-2 border-transparent ",
+          isDropTarget && "border-dashed border-blue-100"
         )}
-      </div>
+      >
+        {/* === RIGHT CONTENT AREA: Files/Folders or Document Editor === */}
+        <div className="flex-1 p-4">
+          {/* Conditional rendering: Document editor or folder contents */}
+          {activeDocument && documentModelModule && editorModule ? (
+            // Document editor view
+            <EditorContainer
+              handleClose={() => setActiveDocumentId(undefined)}
+              activeDocumentId={activeDocumentId || ""}
+            />
+          ) : (
+            <InvoiceTable
+              setActiveDocumentId={setActiveDocumentId}
+              files={fileChildren}
+              state={state || []}
+              selected={selected}
+              setSelected={setSelected}
+              onBatchAction={() => {}}
+              onDeleteNode={() => {}}
+              renameNode={() => {}}
+              filteredDocumentModels={documentModelModules}
+              onSelectDocumentModel={onSelectDocumentModel}
+            />
+          )}
+        </div>
 
-      {/* === DOCUMENT CREATION MODAL === */}
-      {/* Modal for entering document name after selecting type */}
-      <CreateDocumentModal
-        onContinue={onCreateDocument}
-        onOpenChange={(open) => setOpenModal(open)}
-        open={openModal}
-      />
+        {/* === DOCUMENT CREATION MODAL === */}
+        {/* Modal for entering document name after selecting type */}
+        <CreateDocumentModal
+          onContinue={onCreateDocument}
+          onOpenChange={(open) => setOpenModal(open)}
+          open={openModal}
+        />
+      </div>
     </div>
   );
 }
