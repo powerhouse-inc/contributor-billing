@@ -9,7 +9,7 @@ import {
 } from "../../document-models/integrations/index.js";
 import { setName } from "document-model";
 
-export const getResolvers = (subgraph: Subgraph) => {
+export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
   const reactor = subgraph.reactor;
 
   return {

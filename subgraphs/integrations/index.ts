@@ -6,7 +6,7 @@ import { getResolvers } from "./resolvers.js";
 export class IntegrationsSubgraph extends Subgraph {
   name = "integrations";
   typeDefs: DocumentNode = schema;
-  resolvers = getResolvers(this);
+  resolvers: Record<string, any> = getResolvers(this);
   additionalContextFields = {};
   async onSetup() {}
   async onDisconnect() {}
