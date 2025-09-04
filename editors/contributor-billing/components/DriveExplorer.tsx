@@ -312,7 +312,7 @@ export function DriveExplorer(props: DriveEditorProps) {
       <div
         {...dropProps}
         className={twMerge(
-          "editor-container rounded-md border-2 border-transparent ",
+          "rounded-md border-2 border-transparent ",
           isDropTarget && "border-dashed border-blue-100"
         )}
       >
