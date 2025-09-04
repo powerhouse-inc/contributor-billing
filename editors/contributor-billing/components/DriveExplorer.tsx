@@ -100,12 +100,9 @@ export function DriveExplorer(props: DriveEditorProps) {
   // All document states
   const allDocuments = useSelectedDriveDocuments();
   const state = allDocuments;
-  const docDispatchers = state?.map((dco) => {
-    return useDocumentById(dco.header.id);
-  });
 
   const getDocDispatcher = (id: string) => {
-    return docDispatchers?.find((dco) => dco[0]?.header.id === id);
+    return useDocumentById(id);
   };
   // === EVENT HANDLERS ===
 
