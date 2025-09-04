@@ -174,8 +174,6 @@ export const InvoiceTable = ({
   const handleCreateBillingStatement = async (id: string) => {
     const invoiceFile = files.find((file) => file.id === id);
     const invoiceState = state.find((doc) => doc.header.id === id);
-    console.log("invoiceFile", invoiceFile);
-    console.log("invoiceState", invoiceState);
     if (!invoiceState) {
       return;
     }
@@ -284,7 +282,6 @@ export const InvoiceTable = ({
   };
 
   const selectedInvoiceIds = Object.keys(selected).filter((id) => selected[id]);
-  console.log("selectedInvoiceIds", selectedInvoiceIds);
   const selectedInvoices = selectedInvoiceIds.map((id) => ({
     ...state.find((doc) => doc.header.id === id),
     id,
@@ -351,7 +348,7 @@ export const InvoiceTable = ({
   return (
     <div
       className="w-full h-full bg-white rounded-lg p-4 border border-gray-200 shadow-md mt-4 overflow-x-auto"
-      key={`${Object.keys(state).length}`}
+      key={`${state.length}`}
     >
       <HeaderControls
         statusOptions={statusOptions}

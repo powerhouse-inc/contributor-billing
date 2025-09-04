@@ -115,6 +115,8 @@ export function DriveExplorer(props: DriveEditorProps) {
       const documentModel = selectedDocumentModel.current;
       if (!documentModel || !selectedDrive?.header.id) return;
 
+      const editorType = documentModel.documentModel.id === "powerhouse/invoice" ? "powerhouse-invoice-editor" : "integrations-editor";
+
       try {
         const node = await addDocument(
           selectedDrive.header.id,
@@ -123,7 +125,7 @@ export function DriveExplorer(props: DriveEditorProps) {
           selectedFolder?.id,
           undefined,
           undefined,
-          "powerhouse-invoice-editor"
+          editorType
         );
 
         selectedDocumentModel.current = null;
@@ -169,6 +171,9 @@ export function DriveExplorer(props: DriveEditorProps) {
     : null;
 
   // === RENDER ===
+
+  console.log("files", fileChildren);
+  console.log("state", state);
   return (
     <div className="flex h-full editor-container">
       {/* === RIGHT CONTENT AREA: Files/Folders or Document Editor === */}
