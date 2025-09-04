@@ -45,14 +45,14 @@ function isFiatCurrency(currency: string): boolean {
 
 export default function Editor(props: any) {
   let dispatch: any;
-  const { document } = props;
+  const { document: doc } = props;
   if (props?.dispatch) {
     dispatch = props.dispatch;
   } else {
     const selectedDocument = useSelectedDocument();
     dispatch = selectedDocument[1];
   }
-  const state = document.state.global;
+  const state = doc.state.global;
 
   // Dynamic property check based on the actual schema
   try {

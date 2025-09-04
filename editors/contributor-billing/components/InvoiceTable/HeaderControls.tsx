@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Input, Select } from "@powerhousedao/document-engineering";
 import ConfirmationModal from "../../../invoice/components/confirmationModal.js";
-import { Icon, UiFileNode } from "@powerhousedao/design-system";
+import { Icon } from "@powerhousedao/design-system";
 
 
 const currencyOptions = [
@@ -34,7 +34,7 @@ export const HeaderControls = ({
   onBatchAction?: (action: string) => void;
   selectedStatuses?: string[];
   createIntegrationsDocument?: () => void;
-  integrationsDoc?: UiFileNode | null;
+  integrationsDoc?: any | null;
   setActiveDocumentId?: (id: string) => void;
 }) => {
   const batchOptions = [

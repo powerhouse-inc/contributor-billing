@@ -1,107 +1,38 @@
-import { type DriveEditorProps } from "@powerhousedao/reactor-browser";
-import { DriveContextProvider } from "@powerhousedao/reactor-browser/hooks/useDriveContext";
-import {
-  type DocumentDriveDocument,
-  addFolder,
-  deleteNode,
-  updateNode,
-  generateNodesCopy,
-  copyNode,
-} from "document-drive";
 import { WagmiContext } from "@powerhousedao/design-system";
+import {
+  AnalyticsProvider,
+  DriveContextProvider,
+  useAppConfig,
+  type DriveEditorProps,
+} from "@powerhousedao/reactor-browser";
 import { DriveExplorer } from "./components/DriveExplorer.js";
-import { useCallback, useState, useEffect } from "react";
-import { generateId } from "document-model";
 
-export type IProps = DriveEditorProps<DocumentDriveDocument>;
-
-export function BaseEditor(props: IProps) {
-  const { dispatch, context } = props;
-
-  // Use state for nodes
-  const [nodes, setNodes] = useState(props.document.state.global.nodes);
-
-  // Keep nodes in sync with props (in case of external updates)
-  useEffect(() => {
-    setNodes(props.document.state.global.nodes);
-  }, [props.document.state.global.nodes]);
-
-  const onAddFolder = useCallback(
-    (name: string, parentFolder?: string) => {
-      dispatch(
-        addFolder({
-          id: generateId(),
-          name,
-          parentFolder,
-        })
-      );
-    },
-    [dispatch]
-  );
-
-  const onDeleteNode = useCallback(
-    (nodeId: string) => {
-      dispatch(deleteNode({ id: nodeId }));
-      setNodes([...props.document.state.global.nodes]);
-    },
-    [dispatch, props.document.state.global.nodes]
-  );
-
-  const renameNode = useCallback(
-    (nodeId: string, name: string) => {
-      dispatch(updateNode({ id: nodeId, name }));
-    },
-    [dispatch]
-  );
-
-  const onCopyNode = useCallback(
-    (nodeId: string, targetName: string, parentId?: string) => {
-      const generateIdWrapper = (prevId: string) => generateId();
-
-      const copyNodesInput = generateNodesCopy(
-        {
-          srcId: nodeId,
-          targetParentFolder: parentId,
-          targetName,
-        },
-        generateIdWrapper,
-        props.document.state.global.nodes
-      );
-
-      const copyNodesAction = copyNodesInput.map((input) => {
-        return copyNode(input);
-      });
-
-      for (const copyNodeAction of copyNodesAction) {
-        dispatch(copyNodeAction);
-      }
-    },
-    [dispatch, props.document.state.global.nodes]
-  );
-
+/**
+ * Base editor component that renders the drive explorer interface.
+ * Customize document opening behavior and drive-level actions here.
+ */
+export function BaseEditor(props: DriveEditorProps) {
+  const { context, document } = props;
   return (
-    <div className="new-drive-explorer">
-      <DriveExplorer
-        key={nodes.length}
-        driveId={props.document.header.id}
-        nodes={nodes}
-        onAddFolder={onAddFolder}
-        onDeleteNode={onDeleteNode}
-        renameNode={renameNode}
-        onCopyNode={onCopyNode}
-        context={context}
-        document={props.document}
-        dispatch={dispatch}
-      />
+    <div className="new-drive-explorer" style={{ height: "100%" }}>
+      <DriveExplorer document={document} context={context} />
     </div>
   );
 }
 
-export default function Editor(props: IProps) {
+/**
+ * Main editor entry point with required providers.
+ */
+export default function Editor(props: DriveEditorProps) {
+  const appConfig = useAppConfig();
+  const analyticsDatabaseName = appConfig?.analyticsDatabaseName;
   return (
+    // Required context providers for drive functionality
     <DriveContextProvider value={props.context}>
       <WagmiContext>
-        <BaseEditor {...props} />
+        <AnalyticsProvider databaseName={analyticsDatabaseName}>
+          <BaseEditor {...props} />
+        </AnalyticsProvider>
       </WagmiContext>
     </DriveContextProvider>
   );

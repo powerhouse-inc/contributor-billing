@@ -3,8 +3,6 @@ import { useState, useMemo } from "react";
 import { HeaderControls } from "./HeaderControls.js";
 import { InvoiceTableSection } from "./InvoiceTableSection.js";
 import { InvoiceTableRow } from "./InvoiceTableRow.js";
-import { type UiFileNode } from "@powerhousedao/design-system";
-import { useDriveContext } from "@powerhousedao/reactor-browser";
 import { type InvoiceLineItem } from "document-models/invoice/index.js";
 import { createPresignedHeader } from "document-model";
 import { type DocumentModelModule } from "document-model";
@@ -15,6 +13,23 @@ import {
   actions,
   type InvoiceAction,
 } from "../../../../document-models/invoice/index.js";
+import {
+  addDocument,
+  type DriveEditorProps,
+  getSyncStatusSync,
+  setSelectedNode,
+  useAllFolderNodes,
+  useDocumentModelModules,
+  useDriveContext,
+  useDriveSharingType,
+  useEditorModules,
+  useFileChildNodes,
+  useFolderChildNodes,
+  useSelectedDrive,
+  useSelectedFolder,
+  useSelectedNodePath,
+  useUserPermissions,
+} from "@powerhousedao/reactor-browser";
 
 const statusOptions = [
   { label: "Draft", value: "DRAFT" },
@@ -29,10 +44,9 @@ const statusOptions = [
 ];
 
 interface InvoiceTableProps {
-  files: UiFileNode[];
+  files: any[];
   state: Record<string, any>;
   setActiveDocumentId: (id: string) => void;
-  getDispatch: () => (action: any, onErrorCallback?: any) => void;
   selected: { [id: string]: boolean };
   setSelected: (
     selected:
@@ -44,15 +58,12 @@ interface InvoiceTableProps {
   renameNode: (nodeId: string, name: string) => void;
   filteredDocumentModels: DocumentModelModule[];
   onSelectDocumentModel: (model: DocumentModelModule) => void;
-  dispatchMap: Record<string, (action: InvoiceAction) => void>;
-  driveId: string;
 }
 
 export const InvoiceTable = ({
   files,
   state,
   setActiveDocumentId,
-  getDispatch,
   selected,
   setSelected,
   onBatchAction,
@@ -60,18 +71,10 @@ export const InvoiceTable = ({
   renameNode,
   filteredDocumentModels,
   onSelectDocumentModel,
-  dispatchMap,
-  driveId,
 }: InvoiceTableProps) => {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const {
-    addDocument,
-    addFile,
-    documentModels,
-    useDriveDocumentStates,
-    selectedNode,
-    useDocumentEditorProps,
-  } = useDriveContext();
+
+  const [selectedDrive] = useSelectedDrive();
 
   const billingDocStates = Object.entries(state)
     .filter(([_, doc]) => doc.documentType === "powerhouse/billing-statement")
@@ -178,13 +181,11 @@ export const InvoiceTable = ({
   };
 
   const handleCreateBillingStatement = async (id: string) => {
-    const driveId = selectedNode?.id;
-    if (!driveId) return;
     const invoiceFile = files.find((file) => file.id === id);
     const invoiceState = state[id];
 
     await addDocument(
-      driveId,
+      selectedDrive?.header.id || "",
       `bill-${invoiceFile?.name}`,
       "powerhouse/billing-statement",
       undefined,
@@ -198,47 +199,11 @@ export const InvoiceTable = ({
           },
         },
         state: {
-          global: {
-            contributor: id,
-            dateIssued: invoiceState.global.dateIssued,
-            dateDue: invoiceState.global.dateDue,
-            lineItems: invoiceState.global.lineItems.map(
-              (item: InvoiceLineItem) => {
-                return {
-                  id: item.id,
-                  description: item.description,
-                  quantity: item.quantity,
-                  unit: "UNIT",
-                  unitPricePwt: 0,
-                  unitPriceCash: item.unitPriceTaxIncl,
-                  totalPricePwt: 0,
-                  totalPriceCash: item.totalPriceTaxIncl,
-                  lineItemTag: mapTags(item.lineItemTag || []),
-                };
-              }
-            ),
-            status: invoiceState.global.status,
-            currency: invoiceState.global.currency,
-            totalCash: invoiceState.global.lineItems.reduce(
-              (acc: number, item: InvoiceLineItem) =>
-                acc + item.totalPriceTaxIncl,
-              0
-            ),
-            totalPowt: 0,
-            notes: invoiceState.global.notes,
+          auth: {},
+          document: {
+            version: "1.0.0",
           },
-          local: {},
-        },
-        operations: {
-          global: [],
-          local: [],
-        },
-        history: {
-          global: [],
-          local: [],
-        },
-        initialState: {
-          state: {
+          ...({
             global: {
               contributor: id,
               dateIssued: invoiceState.global.dateIssued,
@@ -269,10 +234,56 @@ export const InvoiceTable = ({
               notes: invoiceState.global.notes,
             },
             local: {},
-          },
+          } as any),
+        },
+        operations: {
+          global: [],
+          local: [],
+        },
+        history: {
+          global: [],
+          local: [],
+        },
+        initialState: {
+          ...({
+            state: {
+              global: {
+                contributor: id,
+                dateIssued: invoiceState.global.dateIssued,
+                dateDue: invoiceState.global.dateDue,
+                lineItems: invoiceState.global.lineItems.map(
+                  (item: InvoiceLineItem) => {
+                    return {
+                      id: item.id,
+                      description: item.description,
+                      quantity: item.quantity,
+                      unit: "UNIT",
+                      unitPricePwt: 0,
+                      unitPriceCash: item.unitPriceTaxIncl,
+                      totalPricePwt: 0,
+                      totalPriceCash: item.totalPriceTaxIncl,
+                      lineItemTag: mapTags(item.lineItemTag || []),
+                    };
+                  }
+                ),
+                status: invoiceState.global.status,
+                currency: invoiceState.global.currency,
+                totalCash: invoiceState.global.lineItems.reduce(
+                  (acc: number, item: InvoiceLineItem) =>
+                    acc + item.totalPriceTaxIncl,
+                  0
+                ),
+                totalPowt: 0,
+                notes: invoiceState.global.notes,
+              },
+              local: {},
+            },
+          } as any),
         },
         clipboard: [],
-      }
+      },
+      undefined,
+      "powerhouse-billing-statement-editor"
     );
   };
 
@@ -284,17 +295,6 @@ export const InvoiceTable = ({
   const selectedInvoiceStatuses = selectedInvoices.map(
     (inv) => inv?.global?.status || inv?.status
   );
-
-  // Create dispatch map for selected invoices using the existing dispatchMap prop
-  const selectedInvoiceDispatchMap = useMemo(() => {
-    const map: Record<string, any> = {};
-    selectedInvoiceIds.forEach((invoiceId) => {
-      if (dispatchMap[invoiceId]) {
-        map[invoiceId] = dispatchMap[invoiceId];
-      }
-    });
-    return map;
-  }, [selectedInvoiceIds, dispatchMap]);
 
   const handleCSVExport = async (baseCurrency: string) => {
     console.log(
@@ -339,14 +339,17 @@ export const InvoiceTable = ({
   };
 
   // check if integrations document exists
-  const integrationsDoc = files.find(file => file.documentType === "powerhouse/integrations");
+  const integrationsDoc = files.find(
+    (file) => file.documentType === "powerhouse/integrations"
+  );
   const createIntegrationsDocument = () => {
-
-    const integrationsDocument = filteredDocumentModels?.find(model => model.documentModel.id === "powerhouse/integrations");
-    if (integrationsDocument) {	
+    const integrationsDocument = filteredDocumentModels?.find(
+      (model) => model.documentModel.id === "powerhouse/integrations"
+    );
+    if (integrationsDocument) {
       onSelectDocumentModel(integrationsDocument);
     }
-  }
+  };
 
   return (
     <div
