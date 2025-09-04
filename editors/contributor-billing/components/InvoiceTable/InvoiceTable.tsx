@@ -13,23 +13,7 @@ import {
   actions,
   type InvoiceAction,
 } from "../../../../document-models/invoice/index.js";
-import {
-  addDocument,
-  type DriveEditorProps,
-  getSyncStatusSync,
-  setSelectedNode,
-  useAllFolderNodes,
-  useDocumentModelModules,
-  useDriveContext,
-  useDriveSharingType,
-  useEditorModules,
-  useFileChildNodes,
-  useFolderChildNodes,
-  useSelectedDrive,
-  useSelectedFolder,
-  useSelectedNodePath,
-  useUserPermissions,
-} from "@powerhousedao/reactor-browser";
+import { addDocument, useSelectedDrive } from "@powerhousedao/reactor-browser";
 
 const statusOptions = [
   { label: "Draft", value: "DRAFT" },
@@ -58,6 +42,7 @@ interface InvoiceTableProps {
   renameNode: (nodeId: string, name: string) => void;
   filteredDocumentModels: DocumentModelModule[];
   onSelectDocumentModel: (model: DocumentModelModule) => void;
+  getDocDispatcher: (id: string) => any;
 }
 
 export const InvoiceTable = ({
@@ -71,6 +56,7 @@ export const InvoiceTable = ({
   renameNode,
   filteredDocumentModels,
   onSelectDocumentModel,
+  getDocDispatcher,
 }: InvoiceTableProps) => {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
 
@@ -299,9 +285,26 @@ export const InvoiceTable = ({
       }))
     );
     try {
-      await exportInvoicesToXeroCSV(selectedInvoices, baseCurrency);
+      const exportedData = await exportInvoicesToXeroCSV(
+        selectedInvoices,
+        baseCurrency
+      );
       toast("Invoices exported successfully", {
         type: "success",
+      });
+      selectedInvoiceIds.forEach((id) => {
+        const invoiceDoc = getDocDispatcher(id);
+        const exportedInvoiceData = exportedData[id];
+        if (!invoiceDoc) {
+          return;
+        }
+        const invoiceDispatcher = invoiceDoc[1];
+        invoiceDispatcher(
+          actions.setExportedData({
+            timestamp: exportedInvoiceData.timestamp,
+            exportedLineItems: exportedInvoiceData.exportedLineItems,
+          })
+        );
       });
     } catch (error: any) {
       console.error("Error exporting invoices:", error);

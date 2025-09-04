@@ -27,6 +27,21 @@ export const InvoiceTableRow = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLTableCellElement>(null);
 
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const day = date.getDate().toString().padStart(2, '0');
+    // Use ISO short month names (Jan, Feb, etc.)
+    const monthNames = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    const month = monthNames[date.getMonth()];
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${day}-${month}-${year} ${hours}:${minutes}`;
+  };
+
   const billingDoc = billingDocStates?.find(
     (doc) => doc.contributor === row.id
   );
@@ -127,7 +142,10 @@ export const InvoiceTableRow = ({
       )}
       <td className="px-2 py-2 text-center">
         {hasExportedData ? (
-          <span className="text-green-500">Yes</span>
+          <div className="flex flex-col items-center">
+            <span className="text-green-500">Yes</span>
+            <span className="text-green-500 text-xs">{formatTimestamp(row.exported.timestamp)}</span>
+          </div>
         ) : (
           <span className="text-red-500">No</span>
         )}

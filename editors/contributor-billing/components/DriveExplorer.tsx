@@ -16,6 +16,7 @@ import {
   setSelectedNode,
   useAllDocuments,
   useAllFolderNodes,
+  useDocumentById,
   useDocumentModelModules,
   useDriveContext,
   useDriveSharingType,
@@ -99,7 +100,13 @@ export function DriveExplorer(props: DriveEditorProps) {
   // All document states
   const allDocuments = useSelectedDriveDocuments();
   const state = allDocuments;
+  const docDispatchers = state?.map((dco) => {
+    return useDocumentById(dco.header.id);
+  });
 
+  const getDocDispatcher = (id: string) => {
+    return docDispatchers?.find((dco) => dco[0]?.header.id === id);
+  };
   // === EVENT HANDLERS ===
 
   // Handle folder creation with optional name parameter
@@ -226,6 +233,7 @@ export function DriveExplorer(props: DriveEditorProps) {
               renameNode={() => {}}
               filteredDocumentModels={documentModelModules}
               onSelectDocumentModel={onSelectDocumentModel}
+              getDocDispatcher={getDocDispatcher}
             />
           )}
         </div>
