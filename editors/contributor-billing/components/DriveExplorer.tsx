@@ -1,41 +1,22 @@
-import {
-  Breadcrumbs,
-  CreateDocumentModal,
-  FileItem,
-  FolderItem,
-  useBreadcrumbs,
-  useDrop,
-} from "@powerhousedao/design-system";
+import { CreateDocumentModal, useDrop } from "@powerhousedao/design-system";
 import {
   addDocument,
-  addFile,
-  copyNode,
   type DriveEditorProps,
-  getSyncStatusSync,
-  moveNode,
-  setSelectedNode,
-  useAllDocuments,
-  useAllFolderNodes,
-  useDocumentById,
   useDocumentModelModules,
   useDriveContext,
   useDriveSharingType,
   useEditorModules,
   useFileChildNodes,
-  useFolderChildNodes,
   useSelectedDrive,
   useSelectedDriveDocuments,
   useSelectedFolder,
   useSelectedNodePath,
-  useUserPermissions,
 } from "@powerhousedao/reactor-browser";
 import { type Node } from "document-drive";
 import type { DocumentModelModule } from "document-model";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CreateDocument } from "./CreateDocument.jsx";
-import { EditorContainer } from "./EditorContainer.jsx";
-import { FolderTree } from "./FolderTree.jsx";
-import { InvoiceTable } from "./InvoiceTable/InvoiceTable.jsx";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { EditorContainer } from "./EditorContainer.js";
+import { InvoiceTable } from "./InvoiceTable/InvoiceTable.js";
 import { twMerge } from "tailwind-merge";
 import { ToastContainer } from "@powerhousedao/design-system";
 
@@ -56,17 +37,8 @@ export function DriveExplorer(props: DriveEditorProps) {
   const editorModules = useEditorModules();
   // === DRIVE CONTEXT HOOKS ===
   // Core drive operations and document models
-  const {
-    onAddFile,
-    onAddFolder,
-    onCopyNode,
-    onDuplicateNode,
-    onMoveNode,
-    onRenameNode,
-    showDeleteNodeModal,
-  } = useDriveContext();
+  const { onAddFile, onAddFolder, onCopyNode, onMoveNode } = useDriveContext();
 
-  const { isAllowedToCreateDocuments } = useUserPermissions();
   // === STATE MANAGEMENT HOOKS ===
   // Core state hooks for drive navigation
   const [selectedDrive] = useSelectedDrive(); // Currently selected drive
@@ -85,18 +57,7 @@ export function DriveExplorer(props: DriveEditorProps) {
     onMoveNode,
   });
 
-  // === NAVIGATION SETUP ===
-  // Breadcrumbs for folder navigation
-  const { breadcrumbs, onBreadcrumbSelected } = useBreadcrumbs({
-    selectedNodePath,
-    setSelectedNode,
-  });
-
-  const folderChildren = useFolderChildNodes();
   const fileChildren = useFileChildNodes();
-
-  // All folders for the sidebar tree view
-  const allFolders = useAllFolderNodes();
 
   // All document states
   const allDocuments = useSelectedDriveDocuments();
