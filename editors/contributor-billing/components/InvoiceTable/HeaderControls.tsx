@@ -62,7 +62,31 @@ export const HeaderControls = ({
   return (
     <div className="flex flex-col gap-4 mb-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-bold">Powerhouse OH Admin Drive</h3>
+      <div className="flex gap-2 items-center">
+        {/* <Select
+          options={contributorOptions}
+          onChange={onContributorChange}
+          placeholder="Contributor"
+        /> */}
+        <Select
+          style={{
+            width: "200px",
+            height: "30px",
+          }}
+          options={statusOptions}
+          onChange={onStatusChange}
+          placeholder="Status"
+          selectionIcon="checkmark"
+          multiple={true}
+          value={selectedStatuses}
+        />
+        <input
+          type="text"
+          className="border rounded px-2 py-1 text-sm"
+          placeholder="Search"
+          onChange={(e) => onSearchChange?.(e.target.value)}
+        />
+      </div>
         <div className="flex gap-2 items-center">
           <button
             className={`bg-white border border-gray-300 rounded px-3 py-1 text-sm hover:bg-gray-100 ${!canExport ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -97,31 +121,7 @@ export const HeaderControls = ({
           </div>
         </div>
       </div>
-      <div className="flex gap-2 items-center">
-        {/* <Select
-          options={contributorOptions}
-          onChange={onContributorChange}
-          placeholder="Contributor"
-        /> */}
-        <Select
-          style={{
-            width: "200px",
-            height: "30px",
-          }}
-          options={statusOptions}
-          onChange={onStatusChange}
-          placeholder="Status"
-          selectionIcon="checkmark"
-          multiple={true}
-          value={selectedStatuses}
-        />
-        <input
-          type="text"
-          className="border rounded px-2 py-1 text-sm"
-          placeholder="Search"
-          onChange={(e) => onSearchChange?.(e.target.value)}
-        />
-      </div>
+      
       {showCurrencyModal && (
         <div className="fixed inset-0">
           <div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded shadow-lg p-6 min-w-[300px] flex flex-col items-center">

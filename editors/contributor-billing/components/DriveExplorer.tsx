@@ -19,6 +19,7 @@ import { EditorContainer } from "./EditorContainer.js";
 import { InvoiceTable } from "./InvoiceTable/InvoiceTable.js";
 import { twMerge } from "tailwind-merge";
 import { ToastContainer } from "@powerhousedao/design-system";
+import { HeaderStats } from "./InvoiceTable/HeaderStats.js";
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
@@ -319,21 +320,24 @@ export function DriveExplorer(props: DriveEditorProps) {
               activeDocumentId={activeDocumentId || ""}
             />
           ) : (
-            <InvoiceTable
-              setActiveDocumentId={setActiveDocumentId}
-              files={fileChildren}
-              state={state || []}
-              selected={selected}
-              setSelected={setSelected}
-              onBatchAction={() => {}}
-              onDeleteNode={() => {}}
-              renameNode={() => {}}
-              filteredDocumentModels={documentModelModules}
-              onSelectDocumentModel={onSelectDocumentModel}
-              getDocDispatcher={getDocDispatcher}
-              selectedStatuses={selectedStatuses}
-              onStatusChange={handleStatusChange}
-            />
+            <>
+              <HeaderStats />
+              <InvoiceTable
+                setActiveDocumentId={setActiveDocumentId}
+                files={fileChildren}
+                state={state || []}
+                selected={selected}
+                setSelected={setSelected}
+                onBatchAction={() => {}}
+                onDeleteNode={() => {}}
+                renameNode={() => {}}
+                filteredDocumentModels={documentModelModules}
+                onSelectDocumentModel={onSelectDocumentModel}
+                getDocDispatcher={getDocDispatcher}
+                selectedStatuses={selectedStatuses}
+                onStatusChange={handleStatusChange}
+              />
+            </>
           )}
         </div>
 
