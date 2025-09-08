@@ -25,16 +25,16 @@ export const initialGlobalState: IntegrationsState = {
   },
   googleCloud: {
     keyFile: {
-      type: "",
       project_id: "",
-      private_key_id: "",
-      private_key: "",
       client_email: "",
-      client_id: "",
-      auth_uri: "",
-      token_uri: "",
+      private_key: "",
       auth_provider_x509_cert_url: "",
+      auth_uri: "",
+      client_id: "",
       client_x509_cert_url: "",
+      private_key_id: "",
+      token_uri: "",
+      type: "",
       universe_domain: "",
     },
     location: "",
@@ -46,7 +46,6 @@ export const initialGlobalState: IntegrationsState = {
     email: "",
   },
 };
-
 export const initialLocalState: IntegrationsLocalState = {};
 
 export const createState: CreateState<IntegrationsPHState> = (state) => {
