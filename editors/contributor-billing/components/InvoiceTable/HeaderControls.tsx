@@ -113,6 +113,7 @@ export const HeaderControls = ({
           placeholder="Status"
           selectionIcon="checkmark"
           multiple={true}
+          value={selectedStatuses}
         />
         <input
           type="text"

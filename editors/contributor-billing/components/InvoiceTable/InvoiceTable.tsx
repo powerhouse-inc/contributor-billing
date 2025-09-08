@@ -43,6 +43,8 @@ interface InvoiceTableProps {
   filteredDocumentModels: DocumentModelModule[];
   onSelectDocumentModel: (model: DocumentModelModule) => void;
   getDocDispatcher: (id: string) => any;
+  selectedStatuses: string[];
+  onStatusChange: (value: string | string[]) => void;
 }
 
 export const InvoiceTable = ({
@@ -57,9 +59,9 @@ export const InvoiceTable = ({
   filteredDocumentModels,
   onSelectDocumentModel,
   getDocDispatcher,
+  selectedStatuses,
+  onStatusChange,
 }: InvoiceTableProps) => {
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-
   const [selectedDrive] = useSelectedDrive();
 
   const billingDocStates = state
@@ -68,10 +70,6 @@ export const InvoiceTable = ({
       id: doc.header.id,
       contributor: doc.state.global.contributor,
     }));
-
-  const handleStatusChange = (value: string | string[]) => {
-    setSelectedStatuses(Array.isArray(value) ? value : [value]);
-  };
 
   const shouldShowSection = (status: string) => {
     return selectedStatuses.length === 0 || selectedStatuses.includes(status);
@@ -357,10 +355,10 @@ export const InvoiceTable = ({
     >
       <HeaderControls
         statusOptions={statusOptions}
-        onStatusChange={handleStatusChange}
+        onStatusChange={onStatusChange}
         onBatchAction={onBatchAction}
         onExport={handleCSVExport}
-        selectedStatuses={selectedInvoiceStatuses}
+        selectedStatuses={selectedStatuses}
         createIntegrationsDocument={createIntegrationsDocument}
         integrationsDoc={integrationsDoc}
         setActiveDocumentId={setActiveDocumentId}

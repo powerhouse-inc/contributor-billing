@@ -26,6 +26,12 @@ import { ToastContainer } from "@powerhousedao/design-system";
  */
 export function DriveExplorer(props: DriveEditorProps) {
   const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+
+  // Handler for status filter changes
+  const handleStatusChange = useCallback((value: string | string[]) => {
+    setSelectedStatuses(Array.isArray(value) ? value : [value]);
+  }, []);
 
   // === DOCUMENT EDITOR STATE ===
   // Customize document opening/closing behavior here
@@ -325,6 +331,8 @@ export function DriveExplorer(props: DriveEditorProps) {
               filteredDocumentModels={documentModelModules}
               onSelectDocumentModel={onSelectDocumentModel}
               getDocDispatcher={getDocDispatcher}
+              selectedStatuses={selectedStatuses}
+              onStatusChange={handleStatusChange}
             />
           )}
         </div>
