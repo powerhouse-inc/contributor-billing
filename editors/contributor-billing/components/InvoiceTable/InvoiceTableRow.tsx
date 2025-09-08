@@ -42,6 +42,15 @@ export const InvoiceTableRow = ({
     return `${day}-${month}-${year} ${hours}:${minutes}`;
   };
 
+  const formatAmount = (amount: string | number) => {
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    if (isNaN(numAmount)) return '0.00';
+    return numAmount.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
+
   const billingDoc = billingDocStates?.find(
     (doc) => doc.contributor === row.id
   );
@@ -99,7 +108,7 @@ export const InvoiceTableRow = ({
       <td className="px-2 py-2 text-center">{row.issueDate}</td>
       <td className="px-2 py-2 text-center">{row.dueDate}</td>
       <td className="px-2 py-2 text-center">{row.currency}</td>
-      <td className="px-2 py-2 text-center">{row.amount}</td>
+      <td className="px-2 py-2 text-center">{formatAmount(row.amount)}</td>
       {(row.status === "ISSUED" ||
         row.status === "ACCEPTED" ||
         row.status === "PAYMENTSCHEDULED" ||
