@@ -9,7 +9,7 @@ import {
 } from "../../document-models/integrations/index.js";
 import { setName } from "document-model";
 
-export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
+export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {
@@ -37,6 +37,8 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
               driveId: driveId,
               ...doc,
               ...doc.header,
+              created: doc.header.createdAtUtcIso,
+              lastModified: doc.header.lastModifiedAtUtcIso,
               state: doc.state.global,
               stateJSON: doc.state.global,
               revision: doc.header?.revision?.global ?? 0,
@@ -53,6 +55,8 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
                   driveId: driveId,
                   ...doc,
                   ...doc.header,
+                  created: doc.header.createdAtUtcIso,
+                  lastModified: doc.header.lastModifiedAtUtcIso,
                   state: doc.state.global,
                   stateJSON: doc.state.global,
                   revision: doc.header?.revision?.global ?? 0,
