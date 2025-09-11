@@ -29,25 +29,35 @@ export const InvoiceTableRow = ({
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
-    const day = date.getDate().toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, "0");
     // Use ISO short month names (Jan, Feb, etc.)
     const monthNames = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
     const month = monthNames[date.getMonth()];
     const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
     return `${day}-${month}-${year} ${hours}:${minutes}`;
   };
 
   const formatAmount = (amount: string | number) => {
-    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-    if (isNaN(numAmount)) return '0.00';
-    return numAmount.toLocaleString('en-US', {
+    const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
+    if (isNaN(numAmount)) return "0.00";
+    return numAmount.toLocaleString("en-US", {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     });
   };
 
@@ -153,7 +163,9 @@ export const InvoiceTableRow = ({
         {hasExportedData ? (
           <div className="flex flex-col items-center">
             <span className="text-green-500">Yes</span>
-            <span className="text-green-500 text-xs">{formatTimestamp(row.exported.timestamp)}</span>
+            <span className="text-green-500 text-xs">
+              {formatTimestamp(row.exported.timestamp)}
+            </span>
           </div>
         ) : (
           <span className="text-red-500">No</span>

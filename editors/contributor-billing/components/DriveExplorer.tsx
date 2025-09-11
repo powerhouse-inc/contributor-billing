@@ -271,6 +271,7 @@ export function DriveExplorer(props: DriveEditorProps) {
     ? fileChildren.find((file) => file.id === activeDocumentId)
     : undefined;
 
+
   const documentModelModule = activeDocument
     ? documentModelModules?.find(
         (m) => m.documentModel.id === activeDocument.documentType
@@ -282,6 +283,7 @@ export function DriveExplorer(props: DriveEditorProps) {
         e.documentTypes.includes(activeDocument.documentType)
       )
     : null;
+
 
   // === RENDER ===
 

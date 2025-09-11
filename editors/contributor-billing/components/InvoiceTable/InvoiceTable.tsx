@@ -4,7 +4,10 @@ import { HeaderControls } from "./HeaderControls.js";
 import { InvoiceTableSection } from "./InvoiceTableSection.js";
 import { InvoiceTableRow } from "./InvoiceTableRow.js";
 import { type InvoiceLineItem } from "document-models/invoice/index.js";
-import { createPresignedHeader } from "document-model";
+import {
+  createPresignedHeader,
+  actions as documentModelActions,
+} from "document-model";
 import { type DocumentModelModule } from "document-model";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
@@ -13,7 +16,12 @@ import {
   actions,
   type InvoiceAction,
 } from "../../../../document-models/invoice/index.js";
-import { addDocument, useSelectedDrive } from "@powerhousedao/reactor-browser";
+import {
+  addDocument,
+  useSelectedDrive,
+  dispatchActions,
+} from "@powerhousedao/reactor-browser";
+import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
 
 const statusOptions = [
   { label: "Draft", value: "DRAFT" },
@@ -162,107 +170,86 @@ export const InvoiceTable = ({
       return;
     }
 
-    await addDocument(
+    const createdNode = await addDocument(
       selectedDrive?.header.id || "",
       `bill-${invoiceFile?.name}`,
       "powerhouse/billing-statement",
       undefined,
-      {
-        header: {
-          ...createPresignedHeader(),
-          ...{
-            slug: `bill-${makeSlug(invoiceFile?.name || "")}`,
-            name: `bill-${cleanName(invoiceFile?.name || "")}`,
-            documentType: "powerhouse/billing-statement",
-          },
-        },
-        state: {
-          auth: {},
-          document: {
-            version: "1.0.0",
-          },
-          ...({
-            global: {
-              contributor: id,
-              dateIssued: invoiceState.state.global.dateIssued,
-              dateDue: invoiceState.state.global.dateDue,
-              lineItems: invoiceState.state.global.lineItems.map(
-                (item: InvoiceLineItem) => {
-                  return {
-                    id: item.id,
-                    description: item.description,
-                    quantity: item.quantity,
-                    unit: "UNIT",
-                    unitPricePwt: 0,
-                    unitPriceCash: item.unitPriceTaxIncl,
-                    totalPricePwt: 0,
-                    totalPriceCash: item.totalPriceTaxIncl,
-                    lineItemTag: mapTags(item.lineItemTag || []),
-                  };
-                }
-              ),
-              status: invoiceState.state.global.status,
-              currency: invoiceState.state.global.currency,
-              totalCash: invoiceState.state.global.lineItems.reduce(
-                (acc: number, item: InvoiceLineItem) =>
-                  acc + item.totalPriceTaxIncl,
-                0
-              ),
-              totalPowt: 0,
-              notes: invoiceState.state.global.notes,
-            },
-            local: {},
-          } as any),
-        },
-        operations: {
-          global: [],
-          local: [],
-        },
-        history: {
-          global: [],
-          local: [],
-        },
-        initialState: {
-          ...({
-            state: {
-              global: {
-                contributor: id,
-                dateIssued: invoiceState.state.global.dateIssued,
-                dateDue: invoiceState.state.global.dateDue,
-                lineItems: invoiceState.state.global.lineItems.map(
-                  (item: InvoiceLineItem) => {
-                    return {
-                      id: item.id,
-                      description: item.description,
-                      quantity: item.quantity,
-                      unit: "UNIT",
-                      unitPricePwt: 0,
-                      unitPriceCash: item.unitPriceTaxIncl,
-                      totalPricePwt: 0,
-                      totalPriceCash: item.totalPriceTaxIncl,
-                      lineItemTag: mapTags(item.lineItemTag || []),
-                    };
-                  }
-                ),
-                status: invoiceState.state.global.status,
-                currency: invoiceState.state.global.currency,
-                totalCash: invoiceState.state.global.lineItems.reduce(
-                  (acc: number, item: InvoiceLineItem) =>
-                    acc + item.totalPriceTaxIncl,
-                  0
-                ),
-                totalPowt: 0,
-                notes: invoiceState.state.global.notes,
-              },
-              local: {},
-            },
-          } as any),
-        },
-        clipboard: [],
-      },
+      undefined,
       undefined,
       "powerhouse-billing-statement-editor"
     );
+    console.log("created billing statement doc", createdNode);
+    if (!createdNode?.id) {
+      console.error("Failed to create billing statement");
+      return null;
+    }
+    await dispatchActions(
+      billingStatementActions.editContributor({
+        contributor: id,
+      }),
+      createdNode.id
+    );
+    // Prepare billing statement data with empty input handlers
+    const billingStatementData: any = {
+      dateIssued:
+        invoiceState.state.global.dateIssued &&
+        invoiceState.state.global.dateIssued.trim() !== ""
+          ? new Date(invoiceState.state.global.dateIssued).toISOString()
+          : null,
+      dateDue:
+        invoiceState.state.global.dateDue &&
+        invoiceState.state.global.dateDue.trim() !== ""
+          ? new Date(invoiceState.state.global.dateDue).toISOString()
+          : null,
+      currency: invoiceState.state.global.currency || "",
+      notes: invoiceState.state.global.notes || "",
+    };
+
+    await dispatchActions(
+      billingStatementActions.editBillingStatement(billingStatementData),
+      createdNode.id
+    );
+    await dispatchActions(
+      billingStatementActions.editStatus({
+        status: invoiceState.state.global.status,
+      }),
+      createdNode.id
+    );
+
+    // add line items from invoiceState to billing statement
+    invoiceState.state.global.lineItems.forEach(async (lineItem: any) => {
+      await dispatchActions(
+        billingStatementActions.addLineItem({
+          id: lineItem.id,
+          description: lineItem.description,
+          quantity: lineItem.quantity,
+          // Map invoice fields to billing statement fields
+          totalPriceCash: lineItem.totalPriceTaxIncl || 0,
+          totalPricePwt: 0, // Default to 0 since invoice doesn't have POWT pricing
+          unit: "UNIT", // Default to UNIT since invoice doesn't have unit field
+          unitPriceCash: lineItem.unitPriceTaxIncl || 0,
+          unitPricePwt: 0, // Default to 0 since invoice doesn't have POWT pricing
+        }),
+        createdNode.id
+      );
+    });
+
+    // add tags from each invoice line item to billing statement line item
+    invoiceState.state.global.lineItems.forEach(async (lineItem: any) => {
+      const lineItemTag: any = mapTags(lineItem.lineItemTag || []);
+      lineItemTag.forEach(async (tag: any) => {
+        await dispatchActions(
+          billingStatementActions.editLineItemTag({
+            lineItemId: lineItem.id,
+            dimension: tag.dimension,
+            value: tag.value,
+            label: tag.label,
+          }),
+          createdNode.id
+        );
+      });
+    });
   };
 
   const selectedInvoiceIds = Object.keys(selected).filter((id) => selected[id]);

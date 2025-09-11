@@ -43,7 +43,21 @@ export const EditorContainer = (props: {
     selectedDrive?.header.id
   );
 
-  const preferredEditor = selectedDocument?.header.meta?.preferredEditor ?? "powerhouse-invoice-editor";
+  // Determine the correct editor based on document type
+  const getEditorForDocumentType = (documentType: string) => {
+    switch (documentType) {
+      case "powerhouse/billing-statement":
+        return "powerhouse-billing-statement-editor";
+      case "powerhouse/invoice":
+        return "powerhouse-invoice-editor";
+      default:
+        return "powerhouse-invoice-editor";
+    }
+  };
+
+  const preferredEditor = selectedDocument?.header.meta?.preferredEditor ?? 
+    getEditorForDocumentType(selectedDocument?.header.documentType || "");
+  
   const editorModule = useEditorModuleById(
     preferredEditor
   );
