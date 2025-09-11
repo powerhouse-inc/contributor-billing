@@ -23,7 +23,8 @@ export const HeaderControls = ({
   selectedStatuses = [],
   createIntegrationsDocument,
   integrationsDoc,
-  setActiveDocumentId
+  setActiveDocumentId,
+  canExportSelectedRows
 }: {
   contributorOptions?: { label: string; value: string }[];
   statusOptions?: { label: string; value: string }[];
@@ -36,6 +37,7 @@ export const HeaderControls = ({
   createIntegrationsDocument?: () => void;
   integrationsDoc?: any | null;
   setActiveDocumentId?: (id: string) => void;
+  canExportSelectedRows?: () => boolean;
 }) => {
   const batchOptions = [
     { label: "$ Pay Selected", value: "pay" },
@@ -43,18 +45,8 @@ export const HeaderControls = ({
     { label: "Reject Selected", value: "reject" },
   ];
 
-  // Only enable if all selected statuses are in the allowed set
-  const allowedStatuses = [
-    "ACCEPTED",
-    "AWAITINGPAYMENT",
-    "PAYMENTSCHEDULED",
-    "PAYMENTSENT",
-    "PAYMENTRECEIVED",
-    "PAYMENTCLOSED",
-  ];
-  const canExport =
-    selectedStatuses.length > 0 &&
-    selectedStatuses.every((status) => allowedStatuses.includes(status));
+  // Use the function to determine if export should be enabled based on selected rows
+  const canExport = canExportSelectedRows ? canExportSelectedRows() : false;
 
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState("CHF");

@@ -53,6 +53,8 @@ interface InvoiceTableProps {
   getDocDispatcher: (id: string) => any;
   selectedStatuses: string[];
   onStatusChange: (value: string | string[]) => void;
+  onRowSelection: (rowId: string, checked: boolean, rowStatus: string) => void;
+  canExportSelectedRows: () => boolean;
 }
 
 export const InvoiceTable = ({
@@ -69,6 +71,8 @@ export const InvoiceTable = ({
   getDocDispatcher,
   selectedStatuses,
   onStatusChange,
+  onRowSelection,
+  canExportSelectedRows,
 }: InvoiceTableProps) => {
   const [selectedDrive] = useSelectedDrive();
 
@@ -349,6 +353,7 @@ export const InvoiceTable = ({
         createIntegrationsDocument={createIntegrationsDocument}
         integrationsDoc={integrationsDoc}
         setActiveDocumentId={setActiveDocumentId}
+        canExportSelectedRows={canExportSelectedRows}
       />
       {shouldShowSection("DRAFT") && (
         <InvoiceTableSection
@@ -378,10 +383,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -416,10 +418,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -460,10 +459,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -504,10 +500,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -548,10 +541,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -592,10 +582,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -635,10 +622,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -676,10 +660,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -713,10 +694,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}

@@ -70,6 +70,35 @@ export function DriveExplorer(props: DriveEditorProps) {
   const allDocuments = useSelectedDriveDocuments();
   const state = allDocuments;
 
+  // Handler for row selection (does not affect status filter display)
+  const handleRowSelection = useCallback((rowId: string, checked: boolean, rowStatus: string) => {
+    setSelected((prev: { [id: string]: boolean }) => ({
+      ...prev,
+      [rowId]: checked,
+    }));
+  }, []);
+
+  // Determine if CSV export should be enabled based on selected rows
+  const canExportSelectedRows = useCallback(() => {
+    const allowedStatuses = [
+      "ACCEPTED",
+      "AWAITINGPAYMENT",
+      "PAYMENTSCHEDULED",
+      "PAYMENTSENT",
+      "PAYMENTRECEIVED",
+      "PAYMENTCLOSED",
+    ];
+
+    // Get all selected row IDs
+    const selectedRowIds = Object.keys(selected).filter(id => selected[id]);
+    
+    if (selectedRowIds.length === 0) return false;
+
+    // Check if all selected rows have allowed statuses
+    const selectedRows = state?.filter(doc => selectedRowIds.includes(doc.header.id)) || [];
+    return selectedRows.every(row => allowedStatuses.includes((row.state as any).global.status));
+  }, [selected, state]);
+
   // Create a stable dispatcher map using useRef only (no useState to avoid re-renders)
   const dispatchersRef = useRef<Map<string, [any, (action: any) => void]>>(
     new Map()
@@ -338,6 +367,8 @@ export function DriveExplorer(props: DriveEditorProps) {
                 getDocDispatcher={getDocDispatcher}
                 selectedStatuses={selectedStatuses}
                 onStatusChange={handleStatusChange}
+                onRowSelection={handleRowSelection}
+                canExportSelectedRows={canExportSelectedRows}
               />
             </>
           )}
