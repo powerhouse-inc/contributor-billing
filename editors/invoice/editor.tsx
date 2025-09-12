@@ -765,9 +765,7 @@ export default function Editor(props: any) {
                 onChange={(e) => {
                   const newValue = e.target.value.split("T")[0];
                   if (newValue !== state.dateDelivered) {
-                    // Remove dateDelivered from editInvoice, as it's not a valid property
-                    // dispatch(actions.editInvoice({ dateDelivered: newValue }));
-                    // If you need to update delivery date, implement the correct action here
+                    dispatch(actions.editInvoice({ dateDelivered: newValue }));
                   }
                 }}
                 value={state.dateDelivered || ""}
