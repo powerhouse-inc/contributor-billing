@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { actions } from "../../document-models/invoice/index.js";
 import { generateId } from "document-model";
 
@@ -19,13 +19,24 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [responseData, setResponseData] = useState<any>(null);
   const [invoiceStatusResponse, setInvoiceStatusResponse] = useState<any>(null);
   const [safeTxHash, setsafeTxHash] = useState<string | null>(null);
+  const [safeAddress, setSafeAddress] = useState<string | null>(null);
 
   const currency = docState.currency;
   const chainName = docState.issuer.paymentRouting.wallet.chainName;
   const invoiceStatus = docState.status;
+
+  useEffect(() => {
+    // set safeADdress from processorRef
+    if(docState.payments.length < 1) return;
+    const lastPayment = docState.payments[docState.payments.length -1].processorRef;
+    console.log(lastPayment)
+    const retrievedSafeAddress = lastPayment.split(":");
+    if(retrievedSafeAddress[0]) {
+      setSafeAddress(retrievedSafeAddress[0])
+    }
+  },[docState.payments.length])
 
   const TOKEN_ADDRESSES = {
     BASE: {
@@ -114,19 +125,20 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
         const dataObj =
           typeof data.data === "string" ? JSON.parse(data.data) : data.data;
         setsafeTxHash(dataObj.txHash);
+        setSafeAddress(dataObj.safeAddress);
 
         if (invoiceStatus === "ACCEPTED") {
           dispatch(
             actions.schedulePayment({
               id: generateId(),
-              processorRef: dataObj.txHash,
+              processorRef: `${dataObj.safeAddress}:${dataObj.txHash}`,
             })
           );
         } else {
           dispatch(
             actions.addPayment({
               id: generateId(),
-              processorRef: dataObj.txHash,
+              processorRef: `${dataObj.safeAddress}:${dataObj.txHash}`,
               confirmed: false,
             })
           );
@@ -211,7 +223,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
       {safeTxHash && (
         <div className="bg-gray-50 mt-4 rounded-md space-y-2">
           <a
-            href={`https://app.safe.global/transactions/queue?safe=${urlChainName}:0x1FB6bEF04230d67aF0e3455B997a28AFcCe1F45e`}
+            href={`https://app.safe.global/transactions/queue?safe=${urlChainName}:${safeAddress}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-500 hover:text-blue-600 underline block"
@@ -243,7 +255,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
                 <div className="invoice-link text-blue-900 hover:text-blue-600">
                   <a
                     className="view-invoice-button"
-                    href={`https://app.safe.global/transactions/queue?safe=${urlChainName}:0x1FB6bEF04230d67aF0e3455B997a28AFcCe1F45e`}
+                    href={`https://app.safe.global/transactions/queue?safe=${urlChainName}:${safeAddress}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
