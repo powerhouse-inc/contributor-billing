@@ -40,8 +40,8 @@ describe("Billing Statement Line Items Operations", () => {
 
       // Verify operation was recorded
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("ADD_LINE_ITEM");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("ADD_LINE_ITEM");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
 
       // Verify state was updated
       expect(updatedDocument.state.global.lineItems).toHaveLength(1);
@@ -100,8 +100,8 @@ describe("Billing Statement Line Items Operations", () => {
 
       // Verify operation was recorded
       expect(updatedDocument.operations.global).toHaveLength(2);
-      expect(updatedDocument.operations.global[1].type).toBe("EDIT_LINE_ITEM");
-      expect(updatedDocument.operations.global[1].input).toStrictEqual(editInput);
+      expect((updatedDocument.operations.global[1] as any).type).toBe("EDIT_LINE_ITEM");
+      expect((updatedDocument.operations.global[1] as any).input).toStrictEqual(editInput);
 
       // Verify state was updated
       expect(updatedDocument.state.global.lineItems).toHaveLength(1);
@@ -153,8 +153,8 @@ describe("Billing Statement Line Items Operations", () => {
 
       // Verify operation was recorded
       expect(updatedDocument.operations.global).toHaveLength(2);
-      expect(updatedDocument.operations.global[1].type).toBe("EDIT_LINE_ITEM");
-      expect(updatedDocument.operations.global[1].input).toStrictEqual(editInput);
+      expect((updatedDocument.operations.global[1] as any).type).toBe("EDIT_LINE_ITEM");
+      expect((updatedDocument.operations.global[1] as any).input).toStrictEqual(editInput);
 
       // Verify state was updated
       expect(updatedDocument.state.global.lineItems).toHaveLength(1);

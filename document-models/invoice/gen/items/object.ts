@@ -1,12 +1,11 @@
 import { BaseDocumentClass } from "document-model";
+import { InvoicePHState } from "../ph-factories.js";
 import {
   type AddLineItemInput,
   type EditLineItemInput,
   type DeleteLineItemInput,
   type SetLineItemTagInput,
   type SetInvoiceTagInput,
-  type InvoiceState,
-  type InvoiceLocalState,
 } from "../types.js";
 import {
   addLineItem,
@@ -17,11 +16,7 @@ import {
 } from "./creators.js";
 import { type InvoiceAction } from "../actions.js";
 
-export default class Invoice_Items extends BaseDocumentClass<
-  InvoiceState,
-  InvoiceLocalState,
-  InvoiceAction
-> {
+export default class Invoice_Items extends BaseDocumentClass<InvoicePHState> {
   public addLineItem(input: AddLineItemInput) {
     return this.dispatch(addLineItem(input));
   }

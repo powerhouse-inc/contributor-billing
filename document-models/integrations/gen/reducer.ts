@@ -1,13 +1,17 @@
+// TODO: remove eslint-disable rules once refactor is done
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   type StateReducer,
   isDocumentAction,
   createReducer,
 } from "document-model";
-import { type IntegrationsDocument, z } from "./types.js";
+import { IntegrationsPHState } from "./ph-factories.js";
+import { z } from "./types.js";
 
 import { reducer as IntegrationsReducer } from "../src/reducers/integrations.js";
 
-const stateReducer: StateReducer<IntegrationsDocument> = (
+export const stateReducer: StateReducer<IntegrationsPHState> = (
   state,
   action,
   dispatch,
@@ -20,8 +24,8 @@ const stateReducer: StateReducer<IntegrationsDocument> = (
     case "SET_REQUEST_FINANCE":
       z.SetRequestFinanceInputSchema().parse(action.input);
       IntegrationsReducer.setRequestFinanceOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -29,8 +33,8 @@ const stateReducer: StateReducer<IntegrationsDocument> = (
     case "SET_GNOSIS_SAFE":
       z.SetGnosisSafeInputSchema().parse(action.input);
       IntegrationsReducer.setGnosisSafeOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -38,8 +42,8 @@ const stateReducer: StateReducer<IntegrationsDocument> = (
     case "SET_GOOGLE_CLOUD":
       z.SetGoogleCloudInputSchema().parse(action.input);
       IntegrationsReducer.setGoogleCloudOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -49,4 +53,4 @@ const stateReducer: StateReducer<IntegrationsDocument> = (
   }
 };
 
-export const reducer = createReducer<IntegrationsDocument>(stateReducer);
+export const reducer = createReducer<IntegrationsPHState>(stateReducer);

@@ -53,6 +53,7 @@ export type Scalars = {
   OLabel: { input: string; output: string };
   PHID: { input: string; output: string };
   URL: { input: string; output: string };
+  Upload: { input: File; output: File };
 };
 
 export type GnosisSafe = {

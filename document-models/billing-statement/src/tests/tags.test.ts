@@ -47,8 +47,8 @@ describe("Billing Statement Tags Operations", () => {
 
       // Verify operation was recorded
       expect(updatedDocument.operations.global).toHaveLength(2);
-      expect(updatedDocument.operations.global[1].type).toBe("EDIT_LINE_ITEM_TAG");
-      expect(updatedDocument.operations.global[1].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[1] as any).type).toBe("EDIT_LINE_ITEM_TAG");
+      expect((updatedDocument.operations.global[1] as any).input).toStrictEqual(input);
 
       // Verify state was updated
       const lineItem = updatedDocument.state.global.lineItems.find(item => item.id === input.lineItemId);

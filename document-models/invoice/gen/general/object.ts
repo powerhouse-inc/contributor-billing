@@ -1,12 +1,11 @@
 import { BaseDocumentClass } from "document-model";
+import { InvoicePHState } from "../ph-factories.js";
 import {
   type EditInvoiceInput,
   type EditStatusInput,
   type EditPaymentDataInput,
   type SetExportedDataInput,
   type AddPaymentInput,
-  type InvoiceState,
-  type InvoiceLocalState,
 } from "../types.js";
 import {
   editInvoice,
@@ -17,11 +16,7 @@ import {
 } from "./creators.js";
 import { type InvoiceAction } from "../actions.js";
 
-export default class Invoice_General extends BaseDocumentClass<
-  InvoiceState,
-  InvoiceLocalState,
-  InvoiceAction
-> {
+export default class Invoice_General extends BaseDocumentClass<InvoicePHState> {
   public editInvoice(input: EditInvoiceInput) {
     return this.dispatch(editInvoice(input));
   }

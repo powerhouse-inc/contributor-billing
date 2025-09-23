@@ -1,14 +1,15 @@
 import { Subgraph } from "@powerhousedao/reactor-api";
+import type { DocumentNode } from "graphql";
 import { schema } from "./schema.js";
 import { getResolvers } from "./resolvers.js";
 import { handleWebhook, cleanupOldPendingTransactions, setReactor } from "./customResolvers.js";
 import express from "express";
 import cors from "cors";
 
+
 export class InvoiceSubgraph extends Subgraph {
   name = "invoice";
-
-  typeDefs = schema;
+  typeDefs: DocumentNode = schema;
   resolvers = getResolvers(this);
   additionalContextFields = {};
   async onSetup() {

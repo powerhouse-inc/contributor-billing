@@ -46,8 +46,8 @@ export const schema: DocumentNode = gql`
   Queries: Integrations
   """
   type IntegrationsQueries {
-    getDocument(driveId: String, docId: PHID): Integrations
-    getDocuments: [Integrations!]
+    getDocument(docId: PHID!, driveId: PHID): Integrations
+    getDocuments(driveId: String!): [Integrations!]
   }
 
   type Query {
@@ -58,7 +58,7 @@ export const schema: DocumentNode = gql`
   Mutations: Integrations
   """
   type Mutation {
-    Integrations_createDocument(driveId: String, name: String): String
+    Integrations_createDocument(name: String!, driveId: String): String
 
     Integrations_setRequestFinance(
       driveId: String
