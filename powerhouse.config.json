@@ -7,5 +7,6 @@
   },
   "reactor": {
     "port": 4001
-  }
+  },
+  "packages": []
 }
