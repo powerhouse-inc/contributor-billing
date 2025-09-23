@@ -14,6 +14,7 @@ export const reducer: InvoiceGeneralOperations = {
       newState.currency = action.input.currency ?? state.currency;
       newState.dateDue = action.input.dateDue ?? state.dateDue;
       newState.dateIssued = action.input.dateIssued ?? state.dateIssued;
+      newState.dateDelivered = action.input.dateDelivered ?? state.dateDelivered;
       newState.invoiceNo = action.input.invoiceNo ?? state.invoiceNo;
       newState.notes = action.input.notes ?? state.notes;
 

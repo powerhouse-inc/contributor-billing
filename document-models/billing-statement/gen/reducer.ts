@@ -1,15 +1,19 @@
+// TODO: remove eslint-disable rules once refactor is done
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   type StateReducer,
   isDocumentAction,
   createReducer,
 } from "document-model";
-import { type BillingStatementDocument, z } from "./types.js";
+import { BillingStatementPHState } from "./ph-factories.js";
+import { z } from "./types.js";
 
 import { reducer as GeneralReducer } from "../src/reducers/general.js";
 import { reducer as LineItemsReducer } from "../src/reducers/line-items.js";
 import { reducer as TagsReducer } from "../src/reducers/tags.js";
 
-const stateReducer: StateReducer<BillingStatementDocument> = (
+export const stateReducer: StateReducer<BillingStatementPHState> = (
   state,
   action,
   dispatch,
@@ -22,8 +26,8 @@ const stateReducer: StateReducer<BillingStatementDocument> = (
     case "EDIT_BILLING_STATEMENT":
       z.EditBillingStatementInputSchema().parse(action.input);
       GeneralReducer.editBillingStatementOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -31,22 +35,26 @@ const stateReducer: StateReducer<BillingStatementDocument> = (
     case "EDIT_CONTRIBUTOR":
       z.EditContributorInputSchema().parse(action.input);
       GeneralReducer.editContributorOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
 
     case "EDIT_STATUS":
       z.EditStatusInputSchema().parse(action.input);
-      GeneralReducer.editStatusOperation(state[action.scope], action, dispatch);
+      GeneralReducer.editStatusOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
       break;
 
     case "ADD_LINE_ITEM":
       z.AddLineItemInputSchema().parse(action.input);
       LineItemsReducer.addLineItemOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -54,8 +62,8 @@ const stateReducer: StateReducer<BillingStatementDocument> = (
     case "EDIT_LINE_ITEM":
       z.EditLineItemInputSchema().parse(action.input);
       LineItemsReducer.editLineItemOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -63,8 +71,8 @@ const stateReducer: StateReducer<BillingStatementDocument> = (
     case "EDIT_LINE_ITEM_TAG":
       z.EditLineItemTagInputSchema().parse(action.input);
       TagsReducer.editLineItemTagOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -74,4 +82,4 @@ const stateReducer: StateReducer<BillingStatementDocument> = (
   }
 };
 
-export const reducer = createReducer<BillingStatementDocument>(stateReducer);
+export const reducer = createReducer<BillingStatementPHState>(stateReducer);

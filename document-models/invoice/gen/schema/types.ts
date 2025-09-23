@@ -53,6 +53,7 @@ export type Scalars = {
   OLabel: { input: string; output: string };
   PHID: { input: string; output: string };
   URL: { input: string; output: string };
+  Upload: { input: File; output: File };
 };
 
 export type AcceptInput = {
@@ -131,6 +132,7 @@ export type DeleteLineItemInput = {
 
 export type EditInvoiceInput = {
   currency?: InputMaybe<Scalars["String"]["input"]>;
+  dateDelivered?: InputMaybe<Scalars["String"]["input"]>;
   dateDue?: InputMaybe<Scalars["String"]["input"]>;
   dateIssued?: InputMaybe<Scalars["String"]["input"]>;
   invoiceNo?: InputMaybe<Scalars["String"]["input"]>;

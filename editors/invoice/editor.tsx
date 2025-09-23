@@ -37,15 +37,21 @@ import {
 } from "./components/statusModalComponents.js";
 import { InvoiceStateSchema } from "../../document-models/invoice/gen/schema/zod.js";
 import validateStatusBeforeContinue from "./validation/validationHandler.js";
+import { useSelectedDocument } from "@powerhousedao/reactor-browser";
 
 function isFiatCurrency(currency: string): boolean {
   return currencyList.find((c) => c.ticker === currency)?.crypto === false;
 }
 
-export type IProps = EditorProps<InvoiceDocument>;
-
-export default function Editor(props: IProps) {
-  const { document: doc, dispatch } = props;
+export default function Editor(props: any) {
+  let dispatch: any;
+  const { document: doc } = props;
+  if (props?.dispatch) {
+    dispatch = props.dispatch;
+  } else {
+    const selectedDocument = useSelectedDocument();
+    dispatch = selectedDocument[1];
+  }
   const state = doc.state.global;
 
   // Dynamic property check based on the actual schema
@@ -208,14 +214,14 @@ export default function Editor(props: IProps) {
   }, []);
 
   const itemsTotalTaxExcl = useMemo(() => {
-    let total = state.lineItems.reduce((sum, lineItem) => {
+    let total = state.lineItems.reduce((sum: number, lineItem: any) => {
       return sum + lineItem.quantity * lineItem.unitPriceTaxExcl;
     }, 0.0);
 
     // If there's an item being edited, replace its contribution with the edited values
     if (editingItemValues) {
       const originalItem = state.lineItems.find(
-        (item) => item.id === editingItemValues.id
+        (item: any) => item.id === editingItemValues.id
       );
       if (originalItem) {
         // Subtract the original contribution and add the edited contribution
@@ -230,14 +236,14 @@ export default function Editor(props: IProps) {
   }, [state.lineItems, editingItemValues]);
 
   const itemsTotalTaxIncl = useMemo(() => {
-    let total = state.lineItems.reduce((sum, lineItem) => {
+    let total = state.lineItems.reduce((sum: number, lineItem: any) => {
       return sum + lineItem.quantity * lineItem.unitPriceTaxIncl;
     }, 0.0);
 
     // If there's an item being edited, replace its contribution with the edited values
     if (editingItemValues) {
       const originalItem = state.lineItems.find(
-        (item) => item.id === editingItemValues.id
+        (item: any) => item.id === editingItemValues.id
       );
       if (originalItem) {
         // Subtract the original contribution and add the edited contribution
@@ -440,7 +446,7 @@ export default function Editor(props: IProps) {
     }
     if (newStatus === "ISSUED") {
       const trueRejection = state.rejections.find(
-        (rejection) => rejection.final === true
+        (rejection: any) => rejection.final === true
       );
       if (state.status === "REJECTED" && trueRejection) {
         setRejectReason(trueRejection.reason);
@@ -759,9 +765,7 @@ export default function Editor(props: IProps) {
                 onChange={(e) => {
                   const newValue = e.target.value.split("T")[0];
                   if (newValue !== state.dateDelivered) {
-                    // Remove dateDelivered from editInvoice, as it's not a valid property
-                    // dispatch(actions.editInvoice({ dateDelivered: newValue }));
-                    // If you need to update delivery date, implement the correct action here
+                    dispatch(actions.editInvoice({ dateDelivered: newValue }));
                   }
                 }}
                 value={state.dateDelivered || ""}
@@ -827,7 +831,7 @@ export default function Editor(props: IProps) {
       <div className="mb-8">
         <LineItemsTable
           currency={state.currency}
-          lineItems={state.lineItems.map((item) => ({
+          lineItems={state.lineItems.map((item: any) => ({
             ...item,
             lineItemTag: item.lineItemTag ?? [],
           }))}

@@ -1,17 +1,12 @@
 import {
   BaseDocumentClass,
-  type ExtendedState,
-  type PartialState,
   applyMixins,
   type SignalDispatch,
 } from "document-model";
-import {
-  type BillingStatementState,
-  type BillingStatementLocalState,
-} from "./types.js";
+import { BillingStatementPHState } from "./ph-factories.js";
 import { type BillingStatementAction } from "./actions.js";
 import { reducer } from "./reducer.js";
-import utils from "./utils.js";
+import { createDocument } from "./utils.js";
 import BillingStatement_General from "./general/object.js";
 import BillingStatement_LineItems from "./line-items/object.js";
 import BillingStatement_Tags from "./tags/object.js";
@@ -27,23 +22,14 @@ interface BillingStatement
     BillingStatement_Tags {}
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-class BillingStatement extends BaseDocumentClass<
-  BillingStatementState,
-  BillingStatementLocalState,
-  BillingStatementAction
-> {
+class BillingStatement extends BaseDocumentClass<BillingStatementPHState> {
   static fileExtension = ".phdm";
 
   constructor(
-    initialState?: Partial<
-      ExtendedState<
-        PartialState<BillingStatementState>,
-        PartialState<BillingStatementLocalState>
-      >
-    >,
+    initialState?: Partial<BillingStatementPHState>,
     dispatch?: SignalDispatch,
   ) {
-    super(reducer, utils.createDocument(initialState), dispatch);
+    super(reducer, createDocument(initialState), dispatch);
   }
 
   public saveToFile(path: string, name?: string) {

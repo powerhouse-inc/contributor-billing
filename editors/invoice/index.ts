@@ -1,8 +1,7 @@
 import type { EditorModule } from "document-model";
 import Editor from "./editor.js";
-import type { InvoiceDocument } from "../../document-models/invoice/index.js";
 
-export const module: EditorModule<InvoiceDocument> = {
+export const module: EditorModule = {
   Component: Editor,
   documentTypes: ["powerhouse/invoice"],
   config: {

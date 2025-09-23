@@ -27,8 +27,8 @@ describe("General Operations", () => {
     const updatedDocument = reducer(document, creators.editInvoice(input));
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe("EDIT_INVOICE");
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_INVOICE");
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editStatus operation", () => {
@@ -37,8 +37,8 @@ describe("General Operations", () => {
     const updatedDocument = reducer(document, creators.editStatus(input));
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe("EDIT_STATUS");
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_STATUS");
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editPaymentData operation", () => {
@@ -47,8 +47,8 @@ describe("General Operations", () => {
     const updatedDocument = reducer(invoice, creators.editPaymentData({ paymentDate: paymentDate, txnRef: "0x123", confirmed: true, id: "123" }));
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe("EDIT_PAYMENT_DATA");
-    expect(updatedDocument.operations.global[0].input).toEqual({ paymentDate: paymentDate, txnRef: "0x123", confirmed: true, id: "123" });
+    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_PAYMENT_DATA");
+    expect((updatedDocument.operations.global[0] as any).input).toEqual({ paymentDate: paymentDate, txnRef: "0x123", confirmed: true, id: "123" });
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle setExportedData operation", () => {
@@ -61,8 +61,8 @@ describe("General Operations", () => {
     const updatedDocument = reducer(document, creators.setExportedData(input));
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe("SET_EXPORTED_DATA");
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_EXPORTED_DATA");
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
 });

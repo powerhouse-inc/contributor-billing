@@ -1,14 +1,12 @@
 import {
   BaseDocumentClass,
-  type ExtendedState,
-  type PartialState,
   applyMixins,
   type SignalDispatch,
 } from "document-model";
-import { type InvoiceState, type InvoiceLocalState } from "./types.js";
+import { InvoicePHState } from "./ph-factories.js";
 import { type InvoiceAction } from "./actions.js";
 import { reducer } from "./reducer.js";
-import utils from "./utils.js";
+import { createDocument } from "./utils.js";
 import Invoice_General from "./general/object.js";
 import Invoice_Parties from "./parties/object.js";
 import Invoice_Items from "./items/object.js";
@@ -27,20 +25,14 @@ interface Invoice
     Invoice_Transitions {}
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-class Invoice extends BaseDocumentClass<
-  InvoiceState,
-  InvoiceLocalState,
-  InvoiceAction
-> {
+class Invoice extends BaseDocumentClass<InvoicePHState> {
   static fileExtension = ".phdm";
 
   constructor(
-    initialState?: Partial<
-      ExtendedState<PartialState<InvoiceState>, PartialState<InvoiceLocalState>>
-    >,
+    initialState?: Partial<InvoicePHState>,
     dispatch?: SignalDispatch,
   ) {
-    super(reducer, utils.createDocument(initialState), dispatch);
+    super(reducer, createDocument(initialState), dispatch);
   }
 
   public saveToFile(path: string, name?: string) {

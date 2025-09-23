@@ -1,4 +1,4 @@
-import { type BaseAction } from "document-model";
+import { type Action } from "document-model";
 import type {
   CancelInput,
   IssueInput,
@@ -14,42 +14,39 @@ import type {
   ClosePaymentInput,
 } from "../types.js";
 
-export type CancelAction = BaseAction<"CANCEL", CancelInput, "global">;
-export type IssueAction = BaseAction<"ISSUE", IssueInput, "global">;
-export type ResetAction = BaseAction<"RESET", ResetInput, "global">;
-export type RejectAction = BaseAction<"REJECT", RejectInput, "global">;
-export type AcceptAction = BaseAction<"ACCEPT", AcceptInput, "global">;
-export type ReinstateAction = BaseAction<"REINSTATE", ReinstateInput, "global">;
-export type SchedulePaymentAction = BaseAction<
-  "SCHEDULE_PAYMENT",
-  SchedulePaymentInput,
-  "global"
->;
-export type ReapprovePaymentAction = BaseAction<
-  "REAPPROVE_PAYMENT",
-  ReapprovePaymentInput,
-  "global"
->;
-export type RegisterPaymentTxAction = BaseAction<
-  "REGISTER_PAYMENT_TX",
-  RegisterPaymentTxInput,
-  "global"
->;
-export type ReportPaymentIssueAction = BaseAction<
-  "REPORT_PAYMENT_ISSUE",
-  ReportPaymentIssueInput,
-  "global"
->;
-export type ConfirmPaymentAction = BaseAction<
-  "CONFIRM_PAYMENT",
-  ConfirmPaymentInput,
-  "global"
->;
-export type ClosePaymentAction = BaseAction<
-  "CLOSE_PAYMENT",
-  ClosePaymentInput,
-  "global"
->;
+export type CancelAction = Action & { type: "CANCEL"; input: CancelInput };
+export type IssueAction = Action & { type: "ISSUE"; input: IssueInput };
+export type ResetAction = Action & { type: "RESET"; input: ResetInput };
+export type RejectAction = Action & { type: "REJECT"; input: RejectInput };
+export type AcceptAction = Action & { type: "ACCEPT"; input: AcceptInput };
+export type ReinstateAction = Action & {
+  type: "REINSTATE";
+  input: ReinstateInput;
+};
+export type SchedulePaymentAction = Action & {
+  type: "SCHEDULE_PAYMENT";
+  input: SchedulePaymentInput;
+};
+export type ReapprovePaymentAction = Action & {
+  type: "REAPPROVE_PAYMENT";
+  input: ReapprovePaymentInput;
+};
+export type RegisterPaymentTxAction = Action & {
+  type: "REGISTER_PAYMENT_TX";
+  input: RegisterPaymentTxInput;
+};
+export type ReportPaymentIssueAction = Action & {
+  type: "REPORT_PAYMENT_ISSUE";
+  input: ReportPaymentIssueInput;
+};
+export type ConfirmPaymentAction = Action & {
+  type: "CONFIRM_PAYMENT";
+  input: ConfirmPaymentInput;
+};
+export type ClosePaymentAction = Action & {
+  type: "CLOSE_PAYMENT";
+  input: ClosePaymentInput;
+};
 
 export type InvoiceTransitionsAction =
   | CancelAction

@@ -3,10 +3,11 @@ import { useState, useMemo } from "react";
 import { HeaderControls } from "./HeaderControls.js";
 import { InvoiceTableSection } from "./InvoiceTableSection.js";
 import { InvoiceTableRow } from "./InvoiceTableRow.js";
-import { type UiFileNode } from "@powerhousedao/design-system";
-import { useDriveContext } from "@powerhousedao/reactor-browser";
 import { type InvoiceLineItem } from "document-models/invoice/index.js";
-import { createPresignedHeader } from "document-model";
+import {
+  createPresignedHeader,
+  actions as documentModelActions,
+} from "document-model";
 import { type DocumentModelModule } from "document-model";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
@@ -15,6 +16,12 @@ import {
   actions,
   type InvoiceAction,
 } from "../../../../document-models/invoice/index.js";
+import {
+  addDocument,
+  useSelectedDrive,
+  dispatchActions,
+} from "@powerhousedao/reactor-browser";
+import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
 
 const statusOptions = [
   { label: "Draft", value: "DRAFT" },
@@ -29,10 +36,9 @@ const statusOptions = [
 ];
 
 interface InvoiceTableProps {
-  files: UiFileNode[];
-  state: Record<string, any>;
+  files: any[];
+  state: Record<string, any>[];
   setActiveDocumentId: (id: string) => void;
-  getDispatch: () => (action: any, onErrorCallback?: any) => void;
   selected: { [id: string]: boolean };
   setSelected: (
     selected:
@@ -44,15 +50,17 @@ interface InvoiceTableProps {
   renameNode: (nodeId: string, name: string) => void;
   filteredDocumentModels: DocumentModelModule[];
   onSelectDocumentModel: (model: DocumentModelModule) => void;
-  dispatchMap: Record<string, (action: InvoiceAction) => void>;
-  driveId: string;
+  getDocDispatcher: (id: string) => any;
+  selectedStatuses: string[];
+  onStatusChange: (value: string | string[]) => void;
+  onRowSelection: (rowId: string, checked: boolean, rowStatus: string) => void;
+  canExportSelectedRows: () => boolean;
 }
 
 export const InvoiceTable = ({
   files,
   state,
   setActiveDocumentId,
-  getDispatch,
   selected,
   setSelected,
   onBatchAction,
@@ -60,88 +68,70 @@ export const InvoiceTable = ({
   renameNode,
   filteredDocumentModels,
   onSelectDocumentModel,
-  dispatchMap,
-  driveId,
+  getDocDispatcher,
+  selectedStatuses,
+  onStatusChange,
+  onRowSelection,
+  canExportSelectedRows,
 }: InvoiceTableProps) => {
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const {
-    addDocument,
-    addFile,
-    documentModels,
-    useDriveDocumentStates,
-    selectedNode,
-    useDocumentEditorProps,
-  } = useDriveContext();
+  const [selectedDrive] = useSelectedDrive();
 
-  const billingDocStates = Object.entries(state)
-    .filter(([_, doc]) => doc.documentType === "powerhouse/billing-statement")
-    .map(([id, doc]) => ({
-      id,
-      contributor: doc.global.contributor,
+  const billingDocStates = state
+    .filter((doc) => doc.header.documentType === "powerhouse/billing-statement")
+    .map((doc) => ({
+      id: doc.header.id,
+      contributor: doc.state.global.contributor,
     }));
-
-  const getMenuOptions = () => {
-    return [
-      { label: "View Invoice", value: "view-invoice" },
-      // { label: "View Payment Transaction", value: "view-payment" },
-    ];
-  };
-
-  const handleStatusChange = (value: string | string[]) => {
-    setSelectedStatuses(Array.isArray(value) ? value : [value]);
-  };
 
   const shouldShowSection = (status: string) => {
     return selectedStatuses.length === 0 || selectedStatuses.includes(status);
   };
 
   const getInvoicesByStatus = (status: string) => {
-    return Object.entries(state)
+    return state
       .filter(
-        ([_, doc]) =>
-          doc.documentType === "powerhouse/invoice" &&
-          doc.global.status === status
+        (doc) =>
+          doc.header.documentType === "powerhouse/invoice" &&
+          doc.state.global.status === status
       )
-      .map(([id, doc]) => ({
-        id,
-        issuer: doc.global.issuer?.name || "Unknown",
-        status: doc.global.status,
-        invoiceNo: doc.global.invoiceNo,
-        issueDate: doc.global.dateIssued,
-        dueDate: doc.global.dateDue,
-        currency: doc.global.currency,
-        amount: doc.global.totalPriceTaxIncl?.toString() ?? "",
-        exported: doc.global.exported,
+      .map((doc) => ({
+        id: doc.header.id,
+        issuer: doc.state.global.issuer?.name || "Unknown",
+        status: doc.state.global.status,
+        invoiceNo: doc.state.global.invoiceNo,
+        issueDate: doc.state.global.dateIssued,
+        dueDate: doc.state.global.dateDue,
+        currency: doc.state.global.currency,
+        amount: doc.state.global.totalPriceTaxIncl?.toString() ?? "",
+        exported: doc.state.global.exported,
       }));
   };
 
-  // console.log('filteredDocumentModels', filteredDocumentModels)
-
   const getOtherInvoices = () => {
-    return Object.entries(state)
+    return state
       .filter(
-        ([_, doc]) =>
-          doc.documentType === "powerhouse/invoice" &&
-          doc.global.status !== "DRAFT" &&
-          doc.global.status !== "ISSUED" &&
-          doc.global.status !== "ACCEPTED" &&
-          doc.global.status !== "PAYMENTSCHEDULED" &&
-          doc.global.status !== "PAYMENTSENT" &&
-          doc.global.status !== "PAYMENTISSUE" &&
-          doc.global.status !== "PAYMENTCLOSED" &&
-          doc.global.status !== "REJECTED"
+        (doc) =>
+          doc.header.documentType === "powerhouse/invoice" &&
+          doc.state.global.status !== "DRAFT" &&
+          doc.state.global.status !== "ISSUED" &&
+          doc.state.global.status !== "ACCEPTED" &&
+          doc.state.global.status !== "PAYMENTSCHEDULED" &&
+          doc.state.global.status !== "PAYMENTSENT" &&
+          doc.state.global.status !== "PAYMENTISSUE" &&
+          doc.state.global.status !== "PAYMENTCLOSED" &&
+          doc.state.global.status !== "REJECTED"
       )
-      .map(([id, doc]) => ({
-        id,
-        issuer: doc.global.issuer?.name || "Unknown",
-        status: doc.global.status,
-        invoiceNo: doc.global.invoiceNo,
-        issueDate: doc.global.dateIssued,
-        dueDate: doc.global.dateDue,
-        currency: doc.global.currency,
-        amount: doc.global.totalPriceTaxIncl?.toString() ?? "",
-        documentType: doc.documentType,
-        exported: doc.global.exported,
+      .map((doc) => ({
+        id: doc.header.id,
+        issuer: doc.state.global.issuer?.name || "Unknown",
+        status: doc.state.global.status,
+        invoiceNo: doc.state.global.invoiceNo,
+        issueDate: doc.state.global.dateIssued,
+        dueDate: doc.state.global.dateDue,
+        currency: doc.state.global.currency,
+        amount: doc.state.global.totalPriceTaxIncl?.toString() ?? "",
+        documentType: doc.header.documentType,
+        exported: doc.state.global.exported,
       }));
   };
 
@@ -178,136 +168,134 @@ export const InvoiceTable = ({
   };
 
   const handleCreateBillingStatement = async (id: string) => {
-    const driveId = selectedNode?.id;
-    if (!driveId) return;
     const invoiceFile = files.find((file) => file.id === id);
-    const invoiceState = state[id];
+    const invoiceState = state.find((doc) => doc.header.id === id);
+    if (!invoiceState) {
+      return;
+    }
 
-    await addDocument(
-      driveId,
+    const createdNode = await addDocument(
+      selectedDrive?.header.id || "",
       `bill-${invoiceFile?.name}`,
       "powerhouse/billing-statement",
       undefined,
-      {
-        header: {
-          ...createPresignedHeader(),
-          ...{
-            slug: `bill-${makeSlug(invoiceFile?.name || "")}`,
-            name: `bill-${cleanName(invoiceFile?.name || "")}`,
-            documentType: "powerhouse/billing-statement",
-          },
-        },
-        state: {
-          global: {
-            contributor: id,
-            dateIssued: invoiceState.global.dateIssued,
-            dateDue: invoiceState.global.dateDue,
-            lineItems: invoiceState.global.lineItems.map(
-              (item: InvoiceLineItem) => {
-                return {
-                  id: item.id,
-                  description: item.description,
-                  quantity: item.quantity,
-                  unit: "UNIT",
-                  unitPricePwt: 0,
-                  unitPriceCash: item.unitPriceTaxIncl,
-                  totalPricePwt: 0,
-                  totalPriceCash: item.totalPriceTaxIncl,
-                  lineItemTag: mapTags(item.lineItemTag || []),
-                };
-              }
-            ),
-            status: invoiceState.global.status,
-            currency: invoiceState.global.currency,
-            totalCash: invoiceState.global.lineItems.reduce(
-              (acc: number, item: InvoiceLineItem) =>
-                acc + item.totalPriceTaxIncl,
-              0
-            ),
-            totalPowt: 0,
-            notes: invoiceState.global.notes,
-          },
-          local: {},
-        },
-        operations: {
-          global: [],
-          local: [],
-        },
-        history: {
-          global: [],
-          local: [],
-        },
-        initialState: {
-          state: {
-            global: {
-              contributor: id,
-              dateIssued: invoiceState.global.dateIssued,
-              dateDue: invoiceState.global.dateDue,
-              lineItems: invoiceState.global.lineItems.map(
-                (item: InvoiceLineItem) => {
-                  return {
-                    id: item.id,
-                    description: item.description,
-                    quantity: item.quantity,
-                    unit: "UNIT",
-                    unitPricePwt: 0,
-                    unitPriceCash: item.unitPriceTaxIncl,
-                    totalPricePwt: 0,
-                    totalPriceCash: item.totalPriceTaxIncl,
-                    lineItemTag: mapTags(item.lineItemTag || []),
-                  };
-                }
-              ),
-              status: invoiceState.global.status,
-              currency: invoiceState.global.currency,
-              totalCash: invoiceState.global.lineItems.reduce(
-                (acc: number, item: InvoiceLineItem) =>
-                  acc + item.totalPriceTaxIncl,
-                0
-              ),
-              totalPowt: 0,
-              notes: invoiceState.global.notes,
-            },
-            local: {},
-          },
-        },
-        clipboard: [],
-      }
+      undefined,
+      undefined,
+      "powerhouse-billing-statement-editor"
     );
+    console.log("created billing statement doc", createdNode);
+    if (!createdNode?.id) {
+      console.error("Failed to create billing statement");
+      return null;
+    }
+    await dispatchActions(
+      billingStatementActions.editContributor({
+        contributor: id,
+      }),
+      createdNode.id
+    );
+    // Prepare billing statement data with empty input handlers
+    const billingStatementData: any = {
+      dateIssued:
+        invoiceState.state.global.dateIssued &&
+        invoiceState.state.global.dateIssued.trim() !== ""
+          ? new Date(invoiceState.state.global.dateIssued).toISOString()
+          : null,
+      dateDue:
+        invoiceState.state.global.dateDue &&
+        invoiceState.state.global.dateDue.trim() !== ""
+          ? new Date(invoiceState.state.global.dateDue).toISOString()
+          : null,
+      currency: invoiceState.state.global.currency || "",
+      notes: invoiceState.state.global.notes || "",
+    };
+
+    await dispatchActions(
+      billingStatementActions.editBillingStatement(billingStatementData),
+      createdNode.id
+    );
+    await dispatchActions(
+      billingStatementActions.editStatus({
+        status: invoiceState.state.global.status,
+      }),
+      createdNode.id
+    );
+
+    // add line items from invoiceState to billing statement
+    invoiceState.state.global.lineItems.forEach(async (lineItem: any) => {
+      await dispatchActions(
+        billingStatementActions.addLineItem({
+          id: lineItem.id,
+          description: lineItem.description,
+          quantity: lineItem.quantity,
+          // Map invoice fields to billing statement fields
+          totalPriceCash: lineItem.totalPriceTaxIncl || 0,
+          totalPricePwt: 0, // Default to 0 since invoice doesn't have POWT pricing
+          unit: "UNIT", // Default to UNIT since invoice doesn't have unit field
+          unitPriceCash: lineItem.unitPriceTaxIncl || 0,
+          unitPricePwt: 0, // Default to 0 since invoice doesn't have POWT pricing
+        }),
+        createdNode.id
+      );
+    });
+
+    // add tags from each invoice line item to billing statement line item
+    invoiceState.state.global.lineItems.forEach(async (lineItem: any) => {
+      const lineItemTag: any = mapTags(lineItem.lineItemTag || []);
+      lineItemTag.forEach(async (tag: any) => {
+        await dispatchActions(
+          billingStatementActions.editLineItemTag({
+            lineItemId: lineItem.id,
+            dimension: tag.dimension,
+            value: tag.value,
+            label: tag.label,
+          }),
+          createdNode.id
+        );
+      });
+    });
   };
 
   const selectedInvoiceIds = Object.keys(selected).filter((id) => selected[id]);
-  const selectedInvoices = selectedInvoiceIds.map((id) => ({
-    ...state[id],
-    id,
-  }));
+  const selectedInvoices = selectedInvoiceIds
+    .map((id) => {
+      const doc = state.find((doc) => doc.header.id === id);
+      return doc ? { ...doc, id } : null;
+    })
+    .filter((inv) => inv !== null); // Filter out null/undefined invoices
   const selectedInvoiceStatuses = selectedInvoices.map(
-    (inv) => inv?.global?.status || inv?.status
+    (inv: any) => inv?.state?.global?.status || inv?.state?.global?.status
   );
-
-  // Create dispatch map for selected invoices using the existing dispatchMap prop
-  const selectedInvoiceDispatchMap = useMemo(() => {
-    const map: Record<string, any> = {};
-    selectedInvoiceIds.forEach((invoiceId) => {
-      if (dispatchMap[invoiceId]) {
-        map[invoiceId] = dispatchMap[invoiceId];
-      }
-    });
-    return map;
-  }, [selectedInvoiceIds, dispatchMap]);
 
   const handleCSVExport = async (baseCurrency: string) => {
     console.log(
       "Exporting selected invoices:",
-      selectedInvoiceIds.map((id, idx) => ({
-        id,
-        state: selectedInvoices[idx],
+      selectedInvoices.map((inv) => ({
+        id: inv.id,
+        state: inv,
       }))
     );
     try {
-      await exportInvoicesToXeroCSV(selectedInvoices, baseCurrency);
+      const exportedData = await exportInvoicesToXeroCSV(
+        selectedInvoices,
+        baseCurrency
+      );
       toast("Invoices exported successfully", {
         type: "success",
+      });
+      selectedInvoices.forEach((invoice) => {
+        const invoiceDoc = getDocDispatcher(invoice.id);
+        const exportedInvoiceData = exportedData[invoice.id];
+        if (!invoiceDoc || !exportedInvoiceData) {
+          return;
+        }
+        const invoiceDispatcher = invoiceDoc[1];
+        invoiceDispatcher(
+          actions.setExportedData({
+            timestamp: exportedInvoiceData.timestamp,
+            exportedLineItems: exportedInvoiceData.exportedLineItems,
+          })
+        );
       });
     } catch (error: any) {
       console.error("Error exporting invoices:", error);
@@ -339,29 +327,33 @@ export const InvoiceTable = ({
   };
 
   // check if integrations document exists
-  const integrationsDoc = files.find(file => file.documentType === "powerhouse/integrations");
+  const integrationsDoc = files.find(
+    (file) => file.documentType === "powerhouse/integrations"
+  );
   const createIntegrationsDocument = () => {
-
-    const integrationsDocument = filteredDocumentModels?.find(model => model.documentModel.id === "powerhouse/integrations");
-    if (integrationsDocument) {	
+    const integrationsDocument = filteredDocumentModels?.find(
+      (model) => model.documentModel.id === "powerhouse/integrations"
+    );
+    if (integrationsDocument) {
       onSelectDocumentModel(integrationsDocument);
     }
-  }
+  };
 
   return (
     <div
       className="w-full h-full bg-white rounded-lg p-4 border border-gray-200 shadow-md mt-4 overflow-x-auto"
-      key={`${Object.keys(state).length}`}
+      key={`${state.length}`}
     >
       <HeaderControls
         statusOptions={statusOptions}
-        onStatusChange={handleStatusChange}
+        onStatusChange={onStatusChange}
         onBatchAction={onBatchAction}
         onExport={handleCSVExport}
-        selectedStatuses={selectedInvoiceStatuses}
+        selectedStatuses={selectedStatuses}
         createIntegrationsDocument={createIntegrationsDocument}
         integrationsDoc={integrationsDoc}
         setActiveDocumentId={setActiveDocumentId}
+        canExportSelectedRows={canExportSelectedRows}
       />
       {shouldShowSection("DRAFT") && (
         <InvoiceTableSection
@@ -391,10 +383,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -429,10 +418,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -473,10 +459,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -517,10 +500,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -561,10 +541,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -605,10 +582,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -648,10 +622,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -689,10 +660,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
@@ -726,10 +694,7 @@ export const InvoiceTable = ({
                   row={row}
                   isSelected={!!selected[row.id]}
                   onSelect={(checked) =>
-                    setSelected((prev: { [id: string]: boolean }) => ({
-                      ...prev,
-                      [row.id]: checked,
-                    }))
+                    onRowSelection(row.id, checked, row.status)
                   }
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}

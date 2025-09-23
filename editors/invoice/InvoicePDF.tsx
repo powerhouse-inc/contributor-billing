@@ -453,6 +453,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                       <Text style={styles.companyInfoLabel}></Text>
                       <Text style={styles.companyInfo} wrap>
                         {invoice.issuer.address?.city || ""},{" "}
+                        {invoice.issuer.address?.stateProvince || ""},{" "}
                         {getCountryName(
                           invoice.issuer.address?.country || ""
                         ) || ""}
@@ -518,6 +519,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                       <Text style={styles.companyInfoLabel}></Text>
                       <Text style={styles.companyInfo} wrap>
                         {invoice.payer.address?.city || ""},{" "}
+                        {invoice.payer.address?.stateProvince || ""},{" "}
                         {getCountryName(invoice.payer.address?.country || "") ||
                           ""}
                       </Text>
@@ -792,6 +794,7 @@ const PaymentSectionFiat: React.FC<{ paymentRouting: any }> = ({
           <Text style={styles.companyInfoLabel}></Text>
           <Text style={styles.companyInfo}>
             {paymentRouting.bank?.address?.city || ""},{" "}
+            {paymentRouting.bank?.address?.stateProvince || ""},{" "}
             {getCountryName(paymentRouting.bank?.address?.country || "") || ""}
           </Text>
         </View>

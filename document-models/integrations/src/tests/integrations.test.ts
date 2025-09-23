@@ -33,10 +33,10 @@ describe("Integrations Operations", () => {
     );
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe(
+    expect((updatedDocument.operations.global[0] as any).type).toBe(
       "SET_REQUEST_FINANCE",
     );
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     expect(updatedDocument.operations.global[0].index).toEqual(0);
     expect(updatedDocument.state.global.requestFinance).toStrictEqual(input);
   });
@@ -49,8 +49,8 @@ describe("Integrations Operations", () => {
     const updatedDocument = reducer(document, creators.setGnosisSafe(input));
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe("SET_GNOSIS_SAFE");
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_GNOSIS_SAFE");
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     expect(updatedDocument.operations.global[0].index).toEqual(0);
     expect(updatedDocument.state.global.gnosisSafe).toStrictEqual(input);
   });
@@ -77,8 +77,8 @@ describe("Integrations Operations", () => {
     const updatedDocument = reducer(document, creators.setGoogleCloud(input));
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe("SET_GOOGLE_CLOUD");
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_GOOGLE_CLOUD");
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     expect(updatedDocument.operations.global[0].index).toEqual(0);
     expect(updatedDocument.state.global.googleCloud).toStrictEqual(input);
   });
