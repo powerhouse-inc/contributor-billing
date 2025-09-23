@@ -8,7 +8,7 @@ export class LineItemProcessorProcessor implements IProcessor {
   }
 
   async onStrands<TDocument extends PHDocument>(
-    strands: InternalTransmitterUpdate<TDocument>[],
+    strands: InternalTransmitterUpdate[],
   ): Promise<void> {
     if (strands.length === 0) {
       return;
@@ -28,7 +28,7 @@ export class LineItemProcessorProcessor implements IProcessor {
       }
 
       for (const operation of strand.operations) {
-        console.log(">>> ", operation.type);
+        console.log(">>> ", (operation as any).type);
       }
     }
   }
