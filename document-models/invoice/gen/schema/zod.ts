@@ -210,6 +210,7 @@ export function EditInvoiceInputSchema(): z.ZodObject<
 > {
   return z.object({
     currency: z.string().nullish(),
+    dateDelivered: z.string().nullish(),
     dateDue: z.string().nullish(),
     dateIssued: z.string().nullish(),
     invoiceNo: z.string().nullish(),

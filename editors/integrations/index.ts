@@ -1,8 +1,7 @@
 import type { EditorModule } from "document-model";
 import Editor from "./editor.js";
-import type { IntegrationsDocument } from "../../document-models/integrations/index.js";
 
-export const module: EditorModule<IntegrationsDocument> = {
+export const module: EditorModule = {
   Component: Editor,
   documentTypes: ["powerhouse/integrations"],
   config: {

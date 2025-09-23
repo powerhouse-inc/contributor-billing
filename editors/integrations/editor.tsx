@@ -5,8 +5,7 @@ import {
 } from "../../document-models/integrations/index.js";
 import { Button } from "@powerhousedao/document-engineering";
 import React, { useState } from "react";
-
-export type IProps = EditorProps<IntegrationsDocument>;
+import { useSelectedDocument } from "@powerhousedao/reactor-browser";
 
 const TABS = [
   { key: "requestFinance", label: "Request Finance" },
@@ -14,8 +13,16 @@ const TABS = [
   { key: "googleCloud", label: "Google Cloud" },
 ];
 
-export default function Editor(props: IProps) {
-  const { document, dispatch } = props;
+export default function Editor(props: any) {
+  let dispatch: any;
+  const { document } = props;
+  if (props?.dispatch) {
+    dispatch = props.dispatch;
+  } else {
+    const selectedDocument = useSelectedDocument();
+    dispatch = selectedDocument[1];
+  }
+
   const [activeTab, setActiveTab] = useState("requestFinance");
 
   // State for each form

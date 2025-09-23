@@ -1,4 +1,4 @@
-import { type BaseAction } from "document-model";
+import { type Action } from "document-model";
 import type {
   EditIssuerInput,
   EditIssuerBankInput,
@@ -8,36 +8,30 @@ import type {
   EditPayerWalletInput,
 } from "../types.js";
 
-export type EditIssuerAction = BaseAction<
-  "EDIT_ISSUER",
-  EditIssuerInput,
-  "global"
->;
-export type EditIssuerBankAction = BaseAction<
-  "EDIT_ISSUER_BANK",
-  EditIssuerBankInput,
-  "global"
->;
-export type EditIssuerWalletAction = BaseAction<
-  "EDIT_ISSUER_WALLET",
-  EditIssuerWalletInput,
-  "global"
->;
-export type EditPayerAction = BaseAction<
-  "EDIT_PAYER",
-  EditPayerInput,
-  "global"
->;
-export type EditPayerBankAction = BaseAction<
-  "EDIT_PAYER_BANK",
-  EditPayerBankInput,
-  "global"
->;
-export type EditPayerWalletAction = BaseAction<
-  "EDIT_PAYER_WALLET",
-  EditPayerWalletInput,
-  "global"
->;
+export type EditIssuerAction = Action & {
+  type: "EDIT_ISSUER";
+  input: EditIssuerInput;
+};
+export type EditIssuerBankAction = Action & {
+  type: "EDIT_ISSUER_BANK";
+  input: EditIssuerBankInput;
+};
+export type EditIssuerWalletAction = Action & {
+  type: "EDIT_ISSUER_WALLET";
+  input: EditIssuerWalletInput;
+};
+export type EditPayerAction = Action & {
+  type: "EDIT_PAYER";
+  input: EditPayerInput;
+};
+export type EditPayerBankAction = Action & {
+  type: "EDIT_PAYER_BANK";
+  input: EditPayerBankInput;
+};
+export type EditPayerWalletAction = Action & {
+  type: "EDIT_PAYER_WALLET";
+  input: EditPayerWalletInput;
+};
 
 export type InvoicePartiesAction =
   | EditIssuerAction

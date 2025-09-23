@@ -1,18 +1,21 @@
 import {
-  type DocumentModelUtils,
+  type CreateDocument,
+  type CreateState,
+  type LoadFromFile,
+  type LoadFromInput,
   baseCreateDocument,
-  baseCreateExtendedState,
   baseSaveToFile,
   baseSaveToFileHandle,
   baseLoadFromFile,
   baseLoadFromInput,
+  defaultBaseState,
   generateId,
 } from "document-model";
 import {
-  type BillingStatementDocument,
   type BillingStatementState,
   type BillingStatementLocalState,
 } from "./types.js";
+import { BillingStatementPHState } from "./ph-factories.js";
 import { reducer } from "./reducer.js";
 
 export const initialGlobalState: BillingStatementState = {
@@ -28,42 +31,50 @@ export const initialGlobalState: BillingStatementState = {
 };
 export const initialLocalState: BillingStatementLocalState = {};
 
-const utils: DocumentModelUtils<BillingStatementDocument> = {
+export const createState: CreateState<BillingStatementPHState> = (state) => {
+  return {
+    ...defaultBaseState(),
+    global: { ...initialGlobalState, ...(state?.global ?? {}) },
+    local: { ...initialLocalState, ...(state?.local ?? {}) },
+  };
+};
+
+export const createDocument: CreateDocument<BillingStatementPHState> = (
+  state,
+) => {
+  const document = baseCreateDocument(createState, state);
+  document.header.documentType = "powerhouse/billing-statement";
+  // for backwards compatibility, but this is NOT a valid signed document id
+  document.header.id = generateId();
+  return document;
+};
+
+export const saveToFile = (document: any, path: string, name?: string) => {
+  return baseSaveToFile(document, path, ".phdm", name);
+};
+
+export const saveToFileHandle = (document: any, input: any) => {
+  return baseSaveToFileHandle(document, input);
+};
+
+export const loadFromFile: LoadFromFile<BillingStatementPHState> = (path) => {
+  return baseLoadFromFile(path, reducer);
+};
+
+export const loadFromInput: LoadFromInput<BillingStatementPHState> = (
+  input,
+) => {
+  return baseLoadFromInput(input, reducer);
+};
+
+const utils = {
   fileExtension: ".phdm",
-  createState(state) {
-    return {
-      global: { ...initialGlobalState, ...state?.global },
-      local: { ...initialLocalState, ...state?.local },
-    };
-  },
-  createExtendedState(extendedState) {
-    return baseCreateExtendedState({ ...extendedState }, utils.createState);
-  },
-  createDocument(state) {
-    const document = baseCreateDocument(
-      utils.createExtendedState(state),
-      utils.createState,
-    );
-
-    document.header.documentType = "powerhouse/billing-statement";
-
-    // for backwards compatibility, but this is NOT a valid signed document id
-    document.header.id = generateId();
-
-    return document;
-  },
-  saveToFile(document, path, name) {
-    return baseSaveToFile(document, path, ".phdm", name);
-  },
-  saveToFileHandle(document, input) {
-    return baseSaveToFileHandle(document, input);
-  },
-  loadFromFile(path) {
-    return baseLoadFromFile(path, reducer);
-  },
-  loadFromInput(input) {
-    return baseLoadFromInput(input, reducer);
-  },
+  createState,
+  createDocument,
+  saveToFile,
+  saveToFileHandle,
+  loadFromFile,
+  loadFromInput,
 };
 
 export default utils;

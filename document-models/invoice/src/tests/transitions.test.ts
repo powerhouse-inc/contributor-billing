@@ -44,8 +44,8 @@ describe("Transitions Operations", () => {
 
       expect(updatedDocument.state.global.status).toBe("CANCELLED");
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("CANCEL");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("CANCEL");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
 
     it("should handle DRAFT -> ISSUED transition", () => {
@@ -60,8 +60,8 @@ describe("Transitions Operations", () => {
       expect(updatedDocument.state.global.invoiceNo).toBe("INV-2024-001");
       expect(updatedDocument.state.global.dateIssued).toBe("2024-01-15");
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("ISSUE");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("ISSUE");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
   });
 
@@ -79,8 +79,8 @@ describe("Transitions Operations", () => {
 
       expect(updatedDocument.state.global.status).toBe("DRAFT");
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("RESET");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("RESET");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
   });
 
@@ -107,8 +107,8 @@ describe("Transitions Operations", () => {
       expect(updatedDocument.state.global.rejections[0].reason).toBe("Incorrect pricing information");
       expect(updatedDocument.state.global.rejections[0].final).toBe(false);
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("REJECT");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("REJECT");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
 
     it("should handle ISSUED -> ACCEPTED transition", () => {
@@ -121,8 +121,8 @@ describe("Transitions Operations", () => {
       expect(updatedDocument.state.global.status).toBe("ACCEPTED");
       expect(updatedDocument.state.global.payAfter).toBe("2024-02-15T00:00:00Z");
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("ACCEPT");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("ACCEPT");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
   });
 
@@ -145,8 +145,8 @@ describe("Transitions Operations", () => {
 
       expect(updatedDocument.state.global.status).toBe("ISSUED");
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("REINSTATE");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("REINSTATE");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
 
     it("should not allow REJECTED -> ISSUED transition when final rejection exists", () => {
@@ -185,8 +185,8 @@ describe("Transitions Operations", () => {
       expect(updatedDocument.state.global.payments[0].processorRef).toBe("stripe_pi_123456");
       expect(updatedDocument.state.global.payments[0].confirmed).toBe(false);
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("SCHEDULE_PAYMENT");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("SCHEDULE_PAYMENT");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
 
     it("should handle ACCEPTED -> PAYMENTCLOSED transition", () => {
@@ -199,8 +199,8 @@ describe("Transitions Operations", () => {
       expect(updatedDocument.state.global.status).toBe("PAYMENTCLOSED");
       expect(updatedDocument.state.global.closureReason).toBe("CANCELLED");
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("CLOSE_PAYMENT");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("CLOSE_PAYMENT");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
   });
 
@@ -231,8 +231,8 @@ describe("Transitions Operations", () => {
       expect(updatedDocument.state.global.payments[0].txnRef).toBe("txn_789012");
       expect(updatedDocument.state.global.payments[0].paymentDate).toBe("2024-01-20T10:30:00Z");
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("REGISTER_PAYMENT_TX");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("REGISTER_PAYMENT_TX");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
 
     it("should handle PAYMENTSCHEDULED -> PAYMENTISSUE transition", () => {
@@ -246,8 +246,8 @@ describe("Transitions Operations", () => {
       expect(updatedDocument.state.global.status).toBe("PAYMENTISSUE");
       expect(updatedDocument.state.global.payments[0].issue).toBe("Payment processor timeout");
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("REPORT_PAYMENT_ISSUE");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("REPORT_PAYMENT_ISSUE");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
 
     it("should handle PAYMENTSCHEDULED -> PAYMENTCLOSED transition", () => {
@@ -260,8 +260,8 @@ describe("Transitions Operations", () => {
       expect(updatedDocument.state.global.status).toBe("PAYMENTCLOSED");
       expect(updatedDocument.state.global.closureReason).toBe("CANCELLED");
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("CLOSE_PAYMENT");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("CLOSE_PAYMENT");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
   });
 
@@ -290,8 +290,8 @@ describe("Transitions Operations", () => {
       expect(updatedDocument.state.global.status).toBe("PAYMENTISSUE");
       expect(updatedDocument.state.global.payments[0].issue).toBe("Transaction failed");
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("REPORT_PAYMENT_ISSUE");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("REPORT_PAYMENT_ISSUE");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
 
     it("should handle PAYMENTSENT -> PAYMENTRECEIVED transition", () => {
@@ -306,8 +306,8 @@ describe("Transitions Operations", () => {
       expect(updatedDocument.state.global.payments[0].confirmed).toBe(true);
       expect(updatedDocument.state.global.payments[0].amount).toBe(1500.00);
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("CONFIRM_PAYMENT");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("CONFIRM_PAYMENT");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
   });
 
@@ -334,8 +334,8 @@ describe("Transitions Operations", () => {
 
       expect(updatedDocument.state.global.status).toBe("ACCEPTED");
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("REAPPROVE_PAYMENT");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("REAPPROVE_PAYMENT");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
 
     it("should handle PAYMENTISSUE -> PAYMENTCLOSED transition", () => {
@@ -348,8 +348,8 @@ describe("Transitions Operations", () => {
       expect(updatedDocument.state.global.status).toBe("PAYMENTCLOSED");
       expect(updatedDocument.state.global.closureReason).toBe("CANCELLED");
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("CLOSE_PAYMENT");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("CLOSE_PAYMENT");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
   });
 
@@ -378,8 +378,8 @@ describe("Transitions Operations", () => {
       expect(updatedDocument.state.global.status).toBe("PAYMENTISSUE");
       expect(updatedDocument.state.global.payments[0].issue).toBe("Payment amount discrepancy");
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("REPORT_PAYMENT_ISSUE");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("REPORT_PAYMENT_ISSUE");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
   });
 
@@ -398,8 +398,8 @@ describe("Transitions Operations", () => {
 
       expect(updatedDocument.state.global.status).toBe("ACCEPTED");
       expect(updatedDocument.operations.global).toHaveLength(1);
-      expect(updatedDocument.operations.global[0].type).toBe("REAPPROVE_PAYMENT");
-      expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+      expect((updatedDocument.operations.global[0] as any).type).toBe("REAPPROVE_PAYMENT");
+      expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     });
   });
 

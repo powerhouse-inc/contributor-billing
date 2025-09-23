@@ -69,8 +69,8 @@ export const schema: DocumentNode = gql`
   Queries: BillingStatement
   """
   type BillingStatementQueries {
-    getDocument(driveId: String, docId: PHID): BillingStatement
-    getDocuments: [BillingStatement!]
+    getDocument(docId: PHID!, driveId: PHID): BillingStatement
+    getDocuments(driveId: String!): [BillingStatement!]
   }
 
   type Query {
@@ -81,7 +81,7 @@ export const schema: DocumentNode = gql`
   Mutations: BillingStatement
   """
   type Mutation {
-    BillingStatement_createDocument(driveId: String, name: String): String
+    BillingStatement_createDocument(name: String!, driveId: String): String
 
     BillingStatement_editBillingStatement(
       driveId: String

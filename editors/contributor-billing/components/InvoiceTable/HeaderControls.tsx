@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Input, Select } from "@powerhousedao/document-engineering";
 import ConfirmationModal from "../../../invoice/components/confirmationModal.js";
-import { Icon, UiFileNode } from "@powerhousedao/design-system";
+import { Icon } from "@powerhousedao/design-system";
 
 
 const currencyOptions = [
@@ -23,7 +23,8 @@ export const HeaderControls = ({
   selectedStatuses = [],
   createIntegrationsDocument,
   integrationsDoc,
-  setActiveDocumentId
+  setActiveDocumentId,
+  canExportSelectedRows
 }: {
   contributorOptions?: { label: string; value: string }[];
   statusOptions?: { label: string; value: string }[];
@@ -34,8 +35,9 @@ export const HeaderControls = ({
   onBatchAction?: (action: string) => void;
   selectedStatuses?: string[];
   createIntegrationsDocument?: () => void;
-  integrationsDoc?: UiFileNode | null;
+  integrationsDoc?: any | null;
   setActiveDocumentId?: (id: string) => void;
+  canExportSelectedRows?: () => boolean;
 }) => {
   const batchOptions = [
     { label: "$ Pay Selected", value: "pay" },
@@ -43,18 +45,8 @@ export const HeaderControls = ({
     { label: "Reject Selected", value: "reject" },
   ];
 
-  // Only enable if all selected statuses are in the allowed set
-  const allowedStatuses = [
-    "ACCEPTED",
-    "AWAITINGPAYMENT",
-    "PAYMENTSCHEDULED",
-    "PAYMENTSENT",
-    "PAYMENTRECEIVED",
-    "PAYMENTCLOSED",
-  ];
-  const canExport =
-    selectedStatuses.length > 0 &&
-    selectedStatuses.every((status) => allowedStatuses.includes(status));
+  // Use the function to determine if export should be enabled based on selected rows
+  const canExport = canExportSelectedRows ? canExportSelectedRows() : false;
 
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState("CHF");
@@ -62,7 +54,31 @@ export const HeaderControls = ({
   return (
     <div className="flex flex-col gap-4 mb-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-bold">Powerhouse OH Admin Drive</h3>
+      <div className="flex gap-2 items-center">
+        {/* <Select
+          options={contributorOptions}
+          onChange={onContributorChange}
+          placeholder="Contributor"
+        /> */}
+        <Select
+          style={{
+            width: "200px",
+            height: "30px",
+          }}
+          options={statusOptions}
+          onChange={onStatusChange}
+          placeholder="Status"
+          selectionIcon="checkmark"
+          multiple={true}
+          value={selectedStatuses}
+        />
+        <input
+          type="text"
+          className="border rounded px-2 py-1 text-sm"
+          placeholder="Search"
+          onChange={(e) => onSearchChange?.(e.target.value)}
+        />
+      </div>
         <div className="flex gap-2 items-center">
           <button
             className={`bg-white border border-gray-300 rounded px-3 py-1 text-sm hover:bg-gray-100 ${!canExport ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -97,30 +113,7 @@ export const HeaderControls = ({
           </div>
         </div>
       </div>
-      <div className="flex gap-2 items-center">
-        {/* <Select
-          options={contributorOptions}
-          onChange={onContributorChange}
-          placeholder="Contributor"
-        /> */}
-        <Select
-          style={{
-            width: "200px",
-            height: "30px",
-          }}
-          options={statusOptions}
-          onChange={onStatusChange}
-          placeholder="Status"
-          selectionIcon="checkmark"
-          multiple={true}
-        />
-        <input
-          type="text"
-          className="border rounded px-2 py-1 text-sm"
-          placeholder="Search"
-          onChange={(e) => onSearchChange?.(e.target.value)}
-        />
-      </div>
+      
       {showCurrencyModal && (
         <div className="fixed inset-0">
           <div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded shadow-lg p-6 min-w-[300px] flex flex-col items-center">

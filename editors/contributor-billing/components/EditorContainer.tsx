@@ -1,102 +1,124 @@
+import { getRevisionFromDate, useTimelineItems } from "@powerhousedao/common";
 import {
-  useDriveContext,
-  exportDocument,
-  type User,
-  type DriveEditorContext,
-} from "@powerhousedao/reactor-browser";
-import {
-  type DocumentModelModule,
-  type EditorModule,
-  type EditorProps,
-  type PHDocument,
-} from "document-model";
-import {
+  DefaultEditorLoader,
   DocumentToolbar,
   RevisionHistory,
-  DefaultEditorLoader,
+  type TimelineItem,
 } from "@powerhousedao/design-system";
-import { useState, Suspense, type FC, useCallback } from "react";
+import {
+  exportFile,
+  useDocumentById,
+  useEditorModuleById,
+  useSelectedDocument,
+  useSelectedDrive,
+} from "@powerhousedao/reactor-browser";
+import { Action, PHDocument } from "document-model";
+import { Suspense, useCallback, useState } from "react";
 
-export interface EditorContainerProps {
-  driveId: string;
-  documentId: string;
-  documentType: string;
-  onClose: () => void;
-  title: string;
-  context: DriveEditorContext;
-  documentModelModule: DocumentModelModule<PHDocument>;
-  editorModule: EditorModule;
-}
-
-export const EditorContainer: React.FC<EditorContainerProps> = (props) => {
-  const {
-    title,
-    driveId,
-    context,
-    onClose,
-    documentId,
-    documentType,
-    editorModule,
-    documentModelModule,
-  } = props;
-
+/**
+ * Document editor container that wraps individual document editors.
+ * Handles document loading, toolbar, revision history, and dynamic editor loading.
+ * Customize toolbar actions and editor context here.
+ */
+export const EditorContainer = (props: {
+  handleClose: () => void;
+  activeDocumentId: string;
+}) => {
+  const { handleClose } = props;
+  // UI state for revision history and timeline
+  const [selectedTimelineItem, setSelectedTimelineItem] =
+    useState<TimelineItem | null>(null);
   const [showRevisionHistory, setShowRevisionHistory] = useState(false);
-  const { useDocumentEditorProps } = useDriveContext();
-  const user = context.user as User | undefined;
+  const [selectedDocument, dispatch] = useDocumentById(
+    props.activeDocumentId
+  ) as [
+    PHDocument | undefined,
+    (actionOrActions: Action | Action[] | undefined) => void,
+  ];
+  const [selectedDrive] = useSelectedDrive();
+  // Timeline data for revision history
+  const timelineItems = useTimelineItems(   
+    selectedDocument?.header.id,
+    selectedDocument?.header.createdAtUtcIso,
+    selectedDrive?.header.id
+  );
 
-  const { dispatch, error, document } = useDocumentEditorProps({
-    documentId,
-    documentType,
-    driveId,
-    documentModelModule,
-    user,
-  });
-
-  const onExport = useCallback(async () => {
-    if (document) {
-      const ext = documentModelModule.documentModel.extension;
-      await exportDocument(document, title, ext);
+  // Determine the correct editor based on document type
+  const getEditorForDocumentType = (documentType: string) => {
+    switch (documentType) {
+      case "powerhouse/billing-statement":
+        return "powerhouse-billing-statement-editor";
+      case "powerhouse/invoice":
+        return "powerhouse-invoice-editor";
+      default:
+        return "powerhouse-invoice-editor";
     }
-  }, [document?.header?.revision?.global, document?.header?.revision?.local]);
+  };
 
+  const preferredEditor = selectedDocument?.header.meta?.preferredEditor ?? 
+    getEditorForDocumentType(selectedDocument?.header.documentType || "");
+  
+  const editorModule = useEditorModuleById(
+    preferredEditor
+  );
+
+  // Document export functionality - customize export behavior here
+  const onExport = useCallback(async () => {
+    if (selectedDocument) {
+      await exportFile(selectedDocument);
+    }
+  }, [selectedDocument]);
+
+  // Loading state component
   const loadingContent = (
-    <div className="flex-1 flex justify-center items-center h-full">
-      <DefaultEditorLoader />
+    <div className="flex h-full flex-1 items-center justify-center">
+      Sth wrong with the document
     </div>
   );
 
-  if (!document) return loadingContent;
+  if (!selectedDocument) return loadingContent;
 
-  const EditorComponent = editorModule.Component as FC<EditorProps<PHDocument>>;
+  // Dynamically load the appropriate editor component for this document type
+  const EditorComponent = editorModule?.Component;
+  if (!EditorComponent) return loadingContent;
 
   return showRevisionHistory ? (
+    // Revision history view
     <RevisionHistory
-      documentId={documentId}
-      documentTitle={title}
-      globalOperations={document.operations.global}
-      key={documentId}
-      localOperations={document.operations.local}
+      documentId={selectedDocument.header.id}
+      documentTitle={selectedDocument.header.name}
+      globalOperations={selectedDocument.operations.global}
+      key={selectedDocument.header.id}
+      localOperations={selectedDocument.operations.local}
       onClose={() => setShowRevisionHistory(false)}
     />
   ) : (
+    // Main editor view
     <Suspense fallback={loadingContent}>
+      {/* Document toolbar - customize available actions here */}
       <DocumentToolbar
-        onClose={onClose}
+        onClose={handleClose}
         onExport={onExport}
         onShowRevisionHistory={() => setShowRevisionHistory(true)}
-        onSwitchboardLinkClick={() => {}}
-        title={title}
+        onSwitchboardLinkClick={() => {}} // Customize switchboard integration
+        title={selectedDocument.header.name}
+        timelineButtonVisible={editorModule.config.timelineEnabled}
+        timelineItems={timelineItems.data}
+        onTimelineItemClick={setSelectedTimelineItem}
       />
+      {/* Dynamic editor component based on document type */}
       <EditorComponent
         context={{
-          ...context,
-          getDocumentRevision: context.getDocumentRevision
-            ? (options) => context.getDocumentRevision!(documentId, options)
-            : undefined,
+          readMode: !!selectedTimelineItem,
+          selectedTimelineRevision: getRevisionFromDate(
+            selectedTimelineItem?.startDate,
+            selectedTimelineItem?.endDate,
+            selectedDocument.operations.global
+          ),
         }}
         dispatch={dispatch}
-        document={document}
-        error={error}
+        document={selectedDocument}
+        error={console.error}
       />
     </Suspense>
   );

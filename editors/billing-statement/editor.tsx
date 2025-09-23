@@ -8,13 +8,20 @@ import { CurrencyForm } from "../invoice/components/currencyForm.js";
 import { Textarea } from "@powerhousedao/document-engineering";
 import LineItemsTable from "./components/lineItemsTable.js";
 import { formatNumber } from "../invoice/lineItems.js";
+import { useSelectedDocument } from "@powerhousedao/reactor-browser";
 
-export type IProps = EditorProps<BillingStatementDocument>;
+export type IProps = EditorProps;
 
-export default function Editor(props: IProps) {
-  const { document: doc, dispatch } = props;
-  const state = doc.state.global;
-  // console.log("global state", state);
+export default function Editor(props: any) {
+  let dispatch: any;
+  const { document } = props;
+  if (props?.dispatch) {
+    dispatch = props.dispatch;
+  } else {
+    const selectedDocument = useSelectedDocument();
+    dispatch = selectedDocument[1];
+  }
+  const state = document.state.global;
 
   const [notes, setNotes] = useState(state.notes ?? "");
 
@@ -52,7 +59,7 @@ export default function Editor(props: IProps) {
         </div>
       </div>
       {/* Tables */}
-      
+
       <div className="">
         <LineItemsTable state={state} dispatch={dispatch} />
       </div>
@@ -107,8 +114,12 @@ export default function Editor(props: IProps) {
             </thead>
             <tbody>
               <tr>
-                <td className="border px-4 py-2 text-center">{formatNumber(state.totalCash)}</td>
-                <td className="border px-4 py-2 text-center">{formatNumber(state.totalPowt)}</td>
+                <td className="border px-4 py-2 text-center">
+                  {formatNumber(state.totalCash)}
+                </td>
+                <td className="border px-4 py-2 text-center">
+                  {formatNumber(state.totalPowt)}
+                </td>
               </tr>
             </tbody>
           </table>

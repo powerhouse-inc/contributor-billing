@@ -1,41 +1,60 @@
+import {
+  addDocument,
+  useDocumentModelModules,
+  useSelectedDriveId,
+  useSelectedFolder,
+  type VetraDocumentModelModule,
+} from "@powerhousedao/reactor-browser";
 import { Button } from "@powerhousedao/design-system";
-import { type DocumentModelModule } from "document-model";
 
-interface CreateDocumentProps {
-  documentModels?: DocumentModelModule[];
-  createDocument: (doc: DocumentModelModule) => void;
-}
+/**
+ * Document creation UI component.
+ * Displays available document types as clickable buttons.
+ */
+export const CreateDocument = () => {
+  const selectedDriveId = useSelectedDriveId();
+  const selectedFolder = useSelectedFolder();
+  const documentModelModules = useDocumentModelModules();
 
-function getDocumentSpec(doc: DocumentModelModule) {
-  if ("documentModelState" in doc) {
-    return doc.documentModelState as DocumentModelModule["documentModel"];
+  async function handleAddDocument(module: VetraDocumentModelModule) {
+    console.log("create document module", module);
+    if (!selectedDriveId) {
+      return;
+    }
+    await addDocument(
+      selectedDriveId,
+      `New ${module.documentModel.name} document`,
+      module.documentModel.id,
+      selectedFolder?.id,
+      undefined,
+      undefined,
+      "powerhouse-invoice-editor"
+    );
   }
 
-  return doc.documentModel;
-}
-
-export const CreateDocument: React.FC<CreateDocumentProps> = ({
-  documentModels,
-  createDocument,
-}) => {
   return (
     <div className="px-6">
+      {/* Customize section title here */}
       <h3 className="mb-3 mt-4 text-sm font-bold text-gray-600">
         New document
       </h3>
+      {/* Customize layout by changing flex-wrap, gap, or grid layout */}
       <div className="flex w-full flex-wrap gap-4">
-        {documentModels?.map((doc) => {
-          const spec = getDocumentSpec(doc);
+        {documentModelModules?.map((documentModelModule) => {
           return (
             <Button
-              key={spec.id}
-              color="light"
+              key={documentModelModule.documentModel.id}
+              color="light" // Customize button appearance
               size="small"
               className="cursor-pointer"
-              aria-details={spec.description}
-              onClick={() => createDocument(doc)}
+              title={documentModelModule.documentModel.name}
+              aria-description={documentModelModule.documentModel.description}
+              onClick={() => handleAddDocument(documentModelModule)}
             >
-              <span className="text-sm">{spec.name}</span>
+              {/* Customize document type display format */}
+              <span className="text-sm">
+                {documentModelModule.documentModel.name}
+              </span>
             </Button>
           );
         })}

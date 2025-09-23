@@ -65,8 +65,8 @@ export async function exportInvoicesToXeroCSV(invoiceStates: any[], baseCurrency
   const missingDateIssuedInvoices: string[] = [];
 
   for (let invoiceState of invoiceStates) {
-    const state = invoiceState.global;
-    const invoiceId = invoiceState.id;
+    const state = invoiceState.state.global;
+    const invoiceId = invoiceState.header.id;
     const invoiceName = state.name || invoiceId;
     const items = state.lineItems || [];
     const dateIssued = state.dateIssued;
