@@ -194,6 +194,7 @@ enum InvoiceAccountTypeInput {
 input EditInvoiceInput {
     invoiceNo: String
     dateIssued: String
+    dateDelivered: String
     dateDue: String
     currency: String
     notes: String

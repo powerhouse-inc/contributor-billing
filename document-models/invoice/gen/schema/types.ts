@@ -132,6 +132,7 @@ export type DeleteLineItemInput = {
 
 export type EditInvoiceInput = {
   currency?: InputMaybe<Scalars["String"]["input"]>;
+  dateDelivered?: InputMaybe<Scalars["String"]["input"]>;
   dateDue?: InputMaybe<Scalars["String"]["input"]>;
   dateIssued?: InputMaybe<Scalars["String"]["input"]>;
   invoiceNo?: InputMaybe<Scalars["String"]["input"]>;
