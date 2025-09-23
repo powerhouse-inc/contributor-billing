@@ -147,6 +147,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
             streetAddress: docState.payer.address.streetAddress,
             extendedAddress: docState.payer.address.extendedAddress,
             postalCode: docState.payer.address.postalCode,
+            region: docState.payer.address.stateProvince || "",
           },
         },
         sellerInfo: {
@@ -159,6 +160,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
             streetAddress: docState.issuer.address.streetAddress,
             extendedAddress: docState.issuer.address.extendedAddress,
             postalCode: docState.issuer.address.postalCode,
+            region: docState.issuer.address.stateProvince || "",
           },
         },
         paymentOptions: [
