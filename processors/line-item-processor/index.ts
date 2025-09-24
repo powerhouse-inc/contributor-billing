@@ -1,0 +1,45 @@
+import type { PHDocument } from "document-model";
+import { AnalyticsPath, IAnalyticsStore } from "@powerhousedao/reactor-api";
+import { InternalTransmitterUpdate, IProcessor } from "document-drive";
+
+export class LineItemProcessorProcessor implements IProcessor {
+  constructor(private readonly analyticsStore: IAnalyticsStore) {
+    //
+  }
+
+  async onStrands<TDocument extends PHDocument>(
+    strands: InternalTransmitterUpdate[],
+  ): Promise<void> {
+    if (strands.length === 0) {
+      return;
+    }
+
+    for (const strand of strands) {
+      if (strand.operations.length === 0) {
+        continue;
+      }
+
+      const firstOp = strand.operations[0];
+      const source = AnalyticsPath.fromString(
+        `ph/${strand.driveId}/${strand.documentId}/${strand.branch}/${strand.scope}`,
+      );
+      if (firstOp.index === 0) {
+        await this.clearSource(source);
+      }
+
+      for (const operation of strand.operations) {
+        console.log(">>> ", (operation as any).type);
+      }
+    }
+  }
+
+  async onDisconnect() {}
+
+  private async clearSource(source: AnalyticsPath) {
+    try {
+      await this.analyticsStore.clearSeriesBySource(source, true);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+}
