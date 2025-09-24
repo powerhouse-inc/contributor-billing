@@ -35,21 +35,28 @@ export const HeaderStats = () => {
       for (const doc of invoices) {
         const invoice = doc as any;
         const invoiceAmount = invoice.state.global.totalPriceTaxIncl;
-        let invoiceCurrency = invoice.state.global.currency;
+        let invoiceCurrency = invoice.state.global.currency || 'USD'; // Fallback to USD if currency is empty
         let selectCurrency = selectedCurrency;
         if (invoiceCurrency === selectedCurrency) {
           total += invoiceAmount;
         } else {
           try {
+            // Only convert crypto currencies to USD for the API call
+            let fromCurrency = invoiceCurrency;
+            let toCurrency = selectedCurrency;
+            
+            // Convert crypto to USD for API compatibility
             if (invoiceCurrency === "DAI" || invoiceCurrency === "USDS") {
-              invoiceCurrency = "USD";
+              fromCurrency = "USD";
             }
             if (selectedCurrency === "DAI" || selectedCurrency === "USDS") {
-              selectCurrency = "USD";
+              toCurrency = "USD";
             }
+            
             const exchangeRate = await getExchangeRate(
-              invoiceCurrency,
-              selectCurrency
+              fromCurrency,
+              toCurrency,
+              invoiceAmount
             );
             total += invoiceAmount * exchangeRate;
           } catch (error) {
