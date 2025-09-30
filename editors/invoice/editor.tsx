@@ -37,20 +37,21 @@ import {
 } from "./components/statusModalComponents.js";
 import { InvoiceStateSchema } from "../../document-models/invoice/gen/schema/zod.js";
 import validateStatusBeforeContinue from "./validation/validationHandler.js";
-import { useSelectedDocument } from "@powerhousedao/reactor-browser";
+import { useDocumentById } from "@powerhousedao/reactor-browser";
 
 function isFiatCurrency(currency: string): boolean {
   return currencyList.find((c) => c.ticker === currency)?.crypto === false;
 }
 
 export default function Editor(props: any) {
-  const [doc, dispatch] = useSelectedDocument() as [
+  const [doc, dispatch] = useDocumentById(props.documentId) as [
     InvoiceDocument | undefined,
     any,
   ];
   const state = doc?.state.global;
 
   if (!state) {
+    console.log("Document state not found from document id", props.documentId);
     return null;
   }
 

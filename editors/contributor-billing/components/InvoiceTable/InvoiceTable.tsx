@@ -330,12 +330,26 @@ export const InvoiceTable = ({
   const integrationsDoc = files.find(
     (file) => file.documentType === "powerhouse/integrations"
   );
-  const createIntegrationsDocument = () => {
+  const createIntegrationsDocument = async () => {
     const integrationsDocument = filteredDocumentModels?.find(
       (model) => model.documentModel.id === "powerhouse/integrations"
     );
     if (integrationsDocument) {
-      onSelectDocumentModel(integrationsDocument);
+      const createdNode = await addDocument(
+        selectedDrive?.header.id || "",
+        `integration-settings`,
+        "powerhouse/integrations",
+        undefined,
+        undefined,
+        undefined,
+        "integrations-editor"
+      );
+      console.log("created integrations document", createdNode);
+      if (!createdNode?.id) {
+        console.error("Failed to create integrations document");
+        return null;
+      }
+      setActiveDocumentId(createdNode.id);
     }
   };
 

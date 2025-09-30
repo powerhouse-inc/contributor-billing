@@ -1,11 +1,12 @@
 import type { EditorProps } from "document-model";
 import {
   type IntegrationsDocument,
+  IntegrationsState,
   actions,
 } from "../../document-models/integrations/index.js";
 import { Button } from "@powerhousedao/document-engineering";
 import React, { useState } from "react";
-import { useSelectedDocument } from "@powerhousedao/reactor-browser";
+import { useDocumentById } from "@powerhousedao/reactor-browser";
 
 const TABS = [
   { key: "requestFinance", label: "Request Finance" },
@@ -14,49 +15,46 @@ const TABS = [
 ];
 
 export default function Editor(props: any) {
-  let dispatch: any;
-  const { document } = props;
-  if (props?.dispatch) {
-    dispatch = props.dispatch;
-  } else {
-    const selectedDocument = useSelectedDocument();
-    dispatch = selectedDocument[1];
+  const [doc, dispatch] = useDocumentById(props.documentId) as [
+    IntegrationsDocument | undefined,
+    any,
+  ];
+  const state = doc?.state.global as IntegrationsState;
+
+  if (!state) {
+    console.log("Document state not found from document id", props.documentId);
+    return null;
   }
 
   const [activeTab, setActiveTab] = useState("requestFinance");
 
   // State for each form
   const [requestFinance, setRequestFinance] = useState(() => ({
-    apiKey: document.state.global.requestFinance?.apiKey || "",
-    email: document.state.global.requestFinance?.email || "",
+    apiKey: state.requestFinance?.apiKey || "",
+    email: state.requestFinance?.email || "",
   }));
   const [gnosisSafe, setGnosisSafe] = useState(() => ({
-    safeAddress: document.state.global.gnosisSafe?.safeAddress || "",
-    signerPrivateKey: document.state.global.gnosisSafe?.signerPrivateKey || "",
+    safeAddress: state.gnosisSafe?.safeAddress || "",
+    signerPrivateKey: state.gnosisSafe?.signerPrivateKey || "",
   }));
   const [googleCloud, setGoogleCloud] = useState(() => ({
-    projectId: document.state.global.googleCloud?.projectId || "",
-    location: document.state.global.googleCloud?.location || "",
-    processorId: document.state.global.googleCloud?.processorId || "",
+    projectId: state.googleCloud?.projectId || "",
+    location: state.googleCloud?.location || "",
+    processorId: state.googleCloud?.processorId || "",
     keyFile: {
-      type: document.state.global.googleCloud?.keyFile?.type || "",
-      project_id: document.state.global.googleCloud?.keyFile?.project_id || "",
-      private_key_id:
-        document.state.global.googleCloud?.keyFile?.private_key_id || "",
-      private_key:
-        document.state.global.googleCloud?.keyFile?.private_key || "",
-      client_email:
-        document.state.global.googleCloud?.keyFile?.client_email || "",
-      client_id: document.state.global.googleCloud?.keyFile?.client_id || "",
-      auth_uri: document.state.global.googleCloud?.keyFile?.auth_uri || "",
-      token_uri: document.state.global.googleCloud?.keyFile?.token_uri || "",
+      type: state.googleCloud?.keyFile?.type || "",
+      project_id: state.googleCloud?.keyFile?.project_id || "",
+      private_key_id: state.googleCloud?.keyFile?.private_key_id || "",
+      private_key: state.googleCloud?.keyFile?.private_key || "",
+      client_email: state.googleCloud?.keyFile?.client_email || "",
+      client_id: state.googleCloud?.keyFile?.client_id || "",
+      auth_uri: state.googleCloud?.keyFile?.auth_uri || "",
+      token_uri: state.googleCloud?.keyFile?.token_uri || "",
       auth_provider_x509_cert_url:
-        document.state.global.googleCloud?.keyFile
-          ?.auth_provider_x509_cert_url || "",
+        state.googleCloud?.keyFile?.auth_provider_x509_cert_url || "",
       client_x509_cert_url:
-        document.state.global.googleCloud?.keyFile?.client_x509_cert_url || "",
-      universe_domain:
-        document.state.global.googleCloud?.keyFile?.universe_domain || "",
+        state.googleCloud?.keyFile?.client_x509_cert_url || "",
+      universe_domain: state.googleCloud?.keyFile?.universe_domain || "",
     },
   }));
 
@@ -142,10 +140,9 @@ export default function Editor(props: any) {
                   type="submit"
                   className="hover:bg-gray-200"
                   disabled={
-                    document.state.global.requestFinance?.apiKey ===
+                    state.requestFinance?.apiKey ===
                       requestFinance.apiKey &&
-                    document.state.global.requestFinance?.email ===
-                      requestFinance.email
+                    state.requestFinance?.email === requestFinance.email
                   }
                 >
                   Save
@@ -201,9 +198,9 @@ export default function Editor(props: any) {
                   type="submit"
                   className="hover:bg-gray-200"
                   disabled={
-                    document.state.global.gnosisSafe?.safeAddress ===
+                    state.gnosisSafe?.safeAddress ===
                       gnosisSafe.safeAddress &&
-                    document.state.global.gnosisSafe?.signerPrivateKey ===
+                    state.gnosisSafe?.signerPrivateKey ===
                       gnosisSafe.signerPrivateKey
                   }
                 >
@@ -290,36 +287,35 @@ export default function Editor(props: any) {
                   type="submit"
                   className="hover:bg-gray-200"
                   disabled={
-                    document.state.global.googleCloud?.projectId ===
+                    state.googleCloud?.projectId ===
                       googleCloud.projectId &&
-                    document.state.global.googleCloud?.location ===
+                    state.googleCloud?.location ===
                       googleCloud.location &&
-                    document.state.global.googleCloud?.processorId ===
+                    state.googleCloud?.processorId ===
                       googleCloud.processorId &&
-                    document.state.global.googleCloud?.keyFile?.type ===
+                    state.googleCloud?.keyFile?.type ===
                       googleCloud.keyFile.type &&
-                    document.state.global.googleCloud?.keyFile?.project_id ===
+                    state.googleCloud?.keyFile?.project_id ===
                       googleCloud.keyFile.project_id &&
-                    document.state.global.googleCloud?.keyFile
-                      ?.private_key_id === googleCloud.keyFile.private_key_id &&
-                    document.state.global.googleCloud?.keyFile?.private_key ===
+                    state.googleCloud?.keyFile?.private_key_id ===
+                      googleCloud.keyFile.private_key_id &&
+                    state.googleCloud?.keyFile?.private_key ===
                       googleCloud.keyFile.private_key &&
-                    document.state.global.googleCloud?.keyFile?.client_email ===
+                    state.googleCloud?.keyFile?.client_email ===
                       googleCloud.keyFile.client_email &&
-                    document.state.global.googleCloud?.keyFile?.client_id ===
+                    state.googleCloud?.keyFile?.client_id ===
                       googleCloud.keyFile.client_id &&
-                    document.state.global.googleCloud?.keyFile?.auth_uri ===
+                    state.googleCloud?.keyFile?.auth_uri ===
                       googleCloud.keyFile.auth_uri &&
-                    document.state.global.googleCloud?.keyFile?.token_uri ===
+                    state.googleCloud?.keyFile?.token_uri ===
                       googleCloud.keyFile.token_uri &&
-                    document.state.global.googleCloud?.keyFile
+                    state.googleCloud?.keyFile
                       ?.auth_provider_x509_cert_url ===
                       googleCloud.keyFile.auth_provider_x509_cert_url &&
-                    document.state.global.googleCloud?.keyFile
-                      ?.client_x509_cert_url ===
+                    state.googleCloud?.keyFile?.client_x509_cert_url ===
                       googleCloud.keyFile.client_x509_cert_url &&
-                    document.state.global.googleCloud?.keyFile
-                      ?.universe_domain === googleCloud.keyFile.universe_domain
+                    state.googleCloud?.keyFile?.universe_domain ===
+                      googleCloud.keyFile.universe_domain
                   }
                 >
                   Save

@@ -37,7 +37,7 @@ export const EditorContainer = (props: {
   ];
   const [selectedDrive] = useSelectedDrive();
   // Timeline data for revision history
-  const timelineItems = useTimelineItems(   
+  const timelineItems = useTimelineItems(
     selectedDocument?.header.id,
     selectedDocument?.header.createdAtUtcIso,
     selectedDrive?.header.id
@@ -55,12 +55,11 @@ export const EditorContainer = (props: {
     }
   };
 
-  const preferredEditor = selectedDocument?.header.meta?.preferredEditor ?? 
+  const preferredEditor =
+    selectedDocument?.header.meta?.preferredEditor ??
     getEditorForDocumentType(selectedDocument?.header.documentType || "");
-  
-  const editorModule = useEditorModuleById(
-    preferredEditor
-  );
+
+  const editorModule = useEditorModuleById(preferredEditor);
 
   // Document export functionality - customize export behavior here
   const onExport = useCallback(async () => {
@@ -116,9 +115,7 @@ export const EditorContainer = (props: {
             selectedDocument.operations.global
           ),
         }}
-        dispatch={dispatch}
-        document={selectedDocument}
-        error={console.error}
+        documentId={selectedDocument.header.id}
       />
     </Suspense>
   );

@@ -2,26 +2,28 @@ import { ChangeEvent, useState } from "react";
 import type { EditorProps } from "document-model";
 import {
   type BillingStatementDocument,
+  BillingStatementState,
   actions,
 } from "../../document-models/billing-statement/index.js";
 import { CurrencyForm } from "../invoice/components/currencyForm.js";
 import { Textarea } from "@powerhousedao/document-engineering";
 import LineItemsTable from "./components/lineItemsTable.js";
 import { formatNumber } from "../invoice/lineItems.js";
-import { useSelectedDocument } from "@powerhousedao/reactor-browser";
+import { useDocumentById } from "@powerhousedao/reactor-browser";
 
 export type IProps = EditorProps;
 
 export default function Editor(props: any) {
-  let dispatch: any;
-  const { document } = props;
-  if (props?.dispatch) {
-    dispatch = props.dispatch;
-  } else {
-    const selectedDocument = useSelectedDocument();
-    dispatch = selectedDocument[1];
+  const [doc, dispatch] = useDocumentById(props.documentId) as [
+    BillingStatementDocument | undefined,
+    any,
+  ];
+  const state = doc?.state.global as BillingStatementState;
+
+  if (!state) {
+    console.log("Document state not found from document id", props.documentId);
+    return null;
   }
-  const state = document.state.global;
 
   const [notes, setNotes] = useState(state.notes ?? "");
 
@@ -49,7 +51,7 @@ export default function Editor(props: any) {
         <div className="flex justify-end">
           <span className="mr-2 pt-2">Currency: </span>
           <CurrencyForm
-            currency={props.document.state.global.currency}
+            currency={state.currency}
             handleInputChange={(e: ChangeEvent<HTMLInputElement>) => {
               dispatch(
                 actions.editBillingStatement({ currency: e.target.value })
