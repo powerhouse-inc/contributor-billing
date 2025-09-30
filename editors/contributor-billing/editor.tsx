@@ -12,10 +12,9 @@ import { DriveExplorer } from "./components/DriveExplorer.js";
  * Customize document opening behavior and drive-level actions here.
  */
 export function BaseEditor(props: DriveEditorProps) {
-  const { context, document } = props;
   return (
     <div className="new-drive-explorer" style={{ height: "100%" }}>
-      <DriveExplorer document={document} context={context} />
+      <DriveExplorer {...props} />
     </div>
   );
 }
@@ -28,7 +27,7 @@ export default function Editor(props: DriveEditorProps) {
   const analyticsDatabaseName = appConfig?.analyticsDatabaseName;
   return (
     // Required context providers for drive functionality
-    <DriveContextProvider value={props.context}>
+    <DriveContextProvider value={props.context!}>
       <WagmiContext>
         <AnalyticsProvider databaseName={analyticsDatabaseName}>
           <BaseEditor {...props} />
