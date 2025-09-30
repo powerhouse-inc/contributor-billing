@@ -44,15 +44,15 @@ function isFiatCurrency(currency: string): boolean {
 }
 
 export default function Editor(props: any) {
-  let dispatch: any;
-  const { document: doc } = props;
-  if (props?.dispatch) {
-    dispatch = props.dispatch;
-  } else {
-    const selectedDocument = useSelectedDocument();
-    dispatch = selectedDocument[1];
+  const [doc, dispatch] = useSelectedDocument() as [
+    InvoiceDocument | undefined,
+    any,
+  ];
+  const state = doc?.state.global;
+
+  if (!state) {
+    return null;
   }
-  const state = doc.state.global;
 
   // Dynamic property check based on the actual schema
   try {
@@ -353,10 +353,10 @@ export default function Editor(props: any) {
       const pdfBlob = await generatePDFBlob();
 
       // Generate filename based on invoice number
-      const filename = `invoice_${state.invoiceNo || "export"}.xml`;
+      const filename = `invoice_${state!.invoiceNo || "export"}.xml`;
 
       return await downloadUBL({
-        invoice: state,
+        invoice: state!,
         filename,
         pdfBlob, // Pass the PDF blob to be embedded in the UBL file
       });
@@ -387,8 +387,8 @@ export default function Editor(props: any) {
       try {
         root.render(
           <PDFDownloadLink
-            document={<InvoicePDF invoice={state} fiatMode={fiatMode} />}
-            fileName={`invoice-${state.invoiceNo || "export"}.pdf`}
+            document={<InvoicePDF invoice={state!} fiatMode={fiatMode} />}
+            fileName={`invoice-${state!.invoiceNo || "export"}.pdf`}
             className="hidden"
           >
             {({ blob, url, loading, error }) => {
