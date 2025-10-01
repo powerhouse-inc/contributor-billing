@@ -1,25 +1,25 @@
-import { CreateDocumentModal, useDrop } from "@powerhousedao/design-system";
+import {
+  CreateDocumentModal,
+  ToastContainer,
+} from "@powerhousedao/design-system";
 import {
   addDocument,
   type DriveEditorProps,
   useDocumentModelModules,
-  useDriveContext,
-  useDriveSharingType,
   useEditorModules,
   useFileChildNodes,
   useSelectedDrive,
   useSelectedDriveDocuments,
   useSelectedFolder,
-  useSelectedNodePath,
+  useNodeActions,
+  showDeleteNodeModal,
 } from "@powerhousedao/reactor-browser";
-import { type Node } from "document-drive";
 import type { DocumentModelModule } from "document-model";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EditorContainer } from "./EditorContainer.js";
 import { InvoiceTable } from "./InvoiceTable/InvoiceTable.js";
-import { twMerge } from "tailwind-merge";
-import { ToastContainer } from "@powerhousedao/design-system";
 import { HeaderStats } from "./InvoiceTable/HeaderStats.js";
+import type { Node } from "document-drive";
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
@@ -42,27 +42,15 @@ export function DriveExplorer(props: DriveEditorProps) {
   const [openModal, setOpenModal] = useState(false);
   const selectedDocumentModel = useRef<DocumentModelModule | null>(null);
   const editorModules = useEditorModules();
-  // === DRIVE CONTEXT HOOKS ===
-  // Core drive operations and document models
-  const { onAddFile, onAddFolder, onCopyNode, onMoveNode } = useDriveContext();
+
+  // === NODE ACTIONS HOOK ===
+  // Get all node operations from reactor-browser
+  const { onRenameNode, onDuplicateNode } = useNodeActions();
 
   // === STATE MANAGEMENT HOOKS ===
   // Core state hooks for drive navigation
   const [selectedDrive] = useSelectedDrive(); // Currently selected drive
   const selectedFolder = useSelectedFolder(); // Currently selected folder
-  const selectedNodePath = useSelectedNodePath();
-  const sharingType = useDriveSharingType(selectedDrive?.header.id);
-
-  // === DROP HOOKS ===
-  const { isDropTarget, dropProps } = useDrop({
-    node:
-      selectedNodePath?.length > 0
-        ? (selectedNodePath[selectedNodePath.length - 1] as Node)
-        : undefined,
-    onAddFile,
-    onCopyNode,
-    onMoveNode,
-  });
 
   const fileChildren = useFileChildNodes();
 
@@ -71,12 +59,15 @@ export function DriveExplorer(props: DriveEditorProps) {
   const state = allDocuments;
 
   // Handler for row selection (does not affect status filter display)
-  const handleRowSelection = useCallback((rowId: string, checked: boolean, rowStatus: string) => {
-    setSelected((prev: { [id: string]: boolean }) => ({
-      ...prev,
-      [rowId]: checked,
-    }));
-  }, []);
+  const handleRowSelection = useCallback(
+    (rowId: string, checked: boolean, rowStatus: string) => {
+      setSelected((prev: { [id: string]: boolean }) => ({
+        ...prev,
+        [rowId]: checked,
+      }));
+    },
+    []
+  );
 
   // Determine if CSV export should be enabled based on selected rows
   const canExportSelectedRows = useCallback(() => {
@@ -90,13 +81,16 @@ export function DriveExplorer(props: DriveEditorProps) {
     ];
 
     // Get all selected row IDs
-    const selectedRowIds = Object.keys(selected).filter(id => selected[id]);
-    
+    const selectedRowIds = Object.keys(selected).filter((id) => selected[id]);
+
     if (selectedRowIds.length === 0) return false;
 
     // Check if all selected rows have allowed statuses
-    const selectedRows = state?.filter(doc => selectedRowIds.includes(doc.header.id)) || [];
-    return selectedRows.every(row => allowedStatuses.includes((row.state as any).global.status));
+    const selectedRows =
+      state?.filter((doc) => selectedRowIds.includes(doc.header.id)) || [];
+    return selectedRows.every((row) =>
+      allowedStatuses.includes((row.state as any).global.status)
+    );
   }, [selected, state]);
 
   // Create a stable dispatcher map using useRef only (no useState to avoid re-renders)
@@ -222,29 +216,53 @@ export function DriveExplorer(props: DriveEditorProps) {
   const getDocDispatcher = (id: string) => {
     return dispatchersRef.current.get(id) || null;
   };
+
   // === EVENT HANDLERS ===
 
-  // Handle folder creation with optional name parameter
-  const handleCreateFolder = useCallback(
-    async (folderName?: string) => {
-      let name: string | undefined = folderName;
-
-      // If no name provided, prompt for it (for manual folder creation)
-      if (!name) {
-        const promptResult = prompt("Enter folder name:");
-        name = promptResult || undefined;
-      }
-
-      if (name?.trim()) {
-        try {
-          await onAddFolder(name.trim(), selectedFolder);
-        } catch (error) {
-          console.error("Failed to create folder:", error);
-        }
+  // Wrapper for rename that handles node ID
+  const handleRenameNode = useCallback(
+    async (nodeId: string, newName: string) => {
+      const node = fileChildren.find((n) => n.id === nodeId);
+      if (node) {
+        await onRenameNode(newName, node);
       }
     },
-    [onAddFolder, selectedFolder]
+    [fileChildren, onRenameNode]
   );
+
+  // Wrapper for delete that clears selection
+  const handleDeleteNode = useCallback(
+    async (nodeId: string) => {
+      const node = fileChildren.find((n) => n.id === nodeId);
+      if (
+        node &&
+        window.confirm(`Are you sure you want to delete "${node.name}"?`)
+      ) {
+        // Delete via context menu or direct call
+        // The FileItem component will call showDeleteNodeModal instead
+        setSelected((prev) => {
+          const newSelected = { ...prev };
+          delete newSelected[nodeId];
+          return newSelected;
+        });
+      }
+    },
+    [fileChildren]
+  );
+
+  // Wrapper for showDeleteNodeModal (for FileItem) - uses the reactor-browser function
+  const handleShowDeleteModal = useCallback(async (node: Node) => {
+    showDeleteNodeModal(node.id);
+
+    // Clear selection after deletion is confirmed
+    setSelected((prev) => {
+      const newSelected = { ...prev };
+      delete newSelected[node.id];
+      return newSelected;
+    });
+
+    return undefined;
+  }, []);
 
   // Handle document creation from modal
   const onCreateDocument = useCallback(
@@ -300,7 +318,6 @@ export function DriveExplorer(props: DriveEditorProps) {
     ? fileChildren.find((file) => file.id === activeDocumentId)
     : undefined;
 
-
   const documentModelModule = activeDocument
     ? documentModelModules?.find(
         (m) => m.documentModel.id === activeDocument.documentType
@@ -313,22 +330,11 @@ export function DriveExplorer(props: DriveEditorProps) {
       )
     : null;
 
-
   // === RENDER ===
 
-  // console.log("files", fileChildren);
-  // console.log("state", state);
-  // console.log("isDropTarget", isDropTarget);
-  // console.log("dropProps", dropProps);
   return (
     <div className="flex h-full editor-container">
-      <div
-        {...dropProps}
-        className={twMerge(
-          "rounded-md border-2 border-transparent ",
-          isDropTarget && "border-dashed border-blue-100"
-        )}
-      >
+      <div className="h-full">
         <ToastContainer
           position="bottom-right"
           autoClose={5000}
@@ -360,8 +366,13 @@ export function DriveExplorer(props: DriveEditorProps) {
                 selected={selected}
                 setSelected={setSelected}
                 onBatchAction={() => {}}
-                onDeleteNode={() => {}}
-                renameNode={() => {}}
+                onDeleteNode={handleDeleteNode}
+                renameNode={handleRenameNode}
+                onDuplicateNode={async (node: Node) => {
+                  await onDuplicateNode(node);
+                  return undefined;
+                }}
+                showDeleteNodeModal={handleShowDeleteModal}
                 filteredDocumentModels={documentModelModules}
                 onSelectDocumentModel={onSelectDocumentModel}
                 getDocDispatcher={getDocDispatcher}

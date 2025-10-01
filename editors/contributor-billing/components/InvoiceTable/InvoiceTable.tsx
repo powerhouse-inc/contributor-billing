@@ -1,13 +1,8 @@
 import React from "react";
-import { useState, useMemo } from "react";
 import { HeaderControls } from "./HeaderControls.js";
 import { InvoiceTableSection } from "./InvoiceTableSection.js";
 import { InvoiceTableRow } from "./InvoiceTableRow.js";
-import { type InvoiceLineItem } from "document-models/invoice/index.js";
-import {
-  createPresignedHeader,
-  actions as documentModelActions,
-} from "document-model";
+import type { Node } from "document-drive";
 import { type DocumentModelModule } from "document-model";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
@@ -48,6 +43,8 @@ interface InvoiceTableProps {
   onBatchAction: (action: string) => void;
   onDeleteNode: (nodeId: string) => void;
   renameNode: (nodeId: string, name: string) => void;
+  onDuplicateNode: (node: Node) => Promise<Node | undefined>;
+  showDeleteNodeModal: (node: Node) => Promise<Node | undefined>;
   filteredDocumentModels: DocumentModelModule[];
   onSelectDocumentModel: (model: DocumentModelModule) => void;
   getDocDispatcher: (id: string) => any;
@@ -66,6 +63,8 @@ export const InvoiceTable = ({
   onBatchAction,
   onDeleteNode,
   renameNode,
+  onDuplicateNode,
+  showDeleteNodeModal,
   filteredDocumentModels,
   onSelectDocumentModel,
   getDocDispatcher,
@@ -402,6 +401,8 @@ export const InvoiceTable = ({
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
+                  onDuplicateNode={onDuplicateNode}
+                  showDeleteNodeModal={showDeleteNodeModal}
                 />
               ))}
             </tbody>
@@ -437,6 +438,8 @@ export const InvoiceTable = ({
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
+                  onDuplicateNode={onDuplicateNode}
+                  showDeleteNodeModal={showDeleteNodeModal}
                   onCreateBillingStatement={handleCreateBillingStatement}
                   billingDocStates={billingDocStates}
                 />
@@ -478,6 +481,8 @@ export const InvoiceTable = ({
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
+                  onDuplicateNode={onDuplicateNode}
+                  showDeleteNodeModal={showDeleteNodeModal}
                   onCreateBillingStatement={handleCreateBillingStatement}
                   billingDocStates={billingDocStates}
                 />
@@ -519,6 +524,8 @@ export const InvoiceTable = ({
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
+                  onDuplicateNode={onDuplicateNode}
+                  showDeleteNodeModal={showDeleteNodeModal}
                   onCreateBillingStatement={handleCreateBillingStatement}
                   billingDocStates={billingDocStates}
                 />
@@ -560,6 +567,8 @@ export const InvoiceTable = ({
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
+                  onDuplicateNode={onDuplicateNode}
+                  showDeleteNodeModal={showDeleteNodeModal}
                   onCreateBillingStatement={handleCreateBillingStatement}
                   billingDocStates={billingDocStates}
                 />
@@ -601,6 +610,8 @@ export const InvoiceTable = ({
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
+                  onDuplicateNode={onDuplicateNode}
+                  showDeleteNodeModal={showDeleteNodeModal}
                   onCreateBillingStatement={handleCreateBillingStatement}
                   billingDocStates={billingDocStates}
                 />
@@ -641,6 +652,8 @@ export const InvoiceTable = ({
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
+                  onDuplicateNode={onDuplicateNode}
+                  showDeleteNodeModal={showDeleteNodeModal}
                 />
               ))}
             </tbody>
@@ -679,6 +692,8 @@ export const InvoiceTable = ({
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
+                  onDuplicateNode={onDuplicateNode}
+                  showDeleteNodeModal={showDeleteNodeModal}
                 />
               ))}
             </tbody>
@@ -713,6 +728,8 @@ export const InvoiceTable = ({
                   setActiveDocumentId={setActiveDocumentId}
                   onDeleteNode={handleDelete}
                   renameNode={renameNode}
+                  onDuplicateNode={onDuplicateNode}
+                  showDeleteNodeModal={showDeleteNodeModal}
                 />
               ))}
             </tbody>

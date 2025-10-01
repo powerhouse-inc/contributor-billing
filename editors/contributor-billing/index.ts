@@ -9,6 +9,13 @@ export const module: DriveEditorModule = {
     disableExternalControls: true,
     documentToolbarEnabled: true,
     showSwitchboardLink: true,
+    documentTypes: [
+      "powerhouse/invoice",
+      "powerhouse/billing-statement",
+    ],
+    dragAndDrop: {
+      enabled: true,
+    },
   },
 };
 

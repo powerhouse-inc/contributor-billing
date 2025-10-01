@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { RowActionMenu } from "./RowActionMenu.js";
 import { FileItem } from "@powerhousedao/design-system";
-import { useDriveContext } from "@powerhousedao/reactor-browser";
+import type { Node } from "document-drive";
 
 export const InvoiceTableRow = ({
   files,
@@ -11,6 +11,8 @@ export const InvoiceTableRow = ({
   setActiveDocumentId,
   onDeleteNode,
   renameNode,
+  onDuplicateNode,
+  showDeleteNodeModal,
   onCreateBillingStatement,
   billingDocStates,
 }: {
@@ -21,6 +23,8 @@ export const InvoiceTableRow = ({
   setActiveDocumentId: (id: string) => void;
   onDeleteNode: (nodeId: string) => void;
   renameNode: (nodeId: string, name: string) => void;
+  onDuplicateNode?: (node: Node) => Promise<Node | undefined>;
+  showDeleteNodeModal?: (node: Node) => Promise<Node | undefined>;
   onCreateBillingStatement?: (id: string) => void;
   billingDocStates?: { id: string; contributor: string }[];
 }) => {
@@ -71,15 +75,19 @@ export const InvoiceTableRow = ({
   const hasExportedData =
     row.exported != null && Boolean(row.exported.timestamp?.trim());
 
-  const {
-    onAddFile,
-    onAddFolder,
-    onCopyNode,
-    onDuplicateNode,
-    onMoveNode,
-    onRenameNode,
-    showDeleteNodeModal,
-  } = useDriveContext();
+  // Wrapper functions for FileItem that convert between nodeId and Node
+  const handleRenameNode = async (newName: string, node: Node) => {
+    await renameNode(node.id, newName);
+    return undefined;
+  };
+
+  const handleDuplicateNode = async (node: Node): Promise<void> => {
+    if (onDuplicateNode) {
+      await onDuplicateNode(node);
+    }
+  };
+  
+  const handleShowDeleteModal = showDeleteNodeModal || (async () => undefined);
 
   return (
     <tr className="hover:bg-gray-50">
@@ -97,9 +105,9 @@ export const InvoiceTableRow = ({
             key={row.id}
             fileNode={file as any}
             sharingType="PUBLIC"
-            onRenameNode={onRenameNode}
-            onDuplicateNode={() => new Promise((resolve) => resolve(undefined))}
-            showDeleteNodeModal={showDeleteNodeModal}
+            onRenameNode={handleRenameNode}
+            onDuplicateNode={handleDuplicateNode}
+            showDeleteNodeModal={handleShowDeleteModal}
             isAllowedToCreateDocuments={true}
             className="h-10"
             onAddFile={() => new Promise((resolve) => resolve(undefined))}
@@ -140,9 +148,9 @@ export const InvoiceTableRow = ({
             key={billingDoc?.id}
             fileNode={billingFile as any}
             sharingType="PUBLIC"
-            onRenameNode={onRenameNode}
-            onDuplicateNode={() => new Promise((resolve) => resolve(undefined))}
-            showDeleteNodeModal={showDeleteNodeModal}
+            onRenameNode={handleRenameNode}
+            onDuplicateNode={handleDuplicateNode}
+            showDeleteNodeModal={handleShowDeleteModal}
             isAllowedToCreateDocuments={true}
             className="h-10"
             onAddFile={() => new Promise((resolve) => resolve(undefined))}
