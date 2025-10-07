@@ -84,6 +84,7 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.2.12",
     "@eslint/js": "^9.25.0",
+    "@playwright/test": "^1.56.0",
     "@powerhousedao/analytics-engine-core": "^0.5.0",
     "@powerhousedao/codegen": "^5.0.0-staging.21",
     "@powerhousedao/ph-cli": "^5.0.0-staging.21",
