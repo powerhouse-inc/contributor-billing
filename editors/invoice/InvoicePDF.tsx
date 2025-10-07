@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     fontFamily: "Helvetica",
   },
   invoiceNumber: {
-    fontSize: 12,
+    fontSize: 11,
     marginLeft: 0,
   },
   section: {
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     fontWeight: "normal",
   },
   tableCol40: {
-    width: "38%",
+    width: "30%",
     paddingRight: 8,
   },
   tableCol15: {
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   tableCol12: {
-    width: "12%",
+    width: "15%",
     textAlign: "right",
   },
   tableCol18: {
@@ -219,17 +219,9 @@ const styles = StyleSheet.create({
     marginTop: -15,
     marginLeft: -15,
   },
-  statusLabel: {
-    fontSize: 14,
-    marginTop: -13,
-    fontFamily: "Helvetica",
-    fontWeight: "normal",
-    color: "#9ea0a2",
-    marginRight: 4,
-  },
   invoiceLabel: {
-    fontSize: 14,
-    marginRight: 8,
+    fontSize: 11,
+    marginRight: 2,
     marginBottom: 4,
     fontFamily: "Helvetica",
     color: "#9ea0a2",
@@ -360,7 +352,6 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
             {/* Only show header and info on first page */}
             {pageIndex === 0 && (
               <>
-                {/* Top Row: Logo (left) and Invoice of (right) */}
                 <View
                   style={{
                     flexDirection: "row",
@@ -379,7 +370,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                       style={{
                         fontSize: 18,
                         fontWeight: "bold",
-                      marginBottom: 20,
+                        marginBottom: 20,
                         paddingRight: 100,
                         marginRight: 0,
                       }}
@@ -387,64 +378,54 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     >
                       {invoice.issuer.name}
                     </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "flex-start",
-                      gap: 24,
-                      flexWrap: "nowrap",
-                    }}
-                  >
-                    <View>
-                      <Text style={styles.invoiceLabel}>Invoice number</Text>
-                      <Text style={styles.invoiceNumber}>
-                        {invoice.invoiceNo}
-                      </Text>
-                    </View>
+
                     <View
                       style={{
                         flexDirection: "row",
-                        gap: 20,
+                        gap: 10,
                         alignItems: "flex-start",
+                        width: "100%",
+                        flexWrap: "nowrap",
                       }}
                     >
-                      <View>
+                      <View style={{ width: "30%" }}>
+                        <Text style={styles.invoiceLabel}>Invoice number</Text>
+                        <Text style={[styles.invoiceNumber]} wrap>
+                          {invoice.invoiceNo}
+                        </Text>
+                      </View>
+                      <View style={{ width: "15%" }}>
                         <Text style={styles.invoiceLabel}>Invoice date</Text>
                         <Text style={styles.invoiceNumber}>
                           {formatDate(invoice.dateIssued)}
                         </Text>
                       </View>
                       {invoice.dateDelivered && (
-                        <View>
+                        <View style={{ width: "15%" }}>
                           <Text style={styles.invoiceLabel}>Delivery date</Text>
                           <Text style={styles.invoiceNumber}>
                             {formatDate(invoice.dateDelivered)}
                           </Text>
                         </View>
                       )}
-                      <View>
+                      <View style={{ width: "20%" }}>
                         <Text style={styles.invoiceLabel}>Due date</Text>
                         <Text style={styles.invoiceNumber}>
                           {formatDate(invoice.dateDue)}
                         </Text>
                       </View>
-                      <View>
+                      <View style={{ width: "20%" }}>
                         <Text style={styles.invoiceLabel}>
                           Invoice of {invoice.currency}
                         </Text>
                         <Text
-                          style={[
-                            styles.invoiceNumber,
-                            { fontWeight: "bold" },
-                          ]}
+                          style={[styles.invoiceNumber, { fontWeight: "bold" }]}
                         >
                           {formatNumber(invoice.totalPriceTaxIncl)}
                         </Text>
                       </View>
                     </View>
                   </View>
-                  </View>
-                  <View></View>
                 </View>
 
                 {/* Issuer and Payer Information */}
@@ -799,7 +780,7 @@ const PaymentSectionFiat: React.FC<{ paymentRouting: any }> = ({
           </Text>
         </View>
       </View>
-      <View style={[styles.gridColumn]}>
+      <View style={[styles.gridColumn, { paddingLeft: 12 }]}>
         <View style={styles.row}>
           <Text style={styles.companyInfoLabel}>Beneficiary:</Text>
           <Text style={styles.companyInfo}>
@@ -989,9 +970,7 @@ const InvoiceLineItem: React.FC<{ item: any; currency: string }> = ({
         </Text>
       )}
     </View>
-    <Text style={styles.tableCol15}>
-      {item.quantity.toFixed(2)}
-    </Text>
+    <Text style={styles.tableCol15}>{item.quantity.toFixed(2)}</Text>
     <Text style={styles.tableCol18}>
       {formatCurrency(item.unitPriceTaxExcl, currency)}
     </Text>
