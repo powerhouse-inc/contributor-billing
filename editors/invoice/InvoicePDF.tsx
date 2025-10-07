@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   tableRow: {
     flexDirection: "row",
     borderBottomWidth: 0,
-    padding: 8,
+    paddingVertical: 8,
     fontSize: 10,
     alignItems: "flex-start",
   },
@@ -122,11 +122,19 @@ const styles = StyleSheet.create({
     fontWeight: "normal",
   },
   tableCol40: {
-    width: "40%",
+    width: "38%",
     paddingRight: 8,
   },
   tableCol15: {
     width: "15%",
+    textAlign: "right",
+  },
+  tableCol12: {
+    width: "12%",
+    textAlign: "right",
+  },
+  tableCol18: {
+    width: "20%",
     textAlign: "right",
   },
   totals: {
@@ -144,15 +152,15 @@ const styles = StyleSheet.create({
   totalLabel: {
     marginRight: 8,
     color: "#6B7280",
-    fontSize: 14,
+    fontSize: 10,
     fontWeight: "normal",
     width: 120,
     textAlign: "right",
   },
   totalValue: {
-    minWidth: 100,
+    width: 160,
     textAlign: "right",
-    fontSize: 14,
+    fontSize: 10,
     fontWeight: "normal",
     color: "#374151",
   },
@@ -168,15 +176,15 @@ const styles = StyleSheet.create({
   totalLabelBold: {
     marginRight: 8,
     color: "#000",
-    fontSize: 16,
+    fontSize: 10,
     fontWeight: "bold",
     width: 120,
     textAlign: "right",
   },
   totalValueBold: {
-    minWidth: 100,
+    width: 160,
     textAlign: "right",
-    fontSize: 16,
+    fontSize: 10,
     fontWeight: "bold",
     color: "#000",
   },
@@ -221,7 +229,7 @@ const styles = StyleSheet.create({
   },
   invoiceLabel: {
     fontSize: 14,
-    marginRight: 4,
+    marginRight: 8,
     marginBottom: 4,
     fontFamily: "Helvetica",
     color: "#9ea0a2",
@@ -280,7 +288,8 @@ const formatDate = (dateString: Maybe<string>) => {
 const formatCurrency = (amount: number, currency: string) => {
   // Format number with appropriate decimal places
   const formattedAmount = formatNumber(amount);
-  return `${formattedAmount} ${currency}`;
+  // Use non-breaking space to keep currency inline with value
+  return `${formattedAmount}\u00A0${currency}`;
 };
 
 // Helper function to format numbers with appropriate decimal places
@@ -363,40 +372,79 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     style={{
                       flexDirection: "column",
                       alignItems: "flex-start",
+                      marginRight: 0,
                     }}
                   >
-                    {/* <Image style={styles.logo} src={powerhouseLogo} /> */}
                     <Text
                       style={{
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: "bold",
-                        marginBottom: 10,
-                        paddingRight: 65,
-                        marginRight: 20,
+                      marginBottom: 20,
+                        paddingRight: 100,
+                        marginRight: 0,
                       }}
+                      hyphenationCallback={(word) => [word]}
                     >
                       {invoice.issuer.name}
                     </Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "flex-start",
+                      gap: 24,
+                      flexWrap: "nowrap",
+                    }}
+                  >
                     <View>
                       <Text style={styles.invoiceLabel}>Invoice number</Text>
                       <Text style={styles.invoiceNumber}>
                         {invoice.invoiceNo}
                       </Text>
                     </View>
-                  </View>
-                  <View style={{ alignItems: "flex-end" }}>
-                    <Text style={styles.invoiceLabel}>
-                      Invoice of ({invoice.currency})
-                    </Text>
-                    <Text
-                      style={[
-                        styles.invoiceNumber,
-                        { fontSize: 18, fontWeight: "bold" },
-                      ]}
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        gap: 20,
+                        alignItems: "flex-start",
+                      }}
                     >
-                      {formatNumber(invoice.totalPriceTaxIncl)}
-                    </Text>
+                      <View>
+                        <Text style={styles.invoiceLabel}>Invoice date</Text>
+                        <Text style={styles.invoiceNumber}>
+                          {formatDate(invoice.dateIssued)}
+                        </Text>
+                      </View>
+                      {invoice.dateDelivered && (
+                        <View>
+                          <Text style={styles.invoiceLabel}>Delivery date</Text>
+                          <Text style={styles.invoiceNumber}>
+                            {formatDate(invoice.dateDelivered)}
+                          </Text>
+                        </View>
+                      )}
+                      <View>
+                        <Text style={styles.invoiceLabel}>Due date</Text>
+                        <Text style={styles.invoiceNumber}>
+                          {formatDate(invoice.dateDue)}
+                        </Text>
+                      </View>
+                      <View>
+                        <Text style={styles.invoiceLabel}>
+                          Invoice of {invoice.currency}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.invoiceNumber,
+                            { fontWeight: "bold" },
+                          ]}
+                        >
+                          {formatNumber(invoice.totalPriceTaxIncl)}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
+                  </View>
+                  <View></View>
                 </View>
 
                 {/* Issuer and Payer Information */}
@@ -410,10 +458,11 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                   {/* Issuer */}
                   <View
                     style={{
-                      width: "50%",
+                      width: "48%",
                       minWidth: 0,
                       flexDirection: "column",
-                      paddingRight: 65,
+                      paddingRight: 30,
+                      marginRight: 20,
                     }}
                   >
                     <Text style={styles.sectionTitle}>Issuer</Text>
@@ -478,15 +527,21 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                   {/* Payer */}
                   <View
                     style={{
-                      width: "47%",
+                      width: "48%",
                       minWidth: 0,
                       flexDirection: "column",
+                      paddingRight: 0,
+                      marginRight: 10,
                     }}
                   >
                     <Text style={styles.sectionTitle}>Payer</Text>
                     <View style={styles.row}>
                       <Text style={styles.companyInfoLabel}>Name:</Text>
-                      <Text style={styles.companyInfo} wrap>
+                      <Text
+                        style={styles.companyInfo}
+                        wrap
+                        hyphenationCallback={(word) => [word]}
+                      >
                         {invoice.payer.name}
                       </Text>
                     </View>
@@ -503,21 +558,39 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     </View>
                     <View style={styles.row}>
                       <Text style={styles.companyInfoLabel}>Address:</Text>
-                      <Text style={styles.companyInfo} wrap>
+                      <Text
+                        style={styles.companyInfo}
+                        wrap
+                        hyphenationCallback={(word) => [word]}
+                      >
                         {invoice.payer.address?.streetAddress || ""}
                       </Text>
                     </View>
                     {invoice.payer.address?.extendedAddress && (
                       <View style={styles.row}>
-                        <Text style={styles.companyInfoLabel}></Text>
-                        <Text style={styles.companyInfo} wrap>
+                        <Text
+                          style={styles.companyInfoLabel}
+                          hyphenationCallback={(word) => [word]}
+                        ></Text>
+                        <Text
+                          style={styles.companyInfo}
+                          wrap
+                          hyphenationCallback={(word) => [word]}
+                        >
                           {invoice.payer.address?.extendedAddress || ""}
                         </Text>
                       </View>
                     )}
                     <View style={styles.row}>
-                      <Text style={styles.companyInfoLabel}></Text>
-                      <Text style={styles.companyInfo} wrap>
+                      <Text
+                        style={styles.companyInfoLabel}
+                        hyphenationCallback={(word) => [word]}
+                      ></Text>
+                      <Text
+                        style={styles.companyInfo}
+                        wrap
+                        hyphenationCallback={(word) => [word]}
+                      >
                         {invoice.payer.address?.city || ""},{" "}
                         {invoice.payer.address?.stateProvince || ""},{" "}
                         {getCountryName(invoice.payer.address?.country || "") ||
@@ -526,8 +599,11 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     </View>
                     <View style={styles.row}>
                       <Text style={styles.companyInfoLabel}>Postcode:</Text>
-                      <Text style={styles.companyInfo}>
-                        {invoice.payer.address?.postalCode || "00000"}
+                      <Text
+                        style={styles.companyInfo}
+                        hyphenationCallback={(word) => [word]}
+                      >
+                        {invoice.payer.address?.postalCode || ""}
                       </Text>
                     </View>
                     {invoice.payer.contactInfo?.email && (
@@ -540,89 +616,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     )}
                   </View>
 
-                  {/* Invoice details (right) */}
-                  <View
-                    style={{
-                      width: "30%",
-                      alignItems: "flex-end",
-                      textAlign: "right",
-                    }}
-                  >
-                    <View style={{ marginBottom: 5, width: "100%" }}>
-                      <Text
-                        style={{
-                          color: "#9ea0a2",
-                          fontSize: 12,
-                          textAlign: "right",
-                          fontFamily: "Helvetica",
-                          fontWeight: "normal",
-                        }}
-                      >
-                        Invoice date
-                      </Text>
-                      <Text
-                        style={{
-                          fontWeight: 4,
-                          fontSize: 12,
-                          textAlign: "right",
-                          color: "#000",
-                          fontFamily: "Helvetica",
-                        }}
-                      >
-                        {formatDate(invoice.dateIssued)}
-                      </Text>
-                    </View>
-                    {invoice.dateDelivered && (
-                      <View style={{ marginBottom: 5, width: "100%" }}>
-                        <Text
-                          style={{
-                            color: "#9ea0a2",
-                            fontSize: 12,
-                            textAlign: "right",
-                            fontFamily: "Helvetica",
-                            fontWeight: "normal",
-                          }}
-                        >
-                          Delivery date
-                        </Text>
-                        <Text
-                          style={{
-                            fontWeight: 4,
-                            fontSize: 12,
-                            textAlign: "right",
-                            color: "#000",
-                            fontFamily: "Helvetica",
-                          }}
-                        >
-                          {formatDate(invoice.dateDelivered)}
-                        </Text>
-                      </View>
-                    )}
-                    <View style={{ marginBottom: 5, width: "100%" }}>
-                      <Text
-                        style={{
-                          color: "#9ea0a2",
-                          fontSize: 12,
-                          textAlign: "right",
-                          fontFamily: "Helvetica",
-                          fontWeight: "normal",
-                        }}
-                      >
-                        Due date
-                      </Text>
-                      <Text
-                        style={{
-                          fontWeight: 4,
-                          fontSize: 12,
-                          textAlign: "right",
-                          color: "#000",
-                          fontFamily: "Helvetica",
-                        }}
-                      >
-                        {formatDate(invoice.dateDue)}
-                      </Text>
-                    </View>
-                  </View>
+                  {/* Right column previously held dates; now empty */}
                 </View>
 
                 {/* Payment Information */}
@@ -648,9 +642,9 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
               <View style={styles.tableHeader}>
                 <Text style={styles.tableCol40}>Description</Text>
                 <Text style={styles.tableCol15}>Quantity</Text>
-                <Text style={styles.tableCol15}>Unit Price</Text>
-                <Text style={styles.tableCol15}>Tax</Text>
-                <Text style={styles.tableCol15}>Total</Text>
+                <Text style={styles.tableCol18}>Unit Price</Text>
+                <Text style={styles.tableCol12}>Tax</Text>
+                <Text style={styles.tableCol18}>Total</Text>
               </View>
               {items.map((item, index) => (
                 <InvoiceLineItem
@@ -862,7 +856,9 @@ const PaymentSectionFiat: React.FC<{ paymentRouting: any }> = ({
             )}
             {paymentRouting.bank?.intermediaryBank?.beneficiary && (
               <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}>Intermediary Beneficiary:</Text>
+                <Text style={styles.companyInfoLabel}>
+                  Intermediary Beneficiary:
+                </Text>
                 <Text style={styles.companyInfo}>
                   {paymentRouting.bank?.intermediaryBank?.beneficiary}
                 </Text>
@@ -876,39 +872,58 @@ const PaymentSectionFiat: React.FC<{ paymentRouting: any }> = ({
                 </Text>
               </View>
             )}
-            {(paymentRouting.bank?.intermediaryBank?.BIC || paymentRouting.bank?.intermediaryBank?.SWIFT) && (
+            {(paymentRouting.bank?.intermediaryBank?.BIC ||
+              paymentRouting.bank?.intermediaryBank?.SWIFT) && (
               <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}>Intermediary BIC/SWIFT:</Text>
+                <Text style={styles.companyInfoLabel}>
+                  Intermediary BIC/SWIFT:
+                </Text>
                 <Text style={styles.companyInfo}>
-                  {paymentRouting.bank?.intermediaryBank?.BIC || paymentRouting.bank?.intermediaryBank?.SWIFT}
+                  {paymentRouting.bank?.intermediaryBank?.BIC ||
+                    paymentRouting.bank?.intermediaryBank?.SWIFT}
                 </Text>
               </View>
             )}
             {paymentRouting.bank?.intermediaryBank?.address?.streetAddress && (
               <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}>Intermediary Address:</Text>
+                <Text style={styles.companyInfoLabel}>
+                  Intermediary Address:
+                </Text>
                 <Text style={styles.companyInfo}>
-                  {paymentRouting.bank?.intermediaryBank?.address?.streetAddress}
-                  {paymentRouting.bank?.intermediaryBank?.address?.extendedAddress && 
+                  {
+                    paymentRouting.bank?.intermediaryBank?.address
+                      ?.streetAddress
+                  }
+                  {paymentRouting.bank?.intermediaryBank?.address
+                    ?.extendedAddress &&
                     `, ${paymentRouting.bank?.intermediaryBank?.address?.extendedAddress}`}
                 </Text>
               </View>
             )}
-            {(paymentRouting.bank?.intermediaryBank?.address?.city || paymentRouting.bank?.intermediaryBank?.address?.stateProvince || paymentRouting.bank?.intermediaryBank?.address?.postalCode) && (
+            {(paymentRouting.bank?.intermediaryBank?.address?.city ||
+              paymentRouting.bank?.intermediaryBank?.address?.stateProvince ||
+              paymentRouting.bank?.intermediaryBank?.address?.postalCode) && (
               <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}>Intermediary Location:</Text>
+                <Text style={styles.companyInfoLabel}>
+                  Intermediary Location:
+                </Text>
                 <Text style={styles.companyInfo}>
                   {[
                     paymentRouting.bank?.intermediaryBank?.address?.city,
-                    paymentRouting.bank?.intermediaryBank?.address?.stateProvince,
-                    paymentRouting.bank?.intermediaryBank?.address?.postalCode
-                  ].filter(Boolean).join(', ')}
+                    paymentRouting.bank?.intermediaryBank?.address
+                      ?.stateProvince,
+                    paymentRouting.bank?.intermediaryBank?.address?.postalCode,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
                 </Text>
               </View>
             )}
             {paymentRouting.bank?.intermediaryBank?.address?.country && (
               <View style={styles.row}>
-                <Text style={styles.companyInfoLabel}>Intermediary Country:</Text>
+                <Text style={styles.companyInfoLabel}>
+                  Intermediary Country:
+                </Text>
                 <Text style={styles.companyInfo}>
                   {paymentRouting.bank?.intermediaryBank?.address?.country}
                 </Text>
@@ -962,23 +977,28 @@ const InvoiceLineItem: React.FC<{ item: any; currency: string }> = ({
 }) => (
   <View style={styles.tableRow}>
     <View style={styles.tableCol40}>
-      <Text style={styles.itemName}>{item.description}</Text>
+      <Text style={styles.itemName} hyphenationCallback={(word) => [word]}>
+        {item.description}
+      </Text>
       {item.longDescription && (
-        <Text style={styles.itemDescription}>{item.longDescription}</Text>
+        <Text
+          style={styles.itemDescription}
+          hyphenationCallback={(word) => [word]}
+        >
+          {item.longDescription}
+        </Text>
       )}
     </View>
     <Text style={styles.tableCol15}>
-      {item.quantity % 1 === 0
-        ? item.quantity.toString()
-        : item.quantity.toFixed(2)}
+      {item.quantity.toFixed(2)}
     </Text>
-    <Text style={styles.tableCol15}>
+    <Text style={styles.tableCol18}>
       {formatCurrency(item.unitPriceTaxExcl, currency)}
     </Text>
-    <Text style={styles.tableCol15}>
-      {formatCurrency(item.unitPriceTaxIncl - item.unitPriceTaxExcl, currency)}
+    <Text style={styles.tableCol12}>
+      {formatNumber(item.unitPriceTaxIncl - item.unitPriceTaxExcl)}
     </Text>
-    <Text style={styles.tableCol15}>
+    <Text style={styles.tableCol18}>
       {formatCurrency(item.quantity * item.unitPriceTaxIncl, currency)}
     </Text>
   </View>
