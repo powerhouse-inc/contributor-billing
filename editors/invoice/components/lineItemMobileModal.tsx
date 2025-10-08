@@ -100,7 +100,7 @@ export function LineItemMobileModal({
       totalPriceTaxExcl: calculatedValues.totalPriceTaxExcl,
       totalPriceTaxIncl: calculatedValues.totalPriceTaxIncl,
     };
-    onSave(lineItem);
+    onSave(lineItem as EditLineItemInput);
   };
 
   // Prevent body scroll when modal is open
