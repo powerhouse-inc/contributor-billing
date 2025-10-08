@@ -17,6 +17,9 @@ import { Tag } from "lucide-react";
 import { NumberForm } from "./components/numberForm.js";
 import { InputField } from "./components/inputField.js";
 import { LineItemTagsTable } from "./lineItemTags/lineItemTags.js";
+import { LineItemCard } from "./components/lineItemCard.js";
+import { LineItemMobileModal } from "./components/lineItemMobileModal.js";
+import { LineItemsEmptyState } from "./components/lineItemsEmptyState.js";
 
 // Helper function to get precision based on currency
 function getCurrencyPrecision(currency: string): number {
@@ -510,6 +513,8 @@ export function LineItemsTable({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [showTagTable, setShowTagTable] = useState(false);
+  const [mobileEditItem, setMobileEditItem] = useState<Partial<LineItem> | null>(null);
+  const [showMobileModal, setShowMobileModal] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
@@ -599,28 +604,133 @@ export function LineItemsTable({
     );
   }
 
+  // Calculate totals for mobile footer
+  const totalPriceTaxExcl = lineItems.reduce((sum, item) => sum + item.totalPriceTaxExcl, 0);
+  const totalPriceTaxIncl = lineItems.reduce((sum, item) => sum + item.totalPriceTaxIncl, 0);
+
   return (
     <div ref={containerRef} className="relative w-full">
-      {/* Line Items Table */}
-      <div className="mt-4">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h4 className="text-xl font-semibold text-gray-900">Line Items</h4>
-          </div>
+      {/* Mobile Modal */}
+      {showMobileModal && (
+        <LineItemMobileModal
+          key={mobileEditItem?.id || 'new'}
+          item={mobileEditItem || {}}
+          currency={currency}
+          isNew={!mobileEditItem?.id || mobileEditItem.id === ''}
+          onSave={(item: any) => {
+            try {
+              // If editing an item with empty ID, delete it first, then add new one
+              if (mobileEditItem?.id === '') {
+                onDeleteItem({ id: '' });
+                onAddItem(item);
+              } else if (mobileEditItem?.id) {
+                onUpdateItem(item);
+              } else {
+                onAddItem(item);
+              }
+              setShowMobileModal(false);
+              setMobileEditItem(null);
+            } catch (error: any) {
+              toast(error.message || "Failed to save line item", { type: "error" });
+            }
+          }}
+          onCancel={() => {
+            setShowMobileModal(false);
+            setMobileEditItem(null);
+          }}
+        />
+      )}
 
-          <RWAButton
-            className="mb-2"
-            disabled={isAddingNew}
-            onClick={handleAddClick}
-          >
-            Add Line Item
-          </RWAButton>
+      {/* Line Items Section */}
+      <div className="mt-4">
+        {/* Header - Desktop/Tablet */}
+        <div className="mb-4 flex items-center justify-between">
+          <h4 className="text-xl font-semibold text-gray-900">Line Items</h4>
+          <div className="hidden md:flex items-center gap-3">
+            <button
+              onClick={() => setShowTagTable(true)}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+              title="Manage Tags for All Line Items"
+            >
+              <Tag className="w-4 h-4" />
+              <span className="hidden md:inline">Manage Tags</span>
+            </button>
+            <RWAButton
+              className="hidden md:block"
+              disabled={isAddingNew}
+              onClick={handleAddClick}
+            >
+              Add Line Item
+            </RWAButton>
+          </div>
         </div>
 
-        <div
-          ref={tableContainerRef}
-          className="overflow-x-auto rounded-lg border border-gray-200"
-        >
+        {/* Empty State */}
+        {lineItems.length === 0 && !isAddingNew && (
+          <div className="md:hidden">
+            <LineItemsEmptyState
+              onAddItem={() => {
+                setMobileEditItem({});
+                setShowMobileModal(true);
+              }}
+            />
+          </div>
+        )}
+
+        {lineItems.length === 0 && !isAddingNew && (
+          <div className="hidden md:block">
+            <LineItemsEmptyState onAddItem={handleAddClick} />
+          </div>
+        )}
+
+        {/* Mobile Card View */}
+        {lineItems.length > 0 && (
+          <div className="md:hidden space-y-3">
+            {/* Buttons for mobile */}
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={() => setShowTagTable(true)}
+                className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-gray-700"
+                title="Manage Tags for All Line Items"
+              >
+                <Tag className="w-4 h-4" />
+                <span>Tags</span>
+              </button>
+              <button
+                onClick={() => {
+                  setMobileEditItem({});
+                  setShowMobileModal(true);
+                }}
+                className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+              >
+                Add Line Item
+              </button>
+            </div>
+
+            {lineItems.map((item) => (
+              <LineItemCard
+                key={item.id}
+                item={item}
+                currency={currency}
+                onEdit={() => {
+                  setMobileEditItem(item);
+                  setShowMobileModal(true);
+                }}
+                onDelete={() => {
+                  const input: DeleteLineItemInput = { id: item.id };
+                  onDeleteItem(input);
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Desktop/Tablet Table View */}
+        {lineItems.length > 0 && (
+          <div
+            ref={tableContainerRef}
+            className="hidden md:block overflow-x-auto rounded-lg border border-gray-200"
+          >
           <table
             ref={tableRef}
             className="w-full table-fixed border-collapse bg-white"
@@ -655,19 +765,7 @@ export function LineItemsTable({
                   Total (incl. tax)
                 </th>
                 <th className="border-b border-gray-200 p-3 text-center">
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="text-sm">Actions</span>
-                    <Tag
-                      onClick={() => setShowTagTable(true)}
-                      style={{
-                        cursor: "pointer",
-                        width: 28,
-                        height: 28,
-                        color: "white",
-                        fill: "#475264",
-                      }}
-                    />
-                  </span>
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -796,8 +894,33 @@ export function LineItemsTable({
               ) : null}
             </tbody>
           </table>
-        </div>
+          </div>
+        )}
       </div>
+
+      {/* Mobile Totals Footer */}
+      {lineItems.length > 0 && (
+        <div className="md:hidden mt-4 bg-white border border-gray-200 rounded-lg p-4 space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Subtotal (excl. tax):</span>
+            <span className="font-medium text-gray-900">
+              {currency} {formatNumber(totalPriceTaxExcl)}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Total tax:</span>
+            <span className="font-medium text-gray-900">
+              {currency} {formatNumber(totalPriceTaxIncl - totalPriceTaxExcl)}
+            </span>
+          </div>
+          <div className="flex justify-between text-base pt-2 border-t border-gray-200">
+            <span className="font-semibold text-gray-900">Total (incl. tax):</span>
+            <span className="font-bold text-gray-900">
+              {currency} {formatNumber(totalPriceTaxIncl)}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
