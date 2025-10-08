@@ -726,7 +726,7 @@ export function LineItemsTable({
         )}
 
         {/* Desktop/Tablet Table View */}
-        {lineItems.length > 0 && (
+        {(lineItems.length > 0 || isAddingNew) && (
           <div
             ref={tableContainerRef}
             className="hidden md:block overflow-x-auto rounded-lg border border-gray-200"
