@@ -6,6 +6,7 @@ import type { Node } from "document-drive";
 import { type DocumentModelModule } from "document-model";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
+import { exportExpenseReportCSV } from "../../../../scripts/contributor-billing/createExpenseReportCsv.js";
 import { toast } from "@powerhousedao/design-system";
 import {
   actions,
@@ -149,23 +150,6 @@ export const InvoiceTable = ({
     // Clear selection for deleted item
   };
 
-  const cleanName = (name: string) => {
-    const dotIndex = name.lastIndexOf(".");
-    if (dotIndex > 0) {
-      return name.substring(0, dotIndex);
-    }
-    return name;
-  };
-
-  // Remove all non-alphanumeric, non-hyphen, non-underscore chars for slug safety
-  const makeSlug = (name: string) => {
-    return name
-      .replace(/\./g, "") // remove dots
-      .replace(/\s+/g, "-") // replace spaces with hyphens
-      .replace(/[^\w-]/g, "") // remove all non-word chars except hyphen/underscore
-      .toLowerCase();
-  };
-
   const handleCreateBillingStatement = async (id: string) => {
     const invoiceFile = files.find((file) => file.id === id);
     const invoiceState = state.find((doc) => doc.header.id === id);
@@ -262,9 +246,6 @@ export const InvoiceTable = ({
       return doc ? { ...doc, id } : null;
     })
     .filter((inv) => inv !== null); // Filter out null/undefined invoices
-  const selectedInvoiceStatuses = selectedInvoices.map(
-    (inv: any) => inv?.state?.global?.status || inv?.state?.global?.status
-  );
 
   const handleCSVExport = async (baseCurrency: string) => {
     console.log(
@@ -325,6 +306,48 @@ export const InvoiceTable = ({
     }
   };
 
+  const handleExportCSVExpenseReport = async (baseCurrency: string) => {
+    console.log(
+      "Exporting expense report for selected invoices:",
+      selectedInvoices.map((inv) => ({
+        id: inv.id,
+        state: inv,
+      }))
+    );
+    try {
+      await exportExpenseReportCSV(selectedInvoices, baseCurrency);
+      toast("Expense report exported successfully", {
+        type: "success",
+      });
+    } catch (error: any) {
+      console.error("Error exporting expense report:", error);
+      const missingTagInvoices = error.missingTagInvoices || [];
+      const missingTagInvoicesList = missingTagInvoices.map(
+        (invoiceId: string) => {
+          const invoice = files.find((file) => file.id === invoiceId);
+          return invoice?.name || invoiceId;
+        }
+      );
+      console.log(
+        "missingTagInvoicesList",
+        missingTagInvoicesList
+      );
+      toast(
+        <>
+          Invoice Line Item Tags need to be set for:
+          <br />
+          {missingTagInvoicesList.map((name: any, idx: any) => (
+            <React.Fragment key={name}>
+              - {name}
+              <br />
+            </React.Fragment>
+          ))}
+        </>,
+        { type: "error" }
+      );
+    }
+  };
+
   // check if integrations document exists
   const integrationsDoc = files.find(
     (file) => file.documentType === "powerhouse/integrations"
@@ -362,6 +385,7 @@ export const InvoiceTable = ({
         onStatusChange={onStatusChange}
         onBatchAction={onBatchAction}
         onExport={handleCSVExport}
+        onExpenseReportExport={handleExportCSVExpenseReport}
         selectedStatuses={selectedStatuses}
         createIntegrationsDocument={createIntegrationsDocument}
         integrationsDoc={integrationsDoc}
