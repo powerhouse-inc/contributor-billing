@@ -513,7 +513,8 @@ export function LineItemsTable({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [showTagTable, setShowTagTable] = useState(false);
-  const [mobileEditItem, setMobileEditItem] = useState<Partial<LineItem> | null>(null);
+  const [mobileEditItem, setMobileEditItem] =
+    useState<Partial<LineItem> | null>(null);
   const [showMobileModal, setShowMobileModal] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -589,7 +590,7 @@ export function LineItemsTable({
     item: item.description,
     period: "", // Default value
     expenseAccount: "", // Default value
-    total: `$${formatNumber(item.totalPriceTaxIncl)}`,
+    total: `${currency} ${formatNumber(item.totalPriceTaxIncl)}`,
     lineItemTag: item.lineItemTag,
   }));
 
@@ -605,23 +606,29 @@ export function LineItemsTable({
   }
 
   // Calculate totals for mobile footer
-  const totalPriceTaxExcl = lineItems.reduce((sum, item) => sum + item.totalPriceTaxExcl, 0);
-  const totalPriceTaxIncl = lineItems.reduce((sum, item) => sum + item.totalPriceTaxIncl, 0);
+  const totalPriceTaxExcl = lineItems.reduce(
+    (sum, item) => sum + item.totalPriceTaxExcl,
+    0
+  );
+  const totalPriceTaxIncl = lineItems.reduce(
+    (sum, item) => sum + item.totalPriceTaxIncl,
+    0
+  );
 
   return (
     <div ref={containerRef} className="relative w-full">
       {/* Mobile Modal */}
       {showMobileModal && (
         <LineItemMobileModal
-          key={mobileEditItem?.id || 'new'}
+          key={mobileEditItem?.id || "new"}
           item={mobileEditItem || {}}
           currency={currency}
-          isNew={!mobileEditItem?.id || mobileEditItem.id === ''}
+          isNew={!mobileEditItem?.id || mobileEditItem.id === ""}
           onSave={(item: any) => {
             try {
               // If editing an item with empty ID, delete it first, then add new one
-              if (mobileEditItem?.id === '') {
-                onDeleteItem({ id: '' });
+              if (mobileEditItem?.id === "") {
+                onDeleteItem({ id: "" });
                 onAddItem(item);
               } else if (mobileEditItem?.id) {
                 onUpdateItem(item);
@@ -631,7 +638,9 @@ export function LineItemsTable({
               setShowMobileModal(false);
               setMobileEditItem(null);
             } catch (error: any) {
-              toast(error.message || "Failed to save line item", { type: "error" });
+              toast(error.message || "Failed to save line item", {
+                type: "error",
+              });
             }
           }}
           onCancel={() => {
@@ -731,169 +740,171 @@ export function LineItemsTable({
             ref={tableContainerRef}
             className="hidden md:block overflow-x-auto rounded-lg border border-gray-200"
           >
-          <table
-            ref={tableRef}
-            className="w-full table-fixed border-collapse bg-white"
-          >
-            <colgroup>
-              <col style={{ width: "30%" }} />
-              <col style={{ width: "10%" }} />
-              <col style={{ width: "12%" }} />
-              <col style={{ width: "8%" }} />
-              <col />
-              <col />
-              <col />
-            </colgroup>
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="border-b border-gray-200 p-3 text-left">
-                  Description
-                </th>
-                <th className="border-b border-gray-200 p-3 text-right">
-                  Quantity
-                </th>
-                <th className="border-b border-gray-200 p-3 text-right">
-                  Unit Price (excl. tax)
-                </th>
-                <th className="border-b border-gray-200 p-3 text-right">
-                  Tax %
-                </th>
-                <th className="border-b border-gray-200 p-3 text-right">
-                  Total (excl. tax)
-                </th>
-                <th className="border-b border-gray-200 p-3 text-right">
-                  Total (incl. tax)
-                </th>
-                <th className="border-b border-gray-200 p-3 text-center">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {lineItems.map((item) =>
-                editingId === item.id ? (
-                  <EditableLineItem
-                    currency={currency}
-                    item={item}
-                    key={item.id}
-                    onCancel={() => setEditingId(null)}
-                    onSave={(updatedItem) => {
-                      try {
-                        onUpdateItem(updatedItem);
-                        setEditingId(null);
-                      } catch (error: any) {
-                        console.error(error);
+            <table
+              ref={tableRef}
+              className="w-full table-fixed border-collapse bg-white"
+            >
+              <colgroup>
+                <col style={{ width: "30%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "12%" }} />
+                <col style={{ width: "8%" }} />
+                <col />
+                <col />
+                <col />
+              </colgroup>
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="border-b border-gray-200 p-3 text-left">
+                    Description
+                  </th>
+                  <th className="border-b border-gray-200 p-3 text-right">
+                    Quantity
+                  </th>
+                  <th className="border-b border-gray-200 p-3 text-right">
+                    Unit Price (excl. tax)
+                  </th>
+                  <th className="border-b border-gray-200 p-3 text-right">
+                    Tax %
+                  </th>
+                  <th className="border-b border-gray-200 p-3 text-right">
+                    Total (excl. tax)
+                  </th>
+                  <th className="border-b border-gray-200 p-3 text-right">
+                    Total (incl. tax)
+                  </th>
+                  <th className="border-b border-gray-200 p-3 text-center">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {lineItems.map((item) =>
+                  editingId === item.id ? (
+                    <EditableLineItem
+                      currency={currency}
+                      item={item}
+                      key={item.id}
+                      onCancel={() => setEditingId(null)}
+                      onSave={(updatedItem) => {
+                        try {
+                          onUpdateItem(updatedItem);
+                          setEditingId(null);
+                        } catch (error: any) {
+                          console.error(error);
 
-                        if (error?.message?.includes("Invalid action input:")) {
-                          try {
-                            const zodError = JSON.parse(
-                              error.message.split("Invalid action input: ")[1]
-                            );
-                            if (
-                              Array.isArray(zodError) &&
-                              zodError.length > 0
-                            ) {
-                              const firstError = zodError[0];
-                              const errorJSX = (
-                                <div>
-                                  <p className="font-semibold">
-                                    Failed to update line item
-                                  </p>
-                                  <p>{firstError.message}: </p>
-                                  {zodError.map((err: any, index: number) => (
-                                    <ul key={index}>
-                                      <li className="text-red-500 font-semibold">
-                                        - {err.path.join(".")}
-                                      </li>
-                                    </ul>
-                                  ))}
-                                </div>
+                          if (
+                            error?.message?.includes("Invalid action input:")
+                          ) {
+                            try {
+                              const zodError = JSON.parse(
+                                error.message.split("Invalid action input: ")[1]
                               );
+                              if (
+                                Array.isArray(zodError) &&
+                                zodError.length > 0
+                              ) {
+                                const firstError = zodError[0];
+                                const errorJSX = (
+                                  <div>
+                                    <p className="font-semibold">
+                                      Failed to update line item
+                                    </p>
+                                    <p>{firstError.message}: </p>
+                                    {zodError.map((err: any, index: number) => (
+                                      <ul key={index}>
+                                        <li className="text-red-500 font-semibold">
+                                          - {err.path.join(".")}
+                                        </li>
+                                      </ul>
+                                    ))}
+                                  </div>
+                                );
 
-                              toast(errorJSX, {
+                                toast(errorJSX, {
+                                  type: "error",
+                                });
+                                return;
+                              }
+                            } catch (parseError) {
+                              console.error(
+                                "Failed to parse Zod error:",
+                                parseError
+                              );
+                              toast("Invalid input data", {
                                 type: "error",
                               });
                               return;
                             }
-                          } catch (parseError) {
-                            console.error(
-                              "Failed to parse Zod error:",
-                              parseError
-                            );
-                            toast("Invalid input data", {
+                          } else if (error?.message) {
+                            toast(error.message, {
                               type: "error",
                             });
                             return;
                           }
-                        } else if (error?.message) {
-                          toast(error.message, {
+
+                          toast("Failed to update line item", {
                             type: "error",
                           });
-                          return;
                         }
-
-                        toast("Failed to update line item", {
-                          type: "error",
-                        });
-                      }
-                    }}
+                      }}
+                      onEditingItemChange={onEditingItemChange}
+                    />
+                  ) : (
+                    <tr key={item.id} className="hover:bg-gray-50 table-row">
+                      <td className="border-b border-gray-200 p-3 table-cell">
+                        {item.description}
+                      </td>
+                      <td className="border-b border-gray-200 p-3 text-right table-cell">
+                        {item.quantity % 1 === 0
+                          ? item.quantity.toString()
+                          : item.quantity.toFixed(2)}
+                      </td>
+                      <td className="border-b border-gray-200 p-3 text-right table-cell">
+                        {formatNumber(item.unitPriceTaxExcl)}
+                      </td>
+                      <td className="border-b border-gray-200 p-3 text-right table-cell">
+                        {typeof item.taxPercent === "number"
+                          ? Math.round(item.taxPercent)
+                          : 0}
+                        %
+                      </td>
+                      <td className="border-b border-gray-200 p-3 text-right font-medium table-cell">
+                        {formatNumber(item.totalPriceTaxExcl)}
+                      </td>
+                      <td className="border-b border-gray-200 p-3 text-right font-medium table-cell">
+                        {formatNumber(item.totalPriceTaxIncl)}
+                      </td>
+                      <td className="border-b border-gray-200 p-3 table-cell">
+                        <div className="flex justify-center space-x-2">
+                          <button
+                            className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-200"
+                            onClick={() => setEditingId(item.id)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700"
+                            onClick={() => onDeleteItem({ id: item.id })}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                )}
+                {isAddingNew ? (
+                  <EditableLineItem
+                    currency={currency}
+                    item={{}}
+                    onCancel={handleCancelNewItem}
+                    onSave={handleSaveNewItem}
                     onEditingItemChange={onEditingItemChange}
                   />
-                ) : (
-                  <tr key={item.id} className="hover:bg-gray-50 table-row">
-                    <td className="border-b border-gray-200 p-3 table-cell">
-                      {item.description}
-                    </td>
-                    <td className="border-b border-gray-200 p-3 text-right table-cell">
-                      {item.quantity % 1 === 0
-                        ? item.quantity.toString()
-                        : item.quantity.toFixed(2)}
-                    </td>
-                    <td className="border-b border-gray-200 p-3 text-right table-cell">
-                      {formatNumber(item.unitPriceTaxExcl)}
-                    </td>
-                    <td className="border-b border-gray-200 p-3 text-right table-cell">
-                      {typeof item.taxPercent === "number"
-                        ? Math.round(item.taxPercent)
-                        : 0}
-                      %
-                    </td>
-                    <td className="border-b border-gray-200 p-3 text-right font-medium table-cell">
-                      {formatNumber(item.totalPriceTaxExcl)}
-                    </td>
-                    <td className="border-b border-gray-200 p-3 text-right font-medium table-cell">
-                      {formatNumber(item.totalPriceTaxIncl)}
-                    </td>
-                    <td className="border-b border-gray-200 p-3 table-cell">
-                      <div className="flex justify-center space-x-2">
-                        <button
-                          className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-200"
-                          onClick={() => setEditingId(item.id)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700"
-                          onClick={() => onDeleteItem({ id: item.id })}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              )}
-              {isAddingNew ? (
-                <EditableLineItem
-                  currency={currency}
-                  item={{}}
-                  onCancel={handleCancelNewItem}
-                  onSave={handleSaveNewItem}
-                  onEditingItemChange={onEditingItemChange}
-                />
-              ) : null}
-            </tbody>
-          </table>
+                ) : null}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
@@ -914,7 +925,9 @@ export function LineItemsTable({
             </span>
           </div>
           <div className="flex justify-between text-base pt-2 border-t border-gray-200">
-            <span className="font-semibold text-gray-900">Total (incl. tax):</span>
+            <span className="font-semibold text-gray-900">
+              Total (incl. tax):
+            </span>
             <span className="font-bold text-gray-900">
               {currency} {formatNumber(totalPriceTaxIncl)}
             </span>

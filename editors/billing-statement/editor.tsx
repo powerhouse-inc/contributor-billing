@@ -65,25 +65,6 @@ export default function Editor(props: any) {
       <div className="">
         <LineItemsTable state={state} dispatch={dispatch} />
       </div>
-      {/* <button
-        className="bg-blue-500 text-white px-4 py-2 rounded-md text-xs"
-        onClick={() => {
-          dispatch(
-            actions.addLineItem({
-              id: generateId(),
-              description: "Dummy Line Item",
-              quantity: 5,
-              unit: "HOUR",
-              unitPriceCash: 2,
-              unitPricePwt: 1,
-              totalPriceCash: 5 * 2,
-              totalPricePwt: 5 * 1,
-            })
-          );
-        }}
-      >
-        Add Dummy Line Item
-      </button> */}
       {/* Text Area and Totals Table */}
       <div className="grid sm:grid-cols-2">
         <div className="mt-6 p-2 two-column-grid:mt-2">

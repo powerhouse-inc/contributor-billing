@@ -202,7 +202,7 @@ export function LineItemTagsTable({
                   />
                 </td>
                 <td className="border-b border-gray-200 p-3 text-right font-medium">
-                  {item.total}
+                 {item.total}
                 </td>
               </tr>
             ))}
