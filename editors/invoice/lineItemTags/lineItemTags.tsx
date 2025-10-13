@@ -30,7 +30,9 @@ export function LineItemTagsTable({
   dispatch,
   paymentAccounts,
 }: LineItemTagsTableProps) {
-  const [mobileEditItem, setMobileEditItem] = useState<TagAssignmentRow | null>(null);
+  const [mobileEditItem, setMobileEditItem] = useState<TagAssignmentRow | null>(
+    null
+  );
   const [showMobileModal, setShowMobileModal] = useState(false);
 
   const handleReset = () => {
@@ -75,7 +77,6 @@ export function LineItemTagsTable({
     paymentAccounts && paymentAccounts.length > 0
       ? (paymentAccounts[paymentAccounts.length - 1].value ?? "")
       : "";
-
 
   return (
     <div className="w-full">
@@ -139,9 +140,7 @@ export function LineItemTagsTable({
                     }}
                   />
                 </td>
-                <td
-                  className="border-b border-gray-200 w-48"
-                >
+                <td className="border-b border-gray-200 w-48">
                   <DatePicker
                     name="period"
                     dateFormat="YYYY-MM"
@@ -202,7 +201,7 @@ export function LineItemTagsTable({
                   />
                 </td>
                 <td className="border-b border-gray-200 p-3 text-right font-medium">
-                 {item.total}
+                  {item.total}
                 </td>
               </tr>
             ))}
@@ -229,7 +228,11 @@ export function LineItemTagsTable({
           </label>
           <Select
             options={paymentAccountOptions}
-            value={paymentAccountOptions.find((option) => option.value === selectedPaymentAccountValue)?.value ?? ""}
+            value={
+              paymentAccountOptions.find(
+                (option) => option.value === selectedPaymentAccountValue
+              )?.value ?? ""
+            }
             placeholder="Select Payment Account"
             searchable={true}
             onChange={(value) => {
@@ -258,7 +261,11 @@ export function LineItemTagsTable({
           </label>
           <Select
             options={paymentAccountOptions}
-            value={paymentAccountOptions.find((option) => option.value === selectedPaymentAccountValue)?.value ?? ""}
+            value={
+              paymentAccountOptions.find(
+                (option) => option.value === selectedPaymentAccountValue
+              )?.value ?? ""
+            }
             placeholder="Select Payment Account"
             searchable={true}
             onChange={(value) => {

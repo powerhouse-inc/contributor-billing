@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { actions } from "../../document-models/invoice/index.js";
 import { generateId } from "document-model";
-import type { InvoiceAction, InvoiceState } from "../../document-models/invoice/index.js";
+import type {
+  InvoiceAction,
+  InvoiceState,
+} from "../../document-models/invoice/index.js";
 
 let GRAPHQL_URL = "http://localhost:4001/graphql/invoice";
 
@@ -98,55 +101,6 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
     setError(null);
 
     try {
-      const payerWallet = docState.issuer?.paymentRouting?.wallet;
-      if (!payerWallet) {
-        setError("Payer wallet not found.");
-        setIsLoading(false);
-        return;
-      }
-
-      const lastPayment = docState.payments[docState.payments.length - 1] || null;
-      if (!lastPayment) {
-        setError("No payment details found.");
-        setIsLoading(false);
-        return;
-      }
-
-      const chainName = parseChainName(String(payerWallet.chainName || ""));
-      if (!chainName) {
-        setError("Invalid chain name.");
-        setIsLoading(false);
-        return;
-      }
-
-      const tokenAddress = getTokenAddress(String(payerWallet?.chainName || ""), docState.currency);
-      if (!tokenAddress) {
-        setError(`Token ${docState.currency} not supported on ${chainName}.`);
-        setIsLoading(false);
-        return;
-      }
-
-      const rpcUrl = String(payerWallet?.rpc || "");
-      if (!rpcUrl) {
-        setError("RPC URL not available.");
-        setIsLoading(false);
-        return;
-      }
-
-      const fromAddress = String(payerWallet?.address || "");
-      if (!fromAddress) {
-        setError("From address not available.");
-        setIsLoading(false);
-        return;
-      }
-
-      const paymentRef = String(lastPayment?.processorRef || "");
-      if (!paymentRef) {
-        setError("Payment reference not available.");
-        setIsLoading(false);
-        return;
-      }
-
       const response = await fetch(GRAPHQL_URL, {
         method: "POST",
         headers: {
