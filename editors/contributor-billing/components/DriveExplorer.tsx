@@ -11,12 +11,21 @@ import {
   useSelectedDrive,
   useSelectedDriveDocuments,
   useSelectedFolder,
-  useNodeActions,
+  type Reactor,
 } from "@powerhousedao/reactor-browser";
-import type { DocumentModelModule } from "document-model";
+import type { DocumentModelModule, PHBaseState } from "document-model";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { InvoiceTable } from "./InvoiceTable/InvoiceTable.js";
 import { HeaderStats } from "./InvoiceTable/HeaderStats.js";
+import { PHDocument } from "document-model";
+
+declare global {
+  interface Window {
+    driveContext?: {
+      reactor?: Reactor; // or a more specific type
+    };
+  }
+}
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
@@ -39,10 +48,6 @@ export function DriveExplorer(props: DriveEditorProps) {
   const selectedDocumentModel = useRef<DocumentModelModule | null>(null);
   const editorModules = useEditorModules();
 
-  // === NODE ACTIONS HOOK ===
-  // Get all node operations from reactor-browser
-  const { onRenameNode, onDuplicateNode } = useNodeActions();
-
   // === STATE MANAGEMENT HOOKS ===
   // Core state hooks for drive navigation
   const [selectedDrive] = useSelectedDrive(); // Currently selected drive
@@ -51,8 +56,7 @@ export function DriveExplorer(props: DriveEditorProps) {
   const fileChildren = useFileChildNodes();
 
   // All document states
-  const allDocuments = useSelectedDriveDocuments();
-  const state = allDocuments;
+  const allDocuments: PHDocument[] | undefined = useSelectedDriveDocuments();
 
   // Handler for row selection (does not affect status filter display)
   const handleRowSelection = useCallback(
@@ -83,11 +87,15 @@ export function DriveExplorer(props: DriveEditorProps) {
 
     // Check if all selected rows have allowed statuses
     const selectedRows =
-      state?.filter((doc) => selectedRowIds.includes(doc.header.id)) || [];
-    return selectedRows.every((row) =>
-      allowedStatuses.includes((row.state as any).global.status)
+      allDocuments?.filter((doc) => selectedRowIds.includes(doc.header.id)) ||
+      [];
+    return selectedRows.every((row: PHDocument) =>
+      allowedStatuses.includes(
+        (row.state as PHBaseState & { global: { status: string } }).global
+          .status
+      )
     );
-  }, [selected, state]);
+  }, [selected, allDocuments]);
 
   // Create a stable dispatcher map using useRef only (no useState to avoid re-renders)
   const dispatchersRef = useRef<Map<string, [any, (action: any) => void]>>(
@@ -118,14 +126,13 @@ export function DriveExplorer(props: DriveEditorProps) {
 
         // Alternative: Try to access through the context
         // The DriveContextProvider might expose the reactor instance
-        if ((window as any).driveContext?.reactor) {
-          const result = await (window as any).driveContext.reactor.addAction(
-            docId,
-            action
-          );
-          if (result.status !== "SUCCESS") {
+        if ((window as Window).driveContext?.reactor) {
+          const result = await (
+            window as Window
+          ).driveContext?.reactor?.addAction(docId, action);
+          if (result?.status !== "SUCCESS") {
             throw new Error(
-              result.error?.message ?? "Failed to dispatch action"
+              result?.error?.message ?? "Failed to dispatch action"
             );
           }
           return;
@@ -160,7 +167,7 @@ export function DriveExplorer(props: DriveEditorProps) {
   // Update dispatchers when state changes - use a more stable approach
   useEffect(() => {
     // Only update if the document IDs have actually changed
-    const currentDocIds = state?.map((doc) => doc.header.id) || [];
+    const currentDocIds = allDocuments?.map((doc) => doc.header.id) || [];
     const previousDocIds = Array.from(dispatchersRef.current.keys());
 
     // Check if the document list has actually changed
@@ -170,7 +177,7 @@ export function DriveExplorer(props: DriveEditorProps) {
 
     if (!hasChanged) {
       // Just update the document states without recreating dispatchers
-      state?.forEach((doc) => {
+      allDocuments?.forEach((doc) => {
         const docId = doc.header.id;
         if (dispatchersRef.current.has(docId)) {
           const [, dispatchFunction] = dispatchersRef.current.get(docId)!;
@@ -183,7 +190,7 @@ export function DriveExplorer(props: DriveEditorProps) {
     // Only recreate dispatchers when the document list actually changes
     const newDispatchers = new Map();
 
-    state?.forEach((doc) => {
+    allDocuments?.forEach((doc) => {
       const docId = doc.header.id;
 
       // Check if we already have a dispatcher for this document
@@ -207,7 +214,7 @@ export function DriveExplorer(props: DriveEditorProps) {
 
     // Update the ref
     dispatchersRef.current = newDispatchers;
-  }, [state, createDispatchFunction]);
+  }, [allDocuments, createDispatchFunction]);
 
   const getDocDispatcher = (id: string) => {
     return dispatchersRef.current.get(id) || null;
@@ -295,7 +302,7 @@ export function DriveExplorer(props: DriveEditorProps) {
               <HeaderStats />
               <InvoiceTable
                 files={fileChildren}
-                state={state || []}
+                state={allDocuments || []}
                 selected={selected}
                 setSelected={setSelected}
                 filteredDocumentModels={documentModelModules}
