@@ -43,7 +43,9 @@ function isFiatCurrency(currency: string): boolean {
   return currencyList.find((c) => c.ticker === currency)?.crypto === false;
 }
 
-export default function Editor(props: any) {
+export default function Editor(
+  props: Partial<EditorProps> & { documentId?: string }
+) {
   const [doc, dispatch] = useSelectedInvoiceDocument() as [
     InvoiceDocument | undefined,
     any,

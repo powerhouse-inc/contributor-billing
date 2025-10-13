@@ -31,9 +31,11 @@ const statusOptions = [
   { label: "Other", value: "OTHER" },
 ];
 
+type FileNodeLite = { id: string; name: string; documentType?: string };
+
 interface InvoiceTableProps {
-  files: any[];
-  state: Record<string, any>[];
+  files: FileNodeLite[];
+  state: any[];
   selected: { [id: string]: boolean };
   setSelected: (
     selected:
@@ -238,10 +240,10 @@ export const InvoiceTable = ({
       }))
     );
     try {
-      const exportedData = await exportInvoicesToXeroCSV(
-        selectedInvoices,
-        baseCurrency
-      );
+      const exportedData: Record<
+        string,
+        { timestamp: string; exportedLineItems: any }
+      > = await exportInvoicesToXeroCSV(selectedInvoices, baseCurrency);
       toast("Invoices exported successfully", {
         type: "success",
       });

@@ -13,10 +13,10 @@ import { useSelectedBillingStatementDocument } from "../hooks/useBillingStatemen
 
 export type IProps = EditorProps;
 
-export default function Editor(props: any) {
+export default function Editor(props: Partial<EditorProps> & { documentId?: string }) {
   const [doc, dispatch] = useSelectedBillingStatementDocument() as [
     BillingStatementDocument | undefined,
-    any,
+    React.Dispatch<any>,
   ];
   const state = doc?.state.global as BillingStatementState;
 

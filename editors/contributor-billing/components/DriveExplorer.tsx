@@ -98,13 +98,11 @@ export function DriveExplorer(props: DriveEditorProps) {
   }, [selected, allDocuments]);
 
   // Create a stable dispatcher map using useRef only (no useState to avoid re-renders)
-  const dispatchersRef = useRef<Map<string, [any, (action: any) => void]>>(
-    new Map()
-  );
+  const dispatchersRef = useRef<Map<string, [PHDocument, (action: unknown) => Promise<void>]>>(new Map());
 
   // Create a working dispatch function that uses the existing reactor system
   const createDispatchFunction = useCallback((docId: string) => {
-    return async (action: any) => {
+    return async (action: unknown) => {
       try {
         console.log(`Dispatching action for document ${docId}:`, action);
 
@@ -115,7 +113,7 @@ export function DriveExplorer(props: DriveEditorProps) {
         // Try to access the reactor instance through the global window object
         // This is a common pattern in React applications
         if (window.reactor) {
-          const result = await window.reactor.addAction(docId, action);
+          const result = await window.reactor.addAction(docId, action as any);
           if (result.status !== "SUCCESS") {
             throw new Error(
               result.error?.message ?? "Failed to dispatch action"
@@ -129,7 +127,7 @@ export function DriveExplorer(props: DriveEditorProps) {
         if ((window as Window).driveContext?.reactor) {
           const result = await (
             window as Window
-          ).driveContext?.reactor?.addAction(docId, action);
+          ).driveContext?.reactor?.addAction(docId, action as any);
           if (result?.status !== "SUCCESS") {
             throw new Error(
               result?.error?.message ?? "Failed to dispatch action"
@@ -216,7 +214,7 @@ export function DriveExplorer(props: DriveEditorProps) {
     dispatchersRef.current = newDispatchers;
   }, [allDocuments, createDispatchFunction]);
 
-  const getDocDispatcher = (id: string) => {
+  const getDocDispatcher = (id: string): [PHDocument, (action: unknown) => Promise<void>] | null => {
     return dispatchersRef.current.get(id) || null;
   };
 

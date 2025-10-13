@@ -16,7 +16,7 @@ export const InvoiceTableRow = ({
   onCreateBillingStatement,
   billingDocStates,
 }: {
-  files?: any[];
+  files?: { id: string; name: string; documentType?: string }[];
   row: any;
   isSelected: boolean;
   onSelect: (checked: boolean) => void;

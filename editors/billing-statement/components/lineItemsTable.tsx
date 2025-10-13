@@ -2,23 +2,44 @@ import { Tag } from "lucide-react";
 import { Select } from "@powerhousedao/document-engineering";
 import { InputField } from "../../invoice/components/inputField.js";
 import { NumberForm } from "../../invoice/components/numberForm.js";
-import { actions } from "../../../document-models/billing-statement/index.js";
+import { actions, type BillingStatementAction, type BillingStatementState, type BillingStatementUnitInput } from "../../../document-models/billing-statement/index.js";
 import { useState, useRef, useEffect } from "react";
 import { formatNumber } from "../../invoice/lineItems.js";
 import { LineItemTagsTable } from "../lineItemTags/lineItemTags.js";
 
-const initialLineItem = {
+const initialLineItem: LocalLineItemDraft = {
   description: "",
-  unit: "Hour",
+  unit: "HOUR",
   quantity: "",
   unitPriceCash: "",
   unitPricePwt: "",
 };
 
-const LineItemsTable = (props: { state: any; dispatch: any }) => {
+type BillingStatementLineItem = {
+  id: string;
+  description: string;
+  unit: BillingStatementUnitInput;
+  quantity: number;
+  unitPriceCash: number;
+  unitPricePwt: number;
+  totalPriceCash: number;
+  totalPricePwt: number;
+  // other fields (e.g., tags) exist but are not needed here
+};
+
+type LocalLineItemDraft = {
+  id?: string;
+  description: string;
+  unit: BillingStatementUnitInput;
+  quantity: number | string;
+  unitPriceCash: number | string;
+  unitPricePwt: number | string;
+};
+
+const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.Dispatch<BillingStatementAction> }) => {
   const { state, dispatch } = props;
   const [editingRow, setEditingRow] = useState<number | null>(null);
-  const [localLineItem, setLocalLineItem] = useState<any>(initialLineItem);
+  const [localLineItem, setLocalLineItem] = useState<LocalLineItemDraft>(initialLineItem);
   const [showTagTable, setShowTagTable] = useState(false);
   const tableRef = useRef<HTMLDivElement>(null);
 
@@ -46,27 +67,28 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
     };
   }, [editingRow, localLineItem]);
 
-  const units = [
+  const units: Array<{ label: string; value: BillingStatementUnitInput }> = [
     { label: "Minute", value: "MINUTE" },
     { label: "Hour", value: "HOUR" },
     { label: "Day", value: "DAY" },
     { label: "Unit", value: "UNIT" },
   ];
 
-  const handleEdit = (rowIdx: number, item: any) => {
+  const handleEdit = (rowIdx: number, item: BillingStatementLineItem) => {
     setEditingRow(rowIdx);
     setLocalLineItem({ ...item });
   };
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: keyof LocalLineItemDraft, value: string | number) => {
     if (field === "unitPriceCash" || field === "unitPricePwt") {
       // Allow negative numbers with optional minus sign at start
       const regex = new RegExp(`^-?\\d*\\.?\\d{0,6}$`);
-      if (regex.test(value) || value === "-") {
-        setLocalLineItem((prev: any) => ({ ...prev, [field]: value }));
+      const stringValue = String(value);
+      if (regex.test(stringValue) || stringValue === "-") {
+        setLocalLineItem((prev) => ({ ...prev, [field]: value }));
       }
     }
-    setLocalLineItem((prev: any) => ({ ...prev, [field]: value }));
+    setLocalLineItem((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = () => {
@@ -87,7 +109,7 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
       // Get the original line item
       const originalItem = state.lineItems.find(
         (item: any) => item.id === localLineItem.id
-      );
+      ) as BillingStatementLineItem | undefined;
 
       // Check if any values have actually changed
       const hasChanges =
@@ -99,9 +121,10 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
         originalItem.unitPricePwt !== powt;
 
       if (hasChanges) {
+        const id = String(localLineItem.id);
         dispatch(
           actions.editLineItem({
-            id: localLineItem.id,
+            id,
             description,
             unit,
             quantity: qty,
@@ -120,7 +143,7 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
   if (showTagTable) {
     return (
       <LineItemTagsTable
-        lineItems={state.lineItems}
+        lineItems={state.lineItems as unknown as any}
         onClose={() => setShowTagTable(false)}
         dispatch={dispatch}
       />
@@ -184,7 +207,7 @@ const LineItemsTable = (props: { state: any; dispatch: any }) => {
                     <Select
                       options={units}
                       value={localLineItem.unit}
-                      onChange={(value) => handleInputChange("unit", value)}
+                      onChange={(value) => handleInputChange("unit", value as BillingStatementUnitInput)}
                       className="w-32 px-1 py-1 border rounded"
                     />
                   </td>

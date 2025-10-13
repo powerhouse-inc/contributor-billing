@@ -5,6 +5,7 @@ import {
 } from "../../document-models/integrations/index.js";
 import { Button } from "@powerhousedao/document-engineering";
 import { useState } from "react";
+import type { EditorProps } from "document-model";
 import { useSelectedIntegrationsDocument } from "../hooks/useIntegrationsDocument.js";
 
 const TABS = [
@@ -13,10 +14,10 @@ const TABS = [
   { key: "googleCloud", label: "Google Cloud" },
 ];
 
-export default function Editor(props: any) {
+export default function Editor(props: Partial<EditorProps> & { documentId?: string }) {
   const [doc, dispatch] = useSelectedIntegrationsDocument() as [
     IntegrationsDocument | undefined,
-    any,
+    React.Dispatch<any>,
   ];
   const state = doc?.state.global as IntegrationsState;
 
