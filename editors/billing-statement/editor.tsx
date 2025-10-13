@@ -9,12 +9,12 @@ import { CurrencyForm } from "../invoice/components/currencyForm.js";
 import { Textarea } from "@powerhousedao/document-engineering";
 import LineItemsTable from "./components/lineItemsTable.js";
 import { formatNumber } from "../invoice/lineItems.js";
-import { useDocumentById } from "@powerhousedao/reactor-browser";
+import { useSelectedBillingStatementDocument } from "../hooks/useBillingStatementDocument.js";
 
 export type IProps = EditorProps;
 
 export default function Editor(props: any) {
-  const [doc, dispatch] = useDocumentById(props.documentId) as [
+  const [doc, dispatch] = useSelectedBillingStatementDocument() as [
     BillingStatementDocument | undefined,
     any,
   ];

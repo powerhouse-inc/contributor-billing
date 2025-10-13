@@ -299,7 +299,6 @@ throw new MissingIdError("message");
 - Simple, specific fields over complex nested types
 - System auto-generates `OID` for new objects (users don't provide manually)
 
-
 ## UI Component Guidelines
 
 ### Core UI Libraries
@@ -307,6 +306,7 @@ throw new MissingIdError("message");
 **MANDATORY**: Use the following Powerhouse UI libraries for all editor components:
 
 - **Primary Components**: `@powerhousedao/document-engineering` for core UI elements
+
   - Forms: `TextInput`, `Textarea`, `Select`
   - Tables: `ObjectSetTable`, `ColumnDef`, `ColumnAlignment`
   - Navigation: `SidebarProvider`, `Sidebar`, `useSidebar`
@@ -332,6 +332,7 @@ throw new MissingIdError("message");
 **MANDATORY**: Follow these architectural patterns when building UI components:
 
 #### Table Components
+
 - Use `ObjectSetTable` for data display with editable cells
 - Define column configurations using `ColumnDef<T>` with proper typing
 - Implement `onSave`, `onAdd`, and `onDelete` handlers for data operations
@@ -357,6 +358,7 @@ const columns = useMemo<Array<ColumnDef<T>>>(
 ```
 
 #### Form Components
+
 - Use `TextInput`, `Textarea`, and `Select` from document-engineering
 - Implement `onBlur` handlers for auto-save functionality
 - Use `defaultValue` for initial values, not `value` for uncontrolled components
@@ -376,6 +378,7 @@ const columns = useMemo<Array<ColumnDef<T>>>(
 ```
 
 #### Select Component Usage
+
 **MANDATORY**: Use the `Select` component from `@powerhousedao/document-engineering` for dropdown selections:
 
 ```typescript
@@ -394,6 +397,7 @@ const columns = useMemo<Array<ColumnDef<T>>>(
 ```
 
 **Key Select Component Properties:**
+
 - **`label`**: String - The field label displayed above the select
 - **`options`**: Array of `{ label: string, value: string }` - Dropdown options
 - **`value`**: String - Currently selected value from state
@@ -401,6 +405,7 @@ const columns = useMemo<Array<ColumnDef<T>>>(
 - **No external wrapper needed** - Component includes its own label and styling
 
 #### Navigation Components
+
 - Use `SidebarProvider` and `Sidebar` for hierarchical navigation
 - Implement breadcrumb navigation for deep navigation paths
 - Use `useSidebar` hook for sidebar state management
@@ -433,18 +438,20 @@ const columns = useMemo<Array<ColumnDef<T>>>(
 - **Mobile Support**: Ensure components work on mobile devices
 - **Dynamic Layouts**: Adapt layouts based on available screen space
 
-
 ## Custom Drive Explorer Creation Workflow
 
 ### Problem Statement
+
 You need a custom, application-like interface to browse, organize, or interact with specific types of documents stored within a Powerhouse drive, going beyond the standard file listing.
 
 ### Prerequisites
+
 - Powerhouse CLI (ph-cmd) installed
 - A Powerhouse project initialized (ph init)
 - MCP server connection available
 
 ### Step 1: Generate Drive Explorer Template
+
 Navigate to your project root and run the generate command with the `--drive-editor` flag:
 
 ```bash
@@ -453,6 +460,7 @@ ph generate --drive-editor <drive-app-name>
 ```
 
 ### Step 2: Update Module Configuration
+
 After generation, customize the module configuration in `editors/<drive-app-name>/index.ts`:
 
 ```typescript
@@ -469,12 +477,13 @@ export const module: DriveEditorModule = {
 ```
 
 ### Step 3: Customize UI Components
+
 - **Main Explorer** (`components/DriveExplorer.tsx`): Update sidebar title and empty state messages
 - **Document Creation** (`components/CreateDocument.tsx`): Customize document type filtering if needed
 - **Folder Tree** (`components/FolderTree.tsx`): Customize navigation behavior
-- **Editor Container** (`components/EditorContainer.tsx`): Customize toolbar actions
 
 ### Step 4: Update Powerhouse Manifest
+
 Add the drive explorer to the `apps` section in `powerhouse.manifest.json`:
 
 ```json
@@ -491,6 +500,7 @@ Add the drive explorer to the `apps` section in `powerhouse.manifest.json`:
 ```
 
 ### Step 5: Update Module Exports
+
 Ensure the drive explorer is exported in `editors/index.ts`:
 
 ```typescript
@@ -498,6 +508,7 @@ export { module as <PascalCaseName>DriveExplorer } from "./<drive-app-name>/inde
 ```
 
 ### Key Customization Points
+
 - **Sidebar Title**: Brand the explorer for your specific use case
 - **Empty State Messages**: Provide context-specific guidance
 - **Document Filtering**: Filter available document types if needed
@@ -505,24 +516,27 @@ export { module as <PascalCaseName>DriveExplorer } from "./<drive-app-name>/inde
 - **Folder Operations**: Customize folder creation and organization behavior
 
 ### Expected Outcome
+
 - A new directory `editors/<drive-app-name>/` with complete drive explorer implementation
 - Customizable interface for browsing, creating, and managing documents within drives
 - Integration with existing document editors for seamless workflow
 - Proper registration in powerhouse.manifest.json as an app module
 
 ### Notes
+
 - Drive explorers target `powerhouse/document-drive` document type
 - They provide specialized interfaces for managing documents of any type within drives
 - Unlike document editors (which edit specific document types), drive explorers manage collections of documents
 - The generated template includes responsive layout, folder navigation, and document creation workflows
 
-
 ## Drag-and-Drop Implementation for Drive Explorers
 
 ### Overview
+
 This guide explains how to add drag-and-drop file functionality to any drive explorer editor in the Powerhouse ecosystem.
 
 ### Step 1: Configure the Editor Module
+
 In your editor's `index.ts`, add drag-and-drop configuration:
 
 ```typescript
@@ -541,13 +555,14 @@ export const module: DriveEditorModule = {
       // ... other types
     ],
     dragAndDrop: {
-      enabled: true,  // Enable drag-and-drop functionality
+      enabled: true, // Enable drag-and-drop functionality
     },
   },
 };
 ```
 
 ### Step 2: Create the withDropZone HOC
+
 Create a `utils/withDropZone.tsx` file:
 
 ```typescript
@@ -607,6 +622,7 @@ export function withDropZone<T extends DriveEditorProps>(
 ```
 
 ### Step 3: Wrap Your Base Editor Component
+
 In your `editor.tsx`:
 
 ```typescript
@@ -619,7 +635,7 @@ export type IProps = DriveEditorProps;
 // Your base editor component
 export function BaseEditor(props: IProps) {
   const [document] = useSelectedDriveDocument();
-  
+
   return (
     <div style={{ height: "100%" }}>
       {/* Your drive explorer UI */}
@@ -637,6 +653,7 @@ export function Editor(props: IProps) {
 ```
 
 ### Step 4: Install Required Dependencies
+
 Ensure you have the following packages installed:
 
 ```json
@@ -653,6 +670,7 @@ Ensure you have the following packages installed:
 2. **Conditional Rendering**: The HOC checks the config and conditionally wraps the component with `DropZone` only when enabled
 
 3. **File Handling**:
+
    - `useOnDropFile` hook processes dropped files based on allowed `documentTypes`
    - Files are validated against the configured document types
    - Successful drops trigger document creation in the drive
@@ -677,12 +695,15 @@ Ensure you have the following packages installed:
 ## Visual Development
 
 ### Design Principles
+
 - Comprehensive design checklist in `/context/design-principles.md`
 - Brand style guide in `/context/style-guide.md`
 - When making visual (front-end, UI/UX) changes, always refer to these files for guidance
 
 ### Quick Visual Check
+
 IMMEDIATELY after implementing any front-end change:
+
 1. **Identify what changed** - Review the modified components/pages
 2. **Navigate to affected pages** - Use `mcp__playwright__browser_navigate` to visit each changed view
 3. **Verify design compliance** - Compare against `/context/design-principles.md` and `/context/style-guide.md`
@@ -694,7 +715,9 @@ IMMEDIATELY after implementing any front-end change:
 This verification ensures changes meet design standards and user requirements.
 
 ### Comprehensive Design Review
+
 Invoke the `@agent-design-review` subagent for thorough design validation when:
+
 - Completing significant UI/UX features
 - Before finalizing PRs with visual changes
 - Needing comprehensive accessibility and responsiveness testing

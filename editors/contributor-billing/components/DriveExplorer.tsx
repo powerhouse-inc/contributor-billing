@@ -12,20 +12,18 @@ import {
   useSelectedDriveDocuments,
   useSelectedFolder,
   useNodeActions,
-  showDeleteNodeModal,
 } from "@powerhousedao/reactor-browser";
 import type { DocumentModelModule } from "document-model";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { EditorContainer } from "./EditorContainer.js";
 import { InvoiceTable } from "./InvoiceTable/InvoiceTable.js";
 import { HeaderStats } from "./InvoiceTable/HeaderStats.js";
-import type { Node } from "document-drive";
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
  * Layout: Left sidebar (folder tree) + Right content area (files/folders + document editor)
  */
 export function DriveExplorer(props: DriveEditorProps) {
+  const { children, editorConfig } = props;
   const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
 
@@ -36,9 +34,7 @@ export function DriveExplorer(props: DriveEditorProps) {
 
   // === DOCUMENT EDITOR STATE ===
   // Customize document opening/closing behavior here
-  const [activeDocumentId, setActiveDocumentId] = useState<
-    string | undefined
-  >();
+
   const [openModal, setOpenModal] = useState(false);
   const selectedDocumentModel = useRef<DocumentModelModule | null>(null);
   const editorModules = useEditorModules();
@@ -217,53 +213,6 @@ export function DriveExplorer(props: DriveEditorProps) {
     return dispatchersRef.current.get(id) || null;
   };
 
-  // === EVENT HANDLERS ===
-
-  // Wrapper for rename that handles node ID
-  const handleRenameNode = useCallback(
-    async (nodeId: string, newName: string) => {
-      const node = fileChildren.find((n) => n.id === nodeId);
-      if (node) {
-        await onRenameNode(newName, node);
-      }
-    },
-    [fileChildren, onRenameNode]
-  );
-
-  // Wrapper for delete that clears selection
-  const handleDeleteNode = useCallback(
-    async (nodeId: string) => {
-      const node = fileChildren.find((n) => n.id === nodeId);
-      if (
-        node &&
-        window.confirm(`Are you sure you want to delete "${node.name}"?`)
-      ) {
-        // Delete via context menu or direct call
-        // The FileItem component will call showDeleteNodeModal instead
-        setSelected((prev) => {
-          const newSelected = { ...prev };
-          delete newSelected[nodeId];
-          return newSelected;
-        });
-      }
-    },
-    [fileChildren]
-  );
-
-  // Wrapper for showDeleteNodeModal (for FileItem) - uses the reactor-browser function
-  const handleShowDeleteModal = useCallback(async (node: Node) => {
-    showDeleteNodeModal(node.id);
-
-    // Clear selection after deletion is confirmed
-    setSelected((prev) => {
-      const newSelected = { ...prev };
-      delete newSelected[node.id];
-      return newSelected;
-    });
-
-    return undefined;
-  }, []);
-
   // Handle document creation from modal
   const onCreateDocument = useCallback(
     async (fileName: string) => {
@@ -314,21 +263,9 @@ export function DriveExplorer(props: DriveEditorProps) {
   const documentModelModules = useDocumentModelModules();
 
   // Get active document and its editor components
-  const activeDocument = activeDocumentId
-    ? fileChildren.find((file) => file.id === activeDocumentId)
-    : undefined;
 
-  const documentModelModule = activeDocument
-    ? documentModelModules?.find(
-        (m) => m.documentModel.id === activeDocument.documentType
-      )
-    : null;
-
-  const editorModule = activeDocument
-    ? editorModules?.find((e) =>
-        e.documentTypes.includes(activeDocument.documentType)
-      )
-    : null;
+  // if a document is selected then it's editor will be passed as children
+  const showDocumentEditor = !!children;
 
   // === RENDER ===
 
@@ -348,31 +285,19 @@ export function DriveExplorer(props: DriveEditorProps) {
           theme="light"
         />
         {/* === RIGHT CONTENT AREA: Files/Folders or Document Editor === */}
-        <div className="flex-1 p-4">
+        <div className="flex-1">
           {/* Conditional rendering: Document editor or folder contents */}
-          {activeDocument && documentModelModule && editorModule ? (
+          {showDocumentEditor ? (
             // Document editor view
-            <EditorContainer
-              handleClose={() => setActiveDocumentId(undefined)}
-              activeDocumentId={activeDocumentId || ""}
-            />
+            children
           ) : (
             <>
               <HeaderStats />
               <InvoiceTable
-                setActiveDocumentId={setActiveDocumentId}
                 files={fileChildren}
                 state={state || []}
                 selected={selected}
                 setSelected={setSelected}
-                onBatchAction={() => {}}
-                onDeleteNode={handleDeleteNode}
-                renameNode={handleRenameNode}
-                onDuplicateNode={async (node: Node) => {
-                  await onDuplicateNode(node);
-                  return undefined;
-                }}
-                showDeleteNodeModal={handleShowDeleteModal}
                 filteredDocumentModels={documentModelModules}
                 onSelectDocumentModel={onSelectDocumentModel}
                 getDocDispatcher={getDocDispatcher}

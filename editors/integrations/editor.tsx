@@ -1,12 +1,11 @@
-import type { EditorProps } from "document-model";
 import {
   type IntegrationsDocument,
   IntegrationsState,
   actions,
 } from "../../document-models/integrations/index.js";
 import { Button } from "@powerhousedao/document-engineering";
-import React, { useState } from "react";
-import { useDocumentById } from "@powerhousedao/reactor-browser";
+import { useState } from "react";
+import { useSelectedIntegrationsDocument } from "../hooks/useIntegrationsDocument.js";
 
 const TABS = [
   { key: "requestFinance", label: "Request Finance" },
@@ -15,7 +14,7 @@ const TABS = [
 ];
 
 export default function Editor(props: any) {
-  const [doc, dispatch] = useDocumentById(props.documentId) as [
+  const [doc, dispatch] = useSelectedIntegrationsDocument() as [
     IntegrationsDocument | undefined,
     any,
   ];
@@ -140,8 +139,7 @@ export default function Editor(props: any) {
                   type="submit"
                   className="hover:bg-gray-200"
                   disabled={
-                    state.requestFinance?.apiKey ===
-                      requestFinance.apiKey &&
+                    state.requestFinance?.apiKey === requestFinance.apiKey &&
                     state.requestFinance?.email === requestFinance.email
                   }
                 >
@@ -198,8 +196,7 @@ export default function Editor(props: any) {
                   type="submit"
                   className="hover:bg-gray-200"
                   disabled={
-                    state.gnosisSafe?.safeAddress ===
-                      gnosisSafe.safeAddress &&
+                    state.gnosisSafe?.safeAddress === gnosisSafe.safeAddress &&
                     state.gnosisSafe?.signerPrivateKey ===
                       gnosisSafe.signerPrivateKey
                   }
@@ -287,10 +284,8 @@ export default function Editor(props: any) {
                   type="submit"
                   className="hover:bg-gray-200"
                   disabled={
-                    state.googleCloud?.projectId ===
-                      googleCloud.projectId &&
-                    state.googleCloud?.location ===
-                      googleCloud.location &&
+                    state.googleCloud?.projectId === googleCloud.projectId &&
+                    state.googleCloud?.location === googleCloud.location &&
                     state.googleCloud?.processorId ===
                       googleCloud.processorId &&
                     state.googleCloud?.keyFile?.type ===
@@ -309,8 +304,7 @@ export default function Editor(props: any) {
                       googleCloud.keyFile.auth_uri &&
                     state.googleCloud?.keyFile?.token_uri ===
                       googleCloud.keyFile.token_uri &&
-                    state.googleCloud?.keyFile
-                      ?.auth_provider_x509_cert_url ===
+                    state.googleCloud?.keyFile?.auth_provider_x509_cert_url ===
                       googleCloud.keyFile.auth_provider_x509_cert_url &&
                     state.googleCloud?.keyFile?.client_x509_cert_url ===
                       googleCloud.keyFile.client_x509_cert_url &&

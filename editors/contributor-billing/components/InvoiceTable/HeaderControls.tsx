@@ -1,7 +1,8 @@
-import { useState, useRef } from "react";
-import { Input, Select } from "@powerhousedao/document-engineering";
+import { useState } from "react";
+import { Select } from "@powerhousedao/document-engineering";
 import ConfirmationModal from "../../../invoice/components/confirmationModal.js";
 import { Icon } from "@powerhousedao/design-system";
+import { setSelectedNode } from "@powerhousedao/reactor-browser";
 
 const currencyOptions = [
   { label: "CHF", value: "CHF" },
@@ -12,32 +13,24 @@ const currencyOptions = [
 ];
 
 export const HeaderControls = ({
-  contributorOptions = [],
   statusOptions = [],
-  onContributorChange,
   onStatusChange,
   onSearchChange,
   onExport,
   onExpenseReportExport,
-  onBatchAction,
   selectedStatuses = [],
   createIntegrationsDocument,
   integrationsDoc,
-  setActiveDocumentId,
   canExportSelectedRows,
 }: {
-  contributorOptions?: { label: string; value: string }[];
   statusOptions?: { label: string; value: string }[];
-  onContributorChange?: (value: string | string[]) => void;
   onStatusChange?: (value: string | string[]) => void;
   onSearchChange?: (value: string) => void;
   onExport?: (baseCurrency: string) => void;
   onExpenseReportExport?: (baseCurrency: string) => void;
-  onBatchAction?: (action: string) => void;
   selectedStatuses?: string[];
   createIntegrationsDocument?: () => void;
   integrationsDoc?: any | null;
-  setActiveDocumentId?: (id: string) => void;
   canExportSelectedRows?: () => boolean;
 }) => {
   const batchOptions = [
@@ -60,8 +53,6 @@ export const HeaderControls = ({
   const handleBatchAction = (action: string) => {
     if (action === "export-csv-expense-report") {
       setShowExpenseReportCurrencyModal(true);
-    } else {
-      onBatchAction?.(action);
     }
   };
 
@@ -69,11 +60,6 @@ export const HeaderControls = ({
     <div className="flex flex-col gap-4 mb-4">
       <div className="flex justify-between items-center">
         <div className="flex gap-2 items-center">
-          {/* <Select
-          options={contributorOptions}
-          onChange={onContributorChange}
-          placeholder="Contributor"
-        /> */}
           <Select
             style={{
               width: "200px",
@@ -117,7 +103,7 @@ export const HeaderControls = ({
                 if (!integrationsDoc) {
                   createIntegrationsDocument?.();
                 } else {
-                  setActiveDocumentId?.(integrationsDoc.id);
+                  setSelectedNode(integrationsDoc.id);
                 }
               }}
             />

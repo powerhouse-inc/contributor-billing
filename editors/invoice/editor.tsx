@@ -37,14 +37,14 @@ import {
 } from "./components/statusModalComponents.js";
 import { InvoiceStateSchema } from "../../document-models/invoice/gen/schema/zod.js";
 import validateStatusBeforeContinue from "./validation/validationHandler.js";
-import { useDocumentById } from "@powerhousedao/reactor-browser";
+import { useSelectedInvoiceDocument } from "../hooks/useInvoiceDocument.js";
 
 function isFiatCurrency(currency: string): boolean {
   return currencyList.find((c) => c.ticker === currency)?.crypto === false;
 }
 
 export default function Editor(props: any) {
-  const [doc, dispatch] = useDocumentById(props.documentId) as [
+  const [doc, dispatch] = useSelectedInvoiceDocument() as [
     InvoiceDocument | undefined,
     any,
   ];
@@ -691,7 +691,7 @@ export default function Editor(props: any) {
                     strokeLinejoin="round"
                     strokeWidth="2"
                     d="M19 9l-7 7-7-7"
-                ></path>
+                  ></path>
                 </svg>
               </button>
 
@@ -752,12 +752,32 @@ export default function Editor(props: any) {
               aria-label="Toggle invoice settings"
             >
               {mobileHeaderOpen ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                  />
                 </svg>
               )}
             </button>
@@ -766,7 +786,9 @@ export default function Editor(props: any) {
           {/* Current Settings Summary */}
           {!mobileHeaderOpen && (
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-              <span className="font-medium">{state.invoiceNo || "No invoice #"}</span>
+              <span className="font-medium">
+                {state.invoiceNo || "No invoice #"}
+              </span>
               <span>•</span>
               <span>{state.currency}</span>
               <span>•</span>
@@ -781,7 +803,9 @@ export default function Editor(props: any) {
             <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4 shadow-sm">
               {/* Invoice Number */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Invoice Number</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Invoice Number
+                </label>
                 <InputField
                   placeholder={"Add invoice number"}
                   value={invoiceNoInput}
@@ -799,7 +823,9 @@ export default function Editor(props: any) {
 
               {/* Currency */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Currency
+                </label>
                 <CurrencyForm
                   currency={state.currency}
                   handleInputChange={(e) => {
@@ -811,7 +837,9 @@ export default function Editor(props: any) {
 
               {/* Status */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Status
+                </label>
                 <SelectField
                   options={STATUS_OPTIONS}
                   value={state.status}

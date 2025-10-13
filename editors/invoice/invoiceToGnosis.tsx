@@ -4,8 +4,8 @@ import { generateId } from "document-model";
 
 let GRAPHQL_URL = "http://localhost:4001/graphql/invoice";
 
-if (!window.document.baseURI.includes('localhost')) {
-  GRAPHQL_URL = 'https://switchboard-dev.powerhouse.xyz/graphql/invoice'
+if (!window.document.baseURI.includes("localhost")) {
+  GRAPHQL_URL = "https://switchboard-dev.powerhouse.xyz/graphql/invoice";
 }
 
 interface InvoiceToGnosisProps {
@@ -29,14 +29,15 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
 
   useEffect(() => {
     // set safeADdress from processorRef
-    if(docState.payments.length < 1) return;
-    const lastPayment = docState.payments[docState.payments.length -1].processorRef;
-    console.log(lastPayment)
+    if (docState.payments.length < 1) return;
+    const lastPayment =
+      docState.payments[docState.payments.length - 1].processorRef;
+    console.log(lastPayment);
     const retrievedSafeAddress = lastPayment.split(":");
-    if(retrievedSafeAddress[0]) {
-      setSafeAddress(retrievedSafeAddress[0])
+    if (retrievedSafeAddress[0]) {
+      setSafeAddress(retrievedSafeAddress[0]);
     }
-  },[docState.payments.length])
+  }, [docState.payments.length]);
 
   const TOKEN_ADDRESSES = {
     BASE: {
