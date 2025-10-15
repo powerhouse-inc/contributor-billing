@@ -6,7 +6,7 @@ function isValidEthereumAddress(address: string): boolean {
     return ethereumAddressRegex.test(address);
 }
 
-function isValidIBAN(iban: string): boolean {
+export function isValidIBAN(iban: string): boolean {
     const ibanRegex = /^([A-Z]{2}[-]?[0-9]{2})(?=(?:[ -]?[A-Z0-9]){9,30}$)((?:[ -]?[A-Z0-9]{3,5}){2,7})([-]?[A-Z0-9]{1,3})?$/;
 
     // Extract country code from IBAN (first 2 letters)
