@@ -157,6 +157,8 @@ export default function Editor(
     useState<ValidationResult | null>(null);
   const [routingNumberValidation, setRoutingNumberValidation] =
     useState<ValidationResult | null>(null);
+  const [accountNumberValidation, setAccountNumberValidation] =
+    useState<ValidationResult | null>(null);
 
   // Replace showConfirmationModal and pendingStatus with a single modal state
   const [activeModal, setActiveModal] = useState<
@@ -438,6 +440,7 @@ export default function Editor(
       setBankCountryValidation,
       setIbanValidation,
       setBicValidation,
+      setAccountNumberValidation,
       setBankNameValidation,
       setStreetAddressValidation,
       setCityValidation,
@@ -1011,6 +1014,7 @@ export default function Editor(
             postalcodevalidation={postalCodeValidation}
             payeremailvalidation={payerEmailValidation}
             routingNumbervalidation={routingNumberValidation}
+            accountNumbervalidation={accountNumberValidation}
           />
         </div>
 

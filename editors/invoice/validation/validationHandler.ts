@@ -1,4 +1,3 @@
-import { InvoiceDocument } from "document-models/invoice/gen/types.js";
 import { ValidationResult, ValidationContext, validateField } from "./validationManager.js";
 import { toast } from "@powerhousedao/design-system";
 
@@ -12,6 +11,7 @@ const validateStatusBeforeContinue = (
     setBankCountryValidation: (validation: ValidationResult) => void,
     setIbanValidation: (validation: ValidationResult) => void,
     setBicValidation: (validation: ValidationResult) => void,
+    setAccountNumberValidation: (validation: ValidationResult) => void,
     setBankNameValidation: (validation: ValidationResult) => void,
     setStreetAddressValidation: (validation: ValidationResult) => void,
     setCityValidation: (validation: ValidationResult) => void,
@@ -91,15 +91,32 @@ const validateStatusBeforeContinue = (
             validationErrors.push(bankCountryValidation);
         }
 
-        // Validate EUR&GBP IBAN account number
-        const ibanValidation = validateField(
-            "accountNum",
-            state.issuer.paymentRouting?.bank?.accountNum,
-            context
-        );
-        setIbanValidation(ibanValidation as any);
-        if (ibanValidation && !ibanValidation.isValid) {
-            validationErrors.push(ibanValidation);
+        // Validate account number or IBAN depending on currency to avoid duplicate validation of the same field
+        const IBAN_CURRENCIES = ["EUR", "GBP", "DKK"];
+        if (IBAN_CURRENCIES.includes(state.currency)) {
+            // Only IBAN applies
+            const ibanValidation = validateField(
+                "accountNum",
+                state.issuer.paymentRouting?.bank?.accountNum,
+                context
+            );
+            setIbanValidation(ibanValidation as any);
+            setAccountNumberValidation(null as any);
+            if (ibanValidation && !ibanValidation.isValid) {
+                validationErrors.push(ibanValidation);
+            }
+        } else {
+            // Generic account number applies
+            const accountNumberValidation = validateField(
+                "accountNum",
+                state.issuer.paymentRouting?.bank?.accountNum,
+                context
+            );
+            setAccountNumberValidation(accountNumberValidation as any);
+            setIbanValidation(null as any);
+            if (accountNumberValidation && !accountNumberValidation.isValid) {
+                validationErrors.push(accountNumberValidation);
+            }
         }
 
         // Validate BIC/SWIFT number

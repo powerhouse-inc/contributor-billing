@@ -9,15 +9,15 @@ function isValidEthereumAddress(address: string): boolean {
 function isValidIBAN(iban: string): boolean {
     const ibanRegex = /^([A-Z]{2}[-]?[0-9]{2})(?=(?:[ -]?[A-Z0-9]){9,30}$)((?:[ -]?[A-Z0-9]{3,5}){2,7})([-]?[A-Z0-9]{1,3})?$/;
     const hasNumbers = /\d/.test(iban);
-    
+
     // Extract country code from IBAN (first 2 letters)
     const countryCode = iban.substring(0, 2).toUpperCase();
-    
+
     // If IBAN starts with a valid country code (2 letters), validate full IBAN format
     if (/^[A-Z]{2}$/.test(countryCode)) {
         return ibanRegex.test(iban);
     }
-    
+
     // Otherwise just check if it's not empty and has numbers
     return iban.trim() !== '' && hasNumbers;
 }
@@ -161,7 +161,7 @@ export const bankCountryRule: ValidationRule = {
     }
 };
 
-export const accountNumberRule: ValidationRule = {
+export const accountIbanRule: ValidationRule = {
     field: 'accountNum',
     validate: (value: string, document?: any) => {
         if (!value || value.trim() === '') {
@@ -185,7 +185,40 @@ export const accountNumberRule: ValidationRule = {
         };
     },
     appliesTo: {
-        currencies: ['EUR', 'GBP'],
+        currencies: ['EUR', 'GBP', 'DKK'],
+        statusTransitions: {
+            from: ['DRAFT'],
+            to: ['ISSUED']
+        }
+    }
+};
+
+export const accountNumberRule: ValidationRule = {
+    field: 'accountNum',
+    validate: (value: string) => {
+        if (!value || value.trim() === '') {
+            return {
+                isValid: false,
+                message: 'Account number is required',
+                severity: 'warning'
+            };
+        }
+        // Valid account numbers are 6-25 alphanumeric characters. If it DOES NOT match, it's invalid.
+        if (!/^[\da-zA-Z]{6,25}$/.test(value)) {
+            return {
+                isValid: false,
+                message: 'Invalid account number format - For account number, ensure it is 6-25 characters long',
+                severity: 'warning'
+            };
+        }
+        return {
+            isValid: true,
+            message: '',
+            severity: 'none'
+        };
+    },
+    appliesTo: {
+        currencies: ['USD', 'JPY', 'CNY', 'CHF'],
         statusTransitions: {
             from: ['DRAFT'],
             to: ['ISSUED']

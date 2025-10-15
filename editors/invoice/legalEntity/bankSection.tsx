@@ -54,6 +54,7 @@ export type LegalEntityBankSectionProps = Omit<
   readonly bicvalidation?: ValidationResult | null;
   readonly routingNumbervalidation?: ValidationResult | null;
   readonly banknamevalidation?: ValidationResult | null;
+  readonly accountNumbervalidation?: ValidationResult | null;
   readonly currency: string;
 };
 
@@ -101,6 +102,7 @@ export const LegalEntityBankSection = forwardRef(
       bicvalidation,
       routingNumbervalidation,
       banknamevalidation,
+      accountNumbervalidation,
       currency,
       ...divProps
     } = props;
@@ -192,7 +194,15 @@ export const LegalEntityBankSection = forwardRef(
                 onBlur={createBlurHandler("accountNum")}
                 handleInputChange={createInputHandler("accountNum")}
                 className="h-10 w-full text-md mb-2"
-                validation={ibanvalidation}
+                validation={
+                  // Prefer the first failing validation between IBAN and generic account number
+                  (() => {
+                    const firstInvalid =
+                      (ibanvalidation && !ibanvalidation.isValid && ibanvalidation) ||
+                      (accountNumbervalidation && !accountNumbervalidation.isValid && accountNumbervalidation);
+                    return firstInvalid || ibanvalidation || accountNumbervalidation || null;
+                  })()
+                }
               />
             </div>
 
