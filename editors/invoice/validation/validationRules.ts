@@ -18,8 +18,7 @@ function isValidIBAN(iban: string): boolean {
         return ibanRegex.test(iban);
     }
 
-    // Otherwise just check if it's not empty and has numbers
-    return iban.trim() !== '' && hasNumbers;
+    return false;
 }
 
 function isValidEmail(email: string): boolean {
