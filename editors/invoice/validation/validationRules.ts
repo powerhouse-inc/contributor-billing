@@ -7,7 +7,7 @@ function isValidEthereumAddress(address: string): boolean {
 }
 
 function isValidIBAN(iban: string): boolean {
-    const ibanRegex = /^([A-Z]{2}[0-9]{2})(?=(?:[A-Z0-9]){9,30}$)((?:[A-Z0-9]{3,5}){2,7})([A-Z0-9]{1,3})?$/;
+    const ibanRegex = /^([A-Z]{2}[-]?[0-9]{2})(?=(?:[ -]?[A-Z0-9]){9,30}$)((?:[ -]?[A-Z0-9]{3,5}){2,7})([-]?[A-Z0-9]{1,3})?$/;
     const hasNumbers = /\d/.test(iban);
     
     // Extract country code from IBAN (first 2 letters)
@@ -378,7 +378,7 @@ export const lineItemRule: ValidationRule = {
         };
     },
     appliesTo: {
-        currencies: ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'CHF'], 
+        currencies: ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'CHF'],
         statusTransitions: {
             from: ['DRAFT'],
             to: ['ISSUED']
