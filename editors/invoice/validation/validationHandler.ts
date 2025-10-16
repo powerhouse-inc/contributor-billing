@@ -1,5 +1,6 @@
 import { ValidationResult, ValidationContext, validateField } from "./validationManager.js";
 import { toast } from "@powerhousedao/design-system";
+import { isValidIBAN } from "./validationRules.js";
 
 const validateStatusBeforeContinue = (
     newStatus: string,
@@ -136,9 +137,10 @@ const validateStatusBeforeContinue = (
             state.issuer.paymentRouting?.bank?.ABA,
             context
         );
-        setRoutingNumberValidation(routingNumberValidation as any);
-        if (routingNumberValidation && !routingNumberValidation.isValid) {
-            validationErrors.push(routingNumberValidation);
+        const usdIbanPayment =  isValidIBAN(state.issuer.paymentRouting?.bank?.accountNum ?? "") && state.currency === "USD";
+        setRoutingNumberValidation(usdIbanPayment ? null : routingNumberValidation as any);
+        if (usdIbanPayment ? null : routingNumberValidation && !routingNumberValidation.isValid) {
+            validationErrors.push(usdIbanPayment ? { isValid: true, message: '', severity: 'none' } : routingNumberValidation as any);
         }
 
         // Validate bank name

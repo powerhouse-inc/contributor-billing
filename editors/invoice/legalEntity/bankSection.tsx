@@ -5,6 +5,7 @@ import {
   useCallback,
   useState,
   useEffect,
+  useMemo,
 } from "react";
 import { twMerge } from "tailwind-merge";
 import { EditLegalEntityBankInput } from "./legalEntity.js";
@@ -12,6 +13,7 @@ import { CountryForm } from "../components/countryForm.js";
 import { InputField } from "../components/inputField.js";
 import { ValidationResult } from "../validation/validationManager.js";
 import { Select } from "@powerhousedao/document-engineering";
+import { isValidIBAN } from "../validation/validationRules.js";
 
 const FieldLabel = ({ children }: { readonly children: React.ReactNode }) => (
   <label className="block text-sm font-medium text-gray-700">{children}</label>
@@ -78,12 +80,15 @@ function flattenBankInput(value: any) {
       beneficiaryIntermediary: value.intermediaryBank.beneficiary ?? "",
       memoIntermediary: value.intermediaryBank.memo ?? "",
       nameIntermediary: value.intermediaryBank.name ?? "",
-      streetAddressIntermediary: value.intermediaryBank.address?.streetAddress ?? "",
-      extendedAddressIntermediary: value.intermediaryBank.address?.extendedAddress ?? "",
+      streetAddressIntermediary:
+        value.intermediaryBank.address?.streetAddress ?? "",
+      extendedAddressIntermediary:
+        value.intermediaryBank.address?.extendedAddress ?? "",
       cityIntermediary: value.intermediaryBank.address?.city ?? "",
       postalCodeIntermediary: value.intermediaryBank.address?.postalCode ?? "",
       countryIntermediary: value.intermediaryBank.address?.country ?? "",
-      stateProvinceIntermediary: value.intermediaryBank.address?.stateProvince ?? "",
+      stateProvinceIntermediary:
+        value.intermediaryBank.address?.stateProvince ?? "",
     }),
   };
 }
@@ -169,7 +174,12 @@ export const LegalEntityBankSection = forwardRef(
       };
     }
 
-    const SEPA_SWIFT_CURRENCIES = ["EUR", "DKK", "GBP", "CHF", "JPY"	];
+    const SEPA_SWIFT_CURRENCIES = ["EUR", "DKK", "GBP", "CHF", "JPY"];
+
+    const usdIbanPayment = useMemo(
+      () => isValidIBAN(localState.accountNum ?? "") && currency === "USD",
+      [localState.accountNum, currency]
+    );
 
     return (
       <div
@@ -198,9 +208,18 @@ export const LegalEntityBankSection = forwardRef(
                   // Prefer the first failing validation between IBAN and generic account number
                   (() => {
                     const firstInvalid =
-                      (ibanvalidation && !ibanvalidation.isValid && ibanvalidation) ||
-                      (accountNumbervalidation && !accountNumbervalidation.isValid && accountNumbervalidation);
-                    return firstInvalid || ibanvalidation || accountNumbervalidation || null;
+                      (ibanvalidation &&
+                        !ibanvalidation.isValid &&
+                        ibanvalidation) ||
+                      (accountNumbervalidation &&
+                        !accountNumbervalidation.isValid &&
+                        accountNumbervalidation);
+                    return (
+                      firstInvalid ||
+                      ibanvalidation ||
+                      accountNumbervalidation ||
+                      null
+                    );
                   })()
                 }
               />
@@ -252,7 +271,9 @@ export const LegalEntityBankSection = forwardRef(
                         onBlur={createBlurHandler("ABA")}
                         handleInputChange={createInputHandler("ABA")}
                         className="h-10 w-full text-md mb-2"
-                        validation={routingNumbervalidation}
+                        validation={
+                          usdIbanPayment ? null : routingNumbervalidation
+                        }
                       />
                       <InputField
                         value={(localState.BIC || localState.SWIFT) ?? ""}
@@ -462,13 +483,13 @@ export const LegalEntityBankSection = forwardRef(
                               className="h-10 w-full text-md mb-2"
                             />
                             <InputField
-                              value={
-                                localState.SWIFTIntermediary ?? ""
-                              }
+                              value={localState.SWIFTIntermediary ?? ""}
                               label="SWIFT/BIC"
                               placeholder="SWIFT/BIC"
                               onBlur={createBlurHandler("SWIFTIntermediary")}
-                              handleInputChange={createInputHandler("SWIFTIntermediary")}
+                              handleInputChange={createInputHandler(
+                                "SWIFTIntermediary"
+                              )}
                               className="h-10 w-full text-md mb-2"
                             />
                           </div>
