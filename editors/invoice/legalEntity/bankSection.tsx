@@ -5,6 +5,7 @@ import {
   useCallback,
   useState,
   useEffect,
+  useMemo,
 } from "react";
 import { twMerge } from "tailwind-merge";
 import { EditLegalEntityBankInput } from "./legalEntity.js";
@@ -12,35 +13,9 @@ import { CountryForm } from "../components/countryForm.js";
 import { InputField } from "../components/inputField.js";
 import { ValidationResult } from "../validation/validationManager.js";
 import { Select } from "@powerhousedao/document-engineering";
-
-const FieldLabel = ({ children }: { readonly children: React.ReactNode }) => (
-  <label className="block text-sm font-medium text-gray-700">{children}</label>
-);
+import { isValidIBAN } from "../validation/validationRules.js";
 
 const ACCOUNT_TYPES = ["CHECKING", "SAVINGS", "TRUST"] as const;
-
-const AccountTypeSelect = forwardRef(function AccountTypeSelect(
-  props: ComponentPropsWithRef<"select">,
-  ref: Ref<HTMLSelectElement>
-) {
-  return (
-    <select
-      {...props}
-      className={twMerge(
-        "h-10 w-full rounded-md border border-gray-200 bg-white px-3 transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50 disabled:p-0",
-        props.className
-      )}
-      ref={ref}
-    >
-      <option value="">Select Account Type</option>
-      {ACCOUNT_TYPES.map((type) => (
-        <option key={type} value={type}>
-          {type}
-        </option>
-      ))}
-    </select>
-  );
-});
 
 export type LegalEntityBankSectionProps = Omit<
   ComponentPropsWithRef<"div">,
@@ -54,6 +29,7 @@ export type LegalEntityBankSectionProps = Omit<
   readonly bicvalidation?: ValidationResult | null;
   readonly routingNumbervalidation?: ValidationResult | null;
   readonly banknamevalidation?: ValidationResult | null;
+  readonly accountNumbervalidation?: ValidationResult | null;
   readonly currency: string;
 };
 
@@ -77,12 +53,15 @@ function flattenBankInput(value: any) {
       beneficiaryIntermediary: value.intermediaryBank.beneficiary ?? "",
       memoIntermediary: value.intermediaryBank.memo ?? "",
       nameIntermediary: value.intermediaryBank.name ?? "",
-      streetAddressIntermediary: value.intermediaryBank.address?.streetAddress ?? "",
-      extendedAddressIntermediary: value.intermediaryBank.address?.extendedAddress ?? "",
+      streetAddressIntermediary:
+        value.intermediaryBank.address?.streetAddress ?? "",
+      extendedAddressIntermediary:
+        value.intermediaryBank.address?.extendedAddress ?? "",
       cityIntermediary: value.intermediaryBank.address?.city ?? "",
       postalCodeIntermediary: value.intermediaryBank.address?.postalCode ?? "",
       countryIntermediary: value.intermediaryBank.address?.country ?? "",
-      stateProvinceIntermediary: value.intermediaryBank.address?.stateProvince ?? "",
+      stateProvinceIntermediary:
+        value.intermediaryBank.address?.stateProvince ?? "",
     }),
   };
 }
@@ -101,15 +80,31 @@ export const LegalEntityBankSection = forwardRef(
       bicvalidation,
       routingNumbervalidation,
       banknamevalidation,
+      accountNumbervalidation,
       currency,
       ...divProps
     } = props;
-    const [showIntermediary, setShowIntermediary] = useState(false);
+    const [showIntermediary, setShowIntermediary] = useState<boolean>(false);
 
     const [localState, setLocalState] = useState(flattenBankInput(value));
 
     useEffect(() => {
       setLocalState(flattenBankInput(value));
+
+      // Check if there's any intermediary bank data
+      const hasIntermediaryData = !!(
+        localState.accountNumIntermediary ||
+        localState.nameIntermediary ||
+        localState.beneficiaryIntermediary ||
+        localState.ABAIntermediary ||
+        localState.BICIntermediary ||
+        localState.SWIFTIntermediary ||
+        localState.streetAddressIntermediary ||
+        localState.cityIntermediary ||
+        localState.countryIntermediary
+      );
+
+      setShowIntermediary(hasIntermediaryData);
     }, [value]);
 
     const handleInputChange = useCallback(function handleInputChange(
@@ -144,7 +139,7 @@ export const LegalEntityBankSection = forwardRef(
       ) {
         setShowIntermediary(event.target.checked);
       },
-      []
+      [showIntermediary]
     );
 
     function createInputHandler(field: keyof EditLegalEntityBankInput) {
@@ -167,7 +162,12 @@ export const LegalEntityBankSection = forwardRef(
       };
     }
 
-    const SEPA_SWIFT_CURRENCIES = ["EUR", "DKK", "GBP", "CHF", "JPY"	];
+    const SEPA_SWIFT_CURRENCIES = ["EUR", "DKK", "GBP", "CHF", "JPY"];
+
+    const usdIbanPayment = useMemo(
+      () => isValidIBAN(localState.accountNum ?? "") && currency === "USD",
+      [localState.accountNum, currency]
+    );
 
     return (
       <div
@@ -192,7 +192,24 @@ export const LegalEntityBankSection = forwardRef(
                 onBlur={createBlurHandler("accountNum")}
                 handleInputChange={createInputHandler("accountNum")}
                 className="h-10 w-full text-md mb-2"
-                validation={ibanvalidation}
+                validation={
+                  // Prefer the first failing validation between IBAN and generic account number
+                  (() => {
+                    const firstInvalid =
+                      (ibanvalidation &&
+                        !ibanvalidation.isValid &&
+                        ibanvalidation) ||
+                      (accountNumbervalidation &&
+                        !accountNumbervalidation.isValid &&
+                        accountNumbervalidation);
+                    return (
+                      firstInvalid ||
+                      ibanvalidation ||
+                      accountNumbervalidation ||
+                      null
+                    );
+                  })()
+                }
               />
             </div>
 
@@ -242,7 +259,9 @@ export const LegalEntityBankSection = forwardRef(
                         onBlur={createBlurHandler("ABA")}
                         handleInputChange={createInputHandler("ABA")}
                         className="h-10 w-full text-md mb-2"
-                        validation={routingNumbervalidation}
+                        validation={
+                          usdIbanPayment ? null : routingNumbervalidation
+                        }
                       />
                       <InputField
                         value={(localState.BIC || localState.SWIFT) ?? ""}
@@ -426,8 +445,8 @@ export const LegalEntityBankSection = forwardRef(
                         {SEPA_SWIFT_CURRENCIES.includes(currency) ? (
                           <InputField
                             value={
-                              (localState.BICIntermediary ||
-                                localState.SWIFTIntermediary) ??
+                              (localState.SWIFTIntermediary ||
+                                localState.BICIntermediary) ??
                               ""
                             }
                             label="SWIFT/BIC"
@@ -453,12 +472,16 @@ export const LegalEntityBankSection = forwardRef(
                             />
                             <InputField
                               value={
-                                localState.SWIFTIntermediary ?? ""
+                                (localState.SWIFTIntermediary ||
+                                  localState.BICIntermediary) ??
+                                ""
                               }
                               label="SWIFT/BIC"
                               placeholder="SWIFT/BIC"
                               onBlur={createBlurHandler("SWIFTIntermediary")}
-                              handleInputChange={createInputHandler("SWIFTIntermediary")}
+                              handleInputChange={createInputHandler(
+                                "SWIFTIntermediary"
+                              )}
                               className="h-10 w-full text-md mb-2"
                             />
                           </div>

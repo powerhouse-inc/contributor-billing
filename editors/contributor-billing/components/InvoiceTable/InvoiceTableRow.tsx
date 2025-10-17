@@ -1,35 +1,40 @@
-import { useState, useRef } from "react";
-import { RowActionMenu } from "./RowActionMenu.js";
 import { FileItem } from "@powerhousedao/design-system";
-import type { Node } from "document-drive";
+import {
+  getSyncStatusSync,
+  setSelectedNode,
+  showDeleteNodeModal,
+  useDriveSharingType,
+  useNodeActions,
+  useSelectedDriveDocument,
+} from "@powerhousedao/reactor-browser";
 
 export const InvoiceTableRow = ({
   files,
   row,
   isSelected,
   onSelect,
-  setActiveDocumentId,
-  onDeleteNode,
-  renameNode,
-  onDuplicateNode,
-  showDeleteNodeModal,
   onCreateBillingStatement,
   billingDocStates,
 }: {
-  files?: any[];
+  files?: { id: string; name: string; documentType?: string }[];
   row: any;
   isSelected: boolean;
   onSelect: (checked: boolean) => void;
-  setActiveDocumentId: (id: string) => void;
-  onDeleteNode: (nodeId: string) => void;
-  renameNode: (nodeId: string, name: string) => void;
-  onDuplicateNode?: (node: Node) => Promise<Node | undefined>;
-  showDeleteNodeModal?: (node: Node) => Promise<Node | undefined>;
   onCreateBillingStatement?: (id: string) => void;
   billingDocStates?: { id: string; contributor: string }[];
 }) => {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLTableCellElement>(null);
+  const [selectedDrive] = useSelectedDriveDocument(); // Currently selected drive
+  const sharingType = useDriveSharingType(selectedDrive.header.id);
+
+  // Core drive operations and document models
+  const {
+    onAddFile,
+    onAddFolder,
+    onCopyNode,
+    onDuplicateNode,
+    onMoveNode,
+    onRenameNode,
+  } = useNodeActions();
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -75,20 +80,6 @@ export const InvoiceTableRow = ({
   const hasExportedData =
     row.exported != null && Boolean(row.exported.timestamp?.trim());
 
-  // Wrapper functions for FileItem that convert between nodeId and Node
-  const handleRenameNode = async (newName: string, node: Node) => {
-    await renameNode(node.id, newName);
-    return undefined;
-  };
-
-  const handleDuplicateNode = async (node: Node): Promise<void> => {
-    if (onDuplicateNode) {
-      await onDuplicateNode(node);
-    }
-  };
-  
-  const handleShowDeleteModal = showDeleteNodeModal || (async () => undefined);
-
   return (
     <tr className="hover:bg-gray-50">
       <td className="px-2 py-2">
@@ -104,21 +95,21 @@ export const InvoiceTableRow = ({
           <FileItem
             key={row.id}
             fileNode={file as any}
-            sharingType="PUBLIC"
-            onRenameNode={handleRenameNode}
-            onDuplicateNode={handleDuplicateNode}
-            showDeleteNodeModal={handleShowDeleteModal}
+            sharingType={sharingType || "LOCAL"}
             isAllowedToCreateDocuments={true}
             className="h-10"
-            onAddFile={() => new Promise((resolve) => resolve(undefined))}
-            onAddFolder={() => new Promise((resolve) => resolve(undefined))}
-            onCopyNode={() => new Promise((resolve) => resolve(undefined))}
-            onMoveNode={() => new Promise((resolve) => resolve(undefined))}
+            onAddFile={onAddFile}
+            onCopyNode={onCopyNode}
+            onMoveNode={onMoveNode}
+            onRenameNode={onRenameNode}
+            onDuplicateNode={onDuplicateNode}
+            onAddFolder={onAddFolder}
             onAddAndSelectNewFolder={() =>
               new Promise((resolve) => resolve(undefined))
             }
-            getSyncStatusSync={() => undefined}
-            setSelectedNode={() => setActiveDocumentId(row.id)}
+            getSyncStatusSync={getSyncStatusSync}
+            setSelectedNode={setSelectedNode}
+            showDeleteNodeModal={(node) => showDeleteNodeModal(node.id)}
           />
         )}
       </td>
@@ -147,23 +138,21 @@ export const InvoiceTableRow = ({
           <FileItem
             key={billingDoc?.id}
             fileNode={billingFile as any}
-            sharingType="PUBLIC"
-            onRenameNode={handleRenameNode}
-            onDuplicateNode={handleDuplicateNode}
-            showDeleteNodeModal={handleShowDeleteModal}
+            sharingType={sharingType || "LOCAL"}
+            showDeleteNodeModal={(node) => showDeleteNodeModal(node.id)}
             isAllowedToCreateDocuments={true}
             className="h-10"
-            onAddFile={() => new Promise((resolve) => resolve(undefined))}
-            onAddFolder={() => new Promise((resolve) => resolve(undefined))}
-            onCopyNode={() => new Promise((resolve) => resolve(undefined))}
-            onMoveNode={() => new Promise((resolve) => resolve(undefined))}
+            onAddFile={onAddFile}
+            onCopyNode={onCopyNode}
+            onMoveNode={onMoveNode}
+            onRenameNode={onRenameNode}
+            onDuplicateNode={onDuplicateNode}
+            onAddFolder={onAddFolder}
             onAddAndSelectNewFolder={() =>
               new Promise((resolve) => resolve(undefined))
             }
-            getSyncStatusSync={() => undefined}
-            setSelectedNode={() =>
-              setActiveDocumentId(billingDoc?.id as string)
-            }
+            getSyncStatusSync={getSyncStatusSync}
+            setSelectedNode={setSelectedNode}
           />
         </td>
       )}
@@ -179,32 +168,6 @@ export const InvoiceTableRow = ({
           <span className="text-red-500">No</span>
         )}
       </td>
-      {/* <td className="px-2 py-2 text-right relative" ref={menuRef}>
-        <div className="relative inline-block">
-          <button
-            className="px-2 py-1 hover:bg-gray-200 rounded"
-            onClick={() => setMenuOpen(v => !v)}
-          >
-            &#x2026;
-          </button>
-          {menuOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setMenuOpen(false)}
-              />
-              <RowActionMenu
-                options={menuOptions}
-                onAction={action => {
-                  onMenuAction(action);
-                  setMenuOpen(false);
-                  setActiveDocumentId(row.id);
-                }}
-              />
-            </>
-          )}
-        </div>
-      </td> */}
     </tr>
   );
 };
