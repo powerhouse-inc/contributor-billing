@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { actions } from "../../document-models/invoice/index.js";
 import { generateId } from "document-model";
+import type {
+  InvoiceAction,
+  InvoiceState,
+} from "../../document-models/invoice/index.js";
 
 let GRAPHQL_URL = "http://localhost:4001/graphql/invoice";
 
-if (!window.document.baseURI.includes('localhost')) {
-  GRAPHQL_URL = 'https://switchboard.powerhouse.xyz/graphql/invoice'
+if (!window.document.baseURI.includes("localhost")) {
+  GRAPHQL_URL = "https://switchboard.powerhouse.xyz/graphql/invoice";
 }
 
 interface InvoiceToGnosisProps {
-  docState: any; // Replace 'any' with the appropriate type if available
-  dispatch: any;
+  docState: InvoiceState;
+  dispatch: React.Dispatch<InvoiceAction>;
 }
 
 const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
@@ -24,19 +28,20 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
   const [safeAddress, setSafeAddress] = useState<string | null>(null);
 
   const currency = docState.currency;
-  const chainName = docState.issuer.paymentRouting.wallet.chainName;
+  const chainName = docState.issuer?.paymentRouting?.wallet?.chainName || "";
   const invoiceStatus = docState.status;
 
   useEffect(() => {
     // set safeADdress from processorRef
-    if(docState.payments.length < 1) return;
-    const lastPayment = docState.payments[docState.payments.length -1].processorRef;
-    console.log(lastPayment)
-    const retrievedSafeAddress = lastPayment.split(":");
-    if(retrievedSafeAddress[0]) {
-      setSafeAddress(retrievedSafeAddress[0])
+    if (docState.payments.length < 1) return;
+    const lastPaymentRef =
+      docState.payments[docState.payments.length - 1].processorRef || "";
+    console.log(lastPaymentRef);
+    const retrievedSafeAddress = lastPaymentRef.split(":");
+    if (retrievedSafeAddress[0]) {
+      setSafeAddress(retrievedSafeAddress[0]);
     }
-  },[docState.payments.length])
+  }, [docState.payments.length]);
 
   const TOKEN_ADDRESSES = {
     BASE: {
@@ -63,20 +68,20 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
   // Extract payment details from current-state.json
   const paymentDetails = {
     payeeWallet: {
-      address: docState.issuer.paymentRouting.wallet.address,
-      chainName: docState.issuer.paymentRouting.wallet.chainName,
-      chainId: docState.issuer.paymentRouting.wallet.chainId,
+      address: docState.issuer?.paymentRouting?.wallet?.address || "",
+      chainName: docState.issuer?.paymentRouting?.wallet?.chainName || "",
+      chainId: docState.issuer?.paymentRouting?.wallet?.chainId || "",
     },
     token: {
       evmAddress: getTokenAddress(chainName, currency),
       symbol: docState.currency,
-      chainName: docState.issuer.paymentRouting.wallet.chainName,
-      chainId: docState.issuer.paymentRouting.wallet.chainId,
+      chainName: docState.issuer?.paymentRouting?.wallet?.chainName || "",
+      chainId: docState.issuer?.paymentRouting?.wallet?.chainId || "",
     },
     amount: docState.totalPriceTaxIncl || 0.000015, // Make the amount small for testing
   };
 
-  function getTokenAddress(chainName: any, symbol: any) {
+  function getTokenAddress(chainName: string, symbol: string) {
     const networkTokens =
       TOKEN_ADDRESSES[chainName.toUpperCase() as keyof typeof TOKEN_ADDRESSES];
     if (!networkTokens) {
