@@ -226,10 +226,12 @@ export function DriveExplorer(props: DriveEditorProps) {
       const documentModel = selectedDocumentModel.current;
       if (!documentModel || !selectedDrive?.header.id) return;
 
-      const editorType =
-        documentModel.documentModel.id === "powerhouse/invoice"
-          ? "powerhouse-invoice-editor"
-          : "integrations-editor";
+      let editorType = "integrations-editor";
+      if (documentModel.documentModel.id === "powerhouse/invoice") {
+        editorType = "powerhouse-invoice-editor";
+      } else if (documentModel.documentModel.id === "powerhouse/expense-report") {
+        editorType = "powerhouse-expense-report-editor";
+      }
 
       try {
         const node = await addDocument(

@@ -356,6 +356,45 @@ export const InvoiceTable = ({
     }
   };
 
+  // check if expense report document exists
+  const expenseReportDoc = files.find(
+    (file) => file.documentType === "powerhouse/expense-report"
+  );
+
+  // check if at least one billing statement exists
+  const hasBillingStatements = state.some(
+    (doc) => doc.header.documentType === "powerhouse/billing-statement"
+  );
+
+  const handleCreateOrOpenExpenseReport = async () => {
+    if (expenseReportDoc) {
+      // Open existing expense report
+      setSelectedNode(expenseReportDoc.id);
+    } else {
+      // Create new expense report
+      const expenseReportModel = filteredDocumentModels?.find(
+        (model) => model.documentModel.id === "powerhouse/expense-report"
+      );
+      if (expenseReportModel) {
+        const createdNode = await addDocument(
+          selectedDrive?.header.id || "",
+          `expense-report`,
+          "powerhouse/expense-report",
+          undefined,
+          undefined,
+          undefined,
+          "powerhouse-expense-report-editor"
+        );
+        console.log("created expense report document", createdNode);
+        if (!createdNode?.id) {
+          console.error("Failed to create expense report document");
+          return null;
+        }
+        setSelectedNode(createdNode.id);
+      }
+    }
+  };
+
   return (
     <div
       className="w-full h-full bg-white rounded-lg p-4 border border-gray-200 shadow-md mt-4 overflow-x-auto"
@@ -370,6 +409,9 @@ export const InvoiceTable = ({
         createIntegrationsDocument={createIntegrationsDocument}
         integrationsDoc={integrationsDoc}
         canExportSelectedRows={canExportSelectedRows}
+        hasBillingStatements={hasBillingStatements}
+        expenseReportDoc={expenseReportDoc}
+        onCreateOrOpenExpenseReport={handleCreateOrOpenExpenseReport}
       />
       {shouldShowSection("DRAFT") && (
         <InvoiceTableSection
