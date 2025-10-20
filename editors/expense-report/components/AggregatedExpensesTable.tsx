@@ -1,0 +1,408 @@
+import { useMemo, useState } from "react";
+import React from "react";
+import type { Wallet, LineItemGroup, LineItem } from "../../../document-models/expense-report/gen/types.js";
+
+interface AggregatedExpensesTableProps {
+  wallets: Wallet[];
+  groups: LineItemGroup[];
+  periodStart?: string | null;
+  periodEnd?: string | null;
+}
+
+interface LineItemWithGroupInfo extends LineItem {
+  parentGroupId?: string | null;
+  parentGroupLabel?: string;
+  groupLabel?: string;
+}
+
+export function AggregatedExpensesTable({
+  wallets,
+  groups,
+  periodStart,
+  periodEnd,
+}: AggregatedExpensesTableProps) {
+  // State for active tab (selected wallet)
+  const [activeWalletIndex, setActiveWalletIndex] = useState(0);
+
+  // Format period for title
+  const periodTitle = useMemo(() => {
+    if (!periodStart) return "Breakdown";
+
+    const date = new Date(periodStart);
+    const month = date.toLocaleDateString("en-US", { month: "short" });
+    const year = date.getFullYear();
+
+    return `${month} ${year} Breakdown`;
+  }, [periodStart]);
+
+  // Create a map of groups with their parent info
+  const groupsMap = useMemo(() => {
+    const map = new Map<string, { group: LineItemGroup; parent?: LineItemGroup }>();
+
+    groups.forEach((group) => {
+      map.set(group.id, { group });
+    });
+
+    // Add parent references
+    groups.forEach((group) => {
+      if (group.parentId) {
+        const entry = map.get(group.id);
+        const parentEntry = map.get(group.parentId);
+        if (entry && parentEntry) {
+          entry.parent = parentEntry.group;
+        }
+      }
+    });
+
+    return map;
+  }, [groups]);
+
+  // Get line items for the active wallet with group information
+  const walletLineItems = useMemo(() => {
+    if (!wallets[activeWalletIndex]) return [];
+
+    const wallet = wallets[activeWalletIndex];
+    const lineItems = wallet.lineItems || [];
+
+    return lineItems
+      .filter((item): item is NonNullable<typeof item> => item !== null && item !== undefined)
+      .map((item): LineItemWithGroupInfo => {
+        const groupInfo = item.group ? groupsMap.get(item.group) : undefined;
+
+        return {
+          ...item,
+          groupLabel: groupInfo?.group.label || undefined,
+          parentGroupId: groupInfo?.parent?.id || null,
+          parentGroupLabel: groupInfo?.parent?.label || undefined,
+        };
+      });
+  }, [wallets, activeWalletIndex, groupsMap]);
+
+  // Group line items by category and aggregate by parent category
+  const groupedAndAggregatedItems = useMemo(() => {
+    // First, aggregate line items by their category (group)
+    const categoryAggregation = new Map<string, {
+      groupId: string;
+      groupLabel: string;
+      parentGroupId: string | null | undefined;
+      parentGroupLabel: string | undefined;
+      budget: number;
+      forecast: number;
+      actuals: number;
+      payments: number;
+      comments: string[];
+    }>();
+
+    walletLineItems.forEach((item) => {
+      if (!item) return;
+
+      const categoryKey = item.group || "uncategorized";
+      const existing = categoryAggregation.get(categoryKey);
+
+      if (existing) {
+        // Aggregate values for the same category
+        existing.budget += item.budget || 0;
+        existing.forecast += item.forecast || 0;
+        existing.actuals += item.actuals || 0;
+        existing.payments += item.payments || 0;
+        if (item.comments) {
+          existing.comments.push(item.comments);
+        }
+      } else {
+        // Create new category entry
+        categoryAggregation.set(categoryKey, {
+          groupId: categoryKey,
+          groupLabel: item.groupLabel || "Uncategorised",
+          parentGroupId: item.parentGroupId,
+          parentGroupLabel: item.parentGroupLabel,
+          budget: item.budget || 0,
+          forecast: item.forecast || 0,
+          actuals: item.actuals || 0,
+          payments: item.payments || 0,
+          comments: item.comments ? [item.comments] : [],
+        });
+      }
+    });
+
+    // Then, group aggregated categories by their parent
+    const grouped = new Map<string, typeof categoryAggregation extends Map<string, infer T> ? T[] : never>();
+
+    categoryAggregation.forEach((aggItem) => {
+      const parentKey = aggItem.parentGroupId || "uncategorized";
+      const items = grouped.get(parentKey) || [];
+      items.push(aggItem);
+      grouped.set(parentKey, items);
+    });
+
+    return grouped;
+  }, [walletLineItems]);
+
+  // Calculate subtotals for each parent group
+  const calculateSubtotal = (items: Array<{
+    budget: number;
+    forecast: number;
+    actuals: number;
+    payments: number;
+    [key: string]: any;
+  }>) => {
+    return items.reduce(
+      (acc, item) => ({
+        budget: acc.budget + item.budget,
+        forecast: acc.forecast + item.forecast,
+        actuals: acc.actuals + item.actuals,
+        difference: acc.difference + (item.actuals - item.budget),
+        payments: acc.payments + item.payments,
+      }),
+      { budget: 0, forecast: 0, actuals: 0, difference: 0, payments: 0 }
+    );
+  };
+
+  // Calculate grand totals
+  const grandTotals = useMemo(() => {
+    return walletLineItems.reduce(
+      (acc, item) => ({
+        budget: acc.budget + (item?.budget || 0),
+        forecast: acc.forecast + (item?.forecast || 0),
+        actuals: acc.actuals + (item?.actuals || 0),
+        difference: acc.difference + ((item?.actuals || 0) - (item?.budget || 0)),
+        payments: acc.payments + (item?.payments || 0),
+      }),
+      { budget: 0, forecast: 0, actuals: 0, difference: 0, payments: 0 }
+    );
+  }, [walletLineItems]);
+
+  const formatNumber = (value: number) => {
+    return new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
+
+  const formatWalletAddress = (address: string) => {
+    if (!address || address.length < 13) return address;
+    return `${address.substring(0, 6)}...${address.substring(address.length - 6)}`;
+  };
+
+  // Sort parent groups: Headcount first, then Non-Headcount, then others, then uncategorized
+  const sortedParentKeys = useMemo(() => {
+    const keys = Array.from(groupedAndAggregatedItems.keys());
+
+    // Find Headcount and Non-Headcount group IDs
+    const headcountGroup = groups.find(g => g.label === "Headcount Expenses");
+    const nonHeadcountGroup = groups.find(g => g.label === "Non-Headcount Expenses");
+
+    return keys.sort((a, b) => {
+      // Uncategorized always goes last
+      if (a === "uncategorized") return 1;
+      if (b === "uncategorized") return -1;
+
+      // Headcount Expenses always first
+      if (a === headcountGroup?.id) return -1;
+      if (b === headcountGroup?.id) return 1;
+
+      // Non-Headcount Expenses always second
+      if (a === nonHeadcountGroup?.id) return -1;
+      if (b === nonHeadcountGroup?.id) return 1;
+
+      // For other groups, maintain their original order
+      return 0;
+    });
+  }, [groupedAndAggregatedItems, groups]);
+
+  if (wallets.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Wallet Tabs */}
+      <div className="border-b border-gray-200 dark:border-gray-700">
+        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+          {wallets.map((wallet, index) => {
+            const isActive = index === activeWalletIndex;
+            return (
+              <button
+                key={wallet.wallet || index}
+                onClick={() => setActiveWalletIndex(index)}
+                className={`
+                  whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                  ${
+                    isActive
+                      ? "border-green-500 text-green-600 dark:text-green-400"
+                      : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
+                  }
+                `}
+              >
+                {wallet.name || formatWalletAddress(wallet.wallet || "")}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-800">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Expense Category
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Mthly Budget
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Forecast
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Actuals
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Difference
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Comments
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Payments
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            {sortedParentKeys.map((parentKey) => {
+              const items = groupedAndAggregatedItems.get(parentKey) || [];
+              if (items.length === 0) return null;
+
+              const subtotals = calculateSubtotal(items);
+              const parentLabel =
+                parentKey === "uncategorized"
+                  ? "Uncategorised"
+                  : items[0]?.parentGroupLabel || "Other";
+
+              return (
+                <React.Fragment key={parentKey}>
+                  {/* Parent Category Header */}
+                  <tr className="bg-gray-100 dark:bg-gray-800">
+                    <td
+                      colSpan={7}
+                      className="px-6 py-3 text-sm font-bold text-gray-900 dark:text-white"
+                    >
+                      {parentLabel}
+                    </td>
+                  </tr>
+
+                  {/* Aggregated Category Items */}
+                  {items.map((item, index) => {
+                    if (!item) return null;
+
+                    const difference = item.actuals - item.budget;
+                    const commentsText = item.comments.join("; ");
+
+                    return (
+                      <tr
+                        key={item.groupId}
+                        className="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
+                        <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          {item.groupLabel}
+                        </td>
+                        <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                          {formatNumber(item.budget)}
+                        </td>
+                        <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                          {formatNumber(item.forecast)}
+                        </td>
+                        <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                          {formatNumber(item.actuals)}
+                        </td>
+                        <td
+                          className={`px-6 py-3 whitespace-nowrap text-right text-sm font-medium ${
+                            difference > 0
+                              ? "text-red-600 dark:text-red-400"
+                              : difference < 0
+                              ? "text-green-600 dark:text-green-400"
+                              : "text-gray-900 dark:text-white"
+                          }`}
+                        >
+                          {formatNumber(difference)}
+                        </td>
+                        <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-400 italic">
+                          {commentsText}
+                        </td>
+                        <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                          {formatNumber(item.payments)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+
+                  {/* Subtotal Row */}
+                  <tr className="bg-gray-50 dark:bg-gray-800/50 font-semibold">
+                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      Subtotal
+                    </td>
+                    <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                      {formatNumber(subtotals.budget)}
+                    </td>
+                    <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                      {formatNumber(subtotals.forecast)}
+                    </td>
+                    <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                      {formatNumber(subtotals.actuals)}
+                    </td>
+                    <td
+                      className={`px-6 py-3 whitespace-nowrap text-right text-sm font-bold ${
+                        subtotals.difference > 0
+                          ? "text-red-600 dark:text-red-400"
+                          : subtotals.difference < 0
+                          ? "text-green-600 dark:text-green-400"
+                          : "text-gray-900 dark:text-white"
+                      }`}
+                    >
+                      {formatNumber(subtotals.difference)}
+                    </td>
+                    <td className="px-6 py-3"></td>
+                    <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                      {formatNumber(subtotals.payments)}
+                    </td>
+                  </tr>
+                </React.Fragment>
+              );
+            })}
+
+            {/* Grand Total Row */}
+            <tr className="bg-gray-100 dark:bg-gray-800 font-bold">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                Total
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                {formatNumber(grandTotals.budget)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                {formatNumber(grandTotals.forecast)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                {formatNumber(grandTotals.actuals)}
+              </td>
+              <td
+                className={`px-6 py-4 whitespace-nowrap text-right text-sm ${
+                  grandTotals.difference > 0
+                    ? "text-red-600 dark:text-red-400"
+                    : grandTotals.difference < 0
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-gray-900 dark:text-white"
+                }`}
+              >
+                {formatNumber(grandTotals.difference)}
+              </td>
+              <td className="px-6 py-4"></td>
+              <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                {formatNumber(grandTotals.payments)}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

@@ -23,7 +23,6 @@ export type InvoicePHState = PHBaseState & {
 
 export function defaultGlobalState(): InvoiceState {
   return {
-    closureReason: null,
     invoiceNo: "",
     dateIssued: "",
     dateDue: "",
@@ -160,10 +159,8 @@ export function defaultGlobalState(): InvoiceState {
     invoiceTags: [],
     rejections: [],
     payments: [],
-    exported: {
-      exportedLineItems: [],
-      timestamp: "",
-    },
+    exported: null,
+    closureReason: null,
   };
 }
 
