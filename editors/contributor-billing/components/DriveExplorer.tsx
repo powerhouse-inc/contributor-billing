@@ -277,8 +277,8 @@ export function DriveExplorer(props: DriveEditorProps) {
   // === RENDER ===
 
   return (
-    <div className="flex h-full editor-container">
-      <div className="h-full">
+    <div className={`flex h-full ${showDocumentEditor ? "w-full" : "editor-container"}`}>
+      <div className={`h-full ${showDocumentEditor ? "w-full" : ""}`}>
         <ToastContainer
           position="bottom-right"
           autoClose={5000}
