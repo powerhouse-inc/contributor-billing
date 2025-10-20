@@ -106,6 +106,7 @@ export function RejectInvoiceModalContent({
       <div>
         <label className="block mb-1 text-sm">Reason:</label>
         <Textarea
+          autoExpand={true}
           placeholder={"Add reason"}
           value={rejectReason}
           onChange={(e) => {
@@ -150,6 +151,7 @@ export function SchedulePaymentModalContent({
       <div>
         <label className="block mb-1 text-sm">Payment Reference:</label>
         <Textarea
+          autoExpand={true}
           placeholder={"Add payment reference"}
           value={paymentRef}
           onChange={(e) => {
@@ -228,6 +230,7 @@ export function RegisterPaymentTxModalContent({
       <div className="mt-4">
         <label className="block mb-1 text-sm">Transaction Reference:</label>
         <Textarea
+          autoExpand={true}
           placeholder={"Add transaction reference"}
           value={txnRef}
           onChange={(e) => {
@@ -253,6 +256,7 @@ export function ReportPaymentIssueModalContent({
       <div>
         <label className="block mb-1 text-sm">Payment Issue:</label>
         <Textarea
+          autoExpand={true}
           placeholder={"Add payment issue"}
           value={paymentIssue}
           onChange={(e) => {
@@ -281,17 +285,23 @@ export function ConfirmPaymentModalContent({
         <label className="block mb-1 text-sm font-bold">
           Processor Reference :
         </label>
-        <span className="break-all max-w-full">{payments[payments.length - 1].processorRef}</span>
+        <span className="break-all max-w-full">
+          {payments[payments.length - 1].processorRef}
+        </span>
       </div>
       <div className="flex flex-col gap-2 mt-4">
         <label className="block mb-1 text-sm font-bold">Payment Date :</label>
-        <span className="break-all max-w-full">{payments[payments.length - 1].paymentDate}</span>
+        <span className="break-all max-w-full">
+          {payments[payments.length - 1].paymentDate}
+        </span>
       </div>
       <div className="flex flex-col gap-2 mt-4">
         <label className="block mb-1 text-sm font-bold">
           Transaction Reference :
         </label>
-        <span className="break-all max-w-full">{payments[payments.length - 1].txnRef}</span>
+        <span className="break-all max-w-full">
+          {payments[payments.length - 1].txnRef}
+        </span>
       </div>
       <div className="mt-4">
         <label className="block mb-1 text-sm font-bold">Payment Amount:</label>

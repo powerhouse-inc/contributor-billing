@@ -1,12 +1,15 @@
 import { useMemo, useState } from "react";
 import React from "react";
 import type { Wallet, LineItemGroup, LineItem } from "../../../document-models/expense-report/gen/types.js";
+import { actions } from "../../../document-models/expense-report/index.js";
+import { Textarea } from "@powerhousedao/document-engineering";
 
 interface AggregatedExpensesTableProps {
   wallets: Wallet[];
   groups: LineItemGroup[];
   periodStart?: string | null;
   periodEnd?: string | null;
+  dispatch: (action: any) => void;
 }
 
 interface LineItemWithGroupInfo extends LineItem {
@@ -20,9 +23,14 @@ export function AggregatedExpensesTable({
   groups,
   periodStart,
   periodEnd,
+  dispatch,
 }: AggregatedExpensesTableProps) {
   // State for active tab (selected wallet)
   const [activeWalletIndex, setActiveWalletIndex] = useState(0);
+
+  // State for editing comments
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [editingComment, setEditingComment] = useState<string>("");
 
   // Format period for title
   const periodTitle = useMemo(() => {
@@ -90,7 +98,7 @@ export function AggregatedExpensesTable({
       forecast: number;
       actuals: number;
       payments: number;
-      comments: string[];
+      comment: string;
     }>();
 
     walletLineItems.forEach((item) => {
@@ -105,9 +113,7 @@ export function AggregatedExpensesTable({
         existing.forecast += item.forecast || 0;
         existing.actuals += item.actuals || 0;
         existing.payments += item.payments || 0;
-        if (item.comments) {
-          existing.comments.push(item.comments);
-        }
+        // Comment stays the same (first item's comment is used)
       } else {
         // Create new category entry
         categoryAggregation.set(categoryKey, {
@@ -119,7 +125,7 @@ export function AggregatedExpensesTable({
           forecast: item.forecast || 0,
           actuals: item.actuals || 0,
           payments: item.payments || 0,
-          comments: item.comments ? [item.comments] : [],
+          comment: item.comments || "",
         });
       }
     });
@@ -181,6 +187,49 @@ export function AggregatedExpensesTable({
   const formatWalletAddress = (address: string) => {
     if (!address || address.length < 13) return address;
     return `${address.substring(0, 6)}...${address.substring(address.length - 6)}`;
+  };
+
+  // Handle starting comment edit
+  const handleStartEdit = (groupId: string, currentComment: string) => {
+    setEditingGroupId(groupId);
+    setEditingComment(currentComment);
+  };
+
+  // Handle saving comment
+  const handleSaveComment = (groupId: string) => {
+    const wallet = wallets[activeWalletIndex];
+    if (!wallet || !wallet.wallet) return;
+
+    // Find all line items with this group ID
+    const lineItemsToUpdate = wallet.lineItems?.filter(
+      (item) => item?.group === groupId
+    ) || [];
+
+    // Create all update actions
+    const updateActions = lineItemsToUpdate
+      .filter((item) => item?.id)
+      .map((item) =>
+        actions.updateLineItem({
+          wallet: wallet.wallet!,
+          lineItemId: item!.id!,
+          comments: editingComment,
+        })
+      );
+
+    // Dispatch all actions at once
+    if (updateActions.length > 0) {
+      dispatch(updateActions);
+    }
+
+    // Reset editing state
+    setEditingGroupId(null);
+    setEditingComment("");
+  };
+
+  // Handle canceling comment edit
+  const handleCancelEdit = () => {
+    setEditingGroupId(null);
+    setEditingComment("");
   };
 
   // Sort parent groups: Headcount first, then Non-Headcount, then others, then uncategorized
@@ -292,11 +341,11 @@ export function AggregatedExpensesTable({
                   </tr>
 
                   {/* Aggregated Category Items */}
-                  {items.map((item, index) => {
+                  {items.map((item) => {
                     if (!item) return null;
 
                     const difference = item.actuals - item.budget;
-                    const commentsText = item.comments.join("; ");
+                    const isEditing = editingGroupId === item.groupId;
 
                     return (
                       <tr
@@ -326,8 +375,67 @@ export function AggregatedExpensesTable({
                         >
                           {formatNumber(difference)}
                         </td>
-                        <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-400 italic">
-                          {commentsText}
+                        <td className="px-6 py-3 text-sm">
+                          {isEditing ? (
+                            <div className="flex items-start gap-2">
+                              <div className="flex-1">
+                                <Textarea
+                                  value={editingComment}
+                                  onChange={(e) => setEditingComment(e.target.value)}
+                                  placeholder="Add comment..."
+                                  autoExpand={true}
+                                  multiline={true}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Escape") {
+                                      handleCancelEdit();
+                                    }
+                                  }}
+                                />
+                              </div>
+                              <div className="flex gap-1 mt-1">
+                                <button
+                                  onClick={() => handleSaveComment(item.groupId)}
+                                  className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                                  title="Save"
+                                >
+                                  ✓
+                                </button>
+                                <button
+                                  onClick={handleCancelEdit}
+                                  className="px-2 py-1 text-xs bg-gray-400 text-white rounded hover:bg-gray-500"
+                                  title="Cancel"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2 group">
+                              <span className="text-gray-600 dark:text-gray-400 italic flex-1 whitespace-pre-wrap">
+                                {item.comment || "No comments"}
+                              </span>
+                              <button
+                                onClick={() => handleStartEdit(item.groupId, item.comment)}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
+                                title="Edit comment"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4 text-gray-600 dark:text-gray-400"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          )}
                         </td>
                         <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                           {formatNumber(item.payments)}

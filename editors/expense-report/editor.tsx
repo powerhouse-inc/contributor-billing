@@ -165,6 +165,7 @@ export function Editor() {
                   groups={groups}
                   periodStart={periodStart}
                   periodEnd={periodEnd}
+                  dispatch={dispatch}
                 />
               </div>
             </section>
