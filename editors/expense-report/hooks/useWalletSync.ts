@@ -33,55 +33,64 @@ export function useWalletSync(wallets: Wallet[]): SyncStatus {
         return; // No billing statements to sync
       }
 
-      // Get current line items count and total for this wallet
-      const currentLineItemsCount = wallet.lineItems?.length || 0;
-      let currentTotal = 0;
+      // Get current aggregated totals by category from wallet line items
+      const currentCategoryTotals = new Map<string, number>();
       wallet.lineItems?.forEach((item) => {
-        currentTotal += item?.actuals || 0;
+        if (item?.group) {
+          const currentTotal = currentCategoryTotals.get(item.group) || 0;
+          currentCategoryTotals.set(item.group, currentTotal + (item.actuals || 0));
+        }
       });
 
-      // Calculate what the line items should be based on billing statements
-      let expectedLineItemsCount = 0;
-      let expectedTotal = 0;
-      const expectedTags = new Set<string>();
+      // Calculate expected aggregated totals by category from billing statements
+      const expectedCategoryTotals = new Map<string, number>();
+      const expectedCategoryLabels = new Set<string>();
 
       wallet.billingStatements.forEach((statementId) => {
         if (!statementId) return;
         const statement = billingStatements.get(statementId);
         if (statement?.state?.global?.lineItems) {
-          expectedLineItemsCount += statement.state.global.lineItems.length;
           statement.state.global.lineItems.forEach((item: any) => {
-            expectedTotal += item.totalPriceCash || 0;
-            // Collect tags from billing statement
+            // Find expense-account tag
             const expenseAccountTag = item.lineItemTag?.find(
               (tag: any) => tag.dimension === "expense-account"
             );
+
             if (expenseAccountTag?.label) {
-              expectedTags.add(expenseAccountTag.label);
+              expectedCategoryLabels.add(expenseAccountTag.label);
+
+              const currentTotal = expectedCategoryTotals.get(expenseAccountTag.label) || 0;
+              expectedCategoryTotals.set(
+                expenseAccountTag.label,
+                currentTotal + (item.totalPriceCash || 0)
+              );
             }
           });
         }
       });
 
-      // Check current tags in wallet line items
-      const currentTags = new Set<string>();
-      wallet.lineItems?.forEach((item) => {
-        if (item?.group) {
-          // We need to map the group ID back to label to compare
-          // This is a simplified check - just checking if tags exist
-          currentTags.add(item.group);
-        }
-      });
+      // Check if categories have changed
+      const currentCategories = new Set(currentCategoryTotals.keys());
+      const hasTagChanges = currentCategories.size !== expectedCategoryLabels.size;
 
-      // Check if wallet needs sync (count or total mismatch)
-      const needsQuantitySync =
-        currentLineItemsCount !== expectedLineItemsCount ||
-        Math.abs(currentTotal - expectedTotal) > 0.01; // Account for floating point precision
+      // Check if totals per category have changed
+      let hasTotalMismatch = false;
 
-      // Check if tags have changed (size mismatch suggests tag changes)
-      const hasTagChanges = expectedTags.size > 0 && currentTags.size !== expectedTags.size;
+      // We need to check if the aggregated totals match
+      // Since wallet stores group IDs but billing statements have labels,
+      // we need to sum up all line items regardless of category structure
+      const currentTotalActuals = Array.from(currentCategoryTotals.values()).reduce(
+        (sum, total) => sum + total,
+        0
+      );
+      const expectedTotalActuals = Array.from(expectedCategoryTotals.values()).reduce(
+        (sum, total) => sum + total,
+        0
+      );
 
-      if (needsQuantitySync || hasTagChanges) {
+      hasTotalMismatch = Math.abs(currentTotalActuals - expectedTotalActuals) > 0.01;
+
+      if (hasTagChanges || hasTotalMismatch) {
         if (wallet.wallet) {
           outdatedWallets.push(wallet.wallet);
           if (hasTagChanges) {

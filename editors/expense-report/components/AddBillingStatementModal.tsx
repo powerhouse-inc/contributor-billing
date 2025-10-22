@@ -150,48 +150,82 @@ export function AddBillingStatementModal({
   const handleAddStatements = () => {
     if (selectedStatements.size === 0) return;
 
+    // First, add all billing statement references
     selectedStatements.forEach((statementId) => {
-      const statement = billingStatements.find((s) => s.id === statementId);
-      if (!statement || !statement.document) return;
-
-      console.log("Statement document:", statement.document);
-
-      // Add billing statement reference to wallet
       dispatch(
         actions.addBillingStatement({
           wallet: walletAddress,
           billingStatementId: statementId,
         })
       );
+    });
 
-      // Extract line items from billing statement and add to wallet
+    // Aggregate line items by category across all selected billing statements
+    const categoryAggregation = new Map<string, {
+      groupId: string | null;
+      groupLabel: string;
+      budget: number;
+      actuals: number;
+      forecast: number;
+      payments: number;
+    }>();
+
+    selectedStatements.forEach((statementId) => {
+      const statement = billingStatements.find((s) => s.id === statementId);
+      if (!statement || !statement.document) return;
+
+      console.log("Statement document:", statement.document);
+
+      // Extract line items from billing statement
       const billingState = statement.document as any;
       const lineItems = billingState.state?.global?.lineItems || [];
 
       console.log("Line items found:", lineItems.length, lineItems);
 
+      // Aggregate line items by category
       lineItems.forEach((billingLineItem: BillingStatementLineItem) => {
         const groupId = mapTagToGroup(billingLineItem);
+        const categoryKey = groupId || "uncategorized";
 
-        // Create expense report line item from billing statement line item
-        const expenseLineItem = {
-          id: generateId(),
-          label: billingLineItem.description,
-          group: groupId,
-          budget: 0, // Could be mapped if available
-          actuals: billingLineItem.totalPriceCash || 0,
-          forecast: 0, // Could be mapped if available
-          payments: 0, // Could be set based on status
-          comments: null,
-        };
+        const existing = categoryAggregation.get(categoryKey);
 
-        dispatch(
-          actions.addLineItem({
-            wallet: walletAddress,
-            lineItem: expenseLineItem,
-          })
-        );
+        if (existing) {
+          // Aggregate values for the same category
+          existing.actuals += billingLineItem.totalPriceCash || 0;
+        } else {
+          // Create new category entry
+          const group = groups.find((g) => g.id === groupId);
+          categoryAggregation.set(categoryKey, {
+            groupId: groupId,
+            groupLabel: group?.label || "Uncategorised",
+            budget: 0,
+            actuals: billingLineItem.totalPriceCash || 0,
+            forecast: 0,
+            payments: 0,
+          });
+        }
       });
+    });
+
+    // Now add aggregated line items to wallet
+    categoryAggregation.forEach((aggregatedItem) => {
+      const expenseLineItem = {
+        id: generateId(),
+        label: aggregatedItem.groupLabel,
+        group: aggregatedItem.groupId,
+        budget: aggregatedItem.budget,
+        actuals: aggregatedItem.actuals,
+        forecast: aggregatedItem.forecast,
+        payments: aggregatedItem.payments,
+        comments: null,
+      };
+
+      dispatch(
+        actions.addLineItem({
+          wallet: walletAddress,
+          lineItem: expenseLineItem,
+        })
+      );
     });
 
     onClose();

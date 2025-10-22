@@ -52,11 +52,17 @@ export function useSyncWallet() {
       return group ? group.id : null;
     };
 
-    // Clear existing line items for this wallet first
-    // Note: We'll need to add a new action for this, or remove items one by one
-    // For now, let's re-add all line items from billing statements
+    // Aggregate line items by category
+    const categoryAggregation = new Map<string, {
+      groupId: string | null;
+      groupLabel: string;
+      budget: number;
+      actuals: number;
+      forecast: number;
+      payments: number;
+    }>();
 
-    // Extract and add line items from all billing statements
+    // Extract and aggregate line items from all billing statements
     billingStatementIds.forEach((statementId) => {
       const statement = billingStatements.get(statementId);
       if (!statement?.state?.global?.lineItems) return;
@@ -65,25 +71,47 @@ export function useSyncWallet() {
 
       lineItems.forEach((billingLineItem: BillingStatementLineItem) => {
         const groupId = mapTagToGroup(billingLineItem);
+        const categoryKey = groupId || "uncategorized";
 
-        const expenseLineItem = {
-          id: generateId(),
-          label: billingLineItem.description,
-          group: groupId,
-          budget: 0,
-          actuals: billingLineItem.totalPriceCash || 0,
-          forecast: 0,
-          payments: 0,
-          comments: null,
-        };
+        const existing = categoryAggregation.get(categoryKey);
 
-        dispatch(
-          actions.addLineItem({
-            wallet: walletAddress,
-            lineItem: expenseLineItem,
-          })
-        );
+        if (existing) {
+          // Aggregate values for the same category
+          existing.actuals += billingLineItem.totalPriceCash || 0;
+        } else {
+          // Create new category entry
+          const group = groups.find((g) => g.id === groupId);
+          categoryAggregation.set(categoryKey, {
+            groupId: groupId,
+            groupLabel: group?.label || "Uncategorised",
+            budget: 0,
+            actuals: billingLineItem.totalPriceCash || 0,
+            forecast: 0,
+            payments: 0,
+          });
+        }
       });
+    });
+
+    // Now add aggregated line items to wallet
+    categoryAggregation.forEach((aggregatedItem) => {
+      const expenseLineItem = {
+        id: generateId(),
+        label: aggregatedItem.groupLabel,
+        group: aggregatedItem.groupId,
+        budget: aggregatedItem.budget,
+        actuals: aggregatedItem.actuals,
+        forecast: aggregatedItem.forecast,
+        payments: aggregatedItem.payments,
+        comments: null,
+      };
+
+      dispatch(
+        actions.addLineItem({
+          wallet: walletAddress,
+          lineItem: expenseLineItem,
+        })
+      );
     });
   };
 

@@ -1,12 +1,10 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useSelectedExpenseReportDocument } from "../hooks/useExpenseReportDocument.js";
 import { actions } from "../../document-models/expense-report/index.js";
-import { DatePicker } from "@powerhousedao/document-engineering";
+import { DatePicker, Icon, Button } from "@powerhousedao/document-engineering";
 import { WalletsTable } from "./components/WalletsTable.js";
 import { AggregatedExpensesTable } from "./components/AggregatedExpensesTable.js";
 import { AddBillingStatementModal } from "./components/AddBillingStatementModal.js";
-import { useWalletSync } from "./hooks/useWalletSync.js";
-import { useSyncWallet } from "./hooks/useSyncWallet.js";
 
 export function Editor() {
   const [document, dispatch] = useSelectedExpenseReportDocument();
@@ -20,47 +18,6 @@ export function Editor() {
   );
 
   const { wallets, groups } = document.state.global;
-
-  // Check sync status
-  const { needsSync, outdatedWallets, tagChangedWallets } = useWalletSync(wallets);
-  const { syncWallet } = useSyncWallet();
-
-  // Auto-sync on component mount
-  useEffect(() => {
-    if (needsSync && outdatedWallets.length > 0) {
-      if (tagChangedWallets.length > 0) {
-        console.warn("⚠️ Tag changes detected in wallets:", tagChangedWallets);
-        console.log("Auto-syncing wallets with tag changes:", outdatedWallets);
-      } else {
-        console.log("Auto-syncing wallets:", outdatedWallets);
-      }
-
-      // Sync each outdated wallet
-      outdatedWallets.forEach((walletAddress) => {
-        const wallet = wallets.find((w) => w.wallet === walletAddress);
-        if (!wallet || !wallet.billingStatements || wallet.billingStatements.length === 0) {
-          return;
-        }
-
-        // Remove all existing line items first
-        const lineItemsToRemove = [...(wallet.lineItems || [])];
-        lineItemsToRemove.forEach((item) => {
-          if (item?.id) {
-            dispatch(
-              actions.removeLineItem({
-                wallet: wallet.wallet!,
-                lineItemId: item.id,
-              })
-            );
-          }
-        });
-
-        // Re-extract line items from billing statements
-        const billingStatementIds = wallet.billingStatements.filter((id): id is string => id !== null && id !== undefined);
-        syncWallet(wallet.wallet!, billingStatementIds, groups, dispatch);
-      });
-    }
-  }, [needsSync, outdatedWallets, wallets, groups, dispatch, syncWallet]);
 
   // Handle period date changes
   const handlePeriodStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,36 +61,49 @@ export function Editor() {
 
   return (
     <div className="ph-default-styles flex flex-col h-full w-full bg-gray-50 dark:bg-gray-900">
-      {/* Header Section */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-8 py-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Expense Report
-            </h1>
-            <div className="flex items-center justify-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-              <div className="flex items-center gap-2">
-                <span className="font-medium">Period:</span>
-                <DatePicker
-                  name="periodStart"
-                  value={periodStart}
-                  onChange={handlePeriodStartChange}
-                />
-                <span>to</span>
-                <DatePicker
-                  name="periodEnd"
-                  value={periodEnd}
-                  onChange={handlePeriodEndChange}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="flex-1 overflow-auto px-8 py-6">
         <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header Section */}
+          <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="px-6 py-6">
+              <div className="relative">
+                <div className="text-center">
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                    Expense Report
+                  </h1>
+                  <div className="flex items-center justify-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">Period:</span>
+                      <DatePicker
+                        name="periodStart"
+                        value={periodStart}
+                        onChange={handlePeriodStartChange}
+                      />
+                      <span>to</span>
+                      <DatePicker
+                        name="periodEnd"
+                        value={periodEnd}
+                        onChange={handlePeriodEndChange}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    // TODO: Implement PDF export functionality
+                    console.log("Export to PDF clicked");
+                  }}
+                  className="absolute top-0 right-0 flex items-center gap-2"
+                >
+                  <Icon name="ExportPdf" size={18} />
+                  Export to PDF
+                </Button>
+              </div>
+            </div>
+          </section>
+
           {/* Wallets Section */}
           <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">

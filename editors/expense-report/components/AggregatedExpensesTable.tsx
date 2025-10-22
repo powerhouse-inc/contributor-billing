@@ -31,6 +31,15 @@ export function AggregatedExpensesTable({
   // State for editing comments
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingComment, setEditingComment] = useState<string>("");
+  const [originalComment, setOriginalComment] = useState<string>("");
+
+  // State for editing numeric fields
+  const [editingField, setEditingField] = useState<{
+    lineItemId: string;
+    field: "budget" | "forecast" | "actuals" | "payments";
+    originalValue: number;
+  } | null>(null);
+  const [editingValue, setEditingValue] = useState<string>("");
 
   // Format period for title
   const periodTitle = useMemo(() => {
@@ -66,6 +75,7 @@ export function AggregatedExpensesTable({
   }, [groups]);
 
   // Get line items for the active wallet with group information
+  // Line items are now already aggregated by category
   const walletLineItems = useMemo(() => {
     if (!wallets[activeWalletIndex]) return [];
 
@@ -79,17 +89,18 @@ export function AggregatedExpensesTable({
 
         return {
           ...item,
-          groupLabel: groupInfo?.group.label || undefined,
+          groupLabel: groupInfo?.group.label || item.label || undefined,
           parentGroupId: groupInfo?.parent?.id || null,
           parentGroupLabel: groupInfo?.parent?.label || undefined,
         };
       });
   }, [wallets, activeWalletIndex, groupsMap]);
 
-  // Group line items by category and aggregate by parent category
+  // Group line items by parent category
+  // Line items are already aggregated by category, so we just need to group them by parent
   const groupedAndAggregatedItems = useMemo(() => {
-    // First, aggregate line items by their category (group)
-    const categoryAggregation = new Map<string, {
+    const grouped = new Map<string, Array<{
+      lineItemId: string;
       groupId: string;
       groupLabel: string;
       parentGroupId: string | null | undefined;
@@ -99,44 +110,27 @@ export function AggregatedExpensesTable({
       actuals: number;
       payments: number;
       comment: string;
-    }>();
+    }>>();
 
     walletLineItems.forEach((item) => {
       if (!item) return;
 
-      const categoryKey = item.group || "uncategorized";
-      const existing = categoryAggregation.get(categoryKey);
-
-      if (existing) {
-        // Aggregate values for the same category
-        existing.budget += item.budget || 0;
-        existing.forecast += item.forecast || 0;
-        existing.actuals += item.actuals || 0;
-        existing.payments += item.payments || 0;
-        // Comment stays the same (first item's comment is used)
-      } else {
-        // Create new category entry
-        categoryAggregation.set(categoryKey, {
-          groupId: categoryKey,
-          groupLabel: item.groupLabel || "Uncategorised",
-          parentGroupId: item.parentGroupId,
-          parentGroupLabel: item.parentGroupLabel,
-          budget: item.budget || 0,
-          forecast: item.forecast || 0,
-          actuals: item.actuals || 0,
-          payments: item.payments || 0,
-          comment: item.comments || "",
-        });
-      }
-    });
-
-    // Then, group aggregated categories by their parent
-    const grouped = new Map<string, typeof categoryAggregation extends Map<string, infer T> ? T[] : never>();
-
-    categoryAggregation.forEach((aggItem) => {
-      const parentKey = aggItem.parentGroupId || "uncategorized";
+      const parentKey = item.parentGroupId || "uncategorized";
       const items = grouped.get(parentKey) || [];
-      items.push(aggItem);
+
+      items.push({
+        lineItemId: item.id || "",
+        groupId: item.group || "uncategorized",
+        groupLabel: item.groupLabel || "Uncategorised",
+        parentGroupId: item.parentGroupId,
+        parentGroupLabel: item.parentGroupLabel,
+        budget: item.budget || 0,
+        forecast: item.forecast || 0,
+        actuals: item.actuals || 0,
+        payments: item.payments || 0,
+        comment: item.comments || "",
+      });
+
       grouped.set(parentKey, items);
     });
 
@@ -190,46 +184,83 @@ export function AggregatedExpensesTable({
   };
 
   // Handle starting comment edit
-  const handleStartEdit = (groupId: string, currentComment: string) => {
-    setEditingGroupId(groupId);
+  const handleStartEdit = (lineItemId: string, currentComment: string) => {
+    setEditingGroupId(lineItemId);
     setEditingComment(currentComment);
+    setOriginalComment(currentComment);
   };
 
-  // Handle saving comment
-  const handleSaveComment = (groupId: string) => {
+  // Handle saving comment for a single line item
+  const handleSaveComment = () => {
     const wallet = wallets[activeWalletIndex];
-    if (!wallet || !wallet.wallet) return;
+    if (!wallet || !wallet.wallet || !editingGroupId) return;
 
-    // Find all line items with this group ID
-    const lineItemsToUpdate = wallet.lineItems?.filter(
-      (item) => item?.group === groupId
-    ) || [];
-
-    // Create all update actions
-    const updateActions = lineItemsToUpdate
-      .filter((item) => item?.id)
-      .map((item) =>
+    // Only dispatch if the comment has actually changed
+    if (editingComment !== originalComment) {
+      dispatch(
         actions.updateLineItem({
-          wallet: wallet.wallet!,
-          lineItemId: item!.id!,
+          wallet: wallet.wallet,
+          lineItemId: editingGroupId,
           comments: editingComment,
         })
       );
-
-    // Dispatch all actions at once
-    if (updateActions.length > 0) {
-      dispatch(updateActions);
     }
 
     // Reset editing state
     setEditingGroupId(null);
     setEditingComment("");
+    setOriginalComment("");
   };
 
   // Handle canceling comment edit
   const handleCancelEdit = () => {
     setEditingGroupId(null);
     setEditingComment("");
+    setOriginalComment("");
+  };
+
+  // Handle starting numeric field edit
+  const handleStartFieldEdit = (
+    lineItemId: string,
+    field: "budget" | "forecast" | "actuals" | "payments",
+    currentValue: number
+  ) => {
+    setEditingField({ lineItemId, field, originalValue: currentValue });
+    setEditingValue(currentValue.toString());
+  };
+
+  // Handle saving numeric field
+  const handleSaveField = () => {
+    const wallet = wallets[activeWalletIndex];
+    if (!wallet || !wallet.wallet || !editingField) return;
+
+    const numericValue = parseFloat(editingValue);
+    if (isNaN(numericValue)) {
+      // Invalid number, cancel edit
+      handleCancelFieldEdit();
+      return;
+    }
+
+    // Only dispatch if the value has actually changed
+    if (numericValue !== editingField.originalValue) {
+      dispatch(
+        actions.updateLineItem({
+          wallet: wallet.wallet,
+          lineItemId: editingField.lineItemId,
+          [editingField.field]: numericValue,
+        })
+      );
+    }
+
+    // Reset editing state
+    setEditingField(null);
+    setEditingValue("");
+  };
+
+  // Handle canceling numeric field edit
+  const handleCancelFieldEdit = () => {
+    setEditingField(null);
+    setEditingValue("");
   };
 
   // Sort parent groups: Headcount first, then Non-Headcount, then others, then uncategorized
@@ -309,10 +340,10 @@ export function AggregatedExpensesTable({
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Difference
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-96">
                 Comments
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-32">
                 Payments
               </th>
             </tr>
@@ -345,24 +376,68 @@ export function AggregatedExpensesTable({
                     if (!item) return null;
 
                     const difference = item.actuals - item.budget;
-                    const isEditing = editingGroupId === item.groupId;
+                    const isEditingComment = editingGroupId === item.lineItemId;
+
+                    // Helper function to render editable numeric cell
+                    const renderEditableCell = (
+                      field: "budget" | "forecast" | "actuals" | "payments",
+                      value: number
+                    ) => {
+                      const isEditingThis =
+                        editingField?.lineItemId === item.lineItemId &&
+                        editingField?.field === field;
+
+                      if (isEditingThis) {
+                        return (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={editingValue}
+                              onChange={(e) => setEditingValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  handleSaveField();
+                                } else if (e.key === "Escape") {
+                                  handleCancelFieldEdit();
+                                }
+                              }}
+                              onBlur={handleSaveField}
+                              autoFocus
+                              className="w-full px-2 py-1 text-right text-sm border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                            />
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div
+                          className="group cursor-pointer text-right"
+                          onClick={() => handleStartFieldEdit(item.lineItemId, field, value)}
+                        >
+                          <span className="group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 inline-block px-1 py-0.5 rounded transition-colors min-w-[4rem]">
+                            {formatNumber(value)}
+                          </span>
+                        </div>
+                      );
+                    };
 
                     return (
                       <tr
-                        key={item.groupId}
-                        className="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        key={item.lineItemId}
+                        className="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors align-top"
                       >
                         <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                           {item.groupLabel}
                         </td>
                         <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                          {formatNumber(item.budget)}
+                          {renderEditableCell("budget", item.budget)}
                         </td>
                         <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                          {formatNumber(item.forecast)}
+                          {renderEditableCell("forecast", item.forecast)}
                         </td>
                         <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                          {formatNumber(item.actuals)}
+                          {renderEditableCell("actuals", item.actuals)}
                         </td>
                         <td
                           className={`px-6 py-3 whitespace-nowrap text-right text-sm font-medium ${
@@ -375,88 +450,73 @@ export function AggregatedExpensesTable({
                         >
                           {formatNumber(difference)}
                         </td>
-                        <td className="px-6 py-3 text-sm">
-                          {isEditing ? (
-                            <div className="flex items-start gap-2">
-                              <div className="flex-1">
-                                <Textarea
-                                  value={editingComment}
-                                  onChange={(e) => setEditingComment(e.target.value)}
-                                  placeholder="Add comment..."
-                                  autoExpand={true}
-                                  multiline={true}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Escape") {
-                                      handleCancelEdit();
-                                    }
-                                  }}
-                                />
-                              </div>
-                              <div className="flex gap-1 mt-1">
-                                <button
-                                  onClick={() => handleSaveComment(item.groupId)}
-                                  className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
-                                  title="Save"
-                                >
-                                  ✓
-                                </button>
-                                <button
-                                  onClick={handleCancelEdit}
-                                  className="px-2 py-1 text-xs bg-gray-400 text-white rounded hover:bg-gray-500"
-                                  title="Cancel"
-                                >
-                                  ✕
-                                </button>
-                              </div>
-                            </div>
+                        <td className="px-3 py-3 text-sm w-96">
+                          {isEditingComment ? (
+                            <Textarea
+                              value={editingComment}
+                              onChange={(e) => setEditingComment(e.target.value)}
+                              placeholder="Add comment..."
+                              autoExpand={true}
+                              multiline={true}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                  e.preventDefault();
+                                  handleSaveComment();
+                                } else if (e.key === "Escape") {
+                                  handleCancelEdit();
+                                } else if (e.key === "Tab") {
+                                  e.preventDefault();
+                                  handleSaveComment();
+                                }
+                              }}
+                              onBlur={handleSaveComment}
+                              autoFocus
+                              className="w-full px-2 py-1 text-sm border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white max-h-32 overflow-y-auto"
+                            />
                           ) : (
-                            <div className="flex items-center gap-2 group">
-                              <span className="text-gray-600 dark:text-gray-400 italic flex-1 whitespace-pre-wrap">
+                            <div
+                              className="group cursor-pointer w-full max-h-20 overflow-hidden"
+                              onClick={() => handleStartEdit(item.lineItemId, item.comment)}
+                              title={item.comment || "No comments"}
+                            >
+                              <span className="group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 px-1 py-0.5 rounded transition-colors block text-gray-600 dark:text-gray-400 break-words">
                                 {item.comment || "No comments"}
                               </span>
-                              <button
-                                onClick={() => handleStartEdit(item.groupId, item.comment)}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
-                                title="Edit comment"
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="h-4 w-4 text-gray-600 dark:text-gray-400"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                                  />
-                                </svg>
-                              </button>
                             </div>
                           )}
                         </td>
-                        <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                          {formatNumber(item.payments)}
+                        <td className="px-3 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white w-32">
+                          {renderEditableCell("payments", item.payments)}
                         </td>
                       </tr>
                     );
                   })}
 
                   {/* Subtotal Row */}
-                  <tr className="bg-gray-50 dark:bg-gray-800/50 font-semibold">
+                  <tr className="bg-gray-50 dark:bg-gray-800/50 font-semibold align-top">
                     <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       Subtotal
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                      {formatNumber(subtotals.budget)}
+                      <div className="text-right">
+                        <span className="inline-block px-1 py-0.5 min-w-[4rem]">
+                          {formatNumber(subtotals.budget)}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                      {formatNumber(subtotals.forecast)}
+                      <div className="text-right">
+                        <span className="inline-block px-1 py-0.5 min-w-[4rem]">
+                          {formatNumber(subtotals.forecast)}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                      {formatNumber(subtotals.actuals)}
+                      <div className="text-right">
+                        <span className="inline-block px-1 py-0.5 min-w-[4rem]">
+                          {formatNumber(subtotals.actuals)}
+                        </span>
+                      </div>
                     </td>
                     <td
                       className={`px-6 py-3 whitespace-nowrap text-right text-sm font-bold ${
@@ -469,9 +529,13 @@ export function AggregatedExpensesTable({
                     >
                       {formatNumber(subtotals.difference)}
                     </td>
-                    <td className="px-6 py-3"></td>
-                    <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                      {formatNumber(subtotals.payments)}
+                    <td className="px-3 py-3"></td>
+                    <td className="px-3 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white w-32">
+                      <div className="text-right">
+                        <span className="inline-block px-1 py-0.5 min-w-[4rem]">
+                          {formatNumber(subtotals.payments)}
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 </React.Fragment>
@@ -479,18 +543,30 @@ export function AggregatedExpensesTable({
             })}
 
             {/* Grand Total Row */}
-            <tr className="bg-gray-100 dark:bg-gray-800 font-bold">
+            <tr className="bg-gray-100 dark:bg-gray-800 font-bold align-top">
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                 Total
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                {formatNumber(grandTotals.budget)}
+                <div className="text-right">
+                  <span className="inline-block px-1 py-0.5 min-w-[4rem]">
+                    {formatNumber(grandTotals.budget)}
+                  </span>
+                </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                {formatNumber(grandTotals.forecast)}
+                <div className="text-right">
+                  <span className="inline-block px-1 py-0.5 min-w-[4rem]">
+                    {formatNumber(grandTotals.forecast)}
+                  </span>
+                </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                {formatNumber(grandTotals.actuals)}
+                <div className="text-right">
+                  <span className="inline-block px-1 py-0.5 min-w-[4rem]">
+                    {formatNumber(grandTotals.actuals)}
+                  </span>
+                </div>
               </td>
               <td
                 className={`px-6 py-4 whitespace-nowrap text-right text-sm ${
@@ -503,9 +579,13 @@ export function AggregatedExpensesTable({
               >
                 {formatNumber(grandTotals.difference)}
               </td>
-              <td className="px-6 py-4"></td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                {formatNumber(grandTotals.payments)}
+              <td className="px-3 py-4"></td>
+              <td className="px-3 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white w-32">
+                <div className="text-right">
+                  <span className="inline-block px-1 py-0.5 min-w-[4rem]">
+                    {formatNumber(grandTotals.payments)}
+                  </span>
+                </div>
               </td>
             </tr>
           </tbody>
