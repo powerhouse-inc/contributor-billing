@@ -150,7 +150,7 @@ export function AggregatedExpensesTable({
         budget: acc.budget + item.budget,
         forecast: acc.forecast + item.forecast,
         actuals: acc.actuals + item.actuals,
-        difference: acc.difference + (item.actuals - item.budget),
+        difference: acc.difference + (item.forecast - item.actuals),
         payments: acc.payments + item.payments,
       }),
       { budget: 0, forecast: 0, actuals: 0, difference: 0, payments: 0 }
@@ -164,7 +164,7 @@ export function AggregatedExpensesTable({
         budget: acc.budget + (item?.budget || 0),
         forecast: acc.forecast + (item?.forecast || 0),
         actuals: acc.actuals + (item?.actuals || 0),
-        difference: acc.difference + ((item?.actuals || 0) - (item?.budget || 0)),
+        difference: acc.difference + ((item?.forecast || 0) - (item?.actuals || 0)),
         payments: acc.payments + (item?.payments || 0),
       }),
       { budget: 0, forecast: 0, actuals: 0, difference: 0, payments: 0 }
@@ -375,7 +375,7 @@ export function AggregatedExpensesTable({
                   {items.map((item) => {
                     if (!item) return null;
 
-                    const difference = item.actuals - item.budget;
+                    const difference = item.forecast - item.actuals;
                     const isEditingComment = editingGroupId === item.lineItemId;
 
                     // Helper function to render editable numeric cell
@@ -441,10 +441,8 @@ export function AggregatedExpensesTable({
                         </td>
                         <td
                           className={`px-6 py-3 whitespace-nowrap text-right text-sm font-medium ${
-                            difference > 0
+                            difference < 0
                               ? "text-red-600 dark:text-red-400"
-                              : difference < 0
-                              ? "text-green-600 dark:text-green-400"
                               : "text-gray-900 dark:text-white"
                           }`}
                         >
@@ -520,10 +518,8 @@ export function AggregatedExpensesTable({
                     </td>
                     <td
                       className={`px-6 py-3 whitespace-nowrap text-right text-sm font-bold ${
-                        subtotals.difference > 0
+                        subtotals.difference < 0
                           ? "text-red-600 dark:text-red-400"
-                          : subtotals.difference < 0
-                          ? "text-green-600 dark:text-green-400"
                           : "text-gray-900 dark:text-white"
                       }`}
                     >
@@ -570,10 +566,8 @@ export function AggregatedExpensesTable({
               </td>
               <td
                 className={`px-6 py-4 whitespace-nowrap text-right text-sm ${
-                  grandTotals.difference > 0
+                  grandTotals.difference < 0
                     ? "text-red-600 dark:text-red-400"
-                    : grandTotals.difference < 0
-                    ? "text-green-600 dark:text-green-400"
                     : "text-gray-900 dark:text-white"
                 }`}
               >

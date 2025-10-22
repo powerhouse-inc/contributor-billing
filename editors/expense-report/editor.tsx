@@ -5,6 +5,9 @@ import { DatePicker, Icon, Button } from "@powerhousedao/document-engineering";
 import { WalletsTable } from "./components/WalletsTable.js";
 import { AggregatedExpensesTable } from "./components/AggregatedExpensesTable.js";
 import { AddBillingStatementModal } from "./components/AddBillingStatementModal.js";
+import { ExpenseReportPDF } from "./components/ExpenseReportPDF.js";
+import { pdf } from "@react-pdf/renderer";
+import { PDFViewer } from "@react-pdf/renderer";
 
 export function Editor() {
   const [document, dispatch] = useSelectedExpenseReportDocument();
@@ -46,6 +49,38 @@ export function Editor() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedWallet(null);
+  };
+
+  // Handle PDF export
+  const handleExportPDF = async () => {
+    try {
+      const blob = await pdf(
+        <ExpenseReportPDF
+          periodStart={periodStart}
+          periodEnd={periodEnd}
+          wallets={wallets}
+          groups={groups}
+        />
+      ).toBlob();
+
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = window.document.createElement("a");
+      link.href = url;
+
+      // Generate filename with period
+      const filename = periodStart
+        ? `expense-report-${new Date(periodStart).toISOString().split('T')[0]}.pdf`
+        : "expense-report.pdf";
+
+      link.download = filename;
+      link.click();
+
+      // Cleanup
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
   };
 
   // Format period title for the breakdown section
@@ -91,10 +126,7 @@ export function Editor() {
                 </div>
                 <Button
                   variant="ghost"
-                  onClick={() => {
-                    // TODO: Implement PDF export functionality
-                    console.log("Export to PDF clicked");
-                  }}
+                  onClick={handleExportPDF}
                   className="absolute top-0 right-0 flex items-center gap-2"
                 >
                   <Icon name="ExportPdf" size={18} />
@@ -140,6 +172,23 @@ export function Editor() {
               </div>
             </section>
           )}
+
+          {/* Live PDF Preview */}
+          {/* <div className="mt-8 border border-gray-200 rounded-lg overflow-hidden">
+            <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+              <h3 className="text-lg font-semibold">PDF Preview</h3>
+            </div>
+            <div style={{ height: "1000px" }}>
+              <PDFViewer width="100%" height="100%">
+                <ExpenseReportPDF
+                  periodStart={periodStart}
+                  periodEnd={periodEnd}
+                  wallets={wallets}
+                  groups={groups}
+                />
+              </PDFViewer>
+            </div>
+          </div> */}
         </div>
       </div>
 
