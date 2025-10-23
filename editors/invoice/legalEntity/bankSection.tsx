@@ -184,33 +184,40 @@ export const LegalEntityBankSection = forwardRef(
         <div className="space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <InputField
-                // input={localState.accountNum ?? ""}
-                value={localState.accountNum ?? ""}
-                label="Account Number"
-                placeholder="Account Number"
-                onBlur={createBlurHandler("accountNum")}
-                handleInputChange={createInputHandler("accountNum")}
-                className="h-10 w-full text-md mb-2"
-                validation={
-                  // Prefer the first failing validation between IBAN and generic account number
-                  (() => {
-                    const firstInvalid =
-                      (ibanvalidation &&
-                        !ibanvalidation.isValid &&
-                        ibanvalidation) ||
-                      (accountNumbervalidation &&
-                        !accountNumbervalidation.isValid &&
-                        accountNumbervalidation);
-                    return (
-                      firstInvalid ||
-                      ibanvalidation ||
-                      accountNumbervalidation ||
-                      null
-                    );
-                  })()
-                }
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Account Number
+                  {isValidIBAN(localState.accountNum ?? "") && (
+                    <span className="ml-2 text-green-600 font-medium">IBAN</span>
+                  )}
+                </label>
+                <InputField
+                  // input={localState.accountNum ?? ""}
+                  value={localState.accountNum ?? ""}
+                  placeholder="Account Number"
+                  onBlur={createBlurHandler("accountNum")}
+                  handleInputChange={createInputHandler("accountNum")}
+                  className="h-10 w-full text-md mb-2"
+                  validation={
+                    // Prefer the first failing validation between IBAN and generic account number
+                    (() => {
+                      const firstInvalid =
+                        (ibanvalidation &&
+                          !ibanvalidation.isValid &&
+                          ibanvalidation) ||
+                        (accountNumbervalidation &&
+                          !accountNumbervalidation.isValid &&
+                          accountNumbervalidation);
+                      return (
+                        firstInvalid ||
+                        ibanvalidation ||
+                        accountNumbervalidation ||
+                        null
+                      );
+                    })()
+                  }
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
