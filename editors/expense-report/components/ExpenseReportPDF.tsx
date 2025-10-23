@@ -299,48 +299,24 @@ export function ExpenseReportPDF({
           return (
             <View
               key={wallet.wallet || walletIndex}
-              wrap={false}
               break={walletIndex > 0}
             >
-              <Text style={styles.sectionTitle}>
-                {periodStart &&
-                  new Date(periodStart).toLocaleDateString("en-US", {
-                    month: "short",
-                    year: "numeric",
-                  })}{" "}
-                Breakdown
-              </Text>
-              <Text style={styles.walletInfo}>
-                {wallet.name && `${wallet.name} • `}
-                {wallet.wallet || "Unknown Wallet"}
-              </Text>
+              <View wrap={false}>
+                <Text style={styles.sectionTitle}>
+                  {periodStart &&
+                    new Date(periodStart).toLocaleDateString("en-US", {
+                      month: "short",
+                      year: "numeric",
+                    })}{" "}
+                  Breakdown
+                </Text>
+                <Text style={styles.walletInfo}>
+                  {wallet.name && `${wallet.name} • `}
+                  {wallet.wallet || "Unknown Wallet"}
+                </Text>
+              </View>
 
               <View style={styles.table}>
-                {/* Table Header */}
-                <View style={styles.tableHeader}>
-                  <Text style={[styles.headerCell, styles.categoryCol]}>
-                    Category
-                  </Text>
-                  <Text style={[styles.headerCell, styles.budgetCol]}>
-                    Budget
-                  </Text>
-                  <Text style={[styles.headerCell, styles.forecastCol]}>
-                    Forecast
-                  </Text>
-                  <Text style={[styles.headerCell, styles.actualsCol]}>
-                    Actuals
-                  </Text>
-                  <Text style={[styles.headerCell, styles.differenceCol]}>
-                    Difference
-                  </Text>
-                  <Text style={[styles.headerCell, styles.commentsCol]}>
-                    Comments
-                  </Text>
-                  <Text style={[styles.headerCell, styles.paymentsCol]}>
-                    Payments
-                  </Text>
-                </View>
-
                 {/* Grouped Items */}
                 {groupedItems.map((group, groupIndex) => {
                   const subtotals = group.items.reduce(
@@ -357,6 +333,33 @@ export function ExpenseReportPDF({
 
                   return (
                     <View key={group.parentLabel}>
+                      {/* Table Header - show for first group or after page break */}
+                      {groupIndex === 0 && (
+                        <View style={styles.tableHeader} wrap={false}>
+                          <Text style={[styles.headerCell, styles.categoryCol]}>
+                            Category
+                          </Text>
+                          <Text style={[styles.headerCell, styles.budgetCol]}>
+                            Budget
+                          </Text>
+                          <Text style={[styles.headerCell, styles.forecastCol]}>
+                            Forecast
+                          </Text>
+                          <Text style={[styles.headerCell, styles.actualsCol]}>
+                            Actuals
+                          </Text>
+                          <Text style={[styles.headerCell, styles.differenceCol]}>
+                            Difference
+                          </Text>
+                          <Text style={[styles.headerCell, styles.commentsCol]}>
+                            Comments
+                          </Text>
+                          <Text style={[styles.headerCell, styles.paymentsCol]}>
+                            Payments
+                          </Text>
+                        </View>
+                      )}
+
                       {/* Parent Category Header */}
                       <View
                         style={{
@@ -366,6 +369,7 @@ export function ExpenseReportPDF({
                           borderBottom: "1pt solid #e5e7eb",
                           marginTop: groupIndex > 0 ? 8 : 0,
                         }}
+                        wrap={false}
                       >
                         <Text
                           style={{

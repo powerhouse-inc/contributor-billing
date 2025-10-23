@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import React from "react";
 import type { Wallet, LineItemGroup, LineItem } from "../../../document-models/expense-report/gen/types.js";
 import { actions } from "../../../document-models/expense-report/index.js";
-import { Textarea } from "@powerhousedao/document-engineering";
+import { Textarea, Select, Button } from "@powerhousedao/document-engineering";
+import { Plus, Trash2 } from "lucide-react";
+import { generateId } from "document-model";
 
 interface AggregatedExpensesTableProps {
   wallets: Wallet[];
@@ -40,6 +42,144 @@ export function AggregatedExpensesTable({
     originalValue: number;
   } | null>(null);
   const [editingValue, setEditingValue] = useState<string>("");
+
+  // State for adding new line item
+  const [isAddingLineItem, setIsAddingLineItem] = useState(false);
+  const [selectedGroupId, setSelectedGroupId] = useState<string>("");
+  const [duplicateCategoryError, setDuplicateCategoryError] = useState<string>("");
+
+  // State for delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [lineItemToDelete, setLineItemToDelete] = useState<{ id: string; label: string } | null>(null);
+
+  // Ref for line item editor to scroll into view
+  const lineItemEditorRef = useRef<HTMLTableRowElement>(null);
+
+  // Scroll to bottom of page when editor opens
+  useEffect(() => {
+    if (isAddingLineItem && lineItemEditorRef.current) {
+      // Use a slight delay to ensure the editor is rendered
+      setTimeout(() => {
+        // Find the scrollable container by traversing up from the ref
+        let element = lineItemEditorRef.current?.parentElement;
+        while (element) {
+          const style = window.getComputedStyle(element);
+          const isScrollable = style.overflow === 'auto' || style.overflow === 'scroll' ||
+                              style.overflowY === 'auto' || style.overflowY === 'scroll';
+          if (isScrollable && element.scrollHeight > element.clientHeight) {
+            // Found the scrollable container, scroll to bottom
+            element.scrollTo({ top: element.scrollHeight, behavior: "smooth" });
+            break;
+          }
+          element = element.parentElement;
+        }
+      }, 150);
+    }
+  }, [isAddingLineItem]);
+
+  // Get existing category IDs for the active wallet
+  const existingCategoryIds = useMemo(() => {
+    const wallet = wallets[activeWalletIndex];
+    if (!wallet || !wallet.lineItems) return new Set<string>();
+
+    return new Set(
+      wallet.lineItems
+        .filter((item): item is NonNullable<typeof item> => item !== null && item !== undefined)
+        .map(item => item.group)
+        .filter((group): group is string => !!group)
+    );
+  }, [wallets, activeWalletIndex]);
+
+  // Create group options for Select component
+  const groupOptions = useMemo(() => {
+    return groups.map((group) => ({
+      value: group.id,
+      label: group.label || group.id,
+    }));
+  }, [groups]);
+
+  // Handle category selection with duplicate check
+  const handleCategoryChange = (value: string) => {
+    setSelectedGroupId(value);
+
+    // Check if category already exists
+    if (existingCategoryIds.has(value)) {
+      const categoryLabel = groups.find(g => g.id === value)?.label || value;
+      setDuplicateCategoryError(`"${categoryLabel}" already exists in this wallet. Please select a different category.`);
+    } else {
+      setDuplicateCategoryError("");
+    }
+  };
+
+  // Handle saving new line item
+  const handleSaveLineItem = () => {
+    const wallet = wallets[activeWalletIndex];
+    if (!wallet || !wallet.wallet || !selectedGroupId) return;
+
+    // Prevent saving if duplicate
+    if (existingCategoryIds.has(selectedGroupId)) {
+      return;
+    }
+
+    const newLineItem = {
+      id: generateId(),
+      label: groups.find(g => g.id === selectedGroupId)?.label || "",
+      group: selectedGroupId,
+      budget: 0,
+      actuals: 0,
+      forecast: 0,
+      payments: 0,
+      comments: "",
+    };
+
+    dispatch(
+      actions.addLineItem({
+        wallet: wallet.wallet,
+        lineItem: newLineItem,
+      })
+    );
+
+    // Reset state
+    setIsAddingLineItem(false);
+    setSelectedGroupId("");
+    setDuplicateCategoryError("");
+  };
+
+  // Handle canceling new line item
+  const handleCancelLineItem = () => {
+    setIsAddingLineItem(false);
+    setSelectedGroupId("");
+    setDuplicateCategoryError("");
+  };
+
+  // Handle opening delete confirmation modal
+  const handleDeleteLineItem = (lineItemId: string, lineItemLabel: string) => {
+    setLineItemToDelete({ id: lineItemId, label: lineItemLabel });
+    setDeleteModalOpen(true);
+  };
+
+  // Handle confirming deletion
+  const handleConfirmDelete = () => {
+    const wallet = wallets[activeWalletIndex];
+    if (!wallet || !wallet.wallet || !lineItemToDelete) return;
+
+    dispatch(
+      actions.removeLineItem({
+        wallet: wallet.wallet,
+        lineItemId: lineItemToDelete.id,
+      })
+    );
+
+    // Close modal and reset state
+    setDeleteModalOpen(false);
+    setLineItemToDelete(null);
+  };
+
+  // Handle canceling deletion
+  const handleCancelDelete = () => {
+    setDeleteModalOpen(false);
+    setLineItemToDelete(null);
+  };
 
   // Format period for title
   const periodTitle = useMemo(() => {
@@ -325,19 +465,27 @@ export function AggregatedExpensesTable({
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Expense Category
+              <th className="pl-6 pr-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setIsAddingLineItem(true)}
+                    className="inline-flex items-center justify-center w-6 h-6 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors"
+                  >
+                    <Plus size={14} />
+                  </button>
+                  <span>Expense Category</span>
+                </div>
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Mthly Budget
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Forecast
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Actuals
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Difference
               </th>
               <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-96">
@@ -345,6 +493,9 @@ export function AggregatedExpensesTable({
               </th>
               <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-32">
                 Payments
+              </th>
+              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">
+                Actions
               </th>
             </tr>
           </thead>
@@ -364,7 +515,7 @@ export function AggregatedExpensesTable({
                   {/* Parent Category Header */}
                   <tr className="bg-gray-100 dark:bg-gray-800">
                     <td
-                      colSpan={7}
+                      colSpan={8}
                       className="px-6 py-3 text-sm font-bold text-gray-900 dark:text-white"
                     >
                       {parentLabel}
@@ -427,20 +578,20 @@ export function AggregatedExpensesTable({
                         key={item.lineItemId}
                         className="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors align-top"
                       >
-                        <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                        <td className="pl-6 pr-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                           {item.groupLabel}
                         </td>
-                        <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                        <td className="px-3 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                           {renderEditableCell("budget", item.budget)}
                         </td>
-                        <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                        <td className="px-3 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                           {renderEditableCell("forecast", item.forecast)}
                         </td>
-                        <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                        <td className="px-3 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                           {renderEditableCell("actuals", item.actuals)}
                         </td>
                         <td
-                          className={`px-6 py-3 whitespace-nowrap text-right text-sm font-medium ${
+                          className={`px-3 py-3 whitespace-nowrap text-right text-sm font-medium ${
                             difference < 0
                               ? "text-red-600 dark:text-red-400"
                               : "text-gray-900 dark:text-white"
@@ -486,30 +637,39 @@ export function AggregatedExpensesTable({
                         <td className="px-3 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white w-32">
                           {renderEditableCell("payments", item.payments)}
                         </td>
+                        <td className="px-2 py-3 whitespace-nowrap text-center w-16">
+                          <button
+                            onClick={() => handleDeleteLineItem(item.lineItemId, item.groupLabel)}
+                            className="inline-flex items-center justify-center p-0.5 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                            title="Delete line item"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
 
                   {/* Subtotal Row */}
                   <tr className="bg-gray-50 dark:bg-gray-800/50 font-semibold align-top">
-                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    <td className="pl-6 pr-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       Subtotal
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                    <td className="px-3 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                       <div className="text-right">
                         <span className="inline-block px-1 py-0.5 min-w-[4rem]">
                           {formatNumber(subtotals.budget)}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                    <td className="px-3 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                       <div className="text-right">
                         <span className="inline-block px-1 py-0.5 min-w-[4rem]">
                           {formatNumber(subtotals.forecast)}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                    <td className="px-3 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                       <div className="text-right">
                         <span className="inline-block px-1 py-0.5 min-w-[4rem]">
                           {formatNumber(subtotals.actuals)}
@@ -517,7 +677,7 @@ export function AggregatedExpensesTable({
                       </div>
                     </td>
                     <td
-                      className={`px-6 py-3 whitespace-nowrap text-right text-sm font-bold ${
+                      className={`px-3 py-3 whitespace-nowrap text-right text-sm font-bold ${
                         subtotals.difference < 0
                           ? "text-red-600 dark:text-red-400"
                           : "text-gray-900 dark:text-white"
@@ -533,6 +693,7 @@ export function AggregatedExpensesTable({
                         </span>
                       </div>
                     </td>
+                    <td className="px-2 py-3"></td>
                   </tr>
                 </React.Fragment>
               );
@@ -540,24 +701,24 @@ export function AggregatedExpensesTable({
 
             {/* Grand Total Row */}
             <tr className="bg-gray-100 dark:bg-gray-800 font-bold align-top">
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+              <td className="pl-6 pr-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                 Total
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+              <td className="px-3 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                 <div className="text-right">
                   <span className="inline-block px-1 py-0.5 min-w-[4rem]">
                     {formatNumber(grandTotals.budget)}
                   </span>
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+              <td className="px-3 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                 <div className="text-right">
                   <span className="inline-block px-1 py-0.5 min-w-[4rem]">
                     {formatNumber(grandTotals.forecast)}
                   </span>
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+              <td className="px-3 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                 <div className="text-right">
                   <span className="inline-block px-1 py-0.5 min-w-[4rem]">
                     {formatNumber(grandTotals.actuals)}
@@ -565,7 +726,7 @@ export function AggregatedExpensesTable({
                 </div>
               </td>
               <td
-                className={`px-6 py-4 whitespace-nowrap text-right text-sm ${
+                className={`px-3 py-4 whitespace-nowrap text-right text-sm ${
                   grandTotals.difference < 0
                     ? "text-red-600 dark:text-red-400"
                     : "text-gray-900 dark:text-white"
@@ -581,10 +742,107 @@ export function AggregatedExpensesTable({
                   </span>
                 </div>
               </td>
+              <td className="px-2 py-4"></td>
             </tr>
+
+            {/* Line Item Editor Row */}
+            {isAddingLineItem && (
+              <tr
+                ref={lineItemEditorRef}
+                className="bg-white dark:bg-gray-900 border-t border-gray-900 dark:border-gray-100"
+              >
+                <td colSpan={8} className="px-6 py-4">
+                  <div className="space-y-2">
+                    <div className="flex items-end gap-4">
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Select Category
+                        </label>
+                        <Select
+                          name="category"
+                          searchable={true}
+                          value={selectedGroupId}
+                          onChange={(value: string | string[]) => handleCategoryChange(value as string)}
+                          options={groupOptions}
+                          placeholder="Choose a category..."
+                          className="w-full"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={handleSaveLineItem}
+                          disabled={!selectedGroupId || !!duplicateCategoryError}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          SAVE
+                        </Button>
+                        <Button
+                          onClick={handleCancelLineItem}
+                          variant="secondary"
+                        >
+                          CANCEL
+                        </Button>
+                      </div>
+                    </div>
+                    {duplicateCategoryError && (
+                      <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md">
+                        <span className="text-sm text-amber-800 dark:text-amber-200">
+                          {duplicateCategoryError}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalOpen && lineItemToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={handleCancelDelete}
+          />
+
+          {/* Modal */}
+          <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Delete Line Item
+              </h3>
+            </div>
+
+            {/* Content */}
+            <div className="px-6 py-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Are you sure you want to delete the line item{" "}
+                <span className="font-semibold text-gray-900 dark:text-white">
+                  "{lineItemToDelete.label}"
+                </span>
+                ? This action cannot be undone.
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+              <Button onClick={handleCancelDelete} variant="secondary">
+                CANCEL
+              </Button>
+              <Button
+                onClick={handleConfirmDelete}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                DELETE
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

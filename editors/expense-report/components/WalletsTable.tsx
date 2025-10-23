@@ -179,7 +179,38 @@ export function WalletsTable({
                   Forecast
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actuals
+                  <div className="flex items-center justify-end gap-2">
+                    {needsSync && (
+                      <button
+                        onClick={() => {
+                          // Sync all outdated wallets
+                          [...tagChangedWallets, ...outdatedWallets].forEach((walletAddress) => {
+                            const wallet = wallets.find(w => w.wallet === walletAddress);
+                            if (wallet) {
+                              handleSyncWallet(wallet);
+                            }
+                          });
+                        }}
+                        disabled={syncingWallet !== null}
+                        className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
+                          tagChangedWallets.length > 0
+                            ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 animate-pulse"
+                            : "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 animate-pulse"
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        title={
+                          tagChangedWallets.length > 0
+                            ? "ALERT: Tags have changed in billing statements - sync all wallets!"
+                            : "Sync all wallets with latest billing statements"
+                        }
+                      >
+                        <RefreshCw
+                          size={16}
+                          className={syncingWallet !== null ? "animate-spin" : ""}
+                        />
+                      </button>
+                    )}
+                    <span>Actuals</span>
+                  </div>
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Difference
@@ -269,8 +300,59 @@ export function WalletsTable({
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                       {formatCurrency(totals.forecast)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                      {formatCurrency(totals.actuals)}
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                      {totals.actuals === 0 && (!wallet.billingStatements || wallet.billingStatements.length === 0) ? (
+                        // When actuals is 0 and no billing statements, only show the Add Bills button
+                        <div className="flex items-center justify-end">
+                          <button
+                            onClick={() => onAddBillingStatement(wallet.wallet || "")}
+                            className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors"
+                            title="Add billing statement for this wallet"
+                          >
+                            <Plus size={16} />
+                            <span>Add Bills</span>
+                          </button>
+                        </div>
+                      ) : (
+                        // When actuals is not 0 or has billing statements, show compact buttons + value horizontally
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => onAddBillingStatement(wallet.wallet || "")}
+                            className="inline-flex items-center justify-center w-8 h-8 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors"
+                            title="Add billing statement for this wallet"
+                          >
+                            <Plus size={16} />
+                          </button>
+                          {wallet.billingStatements && wallet.billingStatements.length > 0 && (
+                            <button
+                              onClick={() => handleSyncWallet(wallet)}
+                              disabled={syncingWallet === wallet.wallet}
+                              className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
+                                tagChangedWallets.includes(wallet.wallet || "")
+                                  ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 animate-pulse"
+                                  : outdatedWallets.includes(wallet.wallet || "")
+                                  ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 animate-pulse"
+                                  : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              } disabled:opacity-50 disabled:cursor-not-allowed`}
+                              title={
+                                tagChangedWallets.includes(wallet.wallet || "")
+                                  ? "ALERT: Tags have changed - sync required!"
+                                  : outdatedWallets.includes(wallet.wallet || "")
+                                  ? "Sync needed - billing statements updated"
+                                  : "Sync with latest billing statements"
+                              }
+                            >
+                              <RefreshCw
+                                size={16}
+                                className={syncingWallet === wallet.wallet ? "animate-spin" : ""}
+                              />
+                            </button>
+                          )}
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            {formatCurrency(totals.actuals)}
+                          </span>
+                        </div>
+                      )}
                     </td>
                     <td
                       className={`px-6 py-4 whitespace-nowrap text-right text-sm font-medium ${
@@ -288,47 +370,6 @@ export function WalletsTable({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                       <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => onAddBillingStatement(wallet.wallet || "")}
-                          className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors"
-                          title="Add billing statement"
-                        >
-                          <Plus size={16} />
-                          <span>Add Bills</span>
-                        </button>
-                        {/* Sync Button */}
-                        {wallet.billingStatements && wallet.billingStatements.length > 0 && (
-                          <button
-                            onClick={() => handleSyncWallet(wallet)}
-                            disabled={syncingWallet === wallet.wallet}
-                            className={`inline-flex items-center gap-1 px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                              tagChangedWallets.includes(wallet.wallet || "")
-                                ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 animate-pulse"
-                                : outdatedWallets.includes(wallet.wallet || "")
-                                ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 animate-pulse"
-                                : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
-                            } disabled:opacity-50 disabled:cursor-not-allowed`}
-                            title={
-                              tagChangedWallets.includes(wallet.wallet || "")
-                                ? "ALERT: Tags have changed in billing statements - sync required!"
-                                : outdatedWallets.includes(wallet.wallet || "")
-                                ? "Sync needed - billing statements have been updated"
-                                : "Sync with latest billing statements"
-                            }
-                          >
-                            <RefreshCw
-                              size={16}
-                              className={syncingWallet === wallet.wallet ? "animate-spin" : ""}
-                            />
-                            <span>
-                              {tagChangedWallets.includes(wallet.wallet || "")
-                                ? "Tags Changed!"
-                                : outdatedWallets.includes(wallet.wallet || "")
-                                ? "Sync"
-                                : "Synced"}
-                            </span>
-                          </button>
-                        )}
                         <button
                           onClick={() => handleRemoveWallet(wallet.wallet || "")}
                           className="inline-flex items-center justify-center w-8 h-8 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"

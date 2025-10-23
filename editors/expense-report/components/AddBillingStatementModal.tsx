@@ -363,16 +363,16 @@ export function AddBillingStatementModal({
           <div className="flex gap-3">
             <Button
               onClick={onClose}
-              className="px-4 py-2 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30"
+              variant="secondary"
             >
-              Cancel
+              CANCEL
             </Button>
             <Button
               onClick={handleAddStatements}
               disabled={selectedStatements.size === 0}
-              className="px-4 py-2"
+              className="bg-green-600 hover:bg-green-700 text-white"
             >
-              Add{" "}
+              ADD{" "}
               {selectedStatements.size > 0 && `(${selectedStatements.size})`}
             </Button>
           </div>
