@@ -8,5 +8,9 @@
   "reactor": {
     "port": 4001
   },
-  "packages": []
+  "packages": [],
+  "vetra": {
+    "driveId": "bai-contributor-billing",
+    "driveUrl": "https://switchboard.staging.vetra.io/d/bai-contributor-billing"
+  }
 }

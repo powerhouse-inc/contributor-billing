@@ -71,7 +71,7 @@ export default function Editor(props: Partial<EditorProps> & { documentId?: stri
           <Textarea
             label="Notes"
             placeholder="Add notes"
-            autoExpand={false}
+            autoExpand={true}
             rows={4}
             multiline={true}
             value={notes}

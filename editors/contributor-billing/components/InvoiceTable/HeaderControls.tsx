@@ -22,6 +22,9 @@ export const HeaderControls = ({
   createIntegrationsDocument,
   integrationsDoc,
   canExportSelectedRows,
+  hasBillingStatements = false,
+  expenseReportDoc,
+  onCreateOrOpenExpenseReport,
 }: {
   statusOptions?: { label: string; value: string }[];
   onStatusChange?: (value: string | string[]) => void;
@@ -32,6 +35,9 @@ export const HeaderControls = ({
   createIntegrationsDocument?: () => void;
   integrationsDoc?: any | null;
   canExportSelectedRows?: () => boolean;
+  hasBillingStatements?: boolean;
+  expenseReportDoc?: any | null;
+  onCreateOrOpenExpenseReport?: () => void;
 }) => {
   const batchOptions = [
     { label: "$ Pay Selected", value: "pay" },
@@ -80,6 +86,13 @@ export const HeaderControls = ({
           />
         </div>
         <div className="flex gap-2 items-center">
+          <button
+            className={`bg-white border border-gray-300 rounded px-3 py-1 text-sm hover:bg-gray-100 ${!hasBillingStatements ? "opacity-50 cursor-not-allowed" : ""}`}
+            onClick={onCreateOrOpenExpenseReport}
+            disabled={!hasBillingStatements}
+          >
+            {expenseReportDoc ? "Expense Report" : "Create Expense Report"}
+          </button>
           <button
             className={`bg-white border border-gray-300 rounded px-3 py-1 text-sm hover:bg-gray-100 ${!canExport ? "opacity-50 cursor-not-allowed" : ""}`}
             onClick={() => setShowCurrencyModal(true)}

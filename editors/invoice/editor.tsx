@@ -1075,7 +1075,7 @@ export default function Editor(
             <Textarea
               label="Notes"
               placeholder="Add notes"
-              autoExpand={false}
+              autoExpand={true}
               rows={4}
               multiline={true}
               value={notes}
