@@ -1,4 +1,4 @@
-import { Tag } from "lucide-react";
+import { Tag, Plus } from "lucide-react";
 import { Select } from "@powerhousedao/document-engineering";
 import { InputField } from "../../invoice/components/inputField.js";
 import { NumberForm } from "../../invoice/components/numberForm.js";
@@ -6,6 +6,7 @@ import { actions, type BillingStatementAction, type BillingStatementState, type 
 import { useState, useRef, useEffect } from "react";
 import { formatNumber } from "../../invoice/lineItems.js";
 import { LineItemTagsTable } from "../lineItemTags/lineItemTags.js";
+import { generateId } from "document-model";
 
 const initialLineItem: LocalLineItemDraft = {
   description: "",
@@ -41,6 +42,8 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [localLineItem, setLocalLineItem] = useState<LocalLineItemDraft>(initialLineItem);
   const [showTagTable, setShowTagTable] = useState(false);
+  const [isAddingNew, setIsAddingNew] = useState(false);
+  const [newLineItem, setNewLineItem] = useState<LocalLineItemDraft>(initialLineItem);
   const tableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,14 +53,21 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
       const isSelectMenu =
         target.closest('[role="listbox"]') || target.closest('[role="option"]');
 
+      // Check if clicking on buttons (save/cancel)
+      const isButton = target.closest('button');
+
       if (
         tableRef.current &&
         !tableRef.current.contains(event.target as Node) &&
-        !isSelectMenu
+        !isSelectMenu &&
+        !isButton
       ) {
         // Save changes before clearing the editing state
         if (editingRow !== null) {
           handleSave();
+        }
+        if (isAddingNew) {
+          handleCancelAdd();
         }
       }
     }
@@ -65,7 +75,7 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [editingRow, localLineItem]);
+  }, [editingRow, localLineItem, isAddingNew, newLineItem]);
 
   const units: Array<{ label: string; value: BillingStatementUnitInput }> = [
     { label: "Minute", value: "MINUTE" },
@@ -138,6 +148,61 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
       setEditingRow(null);
       setLocalLineItem(initialLineItem);
     }
+  };
+
+  const handleAddLineItem = () => {
+    setIsAddingNew(true);
+    setNewLineItem(initialLineItem);
+  };
+
+  const handleNewLineItemChange = (field: keyof LocalLineItemDraft, value: string | number) => {
+    if (field === "unitPriceCash" || field === "unitPricePwt") {
+      // Allow negative numbers with optional minus sign at start
+      const regex = new RegExp(`^-?\\d*\\.?\\d{0,6}$`);
+      const stringValue = String(value);
+      if (regex.test(stringValue) || stringValue === "-") {
+        setNewLineItem((prev) => ({ ...prev, [field]: value }));
+      }
+    } else {
+      setNewLineItem((prev) => ({ ...prev, [field]: value }));
+    }
+  };
+
+  const handleSaveNewLineItem = () => {
+    const { description, unit, quantity, unitPriceCash, unitPricePwt } = newLineItem;
+
+    if (
+      description &&
+      unit &&
+      quantity !== "" &&
+      unitPriceCash !== "" &&
+      unitPricePwt !== ""
+    ) {
+      const qty = Number(quantity);
+      const fiat = Number(unitPriceCash);
+      const powt = Number(unitPricePwt);
+
+      dispatch(
+        actions.addLineItem({
+          id: generateId(),
+          description,
+          unit,
+          quantity: qty,
+          unitPriceCash: fiat,
+          unitPricePwt: powt,
+          totalPriceCash: qty * fiat,
+          totalPricePwt: qty * powt,
+        })
+      );
+
+      setIsAddingNew(false);
+      setNewLineItem(initialLineItem);
+    }
+  };
+
+  const handleCancelAdd = () => {
+    setIsAddingNew(false);
+    setNewLineItem(initialLineItem);
   };
 
   if (showTagTable) {
@@ -288,8 +353,102 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
                 </tr>
               )
             )}
+            {isAddingNew && (
+              <tr className="bg-green-50">
+                <td className="border px-2 py-1 text-center w-10">
+                  {state.lineItems.length + 1}
+                </td>
+                <td className="border px-2 py-1 w-72">
+                  <InputField
+                    input={newLineItem.description}
+                    value={newLineItem.description}
+                    onBlur={() => {}}
+                    handleInputChange={(e) =>
+                      handleNewLineItemChange("description", e.target.value)
+                    }
+                    className="w-full px-1 py-1 border rounded"
+                  />
+                </td>
+                <td className="border px-2 py-1 w-16">
+                  <Select
+                    options={units}
+                    value={newLineItem.unit}
+                    onChange={(value) => handleNewLineItemChange("unit", value as BillingStatementUnitInput)}
+                    className="w-32 px-1 py-1 border rounded"
+                  />
+                </td>
+                <td className="border px-2 py-1 w-16">
+                  <NumberForm
+                    number={newLineItem.quantity}
+                    handleInputChange={(e: any) =>
+                      handleNewLineItemChange("quantity", e.target.value)
+                    }
+                    className="w-32 px-4 py-1 border rounded text-center"
+                  />
+                </td>
+                <td className="border px-2 py-1 w-16">
+                  <NumberForm
+                    number={newLineItem.unitPriceCash}
+                    handleInputChange={(e: any) =>
+                      handleNewLineItemChange("unitPriceCash", String(e.target.value))
+                    }
+                    className="w-32 px-4 py-1 border rounded text-center"
+                  />
+                </td>
+                <td className="border px-2 py-1 w-16">
+                  <NumberForm
+                    number={newLineItem.unitPricePwt}
+                    handleInputChange={(e: any) =>
+                      handleNewLineItemChange("unitPricePwt", e.target.value)
+                    }
+                    className="w-32 px-4 py-1 border rounded text-center"
+                  />
+                </td>
+                <td className="border px-2 py-1 text-center">
+                  {newLineItem.quantity && newLineItem.unitPriceCash
+                    ? Number(newLineItem.quantity) * Number(newLineItem.unitPriceCash)
+                    : ""}
+                </td>
+                <td className="border px-2 py-1 text-center">
+                  {newLineItem.quantity && newLineItem.unitPricePwt
+                    ? Number(newLineItem.quantity) * Number(newLineItem.unitPricePwt)
+                    : ""}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
+
+        {/* Add Line Item Button */}
+        {!isAddingNew && (
+          <div className="mt-4 flex justify-center">
+            <button
+              onClick={handleAddLineItem}
+              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+            >
+              <Plus size={16} />
+              Add Line Item
+            </button>
+          </div>
+        )}
+
+        {/* Save/Cancel buttons when adding new item */}
+        {isAddingNew && (
+          <div className="mt-4 flex justify-center gap-2">
+            <button
+              onClick={handleSaveNewLineItem}
+              className="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+            >
+              Save Line Item
+            </button>
+            <button
+              onClick={handleCancelAdd}
+              className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

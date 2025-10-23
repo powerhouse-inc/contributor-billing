@@ -143,7 +143,7 @@ export function LineItemTagsTable({
                 <td className="border-b border-gray-200 w-48">
                   <DatePicker
                     name="period"
-                    dateFormat="YYYY-MM"
+                    dateFormat="YYYY-MM-DD"
                     autoClose={true}
                     placeholder="Select Period"
                     value={

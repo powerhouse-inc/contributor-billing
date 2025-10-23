@@ -226,10 +226,12 @@ export function DriveExplorer(props: DriveEditorProps) {
       const documentModel = selectedDocumentModel.current;
       if (!documentModel || !selectedDrive?.header.id) return;
 
-      const editorType =
-        documentModel.documentModel.id === "powerhouse/invoice"
-          ? "powerhouse-invoice-editor"
-          : "integrations-editor";
+      let editorType = "integrations-editor";
+      if (documentModel.documentModel.id === "powerhouse/invoice") {
+        editorType = "powerhouse-invoice-editor";
+      } else if (documentModel.documentModel.id === "powerhouse/expense-report") {
+        editorType = "powerhouse-expense-report-editor";
+      }
 
       try {
         const node = await addDocument(
@@ -275,8 +277,8 @@ export function DriveExplorer(props: DriveEditorProps) {
   // === RENDER ===
 
   return (
-    <div className="flex h-full editor-container">
-      <div className="h-full">
+    <div className={`flex h-full ${showDocumentEditor ? "w-full" : "editor-container"}`}>
+      <div className={`h-full ${showDocumentEditor ? "w-full" : ""}`}>
         <ToastContainer
           position="bottom-right"
           autoClose={5000}

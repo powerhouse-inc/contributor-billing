@@ -28,22 +28,10 @@ export function defaultGlobalState(): IntegrationsState {
       signerPrivateKey: "",
     },
     googleCloud: {
-      keyFile: {
-        type: "",
-        project_id: "",
-        private_key_id: "",
-        private_key: "",
-        client_email: "",
-        client_id: "",
-        auth_uri: "",
-        token_uri: "",
-        auth_provider_x509_cert_url: "",
-        client_x509_cert_url: "",
-        universe_domain: "",
-      },
+      projectId: "",
       location: "",
       processorId: "",
-      projectId: "",
+      keyFile: null,
     },
     requestFinance: {
       apiKey: "",
@@ -110,10 +98,10 @@ export function createIntegrationsDocument(
   const document = createDocument(
     state
       ? createState(
-          createBaseState(state.auth, state.document),
-          state.global,
-          state.local,
-        )
+        createBaseState(state.auth, state.document),
+        state.global,
+        state.local,
+      )
       : undefined,
   );
 
