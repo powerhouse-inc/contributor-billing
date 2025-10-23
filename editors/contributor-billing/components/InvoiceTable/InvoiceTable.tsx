@@ -181,12 +181,6 @@ export const InvoiceTable = ({
       billingStatementActions.editBillingStatement(billingStatementData),
       createdNode.id
     );
-    await dispatchActions(
-      billingStatementActions.editStatus({
-        status: invoiceState.state.global.status,
-      }),
-      createdNode.id
-    );
 
     // add line items from invoiceState to billing statement
     invoiceState.state.global.lineItems.forEach(async (lineItem: any) => {
