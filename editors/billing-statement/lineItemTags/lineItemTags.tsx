@@ -107,7 +107,7 @@ export function LineItemTagsTable({
                 >
                   <DatePicker
                     name="period"
-                    dateFormat="YYYY-MM"
+                    dateFormat="YYYY-MM-DD"
                     autoClose={true}
                     placeholder="Select Period"
                     value={
