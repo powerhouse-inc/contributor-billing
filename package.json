@@ -93,6 +93,7 @@
     "@powerhousedao/reactor-local": "^5.0.0-staging.30",
     "@powerhousedao/scalars": "^1.33.1-staging.5",
     "@powerhousedao/switchboard": "^5.0.0-staging.30",
+    "@powerhousedao/vetra": "5.0.0-staging.30",
     "@tailwindcss/cli": "^4.1.4",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^22.14.1",
