@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { InvoiceAction, actions } from "../../document-models/invoice/index.js";
-import { toast } from "@powerhousedao/design-system";
+import { toast, AnimatedLoader } from "@powerhousedao/design-system";
 import { uploadPdfChunked } from "./uploadPdfChunked.js";
 import { getCountryCodeFromName } from "./utils/utils.js";
 
@@ -295,17 +295,26 @@ export default function PDFUploader({
           />
         </label>
 
-        {isLoading && uploadProgress > 0 && (
+        {isLoading && (
           <div className="mt-2">
-            <p className="text-sm text-gray-600">
-              Uploading: {uploadProgress.toFixed(1)}%
-            </p>
-            <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
-              <div
-                className="bg-blue-600 h-2.5 rounded-full"
-                style={{ width: `${uploadProgress}%` }}
-              ></div>
-            </div>
+            {uploadProgress > 0 && uploadProgress < 100 ? (
+              <div>
+                <p className="text-sm text-gray-600">
+                  Uploading: {uploadProgress.toFixed(1)}%
+                </p>
+                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                  <div
+                    className="bg-blue-600 h-2.5 rounded-full"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2 py-4">
+                <AnimatedLoader size="md" />
+                <p className="text-sm text-gray-600">Processing PDF with Claude AI...</p>
+              </div>
+            )}
           </div>
         )}
 
