@@ -123,7 +123,8 @@ async function executeTransferProposal(
   // Safe API and Protocol Kit instances
   // @ts-ignore - Ignoring constructor error as per requirements
   const safeApiKit = new SafeApiKit({
-    chainId: Number(payerWallet.chainId),
+    chainId: BigInt(payerWallet.chainId),
+    apiKey: process.env.SAFE_API_KEY
   });
 
   // Get next nonce with retry logic for rate limiting
