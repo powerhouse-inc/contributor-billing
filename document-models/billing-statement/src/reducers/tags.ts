@@ -9,32 +9,29 @@ import type { BillingStatementTagsOperations } from "../../gen/tags/operations.j
 
 export const reducer: BillingStatementTagsOperations = {
   editLineItemTagOperation(state, action, dispatch) {
-    try {
-      const stateItem = state.lineItems.find((x) => x.id === action.input.lineItemId);
-      if (!stateItem) throw new Error("Item matching input.lineItemId not found");
+    const stateItem = state.lineItems.find((x) => x.id === action.input.lineItemId);
+    if (!stateItem) throw new Error("Item matching input.lineItemId not found");
 
-      // if tag already exists with the same dimension, update the value and label
-      const existingTag = stateItem.lineItemTag?.find((tag) => tag.dimension === action.input.dimension);
-      if (existingTag) {
-        existingTag.value = action.input.value;
-        existingTag.label = action.input.label || null;
-      } else {
-        // if tag does not exist, add it
-        const newTag: BillingStatementTag = {
-          dimension: action.input.dimension,
-          value: action.input.value,
-          label: action.input.label || null,
-        };
-        if (!stateItem.lineItemTag) {
-          stateItem.lineItemTag = [];
-        }
-
-        // Add the new tag
-        stateItem.lineItemTag?.push(newTag);
-
+    // if tag already exists with the same dimension, update the value and label
+    const existingTag = stateItem.lineItemTag?.find((tag) => tag.dimension === action.input.dimension);
+    if (existingTag) {
+      existingTag.value = action.input.value;
+      existingTag.label = action.input.label || null;
+    } else {
+      // if tag does not exist, add it
+      const newTag: BillingStatementTag = {
+        dimension: action.input.dimension,
+        value: action.input.value,
+        label: action.input.label || null,
+      };
+      if (!stateItem.lineItemTag) {
+        stateItem.lineItemTag = [];
       }
-    } catch (error) {
-      console.error("Failed to edit line item tag:", error);
+
+      // Add the new tag
+      stateItem.lineItemTag?.push(newTag);
+
     }
+
   },
 };

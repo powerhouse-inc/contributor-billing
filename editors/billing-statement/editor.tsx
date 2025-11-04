@@ -9,14 +9,14 @@ import { CurrencyForm } from "../invoice/components/currencyForm.js";
 import { Textarea } from "@powerhousedao/document-engineering";
 import LineItemsTable from "./components/lineItemsTable.js";
 import { formatNumber } from "../invoice/lineItems.js";
-import { useDocumentById } from "@powerhousedao/reactor-browser";
+import { useSelectedBillingStatementDocument } from "../hooks/useBillingStatementDocument.js";
 
 export type IProps = EditorProps;
 
-export default function Editor(props: any) {
-  const [doc, dispatch] = useDocumentById(props.documentId) as [
+export default function Editor(props: Partial<EditorProps> & { documentId?: string }) {
+  const [doc, dispatch] = useSelectedBillingStatementDocument() as [
     BillingStatementDocument | undefined,
-    any,
+    React.Dispatch<any>,
   ];
   const state = doc?.state.global as BillingStatementState;
 
@@ -65,32 +65,13 @@ export default function Editor(props: any) {
       <div className="">
         <LineItemsTable state={state} dispatch={dispatch} />
       </div>
-      {/* <button
-        className="bg-blue-500 text-white px-4 py-2 rounded-md text-xs"
-        onClick={() => {
-          dispatch(
-            actions.addLineItem({
-              id: generateId(),
-              description: "Dummy Line Item",
-              quantity: 5,
-              unit: "HOUR",
-              unitPriceCash: 2,
-              unitPricePwt: 1,
-              totalPriceCash: 5 * 2,
-              totalPricePwt: 5 * 1,
-            })
-          );
-        }}
-      >
-        Add Dummy Line Item
-      </button> */}
       {/* Text Area and Totals Table */}
       <div className="grid sm:grid-cols-2">
         <div className="mt-6 p-2 two-column-grid:mt-2">
           <Textarea
             label="Notes"
             placeholder="Add notes"
-            autoExpand={false}
+            autoExpand={true}
             rows={4}
             multiline={true}
             value={notes}

@@ -6,6 +6,7 @@ import { budgetOptions, expenseAccountOptions } from "./tagMapping.js";
 import {
   actions,
   BillingStatementTag,
+  type BillingStatementAction,
 } from "../../../document-models/billing-statement/index.js";
 import { InputField } from "../../invoice/components/inputField.js";
 
@@ -19,7 +20,7 @@ interface TagAssignmentRow {
 interface LineItemTagsTableProps {
   lineItems: TagAssignmentRow[];
   onClose: () => void;
-  dispatch: Dispatch<any>;
+  dispatch: Dispatch<BillingStatementAction>;
 }
 
 export function LineItemTagsTable({
@@ -106,7 +107,7 @@ export function LineItemTagsTable({
                 >
                   <DatePicker
                     name="period"
-                    dateFormat="YYYY-MM"
+                    dateFormat="YYYY-MM-DD"
                     autoClose={true}
                     placeholder="Select Period"
                     value={
