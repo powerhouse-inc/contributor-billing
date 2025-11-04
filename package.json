@@ -1,7 +1,7 @@
 {
   "name": "@powerhousedao/contributor-billing",
   "description": "Document models that help contributors of open organisations get paid anonymously for their work on a monthly basis.",
-  "version": "0.1.10",
+  "version": "0.1.14",
   "license": "AGPL-3.0-only",
   "type": "module",
   "files": [
@@ -56,7 +56,6 @@
     "service-unstartup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-unstartup.sh"
   },
   "dependencies": {
-    "@google-cloud/documentai": "^8.12.0",
     "@powerhousedao/builder-tools": "^5.0.0-staging.30",
     "@powerhousedao/common": "^5.0.0-staging.30",
     "@powerhousedao/design-system": "^5.0.0-staging.30",

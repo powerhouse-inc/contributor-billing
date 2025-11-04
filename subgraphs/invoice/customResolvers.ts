@@ -1,7 +1,7 @@
 import { executeTransferProposal } from "../../scripts/invoice/gnosisTransactionBuilder.js";
 import { requestDirectPayment } from "../../scripts/invoice/requestFinance.js";
 import { actions } from "../../document-models/invoice/index.js";
-import { uploadPdfAndGetJson } from "../../scripts/invoice/pdfToDocumentAi.js";
+import { uploadPdfAndGetJsonClaude } from "../../scripts/invoice/pdfToClaudeAI.js";
 import * as crypto from "crypto";
 
 // Store pending transactions for webhook matching
@@ -14,7 +14,6 @@ let pendingTransactions: Record<string, {
 
 // Add a set to track processed transaction hashes to avoid duplicate processing
 let processedTransactions: Set<string> = new Set();
-
 
 interface UploadInvoicePdfChunkArgs {
     chunk: string;
@@ -119,7 +118,7 @@ export const Invoice_createRequestFinancePayment = async (_: any, args: any) => 
 
 }
 
-export const Invoice_uploadInvoicePdfChunk = async (_: any, args: any) => {
+export const Invoice_uploadInvoicePdfChunk = async (_: any, args: UploadInvoicePdfChunkArgs) => {
     try {
         const { chunk, chunkIndex, totalChunks, fileName, sessionId } = args;
         const fileKey = `${sessionId}_${fileName}`;
@@ -146,16 +145,40 @@ export const Invoice_uploadInvoicePdfChunk = async (_: any, args: any) => {
             // Combine all chunks
             const completeFile = fileData.chunks.join('');
 
-            // Process the file
-            const result = await uploadPdfAndGetJson(completeFile);
+            console.log("Processing PDF with Claude Haiku 4.5...");
+            const startTime = Date.now();
 
-            // Clean up
-            fileChunksMap.delete(fileKey);
+            try {
+                const claudeResult = await uploadPdfAndGetJsonClaude(completeFile);
+                const processingTime = Date.now() - startTime;
+                console.log(`PDF processing completed in ${processingTime}ms`);
 
-            return {
-                success: true,
-                data: result
-            };
+                const responseData = {
+                    invoiceData: claudeResult.invoiceData,
+                    processingMetadata: {
+                        provider: 'claude-haiku-4.5',
+                        processingTimeMs: processingTime,
+                        processingTimestamp: new Date().toISOString()
+                    }
+                };
+
+                // Clean up
+                fileChunksMap.delete(fileKey);
+
+                return {
+                    success: true,
+                    data: responseData
+                };
+
+            } catch (error) {
+                console.error("Error in PDF processing:", error);
+                fileChunksMap.delete(fileKey);
+
+                return {
+                    success: false,
+                    error: error instanceof Error ? error.message : 'Unknown error'
+                };
+            }
         }
 
         // If not all chunks received yet, just acknowledge receipt

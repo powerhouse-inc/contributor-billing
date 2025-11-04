@@ -6,6 +6,7 @@ import { Tooltip, TooltipProvider } from "@powerhousedao/design-system";
 
 const currencyList = [
   { ticker: "USDS", crypto: true },
+  { ticker: "USDC", crypto: true },
   { ticker: "DAI", crypto: true },
   { ticker: "USD", crypto: false },
   { ticker: "EUR", crypto: false },
@@ -35,7 +36,7 @@ export const HeaderStats = () => {
       for (const doc of invoices) {
         const invoice = doc as any;
         const invoiceAmount = invoice.state.global.totalPriceTaxIncl;
-        let invoiceCurrency = invoice.state.global.currency || 'USD'; // Fallback to USD if currency is empty
+        let invoiceCurrency = invoice.state.global.currency || "USD"; // Fallback to USD if currency is empty
         let selectCurrency = selectedCurrency;
         if (invoiceCurrency === selectedCurrency) {
           total += invoiceAmount;
@@ -44,7 +45,7 @@ export const HeaderStats = () => {
             // Only convert crypto currencies to USD for the API call
             let fromCurrency = invoiceCurrency;
             let toCurrency = selectedCurrency;
-            
+
             // Convert crypto to USD for API compatibility
             if (invoiceCurrency === "DAI" || invoiceCurrency === "USDS") {
               fromCurrency = "USD";
@@ -52,7 +53,7 @@ export const HeaderStats = () => {
             if (selectedCurrency === "DAI" || selectedCurrency === "USDS") {
               toCurrency = "USD";
             }
-            
+
             const exchangeRate = await getExchangeRate(
               fromCurrency,
               toCurrency,
