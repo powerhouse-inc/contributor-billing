@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { InvoiceAction, actions } from "../../document-models/invoice/index.js";
-import { toast, AnimatedLoader } from "@powerhousedao/design-system";
+import { toast } from "@powerhousedao/design-system";
 import { uploadPdfChunked } from "./uploadPdfChunked.js";
 import { getCountryCodeFromName } from "./utils/utils.js";
+import { LoaderCircle } from "lucide-react";
 
 let GRAPHQL_URL = 'http://localhost:4001/graphql/invoice'
 
@@ -32,6 +33,30 @@ export async function loadPDFFile({
 interface PDFUploaderProps {
   dispatch: (action: InvoiceAction) => void;
   changeDropdownOpen: (open: boolean) => void;
+}
+
+/**
+ * Extracts the actual error message from Claude API error format
+ * Format: "Claude API error: 400 - {...json...}"
+ */
+function extractErrorMessage(errorMsg: string): string {
+  if (errorMsg.includes("Claude API error")) {
+    try {
+      const jsonMatch = errorMsg.match(/Claude API error: \d+ - (.+)/);
+      if (jsonMatch) {
+        const errorJson = JSON.parse(jsonMatch[1]);
+        if (errorJson?.error?.message) {
+          return errorJson.error.message;
+        } else if (errorJson?.message) {
+          return errorJson.message;
+        }
+      }
+    } catch (parseError) {
+      // If parsing fails, use the original error message
+      console.error("Failed to parse error message:", parseError);
+    }
+  }
+  return errorMsg;
 }
 
 export default function PDFUploader({
@@ -246,15 +271,17 @@ export default function PDFUploader({
 
             changeDropdownOpen(false);
           } else {
-            throw new Error(result.error || "Failed to process PDF");
+            const errorMsg = extractErrorMessage(result.error || "Failed to process PDF");
+            throw new Error(errorMsg);
           }
         } catch (error) {
           console.error("Error processing PDF:", error);
-          setError(
+          const errorMessage = extractErrorMessage(
             error instanceof Error
               ? error.message
-              : "An error occurred while processing the PDF",
+              : "An error occurred while processing the PDF"
           );
+          setError(errorMessage);
         } finally {
           setIsLoading(false);
         }
@@ -282,8 +309,11 @@ export default function PDFUploader({
       <div className="flex flex-col gap-2">
         <label
           htmlFor="pdf-upload"
-          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
         >
+          {isLoading && (
+            <LoaderCircle className="w-4 h-4 text-blue-600 animate-spin" />
+          )}
           {isLoading ? "Uploading..." : "Upload PDF"}
           <input
             id="pdf-upload"
@@ -295,30 +325,7 @@ export default function PDFUploader({
           />
         </label>
 
-        {isLoading && (
-          <div className="mt-2">
-            {uploadProgress > 0 && uploadProgress < 100 ? (
-              <div>
-                <p className="text-sm text-gray-600">
-                  Uploading: {uploadProgress.toFixed(1)}%
-                </p>
-                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
-                  <div
-                    className="bg-blue-600 h-2.5 rounded-full"
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-2 py-4">
-                <AnimatedLoader size="md" />
-                <p className="text-sm text-gray-600">Processing PDF with Claude AI...</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
       </div>
     </div>
   );
