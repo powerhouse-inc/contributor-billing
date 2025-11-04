@@ -9,7 +9,7 @@
 let GRAPHQL_URL = 'http://localhost:4001/graphql/invoice'
 
 if (!window.document.baseURI.includes('localhost')) {
-  GRAPHQL_URL = 'https://jetstream.powerhouse.io/api/graphql/invoice'
+  GRAPHQL_URL = "https://jetstream.powerhouse.io/api/graphql/invoice";
 }
 
 export async function uploadPdfChunked(

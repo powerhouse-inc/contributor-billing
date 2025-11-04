@@ -36,8 +36,8 @@
 /* Small screens (mobile) */
 @media (max-width: 640px) {
   .editor-container {
-    padding: 0.25rem;
-    transform: scale(0.95);
+    padding: 0.125rem;
+    transform: none;
     transform-origin: top left;
   }
 }
@@ -45,8 +45,8 @@
 /* Medium screens (tablet) */
 @media (min-width: 641px) and (max-width: 1023px) {
   .editor-container {
-    padding: 0.5rem;
-    transform: scale(0.9);
+    padding: 0.25rem;
+    transform: none;
     transform-origin: top left;
   }
 }
@@ -59,5 +59,47 @@
     margin-right: auto;
     padding: 1rem;
     transform: none;
+  }
+}
+
+/* Ensure responsive grid works at md breakpoint and above */
+@media (min-width: 768px) {
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Ensure responsive utilities work at md breakpoint and above */
+@media (min-width: 768px) {
+  .md\:flex {
+    display: flex !important;
+  }
+  .md\:hidden {
+    display: none !important;
+  }
+  .md\:block {
+    display: block !important;
+  }
+  .md\:inline {
+    display: inline !important;
+  }
+}
+
+/* Ensure responsive border/padding utilities work at lg breakpoint and above */
+@media (min-width: 1024px) {
+  .lg\:gap-4 {
+    gap: 1rem !important;
+  }
+  .lg\:border {
+    border-width: 1px !important;
+  }
+  .lg\:border-gray-200 {
+    border-color: rgb(229, 231, 235) !important;
+  }
+  .lg\:rounded-lg {
+    border-radius: 0.5rem !important;
+  }
+  .lg\:p-4 {
+    padding: 1rem !important;
   }
 }
