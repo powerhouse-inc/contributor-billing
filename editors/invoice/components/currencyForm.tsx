@@ -9,6 +9,7 @@ interface CurrencyFormProps {
 
 export const currencyList = [
   { ticker: "USDS", crypto: true },
+  { ticker: "USDC", crypto: true },
   { ticker: "DAI", crypto: true },
   { ticker: "USD", crypto: false },
   { ticker: "EUR", crypto: false },
