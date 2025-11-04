@@ -37,7 +37,7 @@ export interface TransferResult {
   paymentDetails: PaymentDetail[];
 }
 
-const safeAddress = process.env.DEV_STAGING_SAFE_ADDRESS;
+const safeAddress = process.env.PRODUCTION_SAFE_ADDRESS;
 if (!safeAddress) {
   throw new Error('Missing SAFE_ADDRESS in .env');
 }
