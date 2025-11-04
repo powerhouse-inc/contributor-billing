@@ -8,3 +8,5 @@ node_modules
 projects-import.js
 .env
 keyFile.json
+test-results
+.playwright-mcp

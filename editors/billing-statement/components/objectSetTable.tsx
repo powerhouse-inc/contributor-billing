@@ -7,7 +7,8 @@ import type {
   ColumnDef,
 } from "@powerhousedao/document-engineering";
 import {
-  type BillingStatementDocument,
+  type BillingStatementState,
+  type BillingStatementAction,
   actions,
 } from "../../../document-models/billing-statement/index.js";
 
@@ -19,7 +20,18 @@ interface CellContext<T> {
   tableConfig: ObjectSetTableConfig<T>; // Full table configuration
 }
 
-const ObjectSetTableComponent = (props: { state: any; dispatch: any }) => {
+type BillingStatementLineItem = {
+  id: string;
+  description: string;
+  unit: string;
+  quantity: number;
+  unitPriceCash: number;
+  unitPricePwt: number;
+  totalPriceCash: number;
+  totalPricePwt: number;
+};
+
+const ObjectSetTableComponent = (props: { state: BillingStatementState; dispatch: React.Dispatch<BillingStatementAction> }) => {
   const { state, dispatch } = props;
 
   // console.log("lineItems", state.lineItems);
@@ -38,7 +50,7 @@ const ObjectSetTableComponent = (props: { state: any; dispatch: any }) => {
         title: "Description",
         editable: true,
         type: "text",
-        onSave: (newValue: any, context: CellContext<any>) => {
+        onSave: (newValue: string, context: CellContext<BillingStatementLineItem>) => {
           console.log({ newValue, context });
           console.log("id", context.row.id);
           // dispatch(actions.editLineItem(
@@ -54,7 +66,7 @@ const ObjectSetTableComponent = (props: { state: any; dispatch: any }) => {
         title: "Unit",
         editable: true,
         type: "text",
-        renderCell: (row: any, context: CellContext<any>) => {
+        renderCell: (row: BillingStatementLineItem, context: CellContext<BillingStatementLineItem>) => {
           //   let isEditingCell = context.tableConfig.apiRef?.current?.isEditing();
 
           //   if (isEditingCell) {
@@ -167,8 +179,8 @@ const ObjectSetTableComponent = (props: { state: any; dispatch: any }) => {
       <div className="mt-4">
         <ObjectSetTable
           key={state.lineItems.length}
-          columns={columns as any}
-          data={state.lineItems}
+          columns={columns as unknown as ColumnDef<BillingStatementLineItem>[]}
+          data={state.lineItems as unknown as BillingStatementLineItem[]}
           //   onRowClick={() => {}}
           //   onRowDoubleClick={() => {}}
           //   onRowContextMenu={() => {}}

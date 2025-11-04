@@ -237,6 +237,7 @@ type LegalEntityFormProps = {
   readonly postalcodevalidation?: ValidationResult | null;
   readonly payeremailvalidation?: ValidationResult | null;
   readonly routingNumbervalidation?: ValidationResult | null;
+  readonly accountNumbervalidation?: ValidationResult | null;
 };
 
 // Helper to flatten LegalEntity to EditLegalEntityInput
@@ -289,6 +290,7 @@ export function LegalEntityForm({
   postalcodevalidation,
   payeremailvalidation,
   routingNumbervalidation,
+  accountNumbervalidation,
 }: LegalEntityFormProps) {
   // Handler for main info section
   const handleChangeInfo = (update: Partial<EditLegalEntityInput>) => {
@@ -328,6 +330,7 @@ export function LegalEntityForm({
           bicvalidation={bicvalidation}
           routingNumbervalidation={routingNumbervalidation}
           banknamevalidation={banknamevalidation}
+          accountNumbervalidation={accountNumbervalidation}
         />
       )}
     </div>

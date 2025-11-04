@@ -2,10 +2,10 @@ import React from "react";
 import { HeaderControls } from "./HeaderControls.js";
 import { InvoiceTableSection } from "./InvoiceTableSection.js";
 import { InvoiceTableRow } from "./InvoiceTableRow.js";
-import type { Node } from "document-drive";
 import { type DocumentModelModule } from "document-model";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
+import { exportExpenseReportCSV } from "../../../../scripts/contributor-billing/createExpenseReportCsv.js";
 import { toast } from "@powerhousedao/design-system";
 import {
   actions,
@@ -15,6 +15,7 @@ import {
   addDocument,
   useSelectedDrive,
   dispatchActions,
+  setSelectedNode,
 } from "@powerhousedao/reactor-browser";
 import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
 
@@ -30,21 +31,17 @@ const statusOptions = [
   { label: "Other", value: "OTHER" },
 ];
 
+type FileNodeLite = { id: string; name: string; documentType?: string };
+
 interface InvoiceTableProps {
-  files: any[];
-  state: Record<string, any>[];
-  setActiveDocumentId: (id: string) => void;
+  files: FileNodeLite[];
+  state: any[];
   selected: { [id: string]: boolean };
   setSelected: (
     selected:
       | { [id: string]: boolean }
       | ((prev: { [id: string]: boolean }) => { [id: string]: boolean })
   ) => void;
-  onBatchAction: (action: string) => void;
-  onDeleteNode: (nodeId: string) => void;
-  renameNode: (nodeId: string, name: string) => void;
-  onDuplicateNode: (node: Node) => Promise<Node | undefined>;
-  showDeleteNodeModal: (node: Node) => Promise<Node | undefined>;
   filteredDocumentModels: DocumentModelModule[];
   onSelectDocumentModel: (model: DocumentModelModule) => void;
   getDocDispatcher: (id: string) => any;
@@ -57,14 +54,7 @@ interface InvoiceTableProps {
 export const InvoiceTable = ({
   files,
   state,
-  setActiveDocumentId,
   selected,
-  setSelected,
-  onBatchAction,
-  onDeleteNode,
-  renameNode,
-  onDuplicateNode,
-  showDeleteNodeModal,
   filteredDocumentModels,
   onSelectDocumentModel,
   getDocDispatcher,
@@ -144,28 +134,6 @@ export const InvoiceTable = ({
   const rejected = getInvoicesByStatus("REJECTED");
   const otherInvoices = getOtherInvoices();
 
-  const handleDelete = (id: string) => {
-    onDeleteNode(id);
-    // Clear selection for deleted item
-  };
-
-  const cleanName = (name: string) => {
-    const dotIndex = name.lastIndexOf(".");
-    if (dotIndex > 0) {
-      return name.substring(0, dotIndex);
-    }
-    return name;
-  };
-
-  // Remove all non-alphanumeric, non-hyphen, non-underscore chars for slug safety
-  const makeSlug = (name: string) => {
-    return name
-      .replace(/\./g, "") // remove dots
-      .replace(/\s+/g, "-") // replace spaces with hyphens
-      .replace(/[^\w-]/g, "") // remove all non-word chars except hyphen/underscore
-      .toLowerCase();
-  };
-
   const handleCreateBillingStatement = async (id: string) => {
     const invoiceFile = files.find((file) => file.id === id);
     const invoiceState = state.find((doc) => doc.header.id === id);
@@ -213,12 +181,6 @@ export const InvoiceTable = ({
       billingStatementActions.editBillingStatement(billingStatementData),
       createdNode.id
     );
-    await dispatchActions(
-      billingStatementActions.editStatus({
-        status: invoiceState.state.global.status,
-      }),
-      createdNode.id
-    );
 
     // add line items from invoiceState to billing statement
     invoiceState.state.global.lineItems.forEach(async (lineItem: any) => {
@@ -262,9 +224,6 @@ export const InvoiceTable = ({
       return doc ? { ...doc, id } : null;
     })
     .filter((inv) => inv !== null); // Filter out null/undefined invoices
-  const selectedInvoiceStatuses = selectedInvoices.map(
-    (inv: any) => inv?.state?.global?.status || inv?.state?.global?.status
-  );
 
   const handleCSVExport = async (baseCurrency: string) => {
     console.log(
@@ -275,10 +234,10 @@ export const InvoiceTable = ({
       }))
     );
     try {
-      const exportedData = await exportInvoicesToXeroCSV(
-        selectedInvoices,
-        baseCurrency
-      );
+      const exportedData: Record<
+        string,
+        { timestamp: string; exportedLineItems: any }
+      > = await exportInvoicesToXeroCSV(selectedInvoices, baseCurrency);
       toast("Invoices exported successfully", {
         type: "success",
       });
@@ -325,6 +284,45 @@ export const InvoiceTable = ({
     }
   };
 
+  const handleExportCSVExpenseReport = async (baseCurrency: string) => {
+    console.log(
+      "Exporting expense report for selected invoices:",
+      selectedInvoices.map((inv) => ({
+        id: inv.id,
+        state: inv,
+      }))
+    );
+    try {
+      await exportExpenseReportCSV(selectedInvoices, baseCurrency);
+      toast("Expense report exported successfully", {
+        type: "success",
+      });
+    } catch (error: any) {
+      console.error("Error exporting expense report:", error);
+      const missingTagInvoices = error.missingTagInvoices || [];
+      const missingTagInvoicesList = missingTagInvoices.map(
+        (invoiceId: string) => {
+          const invoice = files.find((file) => file.id === invoiceId);
+          return invoice?.name || invoiceId;
+        }
+      );
+      console.log("missingTagInvoicesList", missingTagInvoicesList);
+      toast(
+        <>
+          Invoice Line Item Tags need to be set for:
+          <br />
+          {missingTagInvoicesList.map((name: any, idx: any) => (
+            <React.Fragment key={name}>
+              - {name}
+              <br />
+            </React.Fragment>
+          ))}
+        </>,
+        { type: "error" }
+      );
+    }
+  };
+
   // check if integrations document exists
   const integrationsDoc = files.find(
     (file) => file.documentType === "powerhouse/integrations"
@@ -348,7 +346,46 @@ export const InvoiceTable = ({
         console.error("Failed to create integrations document");
         return null;
       }
-      setActiveDocumentId(createdNode.id);
+      setSelectedNode(createdNode.id);
+    }
+  };
+
+  // check if expense report document exists
+  const expenseReportDoc = files.find(
+    (file) => file.documentType === "powerhouse/expense-report"
+  );
+
+  // check if at least one billing statement exists
+  const hasBillingStatements = state.some(
+    (doc) => doc.header.documentType === "powerhouse/billing-statement"
+  );
+
+  const handleCreateOrOpenExpenseReport = async () => {
+    if (expenseReportDoc) {
+      // Open existing expense report
+      setSelectedNode(expenseReportDoc.id);
+    } else {
+      // Create new expense report
+      const expenseReportModel = filteredDocumentModels?.find(
+        (model) => model.documentModel.id === "powerhouse/expense-report"
+      );
+      if (expenseReportModel) {
+        const createdNode = await addDocument(
+          selectedDrive?.header.id || "",
+          `expense-report`,
+          "powerhouse/expense-report",
+          undefined,
+          undefined,
+          undefined,
+          "powerhouse-expense-report-editor"
+        );
+        console.log("created expense report document", createdNode);
+        if (!createdNode?.id) {
+          console.error("Failed to create expense report document");
+          return null;
+        }
+        setSelectedNode(createdNode.id);
+      }
     }
   };
 
@@ -360,13 +397,15 @@ export const InvoiceTable = ({
       <HeaderControls
         statusOptions={statusOptions}
         onStatusChange={onStatusChange}
-        onBatchAction={onBatchAction}
         onExport={handleCSVExport}
+        onExpenseReportExport={handleExportCSVExpenseReport}
         selectedStatuses={selectedStatuses}
         createIntegrationsDocument={createIntegrationsDocument}
         integrationsDoc={integrationsDoc}
-        setActiveDocumentId={setActiveDocumentId}
         canExportSelectedRows={canExportSelectedRows}
+        hasBillingStatements={hasBillingStatements}
+        expenseReportDoc={expenseReportDoc}
+        onCreateOrOpenExpenseReport={handleCreateOrOpenExpenseReport}
       />
       {shouldShowSection("DRAFT") && (
         <InvoiceTableSection
@@ -398,11 +437,6 @@ export const InvoiceTable = ({
                   onSelect={(checked) =>
                     onRowSelection(row.id, checked, row.status)
                   }
-                  setActiveDocumentId={setActiveDocumentId}
-                  onDeleteNode={handleDelete}
-                  renameNode={renameNode}
-                  onDuplicateNode={onDuplicateNode}
-                  showDeleteNodeModal={showDeleteNodeModal}
                 />
               ))}
             </tbody>
@@ -435,11 +469,6 @@ export const InvoiceTable = ({
                   onSelect={(checked) =>
                     onRowSelection(row.id, checked, row.status)
                   }
-                  setActiveDocumentId={setActiveDocumentId}
-                  onDeleteNode={handleDelete}
-                  renameNode={renameNode}
-                  onDuplicateNode={onDuplicateNode}
-                  showDeleteNodeModal={showDeleteNodeModal}
                   onCreateBillingStatement={handleCreateBillingStatement}
                   billingDocStates={billingDocStates}
                 />
@@ -478,11 +507,6 @@ export const InvoiceTable = ({
                   onSelect={(checked) =>
                     onRowSelection(row.id, checked, row.status)
                   }
-                  setActiveDocumentId={setActiveDocumentId}
-                  onDeleteNode={handleDelete}
-                  renameNode={renameNode}
-                  onDuplicateNode={onDuplicateNode}
-                  showDeleteNodeModal={showDeleteNodeModal}
                   onCreateBillingStatement={handleCreateBillingStatement}
                   billingDocStates={billingDocStates}
                 />
@@ -521,11 +545,6 @@ export const InvoiceTable = ({
                   onSelect={(checked) =>
                     onRowSelection(row.id, checked, row.status)
                   }
-                  setActiveDocumentId={setActiveDocumentId}
-                  onDeleteNode={handleDelete}
-                  renameNode={renameNode}
-                  onDuplicateNode={onDuplicateNode}
-                  showDeleteNodeModal={showDeleteNodeModal}
                   onCreateBillingStatement={handleCreateBillingStatement}
                   billingDocStates={billingDocStates}
                 />
@@ -564,11 +583,6 @@ export const InvoiceTable = ({
                   onSelect={(checked) =>
                     onRowSelection(row.id, checked, row.status)
                   }
-                  setActiveDocumentId={setActiveDocumentId}
-                  onDeleteNode={handleDelete}
-                  renameNode={renameNode}
-                  onDuplicateNode={onDuplicateNode}
-                  showDeleteNodeModal={showDeleteNodeModal}
                   onCreateBillingStatement={handleCreateBillingStatement}
                   billingDocStates={billingDocStates}
                 />
@@ -607,11 +621,6 @@ export const InvoiceTable = ({
                   onSelect={(checked) =>
                     onRowSelection(row.id, checked, row.status)
                   }
-                  setActiveDocumentId={setActiveDocumentId}
-                  onDeleteNode={handleDelete}
-                  renameNode={renameNode}
-                  onDuplicateNode={onDuplicateNode}
-                  showDeleteNodeModal={showDeleteNodeModal}
                   onCreateBillingStatement={handleCreateBillingStatement}
                   billingDocStates={billingDocStates}
                 />
@@ -649,11 +658,6 @@ export const InvoiceTable = ({
                   onSelect={(checked) =>
                     onRowSelection(row.id, checked, row.status)
                   }
-                  setActiveDocumentId={setActiveDocumentId}
-                  onDeleteNode={handleDelete}
-                  renameNode={renameNode}
-                  onDuplicateNode={onDuplicateNode}
-                  showDeleteNodeModal={showDeleteNodeModal}
                 />
               ))}
             </tbody>
@@ -689,11 +693,6 @@ export const InvoiceTable = ({
                   onSelect={(checked) =>
                     onRowSelection(row.id, checked, row.status)
                   }
-                  setActiveDocumentId={setActiveDocumentId}
-                  onDeleteNode={handleDelete}
-                  renameNode={renameNode}
-                  onDuplicateNode={onDuplicateNode}
-                  showDeleteNodeModal={showDeleteNodeModal}
                 />
               ))}
             </tbody>
@@ -725,11 +724,6 @@ export const InvoiceTable = ({
                   onSelect={(checked) =>
                     onRowSelection(row.id, checked, row.status)
                   }
-                  setActiveDocumentId={setActiveDocumentId}
-                  onDeleteNode={handleDelete}
-                  renameNode={renameNode}
-                  onDuplicateNode={onDuplicateNode}
-                  showDeleteNodeModal={showDeleteNodeModal}
                 />
               ))}
             </tbody>
