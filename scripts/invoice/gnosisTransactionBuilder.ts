@@ -37,30 +37,62 @@ export interface TransferResult {
   paymentDetails: PaymentDetail[];
 }
 
-const safeAddress = process.env.PRODUCTION_SAFE_ADDRESS;
+const safeAddress = process.env.DEV_STAGING_SAFE_ADDRESS;
 if (!safeAddress) {
   throw new Error('Missing SAFE_ADDRESS in .env');
 }
 
 const payerWallets: Record<string, PayerWallet> = {
   BASE: {
-      rpc: "https://base.llamarpc.com",
-      chainName: "Base",
-      chainId: "8453",
-      address: safeAddress, // Safe address
+    rpc: "https://base.llamarpc.com",
+    chainName: "Base",
+    chainId: "8453",
+    address: safeAddress, // Safe address
   },
   ETHEREUM: {
-      rpc: "https://eth.llamarpc.com",
-      chainName: "Ethereum",
-      chainId: "1",
-      address: safeAddress, // Safe address
+    rpc: "https://eth.llamarpc.com",
+    chainName: "Ethereum",
+    chainId: "1",
+    address: safeAddress, // Safe address
   },
   "ARBITRUM ONE": {
-      rpc: "https://arb1.arbitrum.io/rpc",
-      chainName: "Arbitrum One",
-      chainId: "42161",
-      address: safeAddress, // Safe address
+    rpc: "https://arb1.arbitrum.io/rpc",
+    chainName: "Arbitrum One",
+    chainId: "42161",
+    address: safeAddress, // Safe address
   },
+}
+
+/**
+ * Retry helper with exponential backoff for Safe API calls
+ * Handles rate limiting (429 errors) and temporary failures
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  initialDelay = 1000,
+  operationName = "API call"
+): Promise<T> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      const isRateLimit = error?.message?.includes('Too Many Requests') ||
+        error?.message?.includes('429') ||
+        error?.status === 429;
+
+      if (isRateLimit && attempt < maxRetries - 1) {
+        const waitTime = initialDelay * Math.pow(2, attempt); // Exponential backoff
+        console.log(`[${operationName}] Rate limited, retrying in ${waitTime}ms... (attempt ${attempt + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+
+      // If it's not a rate limit error, or we've exhausted retries, throw
+      throw error;
+    }
+  }
+  throw new Error(`${operationName}: Max retries (${maxRetries}) exceeded`);
 }
 
 // --- Implementation ---
@@ -94,8 +126,14 @@ async function executeTransferProposal(
     chainId: Number(payerWallet.chainId),
   });
 
-  const nextNonce = await safeApiKit.getNextNonce(safeAddress)
-  console.log("Next Nonce: ",nextNonce)
+  // Get next nonce with retry logic for rate limiting
+  const nextNonce = await withRetry(
+    () => safeApiKit.getNextNonce(safeAddress),
+    3,
+    1000,
+    "getNextNonce"
+  );
+  console.log("Next Nonce: ", nextNonce)
 
   // @ts-ignore - Ignoring constructor error as per requirements
   const protocolKit = await Safe.init({
@@ -135,7 +173,7 @@ async function executeTransferProposal(
   });
 
   console.log('\n=== Creating Safe transaction ===');
-  const safeTx = await protocolKit.createTransaction({ 
+  const safeTx = await protocolKit.createTransaction({
     transactions,
     options: {
       nonce: nextNonce
@@ -145,14 +183,21 @@ async function executeTransferProposal(
   console.log('\n=== Signing & proposing ===');
   const safeTxHash = await protocolKit.getTransactionHash(safeTx);
   const signature = await protocolKit.signHash(safeTxHash);
+  const senderAddress = await signer.getAddress();
 
-  await safeApiKit.proposeTransaction({
-    safeAddress: payerWallet.address,
-    safeTransactionData: safeTx.data,
-    safeTxHash,
-    senderAddress: await signer.getAddress(),
-    senderSignature: signature.data,
-  });
+  // Propose transaction with retry logic for rate limiting
+  await withRetry(
+    async () => safeApiKit.proposeTransaction({
+      safeAddress: payerWallet.address,
+      safeTransactionData: safeTx.data,
+      safeTxHash,
+      senderAddress,
+      senderSignature: signature.data,
+    }),
+    3,
+    1000,
+    "proposeTransaction"
+  );
 
   return {
     success: true,
