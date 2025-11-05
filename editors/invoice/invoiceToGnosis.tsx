@@ -79,6 +79,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
       symbol: docState.currency,
       chainName: docState.issuer?.paymentRouting?.wallet?.chainName || "",
       chainId: docState.issuer?.paymentRouting?.wallet?.chainId || "",
+      decimals: docState.currency === "USDC" ? 6 : 18,
     },
     amount: docState.totalPriceTaxIncl || 0.000015, // Make the amount small for testing
   };
@@ -101,7 +102,9 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
   const handleInvoiceToGnosis = async () => {
     // Prevent concurrent calls using ref (faster than state update)
     if (isProcessingRef.current) {
-      console.log("Payment request already in progress, ignoring duplicate click");
+      console.log(
+        "Payment request already in progress, ignoring duplicate click"
+      );
       return;
     }
 
