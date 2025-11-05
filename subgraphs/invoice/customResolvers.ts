@@ -15,6 +15,9 @@ let pendingTransactions: Record<string, {
 // Add a set to track processed transaction hashes to avoid duplicate processing
 let processedTransactions: Set<string> = new Set();
 
+// Track in-flight payment requests to prevent concurrent processing of the same invoice
+const inFlightPayments: Map<string, Promise<any>> = new Map();
+
 interface UploadInvoicePdfChunkArgs {
     chunk: string;
     chunkIndex: number;
@@ -37,8 +40,6 @@ let reactor: any;
 export const Invoice_processGnosisPayment = async (_: any, args: any) => {
     try {
         const { chainName, paymentDetails, invoiceNo } = args;
-        // Cast payerWallet to any to access its properties
-       
 
         console.log("Processing gnosis payment:", {
             chainName,
@@ -46,35 +47,63 @@ export const Invoice_processGnosisPayment = async (_: any, args: any) => {
             paymentDetails
         });
 
-        // Import and call the executeTransferProposal function
-        const result = await executeTransferProposal(chainName, paymentDetails);
-
-        console.log("Token transfer result:", result);
-
-        // Store the transaction information for later matching with webhook
-        if (result.success && result.txHash) {
-            // Generate a unique ID for this transaction
-            const transactionId = `gnosis-${invoiceNo}-${Date.now()}`;
-
-            // Store the transaction with all the details needed for matching
-            pendingTransactions[transactionId] = {
-                invoiceNo,
-                chainName,
-                paymentDetails,
-                timestamp: Date.now()
-            };
-
-            console.log(`Stored pending transaction ${transactionId} for invoice ${invoiceNo}`);
+        // Check if there's already a payment request in progress for this invoice
+        const paymentKey = `payment-${invoiceNo}`;
+        if (inFlightPayments.has(paymentKey)) {
+            console.log(`Payment request already in progress for invoice ${invoiceNo}, returning existing promise`);
+            return await inFlightPayments.get(paymentKey);
         }
 
-        // Return the result without updating the document status yet
-        // The status will be updated when the webhook confirms the transaction
-        return {
-            success: true,
-            data: result,
-        };
+        // Create a promise for this payment request
+        const paymentPromise = (async () => {
+            try {
+                // Import and call the executeTransferProposal function
+                const result = await executeTransferProposal(chainName, paymentDetails);
+
+                console.log("Token transfer result:", result);
+
+                // Store the transaction information for later matching with webhook
+                if (result.success && result.txHash) {
+                    // Generate a unique ID for this transaction
+                    const transactionId = `gnosis-${invoiceNo}-${Date.now()}`;
+
+                    // Store the transaction with all the details needed for matching
+                    pendingTransactions[transactionId] = {
+                        invoiceNo,
+                        chainName,
+                        paymentDetails,
+                        timestamp: Date.now()
+                    };
+
+                    console.log(`Stored pending transaction ${transactionId} for invoice ${invoiceNo}`);
+                }
+
+                // Return the result without updating the document status yet
+                // The status will be updated when the webhook confirms the transaction
+                return {
+                    success: true,
+                    data: result,
+                };
+            } catch (error) {
+                console.error("Error processing gnosis payment:", error);
+                return {
+                    success: false,
+                    error: error instanceof Error ? error.message : "Unknown error",
+                };
+            } finally {
+                // Remove from in-flight payments when done (success or error)
+                inFlightPayments.delete(paymentKey);
+                console.log(`Removed payment request for invoice ${invoiceNo} from in-flight tracking`);
+            }
+        })();
+
+        // Store the promise to prevent concurrent requests
+        inFlightPayments.set(paymentKey, paymentPromise);
+
+        // Wait for the payment to complete
+        return await paymentPromise;
     } catch (error) {
-        console.error("Error processing gnosis payment:", error);
+        console.error("Error in Invoice_processGnosisPayment wrapper:", error);
         return {
             success: false,
             error: error instanceof Error ? error.message : "Unknown error",

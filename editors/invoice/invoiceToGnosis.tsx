@@ -26,6 +26,8 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
   const [invoiceStatusResponse, setInvoiceStatusResponse] = useState<any>(null);
   const [safeTxHash, setsafeTxHash] = useState<string | null>(null);
   const [safeAddress, setSafeAddress] = useState<string | null>(null);
+  // Use ref to prevent race conditions from rapid clicks
+  const isProcessingRef = React.useRef(false);
 
   const currency = docState.currency;
   const chainName = docState.issuer?.paymentRouting?.wallet?.chainName || "";
@@ -77,6 +79,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
       symbol: docState.currency,
       chainName: docState.issuer?.paymentRouting?.wallet?.chainName || "",
       chainId: docState.issuer?.paymentRouting?.wallet?.chainId || "",
+      decimals: docState.currency === "USDC" ? 6 : 18,
     },
     amount: docState.totalPriceTaxIncl || 0.000015, // Make the amount small for testing
   };
@@ -97,6 +100,15 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
   }
 
   const handleInvoiceToGnosis = async () => {
+    // Prevent concurrent calls using ref (faster than state update)
+    if (isProcessingRef.current) {
+      console.log(
+        "Payment request already in progress, ignoring duplicate click"
+      );
+      return;
+    }
+
+    isProcessingRef.current = true;
     setIsLoading(true);
     setError(null);
 
@@ -172,8 +184,10 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
         );
       }
       setIsLoading(false);
+      isProcessingRef.current = false;
     } catch (error: any) {
       setIsLoading(false);
+      isProcessingRef.current = false;
       console.error("Error during transfer:", error);
       dispatch(
         actions.addPayment({
