@@ -1,4 +1,5 @@
 import { generateId } from 'document-model';
+import { autoTagLineItems } from './autoTagging.js';
 
 export async function uploadPdfAndGetJsonClaude(inputDoc: string) {
     try {
@@ -241,7 +242,7 @@ Extract only the data that is clearly visible in the PDF. If a field is not pres
         }
 
         // Process the invoice data to ensure it matches our expected format
-        const processedInvoiceData = processClaudeInvoiceData(invoiceData);
+        const processedInvoiceData = await processClaudeInvoiceData(invoiceData);
 
         return { invoiceData: processedInvoiceData };
     } catch (error) {
@@ -250,7 +251,7 @@ Extract only the data that is clearly visible in the PDF. If a field is not pres
     }
 }
 
-function processClaudeInvoiceData(rawData: any) {
+async function processClaudeInvoiceData(rawData: any) {
     const invoiceData: any = {
         lineItems: [],
         rejections: [],
@@ -327,9 +328,9 @@ function processClaudeInvoiceData(rawData: any) {
         }));
     }
 
-    // Process line items
+    // Process line items with auto-tagging
     if (rawData.lineItems && Array.isArray(rawData.lineItems)) {
-        invoiceData.lineItems = rawData.lineItems.map((item: any) => ({
+        const processedItems = rawData.lineItems.map((item: any) => ({
             lineItemTag: item.lineItemTag && Array.isArray(item.lineItemTag) ? item.lineItemTag : [],
             description: item.description || '',
             quantity: parseFloat(item.quantity) || 0,
@@ -341,6 +342,10 @@ function processClaudeInvoiceData(rawData: any) {
             id: generateId(),
             taxPercent: parseFloat(item.taxPercent) || 0
         }));
+
+        // Apply auto-tagging to processed items
+        const taggedItems = await autoTagLineItems(processedItems);
+        invoiceData.lineItems = taggedItems;
     }
 
     console.log("Processed Claude invoice data:", JSON.stringify(invoiceData, null, 2));
