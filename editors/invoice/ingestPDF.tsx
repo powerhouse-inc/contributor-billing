@@ -115,6 +115,7 @@ export default function PDFUploader({
             // If we have line items, dispatch them
             if (invoiceData.lineItems && invoiceData.lineItems.length > 0) {
               invoiceData.lineItems.forEach((item: any) => {
+                // Add the line item first
                 dispatch(
                   actions.addLineItem({
                     id: item.id,
@@ -128,6 +129,20 @@ export default function PDFUploader({
                     totalPriceTaxIncl: item.totalPriceTaxIncl,
                   }),
                 );
+
+                // If auto-tagging assigned tags, add them
+                if (item.lineItemTag && Array.isArray(item.lineItemTag)) {
+                  item.lineItemTag.forEach((tag: any) => {
+                    dispatch(
+                      actions.setLineItemTag({
+                        lineItemId: item.id,
+                        dimension: tag.dimension,
+                        value: tag.value,
+                        label: tag.label,
+                      }),
+                    );
+                  });
+                }
               });
             }
 
