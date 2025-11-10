@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { type InvoiceAction, actions } from "../../document-models/invoice/index.js";
 import { toast } from "@powerhousedao/design-system/connect";
 import { uploadPdfChunked } from "./uploadPdfChunked.js";
-import { getCountryCodeFromName } from "./utils/utils.js";
+import { getCountryCodeFromName, mapChainNameToConfig } from "./utils/utils.js";
 import { LoaderCircle } from "lucide-react";
 
 let GRAPHQL_URL = "http://localhost:4001/graphql/invoice";
@@ -192,16 +192,21 @@ export default function PDFUploader({
 
               // Add crypto wallet information dispatch
               if (invoiceData.issuer.paymentRouting?.wallet) {
+                const chainConfig = mapChainNameToConfig(
+                  invoiceData.issuer.paymentRouting.wallet.chainName
+                );
+
                 dispatch(
                   actions.editIssuerWallet({
                     address:
                       invoiceData.issuer.paymentRouting.wallet.address || "",
                     chainId:
-                      invoiceData.issuer.paymentRouting.wallet.chainId || "",
+                      invoiceData.issuer.paymentRouting.wallet.chainId || chainConfig.chainId,
                     chainName:
-                      invoiceData.issuer.paymentRouting.wallet.chainName || "",
-                    rpc: invoiceData.issuer.paymentRouting.wallet.rpc || "",
-                  })
+                      invoiceData.issuer.paymentRouting.wallet.chainName || chainConfig.chainName,
+                    rpc:
+                      invoiceData.issuer.paymentRouting.wallet.rpc || chainConfig.rpc,
+                  }),
                 );
               }
             }
@@ -247,16 +252,21 @@ export default function PDFUploader({
 
               // Add payer crypto wallet information if present
               if (invoiceData.payer.paymentRouting?.wallet) {
+                const payerChainConfig = mapChainNameToConfig(
+                  invoiceData.payer.paymentRouting.wallet.chainName
+                );
+
                 dispatch(
                   actions.editPayerWallet({
                     address:
                       invoiceData.payer.paymentRouting.wallet.address || "",
                     chainId:
-                      invoiceData.payer.paymentRouting.wallet.chainId || "",
+                      invoiceData.payer.paymentRouting.wallet.chainId || payerChainConfig.chainId,
                     chainName:
-                      invoiceData.payer.paymentRouting.wallet.chainName || "",
-                    rpc: invoiceData.payer.paymentRouting.wallet.rpc || "",
-                  })
+                      invoiceData.payer.paymentRouting.wallet.chainName || payerChainConfig.chainName,
+                    rpc:
+                      invoiceData.payer.paymentRouting.wallet.rpc || payerChainConfig.rpc,
+                  }),
                 );
               }
             }
@@ -266,23 +276,25 @@ export default function PDFUploader({
               type: "success",
             });
 
-            // Add debug logging here
-            console.log(
-              "Final document state:",
-              JSON.stringify(
-                {
-                  issuer: invoiceData.issuer,
-                  payer: invoiceData.payer,
-                  lineItems: invoiceData.lineItems,
-                  paymentRouting: invoiceData.issuer?.paymentRouting,
-                  bankDetails: invoiceData.issuer?.paymentRouting?.bank,
-                },
-                null,
-                2
-              )
-            );
-
             changeDropdownOpen(false);
+
+            // Debug log after all dispatch actions are completed
+            setTimeout(() => {
+              console.log(
+                "Final document state after all dispatches:",
+                JSON.stringify(
+                  {
+                    issuer: invoiceData.issuer,
+                    payer: invoiceData.payer,
+                    lineItems: invoiceData.lineItems,
+                    paymentRouting: invoiceData.issuer?.paymentRouting,
+                    bankDetails: invoiceData.issuer?.paymentRouting?.bank,
+                  },
+                  null,
+                  2,
+                ),
+              );
+            }, 100);
           } else {
             const errorMsg = extractErrorMessage(result.error || "Failed to process PDF");
             throw new Error(errorMsg);

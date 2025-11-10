@@ -4,6 +4,7 @@ import type { EditLegalEntityWalletInput } from "./legalEntity.js";
 import { InputField } from "../components/inputField.js";
 import type { ValidationResult } from "../validation/validationManager.js";
 import { Select } from "@powerhousedao/document-engineering";
+import { getAllChainConfigs } from "../utils/utils.js";
 
 export type LegalEntityWalletSectionProps = Omit<
   ComponentProps<"div">,
@@ -56,12 +57,10 @@ export const LegalEntityWalletSection = (
     });
   };
 
-  const CHAIN_PRESETS = [
-    { chainName: "Base", chainId: "8453" },
-    { chainName: "Ethereum", chainId: "1" },
-    { chainName: "Arbitrum One", chainId: "42161" },
-    // { chainName: "Gnosis", chainId: "100" },
-  ];
+  const CHAIN_PRESETS = getAllChainConfigs().map(config => ({
+    chainName: config.chainName,
+    chainId: config.chainId,
+  }));
 
   // Map CHAIN_PRESETS to Select options
   const chainOptions = CHAIN_PRESETS.map((preset) => ({
