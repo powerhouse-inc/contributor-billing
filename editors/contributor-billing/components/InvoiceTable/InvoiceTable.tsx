@@ -416,7 +416,7 @@ export const InvoiceTable = ({
         >
           <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
             <thead>
-              <tr className="bg-gray-50">
+              <tr className="bg-gray-50 font-medium text-gray-500">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Invoice</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
@@ -447,7 +447,7 @@ export const InvoiceTable = ({
         <InvoiceTableSection title="Issued" count={issued.length}>
           <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
             <thead>
-              <tr className="bg-gray-50">
+              <tr className="bg-gray-50 font-medium text-gray-500">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
@@ -485,7 +485,7 @@ export const InvoiceTable = ({
         >
           <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
             <thead>
-              <tr className="bg-gray-50">
+              <tr className="bg-gray-50 font-medium text-gray-500">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
@@ -523,7 +523,7 @@ export const InvoiceTable = ({
         >
           <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
             <thead>
-              <tr className="bg-gray-50">
+              <tr className="bg-gray-50 font-medium text-gray-500">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
@@ -561,7 +561,7 @@ export const InvoiceTable = ({
         >
           <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
             <thead>
-              <tr className="bg-gray-50">
+              <tr className="bg-gray-50 font-medium text-gray-500">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
@@ -599,7 +599,7 @@ export const InvoiceTable = ({
         >
           <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
             <thead>
-              <tr className="bg-gray-50">
+              <tr className="bg-gray-50 font-medium text-gray-500">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
@@ -637,7 +637,7 @@ export const InvoiceTable = ({
         >
           <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
             <thead>
-              <tr className="bg-gray-50">
+              <tr className="bg-gray-50 font-medium text-gray-500">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
@@ -672,7 +672,7 @@ export const InvoiceTable = ({
         >
           <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
             <thead>
-              <tr className="bg-gray-50">
+              <tr className="bg-gray-50 font-medium text-gray-500">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
@@ -703,7 +703,7 @@ export const InvoiceTable = ({
         <InvoiceTableSection title="Other" count={otherInvoices.length}>
           <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
             <thead>
-              <tr className="bg-gray-50">
+              <tr className="bg-gray-50 font-medium text-gray-500">
                 <th className="px-2 py-2 w-8"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
