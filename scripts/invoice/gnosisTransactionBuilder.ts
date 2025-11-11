@@ -3,6 +3,7 @@ import Safe from '@safe-global/protocol-kit';
 import { OperationType } from '@safe-global/types-kit';
 import { ethers, AbiCoder } from 'ethers';
 import dotenv from 'dotenv';
+import { CHAIN_CONFIGS } from '../../editors/invoice/utils/utils.js';
 
 dotenv.config();
 
@@ -44,21 +45,15 @@ if (!safeAddress) {
 
 const payerWallets: Record<string, PayerWallet> = {
   BASE: {
-    rpc: "https://base.llamarpc.com",
-    chainName: "Base",
-    chainId: "8453",
+    ...CHAIN_CONFIGS.base,
     address: safeAddress, // Safe address
   },
   ETHEREUM: {
-    rpc: "https://eth.llamarpc.com",
-    chainName: "Ethereum",
-    chainId: "1",
+    ...CHAIN_CONFIGS.ethereum,
     address: safeAddress, // Safe address
   },
   "ARBITRUM ONE": {
-    rpc: "https://arb1.arbitrum.io/rpc",
-    chainName: "Arbitrum One",
-    chainId: "42161",
+    ...CHAIN_CONFIGS["arbitrum one"],
     address: safeAddress, // Safe address
   },
 }
