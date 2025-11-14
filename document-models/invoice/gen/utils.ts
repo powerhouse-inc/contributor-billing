@@ -18,6 +18,7 @@ import {
 } from "./document-schema.js";
 
 export const initialGlobalState: InvoiceGlobalState = {
+  closureReason: null,
   invoiceNo: "",
   dateIssued: "",
   dateDue: "",
@@ -154,7 +155,10 @@ export const initialGlobalState: InvoiceGlobalState = {
   invoiceTags: [],
   rejections: [],
   payments: [],
-  exported: [],
+  exported: {
+    exportedLineItems: [],
+    timestamp: "",
+  },
 };
 export const initialLocalState: InvoiceLocalState = {};
 

@@ -1,6 +1,6 @@
 import type { PHDocument } from "document-model";
-import { AnalyticsPath, IAnalyticsStore } from "@powerhousedao/reactor-api";
-import { InternalTransmitterUpdate, IProcessor } from "document-drive";
+import { AnalyticsPath, type IAnalyticsStore } from "@powerhousedao/analytics-engine-core";
+import { type InternalTransmitterUpdate, type IProcessor } from "document-drive";
 
 export class LineItemProcessorProcessor implements IProcessor {
   constructor(private readonly analyticsStore: IAnalyticsStore) {

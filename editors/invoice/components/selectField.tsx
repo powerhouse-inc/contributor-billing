@@ -1,5 +1,4 @@
 import { Select } from "@powerhousedao/document-engineering/ui";
-import { Status } from "document-models/invoice/index.js";
 import { Icon } from "@powerhousedao/design-system";
 import { ArrowBigRight, FileCheck } from "lucide-react";
 import { useState } from "react";
@@ -9,19 +8,6 @@ interface SelectFieldProps {
   value: string;
   onChange: (value: string) => void;
 }
-
-const STATUS_OPTIONS: Status[] = [
-  "DRAFT",
-  "ISSUED",
-  "CANCELLED",
-  "ACCEPTED",
-  "REJECTED",
-  "PAYMENTSCHEDULED",
-  "PAYMENTSENT",
-  "PAYMENTISSUE",
-  "PAYMENTRECEIVED",
-  "PAYMENTCLOSED",
-];
 
 function warningIcon() {
   return <Icon name="WarningFill" color="#eb4235" />;

@@ -1,4 +1,4 @@
-import { type Subgraph } from "@powerhousedao/reactor-api";
+import { BaseSubgraph } from "@powerhousedao/reactor-api";
 import { Invoice_processGnosisPayment, Invoice_createRequestFinancePayment, Invoice_uploadInvoicePdfChunk } from "./customResolvers.js";
 import { addFile } from "document-drive";
 import {
@@ -35,7 +35,7 @@ import {
 } from "../../document-models/invoice/index.js";
 import { setName } from "document-model";
 
-export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
+export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {

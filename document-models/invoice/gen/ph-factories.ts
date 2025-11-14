@@ -13,6 +13,7 @@ import { createDocument } from "./utils.js";
 
 export function defaultGlobalState(): InvoiceGlobalState {
   return {
+    closureReason: null,
     invoiceNo: "",
     dateIssued: "",
     dateDue: "",
@@ -149,7 +150,10 @@ export function defaultGlobalState(): InvoiceGlobalState {
     invoiceTags: [],
     rejections: [],
     payments: [],
-    exported: [],
+    exported: {
+      exportedLineItems: [],
+      timestamp: "",
+    },
   };
 }
 

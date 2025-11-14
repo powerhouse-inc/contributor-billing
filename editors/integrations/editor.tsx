@@ -1,6 +1,6 @@
 import {
   type IntegrationsDocument,
-  IntegrationsState,
+  type IntegrationsState,
   actions,
 } from "../../document-models/integrations/index.js";
 import { Button } from "@powerhousedao/document-engineering";

@@ -1,5 +1,5 @@
-import { ValidationResult, ValidationContext, validateField } from "./validationManager.js";
-import { toast } from "@powerhousedao/design-system";
+import { type ValidationResult, type ValidationContext, validateField } from "./validationManager.js";
+import { toast } from "@powerhousedao/design-system/connect";
 import { isValidIBAN } from "./validationRules.js";
 
 const validateStatusBeforeContinue = (

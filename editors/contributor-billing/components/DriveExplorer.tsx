@@ -1,40 +1,35 @@
 import {
   CreateDocumentModal,
   ToastContainer,
-} from "@powerhousedao/design-system";
+} from "@powerhousedao/design-system/connect";
+import type { EditorProps } from "document-model";
 import {
   addDocument,
-  type DriveEditorProps,
   useDocumentModelModules,
+  useDocumentsInSelectedDrive,
   useEditorModules,
-  useFileChildNodes,
+  useFileNodesInSelectedDrive,
   useSelectedDrive,
-  useSelectedDriveDocuments,
   useSelectedFolder,
-  type Reactor,
+  type VetraDocumentModelModule,
 } from "@powerhousedao/reactor-browser";
+import { useReactor } from "@powerhousedao/reactor-browser/connect";
 import type { DocumentModelModule, PHBaseState } from "document-model";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { InvoiceTable } from "./InvoiceTable/InvoiceTable.js";
 import { HeaderStats } from "./InvoiceTable/HeaderStats.js";
-import { PHDocument } from "document-model";
-
-declare global {
-  interface Window {
-    driveContext?: {
-      reactor?: Reactor; // or a more specific type
-    };
-  }
-}
+import type { PHDocument } from "document-model";
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
  * Layout: Left sidebar (folder tree) + Right content area (files/folders + document editor)
  */
-export function DriveExplorer(props: DriveEditorProps) {
-  const { children, editorConfig } = props;
+export function DriveExplorer(props: EditorProps) {
+  const { children } = props;
   const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+
+  const reactor = useReactor();
 
   // Handler for status filter changes
   const handleStatusChange = useCallback((value: string | string[]) => {
@@ -45,7 +40,7 @@ export function DriveExplorer(props: DriveEditorProps) {
   // Customize document opening/closing behavior here
 
   const [openModal, setOpenModal] = useState(false);
-  const selectedDocumentModel = useRef<DocumentModelModule | null>(null);
+  const selectedDocumentModel = useRef<VetraDocumentModelModule | null>(null);
   const editorModules = useEditorModules();
 
   // === STATE MANAGEMENT HOOKS ===
@@ -53,10 +48,10 @@ export function DriveExplorer(props: DriveEditorProps) {
   const [selectedDrive] = useSelectedDrive(); // Currently selected drive
   const selectedFolder = useSelectedFolder(); // Currently selected folder
 
-  const fileChildren = useFileChildNodes();
+  const fileChildren = useFileNodesInSelectedDrive();
 
   // All document states
-  const allDocuments: PHDocument[] | undefined = useSelectedDriveDocuments();
+  const allDocuments: PHDocument[] | undefined = useDocumentsInSelectedDrive();
 
   // Handler for row selection (does not affect status filter display)
   const handleRowSelection = useCallback(
@@ -112,25 +107,11 @@ export function DriveExplorer(props: DriveEditorProps) {
 
         // Try to access the reactor instance through the global window object
         // This is a common pattern in React applications
-        if (window.reactor) {
-          const result = await window.reactor.addAction(docId, action as any);
+        if (reactor) {
+          const result = await reactor.addAction(docId, action as any);
           if (result.status !== "SUCCESS") {
             throw new Error(
               result.error?.message ?? "Failed to dispatch action"
-            );
-          }
-          return;
-        }
-
-        // Alternative: Try to access through the context
-        // The DriveContextProvider might expose the reactor instance
-        if ((window as Window).driveContext?.reactor) {
-          const result = await (
-            window as Window
-          ).driveContext?.reactor?.addAction(docId, action as any);
-          if (result?.status !== "SUCCESS") {
-            throw new Error(
-              result?.error?.message ?? "Failed to dispatch action"
             );
           }
           return;
@@ -227,9 +208,9 @@ export function DriveExplorer(props: DriveEditorProps) {
       if (!documentModel || !selectedDrive?.header.id) return;
 
       let editorType = "integrations-editor";
-      if (documentModel.documentModel.id === "powerhouse/invoice") {
+      if (documentModel.id === "powerhouse/invoice") {
         editorType = "powerhouse-invoice-editor";
-      } else if (documentModel.documentModel.id === "powerhouse/expense-report") {
+      } else if (documentModel.id === "powerhouse/expense-report") {
         editorType = "powerhouse-expense-report-editor";
       }
 
@@ -237,7 +218,7 @@ export function DriveExplorer(props: DriveEditorProps) {
         const node = await addDocument(
           selectedDrive.header.id,
           fileName,
-          documentModel.documentModel.id,
+          documentModel.id,
           selectedFolder?.id,
           undefined,
           undefined,
@@ -258,7 +239,7 @@ export function DriveExplorer(props: DriveEditorProps) {
   );
 
   const onSelectDocumentModel = useCallback(
-    (documentModel: DocumentModelModule) => {
+    (documentModel: VetraDocumentModelModule) => {
       selectedDocumentModel.current = documentModel;
       setOpenModal(true);
     },
@@ -301,11 +282,11 @@ export function DriveExplorer(props: DriveEditorProps) {
             <>
               <HeaderStats />
               <InvoiceTable
-                files={fileChildren}
+                files={fileChildren || []}
                 state={allDocuments || []}
                 selected={selected}
                 setSelected={setSelected}
-                filteredDocumentModels={documentModelModules}
+                filteredDocumentModels={documentModelModules || []}
                 onSelectDocumentModel={onSelectDocumentModel}
                 getDocDispatcher={getDocDispatcher}
                 selectedStatuses={selectedStatuses}

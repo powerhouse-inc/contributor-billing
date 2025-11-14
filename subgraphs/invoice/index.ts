@@ -1,4 +1,4 @@
-import { Subgraph } from "@powerhousedao/reactor-api";
+import { BaseSubgraph } from "@powerhousedao/reactor-api";
 import type { DocumentNode } from "graphql";
 import { schema } from "./schema.js";
 import { getResolvers } from "./resolvers.js";
@@ -7,7 +7,7 @@ import express from "express";
 import cors from "cors";
 
 
-export class InvoiceSubgraph extends Subgraph {
+export class InvoiceSubgraph extends BaseSubgraph {
   name = "invoice";
   typeDefs: DocumentNode = schema;
   resolvers = getResolvers(this);

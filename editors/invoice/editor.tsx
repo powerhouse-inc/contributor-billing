@@ -3,7 +3,7 @@ import { generateId, type EditorProps } from "document-model";
 import {
   type InvoiceDocument,
   type ClosureReason,
-  Status,
+  type Status,
   actions,
 } from "../../document-models/invoice/index.js";
 import { LegalEntityForm } from "./legalEntity/legalEntity.js";
@@ -12,14 +12,14 @@ import { loadUBLFile } from "./ingestUBL.js";
 import PDFUploader from "./ingestPDF.js";
 import RequestFinance from "./requestFinance.js";
 import InvoiceToGnosis from "./invoiceToGnosis.js";
-import { toast, ToastContainer } from "@powerhousedao/design-system";
+import { toast, ToastContainer } from "@powerhousedao/design-system/connect";
 import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
 import { InvoicePDF } from "./InvoicePDF.js";
 import { createRoot } from "react-dom/client";
 import { downloadUBL } from "./exportUBL.js";
 import { CurrencyForm, currencyList } from "./components/currencyForm.js";
 import { InputField } from "./components/inputField.js";
-import { ValidationResult } from "./validation/validationManager.js";
+import type { ValidationResult } from "./validation/validationManager.js";
 import { DatePicker } from "./components/datePicker.js";
 import { SelectField } from "./components/selectField.js";
 import { formatNumber } from "./lineItems.js";

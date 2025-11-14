@@ -1,8 +1,8 @@
-import { ChangeEvent, useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import type { EditorProps } from "document-model";
 import {
   type BillingStatementDocument,
-  BillingStatementState,
+  type BillingStatementState,
   actions,
 } from "../../document-models/billing-statement/index.js";
 import { CurrencyForm } from "../invoice/components/currencyForm.js";

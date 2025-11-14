@@ -1,11 +1,11 @@
-import { Dispatch } from "react";
+import type { Dispatch } from "react";
 import { X, Tag } from "lucide-react";
-import { Button } from "@powerhousedao/design-system";
+import { PowerhouseButton as Button } from "@powerhousedao/design-system/powerhouse/components/index";
 import { Select, DatePicker } from "@powerhousedao/document-engineering/ui";
 import { budgetOptions, expenseAccountOptions } from "./tagMapping.js";
 import {
   actions,
-  BillingStatementTag,
+  type BillingStatementTag,
   type BillingStatementAction,
 } from "../../../document-models/billing-statement/index.js";
 import { InputField } from "../../invoice/components/inputField.js";

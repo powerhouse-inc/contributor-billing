@@ -1,5 +1,5 @@
 import {
-  InvoiceAction,
+  type InvoiceAction,
   actions,
 } from "../../document-models/invoice/index.js";
 

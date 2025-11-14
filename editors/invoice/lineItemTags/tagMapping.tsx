@@ -1,4 +1,4 @@
-import { SelectOption } from "@powerhousedao/document-engineering/ui";
+import type { SelectOption } from "@powerhousedao/document-engineering/ui";
 
 // Removed non expense accounts from the list
 export const expenseAccountOptions: SelectOption[] = [

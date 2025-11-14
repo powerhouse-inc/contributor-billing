@@ -2,7 +2,7 @@
  * Tests for Billing Statement operations
  */
 
-import utils from "../../gen/utils.js";
+import { createDocument } from "../../gen/utils.js";
 import {
   type EditBillingStatementInput,
   type EditContributorInput,
@@ -16,7 +16,7 @@ describe("Billing Statement Operations", () => {
   let document: BillingStatementDocument;
 
   beforeEach(() => {
-    document = utils.createDocument();
+    document = createDocument();
   });
 
   describe("editBillingStatement", () => {

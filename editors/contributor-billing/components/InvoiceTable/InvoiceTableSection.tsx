@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { Button } from "@powerhousedao/design-system";
-import { DocumentModelModule } from "document-model";
+import type { VetraDocumentModelModule } from "@powerhousedao/reactor-browser";
 
 export const InvoiceTableSection = ({
   title,
@@ -15,12 +14,12 @@ export const InvoiceTableSection = ({
   count: number;
   children: React.ReactNode;
   color?: string;
-  onSelectDocumentModel?: (model: DocumentModelModule) => void;
-  filteredDocumentModels?: DocumentModelModule[];
+  onSelectDocumentModel?: (model: VetraDocumentModelModule) => void;
+  filteredDocumentModels?: VetraDocumentModelModule[];
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const invoiceDodModel = filteredDocumentModels?.find(model => model.documentModel.id === "powerhouse/invoice");
+  const invoiceDodModel = filteredDocumentModels?.find(model => model.id === "powerhouse/invoice");
 
   return (
     <div className="mb-2">
@@ -45,7 +44,7 @@ export const InvoiceTableSection = ({
         <button
           className="bg-white border border-gray-300 rounded px-3 py-1 text-sm hover:bg-gray-100 col-span-1 justify-self-end"
           onClick={() => {
-            onSelectDocumentModel?.(invoiceDodModel as DocumentModelModule);
+            onSelectDocumentModel?.(invoiceDodModel as VetraDocumentModelModule);
           }}
           >
             Create Invoice

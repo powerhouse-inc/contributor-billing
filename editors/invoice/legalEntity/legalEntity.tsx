@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import {
+import type {
   EditIssuerBankInput,
   EditIssuerInput,
   EditIssuerWalletInput,
@@ -9,12 +9,12 @@ import {
   EditPayerWalletInput,
   LegalEntity,
 } from "../../../document-models/invoice/index.js";
-import React, { ComponentPropsWithRef } from "react";
+import React, { type ComponentPropsWithRef } from "react";
 import { twMerge } from "tailwind-merge";
 import { LegalEntityWalletSection } from "./walletSection.js";
 import { LegalEntityBankSection } from "./bankSection.js";
 import { CountryForm } from "../components/countryForm.js";
-import { ValidationResult } from "../validation/validationManager.js";
+import type { ValidationResult } from "../validation/validationManager.js";
 import { InputField } from "../components/inputField.js";
 
 export type EditLegalEntityWalletInput =

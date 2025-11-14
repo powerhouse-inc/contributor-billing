@@ -1,5 +1,5 @@
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import {
+import type {
   InvoiceState,
   LegalEntityTaxId,
   LegalEntityCorporateRegistrationId,

@@ -9,7 +9,7 @@ import { ExpenseReportPDF } from "./components/ExpenseReportPDF.js";
 import { pdf } from "@react-pdf/renderer";
 import { PDFViewer } from "@react-pdf/renderer";
 
-export function Editor() {
+export default function Editor() {
   const [document, dispatch] = useSelectedExpenseReportDocument();
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);

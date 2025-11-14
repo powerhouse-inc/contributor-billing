@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { InvoiceAction, actions } from "../../document-models/invoice/index.js";
-import { toast } from "@powerhousedao/design-system";
+import { type InvoiceAction, actions } from "../../document-models/invoice/index.js";
+import { toast } from "@powerhousedao/design-system/connect";
 import { uploadPdfChunked } from "./uploadPdfChunked.js";
 import { getCountryCodeFromName } from "./utils/utils.js";
 import { LoaderCircle } from "lucide-react";

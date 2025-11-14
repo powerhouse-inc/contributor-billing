@@ -1,9 +1,9 @@
-import { Subgraph } from "@powerhousedao/reactor-api";
+import { BaseSubgraph } from "@powerhousedao/reactor-api";
 import type { DocumentNode } from "graphql";
 import { schema } from "./schema.js";
 import { getResolvers } from "./resolvers.js";
 
-export class ExpenseReportSubgraph extends Subgraph {
+export class ExpenseReportSubgraph extends BaseSubgraph {
   name = "expense-report";
   typeDefs: DocumentNode = schema;
   resolvers = getResolvers(this);

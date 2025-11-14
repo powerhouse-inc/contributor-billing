@@ -1,0 +1,6 @@
+{
+  "enabledMcpjsonServers": [
+    "reactor-mcp"
+  ],
+  "enableAllProjectMcpServers": true
+}

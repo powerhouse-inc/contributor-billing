@@ -6,7 +6,7 @@ import { type DocumentModelModule } from "document-model";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
 import { exportExpenseReportCSV } from "../../../../scripts/contributor-billing/createExpenseReportCsv.js";
-import { toast } from "@powerhousedao/design-system";
+import { toast } from "@powerhousedao/design-system/connect";
 import {
   actions,
   type InvoiceAction,
@@ -16,6 +16,7 @@ import {
   useSelectedDrive,
   dispatchActions,
   setSelectedNode,
+  type VetraDocumentModelModule,
 } from "@powerhousedao/reactor-browser";
 import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
 
@@ -42,8 +43,8 @@ interface InvoiceTableProps {
       | { [id: string]: boolean }
       | ((prev: { [id: string]: boolean }) => { [id: string]: boolean })
   ) => void;
-  filteredDocumentModels: DocumentModelModule[];
-  onSelectDocumentModel: (model: DocumentModelModule) => void;
+  filteredDocumentModels: VetraDocumentModelModule[];
+  onSelectDocumentModel: (model: VetraDocumentModelModule) => void;
   getDocDispatcher: (id: string) => any;
   selectedStatuses: string[];
   onStatusChange: (value: string | string[]) => void;
@@ -329,7 +330,7 @@ export const InvoiceTable = ({
   );
   const createIntegrationsDocument = async () => {
     const integrationsDocument = filteredDocumentModels?.find(
-      (model) => model.documentModel.id === "powerhouse/integrations"
+      (model) => model.id === "powerhouse/integrations"
     );
     if (integrationsDocument) {
       const createdNode = await addDocument(
@@ -367,7 +368,7 @@ export const InvoiceTable = ({
     } else {
       // Create new expense report
       const expenseReportModel = filteredDocumentModels?.find(
-        (model) => model.documentModel.id === "powerhouse/expense-report"
+        (model) => model.id === "powerhouse/expense-report"
       );
       if (expenseReportModel) {
         const createdNode = await addDocument(

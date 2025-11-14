@@ -1,12 +1,4 @@
-import { FileItem } from "@powerhousedao/design-system";
-import {
-  getSyncStatusSync,
-  setSelectedNode,
-  showDeleteNodeModal,
-  useDriveSharingType,
-  useNodeActions,
-  useSelectedDriveDocument,
-} from "@powerhousedao/reactor-browser";
+import { FileItem } from "@powerhousedao/design-system/connect";
 
 export const InvoiceTableRow = ({
   files,
@@ -23,19 +15,6 @@ export const InvoiceTableRow = ({
   onCreateBillingStatement?: (id: string) => void;
   billingDocStates?: { id: string; contributor: string }[];
 }) => {
-  const [selectedDrive] = useSelectedDriveDocument(); // Currently selected drive
-  const sharingType = useDriveSharingType(selectedDrive.header.id);
-
-  // Core drive operations and document models
-  const {
-    onAddFile,
-    onAddFolder,
-    onCopyNode,
-    onDuplicateNode,
-    onMoveNode,
-    onRenameNode,
-  } = useNodeActions();
-
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
     const day = date.getDate().toString().padStart(2, "0");
@@ -95,21 +74,7 @@ export const InvoiceTableRow = ({
           <FileItem
             key={row.id}
             fileNode={file as any}
-            sharingType={sharingType || "LOCAL"}
-            isAllowedToCreateDocuments={true}
             className="h-10"
-            onAddFile={onAddFile}
-            onCopyNode={onCopyNode}
-            onMoveNode={onMoveNode}
-            onRenameNode={onRenameNode}
-            onDuplicateNode={onDuplicateNode}
-            onAddFolder={onAddFolder}
-            onAddAndSelectNewFolder={() =>
-              new Promise((resolve) => resolve(undefined))
-            }
-            getSyncStatusSync={getSyncStatusSync}
-            setSelectedNode={setSelectedNode}
-            showDeleteNodeModal={(node) => showDeleteNodeModal(node.id)}
           />
         )}
       </td>
@@ -138,21 +103,7 @@ export const InvoiceTableRow = ({
           <FileItem
             key={billingDoc?.id}
             fileNode={billingFile as any}
-            sharingType={sharingType || "LOCAL"}
-            showDeleteNodeModal={(node) => showDeleteNodeModal(node.id)}
-            isAllowedToCreateDocuments={true}
             className="h-10"
-            onAddFile={onAddFile}
-            onCopyNode={onCopyNode}
-            onMoveNode={onMoveNode}
-            onRenameNode={onRenameNode}
-            onDuplicateNode={onDuplicateNode}
-            onAddFolder={onAddFolder}
-            onAddAndSelectNewFolder={() =>
-              new Promise((resolve) => resolve(undefined))
-            }
-            getSyncStatusSync={getSyncStatusSync}
-            setSelectedNode={setSelectedNode}
           />
         </td>
       )}

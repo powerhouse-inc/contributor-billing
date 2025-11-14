@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Button } from "@powerhousedao/document-engineering";
-import { useSelectedDriveDocuments } from "@powerhousedao/reactor-browser";
+import { useDocumentsInSelectedDrive } from "@powerhousedao/reactor-browser";
 import { generateId } from "document-model";
 import { X, FileText, Check } from "lucide-react";
 import type { LineItemGroup } from "../../../document-models/expense-report/gen/types.js";
@@ -54,7 +54,7 @@ export function AddBillingStatementModal({
   dispatch,
   groups,
 }: AddBillingStatementModalProps) {
-  const documents = useSelectedDriveDocuments();
+  const documents = useDocumentsInSelectedDrive();
   const [selectedStatements, setSelectedStatements] = useState<Set<string>>(
     new Set()
   );

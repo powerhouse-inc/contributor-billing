@@ -1,9 +1,9 @@
-import { Dispatch, useState } from "react";
+import { type Dispatch, useState } from "react";
 import { X, Tag } from "lucide-react";
-import { Button } from "@powerhousedao/design-system";
+import { PowerhouseButton as Button } from "@powerhousedao/design-system/powerhouse/components/index";
 import { Select, DatePicker } from "@powerhousedao/document-engineering/ui";
 import { expenseAccountOptions, paymentAccountOptions } from "./tagMapping.js";
-import { actions, InvoiceTag } from "../../../document-models/invoice/index.js";
+import { actions, type InvoiceTag } from "../../../document-models/invoice/index.js";
 import { InputField } from "../components/inputField.js";
 import { TagCard } from "./tagCard.js";
 import { TagMobileModal } from "./tagMobileModal.js";
