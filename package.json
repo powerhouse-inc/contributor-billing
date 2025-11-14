@@ -132,5 +132,8 @@
   "peerDependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
+  },
+  "overrides": {
+    "vite": "^6.2.3"
   }
 }
