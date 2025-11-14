@@ -3,12 +3,29 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { ExpenseReportPHState } from "./types.js";
-import { z } from "./types.js";
+import type { ExpenseReportPHState } from "@powerhousedao/contributor-billing/document-models/expense-report";
 
-import { reducer as WalletReducer } from "../src/reducers/wallet.js";
+import { expenseReportWalletOperations } from "../src/reducers/wallet.js";
 
-export const stateReducer: StateReducer<ExpenseReportPHState> = (
+import {
+  AddWalletInputSchema,
+  RemoveWalletInputSchema,
+  AddBillingStatementInputSchema,
+  RemoveBillingStatementInputSchema,
+  AddLineItemInputSchema,
+  UpdateLineItemInputSchema,
+  RemoveLineItemInputSchema,
+  AddLineItemGroupInputSchema,
+  UpdateLineItemGroupInputSchema,
+  RemoveLineItemGroupInputSchema,
+  SetGroupTotalsInputSchema,
+  RemoveGroupTotalsInputSchema,
+  SetPeriodStartInputSchema,
+  SetPeriodEndInputSchema,
+  UpdateWalletInputSchema,
+} from "./schema/zod.js";
+
+const stateReducer: StateReducer<ExpenseReportPHState> = (
   state,
   action,
   dispatch,
@@ -19,8 +36,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
 
   switch (action.type) {
     case "ADD_WALLET":
-      z.AddWalletInputSchema().parse(action.input);
-      WalletReducer.addWalletOperation(
+      AddWalletInputSchema().parse(action.input);
+      expenseReportWalletOperations.addWalletOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -28,8 +45,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
       break;
 
     case "REMOVE_WALLET":
-      z.RemoveWalletInputSchema().parse(action.input);
-      WalletReducer.removeWalletOperation(
+      RemoveWalletInputSchema().parse(action.input);
+      expenseReportWalletOperations.removeWalletOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -37,8 +54,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
       break;
 
     case "ADD_BILLING_STATEMENT":
-      z.AddBillingStatementInputSchema().parse(action.input);
-      WalletReducer.addBillingStatementOperation(
+      AddBillingStatementInputSchema().parse(action.input);
+      expenseReportWalletOperations.addBillingStatementOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -46,8 +63,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
       break;
 
     case "REMOVE_BILLING_STATEMENT":
-      z.RemoveBillingStatementInputSchema().parse(action.input);
-      WalletReducer.removeBillingStatementOperation(
+      RemoveBillingStatementInputSchema().parse(action.input);
+      expenseReportWalletOperations.removeBillingStatementOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -55,8 +72,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
       break;
 
     case "ADD_LINE_ITEM":
-      z.AddLineItemInputSchema().parse(action.input);
-      WalletReducer.addLineItemOperation(
+      AddLineItemInputSchema().parse(action.input);
+      expenseReportWalletOperations.addLineItemOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -64,8 +81,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
       break;
 
     case "UPDATE_LINE_ITEM":
-      z.UpdateLineItemInputSchema().parse(action.input);
-      WalletReducer.updateLineItemOperation(
+      UpdateLineItemInputSchema().parse(action.input);
+      expenseReportWalletOperations.updateLineItemOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -73,8 +90,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
       break;
 
     case "REMOVE_LINE_ITEM":
-      z.RemoveLineItemInputSchema().parse(action.input);
-      WalletReducer.removeLineItemOperation(
+      RemoveLineItemInputSchema().parse(action.input);
+      expenseReportWalletOperations.removeLineItemOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -82,8 +99,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
       break;
 
     case "ADD_LINE_ITEM_GROUP":
-      z.AddLineItemGroupInputSchema().parse(action.input);
-      WalletReducer.addLineItemGroupOperation(
+      AddLineItemGroupInputSchema().parse(action.input);
+      expenseReportWalletOperations.addLineItemGroupOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -91,8 +108,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
       break;
 
     case "UPDATE_LINE_ITEM_GROUP":
-      z.UpdateLineItemGroupInputSchema().parse(action.input);
-      WalletReducer.updateLineItemGroupOperation(
+      UpdateLineItemGroupInputSchema().parse(action.input);
+      expenseReportWalletOperations.updateLineItemGroupOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -100,8 +117,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
       break;
 
     case "REMOVE_LINE_ITEM_GROUP":
-      z.RemoveLineItemGroupInputSchema().parse(action.input);
-      WalletReducer.removeLineItemGroupOperation(
+      RemoveLineItemGroupInputSchema().parse(action.input);
+      expenseReportWalletOperations.removeLineItemGroupOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -109,8 +126,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
       break;
 
     case "SET_GROUP_TOTALS":
-      z.SetGroupTotalsInputSchema().parse(action.input);
-      WalletReducer.setGroupTotalsOperation(
+      SetGroupTotalsInputSchema().parse(action.input);
+      expenseReportWalletOperations.setGroupTotalsOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -118,8 +135,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
       break;
 
     case "REMOVE_GROUP_TOTALS":
-      z.RemoveGroupTotalsInputSchema().parse(action.input);
-      WalletReducer.removeGroupTotalsOperation(
+      RemoveGroupTotalsInputSchema().parse(action.input);
+      expenseReportWalletOperations.removeGroupTotalsOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -127,8 +144,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
       break;
 
     case "SET_PERIOD_START":
-      z.SetPeriodStartInputSchema().parse(action.input);
-      WalletReducer.setPeriodStartOperation(
+      SetPeriodStartInputSchema().parse(action.input);
+      expenseReportWalletOperations.setPeriodStartOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -136,8 +153,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
       break;
 
     case "SET_PERIOD_END":
-      z.SetPeriodEndInputSchema().parse(action.input);
-      WalletReducer.setPeriodEndOperation(
+      SetPeriodEndInputSchema().parse(action.input);
+      expenseReportWalletOperations.setPeriodEndOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -145,8 +162,8 @@ export const stateReducer: StateReducer<ExpenseReportPHState> = (
       break;
 
     case "UPDATE_WALLET":
-      z.UpdateWalletInputSchema().parse(action.input);
-      WalletReducer.updateWalletOperation(
+      UpdateWalletInputSchema().parse(action.input);
+      expenseReportWalletOperations.updateWalletOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

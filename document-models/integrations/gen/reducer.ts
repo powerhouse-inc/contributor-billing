@@ -3,12 +3,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { IntegrationsPHState } from "./types.js";
-import { z } from "./types.js";
+import type { IntegrationsPHState } from "@powerhousedao/contributor-billing/document-models/integrations";
 
-import { reducer as IntegrationsReducer } from "../src/reducers/integrations.js";
+import { integrationsIntegrationsOperations } from "../src/reducers/integrations.js";
 
-export const stateReducer: StateReducer<IntegrationsPHState> = (
+import {
+  SetRequestFinanceInputSchema,
+  SetGnosisSafeInputSchema,
+  SetGoogleCloudInputSchema,
+} from "./schema/zod.js";
+
+const stateReducer: StateReducer<IntegrationsPHState> = (
   state,
   action,
   dispatch,
@@ -19,8 +24,8 @@ export const stateReducer: StateReducer<IntegrationsPHState> = (
 
   switch (action.type) {
     case "SET_REQUEST_FINANCE":
-      z.SetRequestFinanceInputSchema().parse(action.input);
-      IntegrationsReducer.setRequestFinanceOperation(
+      SetRequestFinanceInputSchema().parse(action.input);
+      integrationsIntegrationsOperations.setRequestFinanceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -28,8 +33,8 @@ export const stateReducer: StateReducer<IntegrationsPHState> = (
       break;
 
     case "SET_GNOSIS_SAFE":
-      z.SetGnosisSafeInputSchema().parse(action.input);
-      IntegrationsReducer.setGnosisSafeOperation(
+      SetGnosisSafeInputSchema().parse(action.input);
+      integrationsIntegrationsOperations.setGnosisSafeOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -37,8 +42,8 @@ export const stateReducer: StateReducer<IntegrationsPHState> = (
       break;
 
     case "SET_GOOGLE_CLOUD":
-      z.SetGoogleCloudInputSchema().parse(action.input);
-      IntegrationsReducer.setGoogleCloudOperation(
+      SetGoogleCloudInputSchema().parse(action.input);
+      integrationsIntegrationsOperations.setGoogleCloudOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

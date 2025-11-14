@@ -1,14 +1,18 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type EditBillingStatementInput,
-  type EditContributorInput,
-  type EditStatusInput,
+  EditBillingStatementInputSchema,
+  EditContributorInputSchema,
+  EditStatusInputSchema,
+} from "../schema/zod.js";
+import type {
+  EditBillingStatementInput,
+  EditContributorInput,
+  EditStatusInput,
 } from "../types.js";
-import {
-  type EditBillingStatementAction,
-  type EditContributorAction,
-  type EditStatusAction,
+import type {
+  EditBillingStatementAction,
+  EditContributorAction,
+  EditStatusAction,
 } from "./actions.js";
 
 export const editBillingStatement = (input: EditBillingStatementInput) =>
@@ -16,7 +20,7 @@ export const editBillingStatement = (input: EditBillingStatementInput) =>
     "EDIT_BILLING_STATEMENT",
     { ...input },
     undefined,
-    z.EditBillingStatementInputSchema,
+    EditBillingStatementInputSchema,
     "global",
   );
 
@@ -25,7 +29,7 @@ export const editContributor = (input: EditContributorInput) =>
     "EDIT_CONTRIBUTOR",
     { ...input },
     undefined,
-    z.EditContributorInputSchema,
+    EditContributorInputSchema,
     "global",
   );
 
@@ -34,6 +38,6 @@ export const editStatus = (input: EditStatusInput) =>
     "EDIT_STATUS",
     { ...input },
     undefined,
-    z.EditStatusInputSchema,
+    EditStatusInputSchema,
     "global",
   );

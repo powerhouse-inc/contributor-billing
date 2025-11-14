@@ -1,10 +1,4 @@
-/**
- * This is a scaffold file meant for customization:
- * - modify it by implementing the reducer functions
- * - delete the file and run the code generator again to have it reset
- */
-
-import type { InvoicePartiesOperations } from "../../gen/parties/operations.js";
+import type { InvoicePartiesOperations } from "@powerhousedao/contributor-billing/document-models/invoice";
 
 function getStateValue<T>(
   input: T | undefined,
@@ -13,7 +7,7 @@ function getStateValue<T>(
   return input === undefined ? currentValue : input;
 }
 
-export const reducer: InvoicePartiesOperations = {
+export const invoicePartiesOperations: InvoicePartiesOperations = {
   editIssuerOperation(state, action, dispatch) {
     if ('address' in state.issuer && (
       'city' in action.input ||

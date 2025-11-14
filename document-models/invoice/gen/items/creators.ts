@@ -1,18 +1,24 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type AddLineItemInput,
-  type EditLineItemInput,
-  type DeleteLineItemInput,
-  type SetLineItemTagInput,
-  type SetInvoiceTagInput,
+  AddLineItemInputSchema,
+  EditLineItemInputSchema,
+  DeleteLineItemInputSchema,
+  SetLineItemTagInputSchema,
+  SetInvoiceTagInputSchema,
+} from "../schema/zod.js";
+import type {
+  AddLineItemInput,
+  EditLineItemInput,
+  DeleteLineItemInput,
+  SetLineItemTagInput,
+  SetInvoiceTagInput,
 } from "../types.js";
-import {
-  type AddLineItemAction,
-  type EditLineItemAction,
-  type DeleteLineItemAction,
-  type SetLineItemTagAction,
-  type SetInvoiceTagAction,
+import type {
+  AddLineItemAction,
+  EditLineItemAction,
+  DeleteLineItemAction,
+  SetLineItemTagAction,
+  SetInvoiceTagAction,
 } from "./actions.js";
 
 export const addLineItem = (input: AddLineItemInput) =>
@@ -20,7 +26,7 @@ export const addLineItem = (input: AddLineItemInput) =>
     "ADD_LINE_ITEM",
     { ...input },
     undefined,
-    z.AddLineItemInputSchema,
+    AddLineItemInputSchema,
     "global",
   );
 
@@ -29,7 +35,7 @@ export const editLineItem = (input: EditLineItemInput) =>
     "EDIT_LINE_ITEM",
     { ...input },
     undefined,
-    z.EditLineItemInputSchema,
+    EditLineItemInputSchema,
     "global",
   );
 
@@ -38,7 +44,7 @@ export const deleteLineItem = (input: DeleteLineItemInput) =>
     "DELETE_LINE_ITEM",
     { ...input },
     undefined,
-    z.DeleteLineItemInputSchema,
+    DeleteLineItemInputSchema,
     "global",
   );
 
@@ -47,7 +53,7 @@ export const setLineItemTag = (input: SetLineItemTagInput) =>
     "SET_LINE_ITEM_TAG",
     { ...input },
     undefined,
-    z.SetLineItemTagInputSchema,
+    SetLineItemTagInputSchema,
     "global",
   );
 
@@ -56,6 +62,6 @@ export const setInvoiceTag = (input: SetInvoiceTagInput) =>
     "SET_INVOICE_TAG",
     { ...input },
     undefined,
-    z.SetInvoiceTagInputSchema,
+    SetInvoiceTagInputSchema,
     "global",
   );

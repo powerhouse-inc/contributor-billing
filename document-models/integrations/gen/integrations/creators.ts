@@ -1,14 +1,18 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type SetRequestFinanceInput,
-  type SetGnosisSafeInput,
-  type SetGoogleCloudInput,
+  SetRequestFinanceInputSchema,
+  SetGnosisSafeInputSchema,
+  SetGoogleCloudInputSchema,
+} from "../schema/zod.js";
+import type {
+  SetRequestFinanceInput,
+  SetGnosisSafeInput,
+  SetGoogleCloudInput,
 } from "../types.js";
-import {
-  type SetRequestFinanceAction,
-  type SetGnosisSafeAction,
-  type SetGoogleCloudAction,
+import type {
+  SetRequestFinanceAction,
+  SetGnosisSafeAction,
+  SetGoogleCloudAction,
 } from "./actions.js";
 
 export const setRequestFinance = (input: SetRequestFinanceInput) =>
@@ -16,7 +20,7 @@ export const setRequestFinance = (input: SetRequestFinanceInput) =>
     "SET_REQUEST_FINANCE",
     { ...input },
     undefined,
-    z.SetRequestFinanceInputSchema,
+    SetRequestFinanceInputSchema,
     "global",
   );
 
@@ -25,7 +29,7 @@ export const setGnosisSafe = (input: SetGnosisSafeInput) =>
     "SET_GNOSIS_SAFE",
     { ...input },
     undefined,
-    z.SetGnosisSafeInputSchema,
+    SetGnosisSafeInputSchema,
     "global",
   );
 
@@ -34,6 +38,6 @@ export const setGoogleCloud = (input: SetGoogleCloudInput) =>
     "SET_GOOGLE_CLOUD",
     { ...input },
     undefined,
-    z.SetGoogleCloudInputSchema,
+    SetGoogleCloudInputSchema,
     "global",
   );

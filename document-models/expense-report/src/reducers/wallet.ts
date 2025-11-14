@@ -1,6 +1,6 @@
-import type { ExpenseReportWalletOperations } from "../../gen/wallet/operations.js";
+import type { ExpenseReportWalletOperations } from "@powerhousedao/contributor-billing/document-models/expense-report";
 
-export const reducer: ExpenseReportWalletOperations = {
+export const expenseReportWalletOperations: ExpenseReportWalletOperations = {
     addWalletOperation(state, action) {
         // Add new wallet to the wallets array
         const newWallet = {

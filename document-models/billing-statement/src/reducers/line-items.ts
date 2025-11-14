@@ -1,13 +1,10 @@
-/**
- * This is a scaffold file meant for customization:
- * - modify it by implementing the reducer functions
- * - delete the file and run the code generator again to have it reset
- */
+import type {
+  BillingStatementLineItemsOperations,
+  BillingStatementState,
+  BillingStatementLineItem,
+} from "@powerhousedao/contributor-billing/document-models/billing-statement";
 
-import type { BillingStatementLineItemsOperations } from "../../gen/line-items/operations.js";
-import { BillingStatementLineItem, BillingStatementState } from "document-models/billing-statement/gen/types.js";
-
-export const reducer: BillingStatementLineItemsOperations = {
+export const billingStatementLineItemsOperations: BillingStatementLineItemsOperations = {
   addLineItemOperation(state, action, dispatch) {
     const newLineItem: BillingStatementLineItem = {
       ...action.input,

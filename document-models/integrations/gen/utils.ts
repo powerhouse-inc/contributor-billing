@@ -12,11 +12,22 @@ import type {
 } from "./types.js";
 import type { IntegrationsPHState } from "./types.js";
 import { reducer } from "./reducer.js";
+import { integrationsDocumentType } from "./document-type.js";
+import {
+  isIntegrationsDocument,
+  assertIsIntegrationsDocument,
+  isIntegrationsState,
+  assertIsIntegrationsState,
+} from "./document-schema.js";
 
-export const initialGlobalState: IntegrationsGlobalState = {};
+export const initialGlobalState: IntegrationsGlobalState = {
+  gnosisSafe: null,
+  googleCloud: null,
+  requestFinance: null,
+};
 export const initialLocalState: IntegrationsLocalState = {};
 
-const utils: DocumentModelUtils<IntegrationsPHState> = {
+export const utils: DocumentModelUtils<IntegrationsPHState> = {
   fileExtension: ".phdm",
   createState(state) {
     return {
@@ -28,7 +39,7 @@ const utils: DocumentModelUtils<IntegrationsPHState> = {
   createDocument(state) {
     const document = baseCreateDocument(utils.createState, state);
 
-    document.header.documentType = "powerhouse/integrations";
+    document.header.documentType = integrationsDocumentType;
 
     // for backwards compatibility, but this is NOT a valid signed document id
     document.header.id = generateId();
@@ -41,11 +52,25 @@ const utils: DocumentModelUtils<IntegrationsPHState> = {
   loadFromInput(input) {
     return baseLoadFromInput(input, reducer);
   },
+  isStateOfType(state) {
+    return isIntegrationsState(state);
+  },
+  assertIsStateOfType(state) {
+    return assertIsIntegrationsState(state);
+  },
+  isDocumentOfType(document) {
+    return isIntegrationsDocument(document);
+  },
+  assertIsDocumentOfType(document) {
+    return assertIsIntegrationsDocument(document);
+  },
 };
 
 export const createDocument = utils.createDocument;
 export const createState = utils.createState;
 export const saveToFileHandle = utils.saveToFileHandle;
 export const loadFromInput = utils.loadFromInput;
-
-export default utils;
+export const isStateOfType = utils.isStateOfType;
+export const assertIsStateOfType = utils.assertIsStateOfType;
+export const isDocumentOfType = utils.isDocumentOfType;
+export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

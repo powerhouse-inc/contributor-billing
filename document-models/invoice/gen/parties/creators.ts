@@ -1,20 +1,27 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type EditIssuerInput,
-  type EditIssuerBankInput,
-  type EditIssuerWalletInput,
-  type EditPayerInput,
-  type EditPayerBankInput,
-  type EditPayerWalletInput,
+  EditIssuerInputSchema,
+  EditIssuerBankInputSchema,
+  EditIssuerWalletInputSchema,
+  EditPayerInputSchema,
+  EditPayerBankInputSchema,
+  EditPayerWalletInputSchema,
+} from "../schema/zod.js";
+import type {
+  EditIssuerInput,
+  EditIssuerBankInput,
+  EditIssuerWalletInput,
+  EditPayerInput,
+  EditPayerBankInput,
+  EditPayerWalletInput,
 } from "../types.js";
-import {
-  type EditIssuerAction,
-  type EditIssuerBankAction,
-  type EditIssuerWalletAction,
-  type EditPayerAction,
-  type EditPayerBankAction,
-  type EditPayerWalletAction,
+import type {
+  EditIssuerAction,
+  EditIssuerBankAction,
+  EditIssuerWalletAction,
+  EditPayerAction,
+  EditPayerBankAction,
+  EditPayerWalletAction,
 } from "./actions.js";
 
 export const editIssuer = (input: EditIssuerInput) =>
@@ -22,7 +29,7 @@ export const editIssuer = (input: EditIssuerInput) =>
     "EDIT_ISSUER",
     { ...input },
     undefined,
-    z.EditIssuerInputSchema,
+    EditIssuerInputSchema,
     "global",
   );
 
@@ -31,7 +38,7 @@ export const editIssuerBank = (input: EditIssuerBankInput) =>
     "EDIT_ISSUER_BANK",
     { ...input },
     undefined,
-    z.EditIssuerBankInputSchema,
+    EditIssuerBankInputSchema,
     "global",
   );
 
@@ -40,7 +47,7 @@ export const editIssuerWallet = (input: EditIssuerWalletInput) =>
     "EDIT_ISSUER_WALLET",
     { ...input },
     undefined,
-    z.EditIssuerWalletInputSchema,
+    EditIssuerWalletInputSchema,
     "global",
   );
 
@@ -49,7 +56,7 @@ export const editPayer = (input: EditPayerInput) =>
     "EDIT_PAYER",
     { ...input },
     undefined,
-    z.EditPayerInputSchema,
+    EditPayerInputSchema,
     "global",
   );
 
@@ -58,7 +65,7 @@ export const editPayerBank = (input: EditPayerBankInput) =>
     "EDIT_PAYER_BANK",
     { ...input },
     undefined,
-    z.EditPayerBankInputSchema,
+    EditPayerBankInputSchema,
     "global",
   );
 
@@ -67,6 +74,6 @@ export const editPayerWallet = (input: EditPayerWalletInput) =>
     "EDIT_PAYER_WALLET",
     { ...input },
     undefined,
-    z.EditPayerWalletInputSchema,
+    EditPayerWalletInputSchema,
     "global",
   );
