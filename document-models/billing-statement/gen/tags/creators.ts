@@ -1,4 +1,4 @@
-import { createAction } from "document-model";
+import { createAction } from "document-model/core";
 import { z, type EditLineItemTagInput } from "../types.js";
 import { type EditLineItemTagAction } from "./actions.js";
 

@@ -318,7 +318,7 @@ export type InvoiceState = {
   dateDelivered: Maybe<Scalars["Date"]["output"]>;
   dateDue: Scalars["Date"]["output"];
   dateIssued: Scalars["Date"]["output"];
-  exported: ExportedData | null;
+  exported: Maybe<ExportedData>;
   invoiceNo: Scalars["String"]["output"];
   invoiceTags: Array<InvoiceTag>;
   issuer: LegalEntity;

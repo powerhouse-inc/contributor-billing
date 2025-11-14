@@ -1,27 +1,17 @@
 /**
  * Factory methods for creating ExpenseReportDocument instances
  */
-
-import {
-  createBaseState,
-  defaultBaseState,
-  type PHAuthState,
-  type PHDocumentState,
-  type PHBaseState,
-} from "document-model";
+import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
+import { createBaseState, defaultBaseState } from "document-model/core";
 import type {
   ExpenseReportDocument,
   ExpenseReportLocalState,
-  ExpenseReportState,
+  ExpenseReportGlobalState,
+  ExpenseReportPHState,
 } from "./types.js";
 import { createDocument } from "./utils.js";
 
-export type ExpenseReportPHState = PHBaseState & {
-  global: ExpenseReportState;
-  local: ExpenseReportLocalState;
-};
-
-export function defaultGlobalState(): ExpenseReportState {
+export function defaultGlobalState(): ExpenseReportGlobalState {
   return {
     wallets: [],
     groups: [
@@ -179,12 +169,12 @@ export function defaultPHState(): ExpenseReportPHState {
 }
 
 export function createGlobalState(
-  state?: Partial<ExpenseReportState>,
-): ExpenseReportState {
+  state?: Partial<ExpenseReportGlobalState>,
+): ExpenseReportGlobalState {
   return {
     ...defaultGlobalState(),
     ...(state || {}),
-  } as ExpenseReportState;
+  } as ExpenseReportGlobalState;
 }
 
 export function createLocalState(
@@ -198,7 +188,7 @@ export function createLocalState(
 
 export function createState(
   baseState?: Partial<PHBaseState>,
-  globalState?: Partial<ExpenseReportState>,
+  globalState?: Partial<ExpenseReportGlobalState>,
   localState?: Partial<ExpenseReportLocalState>,
 ): ExpenseReportPHState {
   return {
@@ -217,7 +207,7 @@ export function createExpenseReportDocument(
   state?: Partial<{
     auth?: Partial<PHAuthState>;
     document?: Partial<PHDocumentState>;
-    global?: Partial<ExpenseReportState>;
+    global?: Partial<ExpenseReportGlobalState>;
     local?: Partial<ExpenseReportLocalState>;
   }>,
 ): ExpenseReportDocument {

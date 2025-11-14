@@ -1,10 +1,20 @@
-import type { PHDocument } from "document-model";
+import type { PHDocument, PHBaseState } from "document-model";
 import type { IntegrationsAction } from "./actions.js";
-import type { IntegrationsPHState } from "./ph-factories.js";
-import type { IntegrationsState } from "./schema/types.js";
+import type { IntegrationsState as IntegrationsGlobalState } from "./schema/types.js";
 
 export { z } from "./schema/index.js";
-export type * from "./schema/types.js";
+export * from "./schema/types.js";
 type IntegrationsLocalState = Record<PropertyKey, never>;
-export type IntegrationsDocument = PHDocument<IntegrationsPHState>;
-export type { IntegrationsState, IntegrationsLocalState, IntegrationsAction };
+type IntegrationsPHState = PHBaseState & {
+  global: IntegrationsGlobalState;
+  local: IntegrationsLocalState;
+};
+type IntegrationsDocument = PHDocument<IntegrationsPHState>;
+
+export type {
+  IntegrationsGlobalState,
+  IntegrationsLocalState,
+  IntegrationsPHState,
+  IntegrationsAction,
+  IntegrationsDocument,
+};
