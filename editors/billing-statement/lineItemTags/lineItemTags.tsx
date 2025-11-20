@@ -138,7 +138,7 @@ export function LineItemTagsTable({
                         })
                       )
                     }
-                    className="w-full text-xs"
+                    className="w-full text-xs bg-white"
                   />
                 </td>
                 <td className="border-b border-gray-200 p-2">

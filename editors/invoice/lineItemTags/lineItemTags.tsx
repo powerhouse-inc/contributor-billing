@@ -174,6 +174,7 @@ export function LineItemTagsTable({
                         })
                       )
                     }
+                    className="bg-white"
                   />
                 </td>
                 <td className="border-b border-gray-200 p-3">

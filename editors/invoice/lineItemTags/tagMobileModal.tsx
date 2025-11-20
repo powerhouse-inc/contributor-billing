@@ -155,6 +155,7 @@ export function TagMobileModal({
               setPeriodValue(newLabel);
               setPeriodStoredValue(newValue);
             }}
+            className="bg-white"
           />
         </div>
 

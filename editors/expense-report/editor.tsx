@@ -128,12 +128,14 @@ export default function Editor() {
                           name="periodStart"
                           value={periodStart}
                           onChange={handlePeriodStartChange}
+                          className="bg-white"
                         />
                         <span>to</span>
                         <DatePicker
                           name="periodEnd"
                           value={periodEnd}
                           onChange={handlePeriodEndChange}
+                          className="bg-white"
                         />
                       </div>
                     </div>

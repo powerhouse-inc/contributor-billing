@@ -67,7 +67,7 @@ export function IssueInvoiceModalContent({
         <label className="block mb-1 text-sm">Issue Date:</label>
         <DatePicker
           name="issueDate"
-          className={String.raw`w-full p-0`}
+          className={String.raw`w-full p-0 bg-white`}
           onChange={(e) => {
             const newDate = e.target.value.split("T")[0];
             dispatch(
@@ -220,7 +220,7 @@ export function RegisterPaymentTxModalContent({
         <label className="block mb-1 text-sm">Payment Date:</label>
         <DatePicker
           name="paymentDate"
-          className={String.raw`w-full p-0`}
+          className={String.raw`w-full p-0 bg-white`}
           onChange={(e) => {
             setPaymentDate(e.target.value);
           }}

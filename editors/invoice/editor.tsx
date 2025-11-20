@@ -984,7 +984,7 @@ export default function Editor(
                 <label className="block mb-1 text-sm">Issue Date:</label>
                 <DatePicker
                   name="issueDate"
-                  className={String.raw`w-full p-0`}
+                  className={String.raw`w-full p-0 bg-white`}
                   onChange={(e) => {
                     const newDate = e.target.value.split("T")[0];
                     dispatch(
@@ -1000,7 +1000,7 @@ export default function Editor(
                 <label className="block mb-1 text-sm">Delivery Date:</label>
                 <DatePicker
                   name="deliveryDate"
-                  className={String.raw`w-full p-0`}
+                  className={String.raw`w-full p-0 bg-white`}
                   onChange={(e) => {
                     const newValue = e.target.value.split("T")[0];
                     if (newValue !== state.dateDelivered) {
@@ -1047,7 +1047,7 @@ export default function Editor(
               <label className="block mb-1 text-sm">Due Date:</label>
               <DatePicker
                 name="dateDue"
-                className={String.raw`w-full p-0`}
+                className={String.raw`w-full p-0 bg-white`}
                 onChange={(e) =>
                   dispatch(
                     actions.editInvoice({
