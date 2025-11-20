@@ -1,16 +1,15 @@
 import React, { useState } from "react";
-import { InvoiceAction, actions } from "../../document-models/invoice/index.js";
-import { toast } from "@powerhousedao/design-system";
+import { type InvoiceAction, actions } from "../../document-models/invoice/index.js";
+import { toast } from "@powerhousedao/design-system/connect";
 import { uploadPdfChunked } from "./uploadPdfChunked.js";
 import { getCountryCodeFromName, mapChainNameToConfig } from "./utils/utils.js";
 import { LoaderCircle } from "lucide-react";
 
-let GRAPHQL_URL = 'http://localhost:4001/graphql/invoice'
+let GRAPHQL_URL = "http://localhost:4001/graphql/invoice";
 
-if (!window.document.baseURI.includes('localhost')) {
-  GRAPHQL_URL = 'https://switchboard-dev.powerhouse.xyz/graphql/invoice'
+if (!window.document.baseURI.includes("localhost")) {
+  GRAPHQL_URL = "https://switchboard.powerhouse.xyz/graphql/invoice";
 }
-
 
 export async function loadPDFFile({
   file,
@@ -68,7 +67,7 @@ export default function PDFUploader({
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -78,7 +77,6 @@ export default function PDFUploader({
     setError(null);
     setIsLoading(true);
     setUploadProgress(0);
-
 
     try {
       const reader = new FileReader();
@@ -93,7 +91,7 @@ export default function PDFUploader({
             base64Data,
             GRAPHQL_URL,
             50 * 1024,
-            (progress) => setUploadProgress(progress),
+            (progress) => setUploadProgress(progress)
           );
 
           if (result.success) {
@@ -109,7 +107,7 @@ export default function PDFUploader({
                 dateDue:
                   invoiceData.dateDue || new Date().toISOString().split("T")[0],
                 currency: invoiceData.currency || "USD",
-              }),
+              })
             );
 
             // If we have line items, dispatch them
@@ -127,7 +125,7 @@ export default function PDFUploader({
                     unitPriceTaxIncl: item.unitPriceTaxIncl,
                     totalPriceTaxExcl: item.totalPriceTaxExcl,
                     totalPriceTaxIncl: item.totalPriceTaxIncl,
-                  }),
+                  })
                 );
 
                 // If auto-tagging assigned tags, add them
@@ -164,7 +162,7 @@ export default function PDFUploader({
                   tel: invoiceData.issuer.contactInfo?.tel || "",
                   email: invoiceData.issuer.contactInfo?.email || "",
                   id: invoiceData.issuer.id?.taxId || "",
-                }),
+                })
               );
 
               // Add bank information dispatch
@@ -188,7 +186,7 @@ export default function PDFUploader({
                     country:
                       getCountryCodeFromName(bank.address?.country) || "",
                     extendedAddress: bank.address?.extendedAddress || "",
-                  }),
+                  })
                 );
               }
 
@@ -229,7 +227,7 @@ export default function PDFUploader({
                   tel: invoiceData.payer.contactInfo?.tel || "",
                   email: invoiceData.payer.contactInfo?.email || "",
                   id: invoiceData.payer.id?.taxId || "",
-                }),
+                })
               );
 
               // Add payer bank information if present
@@ -248,7 +246,7 @@ export default function PDFUploader({
                     beneficiary:
                       invoiceData.payer.paymentRouting.bank.beneficiary || "",
                     memo: invoiceData.payer.paymentRouting.bank.memo || "",
-                  }),
+                  })
                 );
               }
 
@@ -325,7 +323,7 @@ export default function PDFUploader({
       setError(
         error instanceof Error
           ? error.message
-          : "An error occurred while handling the file",
+          : "An error occurred while handling the file"
       );
       setIsLoading(false);
     }

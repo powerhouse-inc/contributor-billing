@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useSelectedDriveDocuments } from "@powerhousedao/reactor-browser";
+import { useDocumentsInSelectedDrive } from "@powerhousedao/reactor-browser";
 import type { Wallet } from "../../../document-models/expense-report/gen/types.js";
 
 interface SyncStatus {
@@ -9,7 +9,7 @@ interface SyncStatus {
 }
 
 export function useWalletSync(wallets: Wallet[]): SyncStatus {
-  const documents = useSelectedDriveDocuments();
+  const documents = useDocumentsInSelectedDrive();
 
   const syncStatus = useMemo(() => {
     if (!documents || wallets.length === 0) {

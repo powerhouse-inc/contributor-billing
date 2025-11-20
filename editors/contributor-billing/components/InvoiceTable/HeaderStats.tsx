@@ -1,8 +1,8 @@
 import { Select } from "@powerhousedao/document-engineering/ui";
 import { useState, useEffect } from "react";
-import { useSelectedDriveDocuments } from "@powerhousedao/reactor-browser";
+import { useDocumentsInSelectedDrive } from "@powerhousedao/reactor-browser";
 import { getExchangeRate } from "../../util.js";
-import { Tooltip, TooltipProvider } from "@powerhousedao/design-system";
+import { Tooltip, TooltipProvider } from "@powerhousedao/design-system/ui";
 
 const currencyList = [
   { ticker: "USDS", crypto: true },
@@ -20,7 +20,7 @@ const currencyList = [
 export const HeaderStats = () => {
   const [selectedCurrency, setSelectedCurrency] = useState("USD");
   const [totalExpenses, setTotalExpenses] = useState(0);
-  const documents = useSelectedDriveDocuments();
+  const documents = useDocumentsInSelectedDrive();
   const invoices = documents?.filter(
     (doc) => doc.header.documentType === "powerhouse/invoice"
   );

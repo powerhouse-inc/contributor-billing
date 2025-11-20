@@ -1,5 +1,5 @@
-export { module as Invoice } from "./invoice/index.js";
-export { module as ContributorBilling } from "./contributor-billing/index.js";
-export { module as BillingStatement } from "./billing-statement/index.js";
-export { module as Integrations } from "./integrations/index.js";
-export { module as ExpenseReport } from "./expense-report/index.js";
+export { BillingStatement } from "./billing-statement/module.js";
+export { ContributorBilling } from "./contributor-billing/module.js";
+export { ExpenseReport } from "./expense-report/module.js";
+export { Integrations } from "./integrations/module.js";
+export { Invoice } from "./invoice/module.js";

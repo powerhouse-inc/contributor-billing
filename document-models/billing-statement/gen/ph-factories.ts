@@ -1,27 +1,17 @@
 /**
  * Factory methods for creating BillingStatementDocument instances
  */
-
-import {
-  createBaseState,
-  defaultBaseState,
-  type PHAuthState,
-  type PHDocumentState,
-  type PHBaseState,
-} from "document-model";
+import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
+import { createBaseState, defaultBaseState } from "document-model/core";
 import type {
   BillingStatementDocument,
   BillingStatementLocalState,
-  BillingStatementState,
+  BillingStatementGlobalState,
+  BillingStatementPHState,
 } from "./types.js";
 import { createDocument } from "./utils.js";
 
-export type BillingStatementPHState = PHBaseState & {
-  global: BillingStatementState;
-  local: BillingStatementLocalState;
-};
-
-export function defaultGlobalState(): BillingStatementState {
+export function defaultGlobalState(): BillingStatementGlobalState {
   return {
     contributor: "",
     dateIssued: "2025-06-10T15:42:17.873Z",
@@ -48,12 +38,12 @@ export function defaultPHState(): BillingStatementPHState {
 }
 
 export function createGlobalState(
-  state?: Partial<BillingStatementState>,
-): BillingStatementState {
+  state?: Partial<BillingStatementGlobalState>,
+): BillingStatementGlobalState {
   return {
     ...defaultGlobalState(),
     ...(state || {}),
-  } as BillingStatementState;
+  } as BillingStatementGlobalState;
 }
 
 export function createLocalState(
@@ -67,7 +57,7 @@ export function createLocalState(
 
 export function createState(
   baseState?: Partial<PHBaseState>,
-  globalState?: Partial<BillingStatementState>,
+  globalState?: Partial<BillingStatementGlobalState>,
   localState?: Partial<BillingStatementLocalState>,
 ): BillingStatementPHState {
   return {
@@ -86,7 +76,7 @@ export function createBillingStatementDocument(
   state?: Partial<{
     auth?: Partial<PHAuthState>;
     document?: Partial<PHDocumentState>;
-    global?: Partial<BillingStatementState>;
+    global?: Partial<BillingStatementGlobalState>;
     local?: Partial<BillingStatementLocalState>;
   }>,
 ): BillingStatementDocument {

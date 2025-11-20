@@ -4,10 +4,12 @@
  * - delete the file and run the code generator again to have it reset
  */
 
-import { BillingStatementTag } from "document-models/billing-statement/gen/types.js";
-import type { BillingStatementTagsOperations } from "../../gen/tags/operations.js";
+import type {
+  BillingStatementTagsOperations,
+  BillingStatementTag,
+} from "@powerhousedao/contributor-billing/document-models/billing-statement";
 
-export const reducer: BillingStatementTagsOperations = {
+export const billingStatementTagsOperations: BillingStatementTagsOperations = {
   editLineItemTagOperation(state, action, dispatch) {
     const stateItem = state.lineItems.find((x) => x.id === action.input.lineItemId);
     if (!stateItem) throw new Error("Item matching input.lineItemId not found");

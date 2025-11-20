@@ -3,7 +3,7 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
-import utils from "../../gen/utils.js";
+import * as utils from "../../gen/utils.js";
 import { type EditLineItemTagInput, type AddLineItemInput } from "../../gen/schema/index.js";
 import { reducer } from "../../gen/reducer.js";
 import * as creators from "../../gen/tags/creators.js";

@@ -4,15 +4,20 @@
  */
 
 import { generateMock } from "@powerhousedao/codegen";
-import utils from "../../gen/utils.js";
+import * as utils from "../../gen/utils.js";
 import {
-  z,
   type EditIssuerInput,
   type EditIssuerBankInput,
   type EditIssuerWalletInput,
   type EditPayerInput,
   type EditPayerBankInput,
   type EditPayerWalletInput,
+  EditIssuerInputSchema,
+  EditIssuerBankInputSchema,
+  EditIssuerWalletInputSchema,
+  EditPayerInputSchema,
+  EditPayerBankInputSchema,
+  EditPayerWalletInputSchema,
 } from "../../gen/schema/index.js";
 import { reducer } from "../../gen/reducer.js";
 import * as creators from "../../gen/parties/creators.js";
@@ -26,7 +31,7 @@ describe("Parties Operations", () => {
   });
 
   it("should handle editIssuer operation", () => {
-    const input: EditIssuerInput = generateMock(z.EditIssuerInputSchema());
+    const input: EditIssuerInput = generateMock(EditIssuerInputSchema());
 
     const updatedDocument = reducer(document, creators.editIssuer(input));
 
@@ -37,7 +42,7 @@ describe("Parties Operations", () => {
   });
   it("should handle editIssuerBank operation", () => {
     const input: EditIssuerBankInput = generateMock(
-      z.EditIssuerBankInputSchema(),
+      EditIssuerBankInputSchema(),
     );
 
     const updatedDocument = reducer(document, creators.editIssuerBank(input));
@@ -49,7 +54,7 @@ describe("Parties Operations", () => {
   });
   it("should handle editIssuerWallet operation", () => {
     const input: EditIssuerWalletInput = generateMock(
-      z.EditIssuerWalletInputSchema(),
+      EditIssuerWalletInputSchema(),
     );
 
     const updatedDocument = reducer(document, creators.editIssuerWallet(input));
@@ -62,7 +67,7 @@ describe("Parties Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editPayer operation", () => {
-    const input: EditPayerInput = generateMock(z.EditPayerInputSchema());
+    const input: EditPayerInput = generateMock(EditPayerInputSchema());
 
     const updatedDocument = reducer(document, creators.editPayer(input));
 
@@ -73,7 +78,7 @@ describe("Parties Operations", () => {
   });
   it("should handle editPayerBank operation", () => {
     const input: EditPayerBankInput = generateMock(
-      z.EditPayerBankInputSchema(),
+      EditPayerBankInputSchema(),
     );
 
     const updatedDocument = reducer(document, creators.editPayerBank(input));
@@ -85,7 +90,7 @@ describe("Parties Operations", () => {
   });
   it("should handle editPayerWallet operation", () => {
     const input: EditPayerWalletInput = generateMock(
-      z.EditPayerWalletInputSchema(),
+      EditPayerWalletInputSchema(),
     );
 
     const updatedDocument = reducer(document, creators.editPayerWallet(input));

@@ -4,12 +4,14 @@
  */
 
 import { generateMock } from "@powerhousedao/codegen";
-import utils from "../../gen/utils.js";
+import * as utils from "../../gen/utils.js";
 import {
-  z,
   type AddLineItemInput,
   type EditLineItemInput,
   type DeleteLineItemInput,
+  AddLineItemInputSchema,
+  EditLineItemInputSchema,
+  DeleteLineItemInputSchema,
 } from "../../gen/schema/index.js";
 import { reducer } from "../../gen/reducer.js";
 import * as creators from "../../gen/items/creators.js";
@@ -23,7 +25,7 @@ describe("Items Operations", () => {
   });
 
   it("should handle addLineItem operation", () => {
-    const input: AddLineItemInput = generateMock(z.AddLineItemInputSchema());
+    const input: AddLineItemInput = generateMock(AddLineItemInputSchema());
 
     const updatedDocument = reducer(document, creators.addLineItem(input));
 
@@ -33,7 +35,7 @@ describe("Items Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editLineItem operation", () => {
-    const input: EditLineItemInput = generateMock(z.EditLineItemInputSchema());
+    const input: EditLineItemInput = generateMock(EditLineItemInputSchema());
 
     const updatedDocument = reducer(document, creators.editLineItem(input));
 
@@ -44,7 +46,7 @@ describe("Items Operations", () => {
   });
   it("should handle deleteLineItem operation", () => {
     const input: DeleteLineItemInput = generateMock(
-      z.DeleteLineItemInputSchema(),
+      DeleteLineItemInputSchema(),
     );
 
     const updatedDocument = reducer(document, creators.deleteLineItem(input));

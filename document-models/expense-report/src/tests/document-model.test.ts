@@ -4,21 +4,22 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import utils, {
+import {
   initialGlobalState,
   initialLocalState,
+  createDocument,
 } from "../../gen/utils.js";
 
 describe("Expense Report Document Model", () => {
   it("should create a new Expense Report document", () => {
-    const document = utils.createDocument();
+    const document = createDocument();
 
     expect(document).toBeDefined();
     expect(document.header.documentType).toBe("powerhouse/expense-report");
   });
 
   it("should create a new Expense Report document with a valid initial state", () => {
-    const document = utils.createDocument();
+    const document = createDocument();
     expect(document.state.global).toStrictEqual(initialGlobalState);
     expect(document.state.local).toStrictEqual(initialLocalState);
   });

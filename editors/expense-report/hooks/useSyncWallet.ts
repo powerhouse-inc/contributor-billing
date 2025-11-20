@@ -1,4 +1,4 @@
-import { useSelectedDriveDocuments } from "@powerhousedao/reactor-browser";
+import { useDocumentsInSelectedDrive } from "@powerhousedao/reactor-browser";
 import { actions } from "../../../document-models/expense-report/index.js";
 import { generateId } from "document-model";
 import type { LineItemGroup } from "../../../document-models/expense-report/gen/types.js";
@@ -20,7 +20,7 @@ interface BillingStatementLineItem {
 }
 
 export function useSyncWallet() {
-  const documents = useSelectedDriveDocuments();
+  const documents = useDocumentsInSelectedDrive();
 
   const syncWallet = (
     walletAddress: string,

@@ -1,8 +1,8 @@
-import { ComponentProps, useEffect, useState } from "react";
+import { type ComponentProps, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { EditLegalEntityWalletInput } from "./legalEntity.js";
+import type { EditLegalEntityWalletInput } from "./legalEntity.js";
 import { InputField } from "../components/inputField.js";
-import { ValidationResult } from "../validation/validationManager.js";
+import type { ValidationResult } from "../validation/validationManager.js";
 import { Select } from "@powerhousedao/document-engineering";
 import { getAllChainConfigs } from "../utils/utils.js";
 

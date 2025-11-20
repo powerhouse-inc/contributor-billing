@@ -3,7 +3,7 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
-import utils from "../../gen/utils.js";
+import * as utils from "../../gen/utils.js";
 import {
   type AddLineItemInput,
   type EditLineItemInput,

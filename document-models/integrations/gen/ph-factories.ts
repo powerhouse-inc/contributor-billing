@@ -1,42 +1,21 @@
 /**
  * Factory methods for creating IntegrationsDocument instances
  */
-
-import {
-  createBaseState,
-  defaultBaseState,
-  type PHAuthState,
-  type PHDocumentState,
-  type PHBaseState,
-} from "document-model";
+import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
+import { createBaseState, defaultBaseState } from "document-model/core";
 import type {
   IntegrationsDocument,
   IntegrationsLocalState,
-  IntegrationsState,
+  IntegrationsGlobalState,
+  IntegrationsPHState,
 } from "./types.js";
 import { createDocument } from "./utils.js";
 
-export type IntegrationsPHState = PHBaseState & {
-  global: IntegrationsState;
-  local: IntegrationsLocalState;
-};
-
-export function defaultGlobalState(): IntegrationsState {
+export function defaultGlobalState(): IntegrationsGlobalState {
   return {
-    gnosisSafe: {
-      safeAddress: "",
-      signerPrivateKey: "",
-    },
-    googleCloud: {
-      projectId: "",
-      location: "",
-      processorId: "",
-      keyFile: null,
-    },
-    requestFinance: {
-      apiKey: "",
-      email: "",
-    },
+    gnosisSafe: null,
+    googleCloud: null,
+    requestFinance: null,
   };
 }
 
@@ -53,12 +32,12 @@ export function defaultPHState(): IntegrationsPHState {
 }
 
 export function createGlobalState(
-  state?: Partial<IntegrationsState>,
-): IntegrationsState {
+  state?: Partial<IntegrationsGlobalState>,
+): IntegrationsGlobalState {
   return {
     ...defaultGlobalState(),
     ...(state || {}),
-  } as IntegrationsState;
+  } as IntegrationsGlobalState;
 }
 
 export function createLocalState(
@@ -72,7 +51,7 @@ export function createLocalState(
 
 export function createState(
   baseState?: Partial<PHBaseState>,
-  globalState?: Partial<IntegrationsState>,
+  globalState?: Partial<IntegrationsGlobalState>,
   localState?: Partial<IntegrationsLocalState>,
 ): IntegrationsPHState {
   return {
@@ -91,17 +70,17 @@ export function createIntegrationsDocument(
   state?: Partial<{
     auth?: Partial<PHAuthState>;
     document?: Partial<PHDocumentState>;
-    global?: Partial<IntegrationsState>;
+    global?: Partial<IntegrationsGlobalState>;
     local?: Partial<IntegrationsLocalState>;
   }>,
 ): IntegrationsDocument {
   const document = createDocument(
     state
       ? createState(
-        createBaseState(state.auth, state.document),
-        state.global,
-        state.local,
-      )
+          createBaseState(state.auth, state.document),
+          state.global,
+          state.local,
+        )
       : undefined,
   );
 

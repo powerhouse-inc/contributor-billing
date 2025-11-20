@@ -1,17 +1,17 @@
 import {
-  ComponentPropsWithRef,
+  type ComponentPropsWithRef,
   forwardRef,
-  Ref,
+  type Ref,
   useCallback,
   useState,
   useEffect,
   useMemo,
 } from "react";
 import { twMerge } from "tailwind-merge";
-import { EditLegalEntityBankInput } from "./legalEntity.js";
+import type { EditLegalEntityBankInput } from "./legalEntity.js";
 import { CountryForm } from "../components/countryForm.js";
 import { InputField } from "../components/inputField.js";
-import { ValidationResult } from "../validation/validationManager.js";
+import type { ValidationResult } from "../validation/validationManager.js";
 import { Select } from "@powerhousedao/document-engineering";
 import { isValidIBAN } from "../validation/validationRules.js";
 

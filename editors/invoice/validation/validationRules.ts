@@ -1,4 +1,4 @@
-import { ValidationRule } from "./validationManager.js";
+import type { ValidationRule } from "./validationManager.js";
 
 // Helper function to validate Ethereum address
 function isValidEthereumAddress(address: string): boolean {

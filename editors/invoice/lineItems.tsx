@@ -1,4 +1,5 @@
-import { RWAButton, toast } from "@powerhousedao/design-system";
+import { toast } from "@powerhousedao/design-system/connect";
+import { RWAButton } from "@powerhousedao/design-system/rwa";
 import {
   type EditInvoiceInput,
   type DeleteLineItemInput,

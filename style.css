@@ -1,5 +1,5 @@
-@import "tailwindcss" source("./");
-@import './node_modules/@powerhousedao/design-system/dist/style.css';
+@import "tailwindcss";
+@import "@powerhousedao/design-system/theme.css";
 @import './node_modules/@powerhousedao/document-engineering/dist/style.css';
 @import './node_modules/@powerhousedao/document-engineering/dist/style.css';
 

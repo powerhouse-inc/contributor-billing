@@ -1,24 +1,26 @@
+import type { DocumentModelUtils } from "document-model";
 import {
-  type CreateDocument,
-  type CreateState,
-  type LoadFromFile,
-  type LoadFromInput,
   baseCreateDocument,
-  baseSaveToFile,
   baseSaveToFileHandle,
-  baseLoadFromFile,
   baseLoadFromInput,
   defaultBaseState,
   generateId,
-} from "document-model";
-import {
-  type ExpenseReportState,
-  type ExpenseReportLocalState,
+} from "document-model/core";
+import type {
+  ExpenseReportGlobalState,
+  ExpenseReportLocalState,
 } from "./types.js";
-import { ExpenseReportPHState } from "./ph-factories.js";
+import type { ExpenseReportPHState } from "./types.js";
 import { reducer } from "./reducer.js";
+import { expenseReportDocumentType } from "./document-type.js";
+import {
+  isExpenseReportDocument,
+  assertIsExpenseReportDocument,
+  isExpenseReportState,
+  assertIsExpenseReportState,
+} from "./document-schema.js";
 
-export const initialGlobalState: ExpenseReportState = {
+export const initialGlobalState: ExpenseReportGlobalState = {
   wallets: [],
   groups: [
     {
@@ -162,46 +164,50 @@ export const initialGlobalState: ExpenseReportState = {
 };
 export const initialLocalState: ExpenseReportLocalState = {};
 
-export const createState: CreateState<ExpenseReportPHState> = (state) => {
-  return {
-    ...defaultBaseState(),
-    global: { ...initialGlobalState, ...(state?.global ?? {}) },
-    local: { ...initialLocalState, ...(state?.local ?? {}) },
-  };
-};
-
-export const createDocument: CreateDocument<ExpenseReportPHState> = (state) => {
-  const document = baseCreateDocument(createState, state);
-  document.header.documentType = "powerhouse/expense-report";
-  // for backwards compatibility, but this is NOT a valid signed document id
-  document.header.id = generateId();
-  return document;
-};
-
-export const saveToFile = (document: any, path: string, name?: string) => {
-  return baseSaveToFile(document, path, ".phdm", name);
-};
-
-export const saveToFileHandle = (document: any, input: any) => {
-  return baseSaveToFileHandle(document, input);
-};
-
-export const loadFromFile: LoadFromFile<ExpenseReportPHState> = (path) => {
-  return baseLoadFromFile(path, reducer);
-};
-
-export const loadFromInput: LoadFromInput<ExpenseReportPHState> = (input) => {
-  return baseLoadFromInput(input, reducer);
-};
-
-const utils = {
+export const utils: DocumentModelUtils<ExpenseReportPHState> = {
   fileExtension: ".phdm",
-  createState,
-  createDocument,
-  saveToFile,
-  saveToFileHandle,
-  loadFromFile,
-  loadFromInput,
+  createState(state) {
+    return {
+      ...defaultBaseState(),
+      global: { ...initialGlobalState, ...state?.global },
+      local: { ...initialLocalState, ...state?.local },
+    };
+  },
+  createDocument(state) {
+    const document = baseCreateDocument(utils.createState, state);
+
+    document.header.documentType = expenseReportDocumentType;
+
+    // for backwards compatibility, but this is NOT a valid signed document id
+    document.header.id = generateId();
+
+    return document;
+  },
+  saveToFileHandle(document, input) {
+    return baseSaveToFileHandle(document, input);
+  },
+  loadFromInput(input) {
+    return baseLoadFromInput(input, reducer);
+  },
+  isStateOfType(state) {
+    return isExpenseReportState(state);
+  },
+  assertIsStateOfType(state) {
+    return assertIsExpenseReportState(state);
+  },
+  isDocumentOfType(document) {
+    return isExpenseReportDocument(document);
+  },
+  assertIsDocumentOfType(document) {
+    return assertIsExpenseReportDocument(document);
+  },
 };
 
-export default utils;
+export const createDocument = utils.createDocument;
+export const createState = utils.createState;
+export const saveToFileHandle = utils.saveToFileHandle;
+export const loadFromInput = utils.loadFromInput;
+export const isStateOfType = utils.isStateOfType;
+export const assertIsStateOfType = utils.assertIsStateOfType;
+export const isDocumentOfType = utils.isDocumentOfType;
+export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

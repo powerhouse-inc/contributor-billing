@@ -1,20 +1,47 @@
 // TODO: remove eslint-disable rules once refactor is done
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+import type { StateReducer } from "document-model";
+import { isDocumentAction, createReducer } from "document-model/core";
+import type { InvoicePHState } from "@powerhousedao/contributor-billing/document-models/invoice";
+
+import { invoiceGeneralOperations } from "../src/reducers/general.js";
+import { invoicePartiesOperations } from "../src/reducers/parties.js";
+import { invoiceItemsOperations } from "../src/reducers/items.js";
+import { invoiceTransitionsOperations } from "../src/reducers/transitions.js";
+
 import {
-  type StateReducer,
-  isDocumentAction,
-  createReducer,
-} from "document-model";
-import { InvoicePHState } from "./ph-factories.js";
-import { z } from "./types.js";
+  EditInvoiceInputSchema,
+  EditStatusInputSchema,
+  EditPaymentDataInputSchema,
+  SetExportedDataInputSchema,
+  AddPaymentInputSchema,
+  EditIssuerInputSchema,
+  EditIssuerBankInputSchema,
+  EditIssuerWalletInputSchema,
+  EditPayerInputSchema,
+  EditPayerBankInputSchema,
+  EditPayerWalletInputSchema,
+  AddLineItemInputSchema,
+  EditLineItemInputSchema,
+  DeleteLineItemInputSchema,
+  SetLineItemTagInputSchema,
+  SetInvoiceTagInputSchema,
+  CancelInputSchema,
+  IssueInputSchema,
+  ResetInputSchema,
+  RejectInputSchema,
+  AcceptInputSchema,
+  ReinstateInputSchema,
+  SchedulePaymentInputSchema,
+  ReapprovePaymentInputSchema,
+  RegisterPaymentTxInputSchema,
+  ReportPaymentIssueInputSchema,
+  ConfirmPaymentInputSchema,
+  ClosePaymentInputSchema,
+} from "./schema/zod.js";
 
-import { reducer as GeneralReducer } from "../src/reducers/general.js";
-import { reducer as PartiesReducer } from "../src/reducers/parties.js";
-import { reducer as ItemsReducer } from "../src/reducers/items.js";
-import { reducer as TransitionsReducer } from "../src/reducers/transitions.js";
-
-export const stateReducer: StateReducer<InvoicePHState> = (
+const stateReducer: StateReducer<InvoicePHState> = (
   state,
   action,
   dispatch,
@@ -25,8 +52,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
 
   switch (action.type) {
     case "EDIT_INVOICE":
-      z.EditInvoiceInputSchema().parse(action.input);
-      GeneralReducer.editInvoiceOperation(
+      EditInvoiceInputSchema().parse(action.input);
+      invoiceGeneralOperations.editInvoiceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -34,8 +61,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "EDIT_STATUS":
-      z.EditStatusInputSchema().parse(action.input);
-      GeneralReducer.editStatusOperation(
+      EditStatusInputSchema().parse(action.input);
+      invoiceGeneralOperations.editStatusOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -43,8 +70,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "EDIT_PAYMENT_DATA":
-      z.EditPaymentDataInputSchema().parse(action.input);
-      GeneralReducer.editPaymentDataOperation(
+      EditPaymentDataInputSchema().parse(action.input);
+      invoiceGeneralOperations.editPaymentDataOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -52,8 +79,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "SET_EXPORTED_DATA":
-      z.SetExportedDataInputSchema().parse(action.input);
-      GeneralReducer.setExportedDataOperation(
+      SetExportedDataInputSchema().parse(action.input);
+      invoiceGeneralOperations.setExportedDataOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -61,8 +88,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "ADD_PAYMENT":
-      z.AddPaymentInputSchema().parse(action.input);
-      GeneralReducer.addPaymentOperation(
+      AddPaymentInputSchema().parse(action.input);
+      invoiceGeneralOperations.addPaymentOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -70,8 +97,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "EDIT_ISSUER":
-      z.EditIssuerInputSchema().parse(action.input);
-      PartiesReducer.editIssuerOperation(
+      EditIssuerInputSchema().parse(action.input);
+      invoicePartiesOperations.editIssuerOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -79,8 +106,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "EDIT_ISSUER_BANK":
-      z.EditIssuerBankInputSchema().parse(action.input);
-      PartiesReducer.editIssuerBankOperation(
+      EditIssuerBankInputSchema().parse(action.input);
+      invoicePartiesOperations.editIssuerBankOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -88,8 +115,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "EDIT_ISSUER_WALLET":
-      z.EditIssuerWalletInputSchema().parse(action.input);
-      PartiesReducer.editIssuerWalletOperation(
+      EditIssuerWalletInputSchema().parse(action.input);
+      invoicePartiesOperations.editIssuerWalletOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -97,8 +124,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "EDIT_PAYER":
-      z.EditPayerInputSchema().parse(action.input);
-      PartiesReducer.editPayerOperation(
+      EditPayerInputSchema().parse(action.input);
+      invoicePartiesOperations.editPayerOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -106,8 +133,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "EDIT_PAYER_BANK":
-      z.EditPayerBankInputSchema().parse(action.input);
-      PartiesReducer.editPayerBankOperation(
+      EditPayerBankInputSchema().parse(action.input);
+      invoicePartiesOperations.editPayerBankOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -115,8 +142,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "EDIT_PAYER_WALLET":
-      z.EditPayerWalletInputSchema().parse(action.input);
-      PartiesReducer.editPayerWalletOperation(
+      EditPayerWalletInputSchema().parse(action.input);
+      invoicePartiesOperations.editPayerWalletOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -124,8 +151,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "ADD_LINE_ITEM":
-      z.AddLineItemInputSchema().parse(action.input);
-      ItemsReducer.addLineItemOperation(
+      AddLineItemInputSchema().parse(action.input);
+      invoiceItemsOperations.addLineItemOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -133,8 +160,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "EDIT_LINE_ITEM":
-      z.EditLineItemInputSchema().parse(action.input);
-      ItemsReducer.editLineItemOperation(
+      EditLineItemInputSchema().parse(action.input);
+      invoiceItemsOperations.editLineItemOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -142,8 +169,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "DELETE_LINE_ITEM":
-      z.DeleteLineItemInputSchema().parse(action.input);
-      ItemsReducer.deleteLineItemOperation(
+      DeleteLineItemInputSchema().parse(action.input);
+      invoiceItemsOperations.deleteLineItemOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -151,8 +178,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "SET_LINE_ITEM_TAG":
-      z.SetLineItemTagInputSchema().parse(action.input);
-      ItemsReducer.setLineItemTagOperation(
+      SetLineItemTagInputSchema().parse(action.input);
+      invoiceItemsOperations.setLineItemTagOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -160,8 +187,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "SET_INVOICE_TAG":
-      z.SetInvoiceTagInputSchema().parse(action.input);
-      ItemsReducer.setInvoiceTagOperation(
+      SetInvoiceTagInputSchema().parse(action.input);
+      invoiceItemsOperations.setInvoiceTagOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -169,8 +196,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "CANCEL":
-      z.CancelInputSchema().parse(action.input);
-      TransitionsReducer.cancelOperation(
+      CancelInputSchema().parse(action.input);
+      invoiceTransitionsOperations.cancelOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -178,8 +205,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "ISSUE":
-      z.IssueInputSchema().parse(action.input);
-      TransitionsReducer.issueOperation(
+      IssueInputSchema().parse(action.input);
+      invoiceTransitionsOperations.issueOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -187,8 +214,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "RESET":
-      z.ResetInputSchema().parse(action.input);
-      TransitionsReducer.resetOperation(
+      ResetInputSchema().parse(action.input);
+      invoiceTransitionsOperations.resetOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -196,8 +223,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "REJECT":
-      z.RejectInputSchema().parse(action.input);
-      TransitionsReducer.rejectOperation(
+      RejectInputSchema().parse(action.input);
+      invoiceTransitionsOperations.rejectOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -205,8 +232,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "ACCEPT":
-      z.AcceptInputSchema().parse(action.input);
-      TransitionsReducer.acceptOperation(
+      AcceptInputSchema().parse(action.input);
+      invoiceTransitionsOperations.acceptOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -214,8 +241,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "REINSTATE":
-      z.ReinstateInputSchema().parse(action.input);
-      TransitionsReducer.reinstateOperation(
+      ReinstateInputSchema().parse(action.input);
+      invoiceTransitionsOperations.reinstateOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -223,8 +250,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "SCHEDULE_PAYMENT":
-      z.SchedulePaymentInputSchema().parse(action.input);
-      TransitionsReducer.schedulePaymentOperation(
+      SchedulePaymentInputSchema().parse(action.input);
+      invoiceTransitionsOperations.schedulePaymentOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -232,8 +259,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "REAPPROVE_PAYMENT":
-      z.ReapprovePaymentInputSchema().parse(action.input);
-      TransitionsReducer.reapprovePaymentOperation(
+      ReapprovePaymentInputSchema().parse(action.input);
+      invoiceTransitionsOperations.reapprovePaymentOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -241,8 +268,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "REGISTER_PAYMENT_TX":
-      z.RegisterPaymentTxInputSchema().parse(action.input);
-      TransitionsReducer.registerPaymentTxOperation(
+      RegisterPaymentTxInputSchema().parse(action.input);
+      invoiceTransitionsOperations.registerPaymentTxOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -250,8 +277,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "REPORT_PAYMENT_ISSUE":
-      z.ReportPaymentIssueInputSchema().parse(action.input);
-      TransitionsReducer.reportPaymentIssueOperation(
+      ReportPaymentIssueInputSchema().parse(action.input);
+      invoiceTransitionsOperations.reportPaymentIssueOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -259,8 +286,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "CONFIRM_PAYMENT":
-      z.ConfirmPaymentInputSchema().parse(action.input);
-      TransitionsReducer.confirmPaymentOperation(
+      ConfirmPaymentInputSchema().parse(action.input);
+      invoiceTransitionsOperations.confirmPaymentOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -268,8 +295,8 @@ export const stateReducer: StateReducer<InvoicePHState> = (
       break;
 
     case "CLOSE_PAYMENT":
-      z.ClosePaymentInputSchema().parse(action.input);
-      TransitionsReducer.closePaymentOperation(
+      ClosePaymentInputSchema().parse(action.input);
+      invoiceTransitionsOperations.closePaymentOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

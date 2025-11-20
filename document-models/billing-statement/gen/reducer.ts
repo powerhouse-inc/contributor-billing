@@ -1,19 +1,24 @@
 // TODO: remove eslint-disable rules once refactor is done
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+import type { StateReducer } from "document-model";
+import { isDocumentAction, createReducer } from "document-model/core";
+import type { BillingStatementPHState } from "@powerhousedao/contributor-billing/document-models/billing-statement";
+
+import { billingStatementGeneralOperations } from "../src/reducers/general.js";
+import { billingStatementLineItemsOperations } from "../src/reducers/line-items.js";
+import { billingStatementTagsOperations } from "../src/reducers/tags.js";
+
 import {
-  type StateReducer,
-  isDocumentAction,
-  createReducer,
-} from "document-model";
-import { BillingStatementPHState } from "./ph-factories.js";
-import { z } from "./types.js";
+  EditBillingStatementInputSchema,
+  EditContributorInputSchema,
+  EditStatusInputSchema,
+  AddLineItemInputSchema,
+  EditLineItemInputSchema,
+  EditLineItemTagInputSchema,
+} from "./schema/zod.js";
 
-import { reducer as GeneralReducer } from "../src/reducers/general.js";
-import { reducer as LineItemsReducer } from "../src/reducers/line-items.js";
-import { reducer as TagsReducer } from "../src/reducers/tags.js";
-
-export const stateReducer: StateReducer<BillingStatementPHState> = (
+const stateReducer: StateReducer<BillingStatementPHState> = (
   state,
   action,
   dispatch,
@@ -24,8 +29,8 @@ export const stateReducer: StateReducer<BillingStatementPHState> = (
 
   switch (action.type) {
     case "EDIT_BILLING_STATEMENT":
-      z.EditBillingStatementInputSchema().parse(action.input);
-      GeneralReducer.editBillingStatementOperation(
+      EditBillingStatementInputSchema().parse(action.input);
+      billingStatementGeneralOperations.editBillingStatementOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -33,8 +38,8 @@ export const stateReducer: StateReducer<BillingStatementPHState> = (
       break;
 
     case "EDIT_CONTRIBUTOR":
-      z.EditContributorInputSchema().parse(action.input);
-      GeneralReducer.editContributorOperation(
+      EditContributorInputSchema().parse(action.input);
+      billingStatementGeneralOperations.editContributorOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -42,8 +47,8 @@ export const stateReducer: StateReducer<BillingStatementPHState> = (
       break;
 
     case "EDIT_STATUS":
-      z.EditStatusInputSchema().parse(action.input);
-      GeneralReducer.editStatusOperation(
+      EditStatusInputSchema().parse(action.input);
+      billingStatementGeneralOperations.editStatusOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -51,8 +56,8 @@ export const stateReducer: StateReducer<BillingStatementPHState> = (
       break;
 
     case "ADD_LINE_ITEM":
-      z.AddLineItemInputSchema().parse(action.input);
-      LineItemsReducer.addLineItemOperation(
+      AddLineItemInputSchema().parse(action.input);
+      billingStatementLineItemsOperations.addLineItemOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -60,8 +65,8 @@ export const stateReducer: StateReducer<BillingStatementPHState> = (
       break;
 
     case "EDIT_LINE_ITEM":
-      z.EditLineItemInputSchema().parse(action.input);
-      LineItemsReducer.editLineItemOperation(
+      EditLineItemInputSchema().parse(action.input);
+      billingStatementLineItemsOperations.editLineItemOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -69,8 +74,8 @@ export const stateReducer: StateReducer<BillingStatementPHState> = (
       break;
 
     case "EDIT_LINE_ITEM_TAG":
-      z.EditLineItemTagInputSchema().parse(action.input);
-      TagsReducer.editLineItemTagOperation(
+      EditLineItemTagInputSchema().parse(action.input);
+      billingStatementTagsOperations.editLineItemTagOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

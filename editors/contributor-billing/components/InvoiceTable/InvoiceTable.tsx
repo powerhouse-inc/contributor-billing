@@ -6,7 +6,7 @@ import { type DocumentModelModule } from "document-model";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
 import { exportExpenseReportCSV } from "../../../../scripts/contributor-billing/createExpenseReportCsv.js";
-import { toast } from "@powerhousedao/design-system";
+import { toast } from "@powerhousedao/design-system/connect";
 import {
   actions,
   type InvoiceAction,
@@ -16,6 +16,7 @@ import {
   useSelectedDrive,
   dispatchActions,
   setSelectedNode,
+  type VetraDocumentModelModule,
 } from "@powerhousedao/reactor-browser";
 import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
 
@@ -42,8 +43,8 @@ interface InvoiceTableProps {
       | { [id: string]: boolean }
       | ((prev: { [id: string]: boolean }) => { [id: string]: boolean })
   ) => void;
-  filteredDocumentModels: DocumentModelModule[];
-  onSelectDocumentModel: (model: DocumentModelModule) => void;
+  filteredDocumentModels: VetraDocumentModelModule[];
+  onSelectDocumentModel: (model: VetraDocumentModelModule) => void;
   getDocDispatcher: (id: string) => any;
   selectedStatuses: string[];
   onStatusChange: (value: string | string[]) => void;
@@ -55,6 +56,7 @@ export const InvoiceTable = ({
   files,
   state,
   selected,
+  setSelected,
   filteredDocumentModels,
   onSelectDocumentModel,
   getDocDispatcher,
@@ -153,7 +155,7 @@ export const InvoiceTable = ({
     console.log("created billing statement doc", createdNode);
     if (!createdNode?.id) {
       console.error("Failed to create billing statement");
-      return null;
+      return;
     }
     await dispatchActions(
       billingStatementActions.editContributor({
@@ -329,7 +331,7 @@ export const InvoiceTable = ({
   );
   const createIntegrationsDocument = async () => {
     const integrationsDocument = filteredDocumentModels?.find(
-      (model) => model.documentModel.id === "powerhouse/integrations"
+      (model) => model.id === "powerhouse/integrations"
     );
     if (integrationsDocument) {
       const createdNode = await addDocument(
@@ -367,7 +369,7 @@ export const InvoiceTable = ({
     } else {
       // Create new expense report
       const expenseReportModel = filteredDocumentModels?.find(
-        (model) => model.documentModel.id === "powerhouse/expense-report"
+        (model) => model.id === "powerhouse/expense-report"
       );
       if (expenseReportModel) {
         const createdNode = await addDocument(
@@ -406,6 +408,9 @@ export const InvoiceTable = ({
         hasBillingStatements={hasBillingStatements}
         expenseReportDoc={expenseReportDoc}
         onCreateOrOpenExpenseReport={handleCreateOrOpenExpenseReport}
+        selected={selected}
+        handleCreateBillingStatement={handleCreateBillingStatement}
+        setSelected={setSelected}
       />
       {shouldShowSection("DRAFT") && (
         <InvoiceTableSection
@@ -414,17 +419,17 @@ export const InvoiceTable = ({
           onSelectDocumentModel={onSelectDocumentModel}
           filteredDocumentModels={filteredDocumentModels}
         >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
+          <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-400 overflow-hidden">
             <thead>
               <tr className="bg-gray-50 font-medium text-gray-500">
-                <th className="px-2 py-2 w-8"></th>
+                <th className="px-2 py-2 w-8 rounded-tl-sm"></th>
                 <th className="px-2 py-2 text-center">Invoice</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
                 <th className="px-2 py-2 text-center">Due Date</th>
                 <th className="px-2 py-2 text-center">Currency</th>
                 <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2">Exported</th>
+                <th className="px-2 py-2 rounded-tr-sm">Exported</th>
               </tr>
             </thead>
             <tbody>
@@ -445,10 +450,10 @@ export const InvoiceTable = ({
       )}
       {shouldShowSection("ISSUED") && (
         <InvoiceTableSection title="Issued" count={issued.length}>
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
+          <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-400 overflow-hidden">
             <thead>
               <tr className="bg-gray-50 font-medium text-gray-500">
-                <th className="px-2 py-2 w-8"></th>
+                <th className="px-2 py-2 w-8 rounded-tl-sm"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
@@ -456,7 +461,7 @@ export const InvoiceTable = ({
                 <th className="px-2 py-2 text-center">Currency</th>
                 <th className="px-2 py-2 text-center">Amount</th>
                 <th className="px-2 py-2 text-center">Billing Statement</th>
-                <th className="px-2 py-2">Exported</th>
+                <th className="px-2 py-2 rounded-tr-sm">Exported</th>
               </tr>
             </thead>
             <tbody>
@@ -483,10 +488,10 @@ export const InvoiceTable = ({
           count={accepted.length}
           color="bg-green-100 text-green-600"
         >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
+          <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-400 overflow-hidden">
             <thead>
               <tr className="bg-gray-50 font-medium text-gray-500">
-                <th className="px-2 py-2 w-8"></th>
+                <th className="px-2 py-2 w-8 rounded-tl-sm"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
@@ -494,7 +499,7 @@ export const InvoiceTable = ({
                 <th className="px-2 py-2 text-center">Currency</th>
                 <th className="px-2 py-2 text-center">Amount</th>
                 <th className="px-2 py-2 text-center">Billing Statement</th>
-                <th className="px-2 py-2">Exported</th>
+                <th className="px-2 py-2 rounded-tr-sm">Exported</th>
               </tr>
             </thead>
             <tbody>
@@ -521,10 +526,10 @@ export const InvoiceTable = ({
           count={paymentScheduled.length}
           color="bg-green-100 text-green-600"
         >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
+          <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-400 overflow-hidden">
             <thead>
               <tr className="bg-gray-50 font-medium text-gray-500">
-                <th className="px-2 py-2 w-8"></th>
+                <th className="px-2 py-2 w-8 rounded-tl-sm"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
@@ -532,7 +537,7 @@ export const InvoiceTable = ({
                 <th className="px-2 py-2 text-center">Currency</th>
                 <th className="px-2 py-2 text-center">Amount</th>
                 <th className="px-2 py-2 text-center">Billing Statement</th>
-                <th className="px-2 py-2">Exported</th>
+                <th className="px-2 py-2 rounded-tr-sm">Exported</th>
               </tr>
             </thead>
             <tbody>
@@ -559,10 +564,10 @@ export const InvoiceTable = ({
           count={paymentSent.length}
           color="bg-green-100 text-green-600"
         >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
+          <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-400 overflow-hidden">
             <thead>
               <tr className="bg-gray-50 font-medium text-gray-500">
-                <th className="px-2 py-2 w-8"></th>
+                <th className="px-2 py-2 w-8 rounded-tl-sm"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
@@ -570,7 +575,7 @@ export const InvoiceTable = ({
                 <th className="px-2 py-2 text-center">Currency</th>
                 <th className="px-2 py-2 text-center">Amount</th>
                 <th className="px-2 py-2 text-center">Billing Statement</th>
-                <th className="px-2 py-2">Exported</th>
+                <th className="px-2 py-2 rounded-tr-sm">Exported</th>
               </tr>
             </thead>
             <tbody>
@@ -597,10 +602,10 @@ export const InvoiceTable = ({
           count={paymentIssue.length}
           color="bg-yellow-100 text-yellow-600"
         >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
+          <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-400 overflow-hidden">
             <thead>
               <tr className="bg-gray-50 font-medium text-gray-500">
-                <th className="px-2 py-2 w-8"></th>
+                <th className="px-2 py-2 w-8 rounded-tl-sm"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
@@ -608,7 +613,7 @@ export const InvoiceTable = ({
                 <th className="px-2 py-2 text-center">Currency</th>
                 <th className="px-2 py-2 text-center">Amount</th>
                 <th className="px-2 py-2 text-center">Billing Statement</th>
-                <th className="px-2 py-2">Exported</th>
+                <th className="px-2 py-2 rounded-tr-sm">Exported</th>
               </tr>
             </thead>
             <tbody>
@@ -635,17 +640,17 @@ export const InvoiceTable = ({
           count={paymentClosed.length}
           color="bg-red-500 text-black-600"
         >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
+          <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-400 overflow-hidden">
             <thead>
               <tr className="bg-gray-50 font-medium text-gray-500">
-                <th className="px-2 py-2 w-8"></th>
+                <th className="px-2 py-2 w-8 rounded-tl-sm"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
                 <th className="px-2 py-2 text-center">Due Date</th>
                 <th className="px-2 py-2 text-center">Currency</th>
                 <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2">Exported</th>
+                <th className="px-2 py-2 rounded-tr-sm">Exported</th>
               </tr>
             </thead>
             <tbody>
@@ -670,17 +675,17 @@ export const InvoiceTable = ({
           count={rejected.length}
           color="bg-red-500 text-black-600"
         >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
+          <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-400 overflow-hidden">
             <thead>
               <tr className="bg-gray-50 font-medium text-gray-500">
-                <th className="px-2 py-2 w-8"></th>
+                <th className="px-2 py-2 w-8 rounded-tl-sm"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
                 <th className="px-2 py-2 text-center">Due Date</th>
                 <th className="px-2 py-2 text-center">Currency</th>
                 <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2">Exported</th>
+                <th className="px-2 py-2 rounded-tr-sm">Exported</th>
               </tr>
             </thead>
             <tbody>
@@ -701,17 +706,17 @@ export const InvoiceTable = ({
       )}
       {shouldShowSection("OTHER") && (
         <InvoiceTableSection title="Other" count={otherInvoices.length}>
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
+          <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-400 overflow-hidden">
             <thead>
               <tr className="bg-gray-50 font-medium text-gray-500">
-                <th className="px-2 py-2 w-8"></th>
+                <th className="px-2 py-2 w-8 rounded-tl-sm"></th>
                 <th className="px-2 py-2 text-center">Issuer</th>
                 <th className="px-2 py-2 text-center">Invoice No.</th>
                 <th className="px-2 py-2 text-center">Issue Date</th>
                 <th className="px-2 py-2 text-center">Due Date</th>
                 <th className="px-2 py-2 text-center">Currency</th>
                 <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2 text-center">Exported</th>
+                <th className="px-2 py-2 text-center rounded-tr-sm">Exported</th>
               </tr>
             </thead>
             <tbody>

@@ -4,11 +4,10 @@
  * - delete the file and run the code generator again to have it reset
  */
 
-import { deleteEditorActionInputsByTableName } from "@powerhousedao/design-system";
-import type { InvoiceTransitionsOperations } from "../../gen/transitions/operations.js";
 import { permittedTransitions } from "../../utils/statusTransitions.js";
+import type { InvoiceTransitionsOperations } from "@powerhousedao/contributor-billing/document-models/invoice";
 
-export const reducer: InvoiceTransitionsOperations = {
+export const invoiceTransitionsOperations: InvoiceTransitionsOperations = {
   cancelOperation(state, action, dispatch) {
     if (permittedTransitions[state.status].includes('CANCELLED')) {
       state.status = 'CANCELLED';

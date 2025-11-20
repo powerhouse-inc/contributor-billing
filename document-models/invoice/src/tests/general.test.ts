@@ -4,11 +4,12 @@
  */
 
 import { generateMock } from "@powerhousedao/codegen";
-import utils from "../../gen/utils.js";
+import * as utils from "../../gen/utils.js";
 import {
-  z,
   type EditInvoiceInput,
   type EditStatusInput,
+  EditInvoiceInputSchema,
+  EditStatusInputSchema,
 } from "../../gen/schema/index.js";
 import { reducer } from "../../gen/reducer.js";
 import * as creators from "../../gen/general/creators.js";
@@ -22,7 +23,7 @@ describe("General Operations", () => {
   });
 
   it("should handle editInvoice operation", () => {
-    const input: EditInvoiceInput = generateMock(z.EditInvoiceInputSchema());
+    const input: EditInvoiceInput = generateMock(EditInvoiceInputSchema());
 
     const updatedDocument = reducer(document, creators.editInvoice(input));
 
@@ -32,7 +33,7 @@ describe("General Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editStatus operation", () => {
-    const input: EditStatusInput = generateMock(z.EditStatusInputSchema());
+    const input: EditStatusInput = generateMock(EditStatusInputSchema());
 
     const updatedDocument = reducer(document, creators.editStatus(input));
 

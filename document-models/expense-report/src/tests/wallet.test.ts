@@ -5,8 +5,8 @@
 
 import { describe, it, expect, beforeEach } from "vitest";
 import { generateMock } from "@powerhousedao/codegen";
-import utils from "../../gen/utils.js";
-import { z, type AddWalletInput } from "../../gen/schema/index.js";
+import * as utils from "../../gen/utils.js";
+import { type AddWalletInput, AddWalletInputSchema } from "../../gen/schema/index.js";
 import { reducer } from "../../gen/reducer.js";
 import * as creators from "../../gen/wallet/creators.js";
 import type { ExpenseReportDocument } from "../../gen/types.js";
@@ -19,7 +19,7 @@ describe("Wallet Operations", () => {
   });
 
   it("should handle addWallet operation", () => {
-    const input: AddWalletInput = generateMock(z.AddWalletInputSchema());
+    const input: AddWalletInput = generateMock(AddWalletInputSchema());
 
     const updatedDocument = reducer(document, creators.addWallet(input));
 

@@ -1,28 +1,19 @@
 /**
  * Factory methods for creating InvoiceDocument instances
  */
-
-import {
-  createBaseState,
-  defaultBaseState,
-  type PHAuthState,
-  type PHDocumentState,
-  type PHBaseState,
-} from "document-model";
+import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
+import { createBaseState, defaultBaseState } from "document-model/core";
 import type {
   InvoiceDocument,
   InvoiceLocalState,
-  InvoiceState,
+  InvoiceGlobalState,
+  InvoicePHState,
 } from "./types.js";
 import { createDocument } from "./utils.js";
 
-export type InvoicePHState = PHBaseState & {
-  global: InvoiceState;
-  local: InvoiceLocalState;
-};
-
-export function defaultGlobalState(): InvoiceState {
+export function defaultGlobalState(): InvoiceGlobalState {
   return {
+    closureReason: null,
     invoiceNo: "",
     dateIssued: "",
     dateDue: "",
@@ -159,8 +150,10 @@ export function defaultGlobalState(): InvoiceState {
     invoiceTags: [],
     rejections: [],
     payments: [],
-    exported: null,
-    closureReason: null,
+    exported: {
+      exportedLineItems: [],
+      timestamp: "",
+    },
   };
 }
 
@@ -176,11 +169,13 @@ export function defaultPHState(): InvoicePHState {
   };
 }
 
-export function createGlobalState(state?: Partial<InvoiceState>): InvoiceState {
+export function createGlobalState(
+  state?: Partial<InvoiceGlobalState>,
+): InvoiceGlobalState {
   return {
     ...defaultGlobalState(),
     ...(state || {}),
-  } as InvoiceState;
+  } as InvoiceGlobalState;
 }
 
 export function createLocalState(
@@ -194,7 +189,7 @@ export function createLocalState(
 
 export function createState(
   baseState?: Partial<PHBaseState>,
-  globalState?: Partial<InvoiceState>,
+  globalState?: Partial<InvoiceGlobalState>,
   localState?: Partial<InvoiceLocalState>,
 ): InvoicePHState {
   return {
@@ -213,7 +208,7 @@ export function createInvoiceDocument(
   state?: Partial<{
     auth?: Partial<PHAuthState>;
     document?: Partial<PHDocumentState>;
-    global?: Partial<InvoiceState>;
+    global?: Partial<InvoiceGlobalState>;
     local?: Partial<InvoiceLocalState>;
   }>,
 ): InvoiceDocument {

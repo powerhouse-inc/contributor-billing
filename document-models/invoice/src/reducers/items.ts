@@ -1,13 +1,7 @@
-/**
- * This is a scaffold file meant for customization:
- * - modify it by implementing the reducer functions
- * - delete the file and run the code generator again to have it reset
- */
-
-import type { InvoiceItemsOperations } from "../../gen/items/operations.js";
 import type { InvoiceLineItem, InvoiceState, InvoiceTag } from "../../gen/types.js";
+import type { InvoiceItemsOperations } from "@powerhousedao/contributor-billing/document-models/invoice";
 
-export const reducer: InvoiceItemsOperations = {
+export const invoiceItemsOperations: InvoiceItemsOperations = {
   addLineItemOperation(state, action, dispatch) {
 
     const item: InvoiceLineItem = {

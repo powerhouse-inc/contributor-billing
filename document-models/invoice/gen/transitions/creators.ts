@@ -1,32 +1,45 @@
-import { createAction } from "document-model";
+import { createAction } from "document-model/core";
 import {
-  z,
-  type CancelInput,
-  type IssueInput,
-  type ResetInput,
-  type RejectInput,
-  type AcceptInput,
-  type ReinstateInput,
-  type SchedulePaymentInput,
-  type ReapprovePaymentInput,
-  type RegisterPaymentTxInput,
-  type ReportPaymentIssueInput,
-  type ConfirmPaymentInput,
-  type ClosePaymentInput,
+  CancelInputSchema,
+  IssueInputSchema,
+  ResetInputSchema,
+  RejectInputSchema,
+  AcceptInputSchema,
+  ReinstateInputSchema,
+  SchedulePaymentInputSchema,
+  ReapprovePaymentInputSchema,
+  RegisterPaymentTxInputSchema,
+  ReportPaymentIssueInputSchema,
+  ConfirmPaymentInputSchema,
+  ClosePaymentInputSchema,
+} from "../schema/zod.js";
+import type {
+  CancelInput,
+  IssueInput,
+  ResetInput,
+  RejectInput,
+  AcceptInput,
+  ReinstateInput,
+  SchedulePaymentInput,
+  ReapprovePaymentInput,
+  RegisterPaymentTxInput,
+  ReportPaymentIssueInput,
+  ConfirmPaymentInput,
+  ClosePaymentInput,
 } from "../types.js";
-import {
-  type CancelAction,
-  type IssueAction,
-  type ResetAction,
-  type RejectAction,
-  type AcceptAction,
-  type ReinstateAction,
-  type SchedulePaymentAction,
-  type ReapprovePaymentAction,
-  type RegisterPaymentTxAction,
-  type ReportPaymentIssueAction,
-  type ConfirmPaymentAction,
-  type ClosePaymentAction,
+import type {
+  CancelAction,
+  IssueAction,
+  ResetAction,
+  RejectAction,
+  AcceptAction,
+  ReinstateAction,
+  SchedulePaymentAction,
+  ReapprovePaymentAction,
+  RegisterPaymentTxAction,
+  ReportPaymentIssueAction,
+  ConfirmPaymentAction,
+  ClosePaymentAction,
 } from "./actions.js";
 
 export const cancel = (input: CancelInput) =>
@@ -34,7 +47,7 @@ export const cancel = (input: CancelInput) =>
     "CANCEL",
     { ...input },
     undefined,
-    z.CancelInputSchema,
+    CancelInputSchema,
     "global",
   );
 
@@ -43,7 +56,7 @@ export const issue = (input: IssueInput) =>
     "ISSUE",
     { ...input },
     undefined,
-    z.IssueInputSchema,
+    IssueInputSchema,
     "global",
   );
 
@@ -52,7 +65,7 @@ export const reset = (input: ResetInput) =>
     "RESET",
     { ...input },
     undefined,
-    z.ResetInputSchema,
+    ResetInputSchema,
     "global",
   );
 
@@ -61,7 +74,7 @@ export const reject = (input: RejectInput) =>
     "REJECT",
     { ...input },
     undefined,
-    z.RejectInputSchema,
+    RejectInputSchema,
     "global",
   );
 
@@ -70,7 +83,7 @@ export const accept = (input: AcceptInput) =>
     "ACCEPT",
     { ...input },
     undefined,
-    z.AcceptInputSchema,
+    AcceptInputSchema,
     "global",
   );
 
@@ -79,7 +92,7 @@ export const reinstate = (input: ReinstateInput) =>
     "REINSTATE",
     { ...input },
     undefined,
-    z.ReinstateInputSchema,
+    ReinstateInputSchema,
     "global",
   );
 
@@ -88,7 +101,7 @@ export const schedulePayment = (input: SchedulePaymentInput) =>
     "SCHEDULE_PAYMENT",
     { ...input },
     undefined,
-    z.SchedulePaymentInputSchema,
+    SchedulePaymentInputSchema,
     "global",
   );
 
@@ -97,7 +110,7 @@ export const reapprovePayment = (input: ReapprovePaymentInput) =>
     "REAPPROVE_PAYMENT",
     { ...input },
     undefined,
-    z.ReapprovePaymentInputSchema,
+    ReapprovePaymentInputSchema,
     "global",
   );
 
@@ -106,7 +119,7 @@ export const registerPaymentTx = (input: RegisterPaymentTxInput) =>
     "REGISTER_PAYMENT_TX",
     { ...input },
     undefined,
-    z.RegisterPaymentTxInputSchema,
+    RegisterPaymentTxInputSchema,
     "global",
   );
 
@@ -115,7 +128,7 @@ export const reportPaymentIssue = (input: ReportPaymentIssueInput) =>
     "REPORT_PAYMENT_ISSUE",
     { ...input },
     undefined,
-    z.ReportPaymentIssueInputSchema,
+    ReportPaymentIssueInputSchema,
     "global",
   );
 
@@ -124,7 +137,7 @@ export const confirmPayment = (input: ConfirmPaymentInput) =>
     "CONFIRM_PAYMENT",
     { ...input },
     undefined,
-    z.ConfirmPaymentInputSchema,
+    ConfirmPaymentInputSchema,
     "global",
   );
 
@@ -133,6 +146,6 @@ export const closePayment = (input: ClosePaymentInput) =>
     "CLOSE_PAYMENT",
     { ...input },
     undefined,
-    z.ClosePaymentInputSchema,
+    ClosePaymentInputSchema,
     "global",
   );
