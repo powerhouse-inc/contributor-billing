@@ -2,7 +2,14 @@ import { useState } from "react";
 import { Select } from "@powerhousedao/document-engineering";
 import ConfirmationModal from "../../../invoice/components/confirmationModal.js";
 import { Icon } from "@powerhousedao/design-system";
+import { toast } from "@powerhousedao/design-system/connect";
 import { setSelectedNode } from "@powerhousedao/reactor-browser";
+import {
+  useDocumentsInSelectedDrive,
+  useDocumentById,
+} from "@powerhousedao/reactor-browser";
+import type { PHBaseState } from "document-model";
+import type { InvoicePHState } from "../../../../document-models/invoice/gen/types.js";
 
 const currencyOptions = [
   { label: "CHF", value: "CHF" },
@@ -25,6 +32,9 @@ export const HeaderControls = ({
   hasBillingStatements = false,
   expenseReportDoc,
   onCreateOrOpenExpenseReport,
+  selected,
+  handleCreateBillingStatement,
+  setSelected,
 }: {
   statusOptions?: { label: string; value: string }[];
   onStatusChange?: (value: string | string[]) => void;
@@ -38,11 +48,15 @@ export const HeaderControls = ({
   hasBillingStatements?: boolean;
   expenseReportDoc?: any | null;
   onCreateOrOpenExpenseReport?: () => void;
+  selected?: { [id: string]: boolean };
+  handleCreateBillingStatement: (id: string) => Promise<void>;
+  setSelected: (selected: { [id: string]: boolean }) => void;
 }) => {
   const batchOptions = [
-    { label: "$ Pay Selected", value: "pay" },
-    { label: "Approve Selected", value: "approve" },
-    { label: "Reject Selected", value: "reject" },
+    // { label: "$ Pay Selected", value: "pay" },
+    // { label: "Approve Selected", value: "approve" },
+    // { label: "Reject Selected", value: "reject" },
+    { label: "Generate Bill Statements", value: "generate-bills" },
     { label: "Export CSV Expense Report", value: "export-csv-expense-report" },
   ];
 
@@ -55,10 +69,106 @@ export const HeaderControls = ({
     useState(false);
   const [selectedExpenseReportCurrency, setSelectedExpenseReportCurrency] =
     useState("CHF");
+  const [selectedBatchAction, setSelectedBatchAction] = useState<
+    string | undefined
+  >(undefined);
+
+  const allDocuments = useDocumentsInSelectedDrive();
+  const invoices = allDocuments?.filter((doc) => {
+    return (
+      doc.header.documentType === "powerhouse/invoice" &&
+      (doc.state as InvoicePHState).global.status !== "DRAFT"
+    );
+  });
+  const billingStatements = allDocuments?.filter((doc) => {
+    return doc.header.documentType === "powerhouse/billing-statement";
+  });
 
   const handleBatchAction = (action: string) => {
     if (action === "export-csv-expense-report") {
       setShowExpenseReportCurrencyModal(true);
+      const updatedSelected = { ...selected };
+      Object.keys(updatedSelected).forEach((id) => {
+        updatedSelected[id] = false;
+      });
+      setSelected(updatedSelected);
+      // Reset the select value after action is triggered
+      setTimeout(() => setSelectedBatchAction(undefined), 0);
+    }
+    if (action === "generate-bills") {
+      const selectedIds = Object.keys(selected || {}).filter(
+        (id) => selected?.[id]
+      );
+
+      // Check for existing billing statements
+      const existingBills: string[] = [];
+      const invoicesToProcess: string[] = [];
+
+      selectedIds.forEach((id) => {
+        const invoice = invoices?.find((doc) => doc.header.id === id);
+        if (invoice) {
+          const invoiceName = invoice.header.name || "";
+          const expectedBillName = `bill-${invoiceName}`;
+          const existingBill = billingStatements?.find(
+            (bill) => bill.header.name === expectedBillName
+          );
+          if (existingBill) {
+            existingBills.push(invoiceName);
+          } else {
+            invoicesToProcess.push(id);
+          }
+        }
+      });
+
+      if (selectedIds.length === 0) {
+        toast("No invoices selected", {
+          type: "warning",
+        });
+      }
+
+      // Notify user if bills already exist
+      if (existingBills.length > 0) {
+        // Deconstruct selectedIds to set each ID to false
+        const updatedSelected = { ...selected };
+        selectedIds.forEach((id) => {
+          updatedSelected[id] = false;
+        });
+        setSelected(updatedSelected);
+        const billNames = existingBills.join(", ");
+        toast(`Billing statements already exist for: ${billNames}`, {
+          type: "warning",
+        });
+        // Reset the select value after action is triggered
+        setTimeout(() => setSelectedBatchAction(undefined), 0);
+      }
+
+      if (
+        selectedIds.length > 0 &&
+        invoicesToProcess.length === 0 &&
+        existingBills.length === 0
+      ) {
+        // Deconstruct selectedIds to set each ID to false
+        const updatedSelected = { ...selected };
+        selectedIds.forEach((id) => {
+          updatedSelected[id] = false;
+        });
+        setSelected(updatedSelected);
+        toast("Invoice not ready, change status to ISSUED", {
+          type: "warning",
+        });
+        // Reset the select value after action is triggered
+        setTimeout(() => setSelectedBatchAction(undefined), 0);
+        return;
+      }
+
+      // Create billing statements for invoices that don't have them yet
+      invoicesToProcess.forEach(async (id) => {
+        setSelected({ ...selected, [id]: false });
+        await handleCreateBillingStatement(id);
+      });
+
+      // Reset the select value after action is triggered
+      setTimeout(() => setSelectedBatchAction(undefined), 100);
     }
   };
 
@@ -104,7 +214,11 @@ export const HeaderControls = ({
             className="h-[29px]"
             contentClassName="w-54"
             options={batchOptions}
-            onChange={(value) => handleBatchAction(value as string)}
+            value={selectedBatchAction}
+            onChange={(value) => {
+              setSelectedBatchAction(value as string);
+              handleBatchAction(value as string);
+            }}
             placeholder="Batch Action"
           />
           <div className="cursor-pointer">

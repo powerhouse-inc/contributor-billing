@@ -56,6 +56,7 @@ export const InvoiceTable = ({
   files,
   state,
   selected,
+  setSelected,
   filteredDocumentModels,
   onSelectDocumentModel,
   getDocDispatcher,
@@ -154,7 +155,7 @@ export const InvoiceTable = ({
     console.log("created billing statement doc", createdNode);
     if (!createdNode?.id) {
       console.error("Failed to create billing statement");
-      return null;
+      return;
     }
     await dispatchActions(
       billingStatementActions.editContributor({
@@ -407,6 +408,9 @@ export const InvoiceTable = ({
         hasBillingStatements={hasBillingStatements}
         expenseReportDoc={expenseReportDoc}
         onCreateOrOpenExpenseReport={handleCreateOrOpenExpenseReport}
+        selected={selected}
+        handleCreateBillingStatement={handleCreateBillingStatement}
+        setSelected={setSelected}
       />
       {shouldShowSection("DRAFT") && (
         <InvoiceTableSection
