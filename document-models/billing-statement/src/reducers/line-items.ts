@@ -1,8 +1,4 @@
-import type {
-  BillingStatementLineItemsOperations,
-  BillingStatementState,
-  BillingStatementLineItem,
-} from "@powerhousedao/contributor-billing/document-models/billing-statement";
+import type { BillingStatementLineItemsOperations, BillingStatementLineItem, BillingStatementState } from "@powerhousedao/contributor-billing/document-models/billing-statement";
 
 export const billingStatementLineItemsOperations: BillingStatementLineItemsOperations = {
   addLineItemOperation(state, action, dispatch) {

@@ -1,13 +1,4 @@
-/**
- * This is a scaffold file meant for customization:
- * - modify it by implementing the reducer functions
- * - delete the file and run the code generator again to have it reset
- */
-
-import type {
-  BillingStatementTagsOperations,
-  BillingStatementTag,
-} from "@powerhousedao/contributor-billing/document-models/billing-statement";
+import type { BillingStatementTagsOperations, BillingStatementTag } from "@powerhousedao/contributor-billing/document-models/billing-statement";
 
 export const billingStatementTagsOperations: BillingStatementTagsOperations = {
   editLineItemTagOperation(state, action, dispatch) {

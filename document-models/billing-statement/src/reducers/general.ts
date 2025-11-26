@@ -1,7 +1,5 @@
-import {
-  type BillingStatementGeneralOperations,
-  BillingStatementStatusInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/billing-statement";
+import type { BillingStatementGeneralOperations } from "@powerhousedao/contributor-billing/document-models/billing-statement";
+import { BillingStatementStatusInputSchema } from "@powerhousedao/contributor-billing/document-models/billing-statement";
 
 export const billingStatementGeneralOperations: BillingStatementGeneralOperations = {
   editBillingStatementOperation(state, action, dispatch) {
