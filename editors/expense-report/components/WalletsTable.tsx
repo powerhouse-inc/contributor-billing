@@ -1,7 +1,19 @@
 import { useState } from "react";
 import { Button, TextInput } from "@powerhousedao/document-engineering";
-import { Plus, Trash2, Pencil, Check, X, Copy, CheckCheck, RefreshCw } from "lucide-react";
-import type { Wallet, LineItemGroup } from "../../../document-models/expense-report/gen/types.js";
+import {
+  Plus,
+  Trash2,
+  Pencil,
+  Check,
+  X,
+  Copy,
+  CheckCheck,
+  RefreshCw,
+} from "lucide-react";
+import type {
+  Wallet,
+  LineItemGroup,
+} from "../../../document-models/expense-report/gen/types.js";
 import { actions } from "../../../document-models/expense-report/index.js";
 import { useWalletSync } from "../hooks/useWalletSync.js";
 import { useSyncWallet } from "../hooks/useSyncWallet.js";
@@ -29,7 +41,8 @@ export function WalletsTable({
   const [syncingWallet, setSyncingWallet] = useState<string | null>(null);
 
   // Check sync status
-  const { needsSync, outdatedWallets, tagChangedWallets } = useWalletSync(wallets);
+  const { needsSync, outdatedWallets, tagChangedWallets } =
+    useWalletSync(wallets);
   const { syncWallet } = useSyncWallet();
 
   const handleAddWallet = () => {
@@ -37,7 +50,7 @@ export function WalletsTable({
 
     if (trimmedAddress) {
       // Check if wallet already exists
-      const walletExists = wallets.some(w => w.wallet === trimmedAddress);
+      const walletExists = wallets.some((w) => w.wallet === trimmedAddress);
 
       if (walletExists) {
         setWalletError("This wallet already exists");
@@ -62,7 +75,7 @@ export function WalletsTable({
   };
 
   const handleSaveEditName = (walletAddress: string) => {
-    const wallet = wallets.find(w => w.wallet === walletAddress);
+    const wallet = wallets.find((w) => w.wallet === walletAddress);
     const trimmedName = editingName.trim();
 
     // Only update if the name has changed
@@ -95,7 +108,11 @@ export function WalletsTable({
   };
 
   const handleSyncWallet = async (wallet: Wallet) => {
-    if (!wallet.wallet || !wallet.billingStatements || wallet.billingStatements.length === 0) {
+    if (
+      !wallet.wallet ||
+      !wallet.billingStatements ||
+      wallet.billingStatements.length === 0
+    ) {
       return;
     }
 
@@ -116,7 +133,9 @@ export function WalletsTable({
       });
 
       // Re-extract line items from billing statements
-      const billingStatementIds = wallet.billingStatements.filter((id): id is string => id !== null && id !== undefined);
+      const billingStatementIds = wallet.billingStatements.filter(
+        (id): id is string => id !== null && id !== undefined
+      );
       syncWallet(wallet.wallet, billingStatementIds, groups, dispatch);
 
       // Small delay to show sync animation
@@ -184,12 +203,16 @@ export function WalletsTable({
                       <button
                         onClick={() => {
                           // Sync all outdated wallets
-                          [...tagChangedWallets, ...outdatedWallets].forEach((walletAddress) => {
-                            const wallet = wallets.find(w => w.wallet === walletAddress);
-                            if (wallet) {
-                              handleSyncWallet(wallet);
+                          [...tagChangedWallets, ...outdatedWallets].forEach(
+                            (walletAddress) => {
+                              const wallet = wallets.find(
+                                (w) => w.wallet === walletAddress
+                              );
+                              if (wallet) {
+                                handleSyncWallet(wallet);
+                              }
                             }
-                          });
+                          );
                         }}
                         disabled={syncingWallet !== null}
                         className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
@@ -205,7 +228,9 @@ export function WalletsTable({
                       >
                         <RefreshCw
                           size={16}
-                          className={syncingWallet !== null ? "animate-spin" : ""}
+                          className={
+                            syncingWallet !== null ? "animate-spin" : ""
+                          }
                         />
                       </button>
                     )}
@@ -253,7 +278,9 @@ export function WalletsTable({
                             autoFocus
                           />
                           <button
-                            onClick={() => handleSaveEditName(wallet.wallet || "")}
+                            onClick={() =>
+                              handleSaveEditName(wallet.wallet || "")
+                            }
                             className="inline-flex items-center justify-center w-7 h-7 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md transition-colors"
                             title="Save"
                           >
@@ -268,7 +295,7 @@ export function WalletsTable({
                           </button>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
                           <span className="text-sm font-medium text-gray-900 dark:text-white">
                             {wallet.name || "Unnamed Wallet"}
                           </span>
@@ -280,17 +307,25 @@ export function WalletsTable({
                             <Pencil size={12} />
                           </button>
                           <button
-                            onClick={() => handleCopyAddress(wallet.wallet || "")}
+                            onClick={() =>
+                              handleCopyAddress(wallet.wallet || "")
+                            }
                             className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 font-mono hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                             title={`Copy address: ${wallet.wallet}`}
                           >
                             {formatAddress(wallet.wallet || "")}
                             {copiedWallet === wallet.wallet ? (
-                              <CheckCheck size={12} className="text-green-500" />
+                              <CheckCheck
+                                size={12}
+                                className="text-green-500"
+                              />
                             ) : (
                               <Copy size={12} />
                             )}
                           </button>
+                          {/* <button className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 font-mono hover:bg-blue-100 dark:hover:bg-gray-700 rounded transition-colors">
+                            View Txns
+                          </button> */}
                         </div>
                       )}
                     </td>
@@ -301,11 +336,15 @@ export function WalletsTable({
                       {formatCurrency(totals.forecast)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                      {totals.actuals === 0 && (!wallet.billingStatements || wallet.billingStatements.length === 0) ? (
+                      {totals.actuals === 0 &&
+                      (!wallet.billingStatements ||
+                        wallet.billingStatements.length === 0) ? (
                         // When actuals is 0 and no billing statements, only show the Add Bills button
                         <div className="flex items-center justify-end">
                           <button
-                            onClick={() => onAddBillingStatement(wallet.wallet || "")}
+                            onClick={() =>
+                              onAddBillingStatement(wallet.wallet || "")
+                            }
                             className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors"
                             title="Add billing statement for this wallet"
                           >
@@ -317,37 +356,52 @@ export function WalletsTable({
                         // When actuals is not 0 or has billing statements, show compact buttons + value horizontally
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => onAddBillingStatement(wallet.wallet || "")}
+                            onClick={() =>
+                              onAddBillingStatement(wallet.wallet || "")
+                            }
                             className="inline-flex items-center justify-center w-8 h-8 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors"
                             title="Add billing statement for this wallet"
                           >
                             <Plus size={16} />
                           </button>
-                          {wallet.billingStatements && wallet.billingStatements.length > 0 && (
-                            <button
-                              onClick={() => handleSyncWallet(wallet)}
-                              disabled={syncingWallet === wallet.wallet}
-                              className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
-                                tagChangedWallets.includes(wallet.wallet || "")
-                                  ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 animate-pulse"
-                                  : outdatedWallets.includes(wallet.wallet || "")
-                                  ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 animate-pulse"
-                                  : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
-                              } disabled:opacity-50 disabled:cursor-not-allowed`}
-                              title={
-                                tagChangedWallets.includes(wallet.wallet || "")
-                                  ? "ALERT: Tags have changed - sync required!"
-                                  : outdatedWallets.includes(wallet.wallet || "")
-                                  ? "Sync needed - billing statements updated"
-                                  : "Sync with latest billing statements"
-                              }
-                            >
-                              <RefreshCw
-                                size={16}
-                                className={syncingWallet === wallet.wallet ? "animate-spin" : ""}
-                              />
-                            </button>
-                          )}
+                          {wallet.billingStatements &&
+                            wallet.billingStatements.length > 0 && (
+                              <button
+                                onClick={() => handleSyncWallet(wallet)}
+                                disabled={syncingWallet === wallet.wallet}
+                                className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
+                                  tagChangedWallets.includes(
+                                    wallet.wallet || ""
+                                  )
+                                    ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 animate-pulse"
+                                    : outdatedWallets.includes(
+                                          wallet.wallet || ""
+                                        )
+                                      ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 animate-pulse"
+                                      : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                title={
+                                  tagChangedWallets.includes(
+                                    wallet.wallet || ""
+                                  )
+                                    ? "ALERT: Tags have changed - sync required!"
+                                    : outdatedWallets.includes(
+                                          wallet.wallet || ""
+                                        )
+                                      ? "Sync needed - billing statements updated"
+                                      : "Sync with latest billing statements"
+                                }
+                              >
+                                <RefreshCw
+                                  size={16}
+                                  className={
+                                    syncingWallet === wallet.wallet
+                                      ? "animate-spin"
+                                      : ""
+                                  }
+                                />
+                              </button>
+                            )}
                           <span className="text-sm font-medium text-gray-900 dark:text-white">
                             {formatCurrency(totals.actuals)}
                           </span>
@@ -359,8 +413,8 @@ export function WalletsTable({
                         totals.difference > 0
                           ? "text-red-600 dark:text-red-400"
                           : totals.difference < 0
-                          ? "text-green-600 dark:text-green-400"
-                          : "text-gray-900 dark:text-white"
+                            ? "text-green-600 dark:text-green-400"
+                            : "text-gray-900 dark:text-white"
                       }`}
                     >
                       {formatCurrency(totals.difference)}
@@ -371,7 +425,9 @@ export function WalletsTable({
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => handleRemoveWallet(wallet.wallet || "")}
+                          onClick={() =>
+                            handleRemoveWallet(wallet.wallet || "")
+                          }
                           className="inline-flex items-center justify-center w-8 h-8 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
                           title="Remove wallet"
                         >
@@ -387,7 +443,9 @@ export function WalletsTable({
         </div>
       ) : (
         <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-          <p className="text-sm">No wallets added yet. Add a wallet to get started.</p>
+          <p className="text-sm">
+            No wallets added yet. Add a wallet to get started.
+          </p>
         </div>
       )}
 
@@ -433,10 +491,7 @@ export function WalletsTable({
             </div>
           )}
         </div>
-        <Button
-          onClick={handleAddWallet}
-          disabled={!newWalletAddress.trim()}
-        >
+        <Button onClick={handleAddWallet} disabled={!newWalletAddress.trim()}>
           Add Wallet
         </Button>
       </div>
