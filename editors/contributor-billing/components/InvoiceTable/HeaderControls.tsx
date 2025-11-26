@@ -84,7 +84,7 @@ export const HeaderControls = ({
     return doc.header.documentType === "powerhouse/billing-statement";
   });
 
-  const handleBatchAction = (action: string) => {
+  const handleBatchAction = async (action: string) => {
     if (action === "export-csv-expense-report") {
       setShowExpenseReportCurrencyModal(true);
       const updatedSelected = { ...selected };
@@ -162,10 +162,17 @@ export const HeaderControls = ({
       }
 
       // Create billing statements for invoices that don't have them yet
-      invoicesToProcess.forEach(async (id) => {
-        setSelected({ ...selected, [id]: false });
+      // Process sequentially to avoid race conditions
+      for (const id of invoicesToProcess) {
         await handleCreateBillingStatement(id);
+      }
+
+      // Update all selected IDs at once after processing
+      const updatedSelected = { ...selected };
+      invoicesToProcess.forEach((id) => {
+        updatedSelected[id] = false;
       });
+      setSelected(updatedSelected);
 
       // Reset the select value after action is triggered
       setTimeout(() => setSelectedBatchAction(undefined), 100);

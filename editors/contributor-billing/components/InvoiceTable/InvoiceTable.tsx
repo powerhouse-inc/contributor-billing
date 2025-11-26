@@ -18,7 +18,9 @@ import {
   setSelectedNode,
   type VetraDocumentModelModule,
 } from "@powerhousedao/reactor-browser";
+import { useReactor } from "@powerhousedao/reactor-browser/connect";
 import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
+import type { BillingStatementDocument } from "../../../../document-models/billing-statement/index.js";
 
 const statusOptions = [
   { label: "Draft", value: "DRAFT" },
@@ -66,6 +68,7 @@ export const InvoiceTable = ({
   canExportSelectedRows,
 }: InvoiceTableProps) => {
   const [selectedDrive] = useSelectedDrive();
+  const reactor = useReactor();
 
   const billingDocStates = state
     .filter((doc) => doc.header.documentType === "powerhouse/billing-statement")
@@ -157,13 +160,7 @@ export const InvoiceTable = ({
       console.error("Failed to create billing statement");
       return;
     }
-    await dispatchActions(
-      billingStatementActions.editContributor({
-        contributor: id,
-      }),
-      createdNode.id
-    );
-    // Prepare billing statement data with empty input handlers
+    // Prepare billing statement data
     const billingStatementData: any = {
       dateIssued:
         invoiceState.state.global.dateIssued &&
@@ -179,44 +176,58 @@ export const InvoiceTable = ({
       notes: invoiceState.state.global.notes || "",
     };
 
+    // Dispatch initial setup actions together
     await dispatchActions(
-      billingStatementActions.editBillingStatement(billingStatementData),
+      [
+        billingStatementActions.editContributor({
+          contributor: id,
+        }),
+        billingStatementActions.editBillingStatement(billingStatementData),
+      ],
       createdNode.id
     );
 
-    // add line items from invoiceState to billing statement
-    invoiceState.state.global.lineItems.forEach(async (lineItem: any) => {
-      await dispatchActions(
-        billingStatementActions.addLineItem({
-          id: lineItem.id,
-          description: lineItem.description,
-          quantity: lineItem.quantity,
-          // Map invoice fields to billing statement fields
-          totalPriceCash: lineItem.totalPriceTaxIncl || 0,
-          totalPricePwt: 0, // Default to 0 since invoice doesn't have POWT pricing
-          unit: "UNIT", // Default to UNIT since invoice doesn't have unit field
-          unitPriceCash: lineItem.unitPriceTaxIncl || 0,
-          unitPricePwt: 0, // Default to 0 since invoice doesn't have POWT pricing
-        }),
-        createdNode.id
-      );
-    });
+    // Collect all line item actions
+    const lineItemActions = invoiceState.state.global.lineItems.map((lineItem: any) =>
+      billingStatementActions.addLineItem({
+        id: lineItem.id,
+        description: lineItem.description,
+        quantity: lineItem.quantity,
+        // Map invoice fields to billing statement fields
+        totalPriceCash: lineItem.totalPriceTaxIncl || 0,
+        totalPricePwt: 0, // Default to 0 since invoice doesn't have POWT pricing
+        unit: "UNIT", // Default to UNIT since invoice doesn't have unit field
+        unitPriceCash: lineItem.unitPriceTaxIncl || 0,
+        unitPricePwt: 0, // Default to 0 since invoice doesn't have POWT pricing
+      })
+    );
 
-    // add tags from each invoice line item to billing statement line item
-    invoiceState.state.global.lineItems.forEach(async (lineItem: any) => {
+    // Dispatch all line items in one batch
+    if (lineItemActions.length > 0) {
+      await dispatchActions(lineItemActions, createdNode.id);
+    }
+
+    // Collect all tag actions
+    const tagActions: any[] = [];
+    for (const lineItem of invoiceState.state.global.lineItems) {
       const lineItemTag: any = mapTags(lineItem.lineItemTag || []);
-      lineItemTag.forEach(async (tag: any) => {
-        await dispatchActions(
+      for (const tag of lineItemTag) {
+        tagActions.push(
           billingStatementActions.editLineItemTag({
             lineItemId: lineItem.id,
             dimension: tag.dimension,
             value: tag.value,
             label: tag.label,
-          }),
-          createdNode.id
+          })
         );
-      });
-    });
+      }
+    }
+
+    // Dispatch all tags in one batch
+    if (tagActions.length > 0) {
+      await dispatchActions(tagActions, createdNode.id);
+    }
+
   };
 
   const selectedInvoiceIds = Object.keys(selected).filter((id) => selected[id]);
