@@ -14,6 +14,7 @@ import { InputField } from "../components/inputField.js";
 import type { ValidationResult } from "../validation/validationManager.js";
 import { Select } from "@powerhousedao/document-engineering";
 import { isValidIBAN } from "../validation/validationRules.js";
+import { STATE_PROVINCE_OPTIONS } from "./legalEntity.js";
 
 const ACCOUNT_TYPES = ["CHECKING", "SAVINGS", "TRUST"] as const;
 
@@ -188,7 +189,9 @@ export const LegalEntityBankSection = forwardRef(
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Account Number
                   {isValidIBAN(localState.accountNum ?? "") && (
-                    <span className="ml-2 text-green-600 font-medium">IBAN</span>
+                    <span className="ml-2 text-green-600 font-medium">
+                      IBAN
+                    </span>
                   )}
                 </label>
                 <InputField
@@ -340,15 +343,36 @@ export const LegalEntityBankSection = forwardRef(
                   handleInputChange={createInputHandler("city")}
                   className="h-10 w-full text-md mb-2"
                 />
-                <InputField
-                  // input={localState.stateProvince ?? ""}
-                  value={localState.stateProvince ?? ""}
-                  label="State/Province"
-                  placeholder="State/Province"
-                  onBlur={createBlurHandler("stateProvince")}
-                  handleInputChange={createInputHandler("stateProvince")}
-                  className="h-10 w-full text-md mb-2"
-                />
+                <div className="space-y-2">
+                  {localState.country === "US" ? (
+                    <>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        State/Province
+                      </label>
+                      <Select
+                        options={STATE_PROVINCE_OPTIONS}
+                        value={localState.stateProvince ?? ""}
+                        onChange={(value) => {
+                          createBlurHandler("stateProvince")({
+                            target: { value: value as string },
+                          } as React.FocusEvent<HTMLInputElement>);
+                        }}
+                        className="h-10 w-full text-md mb-2"
+                        searchable={true}
+                      />
+                    </>
+                  ) : (
+                    <InputField
+                      // input={localState.stateProvince ?? ""}
+                      value={localState.stateProvince ?? ""}
+                      label="State/Province"
+                      placeholder="State/Province"
+                      onBlur={createBlurHandler("stateProvince")}
+                      handleInputChange={createInputHandler("stateProvince")}
+                      className="h-10 w-full text-md mb-2"
+                    />
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <InputField
@@ -559,17 +583,38 @@ export const LegalEntityBankSection = forwardRef(
                         )}
                         className="h-10 w-full text-md mb-2"
                       />
-                      <InputField
-                        // input={localState.stateProvinceIntermediary ?? ""}
-                        value={localState.stateProvinceIntermediary ?? ""}
-                        label="State/Province"
-                        placeholder="State/Province"
-                        onBlur={createBlurHandler("stateProvinceIntermediary")}
-                        handleInputChange={createInputHandler(
-                          "stateProvinceIntermediary"
+                      <div className="space-y-2">
+                        {localState.countryIntermediary === "US" ? (
+                          <>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">
+                              State/Province
+                            </label>
+                            <Select
+                              options={STATE_PROVINCE_OPTIONS}
+                              value={localState.stateProvinceIntermediary ?? ""}
+                              onChange={(value) => {
+                                createBlurHandler("stateProvinceIntermediary")({
+                                  target: { value: value as string },
+                                } as React.FocusEvent<HTMLInputElement>);
+                              }}
+                              className="h-10 w-full text-md mb-2"
+                              searchable={true}
+                            />
+                          </>
+                        ) : (
+                          <InputField
+                            // input={localState.stateProvince ?? ""}
+                            value={localState.stateProvinceIntermediary ?? ""}
+                            label="State/Province"
+                            placeholder="State/Province"
+                            onBlur={createBlurHandler("stateProvinceIntermediary")}
+                            handleInputChange={createInputHandler(
+                              "stateProvince"
+                            )}
+                            className="h-10 w-full text-md mb-2"
+                          />
                         )}
-                        className="h-10 w-full text-md mb-2"
-                      />
+                      </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <InputField

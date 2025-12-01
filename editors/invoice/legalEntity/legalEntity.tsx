@@ -16,6 +16,7 @@ import { LegalEntityBankSection } from "./bankSection.js";
 import { CountryForm } from "../components/countryForm.js";
 import type { ValidationResult } from "../validation/validationManager.js";
 import { InputField } from "../components/inputField.js";
+import { Select } from "@powerhousedao/document-engineering";
 
 export type EditLegalEntityWalletInput =
   | EditIssuerWalletInput
@@ -27,6 +28,66 @@ export type EditLegalEntityInput = EditIssuerInput | EditPayerInput;
 const FieldLabel = ({ children }: { readonly children: React.ReactNode }) => (
   <label className="block text-sm font-medium text-gray-700">{children}</label>
 );
+
+export const STATE_PROVINCE_OPTIONS = [
+  { label: "Alabama", value: "AL" },
+  { label: "Alaska", value: "AK" },
+  { label: "Arizona", value: "AZ" },
+  { label: "Arkansas", value: "AR" },
+  { label: "American Samoa", value: "AS" },
+  { label: "California", value: "CA" },
+  { label: "Colorado", value: "CO" },
+  { label: "Connecticut", value: "CT" },
+  { label: "Delaware", value: "DE" },
+  { label: "District of Columbia", value: "DC" },
+  { label: "Florida", value: "FL" },
+  { label: "Georgia", value: "GA" },
+  { label: "Guam", value: "GU" },
+  { label: "Hawaii", value: "HI" },
+  { label: "Idaho", value: "ID" },
+  { label: "Illinois", value: "IL" },
+  { label: "Indiana", value: "IN" },
+  { label: "Iowa", value: "IA" },
+  { label: "Kansas", value: "KS" },
+  { label: "Kentucky", value: "KY" },
+  { label: "Louisiana", value: "LA" },
+  { label: "Maine", value: "ME" },
+  { label: "Maryland", value: "MD" },
+  { label: "Massachusetts", value: "MA" },
+  { label: "Michigan", value: "MI" },
+  { label: "Minnesota", value: "MN" },
+  { label: "Mississippi", value: "MS" },
+  { label: "Missouri", value: "MO" },
+  { label: "Montana", value: "MT" },
+  { label: "Nebraska", value: "NE" },
+  { label: "Nevada", value: "NV" },
+  { label: "New Hampshire", value: "NH" },
+  { label: "New Jersey", value: "NJ" },
+  { label: "New Mexico", value: "NM" },
+  { label: "New York", value: "NY" },
+  { label: "North Carolina", value: "NC" },
+  { label: "North Dakota", value: "ND" },
+  { label: "Northern Mariana Islands", value: "MP" },
+  { label: "Ohio", value: "OH" },
+  { label: "Oklahoma", value: "OK" },
+  { label: "Oregon", value: "OR" },
+  { label: "Pennsylvania", value: "PA" },
+  { label: "Puerto Rico", value: "PR" },
+  { label: "Rhode Island", value: "RI" },
+  { label: "South Carolina", value: "SC" },
+  { label: "South Dakota", value: "SD" },
+  { label: "Tennessee", value: "TN" },
+  { label: "Texas", value: "TX" },
+  { label: "Trust Territories", value: "TT" },
+  { label: "Utah", value: "UT" },
+  { label: "Vermont", value: "VT" },
+  { label: "Virgin Islands", value: "VI" },
+  { label: "Virginia", value: "VA" },
+  { label: "Washington", value: "WA" },
+  { label: "West Virginia", value: "WV" },
+  { label: "Wisconsin", value: "WI" },
+  { label: "Wyoming", value: "WY" },
+];
 
 export type LegalEntityMainSectionProps = Omit<
   ComponentPropsWithRef<"div">,
@@ -152,14 +213,33 @@ export const LegalEntityMainSection = (props: LegalEntityMainSectionProps) => {
               />
             </div>
             <div className="space-y-2">
-              <InputField
-                value={value.stateProvince ?? ""}
-                label="State/Province"
-                placeholder="State/Province"
-                onBlur={handleTextareaBlur("stateProvince")}
-                handleInputChange={handleTextareaChange("stateProvince")}
-                className="h-10 w-full text-md mb-2"
-              />
+              {value.country === "US" ? (
+                <>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    State/Province
+                  </label>
+                  <Select
+                    options={STATE_PROVINCE_OPTIONS}
+                    value={value.stateProvince ?? ""}
+                    onChange={(value) => {
+                      handleBlur("stateProvince")({
+                        target: { value: value as string },
+                      } as React.FocusEvent<HTMLInputElement>);
+                    }}
+                    className="h-10 w-full text-md mb-2"
+                    searchable={true}
+                  />
+                </>
+              ) : (
+                <InputField
+                  value={value.stateProvince ?? ""}
+                  label="State/Province"
+                  placeholder="State/Province"
+                  onBlur={handleTextareaBlur("stateProvince")}
+                  handleInputChange={handleTextareaChange("stateProvince")}
+                  className="h-10 w-full text-md mb-2"
+                />
+              )}
             </div>
           </div>
 
