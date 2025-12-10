@@ -1,0 +1,88 @@
+import type { DocumentModelGlobalState } from "document-model";
+
+export const documentModel: DocumentModelGlobalState = {
+  author: {
+    name: "Powerhouse",
+    website: "https://powerhouse.inc",
+  },
+  description:
+    "Document model for managing accounts with KYC/AML status tracking",
+  extension: ".phdm",
+  id: "powerhouse/accounts",
+  name: "Accounts",
+  specifications: [
+    {
+      changeLog: [],
+      modules: [
+        {
+          description: "",
+          id: "49c91000-57f7-4a70-a33e-6bf8c0bb2f51",
+          name: "accounts",
+          operations: [
+            {
+              description: "",
+              errors: [],
+              examples: [],
+              id: "ca55c609-783f-4cbe-90d9-bbe92b7db38c",
+              name: "ADD_ACCOUNT",
+              reducer: "",
+              schema:
+                "input AddAccountInput {\n  id: OID!\n  account: String!\n  name: String!\n  budgetPath: String\n  accountTransactionsId: PHID\n  chain: [String!]\n  type: AccountTypeInput\n  owners: [String!]\n  KycAmlStatus: KycAmlStatusTypeInput\n}\n\nenum AccountTypeInput {\n  Protocol\n  Auditor\n  Operational\n  PaymentProcessor\n}\n\nenum KycAmlStatusTypeInput {\n  PASSED\n  PENDING\n  FAILED\n}",
+              scope: "global",
+              template: "",
+            },
+            {
+              description: "",
+              errors: [],
+              examples: [],
+              id: "a9615673-5492-423d-a505-8fac67c58ac9",
+              name: "UPDATE_ACCOUNT",
+              reducer: "",
+              schema:
+                "input UpdateAccountInput {\n    id: OID!\n    account: String\n    name: String\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: AccountTypeInput\n    owners: [String!]\n    KycAmlStatus: KycAmlStatusTypeInput\n}\n",
+              scope: "global",
+              template: "",
+            },
+            {
+              description: "",
+              errors: [],
+              examples: [],
+              id: "9515cd28-0ee4-4b5b-a7b8-ce3520e111f6",
+              name: "DELETE_ACCOUNT",
+              reducer: "",
+              schema: "input DeleteAccountInput {\n    id: OID!\n}",
+              scope: "global",
+              template: "",
+            },
+            {
+              description: "",
+              errors: [],
+              examples: [],
+              id: "df0d6586-b762-4a5c-99ee-855d32e4e8d7",
+              name: "UPDATE_KYC_STATUS",
+              reducer: "",
+              schema:
+                "input UpdateKycStatusInput {\n    id: OID!\n    KycAmlStatus: KycAmlStatusTypeInput!\n}\n",
+              scope: "global",
+              template: "",
+            },
+          ],
+        },
+      ],
+      state: {
+        global: {
+          examples: [],
+          initialValue: '"{\\n  \\"accounts\\": []\\n}"',
+          schema:
+            "type AccountsState {\n   accounts: [AccountEntry!]!\n}\n\ntype AccountEntry {\n    id: OID!\n    account: String!\n    name: String!\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: AccountType\n    owners: [String!]\n    KycAmlStatus: KycAmlStatusType\n}\n\nenum AccountType {\n    Protocol\n    Auditor\n    Operational\n    PaymentProcessor\n}\n\nenum KycAmlStatusType {\n    PASSED\n    PENDING\n    FAILED\n}",
+        },
+        local: {
+          examples: [],
+          initialValue: '""',
+          schema: "",
+        },
+      },
+      version: 1,
+    },
+  ],
+};
