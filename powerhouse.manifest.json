@@ -8,6 +8,14 @@
     },
     "documentModels": [
         {
+            "id": "powerhouse/accounts",
+            "name": "Accounts"
+        },
+        {
+            "id": "powerhouse/account-transactions",
+            "name": "Account Transactions"
+        },
+        {
             "id": "powerhouse/invoice",
             "name": "Invoice"
         },
@@ -25,6 +33,20 @@
         }
     ],
     "editors": [
+        {
+            "id": "powerhouse-accounts-editor",
+            "name": "Accounts",
+            "documentTypes": [
+                "powerhouse/accounts"
+            ]
+        },
+        {
+            "id": "powerhouse-account-transactions-editor",
+            "name": "Account Transactions",
+            "documentTypes": [
+                "powerhouse/account-transactions"
+            ]
+        },
         {
             "id": "powerhouse-invoice-editor",
             "name": "Invoice",

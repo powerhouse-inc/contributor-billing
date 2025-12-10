@@ -40,6 +40,22 @@ const utils: DocumentModelUtils<AccountsPHState> = {
   loadFromInput(input) {
     return baseLoadFromInput(input, reducer);
   },
+  isStateOfType(state: unknown): state is AccountsPHState {
+    return typeof state === "object" && state !== null && "global" in state;
+  },
+  assertIsStateOfType(state: unknown): asserts state is AccountsPHState {
+    if (!utils.isStateOfType(state)) {
+      throw new Error("Invalid Accounts state");
+    }
+  },
+  isDocumentOfType(document: unknown): document is any {
+    return typeof document === "object" && document !== null && "header" in document;
+  },
+  assertIsDocumentOfType(document: unknown): void {
+    if (!utils.isDocumentOfType(document)) {
+      throw new Error("Invalid Accounts document");
+    }
+  },
 };
 
 export const createDocument = utils.createDocument;
