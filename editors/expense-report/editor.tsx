@@ -6,6 +6,8 @@ import { WalletsTable } from "./components/WalletsTable.js";
 import { AggregatedExpensesTable } from "./components/AggregatedExpensesTable.js";
 import { AddBillingStatementModal } from "./components/AddBillingStatementModal.js";
 import { ExpenseReportPDF } from "./components/ExpenseReportPDF.js";
+import { ExpenseReportTransactionsTable } from "./components/ExpenseReportTransactionsTable.js";
+import type { TransactionEntry } from "../../document-models/account-transactions/gen/types.js";
 import { pdf } from "@react-pdf/renderer";
 import { PDFViewer } from "@react-pdf/renderer";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
@@ -35,6 +37,11 @@ export default function Editor() {
     const start = periodStart ? new Date(periodStart) : null;
     const end = periodEnd ? new Date(periodEnd) : null;
 
+    // Create a set of all wallet addresses in the expense report for intergroup detection
+    const walletAddresses = new Set(
+      wallets.map((w) => w.wallet.toLowerCase())
+    );
+
     return wallets.flatMap((wallet) => {
       const txDocId = (wallet as any).accountTransactionsDocumentId;
       if (!txDocId) return [];
@@ -45,9 +52,9 @@ export default function Editor() {
           doc.header.documentType === "powerhouse/account-transactions"
       ) as any;
 
-      const txs = txDoc?.state?.global?.transactions || [];
+      const txs: TransactionEntry[] = txDoc?.state?.global?.transactions || [];
       return txs
-        .filter((tx: any) => {
+        .filter((tx: TransactionEntry) => {
           if (!tx?.datetime) return false;
           const dt = new Date(tx.datetime);
           if (Number.isNaN(dt.getTime())) return false;
@@ -55,24 +62,17 @@ export default function Editor() {
           if (end && dt > end) return false;
           return true;
         })
-        .map((tx: any) => {
-          const amount = tx.amount;
-          const amountText =
-            amount && typeof amount === "object" && "value" in amount && "unit" in amount
-              ? `${amount.value} ${amount.unit}`
-              : typeof amount === "string"
-                ? amount
-                : "";
-          const txHash = tx.txHash || tx.details?.txHash || "";
-          const token = tx.token || tx.details?.token || "";
+        .map((tx: TransactionEntry) => {
+          // Check if counterParty is another wallet in the expense report
+          const isIntergroup = tx.counterParty
+            ? walletAddresses.has(tx.counterParty.toLowerCase())
+            : false;
+
           return {
             walletName: wallet.name || wallet.wallet,
             walletAddress: wallet.wallet,
-            counterParty: tx.counterParty || "",
-            amount: amountText,
-            datetime: tx.datetime,
-            txHash,
-            token,
+            transaction: tx,
+            isIntergroup,
           };
         });
     });
@@ -270,88 +270,25 @@ export default function Editor() {
           />
         )}
 
-        {/* Transactions Section */}
-        <div className="flex-1 px-8 pb-8">
-          <div className="max-w-7xl mx-auto">
-            <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Transactions ({transactionsByWallet.length})
-                </h2>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  Filtered by selected period
-                </span>
-              </div>
-              <div className="p-6">
-                {transactionsByWallet.length === 0 ? (
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    No transactions found for the selected period. Ensure wallets are linked to Account Transactions documents and that transactions fall within the selected dates.
-                  </p>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                      <thead className="bg-gray-50 dark:bg-gray-800">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Date
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Wallet
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Counterparty
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Amount
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Token
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Tx Hash
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                        {transactionsByWallet.map((tx, idx) => (
-                          <tr key={`${tx.txHash}-${idx}`}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                              {new Date(tx.datetime).toLocaleString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                              <div className="flex flex-col">
-                                <span className="font-medium">{tx.walletName || "Wallet"}</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                                  {tx.walletAddress}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                              {tx.counterParty || "—"}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                              {tx.amount || "—"}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                              {tx.token || "—"}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                              {tx.txHash ? (
-                                <span className="font-mono text-xs">{tx.txHash}</span>
-                              ) : (
-                                "—"
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </section>
-          </div>
-        </div>
+            {/* Transactions Section */}
+            {transactionsByWallet.length > 0 && (
+              <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    Transactions ({transactionsByWallet.length})
+                  </h2>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    Filtered by selected period
+                  </span>
+                </div>
+                <div className="p-6">
+                  <ExpenseReportTransactionsTable
+                    transactions={transactionsByWallet}
+                    wallets={wallets}
+                  />
+                </div>
+              </section>
+            )}
       </div>
     </div>
   );

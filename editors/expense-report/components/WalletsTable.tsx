@@ -131,7 +131,7 @@ export function WalletsTable({
               address: trimmedAddress,
               accountDocumentId: result.accountDocumentId || undefined,
               accountTransactionsDocumentId: result.accountTransactionsDocumentId || undefined,
-            })
+            } as any)
           );
         } else {
           console.warn('[WalletsTable] Service succeeded but no document IDs returned');
