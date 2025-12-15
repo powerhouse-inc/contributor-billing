@@ -227,9 +227,6 @@ export function Editor() {
       <DocumentToolbar document={document} onClose={handleClose} />
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-semibold text-gray-900">Account Transactions</h1>
-        <Button onClick={handleClose} className="text-gray-600 hover:text-gray-900">
-          Close
-        </Button>
       </div>
 
       <div className="flex-1 overflow-auto">
