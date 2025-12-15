@@ -28,6 +28,8 @@ type Wallet {
   totals: [GroupTotals]
   billingStatements: [OID]
   lineItems: [LineItem]
+  accountDocumentId: PHID
+  accountTransactionsDocumentId: PHID
 }
 
 type LineItemGroup {
@@ -157,4 +159,6 @@ input SetPeriodEndInput {
 input UpdateWalletInput {
   address: EthereumAddress!
   name: String
+  accountDocumentId: PHID
+  accountTransactionsDocumentId: PHID
 }

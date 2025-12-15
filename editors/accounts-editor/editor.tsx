@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@powerhousedao/document-engineering";
+import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
   useParentFolderForSelectedNode,
@@ -215,6 +216,7 @@ export function Editor() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
+      <DocumentToolbar document={document} onClose={handleClose} />
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-semibold text-gray-900">Accounts</h1>
         <Button onClick={handleClose} className="text-gray-600 hover:text-gray-900">

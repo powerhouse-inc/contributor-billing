@@ -9,6 +9,8 @@ export const expenseReportWalletOperations: ExpenseReportWalletOperations = {
             totals: [],
             billingStatements: [],
             lineItems: [],
+            accountDocumentId: null,
+            accountTransactionsDocumentId: null,
         };
         state.wallets.push(newWallet);
     },
@@ -210,13 +212,19 @@ export const expenseReportWalletOperations: ExpenseReportWalletOperations = {
         state.periodEnd = action.input.periodEnd;
     },
     updateWalletOperation(state, action, dispatch) {
-        // Update wallet name
+        // Update wallet name and document IDs
         const wallet = state.wallets.find(
             (w) => w.wallet === action.input.address
         );
         if (wallet) {
             if (action.input.name !== undefined && action.input.name !== null) {
                 wallet.name = action.input.name;
+            }
+            if (action.input.accountDocumentId !== undefined && action.input.accountDocumentId !== null) {
+                wallet.accountDocumentId = action.input.accountDocumentId;
+            }
+            if (action.input.accountTransactionsDocumentId !== undefined && action.input.accountTransactionsDocumentId !== null) {
+                wallet.accountTransactionsDocumentId = action.input.accountTransactionsDocumentId;
             }
         }
     }

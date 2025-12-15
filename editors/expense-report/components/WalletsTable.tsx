@@ -17,6 +17,8 @@ import type {
 import { actions } from "../../../document-models/expense-report/index.js";
 import { useWalletSync } from "../hooks/useWalletSync.js";
 import { useSyncWallet } from "../hooks/useSyncWallet.js";
+import { walletAccountService } from "../services/walletAccountService.js";
+import { useDocumentsInSelectedDrive, useSelectedDrive } from "@powerhousedao/reactor-browser";
 
 interface WalletsTableProps {
   wallets: Wallet[];
@@ -39,33 +41,118 @@ export function WalletsTable({
   const [editingName, setEditingName] = useState("");
   const [copiedWallet, setCopiedWallet] = useState<string | null>(null);
   const [syncingWallet, setSyncingWallet] = useState<string | null>(null);
+  const [addingWallet, setAddingWallet] = useState(false);
+
+  // Get drive and documents for account/transactions document management
+  const [selectedDrive] = useSelectedDrive();
+  const allDocuments = useDocumentsInSelectedDrive();
 
   // Check sync status
   const { needsSync, outdatedWallets, tagChangedWallets } =
     useWalletSync(wallets);
   const { syncWallet } = useSyncWallet();
 
-  const handleAddWallet = () => {
+  const handleAddWallet = async () => {
+    console.log('[WalletsTable] handleAddWallet called');
     const trimmedAddress = newWalletAddress.trim();
 
-    if (trimmedAddress) {
-      // Check if wallet already exists
-      const walletExists = wallets.some((w) => w.wallet === trimmedAddress);
+    if (!trimmedAddress) {
+      console.log('[WalletsTable] No wallet address provided');
+      return;
+    }
 
-      if (walletExists) {
-        setWalletError("This wallet already exists");
-        return;
-      }
+    // Check if wallet already exists
+    const walletExists = wallets.some((w) => w.wallet === trimmedAddress);
 
+    if (walletExists) {
+      setWalletError("This wallet already exists");
+      return;
+    }
+
+    setAddingWallet(true);
+    setWalletError("");
+
+    console.log('[WalletsTable] Starting wallet addition process', {
+      address: trimmedAddress,
+      name: newWalletName.trim() || undefined,
+      driveId: selectedDrive?.header.id,
+      documentsCount: allDocuments?.length || 0
+    });
+
+    try {
+      // First, add the wallet to the expense report
       dispatch(
         actions.addWallet({
           wallet: trimmedAddress,
           name: newWalletName.trim() || undefined,
         })
       );
+
+      // Then, process account and transactions documents
+      const driveId = selectedDrive?.header.id;
+      
+      console.log('[WalletsTable] Drive information:', {
+        hasSelectedDrive: !!selectedDrive,
+        driveId,
+        driveHeader: selectedDrive?.header,
+        driveName: selectedDrive?.header?.name
+      });
+      
+      if (!driveId) {
+        console.warn('[WalletsTable] No drive selected - documents will be created but not added to drive');
+        // Still proceed, but documents won't be added to drive
+      }
+
+      console.log('[WalletsTable] Processing wallet account documents...', {
+        driveId,
+        hasDrive: !!selectedDrive,
+        hasDocuments: !!allDocuments,
+        documentsCount: allDocuments?.length || 0
+      });
+      
+      const result = await walletAccountService.processWalletAddition(
+        trimmedAddress,
+        newWalletName.trim() || undefined,
+        driveId,
+        allDocuments
+      );
+
+      console.log('[WalletsTable] Wallet account service result:', result);
+
+      if (result.success) {
+        // Update wallet with document IDs
+        if (result.accountDocumentId || result.accountTransactionsDocumentId) {
+          console.log('[WalletsTable] Updating wallet with document IDs:', {
+            accountDocumentId: result.accountDocumentId,
+            accountTransactionsDocumentId: result.accountTransactionsDocumentId
+          });
+          dispatch(
+            actions.updateWallet({
+              address: trimmedAddress,
+              accountDocumentId: result.accountDocumentId || undefined,
+              accountTransactionsDocumentId: result.accountTransactionsDocumentId || undefined,
+            })
+          );
+        } else {
+          console.warn('[WalletsTable] Service succeeded but no document IDs returned');
+        }
+        
+        // Note: Documents are created and added to the drive, but the UI may need a moment to refresh
+        // The useDocumentsInSelectedDrive hook should automatically detect the new documents
+        console.log('[WalletsTable] Documents created successfully. UI should refresh automatically.');
+      } else {
+        console.error('[WalletsTable] Failed to process wallet account documents:', result.message);
+        // Show error to user
+        setWalletError(`Wallet added, but failed to link documents: ${result.message}`);
+      }
+
       setNewWalletAddress("");
       setNewWalletName("");
-      setWalletError("");
+    } catch (error) {
+      console.error("Error adding wallet:", error);
+      setWalletError("Failed to add wallet. Please try again.");
+    } finally {
+      setAddingWallet(false);
     }
   };
 
@@ -491,8 +578,8 @@ export function WalletsTable({
             </div>
           )}
         </div>
-        <Button onClick={handleAddWallet} disabled={!newWalletAddress.trim()}>
-          Add Wallet
+        <Button onClick={handleAddWallet} disabled={!newWalletAddress.trim() || addingWallet}>
+          {addingWallet ? "Adding..." : "Add Wallet"}
         </Button>
       </div>
     </div>

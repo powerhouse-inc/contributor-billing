@@ -54,14 +54,17 @@ export class AccountTransactionsService {
         account.account
       );
 
-      // Step 4: Update the account with the transaction document ID
-      if (transactionsResult.success) {
-        await this.updateAccountTransactionsId(
-          accountsDocumentId,
-          account.id,
-          createResult.documentId
-        );
+      if (!transactionsResult.success) {
+        console.warn('[AccountTransactionsService] fetchTransactionsFromAlchemy failed:', transactionsResult.message);
       }
+
+      // Step 4: Update the account with the transaction document ID
+      // Always set the AccountTransactionsId so the documents are linked
+      await this.updateAccountTransactionsId(
+        accountsDocumentId,
+        account.id,
+        createResult.documentId
+      );
 
       return {
         success: true,
@@ -82,17 +85,35 @@ export class AccountTransactionsService {
    * Create a new Account Transactions document
    */
   private async createDocument(name: string, driveId?: string): Promise<CreateAccountTransactionsResult> {
+    console.log('[AccountTransactionsService] Creating document', {
+      name,
+      driveId,
+      hasDriveId: !!driveId,
+      endpoint: this.graphqlEndpoint
+    });
+    
+    const variables = {
+      name,
+      ...(driveId && { driveId })
+    };
+    
+    console.log('[AccountTransactionsService] Sending GraphQL request with variables:', variables);
+    
+    const requestBody = {
+      query: `
+        mutation CreateAccountTransactionsDocument($name: String!, $driveId: String) {
+          AccountTransactions_createDocument(name: $name, driveId: $driveId)
+        }
+      `,
+      variables
+    };
+    
+    console.log('[AccountTransactionsService] GraphQL request body:', JSON.stringify(requestBody, null, 2));
+    
     const response = await fetch(this.graphqlEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: `
-          mutation CreateAccountTransactionsDocument($name: String!, $driveId: String) {
-            AccountTransactions_createDocument(name: $name, driveId: $driveId)
-          }
-        `,
-        variables: { name, driveId }
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
