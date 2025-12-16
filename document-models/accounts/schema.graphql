@@ -32,10 +32,10 @@ type AccountEntry {
 }
 
 enum AccountType {
-    Protocol
-    Auditor
-    Operational
-    PaymentProcessor
+    Source
+    Internal
+    Destination
+    External
 }
 
 enum KycAmlStatusType {
@@ -61,10 +61,10 @@ input AddAccountInput {
 }
 
 enum AccountTypeInput {
-  Protocol
-  Auditor
-  Operational
-  PaymentProcessor
+  Source
+  Internal
+  Destination
+  External
 }
 
 enum KycAmlStatusTypeInput {

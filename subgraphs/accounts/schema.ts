@@ -58,10 +58,10 @@ export const schema: DocumentNode = gql`
   }
 
   enum AccountTypeInput {
-    Protocol
-    Auditor
-    Operational
-    PaymentProcessor
+    Source
+    Internal
+    Destination
+    External
   }
 
   enum KycAmlStatusTypeInput {

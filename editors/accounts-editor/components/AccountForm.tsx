@@ -117,10 +117,10 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
             >
               <option value="">Select type...</option>
-              <option value="Protocol">Protocol</option>
-              <option value="Auditor">Auditor</option>
-              <option value="Operational">Operational</option>
-              <option value="PaymentProcessor">Payment Processor</option>
+              <option value="Source">Source</option>
+              <option value="Internal">Internal</option>
+              <option value="Destination">Destination</option>
+              <option value="External">External</option>
             </select>
           </div>
 

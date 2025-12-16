@@ -26,17 +26,17 @@ export const definedNonNullAnySchema = z
   .refine((v) => isDefinedNonNullAny(v));
 
 export const AccountTypeSchema = z.enum([
-  "Auditor",
-  "Operational",
-  "PaymentProcessor",
-  "Protocol",
+  "Source",
+  "Internal",
+  "Destination",
+  "External",
 ]);
 
 export const AccountTypeInputSchema = z.enum([
-  "Auditor",
-  "Operational",
-  "PaymentProcessor",
-  "Protocol",
+  "Source",
+  "Internal",
+  "Destination",
+  "External",
 ]);
 
 export const KycAmlStatusTypeSchema = z.enum(["FAILED", "PASSED", "PENDING"]);

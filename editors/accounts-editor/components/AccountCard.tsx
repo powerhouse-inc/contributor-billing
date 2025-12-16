@@ -27,10 +27,10 @@ export function AccountCard({
   const [showKycMenu, setShowKycMenu] = useState(false);
 
   const accountTypeColors = {
-    Protocol: "bg-purple-100 text-purple-800",
-    Auditor: "bg-blue-100 text-blue-800",
-    Operational: "bg-green-100 text-green-800",
-    PaymentProcessor: "bg-orange-100 text-orange-800",
+    Source: "bg-purple-100 text-purple-800",
+    Internal: "bg-blue-100 text-blue-800",
+    Destination: "bg-green-100 text-green-800",
+    External: "bg-orange-100 text-orange-800",
   };
 
   function handleKycStatusChange(status: KycAmlStatusTypeInput) {

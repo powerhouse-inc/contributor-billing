@@ -69,16 +69,16 @@ export type AccountEntry = {
 };
 
 export type AccountType =
-  | "Auditor"
-  | "Operational"
-  | "PaymentProcessor"
-  | "Protocol";
+  | "Source"
+  | "Internal"
+  | "Destination"
+  | "External";
 
 export type AccountTypeInput =
-  | "Auditor"
-  | "Operational"
-  | "PaymentProcessor"
-  | "Protocol";
+  | "Source"
+  | "Internal"
+  | "Destination"
+  | "External";
 
 export type AccountsState = {
   accounts: Array<AccountEntry>;
