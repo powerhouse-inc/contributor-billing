@@ -1,13 +1,12 @@
-import { useState, useMemo } from "react";
-import { useSelectedExpenseReportDocument } from "../hooks/useExpenseReportDocument.js";
+import { useState, useMemo, useEffect } from "react";
+import { useSelectedExpenseReportDocument } from "../../document-models/expense-report/hooks.js";
 import { actions } from "../../document-models/expense-report/index.js";
-import { DatePicker, Icon, Button } from "@powerhousedao/document-engineering";
+import { Icon, Button, Select } from "@powerhousedao/document-engineering";
 import { WalletsTable } from "./components/WalletsTable.js";
 import { AggregatedExpensesTable } from "./components/AggregatedExpensesTable.js";
 import { AddBillingStatementModal } from "./components/AddBillingStatementModal.js";
 import { ExpenseReportPDF } from "./components/ExpenseReportPDF.js";
 import { pdf } from "@react-pdf/renderer";
-import { PDFViewer } from "@react-pdf/renderer";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
@@ -16,37 +15,128 @@ import {
 import { useSyncWallet } from "./hooks/useSyncWallet.js";
 import { RefreshCw } from "lucide-react";
 
+// Helper function to generate month options from January 2025 to current month
+function generateMonthOptions() {
+  const options: Array<{ label: string; value: string }> = [];
+  const startDate = new Date(2025, 0, 1); // January 2025
+  const currentDate = new Date();
+
+  const date = new Date(startDate);
+
+  while (date <= currentDate) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const monthName = date.toLocaleDateString("en-US", { month: "long" });
+    const label = `${monthName} ${year}`;
+
+    // Value format: YYYY-MM (e.g., "2025-01")
+    const value = `${year}-${String(month + 1).padStart(2, "0")}`;
+
+    options.push({ label, value });
+
+    // Move to next month
+    date.setMonth(date.getMonth() + 1);
+  }
+
+  // Reverse to show most recent first
+  return options.reverse();
+}
+
+// Helper function to get start and end dates for a given month
+function getMonthDateRange(yearMonth: string) {
+  const [year, month] = yearMonth.split("-").map(Number);
+
+  // First day of month at 00:00:00 UTC
+  const periodStart = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0)).toISOString();
+
+  // Last day of month at 23:59:59.999 UTC
+  // Get the last day by using day 0 of the next month
+  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const periodEnd = new Date(Date.UTC(year, month - 1, lastDay, 23, 59, 59, 999)).toISOString();
+
+  return { periodStart, periodEnd };
+}
+
 export default function Editor() {
   const [document, dispatch] = useSelectedExpenseReportDocument();
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSyncingAll, setIsSyncingAll] = useState(false);
-  const [periodStart, setPeriodStart] = useState<string>(
-    document.state.global.periodStart || "",
-  );
-  const [periodEnd, setPeriodEnd] = useState<string>(
-    document.state.global.periodEnd || "",
-  );
+
+  // Guard for undefined document or dispatch
+  if (!document || !dispatch) {
+    return <div>Loading...</div>;
+  }
 
   const { wallets, groups } = document.state.global;
   const { syncWallet } = useSyncWallet();
 
-  // Handle period date changes
-  const handlePeriodStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPeriodStart(value);
-    if (value) {
-      dispatch(actions.setPeriodStart({ periodStart: value }));
+  // Derive current period from document state
+  const periodStart = document.state.global.periodStart || "";
+  const periodEnd = document.state.global.periodEnd || "";
+
+  // Local state for the selected period (before confirmation)
+  const [selectedPeriod, setSelectedPeriod] = useState<string>(() => {
+    if (periodStart) {
+      const date = new Date(periodStart);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
     }
+    // Default to current month
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
+
+  // Track if the selected period differs from the saved period
+  const savedPeriod = useMemo(() => {
+    if (periodStart) {
+      const date = new Date(periodStart);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    }
+    return "";
+  }, [periodStart]);
+
+  // Track if we're in editing mode
+  const [isEditingPeriod, setIsEditingPeriod] = useState(!savedPeriod);
+
+  const isPeriodChanged = selectedPeriod !== savedPeriod;
+
+  // Update selected period when document period changes externally
+  useEffect(() => {
+    if (savedPeriod && savedPeriod !== selectedPeriod) {
+      setSelectedPeriod(savedPeriod);
+    }
+  }, [savedPeriod]);
+
+  // Handle period dropdown change (doesn't save yet)
+  const handlePeriodChange = (value: string) => {
+    setSelectedPeriod(value);
   };
 
-  const handlePeriodEndChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPeriodEnd(value);
-    if (value) {
-      dispatch(actions.setPeriodEnd({ periodEnd: value }));
-    }
+  // Handle period confirmation (saves to document)
+  const handleConfirmPeriod = () => {
+    const { periodStart, periodEnd } = getMonthDateRange(selectedPeriod);
+
+    // Dispatch both start and end dates
+    dispatch(actions.setPeriodStart({ periodStart }));
+    dispatch(actions.setPeriodEnd({ periodEnd }));
+
+    // Exit editing mode
+    setIsEditingPeriod(false);
   };
+
+  // Handle starting to edit the period
+  const handleEditPeriod = () => {
+    setIsEditingPeriod(true);
+  };
+
+  // Generate month options
+  const monthOptions = useMemo(() => generateMonthOptions(), []);
+
+  // Get the formatted display label for the current period
+  const periodDisplayLabel = useMemo(() => {
+    const option = monthOptions.find((opt) => opt.value === selectedPeriod);
+    return option ? option.label : selectedPeriod;
+  }, [selectedPeriod, monthOptions]);
 
   // Handle wallet selection for adding billing statements
   const handleAddBillingStatement = (walletAddress: string) => {
@@ -163,19 +253,40 @@ export default function Editor() {
                     <div className="flex items-center justify-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                       <div className="flex items-center gap-2">
                         <span className="font-medium">Period:</span>
-                        <DatePicker
-                          name="periodStart"
-                          value={periodStart}
-                          onChange={handlePeriodStartChange}
-                          className="bg-white"
-                        />
-                        <span>to</span>
-                        <DatePicker
-                          name="periodEnd"
-                          value={periodEnd}
-                          onChange={handlePeriodEndChange}
-                          className="bg-white"
-                        />
+                        {isEditingPeriod ? (
+                          <>
+                            <Select
+                              options={monthOptions}
+                              value={selectedPeriod}
+                              onChange={(value) =>
+                                handlePeriodChange(value as string)
+                              }
+                              className="min-w-[200px]"
+                            />
+                            {isPeriodChanged && (
+                              <Button
+                                variant="default"
+                                onClick={handleConfirmPeriod}
+                                className="text-sm"
+                              >
+                                Set Period
+                              </Button>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {periodDisplayLabel}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              onClick={handleEditPeriod}
+                              className="text-sm"
+                            >
+                              Change
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -241,23 +352,6 @@ export default function Editor() {
                 </div>
               </section>
             )}
-
-            {/* Live PDF Preview */}
-            {/* <div className="mt-8 border border-gray-200 rounded-lg overflow-hidden">
-            <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-              <h3 className="text-lg font-semibold">PDF Preview</h3>
-            </div>
-            <div style={{ height: "1000px" }}>
-              <PDFViewer width="100%" height="100%">
-                <ExpenseReportPDF
-                  periodStart={periodStart}
-                  periodEnd={periodEnd}
-                  wallets={wallets}
-                  groups={groups}
-                />
-              </PDFViewer>
-            </div>
-          </div> */}
           </div>
         </div>
 

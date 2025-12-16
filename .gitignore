@@ -5,8 +5,6 @@ node_modules
 .env.local
 .env
 .playwright-mcp
-keyFile.json
-.ds_store
 
 .ph
 projects-import.js

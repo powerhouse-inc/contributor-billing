@@ -1,4 +1,4 @@
-import type { BillingStatementLineItemsOperations } from "@powerhousedao/contributor-billing/document-models/billing-statement";
+import type { BillingStatementLineItemsOperations, BillingStatementState } from "@powerhousedao/contributor-billing/document-models/billing-statement";
 
 // Extended operations interface to include delete operation (will be in gen files after MCP update)
 
@@ -35,7 +35,9 @@ export const billingStatementLineItemsOperations: BillingStatementLineItemsOpera
       updateTotals(state);
     },
     deleteLineItemOperation(state, action) {
-      state.lineItems = state.lineItems.filter((x) => x.id !== action.input.id);
+      state.lineItems = state.lineItems.filter(
+        (x) => x.id !== action.input.id,
+      );
       updateTotals(state);
     },
   };

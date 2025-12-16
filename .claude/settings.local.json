@@ -16,7 +16,8 @@
       "Bash(playwright install:*)",
       "Bash(find:*)",
       "Bash(cat:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(git add:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

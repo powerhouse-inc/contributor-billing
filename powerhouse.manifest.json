@@ -20,12 +20,12 @@
             "name": "Invoice"
         },
         {
-            "id": "powerhouse/integrations",
-            "name": "Integrations"
-        },
-        {
             "id": "powerhouse/billing-statement",
             "name": "Billing Statement"
+        },
+        {
+            "id": "powerhouse/integrations",
+            "name": "Integrations"
         },
         {
             "id": "powerhouse/expense-report",
