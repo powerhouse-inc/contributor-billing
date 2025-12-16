@@ -24,7 +24,7 @@ export const initialGlobalState: IntegrationsGlobalState = {};
 export const initialLocalState: IntegrationsLocalState = {};
 
 export const utils: DocumentModelUtils<IntegrationsPHState> = {
-  fileExtension: ".phdm",
+  fileExtension: "",
   createState(state) {
     return {
       ...defaultBaseState(),

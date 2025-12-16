@@ -325,7 +325,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
   function chunkLineItems(
     lineItems: any[],
     firstPageSize: number,
-    otherPageSize: number
+    otherPageSize: number,
   ) {
     if (lineItems.length <= firstPageSize) return [lineItems];
     const chunks = [lineItems.slice(0, firstPageSize)];
@@ -340,7 +340,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
   const lineItemChunks = chunkLineItems(
     invoice.lineItems,
     MAX_ITEMS_FIRST_PAGE,
-    MAX_ITEMS_OTHER_PAGES
+    MAX_ITEMS_OTHER_PAGES,
   );
   const totalPages = lineItemChunks.length;
 
@@ -485,7 +485,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                         {invoice.issuer.address?.city || ""},{" "}
                         {invoice.issuer.address?.stateProvince || ""},{" "}
                         {getCountryName(
-                          invoice.issuer.address?.country || ""
+                          invoice.issuer.address?.country || "",
                         ) || ""}
                       </Text>
                     </View>
@@ -664,9 +664,9 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                           invoice.lineItems.reduce(
                             (sum, item) =>
                               sum + item.quantity * item.unitPriceTaxExcl,
-                            0
+                            0,
                           ),
-                          invoice.currency
+                          invoice.currency,
                         )}
                       </Text>
                     </View>
@@ -679,9 +679,9 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                               sum +
                               item.quantity *
                                 (item.unitPriceTaxIncl - item.unitPriceTaxExcl),
-                            0
+                            0,
                           ),
-                          invoice.currency
+                          invoice.currency,
                         )}
                       </Text>
                     </View>
@@ -692,9 +692,9 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                           invoice.lineItems.reduce(
                             (sum, item) =>
                               sum + item.quantity * item.unitPriceTaxIncl,
-                            0
+                            0,
                           ),
-                          invoice.currency
+                          invoice.currency,
                         )}
                       </Text>
                     </View>

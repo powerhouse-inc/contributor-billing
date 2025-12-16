@@ -18,8 +18,8 @@ scalar Upload
 type InvoiceState {
   status: Status!
   invoiceNo: String!
-  dateIssued: Date!
-  dateDue: Date!
+  dateIssued: Date
+  dateDue: Date
   dateDelivered: Date
   issuer: LegalEntity!
   payer: LegalEntity!
@@ -32,7 +32,7 @@ type InvoiceState {
   payments: [Payment!]!
   payAfter: DateTime
   invoiceTags: [InvoiceTag!]!   # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}
-  exported: ExportedData
+  exported: ExportedData!
   closureReason: ClosureReason
 }
 
@@ -49,7 +49,7 @@ type Rejection {
 }
 
 type ExportedData {
-  timestamp: DateTime!        # ISO 8601 timestamp of the export
+  timestamp: DateTime   # ISO 8601 timestamp of the export
   exportedLineItems: [[String!]!]!   # CSV Format
 }
 

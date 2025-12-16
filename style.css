@@ -1,10 +1,5 @@
 @import "tailwindcss";
 @import "@powerhousedao/design-system/theme.css";
-@import './node_modules/@powerhousedao/document-engineering/dist/style.css';
-@import './node_modules/@powerhousedao/document-engineering/dist/style.css';
-
-/* Uses .dark class for dark mode */
-@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   /* You can customize the theme by overriding the theme variables here */
@@ -15,91 +10,4 @@
   /* A sensible CSS reset is applied by default. If you would prefer to use a different reset or none at all, uncomment the following line */
 
   /* --*: initial; */
-}
-
-/* Responsive Editor Styles */
-.editor-container {
-  width: 100%;
-  min-height: 100vh;
-  margin: 0;
-  padding: 0.5rem;
-  box-sizing: border-box;
-  overflow-x: hidden;
-}
-
-/* Base styles for all screen sizes */
-.editor-container > * {
-  width: 100%;
-  max-width: 100%;
-}
-
-/* Small screens (mobile) */
-@media (max-width: 640px) {
-  .editor-container {
-    padding: 0.125rem;
-    transform: none;
-    transform-origin: top left;
-  }
-}
-
-/* Medium screens (tablet) */
-@media (min-width: 641px) and (max-width: 1023px) {
-  .editor-container {
-    padding: 0.25rem;
-    transform: none;
-    transform-origin: top left;
-  }
-}
-
-/* Large screens (desktop) */
-@media (min-width: 1024px) {
-  .editor-container {
-    max-width: 1280px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 1rem;
-    transform: none;
-  }
-}
-
-/* Ensure responsive grid works at md breakpoint and above */
-@media (min-width: 768px) {
-  .md\:grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-}
-
-/* Ensure responsive utilities work at md breakpoint and above */
-@media (min-width: 768px) {
-  .md\:flex {
-    display: flex !important;
-  }
-  .md\:hidden {
-    display: none !important;
-  }
-  .md\:block {
-    display: block !important;
-  }
-  .md\:inline {
-    display: inline !important;
-  }
-}
-
-/* Ensure responsive border/padding utilities work at lg breakpoint and above */
-@media (min-width: 1024px) {
-  .lg\:gap-4 {
-    gap: 1rem !important;
-  }
-  .lg\:border {
-    border-width: 1px !important;
-  }
-  .lg\:border-gray-200 {
-    border-color: rgb(229, 231, 235) !important;
-  }
-  .lg\:rounded-lg {
-    border-radius: 0.5rem !important;
-  }
-  .lg\:p-4 {
-    padding: 1rem !important;
-  }
 }

@@ -276,7 +276,7 @@ export type EditStatusInput = {
 
 export type ExportedData = {
   exportedLineItems: Array<Array<Scalars["String"]["output"]>>;
-  timestamp: Scalars["DateTime"]["output"];
+  timestamp: Maybe<Scalars["DateTime"]["output"]>;
 };
 
 export type IntermediaryBank = {
@@ -316,9 +316,9 @@ export type InvoiceState = {
   closureReason: Maybe<ClosureReason | `${ClosureReason}`>;
   currency: Scalars["String"]["output"];
   dateDelivered: Maybe<Scalars["Date"]["output"]>;
-  dateDue: Scalars["Date"]["output"];
-  dateIssued: Scalars["Date"]["output"];
-  exported: Maybe<ExportedData>;
+  dateDue: Maybe<Scalars["Date"]["output"]>;
+  dateIssued: Maybe<Scalars["Date"]["output"]>;
+  exported: ExportedData;
   invoiceNo: Scalars["String"]["output"];
   invoiceTags: Array<InvoiceTag>;
   issuer: LegalEntity;

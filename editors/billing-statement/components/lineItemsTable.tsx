@@ -1,8 +1,13 @@
-import { Tag, Plus } from "lucide-react";
+import { Tag, Plus, Trash2 } from "lucide-react";
 import { Select } from "@powerhousedao/document-engineering";
 import { InputField } from "../../invoice/components/inputField.js";
 import { NumberForm } from "../../invoice/components/numberForm.js";
-import { actions, type BillingStatementAction, type BillingStatementState, type BillingStatementUnitInput } from "../../../document-models/billing-statement/index.js";
+import {
+  actions,
+  type BillingStatementAction,
+  type BillingStatementState,
+  type BillingStatementUnitInput,
+} from "../../../document-models/billing-statement/index.js";
 import { useState, useRef, useEffect } from "react";
 import { formatNumber } from "../../invoice/lineItems.js";
 import { LineItemTagsTable } from "../lineItemTags/lineItemTags.js";
@@ -37,13 +42,18 @@ type LocalLineItemDraft = {
   unitPricePwt: number | string;
 };
 
-const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.Dispatch<BillingStatementAction> }) => {
+const LineItemsTable = (props: {
+  state: BillingStatementState;
+  dispatch: React.Dispatch<BillingStatementAction>;
+}) => {
   const { state, dispatch } = props;
   const [editingRow, setEditingRow] = useState<number | null>(null);
-  const [localLineItem, setLocalLineItem] = useState<LocalLineItemDraft>(initialLineItem);
+  const [localLineItem, setLocalLineItem] =
+    useState<LocalLineItemDraft>(initialLineItem);
   const [showTagTable, setShowTagTable] = useState(false);
   const [isAddingNew, setIsAddingNew] = useState(false);
-  const [newLineItem, setNewLineItem] = useState<LocalLineItemDraft>(initialLineItem);
+  const [newLineItem, setNewLineItem] =
+    useState<LocalLineItemDraft>(initialLineItem);
   const tableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,7 +64,7 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
         target.closest('[role="listbox"]') || target.closest('[role="option"]');
 
       // Check if clicking on buttons (save/cancel)
-      const isButton = target.closest('button');
+      const isButton = target.closest("button");
 
       if (
         tableRef.current &&
@@ -89,7 +99,10 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
     setLocalLineItem({ ...item });
   };
 
-  const handleInputChange = (field: keyof LocalLineItemDraft, value: string | number) => {
+  const handleInputChange = (
+    field: keyof LocalLineItemDraft,
+    value: string | number,
+  ) => {
     if (field === "unitPriceCash" || field === "unitPricePwt") {
       // Allow negative numbers with optional minus sign at start
       const regex = new RegExp(`^-?\\d*\\.?\\d{0,6}$`);
@@ -118,7 +131,7 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
 
       // Get the original line item
       const originalItem = state.lineItems.find(
-        (item: any) => item.id === localLineItem.id
+        (item: any) => item.id === localLineItem.id,
       ) as BillingStatementLineItem | undefined;
 
       // Check if any values have actually changed
@@ -142,7 +155,7 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
             unitPricePwt: powt,
             totalPriceCash: qty * fiat,
             totalPricePwt: qty * powt,
-          })
+          }),
         );
       }
       setEditingRow(null);
@@ -155,7 +168,10 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
     setNewLineItem(initialLineItem);
   };
 
-  const handleNewLineItemChange = (field: keyof LocalLineItemDraft, value: string | number) => {
+  const handleNewLineItemChange = (
+    field: keyof LocalLineItemDraft,
+    value: string | number,
+  ) => {
     if (field === "unitPriceCash" || field === "unitPricePwt") {
       // Allow negative numbers with optional minus sign at start
       const regex = new RegExp(`^-?\\d*\\.?\\d{0,6}$`);
@@ -169,7 +185,8 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
   };
 
   const handleSaveNewLineItem = () => {
-    const { description, unit, quantity, unitPriceCash, unitPricePwt } = newLineItem;
+    const { description, unit, quantity, unitPriceCash, unitPricePwt } =
+      newLineItem;
 
     if (
       description &&
@@ -192,7 +209,7 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
           unitPricePwt: powt,
           totalPriceCash: qty * fiat,
           totalPricePwt: qty * powt,
-        })
+        }),
       );
 
       setIsAddingNew(false);
@@ -203,6 +220,14 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
   const handleCancelAdd = () => {
     setIsAddingNew(false);
     setNewLineItem(initialLineItem);
+  };
+
+  const handleDeleteLineItem = (id: string) => {
+    if (editingRow !== null) {
+      setEditingRow(null);
+      setLocalLineItem(initialLineItem);
+    }
+    dispatch(actions.deleteLineItem({ id }));
   };
 
   if (showTagTable) {
@@ -216,217 +241,298 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
   }
 
   return (
-    <div className="mt-2 overflow-x-auto">
+    <div className="w-full">
       {/* Heading */}
-      <div className="flex justify-between mt-6">
-        <div className="flex items-center">
-          <h1 className="text-1xl font-bold">Line Items</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1">
+          <div className="text-xs font-semibold tracking-[0.24em] text-black/60">
+            LINE ITEMS
+          </div>
+          <div className="text-sm text-black/50">
+            Double‑click a row to edit. Click outside to save.
+          </div>
         </div>
-        <div className="flex items-center">
-          <Tag
-            style={{
-              cursor: "pointer",
-              width: 28,
-              height: 28,
-              color: "white",
-              fill: "#475264",
-            }}
+
+        <div className="flex items-center justify-between gap-3 sm:justify-end">
+          <button
+            type="button"
             onClick={() => setShowTagTable(!showTagTable)}
-          />
+            className="group inline-flex items-center gap-2 rounded-full border border-black/15 bg-[#efe8da] px-3 py-2 text-xs font-semibold tracking-wide text-black/80 shadow-[0_10px_28px_rgba(15,23,42,0.10)] transition hover:bg-[#e7ddc9] focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            aria-label="Open tag editor"
+          >
+            <Tag className="h-4 w-4 text-black/70" />
+            Tags
+          </button>
         </div>
       </div>
+
       {/* Table */}
-      <div className="mt-4 min-w-[900px]" ref={tableRef}>
-        <table className="w-full border border-gray-300 text-sm">
-          <thead className="h-12">
-            <tr className="bg-gray-100 h-10">
-              <th className="border px-2 py-1 w-10">#</th>
-              <th className="border px-2 py-1 w-72">Desc</th>
-              <th className="border px-2 py-1 w-40">Unit</th>
-              <th className="border px-2 py-1 w-16">Qty</th>
-              <th className="border px-2 py-1 w-16">FIAT/Unit</th>
-              <th className="border px-2 py-1 w-16">POWT/Unit</th>
-              <th className="border px-2 py-1 w-16">Total Fiat</th>
-              <th className="border px-2 py-1 w-16">Total POWT</th>
-            </tr>
-          </thead>
-          <tbody>
-            {state.lineItems.map((item: any, idx: number) =>
-              editingRow === idx ? (
-                <tr key={item.id} className="bg-yellow-100">
-                  <td className="border px-2 py-1 text-center w-10">
-                    {idx + 1}
-                  </td>
-                  <td className="border px-2 py-1 w-72">
-                    <InputField
-                      input={localLineItem.description}
-                      value={localLineItem.description}
-                      onBlur={() => {}}
-                      handleInputChange={(e) =>
-                        handleInputChange("description", e.target.value)
-                      }
-                      className="w-full px-1 py-1 border rounded"
-                    />
-                  </td>
-                  <td className="border px-2 py-1 w-16">
-                    <Select
-                      options={units}
-                      value={localLineItem.unit}
-                      onChange={(value) => handleInputChange("unit", value as BillingStatementUnitInput)}
-                      className="w-32 px-1 py-1 border rounded"
-                    />
-                  </td>
-                  <td className="border px-2 py-1 w-16">
-                    <NumberForm
-                      number={localLineItem.quantity}
-                      handleInputChange={(e: any) =>
-                        handleInputChange("quantity", e.target.value)
-                      }
-                      className="w-32 px-4 py-1 border rounded text-center"
-                    />
-                  </td>
-                  <td className="border px-2 py-1 w-16">
-                    <NumberForm
-                      number={localLineItem.unitPriceCash}
-                      handleInputChange={(e: any) =>
-                        handleInputChange(
-                          "unitPriceCash",
-                          String(e.target.value)
-                        )
-                      }
-                      className="w-32 px-4 py-1 border rounded text-center"
-                    />
-                  </td>
-                  <td className="border px-2 py-1 w-16">
-                    <NumberForm
-                      number={localLineItem.unitPricePwt}
-                      handleInputChange={(e: any) =>
-                        handleInputChange("unitPricePwt", e.target.value)
-                      }
-                      className="w-32 px-4 py-1 border rounded text-center"
-                    />
-                  </td>
-                  <td className="border px-2 py-1 text-center">
-                    {localLineItem.quantity && localLineItem.unitPriceCash
-                      ? Number(localLineItem.quantity) *
-                        Number(localLineItem.unitPriceCash)
-                      : ""}
-                  </td>
-                  <td className="border px-2 py-1 text-center">
-                    {localLineItem.quantity && localLineItem.unitPricePwt
-                      ? Number(localLineItem.quantity) *
-                        Number(localLineItem.unitPricePwt)
-                      : ""}
-                  </td>
+      <div className="mt-4 overflow-hidden rounded-xl border border-black/10 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+        <div className="overflow-x-auto" ref={tableRef}>
+          <div className="min-w-[980px]">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="bg-[#efe8da] text-[#14120f]">
+                  <th className="w-10 border-b border-black/10 px-2 py-3 text-center text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                    #
+                  </th>
+                  <th className="w-[28rem] border-b border-black/10 px-3 py-3 text-left text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                    DESCRIPTION
+                  </th>
+                  <th className="w-44 border-b border-black/10 px-3 py-3 text-left text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                    UNIT
+                  </th>
+                  <th className="w-20 border-b border-black/10 px-3 py-3 text-right text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                    QTY
+                  </th>
+                  <th className="w-28 border-b border-black/10 px-3 py-3 text-right text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                    FIAT/UNIT
+                  </th>
+                  <th className="w-28 border-b border-black/10 px-3 py-3 text-right text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                    POWT/UNIT
+                  </th>
+                  <th className="w-32 border-b border-black/10 px-3 py-3 text-right text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                    TOTAL FIAT
+                  </th>
+                  <th className="w-32 border-b border-black/10 px-3 py-3 text-right text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                    TOTAL POWT
+                  </th>
+                  <th className="w-16 border-b border-black/10 px-2 py-3 text-center text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                    {/* Delete column header */}
+                  </th>
                 </tr>
-              ) : (
-                <tr
-                  key={item.id}
-                  className="hover:bg-gray-50 cursor-pointer"
-                  onDoubleClick={() => {
-                    setEditingRow(idx);
-                    setLocalLineItem({ ...item });
-                  }}
-                >
-                  <td className="border px-2 py-2 text-center w-10">
-                    {idx + 1}
-                  </td>
-                  <td className="border px-2 py-2">{item.description}</td>
-                  <td className="border px-2 py-2 w-40 text-center">
-                    {item.unit}
-                  </td>
-                  <td className="border px-2 py-2 w-16 text-center">
-                    {item.quantity}
-                  </td>
-                  <td className="border px-2 py-2 w-10 text-center">
-                    {formatNumber(item.unitPriceCash)}
-                  </td>
-                  <td className="border px-2 py-2 w-10 text-center">
-                    {formatNumber(item.unitPricePwt)}
-                  </td>
-                  <td className="border px-2 py-2 text-center">
-                    {formatNumber(item.totalPriceCash)}
-                  </td>
-                  <td className="border px-2 py-2 text-center">
-                    {formatNumber(item.totalPricePwt)}
-                  </td>
-                </tr>
-              )
-            )}
-            {isAddingNew && (
-              <tr className="bg-green-50">
-                <td className="border px-2 py-1 text-center w-10">
-                  {state.lineItems.length + 1}
-                </td>
-                <td className="border px-2 py-1 w-72">
-                  <InputField
-                    input={newLineItem.description}
-                    value={newLineItem.description}
-                    onBlur={() => {}}
-                    handleInputChange={(e) =>
-                      handleNewLineItemChange("description", e.target.value)
-                    }
-                    className="w-full px-1 py-1 border rounded"
-                  />
-                </td>
-                <td className="border px-2 py-1 w-16">
-                  <Select
-                    options={units}
-                    value={newLineItem.unit}
-                    onChange={(value) => handleNewLineItemChange("unit", value as BillingStatementUnitInput)}
-                    className="w-32 px-1 py-1 border rounded"
-                  />
-                </td>
-                <td className="border px-2 py-1 w-16">
-                  <NumberForm
-                    number={newLineItem.quantity}
-                    handleInputChange={(e: any) =>
-                      handleNewLineItemChange("quantity", e.target.value)
-                    }
-                    className="w-32 px-4 py-1 border rounded text-center"
-                  />
-                </td>
-                <td className="border px-2 py-1 w-16">
-                  <NumberForm
-                    number={newLineItem.unitPriceCash}
-                    handleInputChange={(e: any) =>
-                      handleNewLineItemChange("unitPriceCash", String(e.target.value))
-                    }
-                    className="w-32 px-4 py-1 border rounded text-center"
-                  />
-                </td>
-                <td className="border px-2 py-1 w-16">
-                  <NumberForm
-                    number={newLineItem.unitPricePwt}
-                    handleInputChange={(e: any) =>
-                      handleNewLineItemChange("unitPricePwt", e.target.value)
-                    }
-                    className="w-32 px-4 py-1 border rounded text-center"
-                  />
-                </td>
-                <td className="border px-2 py-1 text-center">
-                  {newLineItem.quantity && newLineItem.unitPriceCash
-                    ? Number(newLineItem.quantity) * Number(newLineItem.unitPriceCash)
-                    : ""}
-                </td>
-                <td className="border px-2 py-1 text-center">
-                  {newLineItem.quantity && newLineItem.unitPricePwt
-                    ? Number(newLineItem.quantity) * Number(newLineItem.unitPricePwt)
-                    : ""}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              </thead>
+              <tbody className="text-black/90">
+                {state.lineItems.map((item: any, idx: number) =>
+                  editingRow === idx ? (
+                    <tr
+                      key={item.id}
+                      className="bg-[#fff3cf] shadow-[inset_0_0_0_1px_rgba(245,158,11,0.35)]"
+                    >
+                      <td className="border-b border-black/10 px-2 py-3 text-center font-mono text-xs tabular-nums text-black/60">
+                        {idx + 1}
+                      </td>
+                      <td className="border-b border-black/10 px-3 py-2">
+                        <InputField
+                          input={localLineItem.description}
+                          value={localLineItem.description}
+                          onBlur={() => {}}
+                          handleInputChange={(e) =>
+                            handleInputChange("description", e.target.value)
+                          }
+                          className="w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                        />
+                      </td>
+                      <td className="border-b border-black/10 px-3 py-2">
+                        <Select
+                          options={units}
+                          value={localLineItem.unit}
+                          onChange={(value) =>
+                            handleInputChange(
+                              "unit",
+                              value as BillingStatementUnitInput,
+                            )
+                          }
+                          className="w-44 rounded-lg border border-black/15 bg-white px-2 py-2 text-sm"
+                        />
+                      </td>
+                      <td className="border-b border-black/10 px-3 py-2">
+                        <NumberForm
+                          number={localLineItem.quantity}
+                          handleInputChange={(e: any) =>
+                            handleInputChange("quantity", e.target.value)
+                          }
+                          className="w-24 rounded-lg border border-black/15 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                        />
+                      </td>
+                      <td className="border-b border-black/10 px-3 py-2">
+                        <NumberForm
+                          number={localLineItem.unitPriceCash}
+                          handleInputChange={(e: any) =>
+                            handleInputChange(
+                              "unitPriceCash",
+                              String(e.target.value),
+                            )
+                          }
+                          className="w-28 rounded-lg border border-black/15 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                        />
+                      </td>
+                      <td className="border-b border-black/10 px-3 py-2">
+                        <NumberForm
+                          number={localLineItem.unitPricePwt}
+                          handleInputChange={(e: any) =>
+                            handleInputChange("unitPricePwt", e.target.value)
+                          }
+                          className="w-28 rounded-lg border border-black/15 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                        />
+                      </td>
+                      <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums text-black/70">
+                        {localLineItem.quantity && localLineItem.unitPriceCash
+                          ? Number(localLineItem.quantity) *
+                            Number(localLineItem.unitPriceCash)
+                          : ""}
+                      </td>
+                      <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums text-black/70">
+                        {localLineItem.quantity && localLineItem.unitPricePwt
+                          ? Number(localLineItem.quantity) *
+                            Number(localLineItem.unitPricePwt)
+                          : ""}
+                      </td>
+                      <td className="border-b border-black/10 px-2 py-3 text-center">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteLineItem(String(localLineItem.id));
+                          }}
+                          className="inline-flex items-center justify-center rounded-lg p-1.5 text-red-600/70 transition hover:bg-red-50 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600/20 focus-visible:ring-offset-1"
+                          aria-label="Delete line item"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr
+                      key={item.id}
+                      className="cursor-pointer odd:bg-[#fbf8f1] even:bg-white hover:bg-[#fff3cf]/60"
+                      onDoubleClick={() => {
+                        setEditingRow(idx);
+                        setLocalLineItem({ ...item });
+                      }}
+                    >
+                      <td className="border-b border-black/10 px-2 py-3 text-center font-mono text-xs tabular-nums text-black/60">
+                        {idx + 1}
+                      </td>
+                      <td className="border-b border-black/10 px-3 py-3">
+                        {item.description}
+                      </td>
+                      <td className="border-b border-black/10 px-3 py-3 text-center text-xs font-semibold tracking-wide text-black/60">
+                        {item.unit}
+                      </td>
+                      <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums">
+                        {item.quantity}
+                      </td>
+                      <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums">
+                        {formatNumber(item.unitPriceCash)}
+                      </td>
+                      <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums">
+                        {formatNumber(item.unitPricePwt)}
+                      </td>
+                      <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums">
+                        {formatNumber(item.totalPriceCash)}
+                      </td>
+                      <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums">
+                        {formatNumber(item.totalPricePwt)}
+                      </td>
+                      <td className="border-b border-black/10 px-2 py-3 text-center">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteLineItem(item.id);
+                          }}
+                          className="inline-flex items-center justify-center rounded-lg p-1.5 text-red-600/70 transition hover:bg-red-50 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600/20 focus-visible:ring-offset-1"
+                          aria-label="Delete line item"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ),
+                )}
+                {isAddingNew && (
+                  <tr className="bg-[#e8fff3] shadow-[inset_0_0_0_1px_rgba(16,185,129,0.22)]">
+                    <td className="border-b border-black/10 px-2 py-3 text-center font-mono text-xs tabular-nums text-black/60">
+                      {state.lineItems.length + 1}
+                    </td>
+                    <td className="border-b border-black/10 px-3 py-2">
+                      <InputField
+                        input={newLineItem.description}
+                        value={newLineItem.description}
+                        onBlur={() => {}}
+                        handleInputChange={(e) =>
+                          handleNewLineItemChange("description", e.target.value)
+                        }
+                        className="w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                      />
+                    </td>
+                    <td className="border-b border-black/10 px-3 py-2">
+                      <Select
+                        options={units}
+                        value={newLineItem.unit}
+                        onChange={(value) =>
+                          handleNewLineItemChange(
+                            "unit",
+                            value as BillingStatementUnitInput,
+                          )
+                        }
+                        className="w-44 rounded-lg border border-black/15 bg-white px-2 py-2 text-sm"
+                      />
+                    </td>
+                    <td className="border-b border-black/10 px-3 py-2">
+                      <NumberForm
+                        number={newLineItem.quantity}
+                        handleInputChange={(e: any) =>
+                          handleNewLineItemChange("quantity", e.target.value)
+                        }
+                        className="w-24 rounded-lg border border-black/15 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                      />
+                    </td>
+                    <td className="border-b border-black/10 px-3 py-2">
+                      <NumberForm
+                        number={newLineItem.unitPriceCash}
+                        handleInputChange={(e: any) =>
+                          handleNewLineItemChange(
+                            "unitPriceCash",
+                            String(e.target.value),
+                          )
+                        }
+                        className="w-28 rounded-lg border border-black/15 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                      />
+                    </td>
+                    <td className="border-b border-black/10 px-3 py-2">
+                      <NumberForm
+                        number={newLineItem.unitPricePwt}
+                        handleInputChange={(e: any) =>
+                          handleNewLineItemChange(
+                            "unitPricePwt",
+                            e.target.value,
+                          )
+                        }
+                        className="w-28 rounded-lg border border-black/15 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                      />
+                    </td>
+                    <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums text-black/70">
+                      {newLineItem.quantity && newLineItem.unitPriceCash
+                        ? Number(newLineItem.quantity) *
+                          Number(newLineItem.unitPriceCash)
+                        : ""}
+                    </td>
+                    <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums text-black/70">
+                      {newLineItem.quantity && newLineItem.unitPricePwt
+                        ? Number(newLineItem.quantity) *
+                          Number(newLineItem.unitPricePwt)
+                        : ""}
+                    </td>
+                    <td className="border-b border-black/10 px-2 py-3 text-center">
+                      {/* Empty cell for new item row */}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         {/* Add Line Item Button */}
         {!isAddingNew && (
-          <div className="mt-4 flex justify-center">
+          <div className="flex justify-center bg-[#fbf8f1] px-4 py-4">
             <button
               onClick={handleAddLineItem}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+              className="inline-flex items-center gap-2 rounded-full border border-black/15 bg-[#efe8da] px-4 py-2 text-xs font-semibold tracking-wide text-black/80 shadow-[0_10px_28px_rgba(15,23,42,0.10)] transition hover:bg-[#e7ddc9] focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
             >
-              <Plus size={16} />
+              <Plus className="h-4 w-4 text-black/70" />
               Add Line Item
             </button>
           </div>
@@ -434,16 +540,16 @@ const LineItemsTable = (props: { state: BillingStatementState; dispatch: React.D
 
         {/* Save/Cancel buttons when adding new item */}
         {isAddingNew && (
-          <div className="mt-4 flex justify-center gap-2">
+          <div className="flex justify-center gap-2 bg-[#fbf8f1] px-4 py-4">
             <button
               onClick={handleSaveNewLineItem}
-              className="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+              className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold tracking-wide text-white shadow-[0_10px_28px_rgba(0,0,0,0.18)] transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
             >
               Save Line Item
             </button>
             <button
               onClick={handleCancelAdd}
-              className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+              className="rounded-full bg-[#121319] px-4 py-2 text-xs font-semibold tracking-wide text-[#f6f1e7] shadow-[0_10px_28px_rgba(0,0,0,0.18)] transition hover:bg-[#1b1d26] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d38a]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
             >
               Cancel
             </button>

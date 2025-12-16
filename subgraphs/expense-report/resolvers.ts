@@ -1,27 +1,33 @@
-import { BaseSubgraph } from "@powerhousedao/reactor-api";
+import type { BaseSubgraph } from "@powerhousedao/reactor-api";
 import { addFile } from "document-drive";
+import { setName } from "document-model";
 import {
   actions,
-  type AddWalletInput,
-  type RemoveWalletInput,
-  type AddBillingStatementInput,
-  type RemoveBillingStatementInput,
-  type AddLineItemInput,
-  type UpdateLineItemInput,
-  type RemoveLineItemInput,
-  type AddLineItemGroupInput,
-  type UpdateLineItemGroupInput,
-  type RemoveLineItemGroupInput,
-  type SetGroupTotalsInput,
-  type RemoveGroupTotalsInput,
-  type SetPeriodStartInput,
-  type SetPeriodEndInput,
-  type UpdateWalletInput,
-  type ExpenseReportDocument,
-} from "../../document-models/expense-report/index.js";
-import { setName } from "document-model";
+  expenseReportDocumentType,
+} from "@powerhousedao/contributor-billing/document-models/expense-report";
 
-export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> => {
+import type {
+  ExpenseReportDocument,
+  AddWalletInput,
+  RemoveWalletInput,
+  AddBillingStatementInput,
+  RemoveBillingStatementInput,
+  AddLineItemInput,
+  UpdateLineItemInput,
+  RemoveLineItemInput,
+  AddLineItemGroupInput,
+  UpdateLineItemGroupInput,
+  RemoveLineItemGroupInput,
+  SetGroupTotalsInput,
+  RemoveGroupTotalsInput,
+  SetPeriodStartInput,
+  SetPeriodEndInput,
+  UpdateWalletInput,
+} from "@powerhousedao/contributor-billing/document-models/expense-report";
+
+export const getResolvers = (
+  subgraph: BaseSubgraph,
+): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {
@@ -77,7 +83,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
             );
 
             return docs.filter(
-              (doc) => doc.header.documentType === "powerhouse/expense-report",
+              (doc) => doc.header.documentType === expenseReportDocumentType,
             );
           },
         };
@@ -89,7 +95,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
         args: { name: string; driveId?: string },
       ) => {
         const { driveId, name } = args;
-        const document = await reactor.addDocument("powerhouse/expense-report");
+        const document = await reactor.addDocument(expenseReportDocumentType);
 
         if (driveId) {
           await reactor.addAction(
@@ -97,7 +103,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
             addFile({
               name,
               id: document.header.id,
-              documentType: "powerhouse/expense-report",
+              documentType: expenseReportDocumentType,
             }),
           );
         }
