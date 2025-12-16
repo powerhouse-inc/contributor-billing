@@ -34,7 +34,9 @@ export const NumberForm = ({
           handleInputChange(e);
         }}
         precision={precision}
-        value={typeof number === "string" && number === "-" ? 0 : Number(number)}
+        value={
+          typeof number === "string" && number === "-" ? 0 : Number(number)
+        }
         placeholder={placeholder}
         className={twMerge(className)}
       />

@@ -3,47 +3,7 @@ import type { DocumentNode } from "graphql";
 
 export const schema: DocumentNode = gql`
   """
-  Subgraph definition for Integrations (powerhouse/integrations)
-  """
-  type IntegrationsState {
-    requestFinance: RequestFinance
-    gnosisSafe: GnosisSafe
-    googleCloud: GoogleCloud
-  }
-
-  type RequestFinance {
-    apiKey: String
-    email: String
-  }
-
-  type GnosisSafe {
-    safeAddress: EthereumAddress
-    signerPrivateKey: String
-  }
-
-  type GoogleCloud {
-    projectId: String
-    location: String
-    processorId: String
-    keyFile: GoogleKeyFile
-  }
-
-  type GoogleKeyFile {
-    type: String
-    project_id: String
-    private_key_id: String
-    private_key: String
-    client_email: String
-    client_id: String
-    auth_uri: String
-    token_uri: String
-    auth_provider_x509_cert_url: String
-    client_x509_cert_url: String
-    universe_domain: String
-  }
-
-  """
-  Queries: Integrations
+  Queries: Integrations Document
   """
   type IntegrationsQueries {
     getDocument(docId: PHID!, driveId: PHID): Integrations
@@ -92,10 +52,10 @@ export const schema: DocumentNode = gql`
     projectId: String
     location: String
     processorId: String
-    keyFile: GoogleKeyFileInput
+    keyFile: Integrations_GoogleKeyFileInput
   }
 
-  input GoogleKeyFileInput {
+  input Integrations_GoogleKeyFileInput {
     type: String
     project_id: String
     private_key_id: String

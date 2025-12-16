@@ -4,7 +4,7 @@
         "website": "https://powerhouse.inc"
     },
     "description": "The Invoice document model that allows a contributor to request compensation based on their contributions",
-    "extension": ".phdm",
+    "extension": "",
     "id": "powerhouse/invoice",
     "name": "Invoice",
     "specifications": [
@@ -12,338 +12,338 @@
             "changeLog": [],
             "modules": [
                 {
+                    "description": "",
                     "id": "WDJ7NWCy8TEDk1TWvr0F+VXvIqc=",
                     "name": "general",
-                    "description": "",
                     "operations": [
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "8Ld7B60Upub1CNmVrx3TMzmyl54=",
                             "name": "EDIT_INVOICE",
-                            "description": "",
-                            "schema": "input EditInvoiceInput {\n    invoiceNo: String\n    dateIssued: String\n    dateDue: String\n    currency: String\n    notes: String\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input EditInvoiceInput {\n    invoiceNo: String\n    dateIssued: String\n    dateDelivered: String\n    dateDue: String\n    currency: String\n    notes: String\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "cCXTmSu1J8VoyDQAk9l/ub3SjWw=",
                             "name": "EDIT_STATUS",
-                            "description": "",
-                            "schema": "input EditStatusInput {\n  status: Status!\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input EditStatusInput {\n  status: Status!\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "a++9qKPt5DBpAB/T6dHeJLFLUnA=",
                             "name": "EDIT_PAYMENT_DATA",
-                            "description": "",
-                            "schema": "input EditPaymentDataInput {\n  id: OID!\n  processorRef: String\n  paymentDate: DateTime\n  txnRef: String\n  confirmed: Boolean!\n  issue: String\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input EditPaymentDataInput {\n  id: OID!\n  processorRef: String\n  paymentDate: DateTime\n  txnRef: String\n  confirmed: Boolean!\n  issue: String\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "Set exported line items in CSV format with timestamp to track exports",
+                            "errors": [],
+                            "examples": [],
                             "id": "GcKc8GFnD3w7M1fdwxBXrGBwCRM=",
                             "name": "SET_EXPORTED_DATA",
-                            "description": "Set exported line items in CSV format with timestamp to track exports",
-                            "schema": "input SetExportedDataInput {\n  timestamp: DateTime!\n  exportedLineItems: [[String!]!]! \n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input SetExportedDataInput {\n  timestamp: DateTime!\n  exportedLineItems: [[String!]!]! \n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "1bd3e06e-2be9-4655-88cb-81f02547f9bf",
                             "name": "ADD_PAYMENT",
-                            "description": "",
-                            "schema": "input AddPaymentInput {\n  id: OID!\n  processorRef: String\n  paymentDate: DateTime\n  txnRef: String\n  confirmed: Boolean!\n  issue: String\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input AddPaymentInput {\n  id: OID!\n  processorRef: String\n  paymentDate: DateTime\n  txnRef: String\n  confirmed: Boolean!\n  issue: String\n}",
+                            "scope": "global",
+                            "template": ""
                         }
                     ]
                 },
                 {
+                    "description": "",
                     "id": "M8OqnRBEHn6EHQTyrx826u5xAJg=",
                     "name": "parties",
-                    "description": "",
                     "operations": [
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "HSnSU0WWJ8ytXGtuYqKPy8mccB4=",
                             "name": "EDIT_ISSUER",
-                            "description": "",
-                            "schema": "input EditIssuerInput {\n    id: String\n    name: String\n    streetAddress: String\n    extendedAddress: String\n    city: String\n    postalCode: String\n    country: String\n    stateProvince: String\n    tel: String\n    email: String\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input EditIssuerInput {\n    id: String\n    name: String\n    streetAddress: String\n    extendedAddress: String\n    city: String\n    postalCode: String\n    country: String\n    stateProvince: String\n    tel: String\n    email: String\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "nq2GFV2bmGet6sNlA2XytS7cPA0=",
                             "name": "EDIT_ISSUER_BANK",
-                            "description": "",
-                            "schema": "input EditIssuerBankInput {\n  name: String\n    streetAddress: String\n    extendedAddress: String\n    city: String\n    postalCode: String\n    country: String\n    stateProvince: String\n    ABA: String\n    BIC: String\n    SWIFT: String\n    accountNum: String\n    accountType: InvoiceAccountTypeInput\n    beneficiary: String\n    memo: String\n    # intermediaryBank\n    nameIntermediary: String\n    streetAddressIntermediary: String\n    extendedAddressIntermediary: String\n    cityIntermediary: String\n    postalCodeIntermediary: String\n    countryIntermediary: String\n    stateProvinceIntermediary: String\n    ABAIntermediary: String\n    BICIntermediary: String\n    SWIFTIntermediary: String\n    accountNumIntermediary: String\n    accountTypeIntermediary: InvoiceAccountTypeInput\n    beneficiaryIntermediary: String\n    memoIntermediary: String\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input EditIssuerBankInput {\n  name: String\n    streetAddress: String\n    extendedAddress: String\n    city: String\n    postalCode: String\n    country: String\n    stateProvince: String\n    ABA: String\n    BIC: String\n    SWIFT: String\n    accountNum: String\n    accountType: InvoiceAccountTypeInput\n    beneficiary: String\n    memo: String\n    # intermediaryBank\n    nameIntermediary: String\n    streetAddressIntermediary: String\n    extendedAddressIntermediary: String\n    cityIntermediary: String\n    postalCodeIntermediary: String\n    countryIntermediary: String\n    stateProvinceIntermediary: String\n    ABAIntermediary: String\n    BICIntermediary: String\n    SWIFTIntermediary: String\n    accountNumIntermediary: String\n    accountTypeIntermediary: InvoiceAccountTypeInput\n    beneficiaryIntermediary: String\n    memoIntermediary: String\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "XtXz6W0lScsBwPkaWofR9LtWjm0=",
                             "name": "EDIT_ISSUER_WALLET",
-                            "description": "",
-                            "schema": "input EditIssuerWalletInput {\n    rpc: String\n    chainName: String\n    chainId: String\n    address: String\n}\n\n",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input EditIssuerWalletInput {\n    rpc: String\n    chainName: String\n    chainId: String\n    address: String\n}\n\n",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "Lt7r5VNsfyWZhAlm/g3VY0buEhM=",
                             "name": "EDIT_PAYER",
-                            "description": "",
-                            "schema": "input EditPayerInput {\n    id: String\n    name: String\n    streetAddress: String\n    extendedAddress: String\n    city: String\n    postalCode: String\n    country: String\n    stateProvince: String\n    tel: String\n    email: String\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input EditPayerInput {\n    id: String\n    name: String\n    streetAddress: String\n    extendedAddress: String\n    city: String\n    postalCode: String\n    country: String\n    stateProvince: String\n    tel: String\n    email: String\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "Ibn3ArEEpicKLmrfE37zsq78Qeg=",
                             "name": "EDIT_PAYER_BANK",
-                            "description": "",
-                            "schema": "input EditPayerBankInput {\n    name: String\n    streetAddress: String\n    extendedAddress: String\n    city: String\n    postalCode: String\n    country: String\n    stateProvince: String\n    ABA: String\n    BIC: String\n    SWIFT: String\n    accountNum: String\n    accountType: InvoiceAccountTypeInput\n    beneficiary: String\n    memo: String\n    # intermediaryBank\n    nameIntermediary: String\n    streetAddressIntermediary: String\n    extendedAddressIntermediary: String\n    cityIntermediary: String\n    postalCodeIntermediary: String\n    countryIntermediary: String\n    stateProvinceIntermediary: String\n    ABAIntermediary: String\n    BICIntermediary: String\n    SWIFTIntermediary: String\n    accountNumIntermediary: String\n    accountTypeIntermediary: InvoiceAccountTypeInput\n    beneficiaryIntermediary: String\n    memoIntermediary: String\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input EditPayerBankInput {\n    name: String\n    streetAddress: String\n    extendedAddress: String\n    city: String\n    postalCode: String\n    country: String\n    stateProvince: String\n    ABA: String\n    BIC: String\n    SWIFT: String\n    accountNum: String\n    accountType: InvoiceAccountTypeInput\n    beneficiary: String\n    memo: String\n    # intermediaryBank\n    nameIntermediary: String\n    streetAddressIntermediary: String\n    extendedAddressIntermediary: String\n    cityIntermediary: String\n    postalCodeIntermediary: String\n    countryIntermediary: String\n    stateProvinceIntermediary: String\n    ABAIntermediary: String\n    BICIntermediary: String\n    SWIFTIntermediary: String\n    accountNumIntermediary: String\n    accountTypeIntermediary: InvoiceAccountTypeInput\n    beneficiaryIntermediary: String\n    memoIntermediary: String\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "uEdf8IAGEgC8tiZRKn9WI4O/7KY=",
                             "name": "EDIT_PAYER_WALLET",
-                            "description": "",
-                            "schema": "input EditPayerWalletInput {\n    rpc: String\n    chainName: String\n    chainId: String\n    address: String\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input EditPayerWalletInput {\n    rpc: String\n    chainName: String\n    chainId: String\n    address: String\n}",
+                            "scope": "global",
+                            "template": ""
                         }
                     ]
                 },
                 {
+                    "description": "",
                     "id": "V6qGoeW+8RP3CHE0XQiBYOy4EKI=",
                     "name": "items",
-                    "description": "",
                     "operations": [
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "+Y7o2f0Ht0lsDpoR9FlQwEwzaFU=",
                             "name": "ADD_LINE_ITEM",
-                            "description": "",
-                            "schema": "input AddLineItemInput {\n    id: OID!\n    description: String!\n    taxPercent: Float!\n    quantity: Float!\n    currency: String! # Default can be USD\n    unitPriceTaxExcl: Float!\n    unitPriceTaxIncl: Float!\n    totalPriceTaxExcl: Float!\n    totalPriceTaxIncl: Float!\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input AddLineItemInput {\n    id: OID!\n    description: String!\n    taxPercent: Float!\n    quantity: Float!\n    currency: String! # Default can be USD\n    unitPriceTaxExcl: Float!\n    unitPriceTaxIncl: Float!\n    totalPriceTaxExcl: Float!\n    totalPriceTaxIncl: Float!\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "PCi10xZY1UKyAAsV/etTfQSULa0=",
                             "name": "EDIT_LINE_ITEM",
-                            "description": "",
-                            "schema": "input EditLineItemInput {\n    id: OID!\n    description: String\n    taxPercent: Float\n    quantity: Float\n    currency: String\n    unitPriceTaxExcl: Float\n    unitPriceTaxIncl: Float\n    totalPriceTaxExcl: Float\n    totalPriceTaxIncl: Float\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input EditLineItemInput {\n    id: OID!\n    description: String\n    taxPercent: Float\n    quantity: Float\n    currency: String\n    unitPriceTaxExcl: Float\n    unitPriceTaxIncl: Float\n    totalPriceTaxExcl: Float\n    totalPriceTaxIncl: Float\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "E9/QRfqZQuNXj/f2sO2HeEjojUI=",
                             "name": "DELETE_LINE_ITEM",
-                            "description": "",
-                            "schema": "input DeleteLineItemInput {\n  id: OID!\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input DeleteLineItemInput {\n  id: OID!\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "eb020c14-9c7c-4858-8469-fd25059d532f",
                             "name": "SET_LINE_ITEM_TAG",
-                            "description": "",
-                            "schema": "input SetLineItemTagInput {\n  lineItemId: OID!\n  dimension: String!\n  value: String!\n  label: String\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input SetLineItemTagInput {\n  lineItemId: OID!\n  dimension: String!\n  value: String!\n  label: String\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
-                            "id": "5ch1tXNyQn0zt2NCITjSqL6Kmso=",
-                            "name": "SET_INVOICE_TAG",
                             "description": "",
-                            "schema": "input SetInvoiceTagInput {\n  dimension: String!\n  value: String!\n  label: String\n}",
-                            "template": "",
-                            "reducer": "",
                             "errors": [],
                             "examples": [],
-                            "scope": "global"
+                            "id": "5ch1tXNyQn0zt2NCITjSqL6Kmso=",
+                            "name": "SET_INVOICE_TAG",
+                            "reducer": "",
+                            "schema": "input SetInvoiceTagInput {\n  dimension: String!\n  value: String!\n  label: String\n}",
+                            "scope": "global",
+                            "template": ""
                         }
                     ]
                 },
                 {
+                    "description": "",
                     "id": "0af3e43f-8233-4d95-862f-70f1d54fe1dd",
                     "name": "transitions",
-                    "description": "",
                     "operations": [
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "f516b9e3-4b47-4b49-955c-6e907778e186",
                             "name": "CANCEL",
-                            "description": "",
-                            "schema": "input CancelInput {\n  \"Add your inputs here\"\n  _placeholder: String\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input CancelInput {\n  \"Add your inputs here\"\n  _placeholder: String\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "261d8f6d-6d70-4c99-99aa-7717d22d08c3",
                             "name": "ISSUE",
-                            "description": "",
-                            "schema": "input IssueInput {\n  invoiceNo: String!\n  dateIssued: String!\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input IssueInput {\n  invoiceNo: String!\n  dateIssued: String!\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "05bf4cc9-7772-481a-8d0f-1471ffaa4287",
                             "name": "RESET",
-                            "description": "",
-                            "schema": "input ResetInput {\n  \"Add your inputs here\"\n  _placeholder: String\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input ResetInput {\n  \"Add your inputs here\"\n  _placeholder: String\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "0ae43a1e-e4a8-4a2e-aedc-e5e10a426de5",
                             "name": "REJECT",
-                            "description": "",
-                            "schema": "input RejectInput {\n  id: OID! # New Rejection ID\n  reason: String!\n  final: Boolean!\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input RejectInput {\n  id: OID! # New Rejection ID\n  reason: String!\n  final: Boolean!\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "54a3fd38-abac-48d7-9cd1-2def01a15f93",
                             "name": "ACCEPT",
-                            "description": "",
-                            "schema": "input AcceptInput {\n  payAfter: DateTime\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input AcceptInput {\n  payAfter: DateTime\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "14566620-08db-4f56-84e7-96c30049dd33",
                             "name": "REINSTATE",
-                            "description": "",
-                            "schema": "input ReinstateInput {\n  \"Add your inputs here\"\n  _placeholder: String\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input ReinstateInput {\n  \"Add your inputs here\"\n  _placeholder: String\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "e5df6e79-1398-4e9b-baeb-11957882f47d",
                             "name": "SCHEDULE_PAYMENT",
-                            "description": "",
-                            "schema": "input SchedulePaymentInput {\n  id: OID!           # New Payment ID\n  processorRef: String!\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input SchedulePaymentInput {\n  id: OID!           # New Payment ID\n  processorRef: String!\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "96849e73-c8ed-4726-b523-29e03cd3fd29",
                             "name": "REAPPROVE_PAYMENT",
-                            "description": "",
-                            "schema": "input ReapprovePaymentInput {\n  \"Add your inputs here\"\n  _placeholder: String\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input ReapprovePaymentInput {\n  \"Add your inputs here\"\n  _placeholder: String\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "f5dabccc-4055-4c0a-b650-c5b2e7f37ac5",
                             "name": "REGISTER_PAYMENT_TX",
-                            "description": "",
-                            "schema": "input RegisterPaymentTxInput {\n  id: OID!       # Payment ID\n  timestamp: DateTime!\n  txRef: String!\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input RegisterPaymentTxInput {\n  id: OID!       # Payment ID\n  timestamp: DateTime!\n  txRef: String!\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "562df495-9d22-4293-be78-e5258713d620",
                             "name": "REPORT_PAYMENT_ISSUE",
-                            "description": "",
-                            "schema": "input ReportPaymentIssueInput {\n  id: OID!       # Payment ID\n  issue: String!\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input ReportPaymentIssueInput {\n  id: OID!       # Payment ID\n  issue: String!\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "8f374198-3588-487d-8833-b29790caeab0",
                             "name": "CONFIRM_PAYMENT",
-                            "description": "",
-                            "schema": "input ConfirmPaymentInput {\n  id: OID!       # Payment ID\n  amount: Float!\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input ConfirmPaymentInput {\n  id: OID!       # Payment ID\n  amount: Float!\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
-                            "id": "13d337eb-8a4f-44e4-b5f5-83c5287e7360",
-                            "name": "CLOSE_PAYMENT",
                             "description": "",
-                            "schema": "input ClosePaymentInput {\n  closureReason: ClosureReasonInput\n}\n\nenum ClosureReasonInput {\n  UNDERPAID\n  OVERPAID\n  CANCELLED\n}",
-                            "template": "",
-                            "reducer": "",
                             "errors": [],
                             "examples": [],
-                            "scope": "global"
+                            "id": "13d337eb-8a4f-44e4-b5f5-83c5287e7360",
+                            "name": "CLOSE_PAYMENT",
+                            "reducer": "",
+                            "schema": "input ClosePaymentInput {\n  closureReason: ClosureReasonInput\n}\n\nenum ClosureReasonInput {\n  UNDERPAID\n  OVERPAID\n  CANCELLED\n}",
+                            "scope": "global",
+                            "template": ""
                         }
                     ]
                 }
@@ -351,8 +351,8 @@
             "state": {
                 "global": {
                     "examples": [],
-                    "initialValue": "{\n  \"invoiceNo\": \"\",\n  \"dateIssued\": \"\",\n  \"dateDue\": \"\",\n  \"dateDelivered\": null,\n  \"payAfter\": null,\n  \"status\": \"DRAFT\",\n  \"issuer\": {\n    \"id\": null,\n    \"name\": \"\",\n    \"address\": {\n      \"streetAddress\": \"\",\n      \"extendedAddress\": \"\",\n      \"city\": \"\",\n      \"postalCode\": \"\",\n      \"country\": \"\",\n      \"stateProvince\": \"\"\n    },\n    \"contactInfo\": {\n      \"tel\": \"\",\n      \"email\": \"\"\n    },\n    \"country\": \"\",\n    \"paymentRouting\": {\n      \"bank\": {\n        \"name\": \"\",\n        \"address\": {\n          \"streetAddress\": \"\",\n          \"extendedAddress\": \"\",\n          \"city\": \"\",\n          \"postalCode\": \"\",\n          \"country\": \"\",\n          \"stateProvince\": \"\"\n        },\n        \"ABA\": \"\",\n        \"BIC\": \"\",\n        \"SWIFT\": \"\",\n        \"accountNum\": \"\",\n        \"accountType\": \"CHECKING\",\n        \"beneficiary\": \"\",\n        \"intermediaryBank\": {\n          \"name\": \"\",\n          \"address\": {\n            \"streetAddress\": \"\",\n            \"extendedAddress\": \"\",\n            \"city\": \"\",\n            \"postalCode\": \"\",\n            \"country\": \"\",\n            \"stateProvince\": \"\"\n          },\n          \"ABA\": \"\",\n          \"BIC\": \"\",\n          \"SWIFT\": \"\",\n          \"accountNum\": \"\",\n          \"accountType\": \"CHECKING\",\n          \"beneficiary\": \"\",\n          \"memo\": \"\"\n        },\n        \"memo\": \"\"\n      },\n      \"wallet\": {\n        \"rpc\": \"\",\n        \"chainName\": \"\",\n        \"chainId\": \"\",\n        \"address\": \"\"\n      }\n    }\n  },\n  \"payer\": {\n    \"id\": null,\n    \"name\": \"\",\n    \"address\": {\n      \"streetAddress\": \"\",\n      \"extendedAddress\": \"\",\n      \"city\": \"\",\n      \"postalCode\": \"\",\n      \"country\": \"\",\n      \"stateProvince\": \"\"\n    },\n    \"contactInfo\": {\n      \"tel\": \"\",\n      \"email\": \"\"\n    },\n    \"country\": \"\",\n    \"paymentRouting\": {\n      \"bank\": {\n        \"name\": \"\",\n        \"address\": {\n          \"streetAddress\": \"\",\n          \"extendedAddress\": \"\",\n          \"city\": \"\",\n          \"postalCode\": \"\",\n          \"country\": \"\",\n          \"stateProvince\": \"\"\n        },\n        \"ABA\": \"\",\n        \"BIC\": \"\",\n        \"SWIFT\": \"\",\n        \"accountNum\": \"\",\n        \"accountType\": \"CHECKING\",\n        \"beneficiary\": \"\",\n        \"intermediaryBank\": {\n          \"name\": \"\",\n          \"address\": {\n            \"streetAddress\": \"\",\n            \"extendedAddress\": \"\",\n            \"city\": \"\",\n            \"postalCode\": \"\",\n            \"country\": \"\",\n            \"stateProvince\": \"\"\n          },\n          \"ABA\": \"\",\n          \"BIC\": \"\",\n          \"SWIFT\": \"\",\n          \"accountNum\": \"\",\n          \"accountType\": \"CHECKING\",\n          \"beneficiary\": \"\",\n          \"memo\": \"\"\n        },\n        \"memo\": \"\"\n      },\n      \"wallet\": {\n        \"rpc\": \"\",\n        \"chainName\": \"\",\n        \"chainId\": \"\",\n        \"address\": \"\"\n      }\n    }\n  },\n  \"currency\": \"\",\n  \"lineItems\": [],\n  \"totalPriceTaxExcl\": 0,\n  \"totalPriceTaxIncl\": 0,\n  \"notes\": null,\n  \"invoiceTags\": [],\n  \"rejections\": [],\n  \"payments\": [],\n  \"exported\": []\n}",
-                    "schema": "type InvoiceState {\n  status: Status!\n  invoiceNo: String!\n  dateIssued: Date!\n  dateDue: Date!\n  dateDelivered: Date\n  issuer: LegalEntity!\n  payer: LegalEntity!\n  currency: String!\n  lineItems: [InvoiceLineItem!]!\n  totalPriceTaxExcl: Float!\n  totalPriceTaxIncl: Float!\n  notes: String\n  rejections: [Rejection!]!\n  payments: [Payment!]!\n  payAfter: DateTime\n  invoiceTags: [InvoiceTag!]!   # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}\n  exported: ExportedData\n  closureReason: ClosureReason\n}\n\nenum ClosureReason {\n  UNDERPAID\n  OVERPAID\n  CANCELLED\n}\n\ntype Rejection {\n  id: OID!\n  reason: String!\n  final: Boolean!\n}\n\ntype ExportedData {\n  timestamp: DateTime!        # ISO 8601 timestamp of the export\n  exportedLineItems: [[String!]!]!   # CSV Format\n}\n\ntype Payment {\n  id: OID!\n  processorRef: String\n  paymentDate: DateTime\n  txnRef: String\n  confirmed: Boolean!\n  issue: String\n  amount: Float\n}\n\ntype Token {\n  evmAddress: String\n  symbol: String\n  chainName: String\n  chainId: String\n  rpc: String\n}\n\ntype LegalEntity {\n  id: LegalEntityId\n  name: String\n  address: Address\n  contactInfo: ContactInfo\n  country: String\n  paymentRouting: PaymentRouting\n}\n\ntype Address {\n  streetAddress: String\n  extendedAddress: String\n  city: String\n  postalCode: String\n  country: String\n  stateProvince: String\n}\n\ntype ContactInfo {\n  tel: String\n  email: String\n}\n\ntype PaymentRouting {\n  bank: Bank\n  wallet: InvoiceWallet\n}\n\ntype Bank {\n  name: String!\n  address: Address!\n  ABA: String\n  BIC: String\n  SWIFT: String\n  accountNum: String!\n  accountType: InvoiceAccountType\n  beneficiary: String\n  intermediaryBank: IntermediaryBank\n  memo: String\n}\n\ntype IntermediaryBank {\n  name: String!\n  address: Address!\n  ABA: String\n  BIC: String\n  SWIFT: String\n  accountNum: String!\n  accountType: InvoiceAccountType\n  beneficiary: String\n  memo: String\n}\n\ntype InvoiceWallet {\n  rpc: String\n  chainName: String\n  chainId: String\n  address: String\n}\n\ntype InvoiceLineItem {\n  id: OID!\n  description: String!\n  taxPercent: Float!\n  quantity: Float!\n  currency: String!\n  unitPriceTaxExcl: Float!\n  unitPriceTaxIncl: Float!\n  totalPriceTaxExcl: Float!\n  totalPriceTaxIncl: Float!\n  lineItemTag: [InvoiceTag!]\n}\n\ntype InvoiceTag {\n  dimension: String!  # \"xero-expense-account\", \"xero-payment-account\", \"accounting-period\", ...\n  value: String!      # \"627\", ..., \"090\", ..., \"2025/05\", \"2025/Q1\", ...\n  label: String       # \"Marketing\", ..., \"Business Bank\", ..., \"May 2025\"\n}\n\nunion LegalEntityId = LegalEntityTaxId | LegalEntityCorporateRegistrationId\n\ntype LegalEntityTaxId {\n  taxId: String!\n}\n\ntype LegalEntityCorporateRegistrationId {\n  corpRegId: String!\n}\n\nenum Status {\n  DRAFT\n  ISSUED\n  CANCELLED\n  ACCEPTED\n  REJECTED\n  PAYMENTSCHEDULED\n  PAYMENTSENT\n  PAYMENTISSUE\n  PAYMENTRECEIVED\n  PAYMENTCLOSED\n}\n\nenum InvoiceAccountType {\n  CHECKING\n  SAVINGS\n  TRUST\n  WALLET\n}\n\nenum InvoiceAccountTypeInput {\n  CHECKING\n  SAVINGS\n  TRUST\n  WALLET\n}"
+                    "initialValue": "{\n  \"status\": \"DRAFT\",\n  \"invoiceNo\": \"\",\n  \"dateIssued\": null,\n  \"dateDue\": null,\n  \"dateDelivered\": null,\n  \"issuer\": {\n    \"id\": null,\n    \"name\": null,\n    \"address\": null,\n    \"contactInfo\": null,\n    \"country\": null,\n    \"paymentRouting\": null\n  },\n  \"payer\": {\n    \"id\": null,\n    \"name\": null,\n    \"address\": null,\n    \"contactInfo\": null,\n    \"country\": null,\n    \"paymentRouting\": null\n  },\n  \"currency\": \"\",\n  \"lineItems\": [],\n  \"totalPriceTaxExcl\": 0,\n  \"totalPriceTaxIncl\": 0,\n  \"notes\": null,\n  \"rejections\": [],\n  \"payments\": [],\n  \"payAfter\": null,\n  \"invoiceTags\": [],\n  \"exported\": {\n    \"timestamp\": null,\n    \"exportedLineItems\": []\n  },\n  \"closureReason\": null\n}",
+                    "schema": "type InvoiceState {\n  status: Status!\n  invoiceNo: String!\n  dateIssued: Date\n  dateDue: Date\n  dateDelivered: Date\n  issuer: LegalEntity!\n  payer: LegalEntity!\n  currency: String!\n  lineItems: [InvoiceLineItem!]!\n  totalPriceTaxExcl: Float!\n  totalPriceTaxIncl: Float!\n  notes: String\n  rejections: [Rejection!]!\n  payments: [Payment!]!\n  payAfter: DateTime\n  invoiceTags: [InvoiceTag!]!   # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}\n  exported: ExportedData!\n  closureReason: ClosureReason\n}\n\nenum ClosureReason {\n  UNDERPAID\n  OVERPAID\n  CANCELLED\n}\n\ntype Rejection {\n  id: OID!\n  reason: String!\n  final: Boolean!\n}\n\ntype ExportedData {\n  timestamp: DateTime   # ISO 8601 timestamp of the export\n  exportedLineItems: [[String!]!]!   # CSV Format\n}\n\ntype Payment {\n  id: OID!\n  processorRef: String\n  paymentDate: DateTime\n  txnRef: String\n  confirmed: Boolean!\n  issue: String\n  amount: Float\n}\n\ntype Token {\n  evmAddress: String\n  symbol: String\n  chainName: String\n  chainId: String\n  rpc: String\n}\n\ntype LegalEntity {\n  id: LegalEntityId\n  name: String\n  address: Address\n  contactInfo: ContactInfo\n  country: String\n  paymentRouting: PaymentRouting\n}\n\ntype Address {\n  streetAddress: String\n  extendedAddress: String\n  city: String\n  postalCode: String\n  country: String\n  stateProvince: String\n}\n\ntype ContactInfo {\n  tel: String\n  email: String\n}\n\ntype PaymentRouting {\n  bank: Bank\n  wallet: InvoiceWallet\n}\n\ntype Bank {\n  name: String!\n  address: Address!\n  ABA: String\n  BIC: String\n  SWIFT: String\n  accountNum: String!\n  accountType: InvoiceAccountType\n  beneficiary: String\n  intermediaryBank: IntermediaryBank\n  memo: String\n}\n\ntype IntermediaryBank {\n  name: String!\n  address: Address!\n  ABA: String\n  BIC: String\n  SWIFT: String\n  accountNum: String!\n  accountType: InvoiceAccountType\n  beneficiary: String\n  memo: String\n}\n\ntype InvoiceWallet {\n  rpc: String\n  chainName: String\n  chainId: String\n  address: String\n}\n\ntype InvoiceLineItem {\n  id: OID!\n  description: String!\n  taxPercent: Float!\n  quantity: Float!\n  currency: String!\n  unitPriceTaxExcl: Float!\n  unitPriceTaxIncl: Float!\n  totalPriceTaxExcl: Float!\n  totalPriceTaxIncl: Float!\n  lineItemTag: [InvoiceTag!]\n}\n\ntype InvoiceTag {\n  dimension: String!  # \"xero-expense-account\", \"xero-payment-account\", \"accounting-period\", ...\n  value: String!      # \"627\", ..., \"090\", ..., \"2025/05\", \"2025/Q1\", ...\n  label: String       # \"Marketing\", ..., \"Business Bank\", ..., \"May 2025\"\n}\n\nunion LegalEntityId = LegalEntityTaxId | LegalEntityCorporateRegistrationId\n\ntype LegalEntityTaxId {\n  taxId: String!\n}\n\ntype LegalEntityCorporateRegistrationId {\n  corpRegId: String!\n}\n\nenum Status {\n  DRAFT\n  ISSUED\n  CANCELLED\n  ACCEPTED\n  REJECTED\n  PAYMENTSCHEDULED\n  PAYMENTSENT\n  PAYMENTISSUE\n  PAYMENTRECEIVED\n  PAYMENTCLOSED\n}\n\nenum InvoiceAccountType {\n  CHECKING\n  SAVINGS\n  TRUST\n  WALLET\n}\n\nenum InvoiceAccountTypeInput {\n  CHECKING\n  SAVINGS\n  TRUST\n  WALLET\n}"
                 },
                 "local": {
                     "examples": [],

@@ -1,18 +1,25 @@
-import { BaseSubgraph } from "@powerhousedao/reactor-api";
+import type { BaseSubgraph } from "@powerhousedao/reactor-api";
 import { addFile } from "document-drive";
+import { setName } from "document-model";
 import {
   actions,
-  type EditBillingStatementInput,
-  type EditContributorInput,
-  type EditStatusInput,
-  type AddLineItemInput,
-  type EditLineItemInput,
-  type EditLineItemTagInput,
-  type BillingStatementDocument,
-} from "../../document-models/billing-statement/index.js";
-import { setName } from "document-model";
+  billingStatementDocumentType,
+} from "@powerhousedao/contributor-billing/document-models/billing-statement";
 
-export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> => {
+import type {
+  BillingStatementDocument,
+  EditBillingStatementInput,
+  EditContributorInput,
+  EditStatusInput,
+  AddLineItemInput,
+  EditLineItemInput,
+  DeleteLineItemInput,
+  EditLineItemTagInput,
+} from "@powerhousedao/contributor-billing/document-models/billing-statement";
+
+export const getResolvers = (
+  subgraph: BaseSubgraph,
+): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {
@@ -69,8 +76,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
             );
 
             return docs.filter(
-              (doc) =>
-                doc.header.documentType === "powerhouse/billing-statement",
+              (doc) => doc.header.documentType === billingStatementDocumentType,
             );
           },
         };
@@ -83,7 +89,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
       ) => {
         const { driveId, name } = args;
         const document = await reactor.addDocument(
-          "powerhouse/billing-statement",
+          billingStatementDocumentType,
         );
 
         if (driveId) {
@@ -92,7 +98,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
             addFile({
               name,
               id: document.header.id,
-              documentType: "powerhouse/billing-statement",
+              documentType: billingStatementDocumentType,
             }),
           );
         }
@@ -211,6 +217,28 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
 
         if (result.status !== "SUCCESS") {
           throw new Error(result.error?.message ?? "Failed to editLineItem");
+        }
+
+        return true;
+      },
+
+      BillingStatement_deleteLineItem: async (
+        _: unknown,
+        args: { docId: string; input: DeleteLineItemInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<BillingStatementDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.deleteLineItem(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to deleteLineItem");
         }
 
         return true;

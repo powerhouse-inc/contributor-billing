@@ -41,7 +41,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <button
             onClick={onContinue}
             disabled={continueDisabled}
-            className={`flex-1 min-h-[48px] min-w-[142px] text-base font-semibold py-3 px-6 rounded-xl outline-none active:opacity-75 hover:scale-105 transform transition-all bg-gray-800 text-gray-50 ${continueDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`flex-1 min-h-[48px] min-w-[142px] text-base font-semibold py-3 px-6 rounded-xl outline-none active:opacity-75 hover:scale-105 transform transition-all bg-gray-800 text-gray-50 ${continueDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             {continueLabel}
           </button>
