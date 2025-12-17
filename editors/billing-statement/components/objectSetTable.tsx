@@ -1,7 +1,6 @@
-import { useState } from "react";
 import { Tag } from "lucide-react";
 import { ObjectSetTable, Select } from "@powerhousedao/document-engineering";
-import { useMemo, useRef, useEffect } from "react";
+import { useMemo } from "react";
 import type {
   ObjectSetTableConfig,
   ColumnDef,
@@ -31,7 +30,10 @@ type BillingStatementLineItem = {
   totalPricePwt: number;
 };
 
-const ObjectSetTableComponent = (props: { state: BillingStatementState; dispatch: React.Dispatch<BillingStatementAction> }) => {
+const ObjectSetTableComponent = (props: {
+  state: BillingStatementState;
+  dispatch: React.Dispatch<BillingStatementAction>;
+}) => {
   const { state, dispatch } = props;
 
   // console.log("lineItems", state.lineItems);
@@ -50,7 +52,10 @@ const ObjectSetTableComponent = (props: { state: BillingStatementState; dispatch
         title: "Description",
         editable: true,
         type: "text",
-        onSave: (newValue: string, context: CellContext<BillingStatementLineItem>) => {
+        onSave: (
+          newValue: string,
+          context: CellContext<BillingStatementLineItem>,
+        ) => {
           console.log({ newValue, context });
           console.log("id", context.row.id);
           // dispatch(actions.editLineItem(
@@ -66,7 +71,10 @@ const ObjectSetTableComponent = (props: { state: BillingStatementState; dispatch
         title: "Unit",
         editable: true,
         type: "text",
-        renderCell: (row: BillingStatementLineItem, context: CellContext<BillingStatementLineItem>) => {
+        renderCell: (
+          row: BillingStatementLineItem,
+          context: CellContext<BillingStatementLineItem>,
+        ) => {
           //   let isEditingCell = context.tableConfig.apiRef?.current?.isEditing();
 
           //   if (isEditingCell) {
@@ -113,7 +121,7 @@ const ObjectSetTableComponent = (props: { state: BillingStatementState; dispatch
         type: "number",
       },
     ],
-    []
+    [],
   );
 
   const data = [

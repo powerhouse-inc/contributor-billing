@@ -389,7 +389,7 @@ export function ExportedDataSchema(): z.ZodObject<Properties<ExportedData>> {
   return z.object({
     __typename: z.literal("ExportedData").optional(),
     exportedLineItems: z.array(z.array(z.string())),
-    timestamp: z.string().datetime(),
+    timestamp: z.string().datetime().nullable(),
   });
 }
 
@@ -434,9 +434,9 @@ export function InvoiceStateSchema(): z.ZodObject<Properties<InvoiceState>> {
     closureReason: ClosureReasonSchema.nullable(),
     currency: z.string(),
     dateDelivered: z.string().datetime().nullable(),
-    dateDue: z.string().datetime(),
-    dateIssued: z.string().datetime(),
-    exported: ExportedDataSchema().nullable(),
+    dateDue: z.string().datetime().nullable(),
+    dateIssued: z.string().datetime().nullable(),
+    exported: ExportedDataSchema(),
     invoiceNo: z.string(),
     invoiceTags: z.array(InvoiceTagSchema()),
     issuer: LegalEntitySchema(),

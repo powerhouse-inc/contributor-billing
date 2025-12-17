@@ -1,18 +1,22 @@
-import type { BillingStatementTagsOperations, BillingStatementTag } from "@powerhousedao/contributor-billing/document-models/billing-statement";
+import type { BillingStatementTagsOperations } from "@powerhousedao/contributor-billing/document-models/billing-statement";
 
 export const billingStatementTagsOperations: BillingStatementTagsOperations = {
-  editLineItemTagOperation(state, action, dispatch) {
-    const stateItem = state.lineItems.find((x) => x.id === action.input.lineItemId);
+  editLineItemTagOperation(state, action) {
+    const stateItem = state.lineItems.find(
+      (x) => x.id === action.input.lineItemId,
+    );
     if (!stateItem) throw new Error("Item matching input.lineItemId not found");
 
     // if tag already exists with the same dimension, update the value and label
-    const existingTag = stateItem.lineItemTag?.find((tag) => tag.dimension === action.input.dimension);
+    const existingTag = stateItem.lineItemTag?.find(
+      (tag) => tag.dimension === action.input.dimension,
+    );
     if (existingTag) {
       existingTag.value = action.input.value;
       existingTag.label = action.input.label || null;
     } else {
       // if tag does not exist, add it
-      const newTag: BillingStatementTag = {
+      const newTag = {
         dimension: action.input.dimension,
         value: action.input.value,
         label: action.input.label || null,
@@ -23,8 +27,6 @@ export const billingStatementTagsOperations: BillingStatementTagsOperations = {
 
       // Add the new tag
       stateItem.lineItemTag?.push(newTag);
-
     }
-
   },
 };

@@ -37,7 +37,7 @@ import {
 } from "./components/statusModalComponents.js";
 import { InvoiceStateSchema } from "../../document-models/invoice/gen/schema/zod.js";
 import validateStatusBeforeContinue from "./validation/validationHandler.js";
-import { useSelectedInvoiceDocument } from "../hooks/useInvoiceDocument.js";
+import { useSelectedInvoiceDocument } from "../../document-models/invoice/hooks.js";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
@@ -48,87 +48,51 @@ function isFiatCurrency(currency: string): boolean {
   return currencyList.find((c) => c.ticker === currency)?.crypto === false;
 }
 
-export default function Editor(
-  props: Partial<EditorProps> & { documentId?: string }
-) {
+/**
+ * Converts a date-only string (YYYY-MM-DD) to ISO datetime string (YYYY-MM-DDTHH:mm:ss.sssZ)
+ * Used when dispatching date values to match the Zod schema requirements
+ */
+function dateToDatetime(dateStr: string | null | undefined): string | null {
+  if (!dateStr || dateStr.trim() === "") return null;
+  // If it's already a datetime string, return as is
+  if (dateStr.includes("T")) return dateStr;
+  // Convert date-only to datetime at midnight UTC
+  return `${dateStr}T00:00:00.000Z`;
+}
+
+/**
+ * Converts an ISO datetime string to date-only string (YYYY-MM-DD) for DatePicker
+ * Used when displaying date values from state
+ */
+function datetimeToDate(datetimeStr: string | null | undefined): string {
+  if (!datetimeStr || datetimeStr.trim() === "") return "";
+  // Extract date part from datetime string
+  return datetimeStr.split("T")[0];
+}
+
+export default function Editor() {
   const [doc, dispatch] = useSelectedInvoiceDocument() as [
     InvoiceDocument | undefined,
     any,
   ];
   const state = doc?.state.global;
 
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
+  // Get the parent folder node for the currently selected node
+  const parentFolder = useParentFolderForSelectedNode();
+
   // Mobile header menu state
   const [mobileHeaderOpen, setMobileHeaderOpen] = useState(false);
 
-  if (!state) {
-    console.log("Document state not found from document id", props.documentId);
-    return null;
-  }
-
-  // Dynamic property check based on the actual schema
-  try {
-    const schema = InvoiceStateSchema();
-    const expectedProperties = Object.keys(schema.shape).filter(
-      (prop) => prop !== "__typename"
-    );
-    const missingProperties = expectedProperties.filter(
-      (prop) => !(prop in state)
-    );
-    if (missingProperties.length > 0) {
-      // Show error message for missing properties
-      return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50">
-          <div className="max-w-md mx-auto text-center p-8 bg-white rounded-lg shadow-lg border border-red-200">
-            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
-              <svg
-                className="w-8 h-8 text-red-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                ></path>
-              </svg>
-            </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Document Schema Mismatch
-            </h2>
-            <p className="text-gray-600 mb-4">
-              The current document structure doesn't match the expected schema.
-              This usually happens when using an outdated document model.
-            </p>
-            <p className="text-sm text-gray-500 mb-4">
-              Please create a new document using the latest document model to
-              ensure compatibility.
-            </p>
-            <details className="text-left text-xs text-gray-600">
-              <summary className="cursor-pointer hover:text-gray-800">
-                View missing properties
-              </summary>
-              <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto max-h-32">
-                {JSON.stringify(missingProperties, null, 2)}
-              </pre>
-            </details>
-          </div>
-        </div>
-      );
-    }
-  } catch (error) {
-    console.error("Error checking schema properties:", error);
-  }
-
-  const [fiatMode, setFiatMode] = useState(isFiatCurrency(state.currency));
+  // Initialize hooks with safe defaults that don't depend on state being available
+  const [fiatMode, setFiatMode] = useState(false);
   const [uploadDropdownOpen, setUploadDropdownOpen] = useState(false);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
-  const [invoiceNoInput, setInvoiceNoInput] = useState(state.invoiceNo || "");
+  const [invoiceNoInput, setInvoiceNoInput] = useState("");
   const uploadDropdownRef = useRef<HTMLDivElement>(null);
   const exportDropdownRef = useRef<HTMLDivElement>(null);
   const [isPdfLoading, setIsPdfLoading] = useState(false);
-  const [notes, setNotes] = useState(state.notes || "");
+  const [notes, setNotes] = useState("");
 
   // Validation state
   const [invoiceValidation, setInvoiceValidation] =
@@ -138,17 +102,17 @@ export default function Editor(
   const [currencyValidation, setCurrencyValidation] =
     useState<ValidationResult | null>(null);
   const [ibanValidation, setIbanValidation] = useState<ValidationResult | null>(
-    null
+    null,
   );
   const [bicValidation, setBicValidation] = useState<ValidationResult | null>(
-    null
+    null,
   );
   const [bankNameValidation, setBankNameValidation] =
     useState<ValidationResult | null>(null);
   const [streetAddressValidation, setStreetAddressValidation] =
     useState<ValidationResult | null>(null);
   const [cityValidation, setCityValidation] = useState<ValidationResult | null>(
-    null
+    null,
   );
   const [postalCodeValidation, setPostalCodeValidation] =
     useState<ValidationResult | null>(null);
@@ -198,8 +162,22 @@ export default function Editor(
   } | null>(null);
 
   useEffect(() => {
-    setFiatMode(isFiatCurrency(state.currency));
-  }, [state.currency, state]);
+    if (state?.currency) {
+      setFiatMode(isFiatCurrency(state.currency));
+    }
+  }, [state?.currency]);
+
+  useEffect(() => {
+    if (state?.invoiceNo !== undefined) {
+      setInvoiceNoInput(state.invoiceNo || "");
+    }
+  }, [state?.invoiceNo]);
+
+  useEffect(() => {
+    if (state?.notes !== undefined) {
+      setNotes(state.notes || "");
+    }
+  }, [state?.notes]);
 
   // Add click outside listener to close dropdowns
   useEffect(() => {
@@ -225,6 +203,7 @@ export default function Editor(
   }, []);
 
   const itemsTotalTaxExcl = useMemo(() => {
+    if (!state?.lineItems) return 0;
     let total = state.lineItems.reduce((sum: number, lineItem: any) => {
       return sum + lineItem.quantity * lineItem.unitPriceTaxExcl;
     }, 0.0);
@@ -232,7 +211,7 @@ export default function Editor(
     // If there's an item being edited, replace its contribution with the edited values
     if (editingItemValues) {
       const originalItem = state.lineItems.find(
-        (item: any) => item.id === editingItemValues.id
+        (item: any) => item.id === editingItemValues.id,
       );
       if (originalItem) {
         // Subtract the original contribution and add the edited contribution
@@ -244,9 +223,10 @@ export default function Editor(
     }
 
     return total;
-  }, [state.lineItems, editingItemValues]);
+  }, [state?.lineItems, editingItemValues]);
 
   const itemsTotalTaxIncl = useMemo(() => {
+    if (!state?.lineItems) return 0;
     let total = state.lineItems.reduce((sum: number, lineItem: any) => {
       return sum + lineItem.quantity * lineItem.unitPriceTaxIncl;
     }, 0.0);
@@ -254,7 +234,7 @@ export default function Editor(
     // If there's an item being edited, replace its contribution with the edited values
     if (editingItemValues) {
       const originalItem = state.lineItems.find(
-        (item: any) => item.id === editingItemValues.id
+        (item: any) => item.id === editingItemValues.id,
       );
       if (originalItem) {
         // Subtract the original contribution and add the edited contribution
@@ -266,7 +246,101 @@ export default function Editor(
     }
 
     return total;
-  }, [state.lineItems, editingItemValues]);
+  }, [state?.lineItems, editingItemValues]);
+
+  // Dynamic property check based on the actual schema
+  let missingProperties: string[] = [];
+  try {
+    const schema = InvoiceStateSchema();
+    const expectedProperties = Object.keys(schema.shape).filter(
+      (prop) => prop !== "__typename",
+    );
+    if (state) {
+      missingProperties = expectedProperties.filter((prop) => !(prop in state));
+    }
+  } catch (error) {
+    console.error("Error checking schema properties:", error);
+  }
+
+  if (missingProperties.length > 0) {
+    // Show error message for missing properties
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="max-w-md mx-auto text-center p-8 bg-white rounded-lg shadow-lg border border-red-200">
+          <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+            <svg
+              className="w-8 h-8 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+              ></path>
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Document Schema Mismatch
+          </h2>
+          <p className="text-gray-600 mb-4">
+            The current document structure doesn't match the expected schema.
+            This usually happens when using an outdated document model.
+          </p>
+          <p className="text-sm text-gray-500 mb-4">
+            Please create a new document using the latest document model to
+            ensure compatibility.
+          </p>
+          <details className="text-left text-xs text-gray-600">
+            <summary className="cursor-pointer hover:text-gray-800">
+              View missing properties
+            </summary>
+            <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto max-h-32">
+              {JSON.stringify(missingProperties, null, 2)}
+            </pre>
+          </details>
+        </div>
+      </div>
+    );
+  }
+
+  // NOW ALL HOOKS ARE CALLED - SAFE TO DO CONDITIONAL RETURNS
+  if (!state) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="max-w-md mx-auto text-center p-8 bg-white rounded-lg shadow-lg border border-red-200">
+          <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+            <svg
+              className="w-8 h-8 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+              ></path>
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Document Schema Mismatch
+          </h2>
+          <p className="text-gray-600 mb-4">
+            The current document structure doesn't match the expected schema.
+            This usually happens when using an outdated document model.
+          </p>
+          <p className="text-sm text-gray-500 mb-4">
+            Please create a new document using the latest document model to
+            ensure compatibility.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const STATUS_OPTIONS: Status[] = [
     "DRAFT",
@@ -282,7 +356,7 @@ export default function Editor(
   ];
 
   const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -349,7 +423,7 @@ export default function Editor(
             }
             return null;
           }}
-        </PDFDownloadLink>
+        </PDFDownloadLink>,
       );
     } catch (error) {
       console.error("Error exporting PDF:", error);
@@ -421,7 +495,7 @@ export default function Editor(
               }
               return null;
             }}
-          </PDFDownloadLink>
+          </PDFDownloadLink>,
         );
       } catch (error) {
         console.error("Error generating PDF blob:", error);
@@ -451,14 +525,14 @@ export default function Editor(
       setPayerEmailValidation,
       setLineItemValidation,
       setRoutingNumberValidation,
-      isFiatCurrency
+      isFiatCurrency,
     );
     if (validationResult) {
       return;
     }
     if (newStatus === "ISSUED") {
       const trueRejection = state.rejections.find(
-        (rejection: any) => rejection.final === true
+        (rejection: any) => rejection.final === true,
       );
       if (state.status === "REJECTED" && trueRejection) {
         setRejectReason(trueRejection.reason);
@@ -597,17 +671,15 @@ export default function Editor(
     // Add more labels as needed
   };
 
-  // Get the parent folder node for the currently selected node
-  const parentFolder = useParentFolderForSelectedNode();
   // Set the selected node to the parent folder node (close the editor)
   function handleClose() {
-    setSelectedNode(parentFolder?.id);
+    setSelectedNode(parentFolder);
   }
 
   return (
     <div>
       <DocumentToolbar document={doc} onClose={handleClose} />
-      <div className="editor-container">
+      <div className="container mx-auto">
         <ToastContainer
           position="bottom-right"
           autoClose={5000}
@@ -986,14 +1058,15 @@ export default function Editor(
                   name="issueDate"
                   className={String.raw`w-full p-0 bg-white`}
                   onChange={(e) => {
-                    const newDate = e.target.value.split("T")[0];
+                    const dateOnly = e.target.value.split("T")[0];
+                    const datetime = dateToDatetime(dateOnly);
                     dispatch(
                       actions.editInvoice({
-                        dateIssued: newDate,
-                      })
+                        dateIssued: datetime,
+                      }),
                     );
                   }}
-                  value={state.dateIssued}
+                  value={datetimeToDate(state.dateIssued)}
                 />
               </div>
               <div className="mb-2">
@@ -1002,14 +1075,15 @@ export default function Editor(
                   name="deliveryDate"
                   className={String.raw`w-full p-0 bg-white`}
                   onChange={(e) => {
-                    const newValue = e.target.value.split("T")[0];
-                    if (newValue !== state.dateDelivered) {
+                    const dateOnly = e.target.value.split("T")[0];
+                    const datetime = dateToDatetime(dateOnly);
+                    if (datetime !== state.dateDelivered) {
                       dispatch(
-                        actions.editInvoice({ dateDelivered: newValue })
+                        actions.editInvoice({ dateDelivered: datetime }),
                       );
                     }
                   }}
-                  value={state.dateDelivered || ""}
+                  value={datetimeToDate(state.dateDelivered)}
                 />
               </div>
             </div>
@@ -1048,14 +1122,16 @@ export default function Editor(
               <DatePicker
                 name="dateDue"
                 className={String.raw`w-full p-0 bg-white`}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const dateOnly = e.target.value.split("T")[0];
+                  const datetime = dateToDatetime(dateOnly);
                   dispatch(
                     actions.editInvoice({
-                      dateDue: e.target.value.split("T")[0],
-                    })
-                  )
-                }
-                value={state.dateDue}
+                      dateDue: datetime,
+                    }),
+                  );
+                }}
+                value={datetimeToDate(state.dateDue)}
               />
             </div>
             <LegalEntityForm
@@ -1140,11 +1216,23 @@ export default function Editor(
             onCancel={() => setActiveModal(null)}
             onContinue={() => {
               if (activeModal === "issueInvoice") {
+                // Ensure dateIssued is a valid datetime string for the issue action
+                // The issue action requires a non-null string, so use current date if not set
+                let issueDate: string;
+                if (state.dateIssued && state.dateIssued.trim() !== "") {
+                  issueDate = state.dateIssued.includes("T")
+                    ? state.dateIssued
+                    : dateToDatetime(state.dateIssued) ||
+                      new Date().toISOString();
+                } else {
+                  issueDate = new Date().toISOString();
+                }
+
                 dispatch(
                   actions.issue({
                     invoiceNo: invoiceNoInput,
-                    dateIssued: state.dateIssued,
-                  })
+                    dateIssued: issueDate,
+                  }),
                 );
               }
               if (activeModal === "rejectInvoice") {
@@ -1153,7 +1241,7 @@ export default function Editor(
                     final: finalReason,
                     id: generateId(),
                     reason: rejectReason,
-                  })
+                  }),
                 );
               }
               if (activeModal === "schedulePayment") {
@@ -1161,14 +1249,14 @@ export default function Editor(
                   actions.schedulePayment({
                     id: generateId(),
                     processorRef: paymentRef,
-                  })
+                  }),
                 );
               }
               if (activeModal === "closePayment") {
                 dispatch(
                   actions.closePayment({
                     closureReason: closureReason as ClosureReason,
-                  })
+                  }),
                 );
               }
               if (activeModal === "registerPayment") {
@@ -1177,7 +1265,7 @@ export default function Editor(
                     id: state.payments[state.payments.length - 1].id,
                     timestamp: paymentDate,
                     txRef: txnRef,
-                  })
+                  }),
                 );
               }
               if (activeModal === "reportPaymentIssue") {
@@ -1185,7 +1273,7 @@ export default function Editor(
                   actions.reportPaymentIssue({
                     id: state.payments[state.payments.length - 1].id,
                     issue: paymentIssue,
-                  })
+                  }),
                 );
               }
               if (activeModal === "confirmPayment") {
@@ -1193,7 +1281,7 @@ export default function Editor(
                   actions.confirmPayment({
                     id: state.payments[state.payments.length - 1].id,
                     amount: parseFloat(paymentAmount) || 0,
-                  })
+                  }),
                 );
               }
               setActiveModal(null);

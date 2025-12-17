@@ -69,13 +69,13 @@ type EditableLineItemProps = {
       quantity: number;
       unitPriceTaxExcl: number;
       unitPriceTaxIncl: number;
-    } | null
+    } | null,
   ) => void;
 };
 
 const EditableLineItem = forwardRef(function EditableLineItem(
   props: EditableLineItemProps,
-  ref: React.Ref<HTMLTableRowElement>
+  ref: React.Ref<HTMLTableRowElement>,
 ) {
   const { item, onSave, onCancel, currency, onEditingItemChange } = props;
   const [editedItem, setEditedItem] = useState<Partial<EditableLineItem>>({
@@ -494,7 +494,7 @@ type LineItemsTableProps = {
       quantity: number;
       unitPriceTaxExcl: number;
       unitPriceTaxIncl: number;
-    } | null
+    } | null,
   ) => void;
   readonly dispatch: Dispatch<any>;
   readonly paymentAccounts: InvoiceTag[];
@@ -609,11 +609,11 @@ export function LineItemsTable({
   // Calculate totals for mobile footer
   const totalPriceTaxExcl = lineItems.reduce(
     (sum, item) => sum + item.totalPriceTaxExcl,
-    0
+    0,
   );
   const totalPriceTaxIncl = lineItems.reduce(
     (sum, item) => sum + item.totalPriceTaxIncl,
-    0
+    0,
   );
 
   return (
@@ -799,7 +799,9 @@ export function LineItemsTable({
                           ) {
                             try {
                               const zodError = JSON.parse(
-                                error.message.split("Invalid action input: ")[1]
+                                error.message.split(
+                                  "Invalid action input: ",
+                                )[1],
                               );
                               if (
                                 Array.isArray(zodError) &&
@@ -830,7 +832,7 @@ export function LineItemsTable({
                             } catch (parseError) {
                               console.error(
                                 "Failed to parse Zod error:",
-                                parseError
+                                parseError,
                               );
                               toast("Invalid input data", {
                                 type: "error",
@@ -893,7 +895,7 @@ export function LineItemsTable({
                         </div>
                       </td>
                     </tr>
-                  )
+                  ),
                 )}
                 {isAddingNew ? (
                   <EditableLineItem

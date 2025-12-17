@@ -3,50 +3,7 @@ import type { DocumentNode } from "graphql";
 
 export const schema: DocumentNode = gql`
   """
-  Subgraph definition for ExpenseReport (powerhouse/expense-report)
-  """
-  type ExpenseReportState {
-    wallets: [Wallet!]!
-    groups: [LineItemGroup!]!
-    periodStart: DateTime
-    periodEnd: DateTime
-  }
-
-  type Wallet {
-    name: String
-    wallet: EthereumAddress
-    totals: [GroupTotals]
-    billingStatements: [OID]
-    lineItems: [LineItem]
-  }
-
-  type LineItemGroup {
-    id: ID!
-    label: String
-    parentId: ID
-  }
-
-  type GroupTotals {
-    group: ID ## LineItemGroupId
-    totalBudget: Float
-    totalForecast: Float
-    totalActuals: Float
-    totalPayments: Float
-  }
-
-  type LineItem {
-    id: ID
-    label: String
-    group: ID ## LineItemGroupId
-    budget: Float
-    actuals: Float
-    forecast: Float
-    payments: Float
-    comments: String
-  }
-
-  """
-  Queries: ExpenseReport
+  Queries: ExpenseReport Document
   """
   type ExpenseReportQueries {
     getDocument(docId: PHID!, driveId: PHID): ExpenseReport
@@ -160,10 +117,10 @@ export const schema: DocumentNode = gql`
   }
   input ExpenseReport_AddLineItemInput {
     wallet: EthereumAddress!
-    lineItem: LineItemInput!
+    lineItem: ExpenseReport_LineItemInput!
   }
 
-  input LineItemInput {
+  input ExpenseReport_LineItemInput {
     id: ID!
     label: String
     group: ID
@@ -203,10 +160,10 @@ export const schema: DocumentNode = gql`
   }
   input ExpenseReport_SetGroupTotalsInput {
     wallet: EthereumAddress!
-    groupTotals: GroupTotalsInput!
+    groupTotals: ExpenseReport_GroupTotalsInput!
   }
 
-  input GroupTotalsInput {
+  input ExpenseReport_GroupTotalsInput {
     group: ID!
     totalBudget: Float
     totalForecast: Float

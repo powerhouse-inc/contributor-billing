@@ -3,7 +3,10 @@ import { X, Tag } from "lucide-react";
 import { PowerhouseButton as Button } from "@powerhousedao/design-system/powerhouse/components/index";
 import { Select, DatePicker } from "@powerhousedao/document-engineering/ui";
 import { expenseAccountOptions, paymentAccountOptions } from "./tagMapping.js";
-import { actions, type InvoiceTag } from "../../../document-models/invoice/index.js";
+import {
+  actions,
+  type InvoiceTag,
+} from "../../../document-models/invoice/index.js";
 import { InputField } from "../components/inputField.js";
 import { TagCard } from "./tagCard.js";
 import { TagMobileModal } from "./tagMobileModal.js";
@@ -31,7 +34,7 @@ export function LineItemTagsTable({
   paymentAccounts,
 }: LineItemTagsTableProps) {
   const [mobileEditItem, setMobileEditItem] = useState<TagAssignmentRow | null>(
-    null
+    null,
   );
   const [showMobileModal, setShowMobileModal] = useState(false);
 
@@ -45,7 +48,7 @@ export function LineItemTagsTable({
             dimension: tag.dimension,
             value: "",
             label: "",
-          })
+          }),
         );
       });
     });
@@ -57,7 +60,7 @@ export function LineItemTagsTable({
           dimension: tag.dimension,
           value: "",
           label: "",
-        })
+        }),
       );
     });
   };
@@ -135,7 +138,7 @@ export function LineItemTagsTable({
                         actions.editLineItem({
                           id: item.id,
                           description: e.target.value,
-                        })
+                        }),
                       );
                     }}
                   />
@@ -148,7 +151,7 @@ export function LineItemTagsTable({
                     placeholder="Select Period"
                     value={
                       item.lineItemTag.find(
-                        (tag) => tag.dimension === "accounting-period"
+                        (tag) => tag.dimension === "accounting-period",
                       )?.label || ""
                     }
                     onChange={(e) =>
@@ -169,9 +172,9 @@ export function LineItemTagsTable({
                             {
                               month: "long",
                               year: "numeric",
-                            }
+                            },
                           ),
-                        })
+                        }),
                       )
                     }
                     className="bg-white"
@@ -182,7 +185,7 @@ export function LineItemTagsTable({
                     options={expenseAccountOptions}
                     value={
                       item.lineItemTag.find(
-                        (tag) => tag.dimension === "xero-expense-account"
+                        (tag) => tag.dimension === "xero-expense-account",
                       )?.value || ""
                     }
                     placeholder="Select Expense Account"
@@ -194,9 +197,9 @@ export function LineItemTagsTable({
                           dimension: "xero-expense-account",
                           value: value as string,
                           label: expenseAccountOptions.find(
-                            (option) => option.value === value
+                            (option) => option.value === value,
                           )?.label,
-                        })
+                        }),
                       );
                     }}
                   />
@@ -231,7 +234,7 @@ export function LineItemTagsTable({
             options={paymentAccountOptions}
             value={
               paymentAccountOptions.find(
-                (option) => option.value === selectedPaymentAccountValue
+                (option) => option.value === selectedPaymentAccountValue,
               )?.value ?? ""
             }
             placeholder="Select Payment Account"
@@ -246,7 +249,7 @@ export function LineItemTagsTable({
                   dimension: "xero-payment-account",
                   value: value as string,
                   label: cleanLabel,
-                })
+                }),
               );
             }}
             style={{ width: "230px" }}
@@ -264,7 +267,7 @@ export function LineItemTagsTable({
             options={paymentAccountOptions}
             value={
               paymentAccountOptions.find(
-                (option) => option.value === selectedPaymentAccountValue
+                (option) => option.value === selectedPaymentAccountValue,
               )?.value ?? ""
             }
             placeholder="Select Payment Account"
@@ -279,7 +282,7 @@ export function LineItemTagsTable({
                   dimension: "xero-payment-account",
                   value: value as string,
                   label: cleanLabel,
-                })
+                }),
               );
             }}
           />

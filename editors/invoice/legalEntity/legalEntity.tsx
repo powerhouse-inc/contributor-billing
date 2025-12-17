@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import type {
   EditIssuerBankInput,
   EditIssuerInput,
@@ -151,7 +149,7 @@ export const LegalEntityMainSection = (props: LegalEntityMainSectionProps) => {
       {...divProps}
       className={twMerge(
         "rounded-lg border border-gray-200 bg-white p-6 mb-2",
-        props.className
+        props.className,
       )}
     >
       <h3 className="mb-4 text-lg font-semibold text-gray-900">
@@ -322,7 +320,7 @@ type LegalEntityFormProps = {
 
 // Helper to flatten LegalEntity to EditLegalEntityInput
 function flattenLegalEntityToEditInput(
-  legalEntity: LegalEntity
+  legalEntity: LegalEntity,
 ): EditLegalEntityInput {
   let id = "";
   if (typeof legalEntity.id === "string") {

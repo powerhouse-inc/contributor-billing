@@ -3,57 +3,103 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
+import { describe, it, expect } from "vitest";
 import { generateMock } from "@powerhousedao/codegen";
-import * as utils from "../../gen/utils.js";
 import {
-  type AddLineItemInput,
-  type EditLineItemInput,
-  type DeleteLineItemInput,
+  reducer,
+  utils,
+  isInvoiceDocument,
+  addLineItem,
   AddLineItemInputSchema,
+  editLineItem,
   EditLineItemInputSchema,
+  deleteLineItem,
   DeleteLineItemInputSchema,
-} from "../../gen/schema/index.js";
-import { reducer } from "../../gen/reducer.js";
-import * as creators from "../../gen/items/creators.js";
-import type { InvoiceDocument } from "../../gen/types.js";
+  setLineItemTag,
+  SetLineItemTagInputSchema,
+  setInvoiceTag,
+  SetInvoiceTagInputSchema,
+} from "@powerhousedao/contributor-billing/document-models/invoice";
 
 describe("Items Operations", () => {
-  let document: InvoiceDocument;
-
-  beforeEach(() => {
-    document = utils.createDocument();
-  });
-
   it("should handle addLineItem operation", () => {
-    const input: AddLineItemInput = generateMock(AddLineItemInputSchema());
+    const document = utils.createDocument();
+    const input = generateMock(AddLineItemInputSchema());
 
-    const updatedDocument = reducer(document, creators.addLineItem(input));
+    const updatedDocument = reducer(document, addLineItem(input));
 
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("ADD_LINE_ITEM");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "ADD_LINE_ITEM",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editLineItem operation", () => {
-    const input: EditLineItemInput = generateMock(EditLineItemInputSchema());
+    const document = utils.createDocument();
+    const input = generateMock(EditLineItemInputSchema());
 
-    const updatedDocument = reducer(document, creators.editLineItem(input));
+    const updatedDocument = reducer(document, editLineItem(input));
 
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_LINE_ITEM");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "EDIT_LINE_ITEM",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle deleteLineItem operation", () => {
-    const input: DeleteLineItemInput = generateMock(
-      DeleteLineItemInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(DeleteLineItemInputSchema());
 
-    const updatedDocument = reducer(document, creators.deleteLineItem(input));
+    const updatedDocument = reducer(document, deleteLineItem(input));
 
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("DELETE_LINE_ITEM");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "DELETE_LINE_ITEM",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
+    expect(updatedDocument.operations.global[0].index).toEqual(0);
+  });
+  it("should handle setLineItemTag operation", () => {
+    const document = utils.createDocument();
+    const input = generateMock(SetLineItemTagInputSchema());
+
+    const updatedDocument = reducer(document, setLineItemTag(input));
+
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
+    expect(updatedDocument.operations.global).toHaveLength(1);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "SET_LINE_ITEM_TAG",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
+    expect(updatedDocument.operations.global[0].index).toEqual(0);
+  });
+  it("should handle setInvoiceTag operation", () => {
+    const document = utils.createDocument();
+    const input = generateMock(SetInvoiceTagInputSchema());
+
+    const updatedDocument = reducer(document, setInvoiceTag(input));
+
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
+    expect(updatedDocument.operations.global).toHaveLength(1);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "SET_INVOICE_TAG",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
 });

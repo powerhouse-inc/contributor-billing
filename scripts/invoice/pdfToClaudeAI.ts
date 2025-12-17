@@ -1,27 +1,27 @@
-import { generateId } from 'document-model';
-import { autoTagLineItems } from './autoTagging.js';
+import { generateId } from "document-model";
+import { autoTagLineItems } from "./autoTagging.js";
 
 export async function uploadPdfAndGetJsonClaude(inputDoc: string) {
-    try {
-        console.log("Starting PDF upload and processing with Claude AI");
+  try {
+    console.log("Starting PDF upload and processing with Claude AI");
 
-        const apiKey = process.env.CLAUDE_API_KEY;
-        if (!apiKey) {
-            throw new Error("CLAUDE_API_KEY environment variable is not set");
-        }
+    const apiKey = process.env.CLAUDE_API_KEY;
+    if (!apiKey) {
+      throw new Error("CLAUDE_API_KEY environment variable is not set");
+    }
 
-        console.log("Preparing Claude API request with PDF...");
+    console.log("Preparing Claude API request with PDF...");
 
-        // Create the prompt for Claude to extract invoice data from PDF
-        const prompt = `
+    // Create the prompt for Claude to extract invoice data from PDF
+    const prompt = `
 Please analyze this PDF invoice document and extract the following information in JSON format:
 
 {
   "status": "status of invoice (DRAFT, ISSUED, CANCELLED, ACCEPTED, REJECTED, PAYMENTSCHEDULED, PAYMENTSENT, PAYMENTISSUE, PAYMENTRECEIVED, PAYMENTCLOSED)",
   "invoiceNo": "invoice number",
-  "dateIssued": "invoice date in YYYY-MM-DD format",
-  "dateDue": "due date in YYYY-MM-DD format",
-  "dateDelivered": "delivery date in YYYY-MM-DD format (if specified)",
+  "dateIssued": "invoice date in YYYY-MM-DDTHH:mm:ss.sssZ format",
+  "dateDue": "due date in YYYY-MM-DDTHH:mm:ss.sssZ format",
+  "dateDelivered": "delivery date in YYYY-MM-DDTHH:mm:ss.sssZ format (if specified)",
   "currency": "currency code crypto or fiat (USD, EUR, DAI, USDC, USDT, etc.)",
   "notes": "any notes or additional information on the invoice",
   "payAfter": "earliest payment date in ISO format (if specified)",
@@ -172,182 +172,197 @@ Please analyze this PDF invoice document and extract the following information i
 Extract only the data that is clearly visible in the PDF. If a field is not present, use null. Be very careful with numbers - preserve the exact values without modification. For dates, convert to YYYY-MM-DD format. For currencies, use standard 3-letter codes (USD, EUR, GBP, etc.).
 `;
 
-        const requestBody = {
-            model: "claude-haiku-4-5-20251001",
-            max_tokens: 4000,
-            messages: [
-                {
-                    role: "user",
-                    content: [
-                        {
-                            type: "text",
-                            text: prompt
-                        },
-                        {
-                            type: "document",
-                            source: {
-                                type: "base64",
-                                media_type: "application/pdf",
-                                data: inputDoc
-                            }
-                        }
-                    ]
-                }
-            ]
-        };
-
-        console.log("Sending request to Claude API...");
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': apiKey,
-                'anthropic-version': '2023-06-01'
+    const requestBody = {
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 4000,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: prompt,
             },
-            body: JSON.stringify(requestBody)
-        });
+            {
+              type: "document",
+              source: {
+                type: "base64",
+                media_type: "application/pdf",
+                data: inputDoc,
+              },
+            },
+          ],
+        },
+      ],
+    };
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Claude API error: ${response.status} - ${errorText}`);
-        }
+    console.log("Sending request to Claude API...");
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify(requestBody),
+    });
 
-        const result = await response.json();
-        console.log("PDF processed successfully with Claude AI");
-
-        // Extract JSON from Claude's response
-        const responseText = result.content[0]?.text;
-        if (!responseText) {
-            throw new Error("No response text from Claude API");
-        }
-
-        // Try to extract JSON from the response
-        let invoiceData;
-        try {
-            // Look for JSON block in the response
-            const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) ||
-                responseText.match(/\{[\s\S]*\}/);
-
-            if (jsonMatch) {
-                const jsonString = jsonMatch[1] || jsonMatch[0];
-                invoiceData = JSON.parse(jsonString);
-            } else {
-                // Fallback: try to parse the entire response as JSON
-                invoiceData = JSON.parse(responseText);
-            }
-        } catch (parseError) {
-            console.error("Failed to parse Claude response as JSON:", parseError);
-            console.error("Response text:", responseText);
-            throw new Error("Failed to parse Claude response as valid JSON");
-        }
-
-        // Process the invoice data to ensure it matches our expected format
-        const processedInvoiceData = await processClaudeInvoiceData(invoiceData);
-
-        return { invoiceData: processedInvoiceData };
-    } catch (error) {
-        console.error("Error in uploadPdfAndGetJsonClaude:", error);
-        throw error;
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Claude API error: ${response.status} - ${errorText}`);
     }
+
+    const result = await response.json();
+    console.log("PDF processed successfully with Claude AI");
+
+    // Extract JSON from Claude's response
+    const responseText = result.content[0]?.text;
+    if (!responseText) {
+      throw new Error("No response text from Claude API");
+    }
+
+    // Try to extract JSON from the response
+    let invoiceData;
+    try {
+      // Look for JSON block in the response
+      const jsonMatch =
+        responseText.match(/```json\s*([\s\S]*?)\s*```/) ||
+        responseText.match(/\{[\s\S]*\}/);
+
+      if (jsonMatch) {
+        const jsonString = jsonMatch[1] || jsonMatch[0];
+        invoiceData = JSON.parse(jsonString);
+      } else {
+        // Fallback: try to parse the entire response as JSON
+        invoiceData = JSON.parse(responseText);
+      }
+    } catch (parseError) {
+      console.error("Failed to parse Claude response as JSON:", parseError);
+      console.error("Response text:", responseText);
+      throw new Error("Failed to parse Claude response as valid JSON");
+    }
+
+    // Process the invoice data to ensure it matches our expected format
+    const processedInvoiceData = await processClaudeInvoiceData(invoiceData);
+
+    return { invoiceData: processedInvoiceData };
+  } catch (error) {
+    console.error("Error in uploadPdfAndGetJsonClaude:", error);
+    throw error;
+  }
 }
 
 async function processClaudeInvoiceData(rawData: any) {
-    const invoiceData: any = {
-        lineItems: [],
-        rejections: [],
-        payments: [],
-        invoiceTags: []
+  const invoiceData: any = {
+    lineItems: [],
+    rejections: [],
+    payments: [],
+    invoiceTags: [],
+  };
+
+  // Basic invoice fields
+  if (rawData.status) invoiceData.status = rawData.status;
+  if (rawData.invoiceNo) invoiceData.invoiceNo = rawData.invoiceNo;
+  if (rawData.dateIssued) invoiceData.dateIssued = rawData.dateIssued;
+  if (rawData.dateDue) invoiceData.dateDue = rawData.dateDue;
+  if (rawData.dateDelivered) invoiceData.dateDelivered = rawData.dateDelivered;
+  if (rawData.currency) invoiceData.currency = rawData.currency;
+  if (rawData.notes) invoiceData.notes = rawData.notes;
+  if (rawData.payAfter) invoiceData.payAfter = rawData.payAfter;
+  if (rawData.closureReason) invoiceData.closureReason = rawData.closureReason;
+  if (rawData.totalPriceTaxExcl)
+    invoiceData.totalPriceTaxExcl = parseFloat(rawData.totalPriceTaxExcl);
+  if (rawData.totalPriceTaxIncl)
+    invoiceData.totalPriceTaxIncl = parseFloat(rawData.totalPriceTaxIncl);
+
+  // Tags
+  if (rawData.invoiceTags && Array.isArray(rawData.invoiceTags)) {
+    invoiceData.invoiceTags = rawData.invoiceTags;
+  }
+
+  // Exported data
+  if (rawData.exported) {
+    invoiceData.exported = rawData.exported;
+  }
+
+  // Process issuer data
+  if (rawData.issuer) {
+    invoiceData.issuer = {
+      name: rawData.issuer.name || null,
+      address: rawData.issuer.address || null,
+      contactInfo: rawData.issuer.contactInfo || { email: null, tel: null },
+      country: rawData.issuer.address?.country || null,
+      id: rawData.issuer.id || null,
+      paymentRouting: rawData.issuer.paymentRouting || null,
     };
+  }
 
-    // Basic invoice fields
-    if (rawData.status) invoiceData.status = rawData.status;
-    if (rawData.invoiceNo) invoiceData.invoiceNo = rawData.invoiceNo;
-    if (rawData.dateIssued) invoiceData.dateIssued = rawData.dateIssued;
-    if (rawData.dateDue) invoiceData.dateDue = rawData.dateDue;
-    if (rawData.dateDelivered) invoiceData.dateDelivered = rawData.dateDelivered;
-    if (rawData.currency) invoiceData.currency = rawData.currency;
-    if (rawData.notes) invoiceData.notes = rawData.notes;
-    if (rawData.payAfter) invoiceData.payAfter = rawData.payAfter;
-    if (rawData.closureReason) invoiceData.closureReason = rawData.closureReason;
-    if (rawData.totalPriceTaxExcl) invoiceData.totalPriceTaxExcl = parseFloat(rawData.totalPriceTaxExcl);
-    if (rawData.totalPriceTaxIncl) invoiceData.totalPriceTaxIncl = parseFloat(rawData.totalPriceTaxIncl);
+  // Process payer data
+  if (rawData.payer) {
+    invoiceData.payer = {
+      name: rawData.payer.name || null,
+      address: rawData.payer.address || null,
+      contactInfo: rawData.payer.contactInfo || { email: null, tel: null },
+      country: rawData.payer.address?.country || null,
+      id: rawData.payer.id || null,
+      paymentRouting: rawData.payer.paymentRouting || null,
+    };
+  }
 
-    // Tags
-    if (rawData.invoiceTags && Array.isArray(rawData.invoiceTags)) {
-        invoiceData.invoiceTags = rawData.invoiceTags;
-    }
+  // Process rejections
+  if (rawData.rejections && Array.isArray(rawData.rejections)) {
+    invoiceData.rejections = rawData.rejections.map((rejection: any) => ({
+      id: generateId(),
+      reason: rejection.reason || "",
+      final: Boolean(rejection.final),
+    }));
+  }
 
-    // Exported data
-    if (rawData.exported) {
-        invoiceData.exported = rawData.exported;
-    }
+  // Process payments
+  if (rawData.payments && Array.isArray(rawData.payments)) {
+    invoiceData.payments = rawData.payments.map((payment: any) => ({
+      id: generateId(),
+      processorRef: payment.processorRef || null,
+      paymentDate: payment.paymentDate || null,
+      txnRef: payment.txnRef || null,
+      confirmed: Boolean(payment.confirmed),
+      issue: payment.issue || null,
+      amount: payment.amount ? parseFloat(payment.amount) : null,
+    }));
+  }
 
-    // Process issuer data
-    if (rawData.issuer) {
-        invoiceData.issuer = {
-            name: rawData.issuer.name || null,
-            address: rawData.issuer.address || null,
-            contactInfo: rawData.issuer.contactInfo || { email: null, tel: null },
-            country: rawData.issuer.address?.country || null,
-            id: rawData.issuer.id || null,
-            paymentRouting: rawData.issuer.paymentRouting || null
-        };
-    }
+  // Process line items with auto-tagging
+  if (rawData.lineItems && Array.isArray(rawData.lineItems)) {
+    const processedItems = rawData.lineItems.map((item: any) => ({
+      lineItemTag:
+        item.lineItemTag && Array.isArray(item.lineItemTag)
+          ? item.lineItemTag
+          : [],
+      description: item.description || "",
+      quantity: parseFloat(item.quantity) || 0,
+      unitPriceTaxExcl: parseFloat(item.unitPriceTaxExcl) || 0,
+      unitPriceTaxIncl:
+        parseFloat(item.unitPriceTaxIncl) ||
+        parseFloat(item.unitPriceTaxExcl) ||
+        0,
+      totalPriceTaxExcl: parseFloat(item.totalPriceTaxExcl) || 0,
+      totalPriceTaxIncl:
+        parseFloat(item.totalPriceTaxIncl) ||
+        parseFloat(item.totalPriceTaxExcl) ||
+        0,
+      currency: item.currency || rawData.currency || "USD",
+      id: generateId(),
+      taxPercent: parseFloat(item.taxPercent) || 0,
+    }));
 
-    // Process payer data
-    if (rawData.payer) {
-        invoiceData.payer = {
-            name: rawData.payer.name || null,
-            address: rawData.payer.address || null,
-            contactInfo: rawData.payer.contactInfo || { email: null, tel: null },
-            country: rawData.payer.address?.country || null,
-            id: rawData.payer.id || null,
-            paymentRouting: rawData.payer.paymentRouting || null
-        };
-    }
+    // Apply auto-tagging to processed items
+    const taggedItems = await autoTagLineItems(processedItems);
+    invoiceData.lineItems = taggedItems;
+  }
 
-    // Process rejections
-    if (rawData.rejections && Array.isArray(rawData.rejections)) {
-        invoiceData.rejections = rawData.rejections.map((rejection: any) => ({
-            id: generateId(),
-            reason: rejection.reason || '',
-            final: Boolean(rejection.final)
-        }));
-    }
-
-    // Process payments
-    if (rawData.payments && Array.isArray(rawData.payments)) {
-        invoiceData.payments = rawData.payments.map((payment: any) => ({
-            id: generateId(),
-            processorRef: payment.processorRef || null,
-            paymentDate: payment.paymentDate || null,
-            txnRef: payment.txnRef || null,
-            confirmed: Boolean(payment.confirmed),
-            issue: payment.issue || null,
-            amount: payment.amount ? parseFloat(payment.amount) : null
-        }));
-    }
-
-    // Process line items with auto-tagging
-    if (rawData.lineItems && Array.isArray(rawData.lineItems)) {
-        const processedItems = rawData.lineItems.map((item: any) => ({
-            lineItemTag: item.lineItemTag && Array.isArray(item.lineItemTag) ? item.lineItemTag : [],
-            description: item.description || '',
-            quantity: parseFloat(item.quantity) || 0,
-            unitPriceTaxExcl: parseFloat(item.unitPriceTaxExcl) || 0,
-            unitPriceTaxIncl: parseFloat(item.unitPriceTaxIncl) || parseFloat(item.unitPriceTaxExcl) || 0,
-            totalPriceTaxExcl: parseFloat(item.totalPriceTaxExcl) || 0,
-            totalPriceTaxIncl: parseFloat(item.totalPriceTaxIncl) || parseFloat(item.totalPriceTaxExcl) || 0,
-            currency: item.currency || rawData.currency || 'USD',
-            id: generateId(),
-            taxPercent: parseFloat(item.taxPercent) || 0
-        }));
-
-        // Apply auto-tagging to processed items
-        const taggedItems = await autoTagLineItems(processedItems);
-        invoiceData.lineItems = taggedItems;
-    }
-
-    console.log("Processed Claude invoice data:", JSON.stringify(invoiceData, null, 2));
-    return invoiceData;
+  console.log(
+    "Processed Claude invoice data:",
+    JSON.stringify(invoiceData, null, 2),
+  );
+  return invoiceData;
 }

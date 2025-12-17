@@ -1,7 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: true
----
-- Use tailwindcss ^4.1.4" when making css style changes in this project. 
-- Apply the css styles inline in each element in the className prop

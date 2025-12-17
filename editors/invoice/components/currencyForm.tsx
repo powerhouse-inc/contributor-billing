@@ -1,4 +1,7 @@
-import { Form, CurrencyCodeField } from "@powerhousedao/document-engineering/scalars";
+import {
+  Form,
+  CurrencyCodeField,
+} from "@powerhousedao/document-engineering/scalars";
 import { type ValidationResult } from "../validation/validationManager.js";
 
 interface CurrencyFormProps {

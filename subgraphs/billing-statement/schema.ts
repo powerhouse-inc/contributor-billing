@@ -3,70 +3,7 @@ import type { DocumentNode } from "graphql";
 
 export const schema: DocumentNode = gql`
   """
-  Subgraph definition for BillingStatement (powerhouse/billing-statement)
-  """
-  type BillingStatementState {
-    contributor: PHID # Change to AID when available
-    dateIssued: DateTime!
-    dateDue: DateTime
-    lineItems: [BillingStatementLineItem!]!
-    status: BillingStatementStatus!
-    currency: String!
-    totalCash: Float!
-    totalPowt: Float!
-    notes: String
-  }
-
-  type BillingStatementLineItem {
-    id: OID!
-    description: String!
-    quantity: Float!
-    unit: BillingStatementUnit!
-    unitPricePwt: Float!
-    unitPriceCash: Float!
-    totalPricePwt: Float!
-    totalPriceCash: Float!
-    lineItemTag: [BillingStatementTag!]!
-  }
-
-  type BillingStatementTag {
-    dimension: String!
-    value: String!
-    label: String
-  }
-
-  enum BillingStatementStatus {
-    DRAFT
-    ISSUED
-    ACCEPTED
-    REJECTED
-    PAID
-  }
-
-  enum BillingStatementStatusInput {
-    DRAFT
-    ISSUED
-    ACCEPTED
-    REJECTED
-    PAID
-  }
-
-  enum BillingStatementUnit {
-    MINUTE
-    HOUR
-    DAY
-    UNIT
-  }
-
-  enum BillingStatementUnitInput {
-    MINUTE
-    HOUR
-    DAY
-    UNIT
-  }
-
-  """
-  Queries: BillingStatement
+  Queries: BillingStatement Document
   """
   type BillingStatementQueries {
     getDocument(docId: PHID!, driveId: PHID): BillingStatement
@@ -108,6 +45,11 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: BillingStatement_EditLineItemInput
     ): Int
+    BillingStatement_deleteLineItem(
+      driveId: String
+      docId: PHID
+      input: BillingStatement_DeleteLineItemInput
+    ): Int
     BillingStatement_editLineItemTag(
       driveId: String
       docId: PHID
@@ -128,7 +70,7 @@ export const schema: DocumentNode = gql`
     contributor: PHID!
   }
   input BillingStatement_EditStatusInput {
-    status: BillingStatementStatusInput!
+    status: BillingStatement_BillingStatementStatusInput!
   }
 
   """
@@ -138,7 +80,7 @@ export const schema: DocumentNode = gql`
     id: OID!
     description: String!
     quantity: Float!
-    unit: BillingStatementUnitInput!
+    unit: BillingStatement_BillingStatementUnitInput!
     unitPricePwt: Float!
     unitPriceCash: Float!
     totalPricePwt: Float!
@@ -148,11 +90,14 @@ export const schema: DocumentNode = gql`
     id: OID!
     description: String
     quantity: Float
-    unit: BillingStatementUnitInput
+    unit: BillingStatement_BillingStatementUnitInput
     unitPricePwt: Float
     unitPriceCash: Float
     totalPricePwt: Float
     totalPriceCash: Float
+  }
+  input BillingStatement_DeleteLineItemInput {
+    id: OID!
   }
 
   """

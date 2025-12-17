@@ -115,6 +115,10 @@ export type BillingStatementUnit = "DAY" | "HOUR" | "MINUTE" | "UNIT";
 
 export type BillingStatementUnitInput = "DAY" | "HOUR" | "MINUTE" | "UNIT";
 
+export type DeleteLineItemInput = {
+  id: Scalars["OID"]["input"];
+};
+
 export type EditBillingStatementInput = {
   currency?: InputMaybe<Scalars["String"]["input"]>;
   dateDue?: InputMaybe<Scalars["DateTime"]["input"]>;

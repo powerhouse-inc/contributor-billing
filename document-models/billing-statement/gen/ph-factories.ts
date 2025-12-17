@@ -13,7 +13,7 @@ import { createDocument } from "./utils.js";
 
 export function defaultGlobalState(): BillingStatementGlobalState {
   return {
-    contributor: "",
+    contributor: null,
     dateIssued: "2025-06-10T15:42:17.873Z",
     dateDue: "2025-06-10T15:42:17.873Z",
     lineItems: [],

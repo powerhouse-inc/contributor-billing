@@ -38,163 +38,186 @@ export function LineItemTagsTable({
             dimension: tag.dimension,
             value: "",
             label: "",
-          })
+          }),
         );
       });
     });
   };
   return (
-    <div className="w-full">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 p-6 bg-white z-10">
-        <span className="flex items-center gap-2">
-          <h2 className="text-1xl font-semibold text-gray-900">Assign Tags </h2>
-          <Tag
-            style={{ width: 28, height: 28, color: "white", fill: "#475264" }}
-          />
-        </span>
-        <div className="flex items-center gap-2">
-          <Button color="light" size="small" onClick={handleReset}>
-            Reset{" "}
-          </Button>
-          <button
-            onClick={onClose}
-            className="rounded-full p-2 hover:bg-gray-100"
-          >
-            <X size={24} className="text-gray-500" />
-          </button>
-        </div>
-      </div>
-      {/* Table */}
-      <div className="overflow-x-auto rounded-sm border border-gray-200">
-        <table className="w-full border-collapse bg-white">
-          <thead className="bg-gray-50 z-10">
-            <tr>
-              <th className="border-b border-gray-200 p-3 text-center text-sm">
-                Item
-              </th>
-              <th className="border-b border-gray-200 p-3 text-center text-sm">
-                Period
-              </th>
-              <th className="border-b border-gray-200 p-3 text-center text-sm">
-                Expense Account
-              </th>
-              <th className="border-b border-gray-200 p-3 text-center text-sm">
-                Budget
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {lineItems.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50">
-                <td className="border-b border-gray-200 p-2">
-                  <InputField
-                    value={item.description}
-                    handleInputChange={(e) => {}}
-                    onBlur={(e) => {
-                      dispatch(
-                        actions.editLineItem({
-                          id: item.id,
-                          description: e.target.value,
-                        })
-                      );
-                    }}
-                    className="w-full text-xs"
-                  />
-                </td>
-                <td
-                  className="border-b border-gray-200 p-2 w-50"
-                >
-                  <DatePicker
-                    name="period"
-                    dateFormat="YYYY-MM-DD"
-                    autoClose={true}
-                    placeholder="Select Period"
-                    value={
-                      item.lineItemTag.find(
-                        (tag) => tag.dimension === "accounting-period"
-                      )?.label || ""
-                    }
-                    onChange={(e) =>
-                      dispatch(
-                        actions.editLineItemTag({
-                          lineItemId: item.id,
-                          dimension: "accounting-period",
-                          value: new Date(e.target.value)
-                            .toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "numeric",
-                            })
-                            .split("/")
-                            .reverse()
-                            .join("/"),
-                          label: new Date(e.target.value).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "long",
-                              year: "numeric",
+    <div className="min-h-screen w-full bg-white text-[#14120f]">
+      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="overflow-hidden rounded-2xl border border-black/10 bg-white text-[#14120f] shadow-[0_18px_50px_rgba(15,23,42,0.10)]">
+          {/* Header */}
+          <div className="flex flex-col gap-4 border-b border-black/10 bg-[#efe8da] px-6 py-5 text-[#14120f] sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="grid h-10 w-10 place-items-center rounded-xl border border-black/10 bg-white">
+                <Tag className="h-5 w-5 text-black/70" />
+              </div>
+              <div>
+                <div className="text-[11px] font-semibold tracking-[0.22em] text-black/60">
+                  TAG EDITOR
+                </div>
+                <h2 className="font-serif text-xl tracking-tight">
+                  Assign tags to line items
+                </h2>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button color="light" size="small" onClick={handleReset}>
+                Reset
+              </Button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex items-center justify-center rounded-full border border-black/15 bg-black/5 p-2 text-black/70 transition hover:bg-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-[#efe8da]"
+                aria-label="Close tag editor"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="p-6">
+            <div className="overflow-hidden rounded-xl border border-black/10 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead className="bg-[#efe8da] text-[#14120f]">
+                    <tr>
+                      <th className="border-b border-black/10 px-3 py-3 text-left text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                        ITEM
+                      </th>
+                      <th className="border-b border-black/10 px-3 py-3 text-left text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                        PERIOD
+                      </th>
+                      <th className="border-b border-black/10 px-3 py-3 text-left text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                        EXPENSE ACCOUNT
+                      </th>
+                      <th className="border-b border-black/10 px-3 py-3 text-left text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                        BUDGET
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-sm text-black/90">
+                    {lineItems.map((item) => (
+                      <tr
+                        key={item.id}
+                        className="odd:bg-[#fbf8f1] even:bg-white hover:bg-[#fff3cf]/60"
+                      >
+                        <td className="border-b border-gray-200 p-2">
+                          <InputField
+                            value={item.description}
+                            handleInputChange={(e) => {}}
+                            onBlur={(e) => {
+                              dispatch(
+                                actions.editLineItem({
+                                  id: item.id,
+                                  description: e.target.value,
+                                }),
+                              );
+                            }}
+                            className="w-full text-xs"
+                          />
+                        </td>
+                        <td className="border-b border-gray-200 p-2 w-50">
+                          <DatePicker
+                            name="period"
+                            dateFormat="YYYY-MM-DD"
+                            autoClose={true}
+                            placeholder="Select Period"
+                            value={
+                              item.lineItemTag.find(
+                                (tag) => tag.dimension === "accounting-period",
+                              )?.label || ""
                             }
-                          ),
-                        })
-                      )
-                    }
-                    className="w-full text-xs bg-white"
-                  />
-                </td>
-                <td className="border-b border-gray-200 p-2">
-                  <Select
-                    options={expenseAccountOptions}
-                    value={
-                      item.lineItemTag.find(
-                        (tag) => tag.dimension === "expense-account"
-                      )?.value || ""
-                    }
-                    placeholder="Select Expense Account"
-                    searchable={true}
-                    onChange={(value) => {
-                      const selectedOption = expenseAccountOptions.find(
-                        (option) => option.value === value
-                      )
-                      dispatch(
-                        actions.editLineItemTag({
-                          lineItemId: item.id,
-                          dimension: "expense-account",
-                          value: selectedOption?.value || "",
-                          label: selectedOption?.label
-                        })
-                      );
-                    }}
-                    className="w-full text-xs"
-                  />
-                </td>
-                <td className="border-b border-gray-200 p-2">
-                  <Select
-                    options={budgetOptions}
-                    value={
-                      item.lineItemTag.find((tag) => tag.dimension === "budget")
-                        ?.value || ""
-                    }
-                    placeholder="Select Budget"
-                    onChange={(value) => {
-                      dispatch(
-                        actions.editLineItemTag({
-                          lineItemId: item.id,
-                          dimension: "budget",
-                          value: value as string,
-                          label: budgetOptions.find(
-                            (option) => option.value === value
-                          )?.label,
-                        })
-                      );
-                    }}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                            onChange={(e) =>
+                              dispatch(
+                                actions.editLineItemTag({
+                                  lineItemId: item.id,
+                                  dimension: "accounting-period",
+                                  value: new Date(e.target.value)
+                                    .toLocaleDateString("en-US", {
+                                      year: "numeric",
+                                      month: "numeric",
+                                    })
+                                    .split("/")
+                                    .reverse()
+                                    .join("/"),
+                                  label: new Date(
+                                    e.target.value,
+                                  ).toLocaleDateString("en-US", {
+                                    month: "long",
+                                    year: "numeric",
+                                  }),
+                                }),
+                              )
+                            }
+                            className="w-full text-xs bg-white"
+                          />
+                        </td>
+                        <td className="border-b border-gray-200 p-2">
+                          <Select
+                            options={expenseAccountOptions}
+                            value={
+                              item.lineItemTag.find(
+                                (tag) => tag.dimension === "expense-account",
+                              )?.value || ""
+                            }
+                            placeholder="Select Expense Account"
+                            searchable={true}
+                            onChange={(value) => {
+                              const selectedOption = expenseAccountOptions.find(
+                                (option) => option.value === value,
+                              );
+                              dispatch(
+                                actions.editLineItemTag({
+                                  lineItemId: item.id,
+                                  dimension: "expense-account",
+                                  value: selectedOption?.value || "",
+                                  label: selectedOption?.label,
+                                }),
+                              );
+                            }}
+                            className="w-full text-xs"
+                          />
+                        </td>
+                        <td className="border-b border-gray-200 p-2">
+                          <Select
+                            options={budgetOptions}
+                            value={
+                              item.lineItemTag.find(
+                                (tag) => tag.dimension === "budget",
+                              )?.value || ""
+                            }
+                            placeholder="Select Budget"
+                            onChange={(value) => {
+                              dispatch(
+                                actions.editLineItemTag({
+                                  lineItemId: item.id,
+                                  dimension: "budget",
+                                  value: value as string,
+                                  label: budgetOptions.find(
+                                    (option) => option.value === value,
+                                  )?.label,
+                                }),
+                              );
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="mt-4 text-xs text-black/50">
+              Changes persist as you blur fields/selects.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
-

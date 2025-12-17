@@ -1,46 +1,19 @@
 import type { IntegrationsIntegrationsOperations } from "@powerhousedao/contributor-billing/document-models/integrations";
 
-export const integrationsIntegrationsOperations: IntegrationsIntegrationsOperations = {
-  setRequestFinanceOperation(state, action, dispatch) {
-    const requestFinance = {
-      apiKey: action.input.apiKey || '',
-      email: action.input.email || '',
-    };
-
-    state.requestFinance = requestFinance;
-
-
-  },
-  setGnosisSafeOperation(state, action, dispatch) {
-    const gnosisSafe = {
-      safeAddress: action.input.safeAddress || '',
-      signerPrivateKey: action.input.signerPrivateKey || '',
-    };
-
-    state.gnosisSafe = gnosisSafe;
-
-  },
-  setGoogleCloudOperation(state, action, dispatch) {
-    const googleCloud = {
-      projectId: action.input.projectId || '',
-      location: action.input.location || '',
-      processorId: action.input.processorId || '',
-      keyFile: {
-        type: action.input.keyFile?.type || '',
-        project_id: action.input.keyFile?.project_id || '',
-        private_key_id: action.input.keyFile?.private_key_id || '',
-        private_key: action.input.keyFile?.private_key || '',
-        client_email: action.input.keyFile?.client_email || '',
-        client_id: action.input.keyFile?.client_id || '',
-        auth_uri: action.input.keyFile?.auth_uri || '',
-        token_uri: action.input.keyFile?.token_uri || '',
-        auth_provider_x509_cert_url: action.input.keyFile?.auth_provider_x509_cert_url || '',
-        client_x509_cert_url: action.input.keyFile?.client_x509_cert_url || '',
-        universe_domain: action.input.keyFile?.universe_domain || '',
-      },
-    };
-
-    state.googleCloud = googleCloud;
-
-  },
-};
+export const integrationsIntegrationsOperations: IntegrationsIntegrationsOperations =
+  {
+    setRequestFinanceOperation(state, action) {
+      // TODO: Implement "setRequestFinanceOperation" reducer
+      throw new Error(
+        'Reducer "setRequestFinanceOperation" not yet implemented',
+      );
+    },
+    setGnosisSafeOperation(state, action) {
+      // TODO: Implement "setGnosisSafeOperation" reducer
+      throw new Error('Reducer "setGnosisSafeOperation" not yet implemented');
+    },
+    setGoogleCloudOperation(state, action) {
+      // TODO: Implement "setGoogleCloudOperation" reducer
+      throw new Error('Reducer "setGoogleCloudOperation" not yet implemented');
+    },
+  };

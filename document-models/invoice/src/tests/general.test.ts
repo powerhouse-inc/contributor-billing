@@ -3,67 +3,86 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
+import { describe, it, expect } from "vitest";
 import { generateMock } from "@powerhousedao/codegen";
-import * as utils from "../../gen/utils.js";
 import {
-  type EditInvoiceInput,
-  type EditStatusInput,
+  reducer,
+  utils,
+  isInvoiceDocument,
+  editInvoice,
   EditInvoiceInputSchema,
+  editStatus,
   EditStatusInputSchema,
-} from "../../gen/schema/index.js";
-import { reducer } from "../../gen/reducer.js";
-import * as creators from "../../gen/general/creators.js";
-import type { InvoiceDocument } from "../../gen/types.js";
+  editPaymentData,
+  EditPaymentDataInputSchema,
+  setExportedData,
+  SetExportedDataInputSchema,
+} from "@powerhousedao/contributor-billing/document-models/invoice";
 
 describe("General Operations", () => {
-  let document: InvoiceDocument;
-
-  beforeEach(() => {
-    document = utils.createDocument();
-  });
-
   it("should handle editInvoice operation", () => {
-    const input: EditInvoiceInput = generateMock(EditInvoiceInputSchema());
+    const document = utils.createDocument();
+    const input = generateMock(EditInvoiceInputSchema());
 
-    const updatedDocument = reducer(document, creators.editInvoice(input));
+    const updatedDocument = reducer(document, editInvoice(input));
 
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_INVOICE");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "EDIT_INVOICE",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editStatus operation", () => {
-    const input: EditStatusInput = generateMock(EditStatusInputSchema());
+    const document = utils.createDocument();
+    const input = generateMock(EditStatusInputSchema());
 
-    const updatedDocument = reducer(document, creators.editStatus(input));
+    const updatedDocument = reducer(document, editStatus(input));
 
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_STATUS");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "EDIT_STATUS",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
-  it("should handle editPaymentData operation", () => {
-    const invoice = utils.createDocument();
-    const paymentDate = new Date().toISOString();
-    const updatedDocument = reducer(invoice, creators.editPaymentData({ paymentDate: paymentDate, txnRef: "0x123", confirmed: true, id: "123" }));
 
+  it("should handle editPaymentData operation", () => {
+    const document = utils.createDocument();
+    const input = generateMock(EditPaymentDataInputSchema());
+
+    const updatedDocument = reducer(document, editPaymentData(input));
+
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_PAYMENT_DATA");
-    expect((updatedDocument.operations.global[0] as any).input).toEqual({ paymentDate: paymentDate, txnRef: "0x123", confirmed: true, id: "123" });
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "EDIT_PAYMENT_DATA",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle setExportedData operation", () => {
-    
-    const input = {
-      timestamp: '2025-01-01T00:00:00Z',
-      exportedLineItems: [['1', '2', '3'], ['4', '5', '6']]
-    }
+    const document = utils.createDocument();
+    const input = generateMock(SetExportedDataInputSchema());
 
-    const updatedDocument = reducer(document, creators.setExportedData(input));
+    const updatedDocument = reducer(document, setExportedData(input));
 
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_EXPORTED_DATA");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "SET_EXPORTED_DATA",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
 });

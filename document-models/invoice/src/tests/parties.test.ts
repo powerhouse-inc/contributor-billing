@@ -3,101 +3,119 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
+import { describe, it, expect } from "vitest";
 import { generateMock } from "@powerhousedao/codegen";
-import * as utils from "../../gen/utils.js";
 import {
-  type EditIssuerInput,
-  type EditIssuerBankInput,
-  type EditIssuerWalletInput,
-  type EditPayerInput,
-  type EditPayerBankInput,
-  type EditPayerWalletInput,
+  reducer,
+  utils,
+  isInvoiceDocument,
+  editIssuer,
   EditIssuerInputSchema,
+  editIssuerBank,
   EditIssuerBankInputSchema,
+  editIssuerWallet,
   EditIssuerWalletInputSchema,
+  editPayer,
   EditPayerInputSchema,
+  editPayerBank,
   EditPayerBankInputSchema,
+  editPayerWallet,
   EditPayerWalletInputSchema,
-} from "../../gen/schema/index.js";
-import { reducer } from "../../gen/reducer.js";
-import * as creators from "../../gen/parties/creators.js";
-import type { InvoiceDocument } from "../../gen/types.js";
+} from "@powerhousedao/contributor-billing/document-models/invoice";
 
 describe("Parties Operations", () => {
-  let document: InvoiceDocument;
-
-  beforeEach(() => {
-    document = utils.createDocument();
-  });
-
   it("should handle editIssuer operation", () => {
-    const input: EditIssuerInput = generateMock(EditIssuerInputSchema());
+    const document = utils.createDocument();
+    const input = generateMock(EditIssuerInputSchema());
 
-    const updatedDocument = reducer(document, creators.editIssuer(input));
+    const updatedDocument = reducer(document, editIssuer(input));
 
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_ISSUER");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "EDIT_ISSUER",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editIssuerBank operation", () => {
-    const input: EditIssuerBankInput = generateMock(
-      EditIssuerBankInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(EditIssuerBankInputSchema());
 
-    const updatedDocument = reducer(document, creators.editIssuerBank(input));
+    const updatedDocument = reducer(document, editIssuerBank(input));
 
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_ISSUER_BANK");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "EDIT_ISSUER_BANK",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editIssuerWallet operation", () => {
-    const input: EditIssuerWalletInput = generateMock(
-      EditIssuerWalletInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(EditIssuerWalletInputSchema());
 
-    const updatedDocument = reducer(document, creators.editIssuerWallet(input));
+    const updatedDocument = reducer(document, editIssuerWallet(input));
 
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe(
+    expect(updatedDocument.operations.global[0].action.type).toBe(
       "EDIT_ISSUER_WALLET",
     );
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editPayer operation", () => {
-    const input: EditPayerInput = generateMock(EditPayerInputSchema());
+    const document = utils.createDocument();
+    const input = generateMock(EditPayerInputSchema());
 
-    const updatedDocument = reducer(document, creators.editPayer(input));
+    const updatedDocument = reducer(document, editPayer(input));
 
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_PAYER");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe("EDIT_PAYER");
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editPayerBank operation", () => {
-    const input: EditPayerBankInput = generateMock(
-      EditPayerBankInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(EditPayerBankInputSchema());
 
-    const updatedDocument = reducer(document, creators.editPayerBank(input));
+    const updatedDocument = reducer(document, editPayerBank(input));
 
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_PAYER_BANK");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "EDIT_PAYER_BANK",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editPayerWallet operation", () => {
-    const input: EditPayerWalletInput = generateMock(
-      EditPayerWalletInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(EditPayerWalletInputSchema());
 
-    const updatedDocument = reducer(document, creators.editPayerWallet(input));
+    const updatedDocument = reducer(document, editPayerWallet(input));
 
+    expect(isInvoiceDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_PAYER_WALLET");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "EDIT_PAYER_WALLET",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
 });

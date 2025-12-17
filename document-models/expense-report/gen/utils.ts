@@ -165,7 +165,7 @@ export const initialGlobalState: ExpenseReportGlobalState = {
 export const initialLocalState: ExpenseReportLocalState = {};
 
 export const utils: DocumentModelUtils<ExpenseReportPHState> = {
-  fileExtension: ".phdm",
+  fileExtension: "",
   createState(state) {
     return {
       ...defaultBaseState(),

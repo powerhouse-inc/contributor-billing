@@ -21,7 +21,7 @@ import {
 } from "./document-schema.js";
 
 export const initialGlobalState: BillingStatementGlobalState = {
-  contributor: "",
+  contributor: null,
   dateIssued: "2025-06-10T15:42:17.873Z",
   dateDue: "2025-06-10T15:42:17.873Z",
   lineItems: [],
@@ -34,7 +34,7 @@ export const initialGlobalState: BillingStatementGlobalState = {
 export const initialLocalState: BillingStatementLocalState = {};
 
 export const utils: DocumentModelUtils<BillingStatementPHState> = {
-  fileExtension: ".phdm",
+  fileExtension: "",
   createState(state) {
     return {
       ...defaultBaseState(),

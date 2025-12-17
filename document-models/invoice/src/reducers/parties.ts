@@ -8,49 +8,79 @@ function getStateValue<T>(
 }
 
 export const invoicePartiesOperations: InvoicePartiesOperations = {
-  editIssuerOperation(state, action, dispatch) {
-    if ('address' in state.issuer && (
-      'city' in action.input ||
-      'country' in action.input ||
-      'extendedAddress' in action.input ||
-      'postalCode' in action.input ||
-      'stateProvince' in action.input ||
-      'streetAddress' in action.input
-    )) {
+  editIssuerOperation(state, action) {
+    if (
+      "address" in state.issuer &&
+      ("city" in action.input ||
+        "country" in action.input ||
+        "extendedAddress" in action.input ||
+        "postalCode" in action.input ||
+        "stateProvince" in action.input ||
+        "streetAddress" in action.input)
+    ) {
       state.issuer.address = {
         ...state.issuer.address,
-        city: action.input.city !== undefined ? action.input.city : state.issuer.address?.city ?? null,
-        country: action.input.country !== undefined ? action.input.country : state.issuer.address?.country ?? null,
-        extendedAddress: action.input.extendedAddress !== undefined ? action.input.extendedAddress : state.issuer.address?.extendedAddress ?? null,
-        postalCode: action.input.postalCode !== undefined ? action.input.postalCode : state.issuer.address?.postalCode ?? null,
-        stateProvince: action.input.stateProvince !== undefined ? action.input.stateProvince : state.issuer.address?.stateProvince ?? null,
-        streetAddress: action.input.streetAddress !== undefined ? action.input.streetAddress : state.issuer.address?.streetAddress ?? null,
+        city:
+          action.input.city !== undefined
+            ? action.input.city
+            : (state.issuer.address?.city ?? null),
+        country:
+          action.input.country !== undefined
+            ? action.input.country
+            : (state.issuer.address?.country ?? null),
+        extendedAddress:
+          action.input.extendedAddress !== undefined
+            ? action.input.extendedAddress
+            : (state.issuer.address?.extendedAddress ?? null),
+        postalCode:
+          action.input.postalCode !== undefined
+            ? action.input.postalCode
+            : (state.issuer.address?.postalCode ?? null),
+        stateProvince:
+          action.input.stateProvince !== undefined
+            ? action.input.stateProvince
+            : (state.issuer.address?.stateProvince ?? null),
+        streetAddress:
+          action.input.streetAddress !== undefined
+            ? action.input.streetAddress
+            : (state.issuer.address?.streetAddress ?? null),
       };
     }
 
-    if ('contactInfo' in state.issuer && (
-      'tel' in action.input ||
-      'email' in action.input
-    )) {
+    if (
+      "contactInfo" in state.issuer &&
+      ("tel" in action.input || "email" in action.input)
+    ) {
       state.issuer.contactInfo = {
         ...state.issuer.contactInfo,
-        tel: action.input.tel !== undefined ? action.input.tel : state.issuer.contactInfo?.tel ?? null,
-        email: action.input.email !== undefined ? action.input.email : state.issuer.contactInfo?.email ?? null,
+        tel:
+          action.input.tel !== undefined
+            ? action.input.tel
+            : (state.issuer.contactInfo?.tel ?? null),
+        email:
+          action.input.email !== undefined
+            ? action.input.email
+            : (state.issuer.contactInfo?.email ?? null),
       };
     }
 
-    if ('country' in action.input) {
-      state.issuer.country = action.input.country !== undefined ? action.input.country : state.issuer.country ?? null;
+    if ("country" in action.input) {
+      state.issuer.country =
+        action.input.country !== undefined
+          ? action.input.country
+          : (state.issuer.country ?? null);
     }
-    if ('id' in action.input) {
+    if ("id" in action.input) {
       state.issuer.id = action.input.id ? { taxId: action.input.id } : null;
     }
-    if ('name' in action.input) {
-      state.issuer.name = action.input.name !== undefined ? action.input.name : state.issuer.name ?? null;
+    if ("name" in action.input) {
+      state.issuer.name =
+        action.input.name !== undefined
+          ? action.input.name
+          : (state.issuer.name ?? null);
     }
-
   },
-  editIssuerBankOperation(state, action, dispatch) {
+  editIssuerBankOperation(state, action) {
     if (!state.issuer.paymentRouting) {
       state.issuer.paymentRouting = {
         bank: null,
@@ -134,13 +164,13 @@ export const invoicePartiesOperations: InvoicePartiesOperations = {
         accountType: getStateValue(
           action.input.accountTypeIntermediary,
           state.issuer.paymentRouting.bank?.intermediaryBank?.accountType ??
-          null,
+            null,
         ),
         address: {
           city: getStateValue(
             action.input.cityIntermediary,
-            state.issuer.paymentRouting.bank?.intermediaryBank?.address
-              .city ?? null,
+            state.issuer.paymentRouting.bank?.intermediaryBank?.address.city ??
+              null,
           ),
           country: getStateValue(
             action.input.countryIntermediary,
@@ -171,7 +201,7 @@ export const invoicePartiesOperations: InvoicePartiesOperations = {
         beneficiary: getStateValue(
           action.input.beneficiaryIntermediary,
           state.issuer.paymentRouting.bank?.intermediaryBank?.beneficiary ??
-          null,
+            null,
         ),
         name:
           action.input.nameIntermediary ??
@@ -183,9 +213,8 @@ export const invoicePartiesOperations: InvoicePartiesOperations = {
         ),
       },
     };
-
   },
-  editIssuerWalletOperation(state, action, dispatch) {
+  editIssuerWalletOperation(state, action) {
     if (!state.issuer.paymentRouting) {
       state.issuer.paymentRouting = {
         bank: null,
@@ -206,54 +235,82 @@ export const invoicePartiesOperations: InvoicePartiesOperations = {
         action.input.chainName ??
         state.issuer.paymentRouting.wallet?.chainName ??
         null,
-      rpc:
-        action.input.rpc ?? state.issuer.paymentRouting.wallet?.rpc ?? null,
+      rpc: action.input.rpc ?? state.issuer.paymentRouting.wallet?.rpc ?? null,
     };
-
   },
-  editPayerOperation(state, action, dispatch) {
-    if ('address' in state.payer && (
-      'city' in action.input ||
-      'country' in action.input ||
-      'extendedAddress' in action.input ||
-      'postalCode' in action.input ||
-      'stateProvince' in action.input ||
-      'streetAddress' in action.input
-    )) {
+  editPayerOperation(state, action) {
+    if (
+      "address" in state.payer &&
+      ("city" in action.input ||
+        "country" in action.input ||
+        "extendedAddress" in action.input ||
+        "postalCode" in action.input ||
+        "stateProvince" in action.input ||
+        "streetAddress" in action.input)
+    ) {
       state.payer.address = {
         ...state.payer.address,
-        city: action.input.city !== undefined ? action.input.city : state.payer.address?.city ?? null,
-        country: action.input.country !== undefined ? action.input.country : state.payer.address?.country ?? null,
-        extendedAddress: action.input.extendedAddress !== undefined ? action.input.extendedAddress : state.payer.address?.extendedAddress ?? null,
-        postalCode: action.input.postalCode !== undefined ? action.input.postalCode : state.payer.address?.postalCode ?? null,
-        stateProvince: action.input.stateProvince !== undefined ? action.input.stateProvince : state.payer.address?.stateProvince ?? null,
-        streetAddress: action.input.streetAddress !== undefined ? action.input.streetAddress : state.payer.address?.streetAddress ?? null,
+        city:
+          action.input.city !== undefined
+            ? action.input.city
+            : (state.payer.address?.city ?? null),
+        country:
+          action.input.country !== undefined
+            ? action.input.country
+            : (state.payer.address?.country ?? null),
+        extendedAddress:
+          action.input.extendedAddress !== undefined
+            ? action.input.extendedAddress
+            : (state.payer.address?.extendedAddress ?? null),
+        postalCode:
+          action.input.postalCode !== undefined
+            ? action.input.postalCode
+            : (state.payer.address?.postalCode ?? null),
+        stateProvince:
+          action.input.stateProvince !== undefined
+            ? action.input.stateProvince
+            : (state.payer.address?.stateProvince ?? null),
+        streetAddress:
+          action.input.streetAddress !== undefined
+            ? action.input.streetAddress
+            : (state.payer.address?.streetAddress ?? null),
       };
     }
 
-    if ('contactInfo' in state.payer && (
-      'tel' in action.input ||
-      'email' in action.input
-    )) {
+    if (
+      "contactInfo" in state.payer &&
+      ("tel" in action.input || "email" in action.input)
+    ) {
       state.payer.contactInfo = {
         ...state.payer.contactInfo,
-        tel: action.input.tel !== undefined ? action.input.tel : state.payer.contactInfo?.tel ?? null,
-        email: action.input.email !== undefined ? action.input.email : state.payer.contactInfo?.email ?? null,
+        tel:
+          action.input.tel !== undefined
+            ? action.input.tel
+            : (state.payer.contactInfo?.tel ?? null),
+        email:
+          action.input.email !== undefined
+            ? action.input.email
+            : (state.payer.contactInfo?.email ?? null),
       };
     }
 
-    if ('country' in action.input) {
-      state.payer.country = action.input.country !== undefined ? action.input.country : state.payer.country ?? null;
+    if ("country" in action.input) {
+      state.payer.country =
+        action.input.country !== undefined
+          ? action.input.country
+          : (state.payer.country ?? null);
     }
-    if ('id' in action.input) {
+    if ("id" in action.input) {
       state.payer.id = action.input.id ? { taxId: action.input.id } : null;
     }
-    if ('name' in action.input) {
-      state.payer.name = action.input.name !== undefined ? action.input.name : state.payer.name ?? null;
+    if ("name" in action.input) {
+      state.payer.name =
+        action.input.name !== undefined
+          ? action.input.name
+          : (state.payer.name ?? null);
     }
-
   },
-  editPayerBankOperation(state, action, dispatch) {
+  editPayerBankOperation(state, action) {
     if (!state.payer.paymentRouting) {
       state.payer.paymentRouting = {
         bank: null,
@@ -337,13 +394,13 @@ export const invoicePartiesOperations: InvoicePartiesOperations = {
         accountType: getStateValue(
           action.input.accountTypeIntermediary,
           state.payer.paymentRouting.bank?.intermediaryBank?.accountType ??
-          null,
+            null,
         ),
         address: {
           city: getStateValue(
             action.input.cityIntermediary,
             state.payer.paymentRouting.bank?.intermediaryBank?.address.city ??
-            null,
+              null,
           ),
           country: getStateValue(
             action.input.countryIntermediary,
@@ -374,7 +431,7 @@ export const invoicePartiesOperations: InvoicePartiesOperations = {
         beneficiary: getStateValue(
           action.input.beneficiaryIntermediary,
           state.payer.paymentRouting.bank?.intermediaryBank?.beneficiary ??
-          null,
+            null,
         ),
         name:
           action.input.nameIntermediary ??
@@ -386,9 +443,8 @@ export const invoicePartiesOperations: InvoicePartiesOperations = {
         ),
       },
     };
-
   },
-  editPayerWalletOperation(state, action, dispatch) {
+  editPayerWalletOperation(state, action) {
     if (!state.payer.paymentRouting) {
       state.payer.paymentRouting = {
         bank: null,
@@ -411,6 +467,5 @@ export const invoicePartiesOperations: InvoicePartiesOperations = {
         null,
       rpc: action.input.rpc ?? state.payer.paymentRouting.wallet?.rpc ?? null,
     };
-
   },
 };
