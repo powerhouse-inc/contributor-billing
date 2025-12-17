@@ -3,12 +3,18 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { AccountsPHState } from "./types.js";
-import { z } from "./types.js";
+import type { AccountsPHState } from "@powerhousedao/contributor-billing/document-models/accounts";
 
-import { reducer as AccountsReducer } from "../src/reducers/accounts.js";
+import { accountsAccountsOperations } from "../src/reducers/accounts.js";
 
-export const stateReducer: StateReducer<AccountsPHState> = (
+import {
+  AddAccountInputSchema,
+  UpdateAccountInputSchema,
+  DeleteAccountInputSchema,
+  UpdateKycStatusInputSchema,
+} from "./schema/zod.js";
+
+const stateReducer: StateReducer<AccountsPHState> = (
   state,
   action,
   dispatch,
@@ -19,8 +25,8 @@ export const stateReducer: StateReducer<AccountsPHState> = (
 
   switch (action.type) {
     case "ADD_ACCOUNT":
-      z.AddAccountInputSchema().parse(action.input);
-      AccountsReducer.addAccountOperation(
+      AddAccountInputSchema().parse(action.input);
+      accountsAccountsOperations.addAccountOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -28,8 +34,8 @@ export const stateReducer: StateReducer<AccountsPHState> = (
       break;
 
     case "UPDATE_ACCOUNT":
-      z.UpdateAccountInputSchema().parse(action.input);
-      AccountsReducer.updateAccountOperation(
+      UpdateAccountInputSchema().parse(action.input);
+      accountsAccountsOperations.updateAccountOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -37,8 +43,8 @@ export const stateReducer: StateReducer<AccountsPHState> = (
       break;
 
     case "DELETE_ACCOUNT":
-      z.DeleteAccountInputSchema().parse(action.input);
-      AccountsReducer.deleteAccountOperation(
+      DeleteAccountInputSchema().parse(action.input);
+      accountsAccountsOperations.deleteAccountOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -46,8 +52,8 @@ export const stateReducer: StateReducer<AccountsPHState> = (
       break;
 
     case "UPDATE_KYC_STATUS":
-      z.UpdateKycStatusInputSchema().parse(action.input);
-      AccountsReducer.updateKycStatusOperation(
+      UpdateKycStatusInputSchema().parse(action.input);
+      accountsAccountsOperations.updateKycStatusOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

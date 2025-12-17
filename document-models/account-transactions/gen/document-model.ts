@@ -9,7 +9,7 @@ export const documentModel: DocumentModelGlobalState = {
     "The AccountTransactions model is designed to track and manage all transactions associated with various accounts. Each transaction entry records critical details such as the source and destination accounts, transaction amount, timestamp, and specific transaction details tailored to the type of transaction (e.g., cryptocurrency or bank-related).",
   extension: ".phdm",
   id: "powerhouse/account-transactions",
-  name: "AccountTransactions",
+  name: "Account Transactions",
   specifications: [
     {
       changeLog: [],

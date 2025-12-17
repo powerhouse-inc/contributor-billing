@@ -28,7 +28,7 @@ export default function Editor() {
     document?.state.global.periodEnd || "",
   );
 
-  const { wallets, groups } = document.state.global;
+  const { wallets, groups } = document?.state.global || { wallets: [], groups: [] };
   const documentsInDrive = useDocumentsInSelectedDrive();
 
   const transactionsByWallet = useMemo(() => {
@@ -38,7 +38,7 @@ export default function Editor() {
     const end = periodEnd ? new Date(periodEnd) : null;
 
     // Create a set of all wallet addresses in the expense report for intergroup detection
-    const walletAddresses = new Set(wallets.map((w) => w.wallet.toLowerCase()));
+    const walletAddresses = new Set(wallets.map((w) => w.wallet?.toLowerCase()).filter((addr): addr is string => addr != null));
 
     return wallets.flatMap((wallet) => {
       const txDocId = (wallet as any).accountTransactionsDocumentId;
@@ -67,8 +67,8 @@ export default function Editor() {
             : false;
 
           return {
-            walletName: wallet.name || wallet.wallet,
-            walletAddress: wallet.wallet,
+            walletName: wallet.name || wallet.wallet || "Unknown",
+            walletAddress: wallet.wallet || "",
             transaction: tx,
             isIntergroup,
           };

@@ -12,11 +12,7 @@ import type {
 import { createDocument } from "./utils.js";
 
 export function defaultGlobalState(): IntegrationsGlobalState {
-  return {
-    gnosisSafe: null,
-    googleCloud: null,
-    requestFinance: null,
-  };
+  return {};
 }
 
 export function defaultLocalState(): IntegrationsLocalState {

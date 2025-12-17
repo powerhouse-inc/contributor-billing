@@ -20,11 +20,7 @@ import {
   assertIsIntegrationsState,
 } from "./document-schema.js";
 
-export const initialGlobalState: IntegrationsGlobalState = {
-  gnosisSafe: null,
-  googleCloud: null,
-  requestFinance: null,
-};
+export const initialGlobalState: IntegrationsGlobalState = {};
 export const initialLocalState: IntegrationsLocalState = {};
 
 export const utils: DocumentModelUtils<IntegrationsPHState> = {

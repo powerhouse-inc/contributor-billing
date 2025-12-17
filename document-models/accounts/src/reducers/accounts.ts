@@ -1,6 +1,6 @@
-import type { AccountsAccountsOperations } from "../../gen/accounts/operations.js";
+import type { AccountsAccountsOperations } from "@powerhousedao/contributor-billing/document-models/accounts";
 
-export const reducer: AccountsAccountsOperations = {
+export const accountsAccountsOperations: AccountsAccountsOperations = {
   addAccountOperation(state, action) {
     if (!action.input.type) {
       throw new Error("Account type is required");

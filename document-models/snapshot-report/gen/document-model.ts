@@ -2,7 +2,7 @@ import type { DocumentModelGlobalState } from "document-model";
 
 export const documentModel: DocumentModelGlobalState = {
   id: "powerhouse/snapshot-report",
-  name: "SnapshotReport",
+  name: "Snapshot Report",
   extension: "phsr",
   description:
     "Document model for creating snapshot reports that track fund flows through categorized accounts over a specified accounting period",
