@@ -52,7 +52,7 @@ export function InvoiceTableContainer() {
             // Handle progress updates if needed
             if (progress.stage === "complete" || progress.stage === "failed") {
               pendingFilesRef.current.delete(file);
-              
+
               // If all files are done, reload the page
               if (pendingFilesRef.current.size === 0) {
                 window.location.reload();
@@ -62,7 +62,7 @@ export function InvoiceTableContainer() {
         } catch (error) {
           console.error("Error dropping file:", error);
           pendingFilesRef.current.delete(file);
-          
+
           // If all files are done (including failed ones), reload
           if (pendingFilesRef.current.size === 0) {
             window.location.reload();
@@ -72,25 +72,31 @@ export function InvoiceTableContainer() {
 
       // Wait for all files to complete
       await Promise.allSettled(filePromises);
-      
+
       // Final check - reload if all files are done
       if (pendingFilesRef.current.size === 0) {
         window.location.reload();
       }
     },
-    [onDropFile]
+    [onDropFile],
   );
 
-  const handleDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    event.dataTransfer.dropEffect = "copy";
-  }, []);
+  const handleDragOver = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.dataTransfer.dropEffect = "copy";
+    },
+    [],
+  );
 
-  const handleDragEnter = useCallback((event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-  }, []);
+  const handleDragEnter = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    [],
+  );
 
   // Handler for status filter changes
   const handleStatusChange = useCallback((value: string | string[]) => {
@@ -124,33 +130,33 @@ export function InvoiceTableContainer() {
     [],
   );
 
-    // Determine if CSV export should be enabled based on selected rows
-    const canExportSelectedRows = useCallback(() => {
-      const allowedStatuses = [
-        "ACCEPTED",
-        "AWAITINGPAYMENT",
-        "PAYMENTSCHEDULED",
-        "PAYMENTSENT",
-        "PAYMENTRECEIVED",
-        "PAYMENTCLOSED",
-      ];
-  
-      // Get all selected row IDs
-      const selectedRowIds = Object.keys(selected).filter((id) => selected[id]);
-  
-      if (selectedRowIds.length === 0) return false;
-  
-      // Check if all selected rows have allowed statuses
-      const selectedRows =
-        allDocuments?.filter((doc) => selectedRowIds.includes(doc.header.id)) ||
-        [];
-      return selectedRows.every((row: PHDocument) =>
-        allowedStatuses.includes(
-          (row.state as PHBaseState & { global: { status: string } }).global
-            .status
-        )
-      );
-    }, [selected, allDocuments]);
+  // Determine if CSV export should be enabled based on selected rows
+  const canExportSelectedRows = useCallback(() => {
+    const allowedStatuses = [
+      "ACCEPTED",
+      "AWAITINGPAYMENT",
+      "PAYMENTSCHEDULED",
+      "PAYMENTSENT",
+      "PAYMENTRECEIVED",
+      "PAYMENTCLOSED",
+    ];
+
+    // Get all selected row IDs
+    const selectedRowIds = Object.keys(selected).filter((id) => selected[id]);
+
+    if (selectedRowIds.length === 0) return false;
+
+    // Check if all selected rows have allowed statuses
+    const selectedRows =
+      allDocuments?.filter((doc) => selectedRowIds.includes(doc.header.id)) ||
+      [];
+    return selectedRows.every((row: PHDocument) =>
+      allowedStatuses.includes(
+        (row.state as PHBaseState & { global: { status: string } }).global
+          .status,
+      ),
+    );
+  }, [selected, allDocuments]);
 
   return (
     <div

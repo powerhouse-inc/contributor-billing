@@ -49,7 +49,9 @@ const utils: DocumentModelUtils<AccountsPHState> = {
     }
   },
   isDocumentOfType(document: unknown): document is any {
-    return typeof document === "object" && document !== null && "header" in document;
+    return (
+      typeof document === "object" && document !== null && "header" in document
+    );
   },
   assertIsDocumentOfType(document: unknown): void {
     if (!utils.isDocumentOfType(document)) {

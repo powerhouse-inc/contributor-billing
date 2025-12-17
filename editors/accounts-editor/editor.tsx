@@ -37,9 +37,15 @@ export function Editor() {
     null,
   );
   const [filteredAccounts, setFilteredAccounts] = useState<AccountEntry[]>([]);
-  const [creatingTransactionsFor, setCreatingTransactionsFor] = useState<string | null>(null);
+  const [creatingTransactionsFor, setCreatingTransactionsFor] = useState<
+    string | null
+  >(null);
   const [isSyncingAll, setIsSyncingAll] = useState(false);
-  const [syncProgress, setSyncProgress] = useState<{ current: number; total: number; account: string } | null>(null);
+  const [syncProgress, setSyncProgress] = useState<{
+    current: number;
+    total: number;
+    account: string;
+  } | null>(null);
 
   function handleClose() {
     setSelectedNode(parentFolder?.id);
@@ -128,19 +134,24 @@ export function Editor() {
     try {
       const driveId = selectedDrive?.header?.id;
       const accountsDocumentId = document.header.id;
-      const result = await accountTransactionsService.createAccountTransactionsDocument(
-        account,
-        accountsDocumentId,
-        driveId
-      );
+      const result =
+        await accountTransactionsService.createAccountTransactionsDocument(
+          account,
+          accountsDocumentId,
+          driveId,
+        );
 
       if (result.success) {
-        alert(`Success! Created document and fetched ${result.transactionsAdded} transactions`);
+        alert(
+          `Success! Created document and fetched ${result.transactionsAdded} transactions`,
+        );
       } else {
         alert(`Error: ${result.message}`);
       }
     } catch (error) {
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+      alert(
+        `Error: ${error instanceof Error ? error.message : "Unknown error occurred"}`,
+      );
     } finally {
       setCreatingTransactionsFor(null);
     }
@@ -149,20 +160,33 @@ export function Editor() {
   async function handleSyncAllTransactions() {
     // Filter accounts that have transaction documents
     const accountsWithTransactions = accounts.filter(
-      (account) => account.accountTransactionsId && account.accountTransactionsId.trim() !== ""
+      (account) =>
+        account.accountTransactionsId &&
+        account.accountTransactionsId.trim() !== "",
     );
 
     if (accountsWithTransactions.length === 0) {
-      alert("No accounts have transaction documents to sync. Create transaction documents first.");
+      alert(
+        "No accounts have transaction documents to sync. Create transaction documents first.",
+      );
       return;
     }
 
-    if (!window.confirm(`This will sync transactions for ${accountsWithTransactions.length} account(s). Continue?`)) {
+    if (
+      !window.confirm(
+        `This will sync transactions for ${accountsWithTransactions.length} account(s). Continue?`,
+      )
+    ) {
       return;
     }
 
     setIsSyncingAll(true);
-    const results: Array<{ account: string; success: boolean; transactionsAdded: number; message: string }> = [];
+    const results: Array<{
+      account: string;
+      success: boolean;
+      transactionsAdded: number;
+      message: string;
+    }> = [];
 
     try {
       for (let i = 0; i < accountsWithTransactions.length; i++) {
@@ -170,24 +194,28 @@ export function Editor() {
         setSyncProgress({
           current: i + 1,
           total: accountsWithTransactions.length,
-          account: account.name
+          account: account.name,
         });
 
-        const result = await accountTransactionsService.syncTransactionsForDocument(
-          account.accountTransactionsId!,
-          account.account
-        );
+        const result =
+          await accountTransactionsService.syncTransactionsForDocument(
+            account.accountTransactionsId!,
+            account.account,
+          );
 
         results.push({
           account: account.name,
           success: result.success,
           transactionsAdded: result.transactionsAdded || 0,
-          message: result.message
+          message: result.message,
         });
       }
 
       // Show summary
-      const totalAdded = results.reduce((sum, r) => sum + r.transactionsAdded, 0);
+      const totalAdded = results.reduce(
+        (sum, r) => sum + r.transactionsAdded,
+        0,
+      );
       const successCount = results.filter((r) => r.success).length;
       const failedCount = results.length - successCount;
 
@@ -197,14 +225,18 @@ export function Editor() {
 
       if (failedCount > 0) {
         message += `\nFailed accounts:\n`;
-        results.filter((r) => !r.success).forEach((r) => {
-          message += `- ${r.account}: ${r.message}\n`;
-        });
+        results
+          .filter((r) => !r.success)
+          .forEach((r) => {
+            message += `- ${r.account}: ${r.message}\n`;
+          });
       }
 
       alert(message);
     } catch (error) {
-      alert(`Error during bulk sync: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+      alert(
+        `Error during bulk sync: ${error instanceof Error ? error.message : "Unknown error occurred"}`,
+      );
     } finally {
       setIsSyncingAll(false);
       setSyncProgress(null);
@@ -212,7 +244,10 @@ export function Editor() {
   }
 
   const accounts = document.state.global.accounts;
-  const displayAccounts = filteredAccounts.length > 0 || accounts.length === 0 ? filteredAccounts : accounts;
+  const displayAccounts =
+    filteredAccounts.length > 0 || accounts.length === 0
+      ? filteredAccounts
+      : accounts;
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -243,19 +278,41 @@ export function Editor() {
                   <div className="flex gap-3">
                     <Button
                       onClick={handleSyncAllTransactions}
-                      disabled={isSyncingAll || accounts.filter(a => a.accountTransactionsId).length === 0}
+                      disabled={
+                        isSyncingAll ||
+                        accounts.filter((a) => a.accountTransactionsId)
+                          .length === 0
+                      }
                       className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors"
                     >
                       {isSyncingAll ? (
                         <span className="flex items-center gap-2">
-                          <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          <svg
+                            className="animate-spin h-4 w-4"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
                           </svg>
-                          {syncProgress ? `${syncProgress.current}/${syncProgress.total}` : 'Syncing...'}
+                          {syncProgress
+                            ? `${syncProgress.current}/${syncProgress.total}`
+                            : "Syncing..."}
                         </span>
                       ) : (
-                        'Sync All Transactions'
+                        "Sync All Transactions"
                       )}
                     </Button>
                     <Button
@@ -275,13 +332,30 @@ export function Editor() {
                           Syncing transactions: {syncProgress.account}
                         </p>
                         <p className="text-xs text-blue-700 mt-1">
-                          Progress: {syncProgress.current} of {syncProgress.total} accounts
+                          Progress: {syncProgress.current} of{" "}
+                          {syncProgress.total} accounts
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <svg className="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="animate-spin h-5 w-5 text-blue-600"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                       </div>
                     </div>
@@ -316,7 +390,7 @@ export function Editor() {
                       Add Account
                     </Button>
                   </div>
-) : (
+                ) : (
                   <div className="space-y-6">
                     {/* Filter Component */}
                     <AccountsFilter
@@ -331,7 +405,9 @@ export function Editor() {
                       onDelete={handleDeleteAccount}
                       onUpdateKycStatus={handleUpdateKycStatus}
                       onCreateTransactions={handleCreateTransactions}
-                      creatingTransactionsFor={creatingTransactionsFor || undefined}
+                      creatingTransactionsFor={
+                        creatingTransactionsFor || undefined
+                      }
                     />
                   </div>
                 )}

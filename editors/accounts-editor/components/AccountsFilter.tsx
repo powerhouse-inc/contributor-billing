@@ -1,5 +1,9 @@
 import React, { useState } from "react";
-import type { AccountEntry, AccountTypeInput, KycAmlStatusTypeInput } from "../../../document-models/accounts/gen/schema/types.js";
+import type {
+  AccountEntry,
+  AccountTypeInput,
+  KycAmlStatusTypeInput,
+} from "../../../document-models/accounts/gen/schema/types.js";
 
 interface AccountsFilterProps {
   accounts: AccountEntry[];
@@ -25,10 +29,12 @@ export function AccountsFilter({
 
       const matchesKyc = !kycFilter || account.KycAmlStatus === kycFilter;
 
-      const matchesChain = !chainFilter ||
-        (account.chain && account.chain.some(chain =>
-          chain.toLowerCase().includes(chainFilter.toLowerCase())
-        ));
+      const matchesChain =
+        !chainFilter ||
+        (account.chain &&
+          account.chain.some((chain) =>
+            chain.toLowerCase().includes(chainFilter.toLowerCase()),
+          ));
 
       return matchesSearch && matchesType && matchesKyc && matchesChain;
     });
@@ -87,7 +93,9 @@ export function AccountsFilter({
           </label>
           <select
             value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value as AccountTypeInput | "")}
+            onChange={(e) =>
+              setTypeFilter(e.target.value as AccountTypeInput | "")
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
           >
             <option value="">All Types</option>
@@ -105,7 +113,9 @@ export function AccountsFilter({
           </label>
           <select
             value={kycFilter}
-            onChange={(e) => setKycFilter(e.target.value as KycAmlStatusTypeInput | "")}
+            onChange={(e) =>
+              setKycFilter(e.target.value as KycAmlStatusTypeInput | "")
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
           >
             <option value="">All Statuses</option>

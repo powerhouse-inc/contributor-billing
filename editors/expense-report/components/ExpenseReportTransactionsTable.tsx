@@ -24,46 +24,54 @@ export function ExpenseReportTransactionsTable({
     return dateB - dateA; // Descending order (newest first)
   });
 
-  function formatAmount(amount: string | { unit: string; value: string }): string {
+  function formatAmount(
+    amount: string | { unit: string; value: string },
+  ): string {
     try {
-      if (typeof amount === 'object' && amount.value) {
+      if (typeof amount === "object" && amount.value) {
         const num = parseFloat(amount.value);
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat("en-US", {
           minimumFractionDigits: 2,
-          maximumFractionDigits: 6
+          maximumFractionDigits: 6,
         }).format(num);
-      } else if (typeof amount === 'string') {
+      } else if (typeof amount === "string") {
         const num = parseFloat(amount);
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat("en-US", {
           minimumFractionDigits: 2,
-          maximumFractionDigits: 6
+          maximumFractionDigits: 6,
         }).format(num);
       }
-      return typeof amount === 'object' ? JSON.stringify(amount) : String(amount);
+      return typeof amount === "object"
+        ? JSON.stringify(amount)
+        : String(amount);
     } catch {
-      return typeof amount === 'object' ? JSON.stringify(amount) : String(amount);
+      return typeof amount === "object"
+        ? JSON.stringify(amount)
+        : String(amount);
     }
   }
 
   function formatDate(dateString: string): string {
     try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       });
     } catch {
       return dateString;
     }
   }
 
-  function getAmountUnit(amount: string | { unit: string; value: string }): string {
-    if (typeof amount === 'object' && amount.unit) {
+  function getAmountUnit(
+    amount: string | { unit: string; value: string },
+  ): string {
+    if (typeof amount === "object" && amount.unit) {
       return amount.unit;
     }
-    return '';
+    return "";
   }
 
   if (transactions.length === 0) {
@@ -86,7 +94,9 @@ export function ExpenseReportTransactionsTable({
           No transactions yet
         </h3>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          No transactions found for the selected period. Ensure wallets are linked to Account Transactions documents and that transactions fall within the selected dates.
+          No transactions found for the selected period. Ensure wallets are
+          linked to Account Transactions documents and that transactions fall
+          within the selected dates.
         </p>
       </div>
     );
@@ -128,15 +138,21 @@ export function ExpenseReportTransactionsTable({
             {sortedTransactions.map((item) => {
               const tx = item.transaction;
               return (
-                <tr key={tx.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                <tr
+                  key={tx.id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                     {formatDate(tx.datetime)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                     <div className="flex flex-col">
-                      <span className="font-medium">{item.walletName || "Wallet"}</span>
+                      <span className="font-medium">
+                        {item.walletName || "Wallet"}
+                      </span>
                       <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                        {item.walletAddress.slice(0, 8)}...{item.walletAddress.slice(-6)}
+                        {item.walletAddress.slice(0, 8)}...
+                        {item.walletAddress.slice(-6)}
                       </span>
                     </div>
                   </td>
@@ -144,7 +160,8 @@ export function ExpenseReportTransactionsTable({
                     {tx.counterParty ? (
                       <div className="flex flex-col gap-1">
                         <span className="font-mono text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                          {tx.counterParty.slice(0, 8)}...{tx.counterParty.slice(-6)}
+                          {tx.counterParty.slice(0, 8)}...
+                          {tx.counterParty.slice(-6)}
                         </span>
                         {item.isIntergroup && (
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
@@ -162,22 +179,38 @@ export function ExpenseReportTransactionsTable({
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        tx.direction === 'INFLOW'
-                          ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                          : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+                        tx.direction === "INFLOW"
+                          ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
+                          : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
                       }`}
                     >
-                      {tx.direction === 'INFLOW' ? (
+                      {tx.direction === "INFLOW" ? (
                         <>
-                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                          <svg
+                            className="w-3 h-3 mr-1"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                              clipRule="evenodd"
+                            />
                           </svg>
                           IN
                         </>
                       ) : (
                         <>
-                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M4 10a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1z" clipRule="evenodd" />
+                          <svg
+                            className="w-3 h-3 mr-1"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M4 10a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1z"
+                              clipRule="evenodd"
+                            />
                           </svg>
                           OUT
                         </>
@@ -215,4 +248,3 @@ export function ExpenseReportTransactionsTable({
     </div>
   );
 }
-

@@ -6,7 +6,7 @@
     "description": "A document that contains expenses for n amount wallets across different dimensions, such as expense types and categories. The flow inside a new expense report starts with the user adding wallets that would represent the expenses. Each wallet would be able to extract the expenses from the list of billing statements that are added to the wallet. From the billing statements, the line items inside the wallet are built with the rich data. For example, a line item has a tag that could be directly linked to a LineItemGroup by the group field. Once all line items are added to the Wallet.lineItems list, the next Wallet.totals field could start being populated. This Wallet.total field holds a list of GroupTotals. These group totals aggregate the line item values by the group they belong to. Once the Wallet.totals is finished, the user will be able to see a full expense report. The last steps for the user are to set the periodStart and periodEnd fields to complete the report. ",
     "extension": "",
     "id": "powerhouse/expense-report",
-    "name": "ExpenseReport",
+    "name": "Expense Report",
     "specifications": [
         {
             "changeLog": [],

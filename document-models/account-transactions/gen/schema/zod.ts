@@ -77,11 +77,9 @@ export function AddTransactionInputSchema(): z.ZodObject<
     amount: z.object({ unit: z.string(), value: z.string() }),
     blockNumber: z.number().nullish(),
     budget: z.string().nullish(),
-    counterParty: z
-      .string()
-      .regex(/^0x[a-fA-F0-9]{40}$/, {
-        message: "Invalid Ethereum address format",
-      }),
+    counterParty: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
+      message: "Invalid Ethereum address format",
+    }),
     datetime: z.string().datetime(),
     direction: z.lazy(() => TransactionDirectionInputSchema),
     id: z.string(),
@@ -118,11 +116,9 @@ export function SetAccountInputSchema(): z.ZodObject<
   Properties<SetAccountInput>
 > {
   return z.object({
-    address: z
-      .string()
-      .regex(/^0x[a-fA-F0-9]{40}$/, {
-        message: "Invalid Ethereum address format",
-      }),
+    address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
+      message: "Invalid Ethereum address format",
+    }),
     name: z.string().nullish(),
   });
 }

@@ -1,4 +1,7 @@
-import type { AccountEntry, KycAmlStatusTypeInput } from "../../../document-models/accounts/gen/schema/types.js";
+import type {
+  AccountEntry,
+  KycAmlStatusTypeInput,
+} from "../../../document-models/accounts/gen/schema/types.js";
 import { AccountCard } from "./AccountCard.js";
 
 interface AccountsListProps {
@@ -48,7 +51,7 @@ export function AccountsList({
     <div className="space-y-4">
       {/* Account Count */}
       <div className="text-sm text-gray-600">
-        {accounts.length} account{accounts.length !== 1 ? 's' : ''}
+        {accounts.length} account{accounts.length !== 1 ? "s" : ""}
       </div>
 
       {/* Full-width Card List */}

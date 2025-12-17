@@ -58,13 +58,17 @@ const utils: DocumentModelUtils<AccountTransactionsPHState> = {
   isStateOfType(state: unknown): state is AccountTransactionsPHState {
     return typeof state === "object" && state !== null && "global" in state;
   },
-  assertIsStateOfType(state: unknown): asserts state is AccountTransactionsPHState {
+  assertIsStateOfType(
+    state: unknown,
+  ): asserts state is AccountTransactionsPHState {
     if (!utils.isStateOfType(state)) {
       throw new Error("Invalid AccountTransactions state");
     }
   },
   isDocumentOfType(document: unknown): document is any {
-    return typeof document === "object" && document !== null && "header" in document;
+    return (
+      typeof document === "object" && document !== null && "header" in document
+    );
   },
   assertIsDocumentOfType(document: unknown): void {
     if (!utils.isDocumentOfType(document)) {

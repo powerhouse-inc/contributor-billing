@@ -6,6 +6,7 @@ import { ContributorBilling } from "./contributor-billing/module.js";
 import { ExpenseReport } from "./expense-report/module.js";
 import { Integrations } from "./integrations/module.js";
 import { Invoice } from "./invoice/module.js";
+import { SnapshotReportEditor } from "./snapshot-report-editor/module.js";
 
 export const editors: EditorModule[] = [
   AccountsEditor,
@@ -15,4 +16,5 @@ export const editors: EditorModule[] = [
   ExpenseReport,
   Integrations,
   Invoice,
+  SnapshotReportEditor,
 ];

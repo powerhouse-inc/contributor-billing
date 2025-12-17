@@ -12,7 +12,10 @@ interface DocumentHeaderProps {
   onNameChange: (name: string) => void;
 }
 
-export function DocumentHeader({ document, onNameChange }: DocumentHeaderProps) {
+export function DocumentHeader({
+  document,
+  onNameChange,
+}: DocumentHeaderProps) {
   const [isEditing, setIsEditing] = useState(false);
 
   function handleSubmit(values: { name: string }) {
@@ -39,7 +42,10 @@ export function DocumentHeader({ document, onNameChange }: DocumentHeaderProps) 
               />
             </div>
             <div className="flex gap-2">
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-sm">
+              <Button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-sm"
+              >
                 Save
               </Button>
               <Button
@@ -77,11 +83,17 @@ export function DocumentHeader({ document, onNameChange }: DocumentHeaderProps) 
         </div>
         <div>
           <span className="font-medium">Created:</span>
-          <p>{new Date(document.header.createdAtUtcIso).toLocaleDateString()}</p>
+          <p>
+            {new Date(document.header.createdAtUtcIso).toLocaleDateString()}
+          </p>
         </div>
         <div>
           <span className="font-medium">Modified:</span>
-          <p>{new Date(document.header.lastModifiedAtUtcIso).toLocaleDateString()}</p>
+          <p>
+            {new Date(
+              document.header.lastModifiedAtUtcIso,
+            ).toLocaleDateString()}
+          </p>
         </div>
       </div>
     </div>

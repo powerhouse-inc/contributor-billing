@@ -22,7 +22,7 @@ export const HeaderStats = () => {
   const [totalExpenses, setTotalExpenses] = useState(0);
   const documents = useDocumentsInSelectedDrive();
   const invoices = documents?.filter(
-    (doc) => doc.header.documentType === "powerhouse/invoice"
+    (doc) => doc.header.documentType === "powerhouse/invoice",
   );
 
   useEffect(() => {
@@ -36,8 +36,8 @@ export const HeaderStats = () => {
       for (const doc of invoices) {
         const invoice = doc as any;
         const invoiceAmount = invoice.state.global.totalPriceTaxIncl;
-        let invoiceCurrency = invoice.state.global.currency || "USD"; // Fallback to USD if currency is empty
-        let selectCurrency = selectedCurrency;
+        const invoiceCurrency = invoice.state.global.currency || "USD"; // Fallback to USD if currency is empty
+        const selectCurrency = selectedCurrency;
         if (invoiceCurrency === selectedCurrency) {
           total += invoiceAmount;
         } else {
@@ -57,7 +57,7 @@ export const HeaderStats = () => {
             const exchangeRate = await getExchangeRate(
               fromCurrency,
               toCurrency,
-              invoiceAmount
+              invoiceAmount,
             );
             total += invoiceAmount * exchangeRate;
           } catch (error) {

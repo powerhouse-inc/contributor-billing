@@ -18,7 +18,10 @@ import { actions } from "../../../document-models/expense-report/index.js";
 import { useWalletSync } from "../hooks/useWalletSync.js";
 import { useSyncWallet } from "../hooks/useSyncWallet.js";
 import { walletAccountService } from "../services/walletAccountService.js";
-import { useDocumentsInSelectedDrive, useSelectedDrive } from "@powerhousedao/reactor-browser";
+import {
+  useDocumentsInSelectedDrive,
+  useSelectedDrive,
+} from "@powerhousedao/reactor-browser";
 
 interface WalletsTableProps {
   wallets: Wallet[];
@@ -53,11 +56,11 @@ export function WalletsTable({
   const { syncWallet } = useSyncWallet();
 
   const handleAddWallet = async () => {
-    console.log('[WalletsTable] handleAddWallet called');
+    console.log("[WalletsTable] handleAddWallet called");
     const trimmedAddress = newWalletAddress.trim();
 
     if (!trimmedAddress) {
-      console.log('[WalletsTable] No wallet address provided');
+      console.log("[WalletsTable] No wallet address provided");
       return;
     }
 
@@ -72,11 +75,11 @@ export function WalletsTable({
     setAddingWallet(true);
     setWalletError("");
 
-    console.log('[WalletsTable] Starting wallet addition process', {
+    console.log("[WalletsTable] Starting wallet addition process", {
       address: trimmedAddress,
       name: newWalletName.trim() || undefined,
       driveId: selectedDrive?.header.id,
-      documentsCount: allDocuments?.length || 0
+      documentsCount: allDocuments?.length || 0,
     });
 
     try {
@@ -85,65 +88,77 @@ export function WalletsTable({
         actions.addWallet({
           wallet: trimmedAddress,
           name: newWalletName.trim() || undefined,
-        })
+        }),
       );
 
       // Then, process account and transactions documents
       const driveId = selectedDrive?.header.id;
-      
-      console.log('[WalletsTable] Drive information:', {
+
+      console.log("[WalletsTable] Drive information:", {
         hasSelectedDrive: !!selectedDrive,
         driveId,
         driveHeader: selectedDrive?.header,
-        driveName: selectedDrive?.header?.name
+        driveName: selectedDrive?.header?.name,
       });
-      
+
       if (!driveId) {
-        console.warn('[WalletsTable] No drive selected - documents will be created but not added to drive');
+        console.warn(
+          "[WalletsTable] No drive selected - documents will be created but not added to drive",
+        );
         // Still proceed, but documents won't be added to drive
       }
 
-      console.log('[WalletsTable] Processing wallet account documents...', {
+      console.log("[WalletsTable] Processing wallet account documents...", {
         driveId,
         hasDrive: !!selectedDrive,
         hasDocuments: !!allDocuments,
-        documentsCount: allDocuments?.length || 0
+        documentsCount: allDocuments?.length || 0,
       });
-      
+
       const result = await walletAccountService.processWalletAddition(
         trimmedAddress,
         newWalletName.trim() || undefined,
         driveId,
-        allDocuments
+        allDocuments,
       );
 
-      console.log('[WalletsTable] Wallet account service result:', result);
+      console.log("[WalletsTable] Wallet account service result:", result);
 
       if (result.success) {
         // Update wallet with document IDs
         if (result.accountDocumentId || result.accountTransactionsDocumentId) {
-          console.log('[WalletsTable] Updating wallet with document IDs:', {
+          console.log("[WalletsTable] Updating wallet with document IDs:", {
             accountDocumentId: result.accountDocumentId,
-            accountTransactionsDocumentId: result.accountTransactionsDocumentId
+            accountTransactionsDocumentId: result.accountTransactionsDocumentId,
           });
           dispatch(
             actions.updateWallet({
               address: trimmedAddress,
               accountDocumentId: result.accountDocumentId || undefined,
-              accountTransactionsDocumentId: result.accountTransactionsDocumentId || undefined,
-            } as any)
+              accountTransactionsDocumentId:
+                result.accountTransactionsDocumentId || undefined,
+            } as any),
           );
         } else {
-          console.warn('[WalletsTable] Service succeeded but no document IDs returned');
+          console.warn(
+            "[WalletsTable] Service succeeded but no document IDs returned",
+          );
         }
-        
+
         // Note: Documents are created and added to the drive, but the UI may need a moment to refresh
         // The useDocumentsInSelectedDrive hook should automatically detect the new documents
-        console.log('[WalletsTable] Documents created successfully. UI should refresh automatically.');
+        console.log(
+          "[WalletsTable] Documents created successfully. UI should refresh automatically.",
+        );
       } else {
-        console.error('[WalletsTable] Failed to process wallet account documents:', result.message);
+        console.error(
+          "[WalletsTable] Failed to process wallet account documents:",
+          result.message,
+        );
         // Show error to user
-        setWalletError(`Wallet added, but failed to link documents: ${result.message}`);
+        setWalletError(
+          `Wallet added, but failed to link documents: ${result.message}`,
+        );
       }
 
       setNewWalletAddress("");
@@ -171,7 +186,7 @@ export function WalletsTable({
         actions.updateWallet({
           address: walletAddress,
           name: trimmedName,
-        })
+        }),
       );
     }
     setEditingWallet(null);
@@ -214,14 +229,14 @@ export function WalletsTable({
             actions.removeLineItem({
               wallet: wallet.wallet!,
               lineItemId: item.id,
-            })
+            }),
           );
         }
       });
 
       // Re-extract line items from billing statements
       const billingStatementIds = wallet.billingStatements.filter(
-        (id): id is string => id !== null && id !== undefined
+        (id): id is string => id !== null && id !== undefined,
       );
       syncWallet(wallet.wallet, billingStatementIds, groups, dispatch);
 
@@ -239,7 +254,7 @@ export function WalletsTable({
     dispatch(
       actions.removeWallet({
         wallet: walletAddress,
-      })
+      }),
     );
   };
 
@@ -293,12 +308,12 @@ export function WalletsTable({
                           [...tagChangedWallets, ...outdatedWallets].forEach(
                             (walletAddress) => {
                               const wallet = wallets.find(
-                                (w) => w.wallet === walletAddress
+                                (w) => w.wallet === walletAddress,
                               );
                               if (wallet) {
                                 handleSyncWallet(wallet);
                               }
-                            }
+                            },
                           );
                         }}
                         disabled={syncingWallet !== null}
@@ -458,22 +473,22 @@ export function WalletsTable({
                                 disabled={syncingWallet === wallet.wallet}
                                 className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
                                   tagChangedWallets.includes(
-                                    wallet.wallet || ""
+                                    wallet.wallet || "",
                                   )
                                     ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 animate-pulse"
                                     : outdatedWallets.includes(
-                                          wallet.wallet || ""
+                                          wallet.wallet || "",
                                         )
                                       ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 animate-pulse"
                                       : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                                 title={
                                   tagChangedWallets.includes(
-                                    wallet.wallet || ""
+                                    wallet.wallet || "",
                                   )
                                     ? "ALERT: Tags have changed - sync required!"
                                     : outdatedWallets.includes(
-                                          wallet.wallet || ""
+                                          wallet.wallet || "",
                                         )
                                       ? "Sync needed - billing statements updated"
                                       : "Sync with latest billing statements"
@@ -578,7 +593,10 @@ export function WalletsTable({
             </div>
           )}
         </div>
-        <Button onClick={handleAddWallet} disabled={!newWalletAddress.trim() || addingWallet}>
+        <Button
+          onClick={handleAddWallet}
+          disabled={!newWalletAddress.trim() || addingWallet}
+        >
           {addingWallet ? "Adding..." : "Add Wallet"}
         </Button>
       </div>

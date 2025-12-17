@@ -26,23 +26,28 @@ export function useSyncWallet() {
     walletAddress: string,
     billingStatementIds: string[],
     groups: LineItemGroup[],
-    dispatch: any
+    dispatch: any,
   ) => {
     if (!documents) return;
 
     // Get billing statement documents
     const billingStatements = new Map<string, any>();
     documents
-      .filter((doc: any) => doc.header.documentType === "powerhouse/billing-statement")
+      .filter(
+        (doc: any) =>
+          doc.header.documentType === "powerhouse/billing-statement",
+      )
       .forEach((doc: any) => {
         billingStatements.set(doc.header.id, doc);
       });
 
     // Helper function to map tag to group
-    const mapTagToGroup = (billingLineItem: BillingStatementLineItem): string | null => {
+    const mapTagToGroup = (
+      billingLineItem: BillingStatementLineItem,
+    ): string | null => {
       // Find expense-account tag
       const expenseAccountTag = billingLineItem.lineItemTag?.find(
-        (tag) => tag.dimension === "expense-account"
+        (tag) => tag.dimension === "expense-account",
       );
 
       if (!expenseAccountTag || !expenseAccountTag.label) return null;
@@ -53,14 +58,17 @@ export function useSyncWallet() {
     };
 
     // Aggregate line items by category
-    const categoryAggregation = new Map<string, {
-      groupId: string | null;
-      groupLabel: string;
-      budget: number;
-      actuals: number;
-      forecast: number;
-      payments: number;
-    }>();
+    const categoryAggregation = new Map<
+      string,
+      {
+        groupId: string | null;
+        groupLabel: string;
+        budget: number;
+        actuals: number;
+        forecast: number;
+        payments: number;
+      }
+    >();
 
     // Extract and aggregate line items from all billing statements
     billingStatementIds.forEach((statementId) => {
@@ -110,7 +118,7 @@ export function useSyncWallet() {
         actions.addLineItem({
           wallet: walletAddress,
           lineItem: expenseLineItem,
-        })
+        }),
       );
     });
   };

@@ -7,7 +7,11 @@ interface TransactionsTableProps {
   onDelete: (id: string) => void;
 }
 
-export function TransactionsTable({ transactions, onEdit, onDelete }: TransactionsTableProps) {
+export function TransactionsTable({
+  transactions,
+  onEdit,
+  onDelete,
+}: TransactionsTableProps) {
   // Sort transactions by datetime, newest first
   const sortedTransactions = [...transactions].sort((a, b) => {
     const dateA = new Date(a.datetime).getTime();
@@ -15,35 +19,41 @@ export function TransactionsTable({ transactions, onEdit, onDelete }: Transactio
     return dateB - dateA; // Descending order (newest first)
   });
 
-  function formatAmount(amount: string | { unit: string; value: string }): string {
+  function formatAmount(
+    amount: string | { unit: string; value: string },
+  ): string {
     try {
-      if (typeof amount === 'object' && amount.value) {
+      if (typeof amount === "object" && amount.value) {
         const num = parseFloat(amount.value);
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat("en-US", {
           minimumFractionDigits: 2,
-          maximumFractionDigits: 6
+          maximumFractionDigits: 6,
         }).format(num);
-      } else if (typeof amount === 'string') {
+      } else if (typeof amount === "string") {
         const num = parseFloat(amount);
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat("en-US", {
           minimumFractionDigits: 2,
-          maximumFractionDigits: 6
+          maximumFractionDigits: 6,
         }).format(num);
       }
-      return typeof amount === 'object' ? JSON.stringify(amount) : String(amount);
+      return typeof amount === "object"
+        ? JSON.stringify(amount)
+        : String(amount);
     } catch {
-      return typeof amount === 'object' ? JSON.stringify(amount) : String(amount);
+      return typeof amount === "object"
+        ? JSON.stringify(amount)
+        : String(amount);
     }
   }
 
   function formatDate(dateString: string): string {
     try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       });
     } catch {
       return dateString;
@@ -117,7 +127,8 @@ export function TransactionsTable({ transactions, onEdit, onDelete }: Transactio
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {transaction.counterParty ? (
                     <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
-                      {transaction.counterParty.slice(0, 8)}...{transaction.counterParty.slice(-6)}
+                      {transaction.counterParty.slice(0, 8)}...
+                      {transaction.counterParty.slice(-6)}
                     </span>
                   ) : (
                     <span className="text-gray-400">—</span>
@@ -129,22 +140,38 @@ export function TransactionsTable({ transactions, onEdit, onDelete }: Transactio
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      transaction.direction === 'INFLOW'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                      transaction.direction === "INFLOW"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
                     }`}
                   >
-                    {transaction.direction === 'INFLOW' ? (
+                    {transaction.direction === "INFLOW" ? (
                       <>
-                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                        <svg
+                          className="w-3 h-3 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                         IN
                       </>
                     ) : (
                       <>
-                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M4 10a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1z" clipRule="evenodd" />
+                        <svg
+                          className="w-3 h-3 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4 10a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                         OUT
                       </>

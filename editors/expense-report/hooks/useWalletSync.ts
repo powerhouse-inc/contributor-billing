@@ -19,7 +19,10 @@ export function useWalletSync(wallets: Wallet[]): SyncStatus {
     // Create a map of billing statement documents
     const billingStatements = new Map<string, any>();
     documents
-      .filter((doc: any) => doc.header.documentType === "powerhouse/billing-statement")
+      .filter(
+        (doc: any) =>
+          doc.header.documentType === "powerhouse/billing-statement",
+      )
       .forEach((doc: any) => {
         billingStatements.set(doc.header.id, doc);
       });
@@ -38,7 +41,10 @@ export function useWalletSync(wallets: Wallet[]): SyncStatus {
       wallet.lineItems?.forEach((item) => {
         if (item?.group) {
           const currentTotal = currentCategoryTotals.get(item.group) || 0;
-          currentCategoryTotals.set(item.group, currentTotal + (item.actuals || 0));
+          currentCategoryTotals.set(
+            item.group,
+            currentTotal + (item.actuals || 0),
+          );
         }
       });
 
@@ -53,16 +59,17 @@ export function useWalletSync(wallets: Wallet[]): SyncStatus {
           statement.state.global.lineItems.forEach((item: any) => {
             // Find expense-account tag
             const expenseAccountTag = item.lineItemTag?.find(
-              (tag: any) => tag.dimension === "expense-account"
+              (tag: any) => tag.dimension === "expense-account",
             );
 
             if (expenseAccountTag?.label) {
               expectedCategoryLabels.add(expenseAccountTag.label);
 
-              const currentTotal = expectedCategoryTotals.get(expenseAccountTag.label) || 0;
+              const currentTotal =
+                expectedCategoryTotals.get(expenseAccountTag.label) || 0;
               expectedCategoryTotals.set(
                 expenseAccountTag.label,
-                currentTotal + (item.totalPriceCash || 0)
+                currentTotal + (item.totalPriceCash || 0),
               );
             }
           });
@@ -71,7 +78,8 @@ export function useWalletSync(wallets: Wallet[]): SyncStatus {
 
       // Check if categories have changed
       const currentCategories = new Set(currentCategoryTotals.keys());
-      const hasTagChanges = currentCategories.size !== expectedCategoryLabels.size;
+      const hasTagChanges =
+        currentCategories.size !== expectedCategoryLabels.size;
 
       // Check if totals per category have changed
       let hasTotalMismatch = false;
@@ -79,16 +87,15 @@ export function useWalletSync(wallets: Wallet[]): SyncStatus {
       // We need to check if the aggregated totals match
       // Since wallet stores group IDs but billing statements have labels,
       // we need to sum up all line items regardless of category structure
-      const currentTotalActuals = Array.from(currentCategoryTotals.values()).reduce(
-        (sum, total) => sum + total,
-        0
-      );
-      const expectedTotalActuals = Array.from(expectedCategoryTotals.values()).reduce(
-        (sum, total) => sum + total,
-        0
-      );
+      const currentTotalActuals = Array.from(
+        currentCategoryTotals.values(),
+      ).reduce((sum, total) => sum + total, 0);
+      const expectedTotalActuals = Array.from(
+        expectedCategoryTotals.values(),
+      ).reduce((sum, total) => sum + total, 0);
 
-      hasTotalMismatch = Math.abs(currentTotalActuals - expectedTotalActuals) > 0.01;
+      hasTotalMismatch =
+        Math.abs(currentTotalActuals - expectedTotalActuals) > 0.01;
 
       if (hasTagChanges || hasTotalMismatch) {
         if (wallet.wallet) {

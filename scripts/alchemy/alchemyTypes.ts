@@ -81,7 +81,8 @@ export const TRACKED_TOKENS = [
 ] as const;
 
 // Helper to get all ERC20 contract addresses as an array
-export const getAllTokenContracts = () => Object.values(SUPPORTED_TOKEN_CONTRACTS);
+export const getAllTokenContracts = () =>
+  Object.values(SUPPORTED_TOKEN_CONTRACTS);
 
 export interface BlockResponse {
   jsonrpc: string;
@@ -103,5 +104,5 @@ export interface TransactionEntry {
   accountingPeriod: string;
   from: string;
   to: string;
-  direction: 'INFLOW' | 'OUTFLOW';
+  direction: "INFLOW" | "OUTFLOW";
 }

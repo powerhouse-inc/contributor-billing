@@ -50,13 +50,13 @@ interface InvoiceGlobalState {
 
 // Helper to convert partial tags to InvoiceTag array
 const toInvoiceTags = (
-  tags: LineItemTagPartial[] | undefined
+  tags: LineItemTagPartial[] | undefined,
 ): InvoiceTag[] => {
   if (!tags) return [];
   return tags
     .filter(
       (tag): tag is LineItemTagPartial & { dimension: string; value: string } =>
-        typeof tag.dimension === "string" && typeof tag.value === "string"
+        typeof tag.dimension === "string" && typeof tag.value === "string",
     )
     .map((tag) => ({
       dimension: tag.dimension,
@@ -101,12 +101,12 @@ interface InvoiceTableProps {
   setSelected: (
     selected:
       | Record<string, boolean>
-      | ((prev: Record<string, boolean>) => Record<string, boolean>)
+      | ((prev: Record<string, boolean>) => Record<string, boolean>),
   ) => void;
   filteredDocumentModels: VetraDocumentModelModule[];
   onSelectDocumentModel: (model: VetraDocumentModelModule) => void;
   getDocDispatcher: (
-    id: string
+    id: string,
   ) => [PHDocument, (action: unknown) => Promise<void>] | null;
   selectedStatuses: string[];
   onStatusChange: (value: string | string[]) => void;
@@ -154,7 +154,7 @@ export const InvoiceTable = ({
   canExportSelectedRows,
 }: InvoiceTableProps) => {
   const [selectedDrive] = useSelectedDrive();
-  
+
   // State to track when export actions complete, triggering page refresh
   const [actionsCompleted, setActionsCompleted] = useState(0);
 
@@ -188,7 +188,7 @@ export const InvoiceTable = ({
   const billingDocStates = useMemo(() => {
     return allDocuments
       .filter(
-        (doc) => doc.header.documentType === "powerhouse/billing-statement"
+        (doc) => doc.header.documentType === "powerhouse/billing-statement",
       )
       .map((doc) => {
         const state = doc.state as unknown as {
@@ -341,7 +341,7 @@ export const InvoiceTable = ({
         undefined,
         undefined,
         undefined,
-        "powerhouse-billing-statement-editor"
+        "powerhouse-billing-statement-editor",
       );
 
       if (!createdNode?.id) {
@@ -367,7 +367,7 @@ export const InvoiceTable = ({
           billingStatementActions.editContributor({ contributor: id }),
           billingStatementActions.editBillingStatement(billingStatementData),
         ],
-        createdNode.id
+        createdNode.id,
       );
 
       // Add line items
@@ -382,7 +382,7 @@ export const InvoiceTable = ({
           unit: "UNIT",
           unitPriceCash: lineItem.unitPriceTaxIncl || 0,
           unitPricePwt: 0,
-        })
+        }),
       );
 
       if (lineItemActions.length > 0) {
@@ -405,7 +405,7 @@ export const InvoiceTable = ({
                 dimension: tag.dimension,
                 value: tag.value,
                 label: tag.label,
-              })
+              }),
             );
           }
         }
@@ -436,7 +436,7 @@ export const InvoiceTable = ({
     try {
       const exportedData = await exportInvoicesToXeroCSV(
         selectedInvoices,
-        baseCurrency
+        baseCurrency,
       );
 
       toast("Invoices exported successfully", { type: "success" });
@@ -453,11 +453,11 @@ export const InvoiceTable = ({
               exportedLineItems: exportedInvoiceData.exportedLineItems,
             }),
           ],
-          invoice.header.id
+          invoice.header.id,
         );
       }
       setSelected({});
-      
+
       // Trigger page refresh after all actions complete
       setActionsCompleted((prev) => prev + 1);
     } catch (error: unknown) {
@@ -466,7 +466,7 @@ export const InvoiceTable = ({
       const missingExpenseTagInvoices = err.missingExpenseTagInvoices || [];
       const missingList = missingExpenseTagInvoices.map(
         (invoiceId: string) =>
-          files.find((file) => file.id === invoiceId)?.name || invoiceId
+          files.find((file) => file.id === invoiceId)?.name || invoiceId,
       );
 
       toast(
@@ -480,7 +480,7 @@ export const InvoiceTable = ({
             </React.Fragment>
           ))}
         </>,
-        { type: "error" }
+        { type: "error" },
       );
     }
   };
@@ -491,11 +491,11 @@ export const InvoiceTable = ({
     try {
       await exportExpenseReportCSV(selectedInvoices, baseCurrency);
       toast("Expense report exported successfully", { type: "success" });
-       // Clear selection
-       const updatedSelected = { ...selected };
-       Object.keys(updatedSelected).forEach((id) => {
-         updatedSelected[id] = false;
-       });
+      // Clear selection
+      const updatedSelected = { ...selected };
+      Object.keys(updatedSelected).forEach((id) => {
+        updatedSelected[id] = false;
+      });
       setSelected(updatedSelected);
     } catch (error: unknown) {
       console.error("Error exporting expense report:", error);
@@ -503,7 +503,7 @@ export const InvoiceTable = ({
       const missingTagInvoices = err.missingTagInvoices || [];
       const missingList = missingTagInvoices.map(
         (invoiceId: string) =>
-          files.find((file) => file.id === invoiceId)?.name || invoiceId
+          files.find((file) => file.id === invoiceId)?.name || invoiceId,
       );
 
       toast(
@@ -517,20 +517,20 @@ export const InvoiceTable = ({
             </React.Fragment>
           ))}
         </>,
-        { type: "error" }
+        { type: "error" },
       );
     }
   };
 
   // Check for integrations document - simple computed value
   const integrationsDoc = files.find(
-    (file) => file.documentType === "powerhouse/integrations"
+    (file) => file.documentType === "powerhouse/integrations",
   );
 
   // Create integrations document - simple async function
   const createIntegrationsDocument = async () => {
     const integrationsModel = filteredDocumentModels.find(
-      (model) => model.id === "powerhouse/integrations"
+      (model) => model.id === "powerhouse/integrations",
     );
 
     if (integrationsModel) {
@@ -541,7 +541,7 @@ export const InvoiceTable = ({
         undefined,
         undefined,
         undefined,
-        "integrations-editor"
+        "integrations-editor",
       );
 
       if (createdNode?.id) {
@@ -552,13 +552,13 @@ export const InvoiceTable = ({
 
   // Check for expense report document - simple computed value
   const expenseReportDoc = files.find(
-    (file) => file.documentType === "powerhouse/expense-report"
+    (file) => file.documentType === "powerhouse/expense-report",
   );
 
   // Check if billing statements exist - memoized to update when allDocuments changes
   const hasBillingStatements = useMemo(() => {
     return allDocuments.some(
-      (doc) => doc.header.documentType === "powerhouse/billing-statement"
+      (doc) => doc.header.documentType === "powerhouse/billing-statement",
     );
   }, [allDocuments]);
 
@@ -568,7 +568,7 @@ export const InvoiceTable = ({
       setSelectedNode(expenseReportDoc.id);
     } else {
       const expenseReportModel = filteredDocumentModels.find(
-        (model) => model.id === "powerhouse/expense-report"
+        (model) => model.id === "powerhouse/expense-report",
       );
 
       if (expenseReportModel) {
@@ -579,7 +579,7 @@ export const InvoiceTable = ({
           undefined,
           undefined,
           undefined,
-          "powerhouse-expense-report-editor"
+          "powerhouse-expense-report-editor",
         );
 
         if (createdNode?.id) {
@@ -600,7 +600,7 @@ export const InvoiceTable = ({
 
   const billingStatementDocs = useMemo(() => {
     return allDocuments.filter(
-      (doc) => doc.header.documentType === "powerhouse/billing-statement"
+      (doc) => doc.header.documentType === "powerhouse/billing-statement",
     );
   }, [allDocuments]);
 
@@ -613,7 +613,7 @@ export const InvoiceTable = ({
       showIssuer?: boolean;
       showBillingStatement?: boolean;
       showCreateButton?: boolean;
-    }
+    },
   ) => {
     if (!shouldShowSection(status)) return null;
 
@@ -700,7 +700,7 @@ export const InvoiceTable = ({
         paymentScheduled,
         {
           showBillingStatement: true,
-        }
+        },
       )}
       {renderSection("PAYMENTSENT", "Payment Sent", paymentSent, {
         showBillingStatement: true,
