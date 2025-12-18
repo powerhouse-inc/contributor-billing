@@ -51,6 +51,20 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
       .map((o) => o.trim())
       .filter((o) => o);
 
+    // Validate required fields with custom message
+    const typeSelect = e.currentTarget.querySelector<HTMLSelectElement>('select[name="accountType"]');
+    if (!formData.type) {
+      if (typeSelect) {
+        typeSelect.setCustomValidity("Please select an Account Type");
+        typeSelect.reportValidity();
+      } else {
+        alert("Account Type is required");
+      }
+      return;
+    } else if (typeSelect) {
+      typeSelect.setCustomValidity(""); // Clear any previous custom message
+    }
+
     onSubmit({
       ...(account?.id && { id: account.id }),
       account: formData.account,
@@ -58,7 +72,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
       budgetPath: formData.budgetPath || undefined,
       accountTransactionsId: formData.accountTransactionsId || undefined,
       chain: chain.length > 0 ? chain : undefined,
-      type: formData.type || undefined,
+      type: formData.type as AccountTypeInput, // Required field
       owners: owners.length > 0 ? owners : undefined,
       KycAmlStatus: formData.KycAmlStatus || undefined,
     });
@@ -104,17 +118,21 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Account Type
+              Account Type <span className="text-red-500">*</span>
             </label>
             <select
+              name="accountType"
               value={formData.type}
-              onChange={(e) =>
+              onChange={(e) => {
                 setFormData({
                   ...formData,
                   type: e.target.value as AccountTypeInput,
-                })
-              }
+                });
+                // Clear custom validation message when user selects a value
+                e.target.setCustomValidity("");
+              }}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              required
             >
               <option value="">Select type...</option>
               <option value="Source">Source</option>

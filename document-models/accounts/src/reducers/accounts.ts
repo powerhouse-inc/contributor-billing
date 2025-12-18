@@ -1,7 +1,12 @@
 import type { AccountsAccountsOperations } from "../../gen/accounts/operations.js";
+import type { AccountType } from "../../gen/schema/types.js";
 
 export const reducer: AccountsAccountsOperations = {
     addAccountOperation(state, action) {
+        // Type is required in schema, but generated types haven't been updated yet
+        if (!action.input.type) {
+            throw new Error("Account type is required");
+        }
         state.accounts.push({
             id: action.input.id,
             account: action.input.account || "",
@@ -9,7 +14,7 @@ export const reducer: AccountsAccountsOperations = {
             budgetPath: action.input.budgetPath || "",
             accountTransactionsId: action.input.accountTransactionsId || "",
             chain: action.input.chain || [],
-            type: action.input.type || "Protocol",
+            type: action.input.type as AccountType, // Required field - type assertion needed until generate is run
             owners: action.input.owners || [],
             KycAmlStatus: action.input.KycAmlStatus || "PENDING",
         });
