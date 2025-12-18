@@ -30,6 +30,10 @@
         {
             "id": "powerhouse/expense-report",
             "name": "Expense Report"
+        },
+        {
+            "id": "powerhouse/snapshot-report",
+            "name": "Snapshot Report"
         }
     ],
     "editors": [
@@ -73,6 +77,13 @@
             "name": "Expense Report",
             "documentTypes": [
                 "powerhouse/expense-report"
+            ]
+        },
+        {
+            "id": "powerhouse-snapshot-report-editor",
+            "name": "Snapshot Report",
+            "documentTypes": [
+                "powerhouse/snapshot-report"
             ]
         }
     ],
