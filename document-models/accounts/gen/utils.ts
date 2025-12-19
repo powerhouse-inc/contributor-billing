@@ -9,13 +9,20 @@ import {
 import type { AccountsGlobalState, AccountsLocalState } from "./types.js";
 import type { AccountsPHState } from "./types.js";
 import { reducer } from "./reducer.js";
+import { accountsDocumentType } from "./document-type.js";
+import {
+  isAccountsDocument,
+  assertIsAccountsDocument,
+  isAccountsState,
+  assertIsAccountsState,
+} from "./document-schema.js";
 
 export const initialGlobalState: AccountsGlobalState = {
   accounts: [],
 };
 export const initialLocalState: AccountsLocalState = {};
 
-const utils: DocumentModelUtils<AccountsPHState> = {
+export const utils: DocumentModelUtils<AccountsPHState> = {
   fileExtension: ".phdm",
   createState(state) {
     return {
@@ -27,7 +34,7 @@ const utils: DocumentModelUtils<AccountsPHState> = {
   createDocument(state) {
     const document = baseCreateDocument(utils.createState, state);
 
-    document.header.documentType = "powerhouse/accounts";
+    document.header.documentType = accountsDocumentType;
 
     // for backwards compatibility, but this is NOT a valid signed document id
     document.header.id = generateId();
@@ -40,21 +47,17 @@ const utils: DocumentModelUtils<AccountsPHState> = {
   loadFromInput(input) {
     return baseLoadFromInput(input, reducer);
   },
-  isStateOfType(state: unknown): state is AccountsPHState {
-    return typeof state === "object" && state !== null && "global" in state;
+  isStateOfType(state) {
+    return isAccountsState(state);
   },
-  assertIsStateOfType(state: unknown): asserts state is AccountsPHState {
-    if (!utils.isStateOfType(state)) {
-      throw new Error("Invalid Accounts state");
-    }
+  assertIsStateOfType(state) {
+    return assertIsAccountsState(state);
   },
-  isDocumentOfType(document: unknown): document is any {
-    return typeof document === "object" && document !== null && "header" in document;
+  isDocumentOfType(document) {
+    return isAccountsDocument(document);
   },
-  assertIsDocumentOfType(document: unknown): void {
-    if (!utils.isDocumentOfType(document)) {
-      throw new Error("Invalid Accounts document");
-    }
+  assertIsDocumentOfType(document) {
+    return assertIsAccountsDocument(document);
   },
 };
 
@@ -62,5 +65,7 @@ export const createDocument = utils.createDocument;
 export const createState = utils.createState;
 export const saveToFileHandle = utils.saveToFileHandle;
 export const loadFromInput = utils.loadFromInput;
-
-export default utils;
+export const isStateOfType = utils.isStateOfType;
+export const assertIsStateOfType = utils.assertIsStateOfType;
+export const isDocumentOfType = utils.isDocumentOfType;
+export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

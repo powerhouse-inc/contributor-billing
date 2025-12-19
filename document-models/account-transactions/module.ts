@@ -9,10 +9,11 @@ import {
   utils,
 } from "@powerhousedao/contributor-billing/document-models/account-transactions";
 
-/** Document model module for the Account Transactions document type */
-export const AccountTransactions: DocumentModelModule<AccountTransactionsPHState> = {
-  reducer,
-  actions,
-  utils,
-  documentModel: createState(defaultBaseState(), documentModel),
-};
+/** Document model module for the Todo List document type */
+export const AccountTransactions: DocumentModelModule<AccountTransactionsPHState> =
+  {
+    reducer,
+    actions,
+    utils,
+    documentModel: createState(defaultBaseState(), documentModel),
+  };

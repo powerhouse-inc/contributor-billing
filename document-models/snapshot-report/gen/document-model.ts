@@ -2,7 +2,7 @@ import type { DocumentModelGlobalState } from "document-model";
 
 export const documentModel: DocumentModelGlobalState = {
   id: "powerhouse/snapshot-report",
-  name: "SnapshotReport",
+  name: "Snapshot Report",
   extension: "phsr",
   description:
     "Document model for creating snapshot reports that track fund flows through categorized accounts over a specified accounting period",
@@ -17,7 +17,7 @@ export const documentModel: DocumentModelGlobalState = {
       state: {
         global: {
           schema:
-            "scalar Amount_Tokens\nscalar EthereumAddress\nscalar Amount_Percentage\nscalar EmailAddress\nscalar Date\nscalar DateTime\nscalar URL\nscalar Amount_Money\nscalar OLabel\nscalar Currency\nscalar PHID\nscalar OID\nscalar Amount_Fiat\nscalar Amount_Currency\nscalar Amount_Crypto\nscalar Amount\n\ntype SnapshotReportState {\n  accountsDocumentId: PHID\n  startDate: DateTime\n  endDate: DateTime\n  reportName: String\n  snapshotAccounts: [SnapshotAccount!]!\n}\n\ntype SnapshotAccount {\n  id: OID!\n  accountId: OID!\n  accountAddress: String!\n  accountName: String!\n  type: AccountType!\n  accountTransactionsId: PHID\n  startingBalances: [TokenBalance!]!\n  endingBalances: [TokenBalance!]!\n  transactions: [SnapshotTransaction!]!\n}\n\ntype TokenBalance {\n  id: OID!\n  token: Currency!\n  amount: Amount_Currency!\n}\n\ntype SnapshotTransaction {\n  id: OID!\n  transactionId: String!\n  counterParty: EthereumAddress\n  amount: Amount_Currency!\n  datetime: DateTime!\n  txHash: String!\n  token: Currency!\n  blockNumber: Int\n  direction: TransactionDirection!\n  flowType: TransactionFlowType\n  counterPartyAccountId: OID\n}\n\nenum AccountType {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum TransactionDirection {\n  INFLOW\n  OUTFLOW\n}\n\nenum TransactionFlowType {\n  TopUp\n  Return\n  Internal\n  External\n}",
+            "type SnapshotReportState {\n  accountsDocumentId: PHID\n  startDate: DateTime\n  endDate: DateTime\n  reportName: String\n  snapshotAccounts: [SnapshotAccount!]!\n}\n\ntype SnapshotAccount {\n  id: OID!\n  accountId: OID!\n  accountAddress: String!\n  accountName: String!\n  type: AccountType!\n  accountTransactionsId: PHID\n  startingBalances: [TokenBalance!]!\n  endingBalances: [TokenBalance!]!\n  transactions: [SnapshotTransaction!]!\n}\n\ntype TokenBalance {\n  id: OID!\n  token: Currency!\n  amount: Amount_Currency!\n}\n\ntype SnapshotTransaction {\n  id: OID!\n  transactionId: String!\n  counterParty: EthereumAddress\n  amount: Amount_Currency!\n  datetime: DateTime!\n  txHash: String!\n  token: Currency!\n  blockNumber: Int\n  direction: TransactionDirection!\n  flowType: TransactionFlowType\n  counterPartyAccountId: OID\n}\n\nenum AccountType {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum AccountTypeInput {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum TransactionDirection {\n  INFLOW\n  OUTFLOW\n}\n\nenum TransactionDirectionInput {\n  INFLOW\n  OUTFLOW\n}\n\nenum TransactionFlowType {\n  TopUp\n  Return\n  Internal\n  External\n}\n\nenum TransactionFlowTypeInput {\n  TopUp\n  Return\n  Internal\n  External\n}",
           initialValue:
             '"{\\n  \\"accountsDocumentId\\": null,\\n  \\"startDate\\": null,\\n  \\"endDate\\": null,\\n  \\"reportName\\": null,\\n  \\"snapshotAccounts\\": []\\n}"',
           examples: [],
@@ -87,7 +87,7 @@ export const documentModel: DocumentModelGlobalState = {
               name: "ADD_SNAPSHOT_ACCOUNT",
               description: "Add an account to the snapshot report",
               schema:
-                "input AddSnapshotAccountInput {\n  id: OID!\n  accountId: OID!\n  accountAddress: String!\n  accountName: String!\n  type: AccountTypeInput!\n  accountTransactionsId: PHID\n}\n\nenum AccountTypeInput {\n  Source\n  Internal\n  Destination\n  External\n}",
+                "input AddSnapshotAccountInput {\n  id: OID!\n  accountId: OID!\n  accountAddress: String!\n  accountName: String!\n  type: AccountTypeInput!\n  accountTransactionsId: PHID\n}",
               template: "Add an account to the snapshot report",
               reducer:
                 "const existingAccount = state.snapshotAccounts.find(a => a.id === action.input.id);\nif (existingAccount) {\n  throw new DuplicateAccountError(`Account with ID ${action.input.id} already exists`);\n}\n\nconst newAccount = {\n  id: action.input.id,\n  accountId: action.input.accountId,\n  accountAddress: action.input.accountAddress,\n  accountName: action.input.accountName,\n  type: action.input.type,\n  accountTransactionsId: action.input.accountTransactionsId || null,\n  startingBalances: [],\n  endingBalances: [],\n  transactions: []\n};\n\nstate.snapshotAccounts.push(newAccount);",
@@ -110,7 +110,7 @@ export const documentModel: DocumentModelGlobalState = {
               description:
                 "Update the type categorization of a snapshot account",
               schema:
-                "input UpdateSnapshotAccountTypeInput {\n  id: OID!\n  type: AccountTypeInput!\n}\n\nenum AccountTypeInput {\n  Source\n  Internal\n  Destination\n  External\n}",
+                "input UpdateSnapshotAccountTypeInput {\n  id: OID!\n  type: AccountTypeInput!\n}",
               template: "Update the type categorization of a snapshot account",
               reducer:
                 "const account = state.snapshotAccounts.find(a => a.id === action.input.id);\nif (!account) {\n  throw new AccountNotFoundError(`Account with ID ${action.input.id} not found`);\n}\n\naccount.type = action.input.type;",
@@ -262,7 +262,7 @@ export const documentModel: DocumentModelGlobalState = {
               description:
                 "Add a transaction to the snapshot with enrichment data",
               schema:
-                "input AddTransactionInput {\n  accountId: OID!\n  id: OID!\n  transactionId: String!\n  counterParty: EthereumAddress\n  amount: Amount_Currency!\n  datetime: DateTime!\n  txHash: String!\n  token: Currency!\n  blockNumber: Int\n  direction: TransactionDirectionInput!\n  flowType: TransactionFlowTypeInput\n  counterPartyAccountId: OID\n}\n\nenum TransactionDirectionInput {\n  INFLOW\n  OUTFLOW\n}\n\nenum TransactionFlowTypeInput {\n  TopUp\n  Return\n  Internal\n  External\n}",
+                "input AddTransactionInput {\n  accountId: OID!\n  id: OID!\n  transactionId: String!\n  counterParty: EthereumAddress\n  amount: Amount_Currency!\n  datetime: DateTime!\n  txHash: String!\n  token: Currency!\n  blockNumber: Int\n  direction: TransactionDirectionInput!\n  flowType: TransactionFlowTypeInput\n  counterPartyAccountId: OID\n}\n",
               template:
                 "Add a transaction to the snapshot with enrichment data",
               reducer:
@@ -314,7 +314,7 @@ export const documentModel: DocumentModelGlobalState = {
               description:
                 "Update the flow type categorization of a transaction",
               schema:
-                "input UpdateTransactionFlowTypeInput {\n  id: OID!\n  flowType: TransactionFlowTypeInput!\n}\n\nenum TransactionFlowTypeInput {\n  TopUp\n  Return\n  Internal\n  External\n}",
+                "input UpdateTransactionFlowTypeInput {\n  id: OID!\n  flowType: TransactionFlowTypeInput!\n}",
               template: "Update the flow type categorization of a transaction",
               reducer:
                 "let transaction = null;\n\nfor (const account of state.snapshotAccounts) {\n  transaction = account.transactions.find(t => t.id === action.input.id);\n  if (transaction) {\n    break;\n  }\n}\n\nif (!transaction) {\n  throw new TransactionNotFoundError(`Transaction with ID ${action.input.id} not found`);\n}\n\ntransaction.flowType = action.input.flowType;",

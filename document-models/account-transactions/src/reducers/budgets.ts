@@ -1,6 +1,6 @@
-import type { AccountTransactionsBudgetsOperations } from "../../gen/budgets/operations.js";
+import type { AccountTransactionsBudgetsOperations } from "@powerhousedao/contributor-billing/document-models/account-transactions";
 
-export const reducer: AccountTransactionsBudgetsOperations = {
+export const accountTransactionsBudgetsOperations: AccountTransactionsBudgetsOperations = {
     addBudgetOperation(state, action) {
         state.budgets.push({
             id: action.input.id,

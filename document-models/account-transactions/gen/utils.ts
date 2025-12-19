@@ -12,6 +12,13 @@ import type {
 } from "./types.js";
 import type { AccountTransactionsPHState } from "./types.js";
 import { reducer } from "./reducer.js";
+import { accountTransactionsDocumentType } from "./document-type.js";
+import {
+  isAccountTransactionsDocument,
+  assertIsAccountTransactionsDocument,
+  isAccountTransactionsState,
+  assertIsAccountTransactionsState,
+} from "./document-schema.js";
 
 export const initialGlobalState: AccountTransactionsGlobalState = {
   account: {
@@ -30,7 +37,7 @@ export const initialGlobalState: AccountTransactionsGlobalState = {
 };
 export const initialLocalState: AccountTransactionsLocalState = {};
 
-const utils: DocumentModelUtils<AccountTransactionsPHState> = {
+export const utils: DocumentModelUtils<AccountTransactionsPHState> = {
   fileExtension: ".phdm",
   createState(state) {
     return {
@@ -42,7 +49,7 @@ const utils: DocumentModelUtils<AccountTransactionsPHState> = {
   createDocument(state) {
     const document = baseCreateDocument(utils.createState, state);
 
-    document.header.documentType = "powerhouse/account-transactions";
+    document.header.documentType = accountTransactionsDocumentType;
 
     // for backwards compatibility, but this is NOT a valid signed document id
     document.header.id = generateId();
@@ -55,21 +62,17 @@ const utils: DocumentModelUtils<AccountTransactionsPHState> = {
   loadFromInput(input) {
     return baseLoadFromInput(input, reducer);
   },
-  isStateOfType(state: unknown): state is AccountTransactionsPHState {
-    return typeof state === "object" && state !== null && "global" in state;
+  isStateOfType(state) {
+    return isAccountTransactionsState(state);
   },
-  assertIsStateOfType(state: unknown): asserts state is AccountTransactionsPHState {
-    if (!utils.isStateOfType(state)) {
-      throw new Error("Invalid AccountTransactions state");
-    }
+  assertIsStateOfType(state) {
+    return assertIsAccountTransactionsState(state);
   },
-  isDocumentOfType(document: unknown): document is any {
-    return typeof document === "object" && document !== null && "header" in document;
+  isDocumentOfType(document) {
+    return isAccountTransactionsDocument(document);
   },
-  assertIsDocumentOfType(document: unknown): void {
-    if (!utils.isDocumentOfType(document)) {
-      throw new Error("Invalid AccountTransactions document");
-    }
+  assertIsDocumentOfType(document) {
+    return assertIsAccountTransactionsDocument(document);
   },
 };
 
@@ -77,5 +80,7 @@ export const createDocument = utils.createDocument;
 export const createState = utils.createState;
 export const saveToFileHandle = utils.saveToFileHandle;
 export const loadFromInput = utils.loadFromInput;
-
-export default utils;
+export const isStateOfType = utils.isStateOfType;
+export const assertIsStateOfType = utils.assertIsStateOfType;
+export const isDocumentOfType = utils.isDocumentOfType;
+export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

@@ -8,8 +8,8 @@ import { Invoice } from "./invoice/module.js";
 import { SnapshotReport } from "./snapshot-report/module.js";
 
 export const documentModels: DocumentModelModule<any>[] = [
-  Accounts,
   AccountTransactions,
+  Accounts,
   BillingStatement,
   ExpenseReport,
   Integrations,

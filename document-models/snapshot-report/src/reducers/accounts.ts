@@ -1,57 +1,45 @@
-import type { SnapshotReportAccountsOperations } from "@powerhousedao/contributor-billing/document-models/snapshot-report";
 import {
   DuplicateAccountError,
   AccountNotFoundError,
 } from "../../gen/accounts/error.js";
+import type { SnapshotReportAccountsOperations } from "@powerhousedao/contributor-billing/document-models/snapshot-report";
 
 export const snapshotReportAccountsOperations: SnapshotReportAccountsOperations =
   {
     addSnapshotAccountOperation(state, action) {
-      const existingAccount = state.snapshotAccounts.find(
-        (a) => a.id === action.input.id,
-      );
-      if (existingAccount) {
-        throw new DuplicateAccountError(
-          `Account with ID ${action.input.id} already exists`,
-        );
-      }
+          const existingAccount = state.snapshotAccounts.find(a => a.id === action.input.id);
+          if (existingAccount) {
+            throw new DuplicateAccountError(`Account with ID ${action.input.id} already exists`);
+          }
 
-      const newAccount = {
-        id: action.input.id,
-        accountId: action.input.accountId,
-        accountAddress: action.input.accountAddress,
-        accountName: action.input.accountName,
-        type: action.input.type,
-        accountTransactionsId: action.input.accountTransactionsId || null,
-        startingBalances: [],
-        endingBalances: [],
-        transactions: [],
-      };
+          const newAccount = {
+            id: action.input.id,
+            accountId: action.input.accountId,
+            accountAddress: action.input.accountAddress,
+            accountName: action.input.accountName,
+            type: action.input.type,
+            accountTransactionsId: action.input.accountTransactionsId || null,
+            startingBalances: [],
+            endingBalances: [],
+            transactions: []
+          };
 
-      state.snapshotAccounts.push(newAccount);
-    },
+          state.snapshotAccounts.push(newAccount);
+      },
     updateSnapshotAccountTypeOperation(state, action) {
-      const account = state.snapshotAccounts.find(
-        (a) => a.id === action.input.id,
-      );
-      if (!account) {
-        throw new AccountNotFoundError(
-          `Account with ID ${action.input.id} not found`,
-        );
-      }
+        const account = state.snapshotAccounts.find(a => a.id === action.input.id);
+        if (!account) {
+          throw new AccountNotFoundError(`Account with ID ${action.input.id} not found`);
+        }
 
-      account.type = action.input.type;
+        account.type = action.input.type;
     },
     removeSnapshotAccountOperation(state, action) {
-      const accountIndex = state.snapshotAccounts.findIndex(
-        (a) => a.id === action.input.id,
-      );
-      if (accountIndex === -1) {
-        throw new AccountNotFoundError(
-          `Account with ID ${action.input.id} not found`,
-        );
-      }
+        const accountIndex = state.snapshotAccounts.findIndex(a => a.id === action.input.id);
+        if (accountIndex === -1) {
+          throw new AccountNotFoundError(`Account with ID ${action.input.id} not found`);
+        }
 
-      state.snapshotAccounts.splice(accountIndex, 1);
+        state.snapshotAccounts.splice(accountIndex, 1);
     },
   };

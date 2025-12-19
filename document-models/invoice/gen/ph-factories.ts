@@ -149,11 +149,7 @@ export function defaultGlobalState(): InvoiceGlobalState {
     invoiceTags: [],
     rejections: [],
     payments: [],
-    exported: {
-      exportedLineItems: [],
-      timestamp: "",
-    },
-    closureReason: null,
+    exported: [],
   };
 }
 

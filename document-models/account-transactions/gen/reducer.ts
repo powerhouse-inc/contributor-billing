@@ -3,14 +3,24 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { AccountTransactionsPHState } from "./types.js";
-import { z } from "./types.js";
+import type { AccountTransactionsPHState } from "@powerhousedao/contributor-billing/document-models/account-transactions";
 
-import { reducer as TransactionsReducer } from "../src/reducers/transactions.js";
-import { reducer as BudgetsReducer } from "../src/reducers/budgets.js";
-import { reducer as AccountReducer } from "../src/reducers/account.js";
+import { accountTransactionsTransactionsOperations } from "../src/reducers/transactions.js";
+import { accountTransactionsBudgetsOperations } from "../src/reducers/budgets.js";
+import { accountTransactionsAccountOperations } from "../src/reducers/account.js";
 
-export const stateReducer: StateReducer<AccountTransactionsPHState> = (
+import {
+  AddTransactionInputSchema,
+  UpdateTransactionInputSchema,
+  DeleteTransactionInputSchema,
+  UpdateTransactionPeriodInputSchema,
+  AddBudgetInputSchema,
+  UpdateBudgetInputSchema,
+  DeleteBudgetInputSchema,
+  SetAccountInputSchema,
+} from "./schema/zod.js";
+
+const stateReducer: StateReducer<AccountTransactionsPHState> = (
   state,
   action,
   dispatch,
@@ -21,8 +31,8 @@ export const stateReducer: StateReducer<AccountTransactionsPHState> = (
 
   switch (action.type) {
     case "ADD_TRANSACTION":
-      z.AddTransactionInputSchema().parse(action.input);
-      TransactionsReducer.addTransactionOperation(
+      AddTransactionInputSchema().parse(action.input);
+      accountTransactionsTransactionsOperations.addTransactionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -30,8 +40,8 @@ export const stateReducer: StateReducer<AccountTransactionsPHState> = (
       break;
 
     case "UPDATE_TRANSACTION":
-      z.UpdateTransactionInputSchema().parse(action.input);
-      TransactionsReducer.updateTransactionOperation(
+      UpdateTransactionInputSchema().parse(action.input);
+      accountTransactionsTransactionsOperations.updateTransactionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -39,8 +49,8 @@ export const stateReducer: StateReducer<AccountTransactionsPHState> = (
       break;
 
     case "DELETE_TRANSACTION":
-      z.DeleteTransactionInputSchema().parse(action.input);
-      TransactionsReducer.deleteTransactionOperation(
+      DeleteTransactionInputSchema().parse(action.input);
+      accountTransactionsTransactionsOperations.deleteTransactionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -48,8 +58,8 @@ export const stateReducer: StateReducer<AccountTransactionsPHState> = (
       break;
 
     case "UPDATE_TRANSACTION_PERIOD":
-      z.UpdateTransactionPeriodInputSchema().parse(action.input);
-      TransactionsReducer.updateTransactionPeriodOperation(
+      UpdateTransactionPeriodInputSchema().parse(action.input);
+      accountTransactionsTransactionsOperations.updateTransactionPeriodOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -57,8 +67,8 @@ export const stateReducer: StateReducer<AccountTransactionsPHState> = (
       break;
 
     case "ADD_BUDGET":
-      z.AddBudgetInputSchema().parse(action.input);
-      BudgetsReducer.addBudgetOperation(
+      AddBudgetInputSchema().parse(action.input);
+      accountTransactionsBudgetsOperations.addBudgetOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -66,8 +76,8 @@ export const stateReducer: StateReducer<AccountTransactionsPHState> = (
       break;
 
     case "UPDATE_BUDGET":
-      z.UpdateBudgetInputSchema().parse(action.input);
-      BudgetsReducer.updateBudgetOperation(
+      UpdateBudgetInputSchema().parse(action.input);
+      accountTransactionsBudgetsOperations.updateBudgetOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -75,8 +85,8 @@ export const stateReducer: StateReducer<AccountTransactionsPHState> = (
       break;
 
     case "DELETE_BUDGET":
-      z.DeleteBudgetInputSchema().parse(action.input);
-      BudgetsReducer.deleteBudgetOperation(
+      DeleteBudgetInputSchema().parse(action.input);
+      accountTransactionsBudgetsOperations.deleteBudgetOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -84,8 +94,8 @@ export const stateReducer: StateReducer<AccountTransactionsPHState> = (
       break;
 
     case "SET_ACCOUNT":
-      z.SetAccountInputSchema().parse(action.input);
-      AccountReducer.setAccountOperation(
+      SetAccountInputSchema().parse(action.input);
+      accountTransactionsAccountOperations.setAccountOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

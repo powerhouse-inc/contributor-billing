@@ -1,16 +1,21 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type AddAccountInput,
-  type UpdateAccountInput,
-  type DeleteAccountInput,
-  type UpdateKycStatusInput,
+  AddAccountInputSchema,
+  UpdateAccountInputSchema,
+  DeleteAccountInputSchema,
+  UpdateKycStatusInputSchema,
+} from "../schema/zod.js";
+import type {
+  AddAccountInput,
+  UpdateAccountInput,
+  DeleteAccountInput,
+  UpdateKycStatusInput,
 } from "../types.js";
-import {
-  type AddAccountAction,
-  type UpdateAccountAction,
-  type DeleteAccountAction,
-  type UpdateKycStatusAction,
+import type {
+  AddAccountAction,
+  UpdateAccountAction,
+  DeleteAccountAction,
+  UpdateKycStatusAction,
 } from "./actions.js";
 
 export const addAccount = (input: AddAccountInput) =>
@@ -18,7 +23,7 @@ export const addAccount = (input: AddAccountInput) =>
     "ADD_ACCOUNT",
     { ...input },
     undefined,
-    z.AddAccountInputSchema,
+    AddAccountInputSchema,
     "global",
   );
 
@@ -27,7 +32,7 @@ export const updateAccount = (input: UpdateAccountInput) =>
     "UPDATE_ACCOUNT",
     { ...input },
     undefined,
-    z.UpdateAccountInputSchema,
+    UpdateAccountInputSchema,
     "global",
   );
 
@@ -36,7 +41,7 @@ export const deleteAccount = (input: DeleteAccountInput) =>
     "DELETE_ACCOUNT",
     { ...input },
     undefined,
-    z.DeleteAccountInputSchema,
+    DeleteAccountInputSchema,
     "global",
   );
 
@@ -45,6 +50,6 @@ export const updateKycStatus = (input: UpdateKycStatusInput) =>
     "UPDATE_KYC_STATUS",
     { ...input },
     undefined,
-    z.UpdateKycStatusInputSchema,
+    UpdateKycStatusInputSchema,
     "global",
   );

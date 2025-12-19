@@ -1,4 +1,4 @@
-import type { BillingStatementTagsOperations, BillingStatementTag } from "@powerhousedao/contributor-billing/document-models/billing-statement";
+import type { BillingStatementTagsOperations } from "@powerhousedao/contributor-billing/document-models/billing-statement";
 
 export const billingStatementTagsOperations: BillingStatementTagsOperations = {
   editLineItemTagOperation(state, action, dispatch) {

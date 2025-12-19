@@ -65,20 +65,16 @@ export type AccountEntry = {
   id: Scalars["OID"]["output"];
   name: Scalars["String"]["output"];
   owners: Maybe<Array<Scalars["String"]["output"]>>;
-  type: Maybe<AccountType | `${AccountType}`>;
+  type: AccountType | `${AccountType}`;
 };
 
-export type AccountType =
-  | "Source"
-  | "Internal"
-  | "Destination"
-  | "External";
+export type AccountType = "Destination" | "External" | "Internal" | "Source";
 
 export type AccountTypeInput =
-  | "Source"
-  | "Internal"
   | "Destination"
-  | "External";
+  | "External"
+  | "Internal"
+  | "Source";
 
 export type AccountsState = {
   accounts: Array<AccountEntry>;
@@ -93,7 +89,7 @@ export type AddAccountInput = {
   id: Scalars["OID"]["input"];
   name: Scalars["String"]["input"];
   owners?: InputMaybe<Array<Scalars["String"]["input"]>>;
-  type?: InputMaybe<AccountTypeInput | `${AccountTypeInput}`>;
+  type: AccountTypeInput | `${AccountTypeInput}`;
 };
 
 export type DeleteAccountInput = {

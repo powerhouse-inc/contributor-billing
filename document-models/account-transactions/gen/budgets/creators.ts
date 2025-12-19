@@ -1,14 +1,18 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type AddBudgetInput,
-  type UpdateBudgetInput,
-  type DeleteBudgetInput,
+  AddBudgetInputSchema,
+  UpdateBudgetInputSchema,
+  DeleteBudgetInputSchema,
+} from "../schema/zod.js";
+import type {
+  AddBudgetInput,
+  UpdateBudgetInput,
+  DeleteBudgetInput,
 } from "../types.js";
-import {
-  type AddBudgetAction,
-  type UpdateBudgetAction,
-  type DeleteBudgetAction,
+import type {
+  AddBudgetAction,
+  UpdateBudgetAction,
+  DeleteBudgetAction,
 } from "./actions.js";
 
 export const addBudget = (input: AddBudgetInput) =>
@@ -16,7 +20,7 @@ export const addBudget = (input: AddBudgetInput) =>
     "ADD_BUDGET",
     { ...input },
     undefined,
-    z.AddBudgetInputSchema,
+    AddBudgetInputSchema,
     "global",
   );
 
@@ -25,7 +29,7 @@ export const updateBudget = (input: UpdateBudgetInput) =>
     "UPDATE_BUDGET",
     { ...input },
     undefined,
-    z.UpdateBudgetInputSchema,
+    UpdateBudgetInputSchema,
     "global",
   );
 
@@ -34,6 +38,6 @@ export const deleteBudget = (input: DeleteBudgetInput) =>
     "DELETE_BUDGET",
     { ...input },
     undefined,
-    z.DeleteBudgetInputSchema,
+    DeleteBudgetInputSchema,
     "global",
   );

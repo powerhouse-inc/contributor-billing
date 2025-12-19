@@ -26,17 +26,17 @@ export const definedNonNullAnySchema = z
   .refine((v) => isDefinedNonNullAny(v));
 
 export const AccountTypeSchema = z.enum([
-  "Source",
-  "Internal",
   "Destination",
   "External",
+  "Internal",
+  "Source",
 ]);
 
 export const AccountTypeInputSchema = z.enum([
-  "Source",
-  "Internal",
   "Destination",
   "External",
+  "Internal",
+  "Source",
 ]);
 
 export const KycAmlStatusTypeSchema = z.enum(["FAILED", "PASSED", "PENDING"]);
@@ -58,7 +58,7 @@ export function AccountEntrySchema(): z.ZodObject<Properties<AccountEntry>> {
     id: z.string(),
     name: z.string(),
     owners: z.array(z.string()).nullable(),
-    type: AccountTypeSchema.nullable(),
+    type: AccountTypeSchema,
   });
 }
 
@@ -81,7 +81,7 @@ export function AddAccountInputSchema(): z.ZodObject<
     id: z.string(),
     name: z.string(),
     owners: z.array(z.string()).nullish(),
-    type: z.lazy(() => AccountTypeInputSchema.nullish()),
+    type: z.lazy(() => AccountTypeInputSchema),
   });
 }
 

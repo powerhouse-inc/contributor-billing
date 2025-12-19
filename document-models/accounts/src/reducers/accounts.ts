@@ -1,7 +1,7 @@
-import type { AccountsAccountsOperations } from "../../gen/accounts/operations.js";
 import type { AccountType } from "../../gen/schema/types.js";
+import type { AccountsAccountsOperations } from "@powerhousedao/contributor-billing/document-models/accounts";
 
-export const reducer: AccountsAccountsOperations = {
+export const accountsAccountsOperations: AccountsAccountsOperations = {
     addAccountOperation(state, action) {
         // Type is required in schema, but generated types haven't been updated yet
         if (!action.input.type) {

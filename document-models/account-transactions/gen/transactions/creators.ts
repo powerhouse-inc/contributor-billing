@@ -1,16 +1,21 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type AddTransactionInput,
-  type UpdateTransactionInput,
-  type DeleteTransactionInput,
-  type UpdateTransactionPeriodInput,
+  AddTransactionInputSchema,
+  UpdateTransactionInputSchema,
+  DeleteTransactionInputSchema,
+  UpdateTransactionPeriodInputSchema,
+} from "../schema/zod.js";
+import type {
+  AddTransactionInput,
+  UpdateTransactionInput,
+  DeleteTransactionInput,
+  UpdateTransactionPeriodInput,
 } from "../types.js";
-import {
-  type AddTransactionAction,
-  type UpdateTransactionAction,
-  type DeleteTransactionAction,
-  type UpdateTransactionPeriodAction,
+import type {
+  AddTransactionAction,
+  UpdateTransactionAction,
+  DeleteTransactionAction,
+  UpdateTransactionPeriodAction,
 } from "./actions.js";
 
 export const addTransaction = (input: AddTransactionInput) =>
@@ -18,7 +23,7 @@ export const addTransaction = (input: AddTransactionInput) =>
     "ADD_TRANSACTION",
     { ...input },
     undefined,
-    z.AddTransactionInputSchema,
+    AddTransactionInputSchema,
     "global",
   );
 
@@ -27,7 +32,7 @@ export const updateTransaction = (input: UpdateTransactionInput) =>
     "UPDATE_TRANSACTION",
     { ...input },
     undefined,
-    z.UpdateTransactionInputSchema,
+    UpdateTransactionInputSchema,
     "global",
   );
 
@@ -36,7 +41,7 @@ export const deleteTransaction = (input: DeleteTransactionInput) =>
     "DELETE_TRANSACTION",
     { ...input },
     undefined,
-    z.DeleteTransactionInputSchema,
+    DeleteTransactionInputSchema,
     "global",
   );
 
@@ -45,6 +50,6 @@ export const updateTransactionPeriod = (input: UpdateTransactionPeriodInput) =>
     "UPDATE_TRANSACTION_PERIOD",
     { ...input },
     undefined,
-    z.UpdateTransactionPeriodInputSchema,
+    UpdateTransactionPeriodInputSchema,
     "global",
   );
