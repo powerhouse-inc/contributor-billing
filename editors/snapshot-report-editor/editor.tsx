@@ -6,10 +6,12 @@ import {
   setSelectedNode,
 } from "@powerhousedao/reactor-browser";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
+import { DatePicker } from "@powerhousedao/document-engineering";
 import { useSelectedSnapshotReportDocument } from "../hooks/useSnapshotReportDocument.js";
 import {
   setReportConfig,
   addSnapshotAccount,
+  addTransaction,
 } from "../../document-models/snapshot-report/gen/creators.js";
 
 export default function Editor() {
@@ -84,8 +86,16 @@ export default function Editor() {
     setSelectedAccountIds(newSelection);
   };
 
-  const handleImportAccounts = () => {
-    selectedAccountIds.forEach((accountId) => {
+  const handleImportAccounts = async () => {
+    if (!documentsInDrive || !startDate || !endDate) {
+      alert("Please set the report period (start and end dates) before importing accounts");
+      return;
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    for (const accountId of selectedAccountIds) {
       const account = availableAccounts.find(
         (acc: any) => acc.id === accountId,
       );
@@ -94,11 +104,14 @@ export default function Editor() {
           alert(
             `Account "${account.name}" does not have a type set. Please update the account first.`,
           );
-          return;
+          continue;
         }
+
+        // Add the snapshot account
+        const snapshotAccountId = generateId();
         dispatch?.(
           addSnapshotAccount({
-            id: generateId(),
+            id: snapshotAccountId,
             accountId: account.id,
             accountAddress: account.account,
             accountName: account.name,
@@ -106,10 +119,103 @@ export default function Editor() {
             accountTransactionsId: account.accountTransactionsId || undefined,
           }),
         );
+
+        // If the account has linked transactions, import them
+        if (account.accountTransactionsId) {
+          const txDoc = documentsInDrive.find(
+            (doc) =>
+              doc.header.id === account.accountTransactionsId &&
+              doc.header.documentType === "powerhouse/account-transactions",
+          ) as any;
+
+          if (txDoc?.state?.global?.transactions) {
+            const transactions = txDoc.state.global.transactions as any[];
+
+            // Filter transactions by the report period
+            const filteredTransactions = transactions.filter((tx: any) => {
+              if (!tx?.datetime) return false;
+              const txDate = new Date(tx.datetime);
+              if (isNaN(txDate.getTime())) return false;
+              return txDate >= start && txDate <= end;
+            });
+
+            // Add each transaction to the snapshot account
+            for (const tx of filteredTransactions) {
+              dispatch?.(
+                addTransaction({
+                  accountId: snapshotAccountId,
+                  id: generateId(),
+                  transactionId: tx.id,
+                  counterParty: tx.counterParty || undefined,
+                  amount: tx.amount,
+                  datetime: tx.datetime,
+                  txHash: tx.details?.txHash || "",
+                  token: tx.details?.token || "",
+                  blockNumber: tx.details?.blockNumber || undefined,
+                  direction: tx.direction,
+                  flowType: undefined, // Can be set later
+                  counterPartyAccountId: undefined, // Can be set later if counterParty matches another account
+                }),
+              );
+            }
+          }
+        }
       }
-    });
+    }
     setIsAccountPickerOpen(false);
     setSelectedAccountIds(new Set());
+  };
+
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const dateValue = e.target.value;
+    if (!dateValue) return;
+
+    // DatePicker may return ISO string or date string - extract just the date part
+    const dateString = dateValue.split("T")[0]; // Get YYYY-MM-DD part if ISO string
+    if (!dateString) return;
+
+    // Create date at start of day (00:00:00)
+    const date = new Date(dateString + "T00:00:00.000Z");
+    if (isNaN(date.getTime())) {
+      console.error("Invalid date value:", dateValue);
+      return;
+    }
+
+    const isoDateTime = date.toISOString();
+    dispatch?.(
+      setReportConfig({
+        startDate: isoDateTime,
+        endDate: endDate || undefined,
+        reportName: reportName || undefined,
+        accountsDocumentId: accountsDocumentId || undefined,
+      }),
+    );
+  };
+
+  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const dateValue = e.target.value;
+    if (!dateValue) return;
+
+    // DatePicker may return ISO string or date string - extract just the date part
+    const dateString = dateValue.split("T")[0]; // Get YYYY-MM-DD part if ISO string
+    if (!dateString) return;
+
+    // Create date at end of day (23:59:59.999)
+    const endOfDay = new Date(dateString + "T23:59:59.999Z");
+    if (isNaN(endOfDay.getTime())) {
+      console.error("Invalid date value:", dateValue);
+      return;
+    }
+
+    const isoDateTime = endOfDay.toISOString();
+    dispatch?.(
+      setReportConfig({
+        endDate: isoDateTime,
+        startDate: startDate || undefined,
+        reportName: reportName || undefined,
+        accountsDocumentId: accountsDocumentId || undefined,
+      }),
+    );
   };
 
   // Get the parent folder node for the currently selected node
@@ -184,49 +290,21 @@ export default function Editor() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Period
               </label>
-              <div className="flex gap-2">
-                <input
-                  type="date"
+              <div className="flex gap-2 items-center">
+                <DatePicker
+                  name="startDate"
                   value={startDate ? startDate.split("T")[0] : ""}
-                  onChange={(e) => {
-                    const dateValue = e.target.value;
-                    if (dateValue) {
-                      // Convert date to ISO DateTime (start of day)
-                      const isoDateTime = new Date(dateValue).toISOString();
-                      dispatch?.(
-                        setReportConfig({
-                          startDate: isoDateTime,
-                          endDate: endDate || undefined,
-                          reportName: reportName || undefined,
-                          accountsDocumentId: accountsDocumentId || undefined,
-                        }),
-                      );
-                    }
-                  }}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={handleStartDateChange}
+                  dateFormat="YYYY-MM-DD"
+                  className="flex-1"
                 />
                 <span className="self-center">to</span>
-                <input
-                  type="date"
+                <DatePicker
+                  name="endDate"
                   value={endDate ? endDate.split("T")[0] : ""}
-                  onChange={(e) => {
-                    const dateValue = e.target.value;
-                    if (dateValue) {
-                      // Convert date to ISO DateTime (end of day)
-                      const endOfDay = new Date(dateValue);
-                      endOfDay.setHours(23, 59, 59, 999);
-                      const isoDateTime = endOfDay.toISOString();
-                      dispatch?.(
-                        setReportConfig({
-                          endDate: isoDateTime,
-                          startDate: startDate || undefined,
-                          reportName: reportName || undefined,
-                          accountsDocumentId: accountsDocumentId || undefined,
-                        }),
-                      );
-                    }
-                  }}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={handleEndDateChange}
+                  dateFormat="YYYY-MM-DD"
+                  className="flex-1"
                 />
               </div>
             </div>
