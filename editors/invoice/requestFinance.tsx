@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { actions } from "../../document-models/invoice/index.js";
 import { generateId } from "document-model";
 
-let GRAPHQL_URL = "http://localhost:4001/graphql/invoice";
+let GRAPHQL_URL = "http://localhost:4001/graphql";
 
 if (!window.document.baseURI.includes('localhost')) {
   GRAPHQL_URL = 'https://switchboard-staging.powerhouse.xyz/graphql/invoice'
@@ -22,7 +22,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
   const [responseData, setResponseData] = useState<any>(null);
   const [invoiceLink, setInvoiceLink] = useState<string | null>(null);
   const [directPaymentStatus, setDirectPaymentStatus] = useState<string | null>(
-    null
+    null,
   );
   const invoiceStatus = docState.status;
 
@@ -63,13 +63,13 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
       } else {
         throw new Error(
           result.data?.Invoice_createRequestFinancePayment?.error ||
-            "Unknown error"
+            "Unknown error",
         );
       }
     } catch (err) {
       console.error("Error creating direct payment:", err);
       setDirectPaymentStatus(
-        `Error creating direct payment: ${err instanceof Error ? err.message : "Unknown error"}`
+        `Error creating direct payment: ${err instanceof Error ? err.message : "Unknown error"}`,
       );
       throw err;
     }
@@ -82,7 +82,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
     setInvoiceLink(null);
     setDirectPaymentStatus(null);
 
-    let bankDetails: any = {
+    const bankDetails: any = {
       currency: docState.currency,
       accountNumber: docState.issuer.paymentRouting.bank.accountNum,
       country:
@@ -182,7 +182,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
       const directPaymentResult = await createDirectPayment(invoiceData);
       console.log(
         "Direct payment created: (unitPrice in cents)",
-        directPaymentResult
+        directPaymentResult,
       );
 
       // Process the response
@@ -193,7 +193,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
             actions.schedulePayment({
               id: generateId(),
               processorRef: directPaymentResult.response.invoiceLinks.pay,
-            })
+            }),
           );
         } else {
           dispatch(
@@ -201,7 +201,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
               id: generateId(),
               processorRef: directPaymentResult.response.invoiceLinks.pay,
               confirmed: false,
-            })
+            }),
           );
         }
       }
@@ -223,7 +223,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
           processorRef: "",
           confirmed: false,
           issue: errorMessage,
-        })
+        }),
       );
     } finally {
       setIsLoading(false);

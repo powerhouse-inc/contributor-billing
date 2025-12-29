@@ -1,41 +1,46 @@
-import { BaseSubgraph } from "@powerhousedao/reactor-api";
-import { Invoice_processGnosisPayment, Invoice_createRequestFinancePayment, Invoice_uploadInvoicePdfChunk } from "./customResolvers.js";
+import type { BaseSubgraph } from "@powerhousedao/reactor-api";
 import { addFile } from "document-drive";
+import { setName } from "document-model";
 import {
   actions,
-  type EditInvoiceInput,
-  type EditStatusInput,
-  type EditPaymentDataInput,
-  type SetExportedDataInput,
-  type AddPaymentInput,
-  type EditIssuerInput,
-  type EditIssuerBankInput,
-  type EditIssuerWalletInput,
-  type EditPayerInput,
-  type EditPayerBankInput,
-  type EditPayerWalletInput,
-  type AddLineItemInput,
-  type EditLineItemInput,
-  type DeleteLineItemInput,
-  type SetLineItemTagInput,
-  type SetInvoiceTagInput,
-  type CancelInput,
-  type IssueInput,
-  type ResetInput,
-  type RejectInput,
-  type AcceptInput,
-  type ReinstateInput,
-  type SchedulePaymentInput,
-  type ReapprovePaymentInput,
-  type RegisterPaymentTxInput,
-  type ReportPaymentIssueInput,
-  type ConfirmPaymentInput,
-  type ClosePaymentInput,
-  type InvoiceDocument,
-} from "../../document-models/invoice/index.js";
-import { setName } from "document-model";
+  invoiceDocumentType,
+} from "@powerhousedao/contributor-billing/document-models/invoice";
 
-export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> => {
+import type {
+  InvoiceDocument,
+  EditInvoiceInput,
+  EditStatusInput,
+  EditPaymentDataInput,
+  SetExportedDataInput,
+  AddPaymentInput,
+  EditIssuerInput,
+  EditIssuerBankInput,
+  EditIssuerWalletInput,
+  EditPayerInput,
+  EditPayerBankInput,
+  EditPayerWalletInput,
+  AddLineItemInput,
+  EditLineItemInput,
+  DeleteLineItemInput,
+  SetLineItemTagInput,
+  SetInvoiceTagInput,
+  CancelInput,
+  IssueInput,
+  ResetInput,
+  RejectInput,
+  AcceptInput,
+  ReinstateInput,
+  SchedulePaymentInput,
+  ReapprovePaymentInput,
+  RegisterPaymentTxInput,
+  ReportPaymentIssueInput,
+  ConfirmPaymentInput,
+  ClosePaymentInput,
+} from "@powerhousedao/contributor-billing/document-models/invoice";
+
+export const getResolvers = (
+  subgraph: BaseSubgraph,
+): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {
@@ -90,7 +95,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
             );
 
             return docs.filter(
-              (doc) => doc.header.documentType === "powerhouse/invoice",
+              (doc) => doc.header.documentType === invoiceDocumentType,
             );
           },
         };
@@ -102,7 +107,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
         args: { name: string; driveId?: string },
       ) => {
         const { driveId, name } = args;
-        const document = await reactor.addDocument("powerhouse/invoice");
+        const document = await reactor.addDocument(invoiceDocumentType);
 
         if (driveId) {
           await reactor.addAction(
@@ -110,7 +115,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
             addFile({
               name,
               id: document.header.id,
-              documentType: "powerhouse/invoice",
+              documentType: invoiceDocumentType,
             }),
           );
         }
@@ -724,9 +729,6 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
 
         return true;
       },
-      Invoice_processGnosisPayment: Invoice_processGnosisPayment,
-      Invoice_createRequestFinancePayment: Invoice_createRequestFinancePayment,
-      Invoice_uploadInvoicePdfChunk: Invoice_uploadInvoicePdfChunk,
     },
   };
 };

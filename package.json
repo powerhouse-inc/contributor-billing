@@ -1,12 +1,11 @@
 {
   "name": "@powerhousedao/contributor-billing",
   "description": "Document models that help contributors of open organisations get paid anonymously for their work on a monthly basis.",
-  "version": "0.1.28",
+  "version": "0.1.30",
   "license": "AGPL-3.0-only",
   "type": "module",
   "files": [
-    "/dist",
-    "/editors/invoice/assets"
+    "/dist"
   ],
   "publishConfig": {
     "access": "public"
@@ -48,7 +47,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint --config eslint.config.js --cache --cache-strategy content",
-    "lint:fix": "npm run lint --fix",
+    "lint:fix": "npm run lint -- --fix",
     "tsc": "tsc",
     "tsc:watch": "tsc --watch",
     "tailwind": "npx @tailwindcss/cli -i ./style.css -o ./dist/style.css",
@@ -66,9 +65,8 @@
     "@powerhousedao/builder-tools": "^5.0.12",
     "@powerhousedao/common": "^5.0.12",
     "@powerhousedao/design-system": "^5.0.12",
-    "@powerhousedao/document-engineering": "^1.38.0",
-    "@powerhousedao/vetra": "^5.0.12",
-    "@react-pdf/renderer": "^4.3.0",
+    "@powerhousedao/document-engineering": "^1.40.0",
+    "@react-pdf/renderer": "^4.3.1",
     "@safe-global/api-kit": "^4.0.0",
     "@safe-global/protocol-kit": "^6.0.3",
     "@safe-global/sdk-starter-kit": "^2.0.2",
@@ -80,13 +78,10 @@
     "dotenv": "^16.5.0",
     "error": "^10.4.0",
     "ethers": "^6.14.0",
-    "express": "^4.21.2",
     "google-auth-library": "^9.15.1",
     "graphql": "^16.10.0",
     "graphql-tag": "^2.12.6",
-    "lucide-react": "^0.511.0",
-    "tailwind-merge": "^3.3.1",
-    "world-countries": "^5.1.0",
+    "lucide-react": "^0.560.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -94,17 +89,16 @@
     "@eslint/js": "^9.38.0",
     "@powerhousedao/analytics-engine-core": "^0.5.0",
     "@powerhousedao/codegen": "^5.0.12",
-    "@powerhousedao/config": "^5.0.12",
+    "@powerhousedao/config": "^5.1.0",
     "@powerhousedao/ph-cli": "^5.0.12",
     "@powerhousedao/reactor-api": "^5.0.12",
     "@powerhousedao/reactor-browser": "^5.0.12",
     "@powerhousedao/reactor-local": "^5.0.12",
-    "@powerhousedao/scalars": "staging",
+    "@powerhousedao/scalars": "latest",
     "@powerhousedao/switchboard": "^5.0.12",
     "@powerhousedao/connect": "^5.0.12",
     "@tailwindcss/cli": "^4.1.4",
     "@testing-library/react": "^16.3.0",
-    "@types/express": "^4.17.25",
     "@types/node": "^24.9.2",
     "@types/react": "^19.2.2",
     "@vitejs/plugin-react": "^5.1.0",
@@ -124,16 +118,10 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
     "vite": "^6.2.3",
-    "vitest": "^3.0.9",
-    "@playwright/test": "^1.56.0",
-    "@types/react-dom": "^19.2.2",
-    "jszip": "^3.10.1"
+    "vitest": "^3.0.9"
   },
   "peerDependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
-  },
-  "overrides": {
-    "vite": "^6.2.3"
   }
 }

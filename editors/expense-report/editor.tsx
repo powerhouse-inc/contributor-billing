@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useSelectedExpenseReportDocument } from "../hooks/useExpenseReportDocument.js";
+import { useSelectedExpenseReportDocument } from "../../document-models/expense-report/hooks.js";
 import { actions } from "../../document-models/expense-report/index.js";
 import { DatePicker, Icon, Button } from "@powerhousedao/document-engineering";
 import { WalletsTable } from "./components/WalletsTable.js";
@@ -19,20 +19,20 @@ export default function Editor() {
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [periodStart, setPeriodStart] = useState<string>(
-    document.state.global.periodStart || ""
+    document?.state.global.periodStart || ""
   );
   const [periodEnd, setPeriodEnd] = useState<string>(
-    document.state.global.periodEnd || ""
+    document?.state.global.periodEnd || ""
   );
 
-  const { wallets, groups } = document.state.global;
+  const { wallets, groups } = document?.state.global || {};
 
   // Handle period date changes
   const handlePeriodStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setPeriodStart(value);
     if (value) {
-      dispatch(actions.setPeriodStart({ periodStart: value }));
+      dispatch?.(actions.setPeriodStart({ periodStart: value }));
     }
   };
 
@@ -40,7 +40,7 @@ export default function Editor() {
     const value = e.target.value;
     setPeriodEnd(value);
     if (value) {
-      dispatch(actions.setPeriodEnd({ periodEnd: value }));
+      dispatch?.(actions.setPeriodEnd({ periodEnd: value }));
     }
   };
 
@@ -63,8 +63,8 @@ export default function Editor() {
         <ExpenseReportPDF
           periodStart={periodStart}
           periodEnd={periodEnd}
-          wallets={wallets}
-          groups={groups}
+          wallets={wallets || []}
+          groups={groups || []}
         />
       ).toBlob();
 
@@ -161,8 +161,8 @@ export default function Editor() {
               </div>
               <div className="p-6">
                 <WalletsTable
-                  wallets={wallets}
-                  groups={groups}
+                  wallets={wallets || []}
+                  groups={groups || []}
                   onAddBillingStatement={handleAddBillingStatement}
                   dispatch={dispatch}
                 />
@@ -170,7 +170,7 @@ export default function Editor() {
             </section>
 
             {/* Aggregated Expenses Section */}
-            {wallets.length > 0 && (
+            {wallets && wallets.length > 0 && (
               <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -180,10 +180,10 @@ export default function Editor() {
                 <div className="p-6">
                   <AggregatedExpensesTable
                     wallets={wallets}
-                    groups={groups}
+                    groups={groups || []}
                     periodStart={periodStart}
                     periodEnd={periodEnd}
-                    dispatch={dispatch}
+                    dispatch={dispatch || (() => {})}
                   />
                 </div>
               </section>
@@ -215,7 +215,7 @@ export default function Editor() {
             onClose={handleCloseModal}
             walletAddress={selectedWallet}
             dispatch={dispatch}
-            groups={groups}
+            groups={groups || []}
           />
         )}
       </div>

@@ -8,6 +8,7 @@ import type {
   BillingStatementTag,
   BillingStatementUnit,
   BillingStatementUnitInput,
+  DeleteLineItemInput,
   EditBillingStatementInput,
   EditContributorInput,
   EditLineItemInput,
@@ -115,6 +116,14 @@ export function BillingStatementTagSchema(): z.ZodObject<
     dimension: z.string(),
     label: z.string().nullable(),
     value: z.string(),
+  });
+}
+
+export function DeleteLineItemInputSchema(): z.ZodObject<
+  Properties<DeleteLineItemInput>
+> {
+  return z.object({
+    id: z.string(),
   });
 }
 

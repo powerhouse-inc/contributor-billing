@@ -1,15 +1,21 @@
-import { BaseSubgraph } from "@powerhousedao/reactor-api";
+import type { BaseSubgraph } from "@powerhousedao/reactor-api";
 import { addFile } from "document-drive";
+import { setName } from "document-model";
 import {
   actions,
-  type SetRequestFinanceInput,
-  type SetGnosisSafeInput,
-  type SetGoogleCloudInput,
-  type IntegrationsDocument,
-} from "../../document-models/integrations/index.js";
-import { setName } from "document-model";
+  integrationsDocumentType,
+} from "@powerhousedao/contributor-billing/document-models/integrations";
 
-export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> => {
+import type {
+  IntegrationsDocument,
+  SetRequestFinanceInput,
+  SetGnosisSafeInput,
+  SetGoogleCloudInput,
+} from "@powerhousedao/contributor-billing/document-models/integrations";
+
+export const getResolvers = (
+  subgraph: BaseSubgraph,
+): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {
@@ -65,7 +71,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
             );
 
             return docs.filter(
-              (doc) => doc.header.documentType === "powerhouse/integrations",
+              (doc) => doc.header.documentType === integrationsDocumentType,
             );
           },
         };
@@ -77,7 +83,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
         args: { name: string; driveId?: string },
       ) => {
         const { driveId, name } = args;
-        const document = await reactor.addDocument("powerhouse/integrations");
+        const document = await reactor.addDocument(integrationsDocumentType);
 
         if (driveId) {
           await reactor.addAction(
@@ -85,7 +91,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
             addFile({
               name,
               id: document.header.id,
-              documentType: "powerhouse/integrations",
+              documentType: integrationsDocumentType,
             }),
           );
         }

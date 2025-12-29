@@ -2,11 +2,11 @@ import { X } from "lucide-react";
 import { useState, useEffect, type Dispatch } from "react";
 import { InputField } from "../components/inputField.js";
 import { Select, DatePicker } from "@powerhousedao/document-engineering/ui";
+import { expenseAccountOptions, paymentAccountOptions } from "./tagMapping.js";
 import {
-  expenseAccountOptions,
-  paymentAccountOptions,
-} from "./tagMapping.js";
-import { actions, type InvoiceTag } from "../../../document-models/invoice/index.js";
+  actions,
+  type InvoiceTag,
+} from "../../../document-models/invoice/index.js";
 
 type TagAssignmentRow = {
   id: string;
@@ -32,14 +32,16 @@ export function TagMobileModal({
 
   // Get current tag values
   const periodTag = item.lineItemTag.find(
-    (tag) => tag.dimension === "accounting-period"
+    (tag) => tag.dimension === "accounting-period",
   );
   const expenseTag = item.lineItemTag.find(
-    (tag) => tag.dimension === "xero-expense-account"
+    (tag) => tag.dimension === "xero-expense-account",
   );
 
   const [periodValue, setPeriodValue] = useState(periodTag?.label || "");
-  const [periodStoredValue, setPeriodStoredValue] = useState(periodTag?.value || "");
+  const [periodStoredValue, setPeriodStoredValue] = useState(
+    periodTag?.value || "",
+  );
   const [expenseValue, setExpenseValue] = useState(expenseTag?.value || "");
   const [expenseLabel, setExpenseLabel] = useState(expenseTag?.label || "");
 
@@ -58,7 +60,7 @@ export function TagMobileModal({
         actions.editLineItem({
           id: item.id,
           description: description,
-        })
+        }),
       );
     }
 
@@ -70,7 +72,7 @@ export function TagMobileModal({
           dimension: "accounting-period",
           value: periodStoredValue,
           label: periodValue,
-        })
+        }),
       );
     }
 
@@ -82,7 +84,7 @@ export function TagMobileModal({
           dimension: "xero-expense-account",
           value: expenseValue,
           label: expenseLabel,
-        })
+        }),
       );
     }
 
@@ -150,7 +152,7 @@ export function TagMobileModal({
                 {
                   month: "long",
                   year: "numeric",
-                }
+                },
               );
               setPeriodValue(newLabel);
               setPeriodStoredValue(newValue);
@@ -172,9 +174,8 @@ export function TagMobileModal({
             onChange={(value) => {
               setExpenseValue(value as string);
               setExpenseLabel(
-                expenseAccountOptions.find(
-                  (option) => option.value === value
-                )?.label || ""
+                expenseAccountOptions.find((option) => option.value === value)
+                  ?.label || "",
               );
             }}
           />
@@ -184,7 +185,9 @@ export function TagMobileModal({
         <div className="bg-gray-50 rounded-lg p-4">
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Total:</span>
-            <span className="text-lg font-bold text-gray-900">{item.total}</span>
+            <span className="text-lg font-bold text-gray-900">
+              {item.total}
+            </span>
           </div>
         </div>
       </div>

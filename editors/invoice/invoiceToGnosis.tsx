@@ -6,7 +6,7 @@ import type {
   InvoiceState,
 } from "../../document-models/invoice/index.js";
 
-let GRAPHQL_URL = "http://localhost:4001/graphql/invoice";
+let GRAPHQL_URL = "http://localhost:4001/graphql";
 
 if (!window.document.baseURI.includes('localhost')) {
   GRAPHQL_URL = 'https://switchboard-staging.powerhouse.xyz/graphql/invoice'
@@ -103,7 +103,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
     // Prevent concurrent calls using ref (faster than state update)
     if (isProcessingRef.current) {
       console.log(
-        "Payment request already in progress, ignoring duplicate click"
+        "Payment request already in progress, ignoring duplicate click",
       );
       return;
     }
@@ -149,7 +149,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
             actions.schedulePayment({
               id: generateId(),
               processorRef: `${dataObj.safeAddress}:${dataObj.txHash}`,
-            })
+            }),
           );
         } else {
           dispatch(
@@ -157,7 +157,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
               id: generateId(),
               processorRef: `${dataObj.safeAddress}:${dataObj.txHash}`,
               confirmed: false,
-            })
+            }),
           );
         }
 
@@ -169,7 +169,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
             chain: chainName,
           };
           setInvoiceStatusResponse(
-            `Amount: ${formattedDetails.amount} ${formattedDetails.token} on ${formattedDetails.chain}`
+            `Amount: ${formattedDetails.amount} ${formattedDetails.token} on ${formattedDetails.chain}`,
           );
         }
       } else {
@@ -180,7 +180,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
             processorRef: "",
             confirmed: false,
             issue: data.error.message,
-          })
+          }),
         );
       }
       setIsLoading(false);
@@ -195,7 +195,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
           processorRef: "",
           confirmed: false,
           issue: error.message,
-        })
+        }),
       );
     }
   };
