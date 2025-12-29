@@ -5,7 +5,7 @@ import { generateId } from "document-model";
 let GRAPHQL_URL = "http://localhost:4001/graphql";
 
 if (!window.document.baseURI.includes('localhost')) {
-  GRAPHQL_URL = 'https://switchboard-staging.powerhouse.xyz/graphql/invoice'
+  GRAPHQL_URL = 'https://switchboard-staging.powerhouse.xyz/graphql'
 }
 
 interface RequestFinanceProps {
