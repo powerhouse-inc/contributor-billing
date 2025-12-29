@@ -3,182 +3,7 @@ import type { DocumentNode } from "graphql";
 
 export const schema: DocumentNode = gql`
   """
-  Subgraph definition for Invoice (powerhouse/invoice)
-  """
-  type InvoiceState {
-    status: Status!
-    invoiceNo: String!
-    dateIssued: Date!
-    dateDue: Date!
-    dateDelivered: Date
-    issuer: LegalEntity!
-    payer: LegalEntity!
-    currency: String!
-    lineItems: [InvoiceLineItem!]!
-    totalPriceTaxExcl: Float!
-    totalPriceTaxIncl: Float!
-    notes: String
-    rejections: [Rejection!]!
-    payments: [Payment!]!
-    payAfter: DateTime
-    invoiceTags: [InvoiceTag!]! # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}
-    exported: ExportedData
-    closureReason: ClosureReason
-  }
-
-  enum ClosureReason {
-    UNDERPAID
-    OVERPAID
-    CANCELLED
-  }
-
-  type Rejection {
-    id: OID!
-    reason: String!
-    final: Boolean!
-  }
-
-  type ExportedData {
-    timestamp: DateTime! # ISO 8601 timestamp of the export
-    exportedLineItems: [[String!]!]! # CSV Format
-  }
-
-  type Payment {
-    id: OID!
-    processorRef: String
-    paymentDate: DateTime
-    txnRef: String
-    confirmed: Boolean!
-    issue: String
-    amount: Float
-  }
-
-  type Token {
-    evmAddress: String
-    symbol: String
-    chainName: String
-    chainId: String
-    rpc: String
-  }
-
-  type LegalEntity {
-    id: LegalEntityId
-    name: String
-    address: Address
-    contactInfo: ContactInfo
-    country: String
-    paymentRouting: PaymentRouting
-  }
-
-  type Address {
-    streetAddress: String
-    extendedAddress: String
-    city: String
-    postalCode: String
-    country: String
-    stateProvince: String
-  }
-
-  type ContactInfo {
-    tel: String
-    email: String
-  }
-
-  type PaymentRouting {
-    bank: Bank
-    wallet: InvoiceWallet
-  }
-
-  type Bank {
-    name: String!
-    address: Address!
-    ABA: String
-    BIC: String
-    SWIFT: String
-    accountNum: String!
-    accountType: InvoiceAccountType
-    beneficiary: String
-    intermediaryBank: IntermediaryBank
-    memo: String
-  }
-
-  type IntermediaryBank {
-    name: String!
-    address: Address!
-    ABA: String
-    BIC: String
-    SWIFT: String
-    accountNum: String!
-    accountType: InvoiceAccountType
-    beneficiary: String
-    memo: String
-  }
-
-  type InvoiceWallet {
-    rpc: String
-    chainName: String
-    chainId: String
-    address: String
-  }
-
-  type InvoiceLineItem {
-    id: OID!
-    description: String!
-    taxPercent: Float!
-    quantity: Float!
-    currency: String!
-    unitPriceTaxExcl: Float!
-    unitPriceTaxIncl: Float!
-    totalPriceTaxExcl: Float!
-    totalPriceTaxIncl: Float!
-    lineItemTag: [InvoiceTag!]
-  }
-
-  type InvoiceTag {
-    dimension: String! # "xero-expense-account", "xero-payment-account", "accounting-period", ...
-    value: String! # "627", ..., "090", ..., "2025/05", "2025/Q1", ...
-    label: String # "Marketing", ..., "Business Bank", ..., "May 2025"
-  }
-
-  union LegalEntityId = LegalEntityTaxId | LegalEntityCorporateRegistrationId
-
-  type LegalEntityTaxId {
-    taxId: String!
-  }
-
-  type LegalEntityCorporateRegistrationId {
-    corpRegId: String!
-  }
-
-  enum Status {
-    DRAFT
-    ISSUED
-    CANCELLED
-    ACCEPTED
-    REJECTED
-    PAYMENTSCHEDULED
-    PAYMENTSENT
-    PAYMENTISSUE
-    PAYMENTRECEIVED
-    PAYMENTCLOSED
-  }
-
-  enum InvoiceAccountType {
-    CHECKING
-    SAVINGS
-    TRUST
-    WALLET
-  }
-
-  enum InvoiceAccountTypeInput {
-    CHECKING
-    SAVINGS
-    TRUST
-    WALLET
-  }
-
-  """
-  Queries: Invoice
+  Queries: Invoice Document
   """
   type InvoiceQueries {
     getDocument(docId: PHID!, driveId: PHID): Invoice
@@ -327,51 +152,7 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: Invoice_ClosePaymentInput
     ): Int
-    Invoice_processGnosisPayment(
-      chainName: String!
-      paymentDetails: JSON!
-      invoiceNo: String!
-    ): ProcessGnosisPaymentOutput
-    Invoice_createRequestFinancePayment(  
-      paymentData: JSON!
-    ): CreateRequestFinancePaymentOutput
-    Invoice_uploadInvoicePdfChunk(
-      chunk: String!
-      chunkIndex: Int!
-      totalChunks: Int!
-      fileName: String!
-      sessionId: String!
-    ): UploadInvoicePdfChunkOutput
   }
-
-  """
-  Output type for PDF chunk upload
-  """
-  type UploadInvoicePdfChunkOutput {
-    success: Boolean!
-    data: JSON
-    error: String
-  }
-
-  """
-  Output type for request finance payment
-  """
-  type CreateRequestFinancePaymentOutput {
-    success: Boolean!
-    data: JSON
-    error: String
-  }
-
-  """
-  Output type for process gnosis payment
-  """
-  type ProcessGnosisPaymentOutput {
-    success: Boolean!
-    data: JSON
-    error: String
-  }
-
-  scalar JSON
 
   """
   Module: General
@@ -379,12 +160,13 @@ export const schema: DocumentNode = gql`
   input Invoice_EditInvoiceInput {
     invoiceNo: String
     dateIssued: String
+    dateDelivered: String
     dateDue: String
     currency: String
     notes: String
   }
   input Invoice_EditStatusInput {
-    status: Status!
+    status: Invoice_Status!
   }
   input Invoice_EditPaymentDataInput {
     id: OID!
@@ -434,7 +216,7 @@ export const schema: DocumentNode = gql`
     BIC: String
     SWIFT: String
     accountNum: String
-    accountType: InvoiceAccountTypeInput
+    accountType: Invoice_InvoiceAccountTypeInput
     beneficiary: String
     memo: String
     # intermediaryBank
@@ -449,7 +231,7 @@ export const schema: DocumentNode = gql`
     BICIntermediary: String
     SWIFTIntermediary: String
     accountNumIntermediary: String
-    accountTypeIntermediary: InvoiceAccountTypeInput
+    accountTypeIntermediary: Invoice_InvoiceAccountTypeInput
     beneficiaryIntermediary: String
     memoIntermediary: String
   }
@@ -484,7 +266,7 @@ export const schema: DocumentNode = gql`
     BIC: String
     SWIFT: String
     accountNum: String
-    accountType: InvoiceAccountTypeInput
+    accountType: Invoice_InvoiceAccountTypeInput
     beneficiary: String
     memo: String
     # intermediaryBank
@@ -499,7 +281,7 @@ export const schema: DocumentNode = gql`
     BICIntermediary: String
     SWIFTIntermediary: String
     accountNumIntermediary: String
-    accountTypeIntermediary: InvoiceAccountTypeInput
+    accountTypeIntermediary: Invoice_InvoiceAccountTypeInput
     beneficiaryIntermediary: String
     memoIntermediary: String
   }
@@ -566,7 +348,7 @@ export const schema: DocumentNode = gql`
     _placeholder: String
   }
   input Invoice_RejectInput {
-    id: OID! # New Rejection ID
+    id: OID! # New Invoice_Rejection ID
     reason: String!
     final: Boolean!
   }
@@ -578,7 +360,7 @@ export const schema: DocumentNode = gql`
     _placeholder: String
   }
   input Invoice_SchedulePaymentInput {
-    id: OID! # New Payment ID
+    id: OID! # New Invoice_Payment ID
     processorRef: String!
   }
   input Invoice_ReapprovePaymentInput {
@@ -586,23 +368,23 @@ export const schema: DocumentNode = gql`
     _placeholder: String
   }
   input Invoice_RegisterPaymentTxInput {
-    id: OID! # Payment ID
+    id: OID! # Invoice_Payment ID
     timestamp: DateTime!
     txRef: String!
   }
   input Invoice_ReportPaymentIssueInput {
-    id: OID! # Payment ID
+    id: OID! # Invoice_Payment ID
     issue: String!
   }
   input Invoice_ConfirmPaymentInput {
-    id: OID! # Payment ID
+    id: OID! # Invoice_Payment ID
     amount: Float!
   }
   input Invoice_ClosePaymentInput {
-    closureReason: ClosureReasonInput
+    closureReason: Invoice_ClosureReasonInput
   }
 
-  enum ClosureReasonInput {
+  enum Invoice_ClosureReasonInput {
     UNDERPAID
     OVERPAID
     CANCELLED

@@ -1,14 +1,17 @@
 import React, { useState } from "react";
-import { type InvoiceAction, actions } from "../../document-models/invoice/index.js";
+import {
+  type InvoiceAction,
+  actions,
+} from "../../document-models/invoice/index.js";
 import { toast } from "@powerhousedao/design-system/connect";
 import { uploadPdfChunked } from "./uploadPdfChunked.js";
 import { getCountryCodeFromName, mapChainNameToConfig } from "./utils/utils.js";
 import { LoaderCircle } from "lucide-react";
 
-let GRAPHQL_URL = "http://localhost:4001/graphql/invoice";
+let GRAPHQL_URL = "http://localhost:4001/graphql";
 
 if (!window.document.baseURI.includes("localhost")) {
-  GRAPHQL_URL = "https://switchboard.powerhouse.xyz/graphql/invoice";
+  GRAPHQL_URL = "https://switchboard.powerhouse.xyz/graphql";
 }
 
 export async function loadPDFFile({
@@ -67,7 +70,7 @@ export default function PDFUploader({
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -91,7 +94,7 @@ export default function PDFUploader({
             base64Data,
             GRAPHQL_URL,
             50 * 1024,
-            (progress) => setUploadProgress(progress)
+            (progress) => setUploadProgress(progress),
           );
 
           if (result.success) {
@@ -107,7 +110,7 @@ export default function PDFUploader({
                 dateDue:
                   invoiceData.dateDue || new Date().toISOString().split("T")[0],
                 currency: invoiceData.currency || "USD",
-              })
+              }),
             );
 
             // If we have line items, dispatch them
@@ -125,7 +128,7 @@ export default function PDFUploader({
                     unitPriceTaxIncl: item.unitPriceTaxIncl,
                     totalPriceTaxExcl: item.totalPriceTaxExcl,
                     totalPriceTaxIncl: item.totalPriceTaxIncl,
-                  })
+                  }),
                 );
 
                 // If auto-tagging assigned tags, add them
@@ -162,7 +165,7 @@ export default function PDFUploader({
                   tel: invoiceData.issuer.contactInfo?.tel || "",
                   email: invoiceData.issuer.contactInfo?.email || "",
                   id: invoiceData.issuer.id?.taxId || "",
-                })
+                }),
               );
 
               // Add bank information dispatch
@@ -186,14 +189,14 @@ export default function PDFUploader({
                     country:
                       getCountryCodeFromName(bank.address?.country) || "",
                     extendedAddress: bank.address?.extendedAddress || "",
-                  })
+                  }),
                 );
               }
 
               // Add crypto wallet information dispatch
               if (invoiceData.issuer.paymentRouting?.wallet) {
                 const chainConfig = mapChainNameToConfig(
-                  invoiceData.issuer.paymentRouting.wallet.chainName
+                  invoiceData.issuer.paymentRouting.wallet.chainName,
                 );
 
                 dispatch(
@@ -201,11 +204,14 @@ export default function PDFUploader({
                     address:
                       invoiceData.issuer.paymentRouting.wallet.address || "",
                     chainId:
-                      invoiceData.issuer.paymentRouting.wallet.chainId || chainConfig.chainId,
+                      invoiceData.issuer.paymentRouting.wallet.chainId ||
+                      chainConfig.chainId,
                     chainName:
-                      invoiceData.issuer.paymentRouting.wallet.chainName || chainConfig.chainName,
+                      invoiceData.issuer.paymentRouting.wallet.chainName ||
+                      chainConfig.chainName,
                     rpc:
-                      invoiceData.issuer.paymentRouting.wallet.rpc || chainConfig.rpc,
+                      invoiceData.issuer.paymentRouting.wallet.rpc ||
+                      chainConfig.rpc,
                   }),
                 );
               }
@@ -227,7 +233,7 @@ export default function PDFUploader({
                   tel: invoiceData.payer.contactInfo?.tel || "",
                   email: invoiceData.payer.contactInfo?.email || "",
                   id: invoiceData.payer.id?.taxId || "",
-                })
+                }),
               );
 
               // Add payer bank information if present
@@ -246,14 +252,14 @@ export default function PDFUploader({
                     beneficiary:
                       invoiceData.payer.paymentRouting.bank.beneficiary || "",
                     memo: invoiceData.payer.paymentRouting.bank.memo || "",
-                  })
+                  }),
                 );
               }
 
               // Add payer crypto wallet information if present
               if (invoiceData.payer.paymentRouting?.wallet) {
                 const payerChainConfig = mapChainNameToConfig(
-                  invoiceData.payer.paymentRouting.wallet.chainName
+                  invoiceData.payer.paymentRouting.wallet.chainName,
                 );
 
                 dispatch(
@@ -261,11 +267,14 @@ export default function PDFUploader({
                     address:
                       invoiceData.payer.paymentRouting.wallet.address || "",
                     chainId:
-                      invoiceData.payer.paymentRouting.wallet.chainId || payerChainConfig.chainId,
+                      invoiceData.payer.paymentRouting.wallet.chainId ||
+                      payerChainConfig.chainId,
                     chainName:
-                      invoiceData.payer.paymentRouting.wallet.chainName || payerChainConfig.chainName,
+                      invoiceData.payer.paymentRouting.wallet.chainName ||
+                      payerChainConfig.chainName,
                     rpc:
-                      invoiceData.payer.paymentRouting.wallet.rpc || payerChainConfig.rpc,
+                      invoiceData.payer.paymentRouting.wallet.rpc ||
+                      payerChainConfig.rpc,
                   }),
                 );
               }
@@ -296,7 +305,9 @@ export default function PDFUploader({
               );
             }, 100);
           } else {
-            const errorMsg = extractErrorMessage(result.error || "Failed to process PDF");
+            const errorMsg = extractErrorMessage(
+              result.error || "Failed to process PDF",
+            );
             throw new Error(errorMsg);
           }
         } catch (error) {
@@ -304,7 +315,7 @@ export default function PDFUploader({
           const errorMessage = extractErrorMessage(
             error instanceof Error
               ? error.message
-              : "An error occurred while processing the PDF"
+              : "An error occurred while processing the PDF",
           );
           setError(errorMessage);
         } finally {
@@ -323,7 +334,7 @@ export default function PDFUploader({
       setError(
         error instanceof Error
           ? error.message
-          : "An error occurred while handling the file"
+          : "An error occurred while handling the file",
       );
       setIsLoading(false);
     }

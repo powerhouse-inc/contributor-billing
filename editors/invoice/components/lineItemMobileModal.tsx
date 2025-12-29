@@ -45,12 +45,14 @@ export function LineItemMobileModal({
   isNew = false,
 }: LineItemMobileModalProps) {
   const [description, setDescription] = useState(item?.description ?? "");
-  const [quantity, setQuantity] = useState<number | string>(item?.quantity ?? 1);
+  const [quantity, setQuantity] = useState<number | string>(
+    item?.quantity ?? 1,
+  );
   const [unitPriceTaxExcl, setUnitPriceTaxExcl] = useState<number | string>(
-    item?.unitPriceTaxExcl ?? 0
+    item?.unitPriceTaxExcl ?? 0,
   );
   const [taxPercent, setTaxPercent] = useState<number | string>(
-    item?.taxPercent ?? 0
+    item?.taxPercent ?? 0,
   );
 
   // Update state when item changes
@@ -63,7 +65,8 @@ export function LineItemMobileModal({
 
   // Calculate totals
   const calculatedValues = useMemo(() => {
-    const qty = typeof quantity === "string" ? parseFloat(quantity) || 1 : quantity;
+    const qty =
+      typeof quantity === "string" ? parseFloat(quantity) || 1 : quantity;
     const unitPrice =
       typeof unitPriceTaxExcl === "string"
         ? parseFloat(unitPriceTaxExcl) || 0
@@ -88,7 +91,7 @@ export function LineItemMobileModal({
 
   const handleSave = () => {
     // For edit: use existing ID (if valid), For new or empty ID: generate ID
-    const needsNewId = isNew || !item?.id || item.id === '';
+    const needsNewId = isNew || !item?.id || item.id === "";
     const lineItem = {
       id: needsNewId ? generateId() : item.id,
       currency,

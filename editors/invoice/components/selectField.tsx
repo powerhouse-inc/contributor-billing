@@ -288,24 +288,24 @@ export const SelectField = (props: SelectFieldProps) => {
       } else if (status === "ISSUED") {
         if (value === "REJECT_INVOICE") onChange("REJECTED");
         else if (value === "ACCEPT_INVOICE") onChange("ACCEPTED");
-      } else if (status === 'REJECTED') {
+      } else if (status === "REJECTED") {
         if (value === "RE_INSTATE_INVOICE") onChange("ISSUED");
-      } else if (status === 'ACCEPTED') {
+      } else if (status === "ACCEPTED") {
         if (value === "SCHEDULE_PAYMENT") onChange("PAYMENTSCHEDULED");
         else if (value === "CLOSE_PAYMENT") onChange("PAYMENTCLOSED");
-      } else if (status === 'PAYMENTSCHEDULED') {
+      } else if (status === "PAYMENTSCHEDULED") {
         if (value === "REGISTER_PAYMENT") onChange("PAYMENTSENT");
         else if (value === "REPORT_PAYMENT_ISSUE") onChange("PAYMENTISSUE");
         else if (value === "CLOSE_PAYMENT") onChange("PAYMENTCLOSED");
-      } else if (status === 'PAYMENTSENT') {
+      } else if (status === "PAYMENTSENT") {
         if (value === "REPORT_PAYMENT_ISSUE") onChange("PAYMENTISSUE");
         else if (value === "CONFIRM_PAYMENT") onChange("PAYMENTRECEIVED");
-      } else if (status === 'PAYMENTISSUE') {
+      } else if (status === "PAYMENTISSUE") {
         if (value === "RE_APPROVE_PAYMENT") onChange("ACCEPTED");
         else if (value === "CLOSE_PAYMENT") onChange("PAYMENTCLOSED");
-      } else if (status === 'PAYMENTRECEIVED') {
+      } else if (status === "PAYMENTRECEIVED") {
         if (value === "REPORT_PAYMENT_ISSUE") onChange("PAYMENTISSUE");
-      } else if (status === 'PAYMENTCLOSED') {
+      } else if (status === "PAYMENTCLOSED") {
         if (value === "RE_APPROVE_PAYMENT") onChange("ACCEPTED");
       }
 

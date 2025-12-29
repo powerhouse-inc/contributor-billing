@@ -1,26 +1,48 @@
 import type { InvoiceGeneralOperations } from "@powerhousedao/contributor-billing/document-models/invoice";
 
+/**
+ * Converts a date string to ISO datetime format if it's not already in that format
+ * Handles both date-only (YYYY-MM-DD) and datetime (YYYY-MM-DDTHH:mm:ss.sssZ) strings
+ */
+function ensureDatetimeFormat(
+  dateStr: string | null | undefined,
+): string | null {
+  if (!dateStr || dateStr.trim() === "") return null;
+  // If it's already a datetime string, return as is
+  if (dateStr.includes("T")) return dateStr;
+  // Convert date-only to datetime at midnight UTC
+  return `${dateStr}T00:00:00.000Z`;
+}
+
 export const invoiceGeneralOperations: InvoiceGeneralOperations = {
-  editInvoiceOperation(state, action, dispatch) {
+  editInvoiceOperation(state, action) {
     const newState = { ...state };
 
     newState.currency = action.input.currency ?? state.currency;
-    newState.dateDue = action.input.dateDue ?? state.dateDue;
-    newState.dateIssued = action.input.dateIssued ?? state.dateIssued;
-    newState.dateDelivered = action.input.dateDelivered ?? state.dateDelivered;
+    // Convert date strings to datetime format to match Zod schema requirements
+    newState.dateDue =
+      action.input.dateDue !== undefined
+        ? ensureDatetimeFormat(action.input.dateDue)
+        : state.dateDue;
+    newState.dateIssued =
+      action.input.dateIssued !== undefined
+        ? ensureDatetimeFormat(action.input.dateIssued)
+        : state.dateIssued;
+    newState.dateDelivered =
+      action.input.dateDelivered !== undefined
+        ? ensureDatetimeFormat(action.input.dateDelivered)
+        : state.dateDelivered;
     newState.invoiceNo = action.input.invoiceNo ?? state.invoiceNo;
     newState.notes = action.input.notes ?? state.notes;
 
     state = Object.assign(state, newState);
-
   },
-  editStatusOperation(state, action, dispatch) {
+  editStatusOperation(state, action) {
     state.status = action.input.status;
-
   },
-  editPaymentDataOperation(state, action, dispatch) {
+  editPaymentDataOperation(state, action) {
     const payment = state.payments.find(
-      (payment) => payment.id === action.input.id
+      (payment) => payment.id === action.input.id,
     );
     if (payment) {
       payment.processorRef = action.input.processorRef ?? payment.processorRef;
@@ -29,13 +51,14 @@ export const invoiceGeneralOperations: InvoiceGeneralOperations = {
       payment.confirmed = action.input.confirmed ?? payment.confirmed;
       payment.issue = action.input.issue ?? payment.issue;
     }
-
   },
-  addPaymentOperation(state, action, dispatch) {
+  addPaymentOperation(state, action) {
     const payment = {
       id: action.input.id,
       processorRef: action.input.processorRef ?? "",
-      paymentDate: action.input.paymentDate ?? "",
+      paymentDate:
+        ensureDatetimeFormat(action.input.paymentDate) ??
+        new Date().toISOString(),
       txnRef: action.input.txnRef ?? "",
       confirmed: action.input.confirmed ?? false,
       issue: action.input.issue ?? "",
@@ -43,12 +66,11 @@ export const invoiceGeneralOperations: InvoiceGeneralOperations = {
     };
     state.payments.push(payment);
   },
-  setExportedDataOperation(state, action, dispatch) {
+  setExportedDataOperation(state, action) {
     const exportedData = {
       timestamp: action.input.timestamp,
       exportedLineItems: action.input.exportedLineItems,
     };
     state.exported = exportedData;
-
-  }
+  },
 };

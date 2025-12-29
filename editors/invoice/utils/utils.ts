@@ -7,7 +7,7 @@ type Country = {
   };
   cca2: string;
 };
-const countriesArray = (countries as unknown) as Country[];
+const countriesArray = countries as unknown as Country[];
 
 // Function to convert country name to country code
 export const getCountryCodeFromName = (
@@ -88,17 +88,17 @@ export const CHAIN_CONFIGS: Record<string, ChainConfig> = {
   base: {
     chainName: "Base",
     chainId: "8453",
-    rpc: "https://base.llamarpc.com"
+    rpc: "https://base.llamarpc.com",
   },
   ethereum: {
     chainName: "Ethereum",
     chainId: "1",
-    rpc: "https://eth.llamarpc.com"
+    rpc: "https://eth.llamarpc.com",
   },
   "arbitrum one": {
     chainName: "Arbitrum One",
     chainId: "42161",
-    rpc: "https://arb1.arbitrum.io/rpc"
+    rpc: "https://arb1.arbitrum.io/rpc",
   },
 };
 
@@ -111,7 +111,9 @@ export const DEFAULT_CHAIN_CONFIG: ChainConfig = CHAIN_CONFIGS.ethereum;
  * @param chainName - Chain name from various sources (Claude AI, user input, etc.)
  * @returns ChainConfig object with chainName, chainId, and rpc
  */
-export function mapChainNameToConfig(chainName: string | null | undefined): ChainConfig {
+export function mapChainNameToConfig(
+  chainName: string | null | undefined,
+): ChainConfig {
   if (!chainName) {
     return DEFAULT_CHAIN_CONFIG;
   }
@@ -138,7 +140,9 @@ export function mapChainNameToConfig(chainName: string | null | undefined): Chai
   }
 
   // If no match found, return default (Ethereum)
-  console.warn(`Unknown chain name: "${chainName}". Using default chain: ${DEFAULT_CHAIN_CONFIG.chainName}`);
+  console.warn(
+    `Unknown chain name: "${chainName}". Using default chain: ${DEFAULT_CHAIN_CONFIG.chainName}`,
+  );
   return DEFAULT_CHAIN_CONFIG;
 }
 
@@ -156,5 +160,8 @@ export function getAllChainConfigs(): ChainConfig[] {
  * @returns ChainConfig if found, null otherwise
  */
 export function getChainConfigByChainId(chainId: string): ChainConfig | null {
-  return Object.values(CHAIN_CONFIGS).find(config => config.chainId === chainId) || null;
+  return (
+    Object.values(CHAIN_CONFIGS).find((config) => config.chainId === chainId) ||
+    null
+  );
 }

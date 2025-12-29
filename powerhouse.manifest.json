@@ -12,55 +12,20 @@
             "name": "Invoice"
         },
         {
-            "id": "powerhouse/integrations",
-            "name": "Integrations"
-        },
-        {
             "id": "powerhouse/billing-statement",
             "name": "Billing Statement"
         },
         {
+            "id": "powerhouse/integrations",
+            "name": "Integrations"
+        },
+        {
             "id": "powerhouse/expense-report",
-            "name": "Expense Report"
+            "name": "ExpenseReport"
         }
     ],
-    "editors": [
-        {
-            "id": "powerhouse-invoice-editor",
-            "name": "Invoice",
-            "documentTypes": [
-                "powerhouse/invoice"
-            ]
-        },
-        {
-            "id": "powerhouse-billing-statement-editor",
-            "name": "Billing Statement",
-            "documentTypes": [
-                "powerhouse/billing-statement"
-            ]
-        },
-        {
-            "id": "integrations-editor",
-            "name": "Integrations",
-            "documentTypes": [
-                "powerhouse/integrations"
-            ]
-        },
-        {
-            "id": "powerhouse-expense-report-editor",
-            "name": "Expense Report",
-            "documentTypes": [
-                "powerhouse/expense-report"
-            ]
-        }
-    ],
-    "apps": [
-        {
-            "id": "contributor-billing",
-            "name": "Contributor Billing",
-            "driveEditor": "contributor-billing"
-        }
-    ],
+    "editors": [],
+    "apps": [],
     "subgraphs": [],
     "importScripts": []
 }

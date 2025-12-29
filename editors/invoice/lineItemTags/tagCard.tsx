@@ -20,10 +20,10 @@ export function TagCard({ item, onEdit }: TagCardProps) {
 
   // Get tag values
   const periodTag = item.lineItemTag.find(
-    (tag) => tag.dimension === "accounting-period"
+    (tag) => tag.dimension === "accounting-period",
   );
   const expenseTag = item.lineItemTag.find(
-    (tag) => tag.dimension === "xero-expense-account"
+    (tag) => tag.dimension === "xero-expense-account",
   );
 
   return (

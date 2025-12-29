@@ -15,6 +15,7 @@ import {
   EditStatusInputSchema,
   AddLineItemInputSchema,
   EditLineItemInputSchema,
+  DeleteLineItemInputSchema,
   EditLineItemTagInputSchema,
 } from "./schema/zod.js";
 
@@ -67,6 +68,15 @@ const stateReducer: StateReducer<BillingStatementPHState> = (
     case "EDIT_LINE_ITEM":
       EditLineItemInputSchema().parse(action.input);
       billingStatementLineItemsOperations.editLineItemOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "DELETE_LINE_ITEM":
+      DeleteLineItemInputSchema().parse(action.input);
+      billingStatementLineItemsOperations.deleteLineItemOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

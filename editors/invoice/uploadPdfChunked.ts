@@ -6,10 +6,10 @@
  * @param onProgress Callback for upload progress
  */
 
-let GRAPHQL_URL = 'http://localhost:4001/graphql/invoice'
+let GRAPHQL_URL = "http://localhost:4001/graphql";
 
 if (!window.document.baseURI.includes('localhost')) {
-  GRAPHQL_URL = 'https://switchboard.powerhouse.xyz/graphql/invoice'
+  GRAPHQL_URL = 'https://switchboard.powerhouse.xyz/graphql'
 }
 
 export async function uploadPdfChunked(
@@ -81,7 +81,10 @@ export async function uploadPdfChunked(
     }
 
     // If this is the last chunk and it was successful, return the final result
-    if (i === totalChunks - 1 && result.data?.Invoice_uploadInvoicePdfChunk?.success) {
+    if (
+      i === totalChunks - 1 &&
+      result.data?.Invoice_uploadInvoicePdfChunk?.success
+    ) {
       return result.data.Invoice_uploadInvoicePdfChunk;
     }
   }

@@ -120,6 +120,10 @@ input EditLineItemInput {
   totalPriceCash: Float
 }
 
+input DeleteLineItemInput {
+  id: OID!
+}
+
 # tags
 
 input EditLineItemTagInput {
