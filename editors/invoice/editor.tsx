@@ -679,7 +679,7 @@ export default function Editor() {
   return (
     <div>
       <DocumentToolbar document={doc} onClose={handleClose} />
-      <div className="container mx-auto">
+      <div className="container mx-auto mt-4">
         <ToastContainer
           position="bottom-right"
           autoClose={5000}
