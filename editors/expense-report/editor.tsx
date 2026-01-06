@@ -6,21 +6,21 @@ import { WalletsTable } from "./components/WalletsTable.js";
 import { AggregatedExpensesTable } from "./components/AggregatedExpensesTable.js";
 import { AddBillingStatementModal } from "./components/AddBillingStatementModal.js";
 import { ExpenseReportPDF } from "./components/ExpenseReportPDF.js";
-import { ExpenseReportTransactionsTable } from "./components/ExpenseReportTransactionsTable.js";
-import type { TransactionEntry } from "../../document-models/account-transactions/gen/types.js";
 import { pdf } from "@react-pdf/renderer";
 import { PDFViewer } from "@react-pdf/renderer";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
   useParentFolderForSelectedNode,
-  useDocumentsInSelectedDrive,
 } from "@powerhousedao/reactor-browser";
+import { useSyncWallet } from "./hooks/useSyncWallet.js";
+import { RefreshCw } from "lucide-react";
 
 export default function Editor() {
   const [document, dispatch] = useSelectedExpenseReportDocument();
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSyncingAll, setIsSyncingAll] = useState(false);
   const [periodStart, setPeriodStart] = useState<string>(
     document.state.global.periodStart || "",
   );
@@ -29,52 +29,7 @@ export default function Editor() {
   );
 
   const { wallets, groups } = document.state.global;
-  const documentsInDrive = useDocumentsInSelectedDrive();
-
-  const transactionsByWallet = useMemo(() => {
-    if (!documentsInDrive) return [];
-
-    const start = periodStart ? new Date(periodStart) : null;
-    const end = periodEnd ? new Date(periodEnd) : null;
-
-    // Create a set of all wallet addresses in the expense report for intergroup detection
-    const walletAddresses = new Set(wallets.map((w) => w.wallet.toLowerCase()));
-
-    return wallets.flatMap((wallet) => {
-      const txDocId = (wallet as any).accountTransactionsDocumentId;
-      if (!txDocId) return [];
-
-      const txDoc = documentsInDrive.find(
-        (doc) =>
-          doc.header.id === txDocId &&
-          doc.header.documentType === "powerhouse/account-transactions",
-      ) as any;
-
-      const txs: TransactionEntry[] = txDoc?.state?.global?.transactions || [];
-      return txs
-        .filter((tx: TransactionEntry) => {
-          if (!tx?.datetime) return false;
-          const dt = new Date(tx.datetime);
-          if (Number.isNaN(dt.getTime())) return false;
-          if (start && dt < start) return false;
-          if (end && dt > end) return false;
-          return true;
-        })
-        .map((tx: TransactionEntry) => {
-          // Check if counterParty is another wallet in the expense report
-          const isIntergroup = tx.counterParty
-            ? walletAddresses.has(tx.counterParty.toLowerCase())
-            : false;
-
-          return {
-            walletName: wallet.name || wallet.wallet,
-            walletAddress: wallet.wallet,
-            transaction: tx,
-            isIntergroup,
-          };
-        });
-    });
-  }, [documentsInDrive, wallets, periodStart, periodEnd]);
+  const { syncWallet } = useSyncWallet();
 
   // Handle period date changes
   const handlePeriodStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,6 +58,41 @@ export default function Editor() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedWallet(null);
+  };
+
+  // Handle sync all wallets
+  const handleSyncAllWallets = () => {
+    if (!periodStart || !periodEnd) {
+      alert(
+        "Please set the period start and end dates before syncing wallet transactions.",
+      );
+      return;
+    }
+
+    setIsSyncingAll(true);
+
+    // Sync all wallets that have either billing statements or transactions
+    wallets.forEach((wallet) => {
+      if (
+        wallet.wallet &&
+        ((wallet.billingStatements && wallet.billingStatements.length > 0) ||
+          wallet.accountTransactionsDocumentId)
+      ) {
+        syncWallet(
+          wallet.wallet,
+          (wallet.lineItems || []).filter((item) => item !== null),
+          (wallet.billingStatements || []).filter((id) => id !== null),
+          groups,
+          wallets,
+          wallet.accountTransactionsDocumentId,
+          periodStart,
+          periodEnd,
+          dispatch,
+        );
+      }
+    });
+
+    setIsSyncingAll(false);
   };
 
   // Handle PDF export
@@ -203,10 +193,22 @@ export default function Editor() {
 
             {/* Wallets Section */}
             <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                   Wallets
                 </h2>
+                <Button
+                  variant="ghost"
+                  onClick={handleSyncAllWallets}
+                  disabled={isSyncingAll}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw
+                    size={16}
+                    className={isSyncingAll ? "animate-spin" : ""}
+                  />
+                  <span>{isSyncingAll ? "Syncing..." : "Sync All"}</span>
+                </Button>
               </div>
               <div className="p-6">
                 <WalletsTable
@@ -268,26 +270,6 @@ export default function Editor() {
             dispatch={dispatch}
             groups={groups}
           />
-        )}
-
-        {/* Transactions Section */}
-        {transactionsByWallet.length > 0 && (
-          <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Transactions ({transactionsByWallet.length})
-              </h2>
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                Filtered by selected period
-              </span>
-            </div>
-            <div className="p-6">
-              <ExpenseReportTransactionsTable
-                transactions={transactionsByWallet}
-                wallets={wallets}
-              />
-            </div>
-          </section>
         )}
       </div>
     </div>

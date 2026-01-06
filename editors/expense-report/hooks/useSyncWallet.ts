@@ -154,7 +154,7 @@ export function useSyncWallet() {
           const group = groups.find((g) => g.id === groupId);
           categoryAggregation.set(categoryKey, {
             groupId: groupId,
-            groupLabel: group?.label || "Uncategorised",
+            groupLabel: group?.label || "Uncategorized",
             budget: 0,
             actuals: billingLineItem.totalPriceCash || 0,
             forecast: 0,
@@ -164,38 +164,30 @@ export function useSyncWallet() {
       });
     });
 
-    // Calculate payments from transactions for "Other" category if we have the data
-    const OTHER_CATEGORY_ID = "f0077e3f-2931-4637-8715-ba3a01ce3786";
-    const otherGroup = groups.find((g) => g.id === OTHER_CATEGORY_ID);
-
-    if (
-      otherGroup &&
-      accountTransactionsDocumentId &&
-      periodStart &&
-      periodEnd
-    ) {
-      const otherCategoryPayments = calculatePaymentsFromTransactions(
+    // Calculate payments from transactions for "Uncategorized" items
+    if (accountTransactionsDocumentId && periodStart && periodEnd) {
+      const transactionPayments = calculatePaymentsFromTransactions(
         accountTransactionsDocumentId,
         periodStart,
         periodEnd,
       );
 
-      if (otherCategoryPayments > 0) {
-        // Check if "Other" category already exists in aggregation
-        const existing = categoryAggregation.get(OTHER_CATEGORY_ID);
+      if (transactionPayments > 0) {
+        // Add payments to "uncategorized" category
+        const uncategorized = categoryAggregation.get("uncategorized");
 
-        if (existing) {
-          // Update existing "Other" category with payments
-          existing.payments = otherCategoryPayments;
+        if (uncategorized) {
+          // Update existing uncategorized category with payments
+          uncategorized.payments = transactionPayments;
         } else {
-          // Create new "Other" category entry with payments
-          categoryAggregation.set(OTHER_CATEGORY_ID, {
-            groupId: OTHER_CATEGORY_ID,
-            groupLabel: otherGroup.label || "Other",
+          // Create new uncategorized category entry with payments
+          categoryAggregation.set("uncategorized", {
+            groupId: null,
+            groupLabel: "Uncategorized",
             budget: 0,
             actuals: 0,
             forecast: 0,
-            payments: otherCategoryPayments,
+            payments: transactionPayments,
           });
         }
       }
