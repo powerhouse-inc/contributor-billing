@@ -77,10 +77,10 @@ export function createIntegrationsDocument(
   const document = createDocument(
     state
       ? createState(
-          createBaseState(state.auth, state.document),
-          state.global,
-          state.local,
-        )
+        createBaseState(state.auth, state.document),
+        state.global,
+        state.local,
+      )
       : undefined,
   );
 

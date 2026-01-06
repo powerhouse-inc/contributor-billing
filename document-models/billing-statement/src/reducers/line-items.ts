@@ -3,44 +3,44 @@ import type { BillingStatementLineItemsOperations, BillingStatementState } from 
 // Extended operations interface to include delete operation (will be in gen files after MCP update)
 
 export const billingStatementLineItemsOperations: BillingStatementLineItemsOperations =
-  {
-    addLineItemOperation(state, action) {
-      const newLineItem = {
-        ...action.input,
-        lineItemTag: [],
-      };
+{
+  addLineItemOperation(state, action) {
+    const newLineItem = {
+      ...action.input,
+      lineItemTag: [],
+    };
 
-      // Check for duplicate ID
-      if (state.lineItems.find((x) => x.id === newLineItem.id)) {
-        throw new Error("Duplicate line item ID");
-      }
+    // Check for duplicate ID
+    if (state.lineItems.find((x) => x.id === newLineItem.id)) {
+      throw new Error("Duplicate line item ID");
+    }
 
-      state.lineItems.push(newLineItem);
-      updateTotals(state);
-    },
-    editLineItemOperation(state, action) {
-      const stateItem = state.lineItems.find((x) => x.id === action.input.id);
-      if (!stateItem) throw new Error("Item matching input.id not found");
+    state.lineItems.push(newLineItem);
+    updateTotals(state);
+  },
+  editLineItemOperation(state, action) {
+    const stateItem = state.lineItems.find((x) => x.id === action.input.id);
+    if (!stateItem) throw new Error("Item matching input.id not found");
 
-      const sanitizedInput = Object.fromEntries(
-        Object.entries(action.input).filter(([, value]) => value !== null),
-      );
+    const sanitizedInput = Object.fromEntries(
+      Object.entries(action.input).filter(([, value]) => value !== null),
+    );
 
-      const nextItem = {
-        ...stateItem,
-        ...sanitizedInput,
-      };
+    const nextItem = {
+      ...stateItem,
+      ...sanitizedInput,
+    };
 
-      Object.assign(stateItem, nextItem);
-      updateTotals(state);
-    },
-    deleteLineItemOperation(state, action) {
-      state.lineItems = state.lineItems.filter(
-        (x) => x.id !== action.input.id,
-      );
-      updateTotals(state);
-    },
-  };
+    Object.assign(stateItem, nextItem);
+    updateTotals(state);
+  },
+  deleteLineItemOperation(state, action) {
+    state.lineItems = state.lineItems.filter(
+      (x) => x.id !== action.input.id,
+    );
+    updateTotals(state);
+  },
+};
 
 const updateTotals = (state: BillingStatementState) => {
   state.totalCash = state.lineItems.reduce((total, lineItem) => {
