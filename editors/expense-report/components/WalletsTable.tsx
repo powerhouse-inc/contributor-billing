@@ -13,17 +13,24 @@ import {
 import type {
   Wallet,
   LineItemGroup,
+  LineItem,
 } from "../../../document-models/expense-report/gen/types.js";
 import { actions } from "../../../document-models/expense-report/index.js";
 import { useWalletSync } from "../hooks/useWalletSync.js";
 import { useSyncWallet } from "../hooks/useSyncWallet.js";
 import { walletAccountService } from "../services/walletAccountService.js";
-import { useDocumentsInSelectedDrive, useSelectedDrive } from "@powerhousedao/reactor-browser";
+import {
+  useDocumentsInSelectedDrive,
+  useSelectedDrive,
+  setSelectedNode,
+} from "@powerhousedao/reactor-browser";
 
 interface WalletsTableProps {
   wallets: Wallet[];
   groups: LineItemGroup[];
   onAddBillingStatement: (walletAddress: string) => void;
+  periodStart: string;
+  periodEnd: string;
   dispatch: any;
 }
 
@@ -31,12 +38,12 @@ export function WalletsTable({
   wallets,
   groups,
   onAddBillingStatement,
+  periodStart,
+  periodEnd,
   dispatch,
 }: WalletsTableProps) {
-  const [newWalletAddress, setNewWalletAddress] = useState("");
-  const [newWalletName, setNewWalletName] = useState("");
+  const [selectedAccountId, setSelectedAccountId] = useState<string>("");
   const [walletError, setWalletError] = useState("");
-  const [hoveredWallet, setHoveredWallet] = useState<string | null>(null);
   const [editingWallet, setEditingWallet] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [copiedWallet, setCopiedWallet] = useState<string | null>(null);
@@ -47,112 +54,209 @@ export function WalletsTable({
   const [selectedDrive] = useSelectedDrive();
   const allDocuments = useDocumentsInSelectedDrive();
 
+  // Get available Account documents from the drive
+  const availableAccounts =
+    allDocuments?.filter(
+      (doc: any) => doc.header.documentType === "powerhouse/accounts",
+    ) || [];
+
+  // Extract all account entries from all Accounts documents
+  const accountEntries = availableAccounts.flatMap((doc: any) => {
+    const accounts = doc.state?.global?.accounts || [];
+    return accounts.map((acc: any) => ({
+      ...acc,
+      accountsDocumentId: doc.header.id, // Store which Accounts document this came from
+    }));
+  });
+
   // Check sync status
   const { needsSync, outdatedWallets, tagChangedWallets } =
     useWalletSync(wallets);
   const { syncWallet } = useSyncWallet();
 
   const handleAddWallet = async () => {
-    console.log('[WalletsTable] handleAddWallet called');
-    const trimmedAddress = newWalletAddress.trim();
+    if (!selectedAccountId) {
+      setWalletError("Please select an account");
+      return;
+    }
 
-    if (!trimmedAddress) {
-      console.log('[WalletsTable] No wallet address provided');
+    // Find the selected account from accountEntries
+    const selectedAccount = accountEntries.find(
+      (acc: any) => acc.id === selectedAccountId,
+    );
+
+    if (!selectedAccount) {
+      setWalletError("Selected account not found");
       return;
     }
 
     // Check if wallet already exists
-    const walletExists = wallets.some((w) => w.wallet === trimmedAddress);
+    const walletExists = wallets.some(
+      (w) => w.wallet === selectedAccount.account,
+    );
 
     if (walletExists) {
-      setWalletError("This wallet already exists");
+      setWalletError("This account is already added to the report");
       return;
     }
 
     setAddingWallet(true);
     setWalletError("");
 
-    console.log('[WalletsTable] Starting wallet addition process', {
-      address: trimmedAddress,
-      name: newWalletName.trim() || undefined,
-      driveId: selectedDrive?.header.id,
-      documentsCount: allDocuments?.length || 0
-    });
-
     try {
-      // First, add the wallet to the expense report
+      // Add the wallet to the expense report
       dispatch(
         actions.addWallet({
-          wallet: trimmedAddress,
-          name: newWalletName.trim() || undefined,
-        })
+          wallet: selectedAccount.account,
+          name: selectedAccount.name || undefined,
+        }),
       );
 
-      // Then, process account and transactions documents
-      const driveId = selectedDrive?.header.id;
-      
-      console.log('[WalletsTable] Drive information:', {
-        hasSelectedDrive: !!selectedDrive,
-        driveId,
-        driveHeader: selectedDrive?.header,
-        driveName: selectedDrive?.header?.name
-      });
-      
-      if (!driveId) {
-        console.warn('[WalletsTable] No drive selected - documents will be created but not added to drive');
-        // Still proceed, but documents won't be added to drive
-      }
-
-      console.log('[WalletsTable] Processing wallet account documents...', {
-        driveId,
-        hasDrive: !!selectedDrive,
-        hasDocuments: !!allDocuments,
-        documentsCount: allDocuments?.length || 0
-      });
-      
-      const result = await walletAccountService.processWalletAddition(
-        trimmedAddress,
-        newWalletName.trim() || undefined,
-        driveId,
-        allDocuments
+      // Immediately update with the linked document IDs
+      dispatch(
+        actions.updateWallet({
+          address: selectedAccount.account,
+          accountDocumentId: selectedAccount.accountsDocumentId || undefined,
+          accountTransactionsDocumentId:
+            selectedAccount.accountTransactionsId || undefined,
+        }),
       );
 
-      console.log('[WalletsTable] Wallet account service result:', result);
-
-      if (result.success) {
-        // Update wallet with document IDs
-        if (result.accountDocumentId || result.accountTransactionsDocumentId) {
-          console.log('[WalletsTable] Updating wallet with document IDs:', {
-            accountDocumentId: result.accountDocumentId,
-            accountTransactionsDocumentId: result.accountTransactionsDocumentId
-          });
-          dispatch(
-            actions.updateWallet({
-              address: trimmedAddress,
-              accountDocumentId: result.accountDocumentId || undefined,
-              accountTransactionsDocumentId: result.accountTransactionsDocumentId || undefined,
-            } as any)
-          );
-        } else {
-          console.warn('[WalletsTable] Service succeeded but no document IDs returned');
-        }
-        
-        // Note: Documents are created and added to the drive, but the UI may need a moment to refresh
-        // The useDocumentsInSelectedDrive hook should automatically detect the new documents
-        console.log('[WalletsTable] Documents created successfully. UI should refresh automatically.');
-      } else {
-        console.error('[WalletsTable] Failed to process wallet account documents:', result.message);
-        // Show error to user
-        setWalletError(`Wallet added, but failed to link documents: ${result.message}`);
-      }
-
-      setNewWalletAddress("");
-      setNewWalletName("");
+      // Clear selection
+      setSelectedAccountId("");
     } catch (error) {
       console.error("Error adding wallet:", error);
       setWalletError("Failed to add wallet. Please try again.");
     } finally {
       setAddingWallet(false);
+    }
+  };
+
+  const handleAddTransactions = async (wallet: Wallet) => {
+    if (!wallet.wallet) {
+      return;
+    }
+
+    // Check if transactions document already exists
+    if (wallet.accountTransactionsDocumentId) {
+      return;
+    }
+
+    try {
+      // Find or create AccountTransactions document for this wallet
+      const existingTxDoc = allDocuments?.find(
+        (doc: any) =>
+          doc.header.documentType === "powerhouse/account-transactions" &&
+          doc.state?.global?.account === wallet.wallet,
+      );
+
+      if (existingTxDoc) {
+        // Link existing document
+        dispatch(
+          actions.updateWallet({
+            address: wallet.wallet,
+            accountTransactionsDocumentId: existingTxDoc.header.id,
+          }),
+        );
+      } else {
+        // Create a new AccountTransactions document using GraphQL
+
+        // Get the GraphQL endpoint
+        const graphqlEndpoint =
+          typeof window !== "undefined" &&
+          !window.document.baseURI.includes("localhost")
+            ? "https://switchboard-dev.powerhouse.xyz/graphql"
+            : "http://localhost:4001/graphql";
+
+        // Step 1: Create the document
+        const documentName = `${wallet.name || wallet.wallet.substring(0, 10)} Transactions`;
+
+        const createResponse = await fetch(graphqlEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+              mutation CreateAccountTransactionsDocument($name: String!, $driveId: String) {
+                AccountTransactions_createDocument(name: $name, driveId: $driveId)
+              }
+            `,
+            variables: {
+              name: documentName,
+              driveId: selectedDrive?.header?.id,
+            },
+          }),
+        });
+
+        if (!createResponse.ok) {
+          throw new Error(
+            `Failed to create AccountTransactions document: ${createResponse.status}`,
+          );
+        }
+
+        const createResult = (await createResponse.json()) as {
+          errors?: Array<{ message: string }>;
+          data?: {
+            AccountTransactions_createDocument?: string;
+          };
+        };
+
+        if (createResult.errors) {
+          throw new Error(
+            createResult.errors[0]?.message ||
+              "Failed to create AccountTransactions document",
+          );
+        }
+
+        const newDocId = createResult.data?.AccountTransactions_createDocument;
+        if (!newDocId) {
+          throw new Error(
+            "Failed to create AccountTransactions document - no ID returned",
+          );
+        }
+
+        // Step 2: Set the account information in the document
+        const setAccountResponse = await fetch(graphqlEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `
+              mutation SetAccount($docId: PHID!, $input: AccountTransactions_SetAccountInput!) {
+                AccountTransactions_setAccount(docId: $docId, input: $input)
+              }
+            `,
+            variables: {
+              docId: newDocId,
+              input: {
+                address: wallet.wallet,
+                name: wallet.name || wallet.wallet,
+              },
+            },
+          }),
+        });
+
+        if (setAccountResponse.ok) {
+          const setAccountResult = (await setAccountResponse.json()) as {
+            errors?: Array<{ message: string }>;
+          };
+          if (setAccountResult.errors) {
+            console.warn(
+              "[WalletsTable] Failed to set account:",
+              setAccountResult.errors[0]?.message,
+            );
+          }
+        }
+
+        // Step 3: Link the new document to the wallet
+        dispatch(
+          actions.updateWallet({
+            address: wallet.wallet,
+            accountTransactionsDocumentId: newDocId,
+          }),
+        );
+      }
+    } catch (error) {
+      console.error("[WalletsTable] Error adding transactions:", error);
+      alert("Failed to add transactions document");
     }
   };
 
@@ -171,7 +275,7 @@ export function WalletsTable({
         actions.updateWallet({
           address: walletAddress,
           name: trimmedName,
-        })
+        }),
       );
     }
     setEditingWallet(null);
@@ -195,35 +299,43 @@ export function WalletsTable({
   };
 
   const handleSyncWallet = async (wallet: Wallet) => {
-    if (
-      !wallet.wallet ||
-      !wallet.billingStatements ||
-      wallet.billingStatements.length === 0
-    ) {
+    if (!wallet.wallet) {
+      return;
+    }
+
+    // Validate period dates before syncing
+    if (!periodStart || !periodEnd) {
+      alert(
+        "Please set the period start and end dates before syncing wallet transactions.",
+      );
       return;
     }
 
     setSyncingWallet(wallet.wallet);
 
     try {
-      // Remove all existing line items first
-      const lineItemsToRemove = [...(wallet.lineItems || [])];
-      lineItemsToRemove.forEach((item) => {
-        if (item?.id) {
-          dispatch(
-            actions.removeLineItem({
-              wallet: wallet.wallet!,
-              lineItemId: item.id,
-            })
-          );
-        }
-      });
-
-      // Re-extract line items from billing statements
-      const billingStatementIds = wallet.billingStatements.filter(
-        (id): id is string => id !== null && id !== undefined
+      // Get existing line items (don't remove them, we'll update instead)
+      const existingLineItems = (wallet.lineItems || []).filter(
+        (item): item is LineItem => item !== null && item !== undefined,
       );
-      syncWallet(wallet.wallet, billingStatementIds, groups, dispatch);
+
+      // Get billing statement IDs
+      const billingStatementIds = (wallet.billingStatements || []).filter(
+        (id): id is string => id !== null && id !== undefined,
+      );
+
+      // Sync wallet with all new parameters
+      syncWallet(
+        wallet.wallet,
+        existingLineItems,
+        billingStatementIds,
+        groups,
+        wallets,
+        wallet.accountTransactionsDocumentId,
+        periodStart,
+        periodEnd,
+        dispatch,
+      );
 
       // Small delay to show sync animation
       setTimeout(() => {
@@ -231,6 +343,7 @@ export function WalletsTable({
       }, 500);
     } catch (error) {
       console.error("Error syncing wallet:", error);
+      alert(error instanceof Error ? error.message : "Error syncing wallet");
       setSyncingWallet(null);
     }
   };
@@ -239,7 +352,7 @@ export function WalletsTable({
     dispatch(
       actions.removeWallet({
         wallet: walletAddress,
-      })
+      }),
     );
   };
 
@@ -293,12 +406,12 @@ export function WalletsTable({
                           [...tagChangedWallets, ...outdatedWallets].forEach(
                             (walletAddress) => {
                               const wallet = wallets.find(
-                                (w) => w.wallet === walletAddress
+                                (w) => w.wallet === walletAddress,
                               );
                               if (wallet) {
                                 handleSyncWallet(wallet);
                               }
-                            }
+                            },
                           );
                         }}
                         disabled={syncingWallet !== null}
@@ -338,13 +451,10 @@ export function WalletsTable({
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
               {wallets.map((wallet) => {
                 const totals = calculateWalletTotals(wallet);
-                const isHovered = hoveredWallet === wallet.wallet;
 
                 return (
                   <tr
                     key={wallet.wallet}
-                    onMouseEnter={() => setHoveredWallet(wallet.wallet || null)}
-                    onMouseLeave={() => setHoveredWallet(null)}
                     className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -451,44 +561,43 @@ export function WalletsTable({
                           >
                             <Plus size={16} />
                           </button>
-                          {wallet.billingStatements &&
-                            wallet.billingStatements.length > 0 && (
-                              <button
-                                onClick={() => handleSyncWallet(wallet)}
-                                disabled={syncingWallet === wallet.wallet}
-                                className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
-                                  tagChangedWallets.includes(
-                                    wallet.wallet || ""
-                                  )
-                                    ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 animate-pulse"
-                                    : outdatedWallets.includes(
-                                          wallet.wallet || ""
-                                        )
-                                      ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 animate-pulse"
-                                      : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                title={
-                                  tagChangedWallets.includes(
-                                    wallet.wallet || ""
-                                  )
-                                    ? "ALERT: Tags have changed - sync required!"
-                                    : outdatedWallets.includes(
-                                          wallet.wallet || ""
-                                        )
-                                      ? "Sync needed - billing statements updated"
+                          {((wallet.billingStatements &&
+                            wallet.billingStatements.length > 0) ||
+                            wallet.accountTransactionsDocumentId) && (
+                            <button
+                              onClick={() => handleSyncWallet(wallet)}
+                              disabled={syncingWallet === wallet.wallet}
+                              className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
+                                tagChangedWallets.includes(wallet.wallet || "")
+                                  ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 animate-pulse"
+                                  : outdatedWallets.includes(
+                                        wallet.wallet || "",
+                                      )
+                                    ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 animate-pulse"
+                                    : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              } disabled:opacity-50 disabled:cursor-not-allowed`}
+                              title={
+                                tagChangedWallets.includes(wallet.wallet || "")
+                                  ? "ALERT: Tags have changed - sync required!"
+                                  : outdatedWallets.includes(
+                                        wallet.wallet || "",
+                                      )
+                                    ? "Sync needed - billing statements updated"
+                                    : wallet.accountTransactionsDocumentId
+                                      ? "Sync wallet with billing statements and transactions"
                                       : "Sync with latest billing statements"
+                              }
+                            >
+                              <RefreshCw
+                                size={16}
+                                className={
+                                  syncingWallet === wallet.wallet
+                                    ? "animate-spin"
+                                    : ""
                                 }
-                              >
-                                <RefreshCw
-                                  size={16}
-                                  className={
-                                    syncingWallet === wallet.wallet
-                                      ? "animate-spin"
-                                      : ""
-                                  }
-                                />
-                              </button>
-                            )}
+                              />
+                            </button>
+                          )}
                           <span className="text-sm font-medium text-gray-900 dark:text-white">
                             {formatCurrency(totals.actuals)}
                           </span>
@@ -506,8 +615,69 @@ export function WalletsTable({
                     >
                       {formatCurrency(totals.difference)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                      {formatCurrency(totals.payments)}
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                      {wallet.accountTransactionsDocumentId ? (
+                        // Show clickable document snippet card when transactions document is linked
+                        <button
+                          onClick={() =>
+                            setSelectedNode(
+                              wallet.accountTransactionsDocumentId!,
+                            )
+                          }
+                          className="w-full bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-2 transition-colors text-left"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <svg
+                                className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                              </svg>
+                              <div className="min-w-0">
+                                <span className="text-xs font-medium text-green-900 dark:text-green-100 block">
+                                  Transactions
+                                </span>
+                                <span className="text-xs text-green-600 dark:text-green-400">
+                                  {formatCurrency(totals.payments)}
+                                </span>
+                              </div>
+                            </div>
+                            <svg
+                              className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                              />
+                            </svg>
+                          </div>
+                        </button>
+                      ) : (
+                        // Show Add Txns button when no transactions document is linked
+                        <div className="flex items-center justify-end">
+                          <button
+                            onClick={() => handleAddTransactions(wallet)}
+                            className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-md transition-colors"
+                            title="Add transactions document for this wallet"
+                          >
+                            <Plus size={16} />
+                            <span>Add Txns</span>
+                          </button>
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                       <div className="flex items-center justify-end gap-2">
@@ -538,38 +708,26 @@ export function WalletsTable({
 
       {/* Add Wallet Form */}
       <div className="flex items-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Wallet Name
-          </label>
-          <TextInput
-            value={newWalletName}
-            onChange={(e) => setNewWalletName(e.target.value)}
-            placeholder="Enter wallet name (optional)"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleAddWallet();
-              }
-            }}
-          />
-        </div>
         <div className="flex-1 relative">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Wallet Address
+            Select Account
           </label>
-          <TextInput
-            value={newWalletAddress}
+          <select
+            value={selectedAccountId}
             onChange={(e) => {
-              setNewWalletAddress(e.target.value);
-              setWalletError(""); // Clear error when typing
+              setSelectedAccountId(e.target.value);
+              setWalletError(""); // Clear error when selecting
             }}
-            placeholder="Enter wallet address (e.g., 0x1234...)"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleAddWallet();
-              }
-            }}
-          />
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">-- Select an account --</option>
+            {accountEntries.map((acc: any) => (
+              <option key={acc.id} value={acc.id}>
+                {acc.name} ({acc.account?.substring(0, 10)}...
+                {acc.account?.substring(acc.account.length - 4)})
+              </option>
+            ))}
+          </select>
           {walletError && (
             <div className="absolute left-0 right-0 top-full mt-1 px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md shadow-lg z-10">
               <p className="text-sm text-red-600 dark:text-red-400">
@@ -578,8 +736,11 @@ export function WalletsTable({
             </div>
           )}
         </div>
-        <Button onClick={handleAddWallet} disabled={!newWalletAddress.trim() || addingWallet}>
-          {addingWallet ? "Adding..." : "Add Wallet"}
+        <Button
+          onClick={handleAddWallet}
+          disabled={!selectedAccountId || addingWallet}
+        >
+          {addingWallet ? "Adding..." : "Add Account"}
         </Button>
       </div>
     </div>

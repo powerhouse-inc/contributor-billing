@@ -22,10 +22,10 @@ export default function Editor() {
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [periodStart, setPeriodStart] = useState<string>(
-    document.state.global.periodStart || ""
+    document.state.global.periodStart || "",
   );
   const [periodEnd, setPeriodEnd] = useState<string>(
-    document.state.global.periodEnd || ""
+    document.state.global.periodEnd || "",
   );
 
   const { wallets, groups } = document.state.global;
@@ -38,9 +38,7 @@ export default function Editor() {
     const end = periodEnd ? new Date(periodEnd) : null;
 
     // Create a set of all wallet addresses in the expense report for intergroup detection
-    const walletAddresses = new Set(
-      wallets.map((w) => w.wallet.toLowerCase())
-    );
+    const walletAddresses = new Set(wallets.map((w) => w.wallet.toLowerCase()));
 
     return wallets.flatMap((wallet) => {
       const txDocId = (wallet as any).accountTransactionsDocumentId;
@@ -49,7 +47,7 @@ export default function Editor() {
       const txDoc = documentsInDrive.find(
         (doc) =>
           doc.header.id === txDocId &&
-          doc.header.documentType === "powerhouse/account-transactions"
+          doc.header.documentType === "powerhouse/account-transactions",
       ) as any;
 
       const txs: TransactionEntry[] = txDoc?.state?.global?.transactions || [];
@@ -116,7 +114,7 @@ export default function Editor() {
           periodEnd={periodEnd}
           wallets={wallets}
           groups={groups}
-        />
+        />,
       ).toBlob();
 
       // Create download link
@@ -215,6 +213,8 @@ export default function Editor() {
                   wallets={wallets}
                   groups={groups}
                   onAddBillingStatement={handleAddBillingStatement}
+                  periodStart={periodStart}
+                  periodEnd={periodEnd}
                   dispatch={dispatch}
                 />
               </div>
@@ -270,25 +270,25 @@ export default function Editor() {
           />
         )}
 
-            {/* Transactions Section */}
-            {transactionsByWallet.length > 0 && (
-              <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    Transactions ({transactionsByWallet.length})
-                  </h2>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Filtered by selected period
-                  </span>
-                </div>
-                <div className="p-6">
-                  <ExpenseReportTransactionsTable
-                    transactions={transactionsByWallet}
-                    wallets={wallets}
-                  />
-                </div>
-              </section>
-            )}
+        {/* Transactions Section */}
+        {transactionsByWallet.length > 0 && (
+          <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Transactions ({transactionsByWallet.length})
+              </h2>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                Filtered by selected period
+              </span>
+            </div>
+            <div className="p-6">
+              <ExpenseReportTransactionsTable
+                transactions={transactionsByWallet}
+                wallets={wallets}
+              />
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
