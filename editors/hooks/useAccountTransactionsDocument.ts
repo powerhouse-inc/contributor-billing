@@ -7,11 +7,13 @@ import type {
   AccountTransactionsDocument,
 } from "../../document-models/account-transactions/index.js";
 
-export function useAccountTransactionsDocument(documentId: string | null | undefined) {
-  return useDocumentOfType<AccountTransactionsDocument, AccountTransactionsAction>(
-    documentId,
-    "powerhouse/account-transactions",
-  );
+export function useAccountTransactionsDocument(
+  documentId: string | null | undefined,
+) {
+  return useDocumentOfType<
+    AccountTransactionsDocument,
+    AccountTransactionsAction
+  >(documentId, "powerhouse/account-transactions");
 }
 
 export function useSelectedAccountTransactionsDocument() {

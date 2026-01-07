@@ -14,7 +14,10 @@ interface DocumentHeaderProps {
   onNameChange: (name: string) => void;
 }
 
-export function DocumentHeader({ document, onNameChange }: DocumentHeaderProps) {
+export function DocumentHeader({
+  document,
+  onNameChange,
+}: DocumentHeaderProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(document.header.name);
 
@@ -95,7 +98,9 @@ export function DocumentHeader({ document, onNameChange }: DocumentHeaderProps) 
             </div>
             <div className="flex items-center gap-2">
               <span className="font-medium text-gray-500">Type:</span>
-              <span className="text-gray-900">{document.header.documentType}</span>
+              <span className="text-gray-900">
+                {document.header.documentType}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="font-medium text-gray-500">Created:</span>
@@ -106,7 +111,9 @@ export function DocumentHeader({ document, onNameChange }: DocumentHeaderProps) 
             <div className="flex items-center gap-2">
               <span className="font-medium text-gray-500">Last Modified:</span>
               <span className="text-gray-900">
-                {new Date(document.header.lastModifiedAtUtcIso).toLocaleString()}
+                {new Date(
+                  document.header.lastModifiedAtUtcIso,
+                ).toLocaleString()}
               </span>
             </div>
           </div>

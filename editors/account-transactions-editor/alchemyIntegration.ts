@@ -3,7 +3,10 @@
  * Follows the contributor-billing pattern for local/remote compatibility
  */
 
-import { getAlchemyGraphQLEndpoint, isLocalEnvironment } from "../../scripts/alchemy/alchemyEnvironment.js";
+import {
+  getAlchemyGraphQLEndpoint,
+  isLocalEnvironment,
+} from "../../scripts/alchemy/alchemyEnvironment.js";
 
 export interface AlchemyIntegrationResult {
   success: boolean;
@@ -20,7 +23,7 @@ export interface AlchemyTransactionData {
   datetime: string;
   accountingPeriod: string;
   from: string; // From address for direction calculation
-  to: string;   // To address for direction calculation
+  to: string; // To address for direction calculation
   direction: string; // Transaction direction: INFLOW or OUTFLOW
 }
 
@@ -44,12 +47,15 @@ export class AlchemyIntegrationService {
    * Get transaction data from Alchemy via GraphQL resolver (without document dependency)
    * Works in both local Connect and remote Switchboard environments
    */
-  async getTransactionsFromAlchemy(address: string, fromBlock?: string): Promise<AlchemyTransactionsResult> {
+  async getTransactionsFromAlchemy(
+    address: string,
+    fromBlock?: string,
+  ): Promise<AlchemyTransactionsResult> {
     try {
       const response = await fetch(this.graphqlEndpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           query: `
@@ -75,9 +81,9 @@ export class AlchemyIntegrationService {
           `,
           variables: {
             address,
-            fromBlock
-          }
-        })
+            fromBlock,
+          },
+        }),
       });
 
       if (!response.ok) {
@@ -85,20 +91,22 @@ export class AlchemyIntegrationService {
         console.error(`[AlchemyIntegration] GraphQL endpoint error:`, {
           status: response.status,
           statusText: response.statusText,
-          errorText
+          errorText,
         });
-        throw new Error(`GraphQL endpoint error: ${response.status} - ${response.statusText} - ${errorText}`);
+        throw new Error(
+          `GraphQL endpoint error: ${response.status} - ${response.statusText} - ${errorText}`,
+        );
       }
 
-      const result = await response.json() as {
-        errors?: Array<{message: string}>;
+      const result = (await response.json()) as {
+        errors?: Array<{ message: string }>;
         data?: {
           AccountTransactions_getTransactionsFromAlchemy?: AlchemyTransactionsResult;
         };
       };
 
       if (result.errors) {
-        throw new Error(result.errors[0]?.message || 'GraphQL error');
+        throw new Error(result.errors[0]?.message || "GraphQL error");
       }
 
       if (result.data?.AccountTransactions_getTransactionsFromAlchemy) {
@@ -106,9 +114,11 @@ export class AlchemyIntegrationService {
       } else {
         throw new Error("Failed to get transactions from Alchemy");
       }
-
     } catch (error) {
-      console.error(`[AlchemyIntegration] Error in ${this.isLocal ? 'local' : 'remote'} mode:`, error);
+      console.error(
+        `[AlchemyIntegration] Error in ${this.isLocal ? "local" : "remote"} mode:`,
+        error,
+      );
       throw error;
     }
   }
@@ -117,12 +127,16 @@ export class AlchemyIntegrationService {
    * Fetch transactions from Alchemy via GraphQL resolver
    * Works in both local Connect and remote Switchboard environments
    */
-  async fetchTransactionsForDocument(docId: string, address: string, fromBlock?: string): Promise<AlchemyIntegrationResult> {
+  async fetchTransactionsForDocument(
+    docId: string,
+    address: string,
+    fromBlock?: string,
+  ): Promise<AlchemyIntegrationResult> {
     try {
       const response = await fetch(this.graphqlEndpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           query: `
@@ -137,34 +151,40 @@ export class AlchemyIntegrationService {
           variables: {
             docId,
             address,
-            fromBlock
-          }
-        })
+            fromBlock,
+          },
+        }),
       });
 
       if (!response.ok) {
-        throw new Error(`GraphQL endpoint error: ${response.status} - ${response.statusText}`);
+        throw new Error(
+          `GraphQL endpoint error: ${response.status} - ${response.statusText}`,
+        );
       }
 
-      const result = await response.json() as {
-        errors?: Array<{message: string}>;
+      const result = (await response.json()) as {
+        errors?: Array<{ message: string }>;
         data?: {
           AccountTransactions_fetchTransactionsFromAlchemy?: AlchemyIntegrationResult;
         };
       };
 
       if (result.errors) {
-        throw new Error(result.errors[0]?.message || 'GraphQL error');
+        throw new Error(result.errors[0]?.message || "GraphQL error");
       }
 
-      if (result.data?.AccountTransactions_fetchTransactionsFromAlchemy?.success) {
+      if (
+        result.data?.AccountTransactions_fetchTransactionsFromAlchemy?.success
+      ) {
         return result.data.AccountTransactions_fetchTransactionsFromAlchemy;
       } else {
         throw new Error("Failed to fetch transactions from Alchemy");
       }
-
     } catch (error) {
-      console.error(`[AlchemyIntegration] Error in ${this.isLocal ? 'local' : 'remote'} mode:`, error);
+      console.error(
+        `[AlchemyIntegration] Error in ${this.isLocal ? "local" : "remote"} mode:`,
+        error,
+      );
       throw error;
     }
   }
@@ -175,8 +195,8 @@ export class AlchemyIntegrationService {
   getEnvironmentInfo() {
     return {
       endpoint: this.graphqlEndpoint,
-      mode: this.isLocal ? 'Local Connect' : 'Remote Switchboard',
-      isLocal: this.isLocal
+      mode: this.isLocal ? "Local Connect" : "Remote Switchboard",
+      isLocal: this.isLocal,
     };
   }
 }

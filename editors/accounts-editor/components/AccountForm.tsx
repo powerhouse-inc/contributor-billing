@@ -52,7 +52,9 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
       .filter((o) => o);
 
     // Validate required fields with custom message
-    const typeSelect = e.currentTarget.querySelector<HTMLSelectElement>('select[name="accountType"]');
+    const typeSelect = e.currentTarget.querySelector<HTMLSelectElement>(
+      'select[name="accountType"]',
+    );
     if (!formData.type) {
       if (typeSelect) {
         typeSelect.setCustomValidity("Please select an Account Type");
@@ -79,7 +81,10 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white rounded-xl border border-gray-200 shadow-sm p-6"
+    >
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>

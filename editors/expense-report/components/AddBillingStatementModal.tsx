@@ -4,9 +4,7 @@ import { useDocumentsInSelectedDrive } from "@powerhousedao/reactor-browser";
 import { generateId } from "document-model";
 import { X, FileText, Check } from "lucide-react";
 import type { LineItemGroup } from "../../../document-models/expense-report/gen/types.js";
-import type {
-  BillingStatementLineItem,
-} from "../../../document-models/billing-statement/gen/types.js";
+import type { BillingStatementLineItem } from "../../../document-models/billing-statement/gen/types.js";
 import { actions } from "../../../document-models/expense-report/index.js";
 
 interface AddBillingStatementModalProps {
@@ -55,7 +53,7 @@ export function AddBillingStatementModal({
 }: AddBillingStatementModalProps) {
   const documents = useDocumentsInSelectedDrive();
   const [selectedStatements, setSelectedStatements] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -64,7 +62,7 @@ export function AddBillingStatementModal({
     if (!documents) return new Set<string>();
 
     const expenseReports = documents.filter(
-      (doc: any) => doc.header.documentType === "powerhouse/expense-report"
+      (doc: any) => doc.header.documentType === "powerhouse/expense-report",
     );
 
     const ids = new Set<string>();
@@ -87,7 +85,8 @@ export function AddBillingStatementModal({
 
     return documents
       .filter(
-        (doc: any) => doc.header.documentType === "powerhouse/billing-statement"
+        (doc: any) =>
+          doc.header.documentType === "powerhouse/billing-statement",
       )
       .map((doc: any) => ({
         id: doc.header.id,
@@ -101,7 +100,7 @@ export function AddBillingStatementModal({
     if (!searchTerm.trim()) return billingStatements;
     const search = searchTerm.toLowerCase();
     return billingStatements.filter((stmt) =>
-      stmt.name.toLowerCase().includes(search)
+      stmt.name.toLowerCase().includes(search),
     );
   }, [billingStatements, searchTerm]);
 
@@ -135,7 +134,7 @@ export function AddBillingStatementModal({
   const mapTagToGroup = (lineItem: BillingStatementLineItem): string | null => {
     // Find expense-account tag
     const expenseAccountTag = lineItem.lineItemTag?.find(
-      (tag) => tag.dimension === "expense-account"
+      (tag) => tag.dimension === "expense-account",
     );
 
     if (!expenseAccountTag || !expenseAccountTag.label) return null;
@@ -155,19 +154,22 @@ export function AddBillingStatementModal({
         actions.addBillingStatement({
           wallet: walletAddress,
           billingStatementId: statementId,
-        })
+        }),
       );
     });
 
     // Aggregate line items by category across all selected billing statements
-    const categoryAggregation = new Map<string, {
-      groupId: string | null;
-      groupLabel: string;
-      budget: number;
-      actuals: number;
-      forecast: number;
-      payments: number;
-    }>();
+    const categoryAggregation = new Map<
+      string,
+      {
+        groupId: string | null;
+        groupLabel: string;
+        budget: number;
+        actuals: number;
+        forecast: number;
+        payments: number;
+      }
+    >();
 
     selectedStatements.forEach((statementId) => {
       const statement = billingStatements.find((s) => s.id === statementId);
@@ -176,7 +178,7 @@ export function AddBillingStatementModal({
       console.log("Statement document:", statement.document);
 
       // Extract line items from billing statement
-      const billingState = statement.document as any;
+      const billingState = statement.document;
       const lineItems = billingState.state?.global?.lineItems || [];
 
       console.log("Line items found:", lineItems.length, lineItems);
@@ -223,7 +225,7 @@ export function AddBillingStatementModal({
         actions.addLineItem({
           wallet: walletAddress,
           lineItem: expenseLineItem,
-        })
+        }),
       );
     });
 
@@ -280,10 +282,10 @@ export function AddBillingStatementModal({
             <div className="space-y-2">
               {filteredStatements.map((statement) => {
                 const isAlreadyAdded = existingBillingStatementIds.has(
-                  statement.id
+                  statement.id,
                 );
                 const isSelected = selectedStatements.has(statement.id);
-                const billingState = statement.document as any;
+                const billingState = statement.document;
                 const lineItemCount =
                   billingState.state?.global?.lineItems?.length || 0;
                 const totalCash = billingState.state?.global?.totalCash || 0;
@@ -360,10 +362,7 @@ export function AddBillingStatementModal({
             {selectedStatements.size !== 1 ? "s" : ""} selected
           </span>
           <div className="flex gap-3">
-            <Button
-              onClick={onClose}
-              variant="secondary"
-            >
+            <Button onClick={onClose} variant="secondary">
               CANCEL
             </Button>
             <Button

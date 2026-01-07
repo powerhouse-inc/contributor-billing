@@ -88,7 +88,9 @@ export default function Editor() {
 
   const handleImportAccounts = async () => {
     if (!documentsInDrive || !startDate || !endDate) {
-      alert("Please set the report period (start and end dates) before importing accounts");
+      alert(
+        "Please set the report period (start and end dates) before importing accounts",
+      );
       return;
     }
 

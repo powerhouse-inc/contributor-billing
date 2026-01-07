@@ -16,14 +16,21 @@ import type {
   LineItem,
 } from "../../../document-models/expense-report/gen/types.js";
 import { actions } from "../../../document-models/expense-report/index.js";
+import {
+  actions as accountTransactionsActions,
+  addTransaction,
+} from "../../../document-models/account-transactions/index.js";
+import { generateId } from "document-model/core";
 import { useWalletSync } from "../hooks/useWalletSync.js";
 import { useSyncWallet } from "../hooks/useSyncWallet.js";
-import { walletAccountService } from "../services/walletAccountService.js";
 import {
+  addDocument,
+  dispatchActions,
   useDocumentsInSelectedDrive,
   useSelectedDrive,
   setSelectedNode,
 } from "@powerhousedao/reactor-browser";
+import { alchemyIntegration } from "../../account-transactions-editor/alchemyIntegration.js";
 
 interface WalletsTableProps {
   wallets: Wallet[];
@@ -159,98 +166,134 @@ export function WalletsTable({
           }),
         );
       } else {
-        // Create a new AccountTransactions document using GraphQL
-
-        // Get the GraphQL endpoint
-        const graphqlEndpoint =
-          typeof window !== "undefined" &&
-          !window.document.baseURI.includes("localhost")
-            ? "https://switchboard-dev.powerhouse.xyz/graphql"
-            : "http://localhost:4001/graphql";
-
-        // Step 1: Create the document
+        // Create a new AccountTransactions document using addDocument
         const documentName = `${wallet.name || wallet.wallet.substring(0, 10)} Transactions`;
 
-        const createResponse = await fetch(graphqlEndpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            query: `
-              mutation CreateAccountTransactionsDocument($name: String!, $driveId: String) {
-                AccountTransactions_createDocument(name: $name, driveId: $driveId)
-              }
-            `,
-            variables: {
-              name: documentName,
-              driveId: selectedDrive?.header?.id,
-            },
-          }),
-        });
+        const createdNode = await addDocument(
+          selectedDrive?.header?.id || "",
+          documentName,
+          "powerhouse/account-transactions",
+          undefined,
+          undefined,
+          undefined,
+          "powerhouse-account-transactions-editor",
+        );
 
-        if (!createResponse.ok) {
-          throw new Error(
-            `Failed to create AccountTransactions document: ${createResponse.status}`,
-          );
+        if (!createdNode?.id) {
+          throw new Error("Failed to create AccountTransactions document");
         }
 
-        const createResult = (await createResponse.json()) as {
-          errors?: Array<{ message: string }>;
-          data?: {
-            AccountTransactions_createDocument?: string;
-          };
-        };
+        // Set the account information in the document
+        await dispatchActions(
+          [
+            accountTransactionsActions.setAccount({
+              address: wallet.wallet,
+              name: wallet.name || wallet.wallet,
+            }),
+          ],
+          createdNode.id,
+        );
 
-        if (createResult.errors) {
-          throw new Error(
-            createResult.errors[0]?.message ||
-              "Failed to create AccountTransactions document",
+        // Fetch transactions from Alchemy and add them to the document
+        try {
+          console.log(
+            "[WalletsTable] Fetching transactions from Alchemy for address:",
+            wallet.wallet,
           );
-        }
 
-        const newDocId = createResult.data?.AccountTransactions_createDocument;
-        if (!newDocId) {
-          throw new Error(
-            "Failed to create AccountTransactions document - no ID returned",
+          const result = await alchemyIntegration.getTransactionsFromAlchemy(
+            wallet.wallet,
           );
-        }
 
-        // Step 2: Set the account information in the document
-        const setAccountResponse = await fetch(graphqlEndpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            query: `
-              mutation SetAccount($docId: PHID!, $input: AccountTransactions_SetAccountInput!) {
-                AccountTransactions_setAccount(docId: $docId, input: $input)
-              }
-            `,
-            variables: {
-              docId: newDocId,
-              input: {
-                address: wallet.wallet,
-                name: wallet.name || wallet.wallet,
-              },
-            },
-          }),
-        });
+          if (result.success && result.transactions.length > 0) {
+            // Add each transaction to the document
+            const transactionActions = result.transactions
+              .filter((txData) => {
+                // Validate required fields
+                if (!txData.direction) {
+                  console.error(
+                    `[WalletsTable] Skipping transaction with undefined direction:`,
+                    txData,
+                  );
+                  return false;
+                }
+                if (!txData.from || !txData.to) {
+                  console.error(
+                    `[WalletsTable] Skipping transaction with undefined from/to:`,
+                    {
+                      hash: txData.txHash,
+                      from: txData.from,
+                      to: txData.to,
+                    },
+                  );
+                  return false;
+                }
+                return true;
+              })
+              .map((txData) => {
+                // Handle amount - it might come as string or object
+                let amount;
+                if (typeof txData.amount === "string") {
+                  // Parse amount string back to object format
+                  const amountParts = txData.amount.split(" ");
+                  amount = {
+                    value: amountParts[0] || "0",
+                    unit: amountParts[1] || txData.token,
+                  };
+                } else if (
+                  typeof txData.amount === "object" &&
+                  txData.amount &&
+                  "value" in txData.amount &&
+                  "unit" in txData.amount
+                ) {
+                  amount = txData.amount;
+                } else {
+                  amount = {
+                    value: "0",
+                    unit: txData.token,
+                  };
+                }
 
-        if (setAccountResponse.ok) {
-          const setAccountResult = (await setAccountResponse.json()) as {
-            errors?: Array<{ message: string }>;
-          };
-          if (setAccountResult.errors) {
-            console.warn(
-              "[WalletsTable] Failed to set account:",
-              setAccountResult.errors[0]?.message,
+                return addTransaction({
+                  id: generateId(),
+                  counterParty: txData.counterParty,
+                  amount: amount,
+                  datetime: txData.datetime,
+                  txHash: txData.txHash,
+                  token: txData.token,
+                  blockNumber: txData.blockNumber,
+                  accountingPeriod: txData.accountingPeriod,
+                  direction: (txData.direction as "INFLOW" | "OUTFLOW") || "OUTFLOW",
+                  budget: null,
+                });
+              });
+
+            // Dispatch all transaction actions at once
+            if (transactionActions.length > 0) {
+              await dispatchActions(transactionActions, createdNode.id);
+              console.log(
+                `[WalletsTable] Successfully added ${transactionActions.length} transactions`,
+              );
+            }
+          } else {
+            console.log(
+              "[WalletsTable] No transactions found for this address",
             );
           }
+        } catch (alchemyError) {
+          console.warn(
+            "[WalletsTable] Failed to fetch transactions from Alchemy:",
+            alchemyError,
+          );
+          // Don't fail the entire operation if Alchemy fetch fails
+          // The document is still created and linked
         }
 
-        // Step 3: Link the new document to the wallet
+        // Link the new document to the wallet
         dispatch(
           actions.updateWallet({
             address: wallet.wallet,
-            accountTransactionsDocumentId: newDocId,
+            accountTransactionsDocumentId: createdNode.id,
           }),
         );
       }

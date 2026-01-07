@@ -22,10 +22,13 @@ export class AccountTransactionsService {
 
   private getGraphQLEndpoint(): string {
     // Environment-aware endpoint selection
-    if (typeof window !== 'undefined' && !window.document.baseURI.includes('localhost')) {
-      return 'https://switchboard-dev.powerhouse.xyz/graphql';
+    if (
+      typeof window !== "undefined" &&
+      !window.document.baseURI.includes("localhost")
+    ) {
+      return "https://switchboard-dev.powerhouse.xyz/graphql";
     }
-    return 'http://localhost:4001/graphql';
+    return "http://localhost:4001/graphql";
   }
 
   /**
@@ -34,7 +37,7 @@ export class AccountTransactionsService {
   async createAccountTransactionsDocument(
     account: AccountEntry,
     accountsDocumentId: string,
-    driveId?: string
+    driveId?: string,
   ): Promise<CreateAccountTransactionsResult> {
     try {
       // Step 1: Create the Account Transactions document
@@ -51,11 +54,14 @@ export class AccountTransactionsService {
       // Step 3: Fetch and add transactions from Alchemy
       const transactionsResult = await this.fetchTransactionsFromAlchemy(
         createResult.documentId,
-        account.account
+        account.account,
       );
 
       if (!transactionsResult.success) {
-        console.warn('[AccountTransactionsService] fetchTransactionsFromAlchemy failed:', transactionsResult.message);
+        console.warn(
+          "[AccountTransactionsService] fetchTransactionsFromAlchemy failed:",
+          transactionsResult.message,
+        );
       }
 
       // Step 4: Update the account with the transaction document ID
@@ -63,20 +69,19 @@ export class AccountTransactionsService {
       await this.updateAccountTransactionsId(
         accountsDocumentId,
         account.id,
-        createResult.documentId
+        createResult.documentId,
       );
 
       return {
         success: true,
         documentId: createResult.documentId,
         transactionsAdded: transactionsResult.transactionsAdded || 0,
-        message: `Successfully created document and fetched ${transactionsResult.transactionsAdded || 0} transactions`
+        message: `Successfully created document and fetched ${transactionsResult.transactionsAdded || 0} transactions`,
       };
-
     } catch (error) {
       return {
         success: false,
-        message: `Failed to create account transactions: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `Failed to create account transactions: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
   }
@@ -84,51 +89,62 @@ export class AccountTransactionsService {
   /**
    * Create a new Account Transactions document
    */
-  private async createDocument(name: string, driveId?: string): Promise<CreateAccountTransactionsResult> {
-    console.log('[AccountTransactionsService] Creating document', {
+  private async createDocument(
+    name: string,
+    driveId?: string,
+  ): Promise<CreateAccountTransactionsResult> {
+    console.log("[AccountTransactionsService] Creating document", {
       name,
       driveId,
       hasDriveId: !!driveId,
-      endpoint: this.graphqlEndpoint
+      endpoint: this.graphqlEndpoint,
     });
-    
+
     const variables = {
       name,
-      ...(driveId && { driveId })
+      ...(driveId && { driveId }),
     };
-    
-    console.log('[AccountTransactionsService] Sending GraphQL request with variables:', variables);
-    
+
+    console.log(
+      "[AccountTransactionsService] Sending GraphQL request with variables:",
+      variables,
+    );
+
     const requestBody = {
       query: `
         mutation CreateAccountTransactionsDocument($name: String!, $driveId: String) {
           AccountTransactions_createDocument(name: $name, driveId: $driveId)
         }
       `,
-      variables
+      variables,
     };
-    
-    console.log('[AccountTransactionsService] GraphQL request body:', JSON.stringify(requestBody, null, 2));
-    
+
+    console.log(
+      "[AccountTransactionsService] GraphQL request body:",
+      JSON.stringify(requestBody, null, 2),
+    );
+
     const response = await fetch(this.graphqlEndpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
-      throw new Error(`GraphQL request failed: ${response.status} - ${response.statusText}`);
+      throw new Error(
+        `GraphQL request failed: ${response.status} - ${response.statusText}`,
+      );
     }
 
-    const result = await response.json() as {
-      errors?: Array<{message: string}>;
+    const result = (await response.json()) as {
+      errors?: Array<{ message: string }>;
       data?: {
         AccountTransactions_createDocument?: string;
       };
     };
 
     if (result.errors) {
-      throw new Error(result.errors[0]?.message || 'GraphQL error');
+      throw new Error(result.errors[0]?.message || "GraphQL error");
     }
 
     const documentId = result.data?.AccountTransactions_createDocument;
@@ -139,23 +155,26 @@ export class AccountTransactionsService {
     return {
       success: true,
       documentId,
-      message: "Document created successfully"
+      message: "Document created successfully",
     };
   }
 
   /**
    * Set account information in the Account Transactions document
    */
-  private async setAccountInfo(documentId: string, account: AccountEntry): Promise<void> {
-    console.log('[AccountTransactionsService] Setting account info:', {
+  private async setAccountInfo(
+    documentId: string,
+    account: AccountEntry,
+  ): Promise<void> {
+    console.log("[AccountTransactionsService] Setting account info:", {
       documentId,
       address: account.account,
-      name: account.name
+      name: account.name,
     });
 
     const response = await fetch(this.graphqlEndpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         query: `
           mutation SetAccount($docId: PHID!, $input: AccountTransactions_SetAccountInput!) {
@@ -166,42 +185,54 @@ export class AccountTransactionsService {
           docId: documentId,
           input: {
             address: account.account,
-            name: account.name
-          }
-        }
-      })
+            name: account.name,
+          },
+        },
+      }),
     });
 
-    console.log('[AccountTransactionsService] SetAccount response status:', response.status);
+    console.log(
+      "[AccountTransactionsService] SetAccount response status:",
+      response.status,
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[AccountTransactionsService] SetAccount failed:', {
+      console.error("[AccountTransactionsService] SetAccount failed:", {
         status: response.status,
         statusText: response.statusText,
-        errorText
+        errorText,
       });
-      throw new Error(`Failed to set account info: ${response.status} - ${response.statusText} - ${errorText}`);
+      throw new Error(
+        `Failed to set account info: ${response.status} - ${response.statusText} - ${errorText}`,
+      );
     }
 
-    const result = await response.json() as {
-      errors?: Array<{message: string}>;
+    const result = (await response.json()) as {
+      errors?: Array<{ message: string }>;
       data?: {
         AccountTransactions_setAccount?: boolean;
       };
     };
 
-    console.log('[AccountTransactionsService] SetAccount result:', result);
+    console.log("[AccountTransactionsService] SetAccount result:", result);
 
     if (result.errors) {
-      console.error('[AccountTransactionsService] SetAccount GraphQL errors:', result.errors);
-      throw new Error(result.errors[0]?.message || 'Failed to set account info');
+      console.error(
+        "[AccountTransactionsService] SetAccount GraphQL errors:",
+        result.errors,
+      );
+      throw new Error(
+        result.errors[0]?.message || "Failed to set account info",
+      );
     }
 
     if (result.data?.AccountTransactions_setAccount) {
-      console.log('[AccountTransactionsService] Account successfully set!');
+      console.log("[AccountTransactionsService] Account successfully set!");
     } else {
-      console.warn('[AccountTransactionsService] SetAccount returned false or undefined');
+      console.warn(
+        "[AccountTransactionsService] SetAccount returned false or undefined",
+      );
     }
   }
 
@@ -210,11 +241,15 @@ export class AccountTransactionsService {
    */
   private async fetchTransactionsFromAlchemy(
     documentId: string,
-    address: string
-  ): Promise<{ success: boolean; transactionsAdded?: number; message: string }> {
+    address: string,
+  ): Promise<{
+    success: boolean;
+    transactionsAdded?: number;
+    message: string;
+  }> {
     const response = await fetch(this.graphqlEndpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         query: `
           mutation FetchTransactionsFromAlchemy($docId: PHID!, $address: EthereumAddress!) {
@@ -225,16 +260,18 @@ export class AccountTransactionsService {
             }
           }
         `,
-        variables: { docId: documentId, address }
-      })
+        variables: { docId: documentId, address },
+      }),
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch transactions: ${response.status} - ${response.statusText}`);
+      throw new Error(
+        `Failed to fetch transactions: ${response.status} - ${response.statusText}`,
+      );
     }
 
-    const result = await response.json() as {
-      errors?: Array<{message: string}>;
+    const result = (await response.json()) as {
+      errors?: Array<{ message: string }>;
       data?: {
         AccountTransactions_fetchTransactionsFromAlchemy?: {
           success: boolean;
@@ -245,10 +282,13 @@ export class AccountTransactionsService {
     };
 
     if (result.errors) {
-      throw new Error(result.errors[0]?.message || 'Failed to fetch transactions');
+      throw new Error(
+        result.errors[0]?.message || "Failed to fetch transactions",
+      );
     }
 
-    const fetchResult = result.data?.AccountTransactions_fetchTransactionsFromAlchemy;
+    const fetchResult =
+      result.data?.AccountTransactions_fetchTransactionsFromAlchemy;
     if (!fetchResult) {
       throw new Error("No result from transaction fetch");
     }
@@ -262,17 +302,20 @@ export class AccountTransactionsService {
   private async updateAccountTransactionsId(
     accountsDocumentId: string,
     accountId: string,
-    transactionsDocumentId: string
+    transactionsDocumentId: string,
   ): Promise<void> {
-    console.log('[AccountTransactionsService] Updating account with transactions ID:', {
-      accountsDocumentId,
-      accountId,
-      transactionsDocumentId
-    });
+    console.log(
+      "[AccountTransactionsService] Updating account with transactions ID:",
+      {
+        accountsDocumentId,
+        accountId,
+        transactionsDocumentId,
+      },
+    );
 
     const response = await fetch(this.graphqlEndpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         query: `
           mutation UpdateAccountTransactionsId($docId: PHID!, $input: Accounts_UpdateAccountInput!) {
@@ -283,35 +326,42 @@ export class AccountTransactionsService {
           docId: accountsDocumentId,
           input: {
             id: accountId,
-            accountTransactionsId: transactionsDocumentId
-          }
-        }
-      })
+            accountTransactionsId: transactionsDocumentId,
+          },
+        },
+      }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[AccountTransactionsService] Failed to update account:', {
+      console.error("[AccountTransactionsService] Failed to update account:", {
         status: response.status,
         statusText: response.statusText,
-        errorText
+        errorText,
       });
-      throw new Error(`Failed to update account: ${response.status} - ${response.statusText}`);
+      throw new Error(
+        `Failed to update account: ${response.status} - ${response.statusText}`,
+      );
     }
 
-    const result = await response.json() as {
-      errors?: Array<{message: string}>;
+    const result = (await response.json()) as {
+      errors?: Array<{ message: string }>;
       data?: {
         Accounts_updateAccount?: number;
       };
     };
 
     if (result.errors) {
-      console.error('[AccountTransactionsService] GraphQL errors:', result.errors);
-      throw new Error(result.errors[0]?.message || 'Failed to update account');
+      console.error(
+        "[AccountTransactionsService] GraphQL errors:",
+        result.errors,
+      );
+      throw new Error(result.errors[0]?.message || "Failed to update account");
     }
 
-    console.log('[AccountTransactionsService] Account successfully updated with transactions ID');
+    console.log(
+      "[AccountTransactionsService] Account successfully updated with transactions ID",
+    );
   }
 
   /**
@@ -319,14 +369,18 @@ export class AccountTransactionsService {
    */
   async syncTransactionsForDocument(
     documentId: string,
-    address: string
-  ): Promise<{ success: boolean; transactionsAdded?: number; message: string }> {
+    address: string,
+  ): Promise<{
+    success: boolean;
+    transactionsAdded?: number;
+    message: string;
+  }> {
     try {
       return await this.fetchTransactionsFromAlchemy(documentId, address);
     } catch (error) {
       return {
         success: false,
-        message: `Failed to sync transactions: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `Failed to sync transactions: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
   }
@@ -337,7 +391,9 @@ export class AccountTransactionsService {
   getEnvironmentInfo() {
     return {
       endpoint: this.graphqlEndpoint,
-      mode: this.graphqlEndpoint.includes('localhost') ? 'Local Connect' : 'Remote Switchboard'
+      mode: this.graphqlEndpoint.includes("localhost")
+        ? "Local Connect"
+        : "Remote Switchboard",
     };
   }
 }

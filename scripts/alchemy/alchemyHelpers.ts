@@ -2,7 +2,7 @@
  * Utility functions for Alchemy API integration
  */
 
-import type { AlchemyAssetTransfer, TransactionEntry } from './alchemyTypes.js';
+import type { AlchemyAssetTransfer, TransactionEntry } from "./alchemyTypes.js";
 
 /**
  * Retry mechanism with exponential backoff (following gnosis pattern)
@@ -11,26 +11,32 @@ export async function withRetry<T>(
   fn: () => Promise<T>,
   maxRetries = 3,
   initialDelay = 1000,
-  operationName = "Alchemy API call"
+  operationName = "Alchemy API call",
 ): Promise<T> {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await fn();
     } catch (error: any) {
-      const isRateLimit = error?.message?.includes('Too Many Requests') ||
-        error?.message?.includes('429') ||
+      const isRateLimit =
+        error?.message?.includes("Too Many Requests") ||
+        error?.message?.includes("429") ||
         error?.status === 429;
 
       if (isRateLimit && attempt < maxRetries - 1) {
         const waitTime = initialDelay * Math.pow(2, attempt);
-        console.log(`[${operationName}] Rate limited, retrying in ${waitTime}ms...`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
+        console.log(
+          `[${operationName}] Rate limited, retrying in ${waitTime}ms...`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
         continue;
       }
 
       // If it's not a rate limit error or we've exhausted retries, throw
       if (attempt === maxRetries - 1) {
-        console.error(`[${operationName}] Max retries exceeded:`, error?.message);
+        console.error(
+          `[${operationName}] Max retries exceeded:`,
+          error?.message,
+        );
       }
       throw error;
     }
@@ -51,7 +57,7 @@ export function isValidEthereumAddress(address: string): boolean {
 export function convertToTransactionEntry(
   transfer: AlchemyAssetTransfer,
   userAddress: string,
-  blockTimestamp?: number
+  blockTimestamp?: number,
 ): TransactionEntry {
   // Convert value based on decimals for ERC20 tokens
   let value: string;
@@ -70,20 +76,20 @@ export function convertToTransactionEntry(
   const fromAddressLower = transfer.from.toLowerCase();
   const toAddressLower = transfer.to.toLowerCase();
 
-  let direction: 'INFLOW' | 'OUTFLOW';
+  let direction: "INFLOW" | "OUTFLOW";
   let counterParty: string;
 
   if (toAddressLower === userAddressLower) {
     // Money coming INTO user's account
-    direction = 'INFLOW';
+    direction = "INFLOW";
     counterParty = transfer.from; // The sender is the counterparty
   } else if (fromAddressLower === userAddressLower) {
     // Money going OUT of user's account
-    direction = 'OUTFLOW';
+    direction = "OUTFLOW";
     counterParty = transfer.to; // The receiver is the counterparty
   } else {
     // This shouldn't happen for user-specific transactions, but fallback to OUTFLOW
-    direction = 'OUTFLOW';
+    direction = "OUTFLOW";
     counterParty = transfer.from;
   }
 
@@ -97,10 +103,14 @@ export function convertToTransactionEntry(
 
   // Validation - throw error if critical fields are undefined
   if (!direction) {
-    throw new Error(`Direction is undefined for transaction ${transfer.hash}. From: ${transfer.from}, To: ${transfer.to}, User: ${userAddress}`);
+    throw new Error(
+      `Direction is undefined for transaction ${transfer.hash}. From: ${transfer.from}, To: ${transfer.to}, User: ${userAddress}`,
+    );
   }
   if (!transfer.from) {
-    throw new Error(`From address is undefined for transaction ${transfer.hash}`);
+    throw new Error(
+      `From address is undefined for transaction ${transfer.hash}`,
+    );
   }
   if (!transfer.to) {
     throw new Error(`To address is undefined for transaction ${transfer.hash}`);
@@ -111,7 +121,7 @@ export function convertToTransactionEntry(
     counterParty,
     amount: {
       unit: token,
-      value: value
+      value: value,
     },
     txHash: transfer.hash,
     token: token,
@@ -120,7 +130,7 @@ export function convertToTransactionEntry(
     accountingPeriod: transactionDate.getFullYear().toString(),
     from: transfer.from,
     to: transfer.to,
-    direction
+    direction,
   };
 }
 
@@ -133,7 +143,7 @@ export function validateEnvironment(): { apiKey: string; network: string } {
     throw new Error("ALCHEMY_API_KEY environment variable is not set");
   }
 
-  const network = process.env.ALCHEMY_NETWORK || 'mainnet';
+  const network = process.env.ALCHEMY_NETWORK || "mainnet";
 
   return { apiKey, network };
 }

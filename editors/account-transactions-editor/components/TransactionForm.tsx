@@ -8,41 +8,53 @@ import {
 import type {
   TransactionEntry,
   Budget,
-  AddTransactionInput
+  AddTransactionInput,
 } from "../../../document-models/account-transactions/gen/types.js";
 
 interface TransactionFormProps {
   transaction?: TransactionEntry;
   budgets: Budget[];
-  onSubmit: (values: AddTransactionInput | Omit<AddTransactionInput, "id">) => void;
+  onSubmit: (
+    values: AddTransactionInput | Omit<AddTransactionInput, "id">,
+  ) => void;
   onCancel: () => void;
 }
 
-export function TransactionForm({ transaction, budgets, onSubmit, onCancel }: TransactionFormProps) {
+export function TransactionForm({
+  transaction,
+  budgets,
+  onSubmit,
+  onCancel,
+}: TransactionFormProps) {
   const isEditing = !!transaction;
 
-  const defaultValues = transaction ? {
-    id: transaction.id,
-    counterParty: transaction.counterParty || "",
-    amount: typeof transaction.amount === 'object' ? transaction.amount.value : transaction.amount,
-    datetime: new Date(transaction.datetime).toISOString().slice(0, 16), // Convert ISO to datetime-local format
-    txHash: transaction.details.txHash,
-    token: transaction.details.token,
-    blockNumber: transaction.details.blockNumber?.toString() || "",
-    budget: transaction.budget || "",
-    accountingPeriod: transaction.accountingPeriod,
-    direction: transaction.direction || "OUTFLOW",
-  } : {
-    counterParty: "",
-    amount: "",
-    datetime: new Date().toISOString().slice(0, 16), // Format for datetime-local input
-    txHash: "",
-    token: "ETH",
-    blockNumber: "",
-    budget: "",
-    accountingPeriod: new Date().getFullYear().toString(),
-    direction: "OUTFLOW",
-  };
+  const defaultValues = transaction
+    ? {
+        id: transaction.id,
+        counterParty: transaction.counterParty || "",
+        amount:
+          typeof transaction.amount === "object"
+            ? transaction.amount.value
+            : transaction.amount,
+        datetime: new Date(transaction.datetime).toISOString().slice(0, 16), // Convert ISO to datetime-local format
+        txHash: transaction.details.txHash,
+        token: transaction.details.token,
+        blockNumber: transaction.details.blockNumber?.toString() || "",
+        budget: transaction.budget || "",
+        accountingPeriod: transaction.accountingPeriod,
+        direction: transaction.direction || "OUTFLOW",
+      }
+    : {
+        counterParty: "",
+        amount: "",
+        datetime: new Date().toISOString().slice(0, 16), // Format for datetime-local input
+        txHash: "",
+        token: "ETH",
+        blockNumber: "",
+        budget: "",
+        accountingPeriod: new Date().getFullYear().toString(),
+        direction: "OUTFLOW",
+      };
 
   function handleSubmit(values: {
     id?: string;
@@ -61,12 +73,14 @@ export function TransactionForm({ transaction, budgets, onSubmit, onCancel }: Tr
       counterParty: values.counterParty,
       amount: {
         unit: values.token,
-        value: values.amount
+        value: values.amount,
       },
       datetime: new Date(values.datetime).toISOString(),
       txHash: values.txHash,
       token: values.token,
-      blockNumber: values.blockNumber ? parseInt(values.blockNumber) : undefined,
+      blockNumber: values.blockNumber
+        ? parseInt(values.blockNumber)
+        : undefined,
       budget: values.budget || undefined,
       accountingPeriod: values.accountingPeriod,
       direction: values.direction as "INFLOW" | "OUTFLOW",
@@ -77,10 +91,10 @@ export function TransactionForm({ transaction, budgets, onSubmit, onCancel }: Tr
 
   const budgetOptions = [
     { value: "", label: "No Budget" },
-    ...budgets.map(budget => ({
+    ...budgets.map((budget) => ({
       value: budget.id,
-      label: budget.name || `Budget ${budget.id.slice(0, 8)}`
-    }))
+      label: budget.name || `Budget ${budget.id.slice(0, 8)}`,
+    })),
   ];
 
   const tokenOptions = [
@@ -136,33 +150,21 @@ export function TransactionForm({ transaction, budgets, onSubmit, onCancel }: Tr
             <FormLabel htmlFor="datetime" required>
               Date & Time
             </FormLabel>
-            <StringField
-              name="datetime"
-              type="datetime-local"
-              required
-            />
+            <StringField name="datetime" type="datetime-local" required />
           </div>
 
           <div>
             <FormLabel htmlFor="token" required>
               Token
             </FormLabel>
-            <SelectField
-              name="token"
-              options={tokenOptions}
-              required
-            />
+            <SelectField name="token" options={tokenOptions} required />
           </div>
 
           <div>
             <FormLabel htmlFor="direction" required>
               Direction
             </FormLabel>
-            <SelectField
-              name="direction"
-              options={directionOptions}
-              required
-            />
+            <SelectField name="direction" options={directionOptions} required />
           </div>
 
           <div>
@@ -178,9 +180,7 @@ export function TransactionForm({ transaction, budgets, onSubmit, onCancel }: Tr
           </div>
 
           <div>
-            <FormLabel htmlFor="blockNumber">
-              Block Number (Optional)
-            </FormLabel>
+            <FormLabel htmlFor="blockNumber">Block Number (Optional)</FormLabel>
             <StringField
               name="blockNumber"
               placeholder="18000000"
@@ -189,24 +189,15 @@ export function TransactionForm({ transaction, budgets, onSubmit, onCancel }: Tr
           </div>
 
           <div>
-            <FormLabel htmlFor="budget">
-              Budget (Optional)
-            </FormLabel>
-            <SelectField
-              name="budget"
-              options={budgetOptions}
-            />
+            <FormLabel htmlFor="budget">Budget (Optional)</FormLabel>
+            <SelectField name="budget" options={budgetOptions} />
           </div>
 
           <div>
             <FormLabel htmlFor="accountingPeriod" required>
               Accounting Period
             </FormLabel>
-            <StringField
-              name="accountingPeriod"
-              placeholder="2024"
-              required
-            />
+            <StringField name="accountingPeriod" placeholder="2024" required />
             <p className="text-xs text-gray-500 mt-1">
               Year or period for accounting purposes
             </p>

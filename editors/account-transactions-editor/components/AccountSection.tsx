@@ -8,7 +8,11 @@ interface AccountSectionProps {
   onSetAccount: (address: string, name?: string) => void;
 }
 
-export function AccountSection({ account, hasFetchedTransactions, onSetAccount }: AccountSectionProps) {
+export function AccountSection({
+  account,
+  hasFetchedTransactions,
+  onSetAccount,
+}: AccountSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
 
   function handleSubmit(values: { address: string; name?: string }) {
@@ -24,7 +28,9 @@ export function AccountSection({ account, hasFetchedTransactions, onSetAccount }
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Account Settings</h2>
+        <h2 className="text-lg font-semibold text-gray-900">
+          Account Settings
+        </h2>
         {hasAccount && !isLocked && !isEditing && (
           <Button
             onClick={() => setIsEditing(true)}
@@ -56,7 +62,8 @@ export function AccountSection({ account, hasFetchedTransactions, onSetAccount }
                 No Account Set
               </h3>
               <p className="text-sm text-yellow-700 mt-1">
-                Set an Ethereum address to start tracking transactions for this account.
+                Set an Ethereum address to start tracking transactions for this
+                account.
               </p>
             </div>
             <Button
@@ -97,7 +104,8 @@ export function AccountSection({ account, hasFetchedTransactions, onSetAccount }
               )}
               {isLocked && (
                 <p className="text-xs text-gray-600 mt-2">
-                  Account is locked after fetching transactions. Create a new document to use a different account.
+                  Account is locked after fetching transactions. Create a new
+                  document to use a different account.
                 </p>
               )}
             </div>
@@ -108,7 +116,7 @@ export function AccountSection({ account, hasFetchedTransactions, onSetAccount }
           onSubmit={handleSubmit}
           defaultValues={{
             address: account.account || "",
-            name: account.name || ""
+            name: account.name || "",
           }}
           className="space-y-4"
         >
