@@ -57,7 +57,7 @@ export type Scalars = {
 };
 
 export type AccountEntry = {
-  KycAmlStatus: Maybe<KycAmlStatusType | `${KycAmlStatusType}`>;
+  KycAmlStatus: Maybe<KycAmlStatusType>;
   account: Scalars["String"]["output"];
   accountTransactionsId: Maybe<Scalars["PHID"]["output"]>;
   budgetPath: Maybe<Scalars["String"]["output"]>;
@@ -65,7 +65,7 @@ export type AccountEntry = {
   id: Scalars["OID"]["output"];
   name: Scalars["String"]["output"];
   owners: Maybe<Array<Scalars["String"]["output"]>>;
-  type: AccountType | `${AccountType}`;
+  type: AccountType;
 };
 
 export type AccountType = "Destination" | "External" | "Internal" | "Source";
@@ -81,7 +81,7 @@ export type AccountsState = {
 };
 
 export type AddAccountInput = {
-  KycAmlStatus?: InputMaybe<KycAmlStatusTypeInput | `${KycAmlStatusTypeInput}`>;
+  KycAmlStatus?: InputMaybe<KycAmlStatusTypeInput>;
   account: Scalars["String"]["input"];
   accountTransactionsId?: InputMaybe<Scalars["PHID"]["input"]>;
   budgetPath?: InputMaybe<Scalars["String"]["input"]>;
@@ -89,7 +89,7 @@ export type AddAccountInput = {
   id: Scalars["OID"]["input"];
   name: Scalars["String"]["input"];
   owners?: InputMaybe<Array<Scalars["String"]["input"]>>;
-  type: AccountTypeInput | `${AccountTypeInput}`;
+  type: AccountTypeInput;
 };
 
 export type DeleteAccountInput = {
@@ -101,7 +101,7 @@ export type KycAmlStatusType = "FAILED" | "PASSED" | "PENDING";
 export type KycAmlStatusTypeInput = "FAILED" | "PASSED" | "PENDING";
 
 export type UpdateAccountInput = {
-  KycAmlStatus?: InputMaybe<KycAmlStatusTypeInput | `${KycAmlStatusTypeInput}`>;
+  KycAmlStatus?: InputMaybe<KycAmlStatusTypeInput>;
   account?: InputMaybe<Scalars["String"]["input"]>;
   accountTransactionsId?: InputMaybe<Scalars["PHID"]["input"]>;
   budgetPath?: InputMaybe<Scalars["String"]["input"]>;
@@ -109,10 +109,10 @@ export type UpdateAccountInput = {
   id: Scalars["OID"]["input"];
   name?: InputMaybe<Scalars["String"]["input"]>;
   owners?: InputMaybe<Array<Scalars["String"]["input"]>>;
-  type?: InputMaybe<AccountTypeInput | `${AccountTypeInput}`>;
+  type?: InputMaybe<AccountTypeInput>;
 };
 
 export type UpdateKycStatusInput = {
-  KycAmlStatus: KycAmlStatusTypeInput | `${KycAmlStatusTypeInput}`;
+  KycAmlStatus: KycAmlStatusTypeInput;
   id: Scalars["OID"]["input"];
 };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button, TextInput } from "@powerhousedao/document-engineering";
 import {
   Plus,
@@ -16,10 +16,6 @@ import type {
   LineItem,
 } from "../../../document-models/expense-report/gen/types.js";
 import { actions } from "../../../document-models/expense-report/index.js";
-import {
-  actions as accountTransactionsActions,
-  addTransaction,
-} from "../../../document-models/account-transactions/index.js";
 import { generateId } from "document-model/core";
 import { useWalletSync } from "../hooks/useWalletSync.js";
 import { useSyncWallet } from "../hooks/useSyncWallet.js";
@@ -29,7 +25,14 @@ import {
   useDocumentsInSelectedDrive,
   useSelectedDrive,
   setSelectedNode,
+  useDocumentById,
 } from "@powerhousedao/reactor-browser";
+import { actions as accountsActions } from "../../../document-models/accounts/index.js";
+import {
+  actions as accountTransactionsActions,
+  addTransaction,
+} from "../../../document-models/account-transactions/index.js";
+import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
 import { alchemyIntegration } from "../../account-transactions-editor/alchemyIntegration.js";
 
 interface WalletsTableProps {
@@ -57,9 +60,40 @@ export function WalletsTable({
   const [syncingWallet, setSyncingWallet] = useState<string | null>(null);
   const [addingWallet, setAddingWallet] = useState(false);
 
+  // State for handling newly created transaction documents
+  const [pendingTxDoc, setPendingTxDoc] = useState<{
+    documentId: string;
+    accountEntry: AccountEntry;
+    accountsDocId: string;
+    walletAddress: string;
+  } | null>(null);
+
+  // Track if we're currently processing to prevent duplicate runs
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Progress state for Add Txns operation
+  const [txProgress, setTxProgress] = useState<{
+    show: boolean;
+    step: string;
+    current: number;
+    total: number;
+    details: string;
+  }>({
+    show: false,
+    step: "",
+    current: 0,
+    total: 5,
+    details: "",
+  });
+
   // Get drive and documents for account/transactions document management
   const [selectedDrive] = useSelectedDrive();
   const allDocuments = useDocumentsInSelectedDrive();
+
+  // Load the pending transaction document if one exists
+  const [pendingDocument, pendingDocDispatch] = useDocumentById(
+    pendingTxDoc?.documentId || null,
+  );
 
   // Get available Account documents from the drive
   const availableAccounts =
@@ -80,6 +114,264 @@ export function WalletsTable({
   const { needsSync, outdatedWallets, tagChangedWallets } =
     useWalletSync(wallets);
   const { syncWallet } = useSyncWallet();
+
+  // Handle fetching and adding transactions when a new document is created
+  useEffect(() => {
+    // Check if we have pending work and all required resources
+    if (!pendingTxDoc || !pendingDocument || !pendingDocDispatch || isProcessing) {
+      return;
+    }
+
+    // Mark as processing and save current pending doc
+    setIsProcessing(true);
+    const currentPendingDoc = pendingTxDoc;
+
+    const fetchAndAddTransactions = async () => {
+      console.log(
+        "[WalletsTable] Processing pending transaction document:",
+        currentPendingDoc.documentId,
+      );
+
+      try {
+        // Step 1: Set account info in the transaction document
+        setTxProgress({
+          show: true,
+          step: "Initializing",
+          current: 1,
+          total: 5,
+          details: "Setting up transaction document...",
+        });
+
+        // Add small delay to ensure document is fully initialized
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        console.log("[WalletsTable] Document state before setAccount:", {
+          documentId: pendingDocument?.header?.id,
+          hasState: !!pendingDocument?.state,
+          hasGlobal: !!(pendingDocument?.state as any)?.global,
+        });
+
+        const setAccountAction = accountTransactionsActions.setAccount({
+          address: currentPendingDoc.accountEntry.account,
+          name: currentPendingDoc.accountEntry.name,
+        });
+
+        console.log("[WalletsTable] Dispatching setAccount action:", setAccountAction);
+
+        pendingDocDispatch(setAccountAction);
+
+        // Wait a bit for the action to be processed
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        console.log("[WalletsTable] Account info set - checking document state:", {
+          account: (pendingDocument?.state as any)?.global?.account,
+        });
+
+        // Step 2: Fetch transactions from Alchemy
+        setTxProgress({
+          show: true,
+          step: "Fetching Transactions",
+          current: 2,
+          total: 5,
+          details: "Retrieving blockchain transactions from Alchemy...",
+        });
+
+        console.log(
+          "[WalletsTable] Fetching transactions from Alchemy for:",
+          currentPendingDoc.accountEntry.account,
+        );
+
+        const result = await alchemyIntegration.getTransactionsFromAlchemy(
+          currentPendingDoc.accountEntry.account,
+        );
+
+        console.log(
+          "[WalletsTable] Alchemy result:",
+          result.success,
+          "transactions count:",
+          result.transactions?.length || 0,
+        );
+
+        if (result.success && result.transactions.length > 0) {
+          // Step 3: Add each transaction using the document's dispatch function
+          setTxProgress({
+            show: true,
+            step: "Adding Transactions",
+            current: 3,
+            total: 5,
+            details: `Processing ${result.transactions.length} transactions...`,
+          });
+
+          let addedCount = 0;
+
+          for (const txData of result.transactions) {
+            // Validate required fields
+            if (!txData.direction || !txData.from || !txData.to) {
+              console.error(
+                "[WalletsTable] Skipping invalid transaction:",
+                txData,
+              );
+              continue;
+            }
+
+            // Handle amount formatting
+            let amount;
+            if (typeof txData.amount === "string") {
+              const amountParts = txData.amount.split(" ");
+              amount = {
+                value: amountParts[0] || "0",
+                unit: amountParts[1] || txData.token,
+              };
+            } else if (
+              typeof txData.amount === "object" &&
+              txData.amount &&
+              "value" in txData.amount &&
+              "unit" in txData.amount
+            ) {
+              amount = txData.amount;
+            } else {
+              amount = {
+                value: "0",
+                unit: txData.token,
+              };
+            }
+
+            // Dispatch transaction directly to the document
+            const txAction = addTransaction({
+              id: generateId(),
+              counterParty: txData.counterParty,
+              amount: amount,
+              datetime: txData.datetime,
+              txHash: txData.txHash,
+              token: txData.token,
+              blockNumber: txData.blockNumber,
+              accountingPeriod: txData.accountingPeriod,
+              direction:
+                (txData.direction as "INFLOW" | "OUTFLOW") || "OUTFLOW",
+              budget: null,
+            });
+
+            if (addedCount === 0) {
+              console.log("[WalletsTable] First transaction action:", txAction);
+            }
+
+            pendingDocDispatch(txAction);
+            addedCount++;
+
+            // Update progress every 10 transactions
+            if (addedCount % 10 === 0) {
+              setTxProgress({
+                show: true,
+                step: "Adding Transactions",
+                current: 3,
+                total: 5,
+                details: `Added ${addedCount} of ${result.transactions.length} transactions...`,
+              });
+              console.log(
+                `[WalletsTable] Added ${addedCount}/${result.transactions.length} transactions`,
+              );
+            }
+          }
+
+          console.log(
+            `[WalletsTable] Successfully added all ${addedCount} transactions`,
+          );
+
+          // Verify operations were added
+          console.log("[WalletsTable] Final transaction count in document:", {
+            transactionsCount:
+              (pendingDocument?.state as any)?.global?.transactions?.length || 0,
+            operationsCount: (pendingDocument?.operations as any)?.global?.length || 0,
+          });
+        } else {
+          console.log("[WalletsTable] No transactions to add");
+        }
+
+        // Step 4: Update the Accounts document with the transaction document ID
+        setTxProgress({
+          show: true,
+          step: "Linking Documents",
+          current: 4,
+          total: 5,
+          details: "Updating account references...",
+        });
+
+        console.log(
+          "[WalletsTable] Updating account in Accounts document:",
+          {
+            accountId: currentPendingDoc.accountEntry.id,
+            accountsDocId: currentPendingDoc.accountsDocId,
+            transactionsDocId: currentPendingDoc.documentId,
+          },
+        );
+
+        await dispatchActions(
+          [
+            accountsActions.updateAccount({
+              id: currentPendingDoc.accountEntry.id,
+              accountTransactionsId: currentPendingDoc.documentId,
+            }),
+          ],
+          currentPendingDoc.accountsDocId,
+        );
+
+        console.log(
+          "[WalletsTable] Successfully updated account with transactions ID",
+        );
+
+        // Step 5: Link the transaction document to the wallet in ExpenseReport
+        setTxProgress({
+          show: true,
+          step: "Finalizing",
+          current: 5,
+          total: 5,
+          details: "Linking to expense report...",
+        });
+
+        dispatch(
+          actions.updateWallet({
+            address: currentPendingDoc.walletAddress,
+            accountTransactionsDocumentId: currentPendingDoc.documentId,
+          }),
+        );
+
+        console.log("[WalletsTable] Successfully linked to wallet");
+
+        // Success! Close modal after a brief delay
+        setTimeout(() => {
+          setTxProgress({
+            show: false,
+            step: "",
+            current: 0,
+            total: 5,
+            details: "",
+          });
+        }, 1500);
+      } catch (error) {
+        console.error(
+          "[WalletsTable] Error processing pending transaction document:",
+          error,
+        );
+        setTxProgress({
+          show: false,
+          step: "",
+          current: 0,
+          total: 5,
+          details: "",
+        });
+        alert(
+          `Failed to fetch transactions: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+      } finally {
+        // Always clear processing state and pending doc
+        setPendingTxDoc(null);
+        setIsProcessing(false);
+      }
+    };
+
+    fetchAndAddTransactions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingTxDoc, pendingDocument, pendingDocDispatch, isProcessing]);
 
   const handleAddWallet = async () => {
     if (!selectedAccountId) {
@@ -149,12 +441,26 @@ export function WalletsTable({
       return;
     }
 
+    if (!selectedDrive?.header?.id) {
+      alert("No drive selected");
+      return;
+    }
+
     try {
+      // Show initial progress
+      setTxProgress({
+        show: true,
+        step: "Preparing",
+        current: 0,
+        total: 5,
+        details: "Checking for existing documents...",
+      });
+
       // Find or create AccountTransactions document for this wallet
       const existingTxDoc = allDocuments?.find(
         (doc: any) =>
           doc.header.documentType === "powerhouse/account-transactions" &&
-          doc.state?.global?.account === wallet.wallet,
+          doc.state?.global?.account?.account === wallet.wallet,
       );
 
       if (existingTxDoc) {
@@ -165,141 +471,154 @@ export function WalletsTable({
             accountTransactionsDocumentId: existingTxDoc.header.id,
           }),
         );
-      } else {
-        // Create a new AccountTransactions document using addDocument
-        const documentName = `${wallet.name || wallet.wallet.substring(0, 10)} Transactions`;
+        setTxProgress({
+          show: false,
+          step: "",
+          current: 0,
+          total: 5,
+          details: "",
+        });
+        return;
+      }
 
-        const createdNode = await addDocument(
-          selectedDrive?.header?.id || "",
-          documentName,
-          "powerhouse/account-transactions",
+      // Step 1: Find or create an Accounts document
+      setTxProgress({
+        show: true,
+        step: "Preparing",
+        current: 0,
+        total: 5,
+        details: "Setting up accounts...",
+      });
+
+      const accountsDoc = allDocuments?.find(
+        (doc: any) => doc.header.documentType === "powerhouse/accounts",
+      ) as any;
+
+      let accountsDocId: string;
+      let existingAccounts: any[] = [];
+
+      if (!accountsDoc) {
+        console.log("[WalletsTable] Creating new Accounts document");
+        const accountsNode = await addDocument(
+          selectedDrive.header.id,
+          "Accounts",
+          "powerhouse/accounts",
           undefined,
           undefined,
           undefined,
-          "powerhouse-account-transactions-editor",
+          "powerhouse-accounts-editor",
         );
 
-        if (!createdNode?.id) {
-          throw new Error("Failed to create AccountTransactions document");
+        if (!accountsNode?.id) {
+          throw new Error("Failed to create Accounts document");
         }
 
-        // Set the account information in the document
+        accountsDocId = accountsNode.id;
+      } else {
+        accountsDocId = accountsDoc.header.id;
+        existingAccounts = accountsDoc.state?.global?.accounts || [];
+      }
+
+      // Step 2: Find or create an AccountEntry for this wallet
+      let accountEntry: AccountEntry | undefined = existingAccounts.find(
+        (acc: any) => acc.account === wallet.wallet,
+      );
+
+      if (!accountEntry) {
+        console.log(
+          "[WalletsTable] Creating new account entry for wallet:",
+          wallet.wallet,
+        );
+
+        const newAccountId = generateId();
+        const newAccountName = wallet.name || wallet.wallet.substring(0, 10);
+
+        // Add the account to the Accounts document
+        console.log(
+          "[WalletsTable] Adding new account to Accounts document:",
+          newAccountId,
+        );
         await dispatchActions(
           [
-            accountTransactionsActions.setAccount({
-              address: wallet.wallet,
-              name: wallet.name || wallet.wallet,
+            accountsActions.addAccount({
+              id: newAccountId,
+              account: wallet.wallet,
+              name: newAccountName,
+              type: "External",
             }),
           ],
-          createdNode.id,
+          accountsDocId,
         );
 
-        // Fetch transactions from Alchemy and add them to the document
-        try {
-          console.log(
-            "[WalletsTable] Fetching transactions from Alchemy for address:",
-            wallet.wallet,
-          );
+        console.log("[WalletsTable] Account added successfully");
 
-          const result = await alchemyIntegration.getTransactionsFromAlchemy(
-            wallet.wallet,
-          );
+        // Create accountEntry reference
+        accountEntry = {
+          id: newAccountId,
+          account: wallet.wallet,
+          name: newAccountName,
+          type: "External",
+          accountTransactionsId: null,
+          KycAmlStatus: null,
+          budgetPath: null,
+          chain: null,
+          owners: null,
+        };
 
-          if (result.success && result.transactions.length > 0) {
-            // Add each transaction to the document
-            const transactionActions = result.transactions
-              .filter((txData) => {
-                // Validate required fields
-                if (!txData.direction) {
-                  console.error(
-                    `[WalletsTable] Skipping transaction with undefined direction:`,
-                    txData,
-                  );
-                  return false;
-                }
-                if (!txData.from || !txData.to) {
-                  console.error(
-                    `[WalletsTable] Skipping transaction with undefined from/to:`,
-                    {
-                      hash: txData.txHash,
-                      from: txData.from,
-                      to: txData.to,
-                    },
-                  );
-                  return false;
-                }
-                return true;
-              })
-              .map((txData) => {
-                // Handle amount - it might come as string or object
-                let amount;
-                if (typeof txData.amount === "string") {
-                  // Parse amount string back to object format
-                  const amountParts = txData.amount.split(" ");
-                  amount = {
-                    value: amountParts[0] || "0",
-                    unit: amountParts[1] || txData.token,
-                  };
-                } else if (
-                  typeof txData.amount === "object" &&
-                  txData.amount &&
-                  "value" in txData.amount &&
-                  "unit" in txData.amount
-                ) {
-                  amount = txData.amount;
-                } else {
-                  amount = {
-                    value: "0",
-                    unit: txData.token,
-                  };
-                }
-
-                return addTransaction({
-                  id: generateId(),
-                  counterParty: txData.counterParty,
-                  amount: amount,
-                  datetime: txData.datetime,
-                  txHash: txData.txHash,
-                  token: txData.token,
-                  blockNumber: txData.blockNumber,
-                  accountingPeriod: txData.accountingPeriod,
-                  direction: (txData.direction as "INFLOW" | "OUTFLOW") || "OUTFLOW",
-                  budget: null,
-                });
-              });
-
-            // Dispatch all transaction actions at once
-            if (transactionActions.length > 0) {
-              await dispatchActions(transactionActions, createdNode.id);
-              console.log(
-                `[WalletsTable] Successfully added ${transactionActions.length} transactions`,
-              );
-            }
-          } else {
-            console.log(
-              "[WalletsTable] No transactions found for this address",
-            );
-          }
-        } catch (alchemyError) {
-          console.warn(
-            "[WalletsTable] Failed to fetch transactions from Alchemy:",
-            alchemyError,
-          );
-          // Don't fail the entire operation if Alchemy fetch fails
-          // The document is still created and linked
-        }
-
-        // Link the new document to the wallet
-        dispatch(
-          actions.updateWallet({
-            address: wallet.wallet,
-            accountTransactionsDocumentId: createdNode.id,
-          }),
-        );
+        // Give a small delay to ensure the account is persisted
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
+
+      // Step 3: Create the AccountTransactions document
+      setTxProgress({
+        show: true,
+        step: "Preparing",
+        current: 0,
+        total: 5,
+        details: "Creating transaction document...",
+      });
+
+      console.log("[WalletsTable] Creating AccountTransactions document");
+      const documentName = `${accountEntry.name} Transactions`;
+
+      const createdNode = await addDocument(
+        selectedDrive.header.id,
+        documentName,
+        "powerhouse/account-transactions",
+        undefined,
+        undefined,
+        undefined,
+        "powerhouse-account-transactions-editor",
+      );
+
+      if (!createdNode?.id) {
+        throw new Error("Failed to create AccountTransactions document");
+      }
+
+      console.log(
+        "[WalletsTable] AccountTransactions document created:",
+        createdNode.id,
+      );
+
+      // Step 4: Set up pending state to let useEffect handle the rest
+      setPendingTxDoc({
+        documentId: createdNode.id,
+        accountEntry,
+        accountsDocId,
+        walletAddress: wallet.wallet,
+      });
     } catch (error) {
       console.error("[WalletsTable] Error adding transactions:", error);
-      alert("Failed to add transactions document");
+      setTxProgress({
+        show: false,
+        step: "",
+        current: 0,
+        total: 5,
+        details: "",
+      });
+      alert(
+        `Failed to add transactions document: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   };
 
@@ -786,6 +1105,46 @@ export function WalletsTable({
           {addingWallet ? "Adding..." : "Add Account"}
         </Button>
       </div>
+
+      {/* Progress Notification - Bottom Right */}
+      {txProgress.show && (
+        <div className="fixed bottom-4 right-4 z-50 transition-all duration-300 ease-out">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 p-4 w-80">
+            <div className="space-y-3">
+              {/* Header with Spinner */}
+              <div className="flex items-center gap-3">
+                <RefreshCw
+                  size={20}
+                  className="animate-spin text-blue-600 dark:text-blue-500 flex-shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                    {txProgress.step}
+                  </h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Step {txProgress.current} of {txProgress.total}
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                <div
+                  className="bg-blue-600 dark:bg-blue-500 h-1.5 rounded-full transition-all duration-300 ease-in-out"
+                  style={{
+                    width: `${(txProgress.current / txProgress.total) * 100}%`,
+                  }}
+                />
+              </div>
+
+              {/* Details */}
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                {txProgress.details}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
