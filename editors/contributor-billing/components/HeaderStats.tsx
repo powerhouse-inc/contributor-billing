@@ -1,8 +1,12 @@
 import { Select } from "@powerhousedao/document-engineering/ui";
-import { useState, useEffect } from "react";
-import { useDocumentsInSelectedDrive } from "@powerhousedao/reactor-browser";
+import { useState, useEffect, useMemo } from "react";
+import {
+  useFileNodesInSelectedDrive,
+  useGetDocuments,
+} from "@powerhousedao/reactor-browser";
 import { getExchangeRate } from "../utils/exchangeRate.js";
 import { Tooltip, TooltipProvider } from "@powerhousedao/design-system/ui";
+import type { InvoiceDocument } from "../../../document-models/invoice/index.js";
 
 const currencyList = [
   { ticker: "USDS", crypto: true },
@@ -20,10 +24,15 @@ const currencyList = [
 export const HeaderStats = () => {
   const [selectedCurrency, setSelectedCurrency] = useState("USD");
   const [totalExpenses, setTotalExpenses] = useState(0);
-  const documents = useDocumentsInSelectedDrive();
-  const invoices = documents?.filter(
-    (doc) => doc.header.documentType === "powerhouse/invoice"
+  const files = useFileNodesInSelectedDrive();
+  const invoiceFiles = useMemo(
+    () =>
+      files
+        ?.filter((file) => file.documentType === "powerhouse/invoice")
+        .map((file) => file.id),
+    [files],
   );
+  const invoices = useGetDocuments(invoiceFiles) as InvoiceDocument[];
 
   useEffect(() => {
     const calculateTotalExpenses = async () => {
@@ -33,11 +42,10 @@ export const HeaderStats = () => {
       }
 
       let total = 0;
-      for (const doc of invoices) {
-        const invoice = doc as any;
+      for (const invoice of invoices) {
         const invoiceAmount = invoice.state.global.totalPriceTaxIncl;
-        let invoiceCurrency = invoice.state.global.currency || "USD"; // Fallback to USD if currency is empty
-        let selectCurrency = selectedCurrency;
+        const invoiceCurrency = invoice.state.global.currency || "USD"; // Fallback to USD if currency is empty
+
         if (invoiceCurrency === selectedCurrency) {
           total += invoiceAmount;
         } else {
@@ -57,7 +65,7 @@ export const HeaderStats = () => {
             const exchangeRate = await getExchangeRate(
               fromCurrency,
               toCurrency,
-              invoiceAmount
+              invoiceAmount,
             );
             total += invoiceAmount * exchangeRate;
           } catch (error) {
@@ -70,7 +78,7 @@ export const HeaderStats = () => {
       setTotalExpenses(total);
     };
 
-    calculateTotalExpenses();
+    calculateTotalExpenses().catch(console.error);
   }, [invoices, selectedCurrency]);
 
   const currencyOptions = currencyList.map((currency) => ({

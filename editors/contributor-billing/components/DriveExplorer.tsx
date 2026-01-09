@@ -2,6 +2,7 @@ import type { EditorProps } from "document-model";
 import { ToastContainer } from "@powerhousedao/design-system/connect";
 import { HeaderStats } from "./HeaderStats.js";
 import { InvoiceTableContainer } from "./InvoiceTableContainer.js";
+import { Suspense } from "react";
 
 /**
  * Main drive explorer component for Contributor Billing.
@@ -34,8 +35,12 @@ export function DriveExplorer({ children }: EditorProps) {
       ) : (
         /* Operational Hub view */
         <div className="container mx-auto p-4 space-y-4">
-          <HeaderStats />
-          <InvoiceTableContainer />
+          <Suspense>
+            <HeaderStats />
+          </Suspense>
+          <Suspense>
+            <InvoiceTableContainer />
+          </Suspense>
         </div>
       )}
     </div>
