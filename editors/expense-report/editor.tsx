@@ -47,12 +47,16 @@ function getMonthDateRange(yearMonth: string) {
   const [year, month] = yearMonth.split("-").map(Number);
 
   // First day of month at 00:00:00 UTC
-  const periodStart = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0)).toISOString();
+  const periodStart = new Date(
+    Date.UTC(year, month - 1, 1, 0, 0, 0, 0),
+  ).toISOString();
 
   // Last day of month at 23:59:59.999 UTC
   // Get the last day by using day 0 of the next month
   const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
-  const periodEnd = new Date(Date.UTC(year, month - 1, lastDay, 23, 59, 59, 999)).toISOString();
+  const periodEnd = new Date(
+    Date.UTC(year, month - 1, lastDay, 23, 59, 59, 999),
+  ).toISOString();
 
   return { periodStart, periodEnd };
 }

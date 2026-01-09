@@ -105,7 +105,7 @@ export const HeaderControls = ({
           const invoiceName = invoice.header.name || "";
           const expectedBillName = `bill-${invoiceName}`;
           const existingBill = billingStatements.find(
-            (bill) => bill.header.name === expectedBillName
+            (bill) => bill.header.name === expectedBillName,
           );
           if (existingBill) {
             existingBills.push(invoiceName);

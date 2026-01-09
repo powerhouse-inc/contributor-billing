@@ -4,15 +4,20 @@ import {
   useDocumentsInSelectedDrive,
   useParentFolderForSelectedNode,
   setSelectedNode,
+  dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import { DatePicker } from "@powerhousedao/document-engineering";
+import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { useSelectedSnapshotReportDocument } from "../hooks/useSnapshotReportDocument.js";
 import {
   setReportConfig,
   addSnapshotAccount,
   addTransaction,
 } from "../../document-models/snapshot-report/gen/creators.js";
+import { useSyncSnapshotAccount } from "./hooks/useSyncSnapshotAccount.js";
+import { formatBalance } from "./utils/balanceCalculations.js";
+import { actions as accountsActions } from "../../document-models/accounts/index.js";
 
 export default function Editor() {
   const [document, dispatch] = useSelectedSnapshotReportDocument();
@@ -21,6 +26,14 @@ export default function Editor() {
   const [selectedAccountIds, setSelectedAccountIds] = useState<Set<string>>(
     new Set(),
   );
+  const [expandedAccounts, setExpandedAccounts] = useState<Set<string>>(
+    new Set(),
+  );
+  const [syncingAccounts, setSyncingAccounts] = useState<Set<string>>(
+    new Set(),
+  );
+  const [isSyncingAll, setIsSyncingAll] = useState(false);
+  const { syncAccount } = useSyncSnapshotAccount();
 
   if (!document) {
     return <div>Loading...</div>;
@@ -56,6 +69,83 @@ export default function Editor() {
     snapshotAccounts.map((acc) => acc.accountId),
   );
 
+  // Create a map of accountId to accountEntry for quick lookup
+  const accountEntryMap = new Map(
+    availableAccounts.map((acc: any) => [acc.id, acc]),
+  );
+
+  // Handle sync for a single account
+  const handleSyncAccount = async (snapshotAccount: any) => {
+    if (!startDate || !endDate) {
+      alert(
+        "Please set the report period (start and end dates) before syncing",
+      );
+      return;
+    }
+
+    setSyncingAccounts((prev) => new Set(prev).add(snapshotAccount.id));
+
+    try {
+      const accountEntry = accountEntryMap.get(snapshotAccount.accountId);
+      const result = await syncAccount(
+        snapshotAccount,
+        accountEntry,
+        accountsDocumentId || undefined,
+        startDate,
+        endDate,
+        dispatch,
+      );
+
+      if (result.success) {
+        // If account transactions document was created, update the Accounts document
+        if (result.documentId && accountEntry && accountsDocumentId) {
+          await dispatchActions(
+            [
+              accountsActions.updateAccount({
+                id: accountEntry.id,
+                accountTransactionsId: result.documentId,
+              }),
+            ],
+            accountsDocumentId,
+          );
+        }
+      } else {
+        alert(`Sync failed: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("Error syncing account:", error);
+      alert(
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    } finally {
+      setSyncingAccounts((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(snapshotAccount.id);
+        return newSet;
+      });
+    }
+  };
+
+  // Handle sync all accounts
+  const handleSyncAll = async () => {
+    if (!startDate || !endDate) {
+      alert(
+        "Please set the report period (start and end dates) before syncing",
+      );
+      return;
+    }
+
+    setIsSyncingAll(true);
+
+    try {
+      for (const snapshotAccount of snapshotAccounts) {
+        await handleSyncAccount(snapshotAccount);
+      }
+    } finally {
+      setIsSyncingAll(false);
+    }
+  };
+
   const handleSetReportName = (name: string) => {
     dispatch?.(
       setReportConfig({
@@ -65,6 +155,18 @@ export default function Editor() {
         accountsDocumentId: undefined,
       }),
     );
+  };
+
+  const handleToggleAccountExpansion = (accountId: string) => {
+    setExpandedAccounts((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(accountId)) {
+        newSet.delete(accountId);
+      } else {
+        newSet.add(accountId);
+      }
+      return newSet;
+    });
   };
 
   const handleOpenAccountPicker = () => {
@@ -317,13 +419,27 @@ export default function Editor() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Snapshot Accounts</h2>
-            <button
-              onClick={handleOpenAccountPicker}
-              disabled={!accountsDocumentId}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              Add Account
-            </button>
+            <div className="flex gap-2">
+              {snapshotAccounts.length > 0 && (
+                <button
+                  onClick={handleSyncAll}
+                  disabled={isSyncingAll || !startDate || !endDate}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <RefreshCw
+                    className={`w-4 h-4 ${isSyncingAll ? "animate-spin" : ""}`}
+                  />
+                  Sync All
+                </button>
+              )}
+              <button
+                onClick={handleOpenAccountPicker}
+                disabled={!accountsDocumentId}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                Add Account
+              </button>
+            </div>
           </div>
 
           {snapshotAccounts.length === 0 ? (
@@ -338,27 +454,241 @@ export default function Editor() {
               {snapshotAccounts.map((account: any) => (
                 <div
                   key={account.id}
-                  className="border border-gray-200 rounded-lg p-4"
+                  className="border border-gray-200 rounded-lg overflow-hidden"
                 >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-semibold">{account.accountName}</h3>
-                      <p className="text-sm text-gray-600">
-                        {account.accountAddress}
-                      </p>
-                      <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                        {account.type}
-                      </span>
+                  {/* Header - Always Visible */}
+                  <div className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold">
+                            {account.accountName}
+                          </h3>
+                          <button
+                            onClick={() => handleSyncAccount(account)}
+                            disabled={
+                              syncingAccounts.has(account.id) ||
+                              !startDate ||
+                              !endDate
+                            }
+                            className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Sync account transactions and balances"
+                          >
+                            <RefreshCw
+                              className={`w-4 h-4 ${
+                                syncingAccounts.has(account.id)
+                                  ? "animate-spin text-blue-600"
+                                  : "text-gray-600"
+                              }`}
+                            />
+                          </button>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          {account.accountAddress}
+                        </p>
+                        <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                          {account.type}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-600">
+                          Transactions: {account.transactions.length}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Tokens: {account.startingBalances.length}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-600">
-                        Transactions: {account.transactions.length}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Balances: {account.startingBalances.length}
-                      </p>
-                    </div>
+
+                    {/* Balances Display */}
+                    {(account.startingBalances.length > 0 ||
+                      account.endingBalances.length > 0) && (
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                          Balances
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {account.startingBalances.map((balance: any) => {
+                            const endingBalance = account.endingBalances.find(
+                              (eb: any) => eb.token === balance.token,
+                            );
+                            return (
+                              <div
+                                key={balance.id}
+                                className="bg-gray-50 rounded p-2 text-sm"
+                              >
+                                <div className="font-medium text-gray-700 mb-1">
+                                  {balance.token}
+                                </div>
+                                <div className="text-xs text-gray-600 space-y-1">
+                                  <div>
+                                    Opening:{" "}
+                                    <span className="font-medium">
+                                      {formatBalance(balance.amount)}
+                                    </span>
+                                  </div>
+                                  {endingBalance && (
+                                    <div>
+                                      Closing:{" "}
+                                      <span className="font-medium">
+                                        {formatBalance(endingBalance.amount)}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {account.endingBalances
+                            .filter(
+                              (eb: any) =>
+                                !account.startingBalances.some(
+                                  (sb: any) => sb.token === eb.token,
+                                ),
+                            )
+                            .map((balance: any) => (
+                              <div
+                                key={balance.id}
+                                className="bg-gray-50 rounded p-2 text-sm"
+                              >
+                                <div className="font-medium text-gray-700 mb-1">
+                                  {balance.token}
+                                </div>
+                                <div className="text-xs text-gray-600">
+                                  <div>
+                                    Closing:{" "}
+                                    <span className="font-medium">
+                                      {formatBalance(balance.amount)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Expand/Collapse Button */}
+                    {account.transactions.length > 0 && (
+                      <button
+                        onClick={() => handleToggleAccountExpansion(account.id)}
+                        className="mt-3 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                      >
+                        {expandedAccounts.has(account.id) ? (
+                          <>
+                            <ChevronUp className="w-4 h-4" />
+                            <span>Hide Transactions</span>
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="w-4 h-4" />
+                            <span>Show Transactions</span>
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
+
+                  {/* Expandable Transaction List */}
+                  {expandedAccounts.has(account.id) &&
+                    account.transactions.length > 0 && (
+                      <div className="border-t border-gray-200 bg-gray-50">
+                        <div className="p-4">
+                          <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                            Transactions ({account.transactions.length})
+                          </h4>
+                          <div className="space-y-2">
+                            {account.transactions.map((tx: any) => (
+                              <div
+                                key={tx.id}
+                                className="bg-white border border-gray-200 rounded p-3 text-sm"
+                              >
+                                <div className="grid grid-cols-2 gap-2">
+                                  {/* Transaction Details Grid */}
+                                  <div>
+                                    <span className="text-gray-500">
+                                      Direction:
+                                    </span>
+                                    <span
+                                      className={`ml-2 font-medium ${
+                                        tx.direction === "INFLOW"
+                                          ? "text-green-600"
+                                          : "text-red-600"
+                                      }`}
+                                    >
+                                      {tx.direction}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-gray-500">
+                                      Amount:
+                                    </span>
+                                    <span className="ml-2 font-medium">
+                                      {typeof tx.amount === "object" &&
+                                      tx.amount?.value !== undefined
+                                        ? `${tx.amount.value} ${tx.amount.unit || tx.token}`
+                                        : `${tx.amount} ${tx.token}`}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-gray-500">Date:</span>
+                                    <span className="ml-2">
+                                      {new Date(
+                                        tx.datetime,
+                                      ).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-gray-500">Time:</span>
+                                    <span className="ml-2">
+                                      {new Date(
+                                        tx.datetime,
+                                      ).toLocaleTimeString()}
+                                    </span>
+                                  </div>
+                                  {tx.counterParty && (
+                                    <div className="col-span-2">
+                                      <span className="text-gray-500">
+                                        Counter Party:
+                                      </span>
+                                      <span className="ml-2 font-mono text-xs">
+                                        {tx.counterParty}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {tx.flowType && (
+                                    <div>
+                                      <span className="text-gray-500">
+                                        Flow Type:
+                                      </span>
+                                      <span className="ml-2 px-2 py-0.5 bg-gray-100 rounded text-xs">
+                                        {tx.flowType}
+                                      </span>
+                                    </div>
+                                  )}
+                                  <div className="col-span-2">
+                                    <span className="text-gray-500">
+                                      Tx Hash:
+                                    </span>
+                                    <a
+                                      href={`https://etherscan.io/tx/${tx.txHash}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="ml-2 text-blue-600 hover:underline font-mono text-xs"
+                                    >
+                                      {tx.txHash.substring(0, 10)}...
+                                      {tx.txHash.substring(
+                                        tx.txHash.length - 8,
+                                      )}
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                 </div>
               ))}
             </div>
