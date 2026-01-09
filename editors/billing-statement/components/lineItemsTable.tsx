@@ -243,12 +243,9 @@ const LineItemsTable = (props: {
   return (
     <div className="w-full">
       {/* Heading */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4">
         <div className="space-y-1">
-          <div className="text-xs font-semibold tracking-[0.24em] text-black/60">
-            LINE ITEMS
-          </div>
-          <div className="text-sm text-black/50">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
             Double‑click a row to edit. Click outside to save.
           </div>
         </div>
@@ -257,62 +254,62 @@ const LineItemsTable = (props: {
           <button
             type="button"
             onClick={() => setShowTagTable(!showTagTable)}
-            className="group inline-flex items-center gap-2 rounded-full border border-black/15 bg-[#efe8da] px-3 py-2 text-xs font-semibold tracking-wide text-black/80 shadow-[0_10px_28px_rgba(15,23,42,0.10)] transition hover:bg-[#e7ddc9] focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            className="group inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm transition hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             aria-label="Open tag editor"
           >
-            <Tag className="h-4 w-4 text-black/70" />
+            <Tag className="h-4 w-4" />
             Tags
           </button>
         </div>
       </div>
 
       {/* Table */}
-      <div className="mt-4 overflow-hidden rounded-xl border border-black/10 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+      <div className="mt-4 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
         <div className="overflow-x-auto" ref={tableRef}>
           <div className="min-w-[980px]">
             <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="bg-[#efe8da] text-[#14120f]">
-                  <th className="w-10 border-b border-black/10 px-2 py-3 text-center text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                <tr className="bg-gray-100 dark:bg-gray-700">
+                  <th className="w-10 border-b border-gray-200 dark:border-gray-600 px-2 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">
                     #
                   </th>
-                  <th className="w-[28rem] border-b border-black/10 px-3 py-3 text-left text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                  <th className="w-[28rem] border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
                     DESCRIPTION
                   </th>
-                  <th className="w-44 border-b border-black/10 px-3 py-3 text-left text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                  <th className="w-44 border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
                     UNIT
                   </th>
-                  <th className="w-20 border-b border-black/10 px-3 py-3 text-right text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                  <th className="w-20 border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300">
                     QTY
                   </th>
-                  <th className="w-28 border-b border-black/10 px-3 py-3 text-right text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                  <th className="w-28 border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300">
                     FIAT/UNIT
                   </th>
-                  <th className="w-28 border-b border-black/10 px-3 py-3 text-right text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                  <th className="w-28 border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300">
                     POWT/UNIT
                   </th>
-                  <th className="w-32 border-b border-black/10 px-3 py-3 text-right text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                  <th className="w-32 border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300">
                     TOTAL FIAT
                   </th>
-                  <th className="w-32 border-b border-black/10 px-3 py-3 text-right text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                  <th className="w-32 border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300">
                     TOTAL POWT
                   </th>
-                  <th className="w-16 border-b border-black/10 px-2 py-3 text-center text-[11px] font-semibold tracking-[0.20em] text-black/70">
+                  <th className="w-16 border-b border-gray-200 dark:border-gray-600 px-2 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">
                     {/* Delete column header */}
                   </th>
                 </tr>
               </thead>
-              <tbody className="text-black/90">
+              <tbody className="text-gray-900 dark:text-gray-100">
                 {state.lineItems.map((item: any, idx: number) =>
                   editingRow === idx ? (
                     <tr
                       key={item.id}
-                      className="bg-[#fff3cf] shadow-[inset_0_0_0_1px_rgba(245,158,11,0.35)]"
+                      className="bg-blue-50 dark:bg-blue-900/20"
                     >
-                      <td className="border-b border-black/10 px-2 py-3 text-center font-mono text-xs tabular-nums text-black/60">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-2 py-3 text-center text-xs text-gray-600 dark:text-gray-400">
                         {idx + 1}
                       </td>
-                      <td className="border-b border-black/10 px-3 py-2">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-2">
                         <InputField
                           input={localLineItem.description}
                           value={localLineItem.description}
@@ -320,10 +317,10 @@ const LineItemsTable = (props: {
                           handleInputChange={(e) =>
                             handleInputChange("description", e.target.value)
                           }
-                          className="w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                          className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm"
                         />
                       </td>
-                      <td className="border-b border-black/10 px-3 py-2">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-2">
                         <Select
                           options={units}
                           value={localLineItem.unit}
@@ -333,19 +330,19 @@ const LineItemsTable = (props: {
                               value as BillingStatementUnitInput,
                             )
                           }
-                          className="w-44 rounded-lg border border-black/15 bg-white px-2 py-2 text-sm"
+                          className="w-44 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-2 text-sm"
                         />
                       </td>
-                      <td className="border-b border-black/10 px-3 py-2">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-2">
                         <NumberForm
                           number={localLineItem.quantity}
                           handleInputChange={(e: any) =>
                             handleInputChange("quantity", e.target.value)
                           }
-                          className="w-24 rounded-lg border border-black/15 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                          className="w-24 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-right"
                         />
                       </td>
-                      <td className="border-b border-black/10 px-3 py-2">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-2">
                         <NumberForm
                           number={localLineItem.unitPriceCash}
                           handleInputChange={(e: any) =>
@@ -354,31 +351,31 @@ const LineItemsTable = (props: {
                               String(e.target.value),
                             )
                           }
-                          className="w-28 rounded-lg border border-black/15 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                          className="w-28 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-right"
                         />
                       </td>
-                      <td className="border-b border-black/10 px-3 py-2">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-2">
                         <NumberForm
                           number={localLineItem.unitPricePwt}
                           handleInputChange={(e: any) =>
                             handleInputChange("unitPricePwt", e.target.value)
                           }
-                          className="w-28 rounded-lg border border-black/15 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                          className="w-28 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-right"
                         />
                       </td>
-                      <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums text-black/70">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-right text-gray-600 dark:text-gray-400">
                         {localLineItem.quantity && localLineItem.unitPriceCash
                           ? Number(localLineItem.quantity) *
                             Number(localLineItem.unitPriceCash)
                           : ""}
                       </td>
-                      <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums text-black/70">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-right text-gray-600 dark:text-gray-400">
                         {localLineItem.quantity && localLineItem.unitPricePwt
                           ? Number(localLineItem.quantity) *
                             Number(localLineItem.unitPricePwt)
                           : ""}
                       </td>
-                      <td className="border-b border-black/10 px-2 py-3 text-center">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-2 py-3 text-center">
                         <button
                           type="button"
                           onClick={(e) => {
@@ -395,37 +392,37 @@ const LineItemsTable = (props: {
                   ) : (
                     <tr
                       key={item.id}
-                      className="cursor-pointer odd:bg-[#fbf8f1] even:bg-white hover:bg-[#fff3cf]/60"
+                      className="cursor-pointer odd:bg-white even:bg-gray-50 dark:odd:bg-gray-800 dark:even:bg-gray-750 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                       onDoubleClick={() => {
                         setEditingRow(idx);
                         setLocalLineItem({ ...item });
                       }}
                     >
-                      <td className="border-b border-black/10 px-2 py-3 text-center font-mono text-xs tabular-nums text-black/60">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-2 py-3 text-center text-xs text-gray-600 dark:text-gray-400">
                         {idx + 1}
                       </td>
-                      <td className="border-b border-black/10 px-3 py-3">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-3">
                         {item.description}
                       </td>
-                      <td className="border-b border-black/10 px-3 py-3 text-center text-xs font-semibold tracking-wide text-black/60">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400">
                         {item.unit}
                       </td>
-                      <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-right">
                         {item.quantity}
                       </td>
-                      <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-right">
                         {formatNumber(item.unitPriceCash)}
                       </td>
-                      <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-right">
                         {formatNumber(item.unitPricePwt)}
                       </td>
-                      <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-right">
                         {formatNumber(item.totalPriceCash)}
                       </td>
-                      <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-right">
                         {formatNumber(item.totalPricePwt)}
                       </td>
-                      <td className="border-b border-black/10 px-2 py-3 text-center">
+                      <td className="border-b border-gray-200 dark:border-gray-600 px-2 py-3 text-center">
                         <button
                           type="button"
                           onClick={(e) => {
@@ -442,11 +439,11 @@ const LineItemsTable = (props: {
                   ),
                 )}
                 {isAddingNew && (
-                  <tr className="bg-[#e8fff3] shadow-[inset_0_0_0_1px_rgba(16,185,129,0.22)]">
-                    <td className="border-b border-black/10 px-2 py-3 text-center font-mono text-xs tabular-nums text-black/60">
+                  <tr className="bg-green-50 dark:bg-green-900/20">
+                    <td className="border-b border-gray-200 dark:border-gray-600 px-2 py-3 text-center text-xs text-gray-600 dark:text-gray-400">
                       {state.lineItems.length + 1}
                     </td>
-                    <td className="border-b border-black/10 px-3 py-2">
+                    <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-2">
                       <InputField
                         input={newLineItem.description}
                         value={newLineItem.description}
@@ -454,10 +451,10 @@ const LineItemsTable = (props: {
                         handleInputChange={(e) =>
                           handleNewLineItemChange("description", e.target.value)
                         }
-                        className="w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm"
                       />
                     </td>
-                    <td className="border-b border-black/10 px-3 py-2">
+                    <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-2">
                       <Select
                         options={units}
                         value={newLineItem.unit}
@@ -467,19 +464,19 @@ const LineItemsTable = (props: {
                             value as BillingStatementUnitInput,
                           )
                         }
-                        className="w-44 rounded-lg border border-black/15 bg-white px-2 py-2 text-sm"
+                        className="w-44 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-2 text-sm"
                       />
                     </td>
-                    <td className="border-b border-black/10 px-3 py-2">
+                    <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-2">
                       <NumberForm
                         number={newLineItem.quantity}
                         handleInputChange={(e: any) =>
                           handleNewLineItemChange("quantity", e.target.value)
                         }
-                        className="w-24 rounded-lg border border-black/15 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                        className="w-24 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-right"
                       />
                     </td>
-                    <td className="border-b border-black/10 px-3 py-2">
+                    <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-2">
                       <NumberForm
                         number={newLineItem.unitPriceCash}
                         handleInputChange={(e: any) =>
@@ -488,10 +485,10 @@ const LineItemsTable = (props: {
                             String(e.target.value),
                           )
                         }
-                        className="w-28 rounded-lg border border-black/15 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                        className="w-28 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-right"
                       />
                     </td>
-                    <td className="border-b border-black/10 px-3 py-2">
+                    <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-2">
                       <NumberForm
                         number={newLineItem.unitPricePwt}
                         handleInputChange={(e: any) =>
@@ -500,22 +497,22 @@ const LineItemsTable = (props: {
                             e.target.value,
                           )
                         }
-                        className="w-28 rounded-lg border border-black/15 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                        className="w-28 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-right"
                       />
                     </td>
-                    <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums text-black/70">
+                    <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-right text-gray-600 dark:text-gray-400">
                       {newLineItem.quantity && newLineItem.unitPriceCash
                         ? Number(newLineItem.quantity) *
                           Number(newLineItem.unitPriceCash)
                         : ""}
                     </td>
-                    <td className="border-b border-black/10 px-3 py-3 text-right font-mono tabular-nums text-black/70">
+                    <td className="border-b border-gray-200 dark:border-gray-600 px-3 py-3 text-right text-gray-600 dark:text-gray-400">
                       {newLineItem.quantity && newLineItem.unitPricePwt
                         ? Number(newLineItem.quantity) *
                           Number(newLineItem.unitPricePwt)
                         : ""}
                     </td>
-                    <td className="border-b border-black/10 px-2 py-3 text-center">
+                    <td className="border-b border-gray-200 dark:border-gray-600 px-2 py-3 text-center">
                       {/* Empty cell for new item row */}
                     </td>
                   </tr>
@@ -527,12 +524,12 @@ const LineItemsTable = (props: {
 
         {/* Add Line Item Button */}
         {!isAddingNew && (
-          <div className="flex justify-center bg-[#fbf8f1] px-4 py-4">
+          <div className="flex justify-center bg-gray-50 dark:bg-gray-700 px-4 py-4">
             <button
               onClick={handleAddLineItem}
-              className="inline-flex items-center gap-2 rounded-full border border-black/15 bg-[#efe8da] px-4 py-2 text-xs font-semibold tracking-wide text-black/80 shadow-[0_10px_28px_rgba(15,23,42,0.10)] transition hover:bg-[#e7ddc9] focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm transition hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             >
-              <Plus className="h-4 w-4 text-black/70" />
+              <Plus className="h-4 w-4" />
               Add Line Item
             </button>
           </div>
@@ -540,16 +537,16 @@ const LineItemsTable = (props: {
 
         {/* Save/Cancel buttons when adding new item */}
         {isAddingNew && (
-          <div className="flex justify-center gap-2 bg-[#fbf8f1] px-4 py-4">
+          <div className="flex justify-center gap-2 bg-gray-50 dark:bg-gray-700 px-4 py-4">
             <button
               onClick={handleSaveNewLineItem}
-              className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold tracking-wide text-white shadow-[0_10px_28px_rgba(0,0,0,0.18)] transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             >
               Save Line Item
             </button>
             <button
               onClick={handleCancelAdd}
-              className="rounded-full bg-[#121319] px-4 py-2 text-xs font-semibold tracking-wide text-[#f6f1e7] shadow-[0_10px_28px_rgba(0,0,0,0.18)] transition hover:bg-[#1b1d26] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d38a]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              className="rounded-lg bg-gray-600 dark:bg-gray-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-700 dark:hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
             >
               Cancel
             </button>

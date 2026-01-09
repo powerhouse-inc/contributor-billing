@@ -118,7 +118,12 @@ export function WalletsTable({
   // Handle fetching and adding transactions when a new document is created
   useEffect(() => {
     // Check if we have pending work and all required resources
-    if (!pendingTxDoc || !pendingDocument || !pendingDocDispatch || isProcessing) {
+    if (
+      !pendingTxDoc ||
+      !pendingDocument ||
+      !pendingDocDispatch ||
+      isProcessing
+    ) {
       return;
     }
 
@@ -156,16 +161,22 @@ export function WalletsTable({
           name: currentPendingDoc.accountEntry.name,
         });
 
-        console.log("[WalletsTable] Dispatching setAccount action:", setAccountAction);
+        console.log(
+          "[WalletsTable] Dispatching setAccount action:",
+          setAccountAction,
+        );
 
         pendingDocDispatch(setAccountAction);
 
         // Wait a bit for the action to be processed
         await new Promise((resolve) => setTimeout(resolve, 200));
 
-        console.log("[WalletsTable] Account info set - checking document state:", {
-          account: (pendingDocument?.state as any)?.global?.account,
-        });
+        console.log(
+          "[WalletsTable] Account info set - checking document state:",
+          {
+            account: (pendingDocument?.state as any)?.global?.account,
+          },
+        );
 
         // Step 2: Fetch transactions from Alchemy
         setTxProgress({
@@ -280,8 +291,10 @@ export function WalletsTable({
           // Verify operations were added
           console.log("[WalletsTable] Final transaction count in document:", {
             transactionsCount:
-              (pendingDocument?.state as any)?.global?.transactions?.length || 0,
-            operationsCount: (pendingDocument?.operations as any)?.global?.length || 0,
+              (pendingDocument?.state as any)?.global?.transactions?.length ||
+              0,
+            operationsCount:
+              (pendingDocument?.operations as any)?.global?.length || 0,
           });
         } else {
           console.log("[WalletsTable] No transactions to add");
@@ -296,14 +309,11 @@ export function WalletsTable({
           details: "Updating account references...",
         });
 
-        console.log(
-          "[WalletsTable] Updating account in Accounts document:",
-          {
-            accountId: currentPendingDoc.accountEntry.id,
-            accountsDocId: currentPendingDoc.accountsDocId,
-            transactionsDocId: currentPendingDoc.documentId,
-          },
-        );
+        console.log("[WalletsTable] Updating account in Accounts document:", {
+          accountId: currentPendingDoc.accountEntry.id,
+          accountsDocId: currentPendingDoc.accountsDocId,
+          transactionsDocId: currentPendingDoc.documentId,
+        });
 
         await dispatchActions(
           [
@@ -370,7 +380,6 @@ export function WalletsTable({
     };
 
     fetchAndAddTransactions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingTxDoc, pendingDocument, pendingDocDispatch, isProcessing]);
 
   const handleAddWallet = async () => {
