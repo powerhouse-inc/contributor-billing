@@ -37,6 +37,7 @@ type TransactionDetails {
     txHash: String!
     token: Currency!
     blockNumber: Int
+    uniqueId: String
 }
 
 type TransactionEntry {
@@ -62,16 +63,31 @@ enum TransactionDirection {
 
 
 
+# account
+
+input SetAccountInput {
+    id: OID!
+    account: String!
+    name: String!
+    budgetPath: String
+    accountTransactionsId: PHID
+    chain: [String!]
+    type: String
+    owners: [String!]
+    KycAmlStatus: String
+}
+
 # transactions
 
 input AddTransactionInput {
     id: ID!
-    counterParty: EthereumAddress!
+    counterParty: EthereumAddress
     amount: Amount_Currency!
     datetime: DateTime!
     txHash: String!
     token: Currency!
     blockNumber: Int
+    uniqueId: String
     budget: OID
     accountingPeriod: String!
     direction: TransactionDirectionInput!
@@ -90,9 +106,15 @@ input UpdateTransactionInput {
     txHash: String
     token: Currency
     blockNumber: Int
+    uniqueId: String
     budget: OID
     accountingPeriod: String
     direction: TransactionDirectionInput
+}
+
+enum TransactionDirectionInput {
+    INFLOW
+    OUTFLOW
 }
 
 input DeleteTransactionInput {
@@ -102,13 +124,6 @@ input DeleteTransactionInput {
 input UpdateTransactionPeriodInput {
     id: ID!
     accountingPeriod: String!
-}
-
-# account
-
-input SetAccountInput {
-    address: EthereumAddress!
-    name: String
 }
 
 # budgets

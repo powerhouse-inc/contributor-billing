@@ -77,14 +77,18 @@ export function AddTransactionInputSchema(): z.ZodObject<
     amount: z.object({ unit: z.string(), value: z.string() }),
     blockNumber: z.number().nullish(),
     budget: z.string().nullish(),
-    counterParty: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    counterParty: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      })
+      .nullish(),
     datetime: z.string().datetime(),
     direction: z.lazy(() => TransactionDirectionInputSchema),
     id: z.string(),
     token: z.string(),
     txHash: z.string(),
+    uniqueId: z.string().nullish(),
   });
 }
 
@@ -116,10 +120,15 @@ export function SetAccountInputSchema(): z.ZodObject<
   Properties<SetAccountInput>
 > {
   return z.object({
-    address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
-    name: z.string().nullish(),
+    KycAmlStatus: z.string().nullish(),
+    account: z.string(),
+    accountTransactionsId: z.string().nullish(),
+    budgetPath: z.string().nullish(),
+    chain: z.array(z.string()).nullish(),
+    id: z.string(),
+    name: z.string(),
+    owners: z.array(z.string()).nullish(),
+    type: z.string().nullish(),
   });
 }
 
@@ -131,6 +140,7 @@ export function TransactionDetailsSchema(): z.ZodObject<
     blockNumber: z.number().nullable(),
     token: z.string(),
     txHash: z.string(),
+    uniqueId: z.string().nullable(),
   });
 }
 
@@ -183,6 +193,7 @@ export function UpdateTransactionInputSchema(): z.ZodObject<
     id: z.string(),
     token: z.string().nullish(),
     txHash: z.string().nullish(),
+    uniqueId: z.string().nullish(),
   });
 }
 

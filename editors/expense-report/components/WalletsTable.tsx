@@ -157,7 +157,8 @@ export function WalletsTable({
         });
 
         const setAccountAction = accountTransactionsActions.setAccount({
-          address: currentPendingDoc.accountEntry.account,
+          id: currentPendingDoc.accountEntry.id,
+          account: currentPendingDoc.accountEntry.account,
           name: currentPendingDoc.accountEntry.name,
         });
 

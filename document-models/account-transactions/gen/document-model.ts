@@ -1,152 +1,158 @@
 import type { DocumentModelGlobalState } from "document-model";
 
 export const documentModel: DocumentModelGlobalState = {
+  id: "powerhouse/account-transactions",
+  name: "AccountTransactions",
+  extension: ".phdm",
+  description:
+    "The AccountTransactions model is designed to track and manage all transactions associated with various accounts. Each transaction entry records critical details such as the source and destination accounts, transaction amount, timestamp, and specific transaction details tailored to the type of transaction (e.g., cryptocurrency or bank-related).",
   author: {
     name: "Powerhouse",
     website: "https://powerhouse.inc",
   },
-  description:
-    "The AccountTransactions model is designed to track and manage all transactions associated with various accounts. Each transaction entry records critical details such as the source and destination accounts, transaction amount, timestamp, and specific transaction details tailored to the type of transaction (e.g., cryptocurrency or bank-related).",
-  extension: ".phdm",
-  id: "powerhouse/account-transactions",
-  name: "AccountTransactions",
   specifications: [
     {
+      version: 1,
       changeLog: [],
+      state: {
+        global: {
+          schema:
+            "type AccountTransactionsState {\n  account: Account!\n  transactions: [TransactionEntry!]!\n  budgets: [Budget!]!\n}\n\ntype Account {\n    id: OID!\n    account: String!\n    name: String!\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: String\n    owners: [String!]\n    KycAmlStatus: String\n}\n\ntype TransactionDetails {\n    txHash: String!\n    token: Currency!\n    blockNumber: Int\n    uniqueId: String\n}\n\ntype TransactionEntry {\n    id: ID!\n    counterParty: EthereumAddress\n    amount: Amount_Currency!\n    datetime: DateTime!\n    details: TransactionDetails!\n    budget: OID\n    accountingPeriod: String!\n    direction: TransactionDirection!\n}\n\ntype Budget {\n    id: OID!\n    name: OLabel\n}\n\nenum TransactionDirection {\n    INFLOW\n    OUTFLOW\n}",
+          initialValue:
+            '"{\\n  \\"account\\": {\\n    \\"id\\": \\"\\",\\n    \\"account\\": \\"\\",\\n    \\"name\\": \\"\\",\\n    \\"budgetPath\\": null,\\n    \\"accountTransactionsId\\": null,\\n    \\"chain\\": null,\\n    \\"type\\": null,\\n    \\"owners\\": null,\\n    \\"KycAmlStatus\\": null\\n  },\\n  \\"transactions\\": [],\\n  \\"budgets\\": []\\n}"',
+          examples: [],
+        },
+        local: {
+          schema: "",
+          initialValue: '""',
+          examples: [],
+        },
+      },
       modules: [
         {
+          id: "account-module-id",
+          name: "account",
           description: "",
-          id: "4155a659-ce1c-40af-aa15-f8daed5c8bb9",
-          name: "transactions",
           operations: [
             {
+              id: "set-account-op-id",
+              name: "SET_ACCOUNT",
               description: "",
+              schema:
+                "input SetAccountInput {\n    id: OID!\n    account: String!\n    name: String!\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: String\n    owners: [String!]\n    KycAmlStatus: String\n}",
+              template: "",
+              reducer:
+                "state.account.account = action.input.account;\nstate.account.name = action.input.name;\nstate.account.budgetPath = action.input.budgetPath || null;\nstate.account.accountTransactionsId = action.input.accountTransactionsId || null;\nstate.account.chain = action.input.chain || null;\nstate.account.type = action.input.type || null;\nstate.account.owners = action.input.owners || null;\nstate.account.KycAmlStatus = action.input.KycAmlStatus || null;",
               errors: [],
               examples: [],
-              id: "455d3b21-245e-415f-a13f-0638c8621c1f",
+              scope: "global",
+            },
+          ],
+        },
+        {
+          id: "transactions-module-id",
+          name: "transactions",
+          description: "",
+          operations: [
+            {
+              id: "add-transaction-op-id",
               name: "ADD_TRANSACTION",
-              reducer: "",
-              schema:
-                "input AddTransactionInput {\n    id: ID!\n    counterParty: EthereumAddress!\n    amount: Amount_Currency!\n    datetime: DateTime!\n    txHash: String!\n    token: Currency!\n    blockNumber: Int\n    budget: OID\n    accountingPeriod: String!\n}",
-              scope: "global",
-              template: "",
-            },
-            {
               description: "",
+              schema:
+                "input AddTransactionInput {\n    id: ID!\n    counterParty: EthereumAddress\n    amount: Amount_Currency!\n    datetime: DateTime!\n    txHash: String!\n    token: Currency!\n    blockNumber: Int\n    uniqueId: String\n    budget: OID\n    accountingPeriod: String!\n    direction: TransactionDirectionInput!\n}\n\nenum TransactionDirectionInput {\n    INFLOW\n    OUTFLOW\n}",
+              template: "",
+              reducer:
+                "state.transactions.push({\n  id: action.input.id,\n  counterParty: action.input.counterParty || null,\n  amount: action.input.amount,\n  datetime: action.input.datetime,\n  details: {\n    txHash: action.input.txHash,\n    token: action.input.token,\n    blockNumber: action.input.blockNumber || null,\n    uniqueId: action.input.uniqueId || null,\n  },\n  budget: action.input.budget || null,\n  accountingPeriod: action.input.accountingPeriod,\n  direction: action.input.direction,\n});",
               errors: [],
               examples: [],
-              id: "85136596-ac66-4d51-afff-4e9d938eacf2",
+              scope: "global",
+            },
+            {
+              id: "update-transaction-op-id",
               name: "UPDATE_TRANSACTION",
-              reducer: "",
+              description: "",
               schema:
-                "input UpdateTransactionInput {\n    id: ID!\n    counterParty: EthereumAddress!\n    amount: Amount_Currency\n    datetime: DateTime\n    txHash: String\n    token: Currency\n    blockNumber: Int\n    budget: OID\n    accountingPeriod: String\n}",
-              scope: "global",
+                "input UpdateTransactionInput {\n    id: ID!\n    counterParty: EthereumAddress\n    amount: Amount_Currency\n    datetime: DateTime\n    txHash: String\n    token: Currency\n    blockNumber: Int\n    uniqueId: String\n    budget: OID\n    accountingPeriod: String\n    direction: TransactionDirectionInput\n}\n\nenum TransactionDirectionInput {\n    INFLOW\n    OUTFLOW\n}",
               template: "",
-            },
-            {
-              description: "",
+              reducer:
+                "const transaction = state.transactions.find(\n  (transaction) => transaction.id === action.input.id,\n);\nif (!transaction) {\n  throw new Error(`Transaction with id ${action.input.id} not found`);\n}\nif (\n  action.input.counterParty !== undefined &&\n  action.input.counterParty !== null\n) {\n  transaction.counterParty = action.input.counterParty;\n}\nif (action.input.amount !== undefined && action.input.amount !== null) {\n  transaction.amount = action.input.amount;\n}\nif (\n  action.input.datetime !== undefined &&\n  action.input.datetime !== null\n) {\n  transaction.datetime = action.input.datetime;\n}\nif (action.input.txHash !== undefined && action.input.txHash !== null) {\n  transaction.details.txHash = action.input.txHash;\n}\nif (action.input.token !== undefined && action.input.token !== null) {\n  transaction.details.token = action.input.token;\n}\nif (action.input.blockNumber !== undefined) {\n  transaction.details.blockNumber = action.input.blockNumber;\n}\nif (action.input.uniqueId !== undefined) {\n  transaction.details.uniqueId = action.input.uniqueId;\n}\nif (\n  action.input.direction !== undefined &&\n  action.input.direction !== null\n) {\n  transaction.direction = action.input.direction;\n}",
               errors: [],
               examples: [],
-              id: "a36e6833-29f5-42b0-89e7-796395b2bcfa",
+              scope: "global",
+            },
+            {
+              id: "delete-transaction-op-id",
               name: "DELETE_TRANSACTION",
-              reducer: "",
-              schema: "input DeleteTransactionInput {\n    id: ID!\n}",
-              scope: "global",
-              template: "",
-            },
-            {
               description: "",
+              schema: "input DeleteTransactionInput {\n    id: ID!\n}",
+              template: "",
+              reducer:
+                "state.transactions = state.transactions.filter(\n  (transaction) => transaction.id !== action.input.id,\n);",
               errors: [],
               examples: [],
-              id: "f04f4491-9ca9-4ceb-8fc7-7d181b36a4ab",
+              scope: "global",
+            },
+            {
+              id: "update-period-op-id",
               name: "UPDATE_TRANSACTION_PERIOD",
-              reducer: "",
+              description: "",
               schema:
                 "input UpdateTransactionPeriodInput {\n    id: ID!\n    accountingPeriod: String!\n}",
-              scope: "global",
               template: "",
+              reducer:
+                'const transaction = state.transactions.find(\n  (transaction) => transaction.id === action.input.id,\n);\nif (!transaction) {\n  throw new Error(`Transaction with id ${action.input.id} not found`);\n}\ntransaction.accountingPeriod = action.input.accountingPeriod || "";',
+              errors: [],
+              examples: [],
+              scope: "global",
             },
           ],
         },
         {
-          description: "",
-          id: "eecc4935-5db5-439d-917d-0f3b9b22c014",
+          id: "budgets-module-id",
           name: "budgets",
+          description: "",
           operations: [
             {
-              description: "",
-              errors: [],
-              examples: [],
-              id: "b0f87610-5ecd-4659-adad-5dccd61362f2",
+              id: "add-budget-op-id",
               name: "ADD_BUDGET",
-              reducer: "",
+              description: "",
               schema:
                 "input AddBudgetInput {\n    id: OID!\n    name: OLabel\n}",
-              scope: "global",
               template: "",
-            },
-            {
-              description: "",
+              reducer:
+                "state.budgets.push({\n  id: action.input.id,\n  name: action.input.name || null,\n});",
               errors: [],
               examples: [],
-              id: "3bc3dea9-9955-4c8b-8639-7e36cd1258d7",
+              scope: "global",
+            },
+            {
+              id: "update-budget-op-id",
               name: "UPDATE_BUDGET",
-              reducer: "",
+              description: "",
               schema:
                 "input UpdateBudgetInput {\n    id: OID!\n    name: OLabel\n}",
-              scope: "global",
               template: "",
-            },
-            {
-              description: "",
-              errors: [],
-              examples: [],
-              id: "88da5742-15c1-453e-a393-cc171e76b3cc",
-              name: "DELETE_BUDGET",
-              reducer: "",
-              schema: "input DeleteBudgetInput {\n    id: OID!\n}",
-              scope: "global",
-              template: "",
-            },
-          ],
-        },
-        {
-          description: "Account management operations",
-          id: "1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
-          name: "account",
-          operations: [
-            {
-              description:
-                "Set the account information including Ethereum address",
-              errors: [],
-              examples: [],
-              id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-              name: "SET_ACCOUNT",
               reducer:
-                "state.account.account = action.input.address;\nstate.account.name = action.input.name || action.input.address;",
-              schema:
-                "input SetAccountInput {\n    address: EthereumAddress!\n    name: String\n}",
+                "const budget = state.budgets.find(\n  (budget) => budget.id === action.input.id,\n);\nif (!budget) {\n  throw new Error(`Budget with id ${action.input.id} not found`);\n}\nif (action.input.name !== undefined && action.input.name !== null) {\n  budget.name = action.input.name;\n}",
+              errors: [],
+              examples: [],
               scope: "global",
+            },
+            {
+              id: "delete-budget-op-id",
+              name: "DELETE_BUDGET",
+              description: "",
+              schema: "input DeleteBudgetInput {\n    id: OID!\n}",
               template: "",
+              reducer:
+                "state.budgets = state.budgets.filter(\n  (budget) => budget.id !== action.input.id,\n);",
+              errors: [],
+              examples: [],
+              scope: "global",
             },
           ],
         },
       ],
-      state: {
-        global: {
-          examples: [],
-          initialValue:
-            '"{\\n  \\"account\\": {\\n    \\"id\\": \\"\\",\\n    \\"account\\": \\"\\",\\n    \\"name\\": \\"\\",\\n    \\"budgetPath\\": null,\\n    \\"accountTransactionsId\\": null,\\n    \\"chain\\": null,\\n    \\"type\\": null,\\n    \\"owners\\": null,\\n    \\"KycAmlStatus\\": null\\n  },\\n  \\"transactions\\": [],\\n  \\"budgets\\": []\\n}"',
-          schema:
-            "type AccountTransactionsState {\n  account: Account!\n  transactions: [TransactionEntry!]!\n  budgets: [Budget!]!\n}\n\ntype Account {\n    id: OID!\n    account: String!\n    name: String!\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: String\n    owners: [String!]\n    KycAmlStatus: String\n}\n\ntype TransactionDetails {\n    txHash: String!\n    token: Currency!\n    blockNumber: Int\n}\n\ntype TransactionEntry {\n    id: ID!\n    counterParty: EthereumAddress\n    amount: Amount_Currency!\n    datetime: DateTime!\n    details: TransactionDetails!\n    budget: OID\n    accountingPeriod: String! # Analytics engine period definition\n}\n\ntype Budget {\n    id: OID!\n    name: OLabel\n}",
-        },
-        local: {
-          examples: [],
-          initialValue: '""',
-          schema: "",
-        },
-      },
-      version: 1,
     },
   ],
 };

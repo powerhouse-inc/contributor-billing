@@ -76,7 +76,8 @@ export class AccountTransactionsService {
       await dispatchActions(
         [
           accountTransactionsActions.setAccount({
-            address: account.account,
+            id: account.id,
+            account: account.account,
             name: account.name,
           }),
         ],

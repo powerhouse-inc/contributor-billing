@@ -17,7 +17,10 @@
       "Bash(find:*)",
       "Bash(cat:*)",
       "Bash(npx eslint:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "mcp__reactor-mcp__addActions",
+      "mcp__reactor-mcp__getDocumentModelSchema",
+      "mcp__reactor-mcp__getDocument"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

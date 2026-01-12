@@ -1,14 +1,14 @@
 import { baseActions } from "document-model";
 import {
+  accountActions,
   transactionsActions,
   budgetsActions,
-  accountActions,
 } from "./gen/creators.js";
 
 /** Actions for the AccountTransactions document model */
 export const actions = {
   ...baseActions,
+  ...accountActions,
   ...transactionsActions,
   ...budgetsActions,
-  ...accountActions,
 };

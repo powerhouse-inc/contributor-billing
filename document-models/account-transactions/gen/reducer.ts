@@ -5,11 +5,12 @@ import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
 import type { AccountTransactionsPHState } from "@powerhousedao/contributor-billing/document-models/account-transactions";
 
+import { accountTransactionsAccountOperations } from "../src/reducers/account.js";
 import { accountTransactionsTransactionsOperations } from "../src/reducers/transactions.js";
 import { accountTransactionsBudgetsOperations } from "../src/reducers/budgets.js";
-import { accountTransactionsAccountOperations } from "../src/reducers/account.js";
 
 import {
+  SetAccountInputSchema,
   AddTransactionInputSchema,
   UpdateTransactionInputSchema,
   DeleteTransactionInputSchema,
@@ -17,7 +18,6 @@ import {
   AddBudgetInputSchema,
   UpdateBudgetInputSchema,
   DeleteBudgetInputSchema,
-  SetAccountInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<AccountTransactionsPHState> = (
@@ -30,6 +30,15 @@ const stateReducer: StateReducer<AccountTransactionsPHState> = (
   }
 
   switch (action.type) {
+    case "SET_ACCOUNT":
+      SetAccountInputSchema().parse(action.input);
+      accountTransactionsAccountOperations.setAccountOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
     case "ADD_TRANSACTION":
       AddTransactionInputSchema().parse(action.input);
       accountTransactionsTransactionsOperations.addTransactionOperation(
@@ -87,15 +96,6 @@ const stateReducer: StateReducer<AccountTransactionsPHState> = (
     case "DELETE_BUDGET":
       DeleteBudgetInputSchema().parse(action.input);
       accountTransactionsBudgetsOperations.deleteBudgetOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-      break;
-
-    case "SET_ACCOUNT":
-      SetAccountInputSchema().parse(action.input);
-      accountTransactionsAccountOperations.setAccountOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

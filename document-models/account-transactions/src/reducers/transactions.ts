@@ -5,13 +5,14 @@ export const accountTransactionsTransactionsOperations: AccountTransactionsTrans
     addTransactionOperation(state, action) {
       state.transactions.push({
         id: action.input.id,
-        counterParty: action.input.counterParty,
+        counterParty: action.input.counterParty || null,
         amount: action.input.amount,
         datetime: action.input.datetime,
         details: {
           txHash: action.input.txHash,
           token: action.input.token,
           blockNumber: action.input.blockNumber || null,
+          uniqueId: action.input.uniqueId || null,
         },
         budget: action.input.budget || null,
         accountingPeriod: action.input.accountingPeriod,
@@ -48,6 +49,9 @@ export const accountTransactionsTransactionsOperations: AccountTransactionsTrans
       }
       if (action.input.blockNumber !== undefined) {
         transaction.details.blockNumber = action.input.blockNumber;
+      }
+      if (action.input.uniqueId !== undefined) {
+        transaction.details.uniqueId = action.input.uniqueId;
       }
       if (
         action.input.direction !== undefined &&

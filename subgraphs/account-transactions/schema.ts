@@ -19,11 +19,12 @@ export const schema: DocumentNode = gql`
   """
   type Mutation {
     AccountTransactions_createDocument(name: String!, driveId: String): String
-    AccountTransactions_setAccount(
-      docId: PHID!
-      input: AccountTransactions_SetAccountInput!
-    ): Boolean
 
+    AccountTransactions_setAccount(
+      driveId: String
+      docId: PHID
+      input: AccountTransactions_SetAccountInput
+    ): Int
     AccountTransactions_addTransaction(
       driveId: String
       docId: PHID
@@ -59,50 +60,21 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: AccountTransactions_DeleteBudgetInput
     ): Int
-    AccountTransactions_fetchTransactionsFromAlchemy(
-      docId: PHID!
-      address: EthereumAddress!
-      fromBlock: String
-    ): AccountTransactions_AlchemyFetchResult
-    AccountTransactions_getTransactionsFromAlchemy(
-      address: EthereumAddress!
-      fromBlock: String
-    ): AccountTransactions_AlchemyTransactionsResult
   }
 
   """
-  Response type for Alchemy fetch operation
+  Module: Account
   """
-  type AccountTransactions_AlchemyFetchResult {
-    success: Boolean!
-    transactionsAdded: Int!
-    message: String!
-  }
-
-  """
-  Response type for Alchemy get transactions operation
-  """
-  type AccountTransactions_AlchemyTransactionsResult {
-    success: Boolean!
-    transactions: [AccountTransactions_TransactionData!]!
-    message: String!
-    transactionsCount: Int!
-  }
-
-  """
-  Transaction data from Alchemy
-  """
-  type AccountTransactions_TransactionData {
-    counterParty: EthereumAddress!
-    amount: Amount_Currency!
-    txHash: String!
-    token: Currency!
-    blockNumber: Int!
-    datetime: DateTime!
-    accountingPeriod: String!
-    from: EthereumAddress!
-    to: EthereumAddress!
-    direction: String!
+  input AccountTransactions_SetAccountInput {
+    id: OID!
+    account: String!
+    name: String!
+    budgetPath: String
+    accountTransactionsId: PHID
+    chain: [String!]
+    type: String
+    owners: [String!]
+    KycAmlStatus: String
   }
 
   """
@@ -116,8 +88,15 @@ export const schema: DocumentNode = gql`
     txHash: String!
     token: Currency!
     blockNumber: Int
+    uniqueId: String
     budget: OID
     accountingPeriod: String!
+    direction: AccountTransactions_TransactionDirectionInput!
+  }
+
+  enum AccountTransactions_TransactionDirectionInput {
+    INFLOW
+    OUTFLOW
   }
   input AccountTransactions_UpdateTransactionInput {
     id: ID!
@@ -127,8 +106,15 @@ export const schema: DocumentNode = gql`
     txHash: String
     token: Currency
     blockNumber: Int
+    uniqueId: String
     budget: OID
     accountingPeriod: String
+    direction: AccountTransactions_TransactionDirectionInput
+  }
+
+  enum AccountTransactions_TransactionDirectionInput {
+    INFLOW
+    OUTFLOW
   }
   input AccountTransactions_DeleteTransactionInput {
     id: ID!
@@ -151,13 +137,5 @@ export const schema: DocumentNode = gql`
   }
   input AccountTransactions_DeleteBudgetInput {
     id: OID!
-  }
-
-  """
-  Input for setting account information
-  """
-  input AccountTransactions_SetAccountInput {
-    address: EthereumAddress!
-    name: String
   }
 `;
