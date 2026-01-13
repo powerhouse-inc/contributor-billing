@@ -42,9 +42,11 @@ export function AddBillingStatementInputSchema(): z.ZodObject<
 > {
   return z.object({
     billingStatementId: z.string(),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -63,9 +65,11 @@ export function AddLineItemInputSchema(): z.ZodObject<
 > {
   return z.object({
     lineItem: z.lazy(() => LineItemInputSchema()),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -74,9 +78,11 @@ export function AddWalletInputSchema(): z.ZodObject<
 > {
   return z.object({
     name: z.string().nullish(),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -156,9 +162,11 @@ export function RemoveBillingStatementInputSchema(): z.ZodObject<
 > {
   return z.object({
     billingStatementId: z.string(),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -167,9 +175,11 @@ export function RemoveGroupTotalsInputSchema(): z.ZodObject<
 > {
   return z.object({
     groupId: z.string(),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -186,9 +196,11 @@ export function RemoveLineItemInputSchema(): z.ZodObject<
 > {
   return z.object({
     lineItemId: z.string(),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -196,9 +208,11 @@ export function RemoveWalletInputSchema(): z.ZodObject<
   Properties<RemoveWalletInput>
 > {
   return z.object({
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -207,9 +221,11 @@ export function SetGroupTotalsInputSchema(): z.ZodObject<
 > {
   return z.object({
     groupTotals: z.lazy(() => GroupTotalsInputSchema()),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -251,9 +267,11 @@ export function UpdateLineItemInputSchema(): z.ZodObject<
     label: z.string().nullish(),
     lineItemId: z.string(),
     payments: z.number().nullish(),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -263,9 +281,11 @@ export function UpdateWalletInputSchema(): z.ZodObject<
   return z.object({
     accountDocumentId: z.string().nullish(),
     accountTransactionsDocumentId: z.string().nullish(),
-    address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    address: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
     name: z.string().nullish(),
   });
 }

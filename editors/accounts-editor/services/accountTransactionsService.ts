@@ -153,6 +153,7 @@ export class AccountTransactionsService {
                 txHash: txData.txHash,
                 token: txData.token,
                 blockNumber: txData.blockNumber,
+                //uniqueId: txData.uniqueId || null,
                 accountingPeriod: txData.accountingPeriod,
                 direction:
                   (txData.direction as "INFLOW" | "OUTFLOW") || "OUTFLOW",
@@ -173,31 +174,6 @@ export class AccountTransactionsService {
               "transaction actions to document:",
               createdNode.id,
             );
-
-            // TEST: Try dispatching just the first transaction with full logging
-            console.log(
-              "[AccountTransactionsService] TEST: Dispatching first transaction only",
-            );
-            console.log(
-              "[AccountTransactionsService] First transaction action:",
-              JSON.stringify(transactionActions[0], null, 2),
-            );
-
-            try {
-              const testResult = await dispatchActions(
-                [transactionActions[0]],
-                createdNode.id,
-              );
-              console.log(
-                "[AccountTransactionsService] TEST: Dispatch result:",
-                testResult,
-              );
-            } catch (testError) {
-              console.error(
-                "[AccountTransactionsService] TEST: Dispatch ERROR:",
-                testError,
-              );
-            }
 
             // Dispatch all actions one at a time for reliability
             for (let i = 0; i < transactionActions.length; i++) {
