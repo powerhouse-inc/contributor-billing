@@ -52,22 +52,9 @@ export const schema: DocumentNode = gql`
     budgetPath: String
     accountTransactionsId: PHID
     chain: [String!]
-    type: AccountTypeInput
+    type: Accounts_AccountTypeInput!
     owners: [String!]
-    KycAmlStatus: KycAmlStatusTypeInput
-  }
-
-  enum AccountTypeInput {
-    Source
-    Internal
-    Destination
-    External
-  }
-
-  enum KycAmlStatusTypeInput {
-    PASSED
-    PENDING
-    FAILED
+    KycAmlStatus: Accounts_KycAmlStatusTypeInput
   }
   input Accounts_UpdateAccountInput {
     id: OID!
@@ -76,16 +63,15 @@ export const schema: DocumentNode = gql`
     budgetPath: String
     accountTransactionsId: PHID
     chain: [String!]
-    type: AccountTypeInput
+    type: Accounts_AccountTypeInput
     owners: [String!]
-    KycAmlStatus: KycAmlStatusTypeInput
+    KycAmlStatus: Accounts_KycAmlStatusTypeInput
   }
-
   input Accounts_DeleteAccountInput {
     id: OID!
   }
   input Accounts_UpdateKycStatusInput {
     id: OID!
-    KycAmlStatus: KycAmlStatusTypeInput!
+    KycAmlStatus: Accounts_KycAmlStatusTypeInput!
   }
 `;

@@ -13,7 +13,7 @@
         },
         {
             "id": "powerhouse/account-transactions",
-            "name": "Account Transactions"
+            "name": "AccountTransactions"
         },
         {
             "id": "powerhouse/invoice",
@@ -24,12 +24,8 @@
             "name": "Billing Statement"
         },
         {
-            "id": "powerhouse/integrations",
-            "name": "Integrations"
-        },
-        {
             "id": "powerhouse/expense-report",
-            "name": "Expense Report"
+            "name": "ExpenseReport"
         },
         {
             "id": "powerhouse/snapshot-report",
@@ -63,13 +59,6 @@
             "name": "Billing Statement",
             "documentTypes": [
                 "powerhouse/billing-statement"
-            ]
-        },
-        {
-            "id": "integrations-editor",
-            "name": "Integrations",
-            "documentTypes": [
-                "powerhouse/integrations"
             ]
         },
         {

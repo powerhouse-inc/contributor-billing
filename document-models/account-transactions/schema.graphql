@@ -61,6 +61,11 @@ enum TransactionDirection {
     OUTFLOW
 }
 
+enum TransactionDirectionInput {
+    INFLOW
+    OUTFLOW
+}
+
 
 
 # account
@@ -93,11 +98,6 @@ input AddTransactionInput {
     direction: TransactionDirectionInput!
 }
 
-enum TransactionDirectionInput {
-    INFLOW
-    OUTFLOW
-}
-
 input UpdateTransactionInput {
     id: ID!
     counterParty: EthereumAddress
@@ -110,11 +110,6 @@ input UpdateTransactionInput {
     budget: OID
     accountingPeriod: String
     direction: TransactionDirectionInput
-}
-
-enum TransactionDirectionInput {
-    INFLOW
-    OUTFLOW
 }
 
 input DeleteTransactionInput {

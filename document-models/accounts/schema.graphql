@@ -44,6 +44,19 @@ enum KycAmlStatusType {
     FAILED
 }
 
+enum AccountTypeInput {
+  Source
+  Internal
+  Destination
+  External
+}
+
+enum KycAmlStatusTypeInput {
+  PASSED
+  PENDING
+  FAILED
+}
+
 
 
 # accounts
@@ -60,19 +73,6 @@ input AddAccountInput {
   KycAmlStatus: KycAmlStatusTypeInput
 }
 
-enum AccountTypeInput {
-  Source
-  Internal
-  Destination
-  External
-}
-
-enum KycAmlStatusTypeInput {
-  PASSED
-  PENDING
-  FAILED
-}
-
 input UpdateAccountInput {
     id: OID!
     account: String
@@ -84,7 +84,6 @@ input UpdateAccountInput {
     owners: [String!]
     KycAmlStatus: KycAmlStatusTypeInput
 }
-
 
 input DeleteAccountInput {
     id: OID!

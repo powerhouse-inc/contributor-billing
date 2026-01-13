@@ -512,7 +512,7 @@ export class WalletAccountService {
             accountTransactionsId:
               existingAccount.accountTransactionsId || null,
             chain: ["ethereum"],
-            type: null,
+            type: "External",
             owners: [],
             KycAmlStatus: null,
           },
@@ -588,7 +588,7 @@ export class WalletAccountService {
         budgetPath: null,
         accountTransactionsId: null,
         chain: ["ethereum"],
-        type: null,
+        type: "External",
         owners: [],
         KycAmlStatus: null,
       };

@@ -1,7 +1,6 @@
 import type { AccountTransactionsTransactionsOperations } from "@powerhousedao/contributor-billing/document-models/account-transactions";
 
-export const accountTransactionsTransactionsOperations: AccountTransactionsTransactionsOperations =
-  {
+export const accountTransactionsTransactionsOperations: AccountTransactionsTransactionsOperations = {
     addTransactionOperation(state, action) {
       // Check for duplicate uniqueId to prevent duplicate transactions
       if (action.input.uniqueId) {
@@ -85,5 +84,5 @@ export const accountTransactionsTransactionsOperations: AccountTransactionsTrans
           throw new Error(`Transaction with id ${action.input.id} not found`);
         }
         transaction.accountingPeriod = action.input.accountingPeriod || "";
-    },
-  };
+    }
+};

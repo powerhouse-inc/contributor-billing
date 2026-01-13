@@ -240,12 +240,12 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
       )}
 
       {safeTxHash && (
-        <div className="bg-gray-50 mt-4 rounded-md space-y-2">
+        <div className="bg-gray-50 mt-4 rounded-md space-y-2 w-full">
           <a
             href={`https://app.safe.global/transactions/queue?safe=${urlChainName}:${safeAddress}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 hover:text-blue-600 underline block"
+            className="text-blue-500 hover:text-blue-600 underline block w-full"
           >
             {linkText}
           </a>

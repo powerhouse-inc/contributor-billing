@@ -7,7 +7,7 @@ export const documentModel: DocumentModelGlobalState = {
   },
   description:
     "Document model for managing accounts with KYC/AML status tracking",
-  extension: ".phdm",
+  extension: "",
   id: "powerhouse/accounts",
   name: "Accounts",
   specifications: [
@@ -16,18 +16,18 @@ export const documentModel: DocumentModelGlobalState = {
       modules: [
         {
           description: "",
-          id: "49c91000-57f7-4a70-a33e-6bf8c0bb2f51",
+          id: "e89202e8-4f6e-4ca3-a326-a5846e909d83",
           name: "accounts",
           operations: [
             {
               description: "",
               errors: [],
               examples: [],
-              id: "ca55c609-783f-4cbe-90d9-bbe92b7db38c",
+              id: "bd25e778-a5d2-4d11-aec2-189370b9c5e1",
               name: "ADD_ACCOUNT",
               reducer: "",
               schema:
-                "input AddAccountInput {\n  id: OID!\n  account: String!\n  name: String!\n  budgetPath: String\n  accountTransactionsId: PHID\n  chain: [String!]\n  type: AccountTypeInput!\n  owners: [String!]\n  KycAmlStatus: KycAmlStatusTypeInput\n}\n\nenum AccountTypeInput {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum KycAmlStatusTypeInput {\n  PASSED\n  PENDING\n  FAILED\n}",
+                "input AddAccountInput {\n  id: OID!\n  account: String!\n  name: String!\n  budgetPath: String\n  accountTransactionsId: PHID\n  chain: [String!]\n  type: AccountTypeInput!\n  owners: [String!]\n  KycAmlStatus: KycAmlStatusTypeInput\n}",
               scope: "global",
               template: "",
             },
@@ -35,11 +35,11 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "a9615673-5492-423d-a505-8fac67c58ac9",
+              id: "0379b6aa-3494-4ec5-8813-11e4b3d9b6b3",
               name: "UPDATE_ACCOUNT",
               reducer: "",
               schema:
-                "input UpdateAccountInput {\n    id: OID!\n    account: String\n    name: String\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: AccountTypeInput\n    owners: [String!]\n    KycAmlStatus: KycAmlStatusTypeInput\n}\n",
+                "input UpdateAccountInput {\n    id: OID!\n    account: String\n    name: String\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: AccountTypeInput\n    owners: [String!]\n    KycAmlStatus: KycAmlStatusTypeInput\n}",
               scope: "global",
               template: "",
             },
@@ -47,7 +47,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "9515cd28-0ee4-4b5b-a7b8-ce3520e111f6",
+              id: "d5de4a42-c20d-47a4-986e-1689eb174592",
               name: "DELETE_ACCOUNT",
               reducer: "",
               schema: "input DeleteAccountInput {\n    id: OID!\n}",
@@ -58,11 +58,11 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "df0d6586-b762-4a5c-99ee-855d32e4e8d7",
+              id: "884e8797-1f49-482e-af22-51854356a1aa",
               name: "UPDATE_KYC_STATUS",
               reducer: "",
               schema:
-                "input UpdateKycStatusInput {\n    id: OID!\n    KycAmlStatus: KycAmlStatusTypeInput!\n}\n",
+                "input UpdateKycStatusInput {\n    id: OID!\n    KycAmlStatus: KycAmlStatusTypeInput!\n}",
               scope: "global",
               template: "",
             },
@@ -74,7 +74,7 @@ export const documentModel: DocumentModelGlobalState = {
           examples: [],
           initialValue: '"{\\n  \\"accounts\\": []\\n}"',
           schema:
-            "type AccountsState {\n   accounts: [AccountEntry!]!\n}\n\ntype AccountEntry {\n    id: OID!\n    account: String!\n    name: String!\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: AccountType!\n    owners: [String!]\n    KycAmlStatus: KycAmlStatusType\n}\n\nenum AccountType {\n    Source\n    Internal\n    Destination\n    External\n}\n\nenum KycAmlStatusType {\n    PASSED\n    PENDING\n    FAILED\n}",
+            "type AccountsState {\n   accounts: [AccountEntry!]!\n}\n\ntype AccountEntry {\n    id: OID!\n    account: String!\n    name: String!\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: AccountType!\n    owners: [String!]\n    KycAmlStatus: KycAmlStatusType\n}\n\nenum AccountType {\n    Source\n    Internal\n    Destination\n    External\n}\n\nenum KycAmlStatusType {\n    PASSED\n    PENDING\n    FAILED\n}\n\nenum AccountTypeInput {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum KycAmlStatusTypeInput {\n  PASSED\n  PENDING\n  FAILED\n}",
         },
         local: {
           examples: [],

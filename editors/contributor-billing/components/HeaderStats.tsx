@@ -45,6 +45,7 @@ export const HeaderStats = () => {
       for (const invoice of invoices) {
         const invoiceAmount = invoice.state.global.totalPriceTaxIncl;
         const invoiceCurrency = invoice.state.global.currency || "USD"; // Fallback to USD if currency is empty
+
         if (invoiceCurrency === selectedCurrency) {
           total += invoiceAmount;
         } else {

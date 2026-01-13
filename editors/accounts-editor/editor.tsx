@@ -69,7 +69,7 @@ export function Editor() {
         budgetPath: values.budgetPath,
         accountTransactionsId: values.accountTransactionsId,
         chain: values.chain,
-        type: values.type,
+        type: values.type || "External",
         owners: values.owners,
         KycAmlStatus: values.KycAmlStatus,
       }),

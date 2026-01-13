@@ -1,14 +1,18 @@
 import type { BaseSubgraph } from "@powerhousedao/reactor-api";
 import { addFile } from "document-drive";
+import { setName } from "document-model";
 import {
   actions,
-  type AddAccountInput,
-  type UpdateAccountInput,
-  type DeleteAccountInput,
-  type UpdateKycStatusInput,
-  type AccountsDocument,
-} from "../../document-models/accounts/index.js";
-import { setName } from "document-model";
+  accountsDocumentType,
+} from "@powerhousedao/contributor-billing/document-models/accounts";
+
+import type {
+  AccountsDocument,
+  AddAccountInput,
+  UpdateAccountInput,
+  DeleteAccountInput,
+  UpdateKycStatusInput,
+} from "@powerhousedao/contributor-billing/document-models/accounts";
 
 export const getResolvers = (
   subgraph: BaseSubgraph,
@@ -67,7 +71,7 @@ export const getResolvers = (
             );
 
             return docs.filter(
-              (doc) => doc.header.documentType === "powerhouse/accounts",
+              (doc) => doc.header.documentType === accountsDocumentType,
             );
           },
         };
@@ -79,7 +83,7 @@ export const getResolvers = (
         args: { name: string; driveId?: string },
       ) => {
         const { driveId, name } = args;
-        const document = await reactor.addDocument("powerhouse/accounts");
+        const document = await reactor.addDocument(accountsDocumentType);
 
         if (driveId) {
           await reactor.addAction(
@@ -87,7 +91,7 @@ export const getResolvers = (
             addFile({
               name,
               id: document.header.id,
-              documentType: "powerhouse/accounts",
+              documentType: accountsDocumentType,
             }),
           );
         }

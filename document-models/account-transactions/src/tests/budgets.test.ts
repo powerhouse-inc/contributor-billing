@@ -3,31 +3,28 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { generateMock } from "@powerhousedao/codegen";
-import utils from "../../gen/utils.js";
 import {
-  z,
-  type AddBudgetInput,
-  type UpdateBudgetInput,
-  type DeleteBudgetInput,
-} from "../../gen/schema/index.js";
-import { reducer } from "../../gen/reducer.js";
-import * as creators from "../../gen/budgets/creators.js";
-import type { AccountTransactionsDocument } from "../../gen/types.js";
+  reducer,
+  utils,
+  isAccountTransactionsDocument,
+  addBudget,
+  AddBudgetInputSchema,
+  updateBudget,
+  UpdateBudgetInputSchema,
+  deleteBudget,
+  DeleteBudgetInputSchema,
+} from "@powerhousedao/contributor-billing/document-models/account-transactions";
 
 describe("Budgets Operations", () => {
-  let document: AccountTransactionsDocument;
-
-  beforeEach(() => {
-    document = utils.createDocument();
-  });
-
   it("should handle addBudget operation", () => {
-    const input: AddBudgetInput = generateMock(z.AddBudgetInputSchema());
+    const document = utils.createDocument();
+    const input = generateMock(AddBudgetInputSchema());
 
-    const updatedDocument = reducer(document, creators.addBudget(input));
+    const updatedDocument = reducer(document, addBudget(input));
 
+    expect(isAccountTransactionsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe("ADD_BUDGET");
     expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
@@ -36,10 +33,12 @@ describe("Budgets Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle updateBudget operation", () => {
-    const input: UpdateBudgetInput = generateMock(z.UpdateBudgetInputSchema());
+    const document = utils.createDocument();
+    const input = generateMock(UpdateBudgetInputSchema());
 
-    const updatedDocument = reducer(document, creators.updateBudget(input));
+    const updatedDocument = reducer(document, updateBudget(input));
 
+    expect(isAccountTransactionsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "UPDATE_BUDGET",
@@ -50,10 +49,12 @@ describe("Budgets Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle deleteBudget operation", () => {
-    const input: DeleteBudgetInput = generateMock(z.DeleteBudgetInputSchema());
+    const document = utils.createDocument();
+    const input = generateMock(DeleteBudgetInputSchema());
 
-    const updatedDocument = reducer(document, creators.deleteBudget(input));
+    const updatedDocument = reducer(document, deleteBudget(input));
 
+    expect(isAccountTransactionsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "DELETE_BUDGET",

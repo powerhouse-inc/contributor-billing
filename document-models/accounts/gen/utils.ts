@@ -23,7 +23,7 @@ export const initialGlobalState: AccountsGlobalState = {
 export const initialLocalState: AccountsLocalState = {};
 
 export const utils: DocumentModelUtils<AccountsPHState> = {
-  fileExtension: ".phdm",
+  fileExtension: "",
   createState(state) {
     return {
       ...defaultBaseState(),

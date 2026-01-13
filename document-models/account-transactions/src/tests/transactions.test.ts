@@ -3,34 +3,30 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { generateMock } from "@powerhousedao/codegen";
-import utils from "../../gen/utils.js";
 import {
-  z,
-  type AddTransactionInput,
-  type UpdateTransactionInput,
-  type DeleteTransactionInput,
-  type UpdateTransactionPeriodInput,
-} from "../../gen/schema/index.js";
-import { reducer } from "../../gen/reducer.js";
-import * as creators from "../../gen/transactions/creators.js";
-import type { AccountTransactionsDocument } from "../../gen/types.js";
+  reducer,
+  utils,
+  isAccountTransactionsDocument,
+  addTransaction,
+  AddTransactionInputSchema,
+  updateTransaction,
+  UpdateTransactionInputSchema,
+  deleteTransaction,
+  DeleteTransactionInputSchema,
+  updateTransactionPeriod,
+  UpdateTransactionPeriodInputSchema,
+} from "@powerhousedao/contributor-billing/document-models/account-transactions";
 
 describe("Transactions Operations", () => {
-  let document: AccountTransactionsDocument;
-
-  beforeEach(() => {
-    document = utils.createDocument();
-  });
-
   it("should handle addTransaction operation", () => {
-    const input: AddTransactionInput = generateMock(
-      z.AddTransactionInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(AddTransactionInputSchema());
 
-    const updatedDocument = reducer(document, creators.addTransaction(input));
+    const updatedDocument = reducer(document, addTransaction(input));
 
+    expect(isAccountTransactionsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "ADD_TRANSACTION",
@@ -41,15 +37,12 @@ describe("Transactions Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle updateTransaction operation", () => {
-    const input: UpdateTransactionInput = generateMock(
-      z.UpdateTransactionInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(UpdateTransactionInputSchema());
 
-    const updatedDocument = reducer(
-      document,
-      creators.updateTransaction(input),
-    );
+    const updatedDocument = reducer(document, updateTransaction(input));
 
+    expect(isAccountTransactionsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "UPDATE_TRANSACTION",
@@ -60,15 +53,12 @@ describe("Transactions Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle deleteTransaction operation", () => {
-    const input: DeleteTransactionInput = generateMock(
-      z.DeleteTransactionInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(DeleteTransactionInputSchema());
 
-    const updatedDocument = reducer(
-      document,
-      creators.deleteTransaction(input),
-    );
+    const updatedDocument = reducer(document, deleteTransaction(input));
 
+    expect(isAccountTransactionsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "DELETE_TRANSACTION",
@@ -79,15 +69,12 @@ describe("Transactions Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle updateTransactionPeriod operation", () => {
-    const input: UpdateTransactionPeriodInput = generateMock(
-      z.UpdateTransactionPeriodInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(UpdateTransactionPeriodInputSchema());
 
-    const updatedDocument = reducer(
-      document,
-      creators.updateTransactionPeriod(input),
-    );
+    const updatedDocument = reducer(document, updateTransactionPeriod(input));
 
+    expect(isAccountTransactionsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "UPDATE_TRANSACTION_PERIOD",

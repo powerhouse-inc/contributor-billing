@@ -1,9 +1,5 @@
-import type { BillingStatementLineItemsOperations, BillingStatementState } from "@powerhousedao/contributor-billing/document-models/billing-statement";
-
-// Extended operations interface to include delete operation (will be in gen files after MCP update)
+import type { BillingStatementState } from "../../gen/types.js";
 import type { BillingStatementLineItemsOperations } from "@powerhousedao/contributor-billing/document-models/billing-statement";
-
-// Extended operations interface to include delete operation (will be in gen files after MCP update)
 
 export const billingStatementLineItemsOperations: BillingStatementLineItemsOperations =
   {

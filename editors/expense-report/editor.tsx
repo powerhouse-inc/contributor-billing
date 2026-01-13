@@ -65,24 +65,82 @@ export default function Editor() {
   const [document, dispatch] = useSelectedExpenseReportDocument();
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [periodStart, setPeriodStart] = useState<string>(
-    document?.state.global.periodStart || ""
-  );
-  const [periodEnd, setPeriodEnd] = useState<string>(
-    document?.state.global.periodEnd || ""
-  );
   const [isSyncingAll, setIsSyncingAll] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState<string>(
-    document?.state.global.periodStart || ""
-  );
-  const [isPeriodChanged, setIsPeriodChanged] = useState(false);
-  const [isEditingPeriod, setIsEditingPeriod] = useState(false);
-  const [periodDisplayLabel, setPeriodDisplayLabel] = useState<string>(
-    document?.state.global.periodStart || ""
-  );
 
-  const { wallets = [], groups = [] } = document?.state.global || {};
+  // Guard for undefined document or dispatch
+  if (!document || !dispatch) {
+    return <div>Loading...</div>;
+  }
+
+  const { wallets, groups } = document.state.global;
   const { syncWallet } = useSyncWallet();
+
+  // Derive current period from document state
+  const periodStart = document.state.global.periodStart || "";
+  const periodEnd = document.state.global.periodEnd || "";
+
+  // Local state for the selected period (before confirmation)
+  const [selectedPeriod, setSelectedPeriod] = useState<string>(() => {
+    if (periodStart) {
+      const date = new Date(periodStart);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    }
+    // Default to current month
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
+
+  // Track if the selected period differs from the saved period
+  const savedPeriod = useMemo(() => {
+    if (periodStart) {
+      const date = new Date(periodStart);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    }
+    return "";
+  }, [periodStart]);
+
+  // Track if we're in editing mode
+  const [isEditingPeriod, setIsEditingPeriod] = useState(!savedPeriod);
+
+  const isPeriodChanged = selectedPeriod !== savedPeriod;
+
+  // Update selected period when document period changes externally
+  useEffect(() => {
+    if (savedPeriod && savedPeriod !== selectedPeriod) {
+      setSelectedPeriod(savedPeriod);
+    }
+  }, [savedPeriod]);
+
+  // Handle period dropdown change (doesn't save yet)
+  const handlePeriodChange = (value: string) => {
+    setSelectedPeriod(value);
+  };
+
+  // Handle period confirmation (saves to document)
+  const handleConfirmPeriod = () => {
+    const { periodStart, periodEnd } = getMonthDateRange(selectedPeriod);
+
+    // Dispatch both start and end dates
+    dispatch(actions.setPeriodStart({ periodStart }));
+    dispatch(actions.setPeriodEnd({ periodEnd }));
+
+    // Exit editing mode
+    setIsEditingPeriod(false);
+  };
+
+  // Handle starting to edit the period
+  const handleEditPeriod = () => {
+    setIsEditingPeriod(true);
+  };
+
+  // Generate month options
+  const monthOptions = useMemo(() => generateMonthOptions(), []);
+
+  // Get the formatted display label for the current period
+  const periodDisplayLabel = useMemo(() => {
+    const option = monthOptions.find((opt) => opt.value === selectedPeriod);
+    return option ? option.label : selectedPeriod;
+  }, [selectedPeriod, monthOptions]);
 
   // Handle wallet selection for adding billing statements
   const handleAddBillingStatement = (walletAddress: string) => {
@@ -108,7 +166,7 @@ export default function Editor() {
     setIsSyncingAll(true);
 
     // Sync all wallets that have either billing statements or transactions
-    wallets?.forEach((wallet) => {
+    wallets.forEach((wallet) => {
       if (
         wallet.wallet &&
         ((wallet.billingStatements && wallet.billingStatements.length > 0) ||
@@ -140,7 +198,7 @@ export default function Editor() {
           periodEnd={periodEnd}
           wallets={wallets}
           groups={groups}
-        />
+        />,
       ).toBlob();
 
       // Create download link
@@ -202,21 +260,17 @@ export default function Editor() {
                         {isEditingPeriod ? (
                           <>
                             <Select
-                              options={generateMonthOptions()}
+                              options={monthOptions}
                               value={selectedPeriod}
                               onChange={(value) =>
-                                setSelectedPeriod(value as string)
+                                handlePeriodChange(value as string)
                               }
                               className="min-w-[200px]"
                             />
                             {isPeriodChanged && (
                               <Button
                                 variant="default"
-                                onClick={() => {
-                                  setIsEditingPeriod(false);
-                                  setIsPeriodChanged(false);
-                                  setPeriodDisplayLabel(selectedPeriod);
-                                }}
+                                onClick={handleConfirmPeriod}
                                 className="text-sm"
                               >
                                 Set Period
@@ -230,11 +284,7 @@ export default function Editor() {
                             </span>
                             <Button
                               variant="ghost"
-                              onClick={() => {
-                                setIsEditingPeriod(true);
-                                setIsPeriodChanged(false);
-                                setPeriodDisplayLabel(selectedPeriod);
-                              }}
+                              onClick={handleEditPeriod}
                               className="text-sm"
                             >
                               Change
@@ -277,8 +327,8 @@ export default function Editor() {
               </div>
               <div className="p-6">
                 <WalletsTable
-                  wallets={wallets || []}
-                  groups={groups || []}
+                  wallets={wallets}
+                  groups={groups}
                   onAddBillingStatement={handleAddBillingStatement}
                   periodStart={periodStart}
                   periodEnd={periodEnd}
@@ -288,7 +338,7 @@ export default function Editor() {
             </section>
 
             {/* Aggregated Expenses Section */}
-            {wallets && wallets.length > 0 && (
+            {wallets.length > 0 && (
               <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -298,10 +348,10 @@ export default function Editor() {
                 <div className="p-6">
                   <AggregatedExpensesTable
                     wallets={wallets}
-                    groups={groups || []}
+                    groups={groups}
                     periodStart={periodStart}
                     periodEnd={periodEnd}
-                    dispatch={dispatch || (() => {})}
+                    dispatch={dispatch}
                   />
                 </div>
               </section>
@@ -316,7 +366,7 @@ export default function Editor() {
             onClose={handleCloseModal}
             walletAddress={selectedWallet}
             dispatch={dispatch}
-            groups={groups || []}
+            groups={groups}
           />
         )}
       </div>

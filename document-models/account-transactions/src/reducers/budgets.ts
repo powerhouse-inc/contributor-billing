@@ -1,13 +1,12 @@
 import type { AccountTransactionsBudgetsOperations } from "@powerhousedao/contributor-billing/document-models/account-transactions";
 
-export const accountTransactionsBudgetsOperations: AccountTransactionsBudgetsOperations =
-  {
+export const accountTransactionsBudgetsOperations: AccountTransactionsBudgetsOperations = {
     addBudgetOperation(state, action) {
-          state.budgets.push({
-            id: action.input.id,
-            name: action.input.name || null,
-          });
-      },
+        state.budgets.push({
+          id: action.input.id,
+          name: action.input.name || null,
+        });
+    },
     updateBudgetOperation(state, action) {
         const budget = state.budgets.find(
           (budget) => budget.id === action.input.id,
@@ -23,5 +22,5 @@ export const accountTransactionsBudgetsOperations: AccountTransactionsBudgetsOpe
         state.budgets = state.budgets.filter(
           (budget) => budget.id !== action.input.id,
         );
-    },
-  };
+    }
+};

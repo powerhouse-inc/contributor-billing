@@ -183,5 +183,7 @@ export const schema: DocumentNode = gql`
   input ExpenseReport_UpdateWalletInput {
     address: EthereumAddress!
     name: String
+    accountDocumentId: PHID
+    accountTransactionsDocumentId: PHID
   }
 `;
