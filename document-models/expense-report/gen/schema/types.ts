@@ -183,11 +183,15 @@ export type UpdateLineItemInput = {
 };
 
 export type UpdateWalletInput = {
+  accountDocumentId?: InputMaybe<Scalars["PHID"]["input"]>;
+  accountTransactionsDocumentId?: InputMaybe<Scalars["PHID"]["input"]>;
   address: Scalars["EthereumAddress"]["input"];
   name?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type Wallet = {
+  accountDocumentId: Maybe<Scalars["PHID"]["output"]>;
+  accountTransactionsDocumentId: Maybe<Scalars["PHID"]["output"]>;
   billingStatements: Maybe<Array<Maybe<Scalars["OID"]["output"]>>>;
   lineItems: Maybe<Array<Maybe<LineItem>>>;
   name: Maybe<Scalars["String"]["output"]>;

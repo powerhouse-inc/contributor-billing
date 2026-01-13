@@ -279,6 +279,8 @@ export function UpdateWalletInputSchema(): z.ZodObject<
   Properties<UpdateWalletInput>
 > {
   return z.object({
+    accountDocumentId: z.string().nullish(),
+    accountTransactionsDocumentId: z.string().nullish(),
     address: z
       .string()
       .regex(/^0x[a-fA-F0-9]{40}$/, {
@@ -291,6 +293,8 @@ export function UpdateWalletInputSchema(): z.ZodObject<
 export function WalletSchema(): z.ZodObject<Properties<Wallet>> {
   return z.object({
     __typename: z.literal("Wallet").optional(),
+    accountDocumentId: z.string().nullable(),
+    accountTransactionsDocumentId: z.string().nullable(),
     billingStatements: z.array(z.string().nullable()).nullable(),
     lineItems: z.array(LineItemSchema().nullable()).nullable(),
     name: z.string().nullable(),

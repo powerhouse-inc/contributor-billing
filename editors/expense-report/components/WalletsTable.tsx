@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button, TextInput } from "@powerhousedao/document-engineering";
 import {
   Plus,
@@ -13,15 +13,34 @@ import {
 import type {
   Wallet,
   LineItemGroup,
+  LineItem,
 } from "../../../document-models/expense-report/gen/types.js";
 import { actions } from "../../../document-models/expense-report/index.js";
+import { generateId } from "document-model/core";
 import { useWalletSync } from "../hooks/useWalletSync.js";
 import { useSyncWallet } from "../hooks/useSyncWallet.js";
+import {
+  addDocument,
+  dispatchActions,
+  useDocumentsInSelectedDrive,
+  useSelectedDrive,
+  setSelectedNode,
+  useDocumentById,
+} from "@powerhousedao/reactor-browser";
+import { actions as accountsActions } from "../../../document-models/accounts/index.js";
+import {
+  actions as accountTransactionsActions,
+  addTransaction,
+} from "../../../document-models/account-transactions/index.js";
+import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
+import { alchemyIntegration } from "../../account-transactions-editor/alchemyIntegration.js";
 
 interface WalletsTableProps {
   wallets: Wallet[];
   groups: LineItemGroup[];
   onAddBillingStatement: (walletAddress: string) => void;
+  periodStart: string;
+  periodEnd: string;
   dispatch: any;
 }
 
@@ -29,43 +48,587 @@ export function WalletsTable({
   wallets,
   groups,
   onAddBillingStatement,
+  periodStart,
+  periodEnd,
   dispatch,
 }: WalletsTableProps) {
-  const [newWalletAddress, setNewWalletAddress] = useState("");
-  const [newWalletName, setNewWalletName] = useState("");
+  const [selectedAccountId, setSelectedAccountId] = useState<string>("");
   const [walletError, setWalletError] = useState("");
-  const [hoveredWallet, setHoveredWallet] = useState<string | null>(null);
   const [editingWallet, setEditingWallet] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [copiedWallet, setCopiedWallet] = useState<string | null>(null);
   const [syncingWallet, setSyncingWallet] = useState<string | null>(null);
+  const [addingWallet, setAddingWallet] = useState(false);
+
+  // State for handling newly created transaction documents
+  const [pendingTxDoc, setPendingTxDoc] = useState<{
+    documentId: string;
+    accountEntry: AccountEntry;
+    accountsDocId: string;
+    walletAddress: string;
+  } | null>(null);
+
+  // Track if we're currently processing to prevent duplicate runs
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Progress state for Add Txns operation
+  const [txProgress, setTxProgress] = useState<{
+    show: boolean;
+    step: string;
+    current: number;
+    total: number;
+    details: string;
+  }>({
+    show: false,
+    step: "",
+    current: 0,
+    total: 5,
+    details: "",
+  });
+
+  // Get drive and documents for account/transactions document management
+  const [selectedDrive] = useSelectedDrive();
+  const allDocuments = useDocumentsInSelectedDrive();
+
+  // Load the pending transaction document if one exists
+  const [pendingDocument, pendingDocDispatch] = useDocumentById(
+    pendingTxDoc?.documentId || null,
+  );
+
+  // Get available Account documents from the drive
+  const availableAccounts =
+    allDocuments?.filter(
+      (doc: any) => doc.header.documentType === "powerhouse/accounts",
+    ) || [];
+
+  // Extract all account entries from all Accounts documents
+  const accountEntries = availableAccounts.flatMap((doc: any) => {
+    const accounts = doc.state?.global?.accounts || [];
+    return accounts.map((acc: any) => ({
+      ...acc,
+      accountsDocumentId: doc.header.id, // Store which Accounts document this came from
+    }));
+  });
 
   // Check sync status
   const { needsSync, outdatedWallets, tagChangedWallets } =
     useWalletSync(wallets);
   const { syncWallet } = useSyncWallet();
 
-  const handleAddWallet = () => {
-    const trimmedAddress = newWalletAddress.trim();
+  // Handle fetching and adding transactions when a new document is created
+  useEffect(() => {
+    // Check if we have pending work and all required resources
+    if (
+      !pendingTxDoc ||
+      !pendingDocument ||
+      !pendingDocDispatch ||
+      isProcessing
+    ) {
+      return;
+    }
 
-    if (trimmedAddress) {
-      // Check if wallet already exists
-      const walletExists = wallets.some((w) => w.wallet === trimmedAddress);
+    // Mark as processing and save current pending doc
+    setIsProcessing(true);
+    const currentPendingDoc = pendingTxDoc;
 
-      if (walletExists) {
-        setWalletError("This wallet already exists");
+    const fetchAndAddTransactions = async () => {
+      console.log(
+        "[WalletsTable] Processing pending transaction document:",
+        currentPendingDoc.documentId,
+      );
+
+      try {
+        // Step 1: Set account info in the transaction document
+        setTxProgress({
+          show: true,
+          step: "Initializing",
+          current: 1,
+          total: 5,
+          details: "Setting up transaction document...",
+        });
+
+        // Add small delay to ensure document is fully initialized
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        console.log("[WalletsTable] Document state before setAccount:", {
+          documentId: pendingDocument?.header?.id,
+          hasState: !!pendingDocument?.state,
+          hasGlobal: !!(pendingDocument?.state as any)?.global,
+        });
+
+        const setAccountAction = accountTransactionsActions.setAccount({
+          id: currentPendingDoc.accountEntry.id,
+          account: currentPendingDoc.accountEntry.account,
+          name: currentPendingDoc.accountEntry.name,
+        });
+
+        console.log(
+          "[WalletsTable] Dispatching setAccount action:",
+          setAccountAction,
+        );
+
+        pendingDocDispatch(setAccountAction);
+
+        // Wait a bit for the action to be processed
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        console.log(
+          "[WalletsTable] Account info set - checking document state:",
+          {
+            account: (pendingDocument?.state as any)?.global?.account,
+          },
+        );
+
+        // Step 2: Fetch transactions from Alchemy
+        setTxProgress({
+          show: true,
+          step: "Fetching Transactions",
+          current: 2,
+          total: 5,
+          details: "Retrieving blockchain transactions from Alchemy...",
+        });
+
+        console.log(
+          "[WalletsTable] Fetching transactions from Alchemy for:",
+          currentPendingDoc.accountEntry.account,
+        );
+
+        const result = await alchemyIntegration.getTransactionsFromAlchemy(
+          currentPendingDoc.accountEntry.account,
+        );
+
+        console.log(
+          "[WalletsTable] Alchemy result:",
+          result.success,
+          "transactions count:",
+          result.transactions?.length || 0,
+        );
+
+        if (result.success && result.transactions.length > 0) {
+          // Step 3: Add each transaction using the document's dispatch function
+          setTxProgress({
+            show: true,
+            step: "Adding Transactions",
+            current: 3,
+            total: 5,
+            details: `Processing ${result.transactions.length} transactions...`,
+          });
+
+          let addedCount = 0;
+
+          for (const txData of result.transactions) {
+            // Validate required fields
+            if (!txData.direction || !txData.from || !txData.to) {
+              console.error(
+                "[WalletsTable] Skipping invalid transaction:",
+                txData,
+              );
+              continue;
+            }
+
+            // Handle amount formatting
+            let amount;
+            if (typeof txData.amount === "string") {
+              const amountParts = txData.amount.split(" ");
+              amount = {
+                value: amountParts[0] || "0",
+                unit: amountParts[1] || txData.token,
+              };
+            } else if (
+              typeof txData.amount === "object" &&
+              txData.amount &&
+              "value" in txData.amount &&
+              "unit" in txData.amount
+            ) {
+              amount = txData.amount;
+            } else {
+              amount = {
+                value: "0",
+                unit: txData.token,
+              };
+            }
+
+            // Dispatch transaction directly to the document
+            const txAction = addTransaction({
+              id: generateId(),
+              counterParty: txData.counterParty,
+              amount: amount,
+              datetime: txData.datetime,
+              txHash: txData.txHash,
+              token: txData.token,
+              blockNumber: txData.blockNumber,
+              accountingPeriod: txData.accountingPeriod,
+              direction:
+                (txData.direction as "INFLOW" | "OUTFLOW") || "OUTFLOW",
+              budget: null,
+            });
+
+            if (addedCount === 0) {
+              console.log("[WalletsTable] First transaction action:", txAction);
+            }
+
+            pendingDocDispatch(txAction);
+            addedCount++;
+
+            // Update progress every 10 transactions
+            if (addedCount % 10 === 0) {
+              setTxProgress({
+                show: true,
+                step: "Adding Transactions",
+                current: 3,
+                total: 5,
+                details: `Added ${addedCount} of ${result.transactions.length} transactions...`,
+              });
+              console.log(
+                `[WalletsTable] Added ${addedCount}/${result.transactions.length} transactions`,
+              );
+            }
+          }
+
+          console.log(
+            `[WalletsTable] Successfully added all ${addedCount} transactions`,
+          );
+
+          // Verify operations were added
+          console.log("[WalletsTable] Final transaction count in document:", {
+            transactionsCount:
+              (pendingDocument?.state as any)?.global?.transactions?.length ||
+              0,
+            operationsCount:
+              (pendingDocument?.operations as any)?.global?.length || 0,
+          });
+        } else {
+          console.log("[WalletsTable] No transactions to add");
+        }
+
+        // Step 4: Update the Accounts document with the transaction document ID
+        setTxProgress({
+          show: true,
+          step: "Linking Documents",
+          current: 4,
+          total: 5,
+          details: "Updating account references...",
+        });
+
+        console.log("[WalletsTable] Updating account in Accounts document:", {
+          accountId: currentPendingDoc.accountEntry.id,
+          accountsDocId: currentPendingDoc.accountsDocId,
+          transactionsDocId: currentPendingDoc.documentId,
+        });
+
+        await dispatchActions(
+          [
+            accountsActions.updateAccount({
+              id: currentPendingDoc.accountEntry.id,
+              accountTransactionsId: currentPendingDoc.documentId,
+            }),
+          ],
+          currentPendingDoc.accountsDocId,
+        );
+
+        console.log(
+          "[WalletsTable] Successfully updated account with transactions ID",
+        );
+
+        // Step 5: Link the transaction document to the wallet in ExpenseReport
+        setTxProgress({
+          show: true,
+          step: "Finalizing",
+          current: 5,
+          total: 5,
+          details: "Linking to expense report...",
+        });
+
+        dispatch(
+          actions.updateWallet({
+            address: currentPendingDoc.walletAddress,
+            accountTransactionsDocumentId: currentPendingDoc.documentId,
+          }),
+        );
+
+        console.log("[WalletsTable] Successfully linked to wallet");
+
+        // Success! Close modal after a brief delay
+        setTimeout(() => {
+          setTxProgress({
+            show: false,
+            step: "",
+            current: 0,
+            total: 5,
+            details: "",
+          });
+        }, 1500);
+      } catch (error) {
+        console.error(
+          "[WalletsTable] Error processing pending transaction document:",
+          error,
+        );
+        setTxProgress({
+          show: false,
+          step: "",
+          current: 0,
+          total: 5,
+          details: "",
+        });
+        alert(
+          `Failed to fetch transactions: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+      } finally {
+        // Always clear processing state and pending doc
+        setPendingTxDoc(null);
+        setIsProcessing(false);
+      }
+    };
+
+    fetchAndAddTransactions();
+  }, [pendingTxDoc, pendingDocument, pendingDocDispatch, isProcessing]);
+
+  const handleAddWallet = async () => {
+    if (!selectedAccountId) {
+      setWalletError("Please select an account");
+      return;
+    }
+
+    // Find the selected account from accountEntries
+    const selectedAccount = accountEntries.find(
+      (acc: any) => acc.id === selectedAccountId,
+    );
+
+    if (!selectedAccount) {
+      setWalletError("Selected account not found");
+      return;
+    }
+
+    // Check if wallet already exists
+    const walletExists = wallets.some(
+      (w) => w.wallet === selectedAccount.account,
+    );
+
+    if (walletExists) {
+      setWalletError("This account is already added to the report");
+      return;
+    }
+
+    setAddingWallet(true);
+    setWalletError("");
+
+    try {
+      // Add the wallet to the expense report
+      dispatch(
+        actions.addWallet({
+          wallet: selectedAccount.account,
+          name: selectedAccount.name || undefined,
+        }),
+      );
+
+      // Immediately update with the linked document IDs
+      dispatch(
+        actions.updateWallet({
+          address: selectedAccount.account,
+          accountDocumentId: selectedAccount.accountsDocumentId || undefined,
+          accountTransactionsDocumentId:
+            selectedAccount.accountTransactionsId || undefined,
+        }),
+      );
+
+      // Clear selection
+      setSelectedAccountId("");
+    } catch (error) {
+      console.error("Error adding wallet:", error);
+      setWalletError("Failed to add wallet. Please try again.");
+    } finally {
+      setAddingWallet(false);
+    }
+  };
+
+  const handleAddTransactions = async (wallet: Wallet) => {
+    if (!wallet.wallet) {
+      return;
+    }
+
+    // Check if transactions document already exists
+    if (wallet.accountTransactionsDocumentId) {
+      return;
+    }
+
+    if (!selectedDrive?.header?.id) {
+      alert("No drive selected");
+      return;
+    }
+
+    try {
+      // Show initial progress
+      setTxProgress({
+        show: true,
+        step: "Preparing",
+        current: 0,
+        total: 5,
+        details: "Checking for existing documents...",
+      });
+
+      // Find or create AccountTransactions document for this wallet
+      const existingTxDoc = allDocuments?.find(
+        (doc: any) =>
+          doc.header.documentType === "powerhouse/account-transactions" &&
+          doc.state?.global?.account?.account === wallet.wallet,
+      );
+
+      if (existingTxDoc) {
+        // Link existing document
+        dispatch(
+          actions.updateWallet({
+            address: wallet.wallet,
+            accountTransactionsDocumentId: existingTxDoc.header.id,
+          }),
+        );
+        setTxProgress({
+          show: false,
+          step: "",
+          current: 0,
+          total: 5,
+          details: "",
+        });
         return;
       }
 
-      dispatch(
-        actions.addWallet({
-          wallet: trimmedAddress,
-          name: newWalletName.trim() || undefined,
-        })
+      // Step 1: Find or create an Accounts document
+      setTxProgress({
+        show: true,
+        step: "Preparing",
+        current: 0,
+        total: 5,
+        details: "Setting up accounts...",
+      });
+
+      const accountsDoc = allDocuments?.find(
+        (doc: any) => doc.header.documentType === "powerhouse/accounts",
+      ) as any;
+
+      let accountsDocId: string;
+      let existingAccounts: any[] = [];
+
+      if (!accountsDoc) {
+        console.log("[WalletsTable] Creating new Accounts document");
+        const accountsNode = await addDocument(
+          selectedDrive.header.id,
+          "Accounts",
+          "powerhouse/accounts",
+          undefined,
+          undefined,
+          undefined,
+          "powerhouse-accounts-editor",
+        );
+
+        if (!accountsNode?.id) {
+          throw new Error("Failed to create Accounts document");
+        }
+
+        accountsDocId = accountsNode.id;
+      } else {
+        accountsDocId = accountsDoc.header.id;
+        existingAccounts = accountsDoc.state?.global?.accounts || [];
+      }
+
+      // Step 2: Find or create an AccountEntry for this wallet
+      let accountEntry: AccountEntry | undefined = existingAccounts.find(
+        (acc: any) => acc.account === wallet.wallet,
       );
-      setNewWalletAddress("");
-      setNewWalletName("");
-      setWalletError("");
+
+      if (!accountEntry) {
+        console.log(
+          "[WalletsTable] Creating new account entry for wallet:",
+          wallet.wallet,
+        );
+
+        const newAccountId = generateId();
+        const newAccountName = wallet.name || wallet.wallet.substring(0, 10);
+
+        // Add the account to the Accounts document
+        console.log(
+          "[WalletsTable] Adding new account to Accounts document:",
+          newAccountId,
+        );
+        await dispatchActions(
+          [
+            accountsActions.addAccount({
+              id: newAccountId,
+              account: wallet.wallet,
+              name: newAccountName,
+              type: "External",
+            }),
+          ],
+          accountsDocId,
+        );
+
+        console.log("[WalletsTable] Account added successfully");
+
+        // Create accountEntry reference
+        accountEntry = {
+          id: newAccountId,
+          account: wallet.wallet,
+          name: newAccountName,
+          type: "External",
+          accountTransactionsId: null,
+          KycAmlStatus: null,
+          budgetPath: null,
+          chain: null,
+          owners: null,
+        };
+
+        // Give a small delay to ensure the account is persisted
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+
+      // Step 3: Create the AccountTransactions document
+      setTxProgress({
+        show: true,
+        step: "Preparing",
+        current: 0,
+        total: 5,
+        details: "Creating transaction document...",
+      });
+
+      console.log("[WalletsTable] Creating AccountTransactions document");
+      const documentName = `${accountEntry.name} Transactions`;
+
+      const createdNode = await addDocument(
+        selectedDrive.header.id,
+        documentName,
+        "powerhouse/account-transactions",
+        undefined,
+        undefined,
+        undefined,
+        "powerhouse-account-transactions-editor",
+      );
+
+      if (!createdNode?.id) {
+        throw new Error("Failed to create AccountTransactions document");
+      }
+
+      console.log(
+        "[WalletsTable] AccountTransactions document created:",
+        createdNode.id,
+      );
+
+      // Step 4: Set up pending state to let useEffect handle the rest
+      setPendingTxDoc({
+        documentId: createdNode.id,
+        accountEntry,
+        accountsDocId,
+        walletAddress: wallet.wallet,
+      });
+    } catch (error) {
+      console.error("[WalletsTable] Error adding transactions:", error);
+      setTxProgress({
+        show: false,
+        step: "",
+        current: 0,
+        total: 5,
+        details: "",
+      });
+      alert(
+        `Failed to add transactions document: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   };
 
@@ -84,7 +647,7 @@ export function WalletsTable({
         actions.updateWallet({
           address: walletAddress,
           name: trimmedName,
-        })
+        }),
       );
     }
     setEditingWallet(null);
@@ -108,35 +671,43 @@ export function WalletsTable({
   };
 
   const handleSyncWallet = async (wallet: Wallet) => {
-    if (
-      !wallet.wallet ||
-      !wallet.billingStatements ||
-      wallet.billingStatements.length === 0
-    ) {
+    if (!wallet.wallet) {
+      return;
+    }
+
+    // Validate period dates before syncing
+    if (!periodStart || !periodEnd) {
+      alert(
+        "Please set the period start and end dates before syncing wallet transactions.",
+      );
       return;
     }
 
     setSyncingWallet(wallet.wallet);
 
     try {
-      // Remove all existing line items first
-      const lineItemsToRemove = [...(wallet.lineItems || [])];
-      lineItemsToRemove.forEach((item) => {
-        if (item?.id) {
-          dispatch(
-            actions.removeLineItem({
-              wallet: wallet.wallet!,
-              lineItemId: item.id,
-            })
-          );
-        }
-      });
-
-      // Re-extract line items from billing statements
-      const billingStatementIds = wallet.billingStatements.filter(
-        (id): id is string => id !== null && id !== undefined
+      // Get existing line items (don't remove them, we'll update instead)
+      const existingLineItems = (wallet.lineItems || []).filter(
+        (item): item is LineItem => item !== null && item !== undefined,
       );
-      syncWallet(wallet.wallet, billingStatementIds, groups, dispatch);
+
+      // Get billing statement IDs
+      const billingStatementIds = (wallet.billingStatements || []).filter(
+        (id): id is string => id !== null && id !== undefined,
+      );
+
+      // Sync wallet with all new parameters
+      syncWallet(
+        wallet.wallet,
+        existingLineItems,
+        billingStatementIds,
+        groups,
+        wallets,
+        wallet.accountTransactionsDocumentId,
+        periodStart,
+        periodEnd,
+        dispatch,
+      );
 
       // Small delay to show sync animation
       setTimeout(() => {
@@ -144,6 +715,7 @@ export function WalletsTable({
       }, 500);
     } catch (error) {
       console.error("Error syncing wallet:", error);
+      alert(error instanceof Error ? error.message : "Error syncing wallet");
       setSyncingWallet(null);
     }
   };
@@ -152,7 +724,7 @@ export function WalletsTable({
     dispatch(
       actions.removeWallet({
         wallet: walletAddress,
-      })
+      }),
     );
   };
 
@@ -206,12 +778,12 @@ export function WalletsTable({
                           [...tagChangedWallets, ...outdatedWallets].forEach(
                             (walletAddress) => {
                               const wallet = wallets.find(
-                                (w) => w.wallet === walletAddress
+                                (w) => w.wallet === walletAddress,
                               );
                               if (wallet) {
                                 handleSyncWallet(wallet);
                               }
-                            }
+                            },
                           );
                         }}
                         disabled={syncingWallet !== null}
@@ -251,13 +823,10 @@ export function WalletsTable({
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
               {wallets.map((wallet) => {
                 const totals = calculateWalletTotals(wallet);
-                const isHovered = hoveredWallet === wallet.wallet;
 
                 return (
                   <tr
                     key={wallet.wallet}
-                    onMouseEnter={() => setHoveredWallet(wallet.wallet || null)}
-                    onMouseLeave={() => setHoveredWallet(null)}
                     className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -364,44 +933,43 @@ export function WalletsTable({
                           >
                             <Plus size={16} />
                           </button>
-                          {wallet.billingStatements &&
-                            wallet.billingStatements.length > 0 && (
-                              <button
-                                onClick={() => handleSyncWallet(wallet)}
-                                disabled={syncingWallet === wallet.wallet}
-                                className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
-                                  tagChangedWallets.includes(
-                                    wallet.wallet || ""
-                                  )
-                                    ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 animate-pulse"
-                                    : outdatedWallets.includes(
-                                          wallet.wallet || ""
-                                        )
-                                      ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 animate-pulse"
-                                      : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                title={
-                                  tagChangedWallets.includes(
-                                    wallet.wallet || ""
-                                  )
-                                    ? "ALERT: Tags have changed - sync required!"
-                                    : outdatedWallets.includes(
-                                          wallet.wallet || ""
-                                        )
-                                      ? "Sync needed - billing statements updated"
+                          {((wallet.billingStatements &&
+                            wallet.billingStatements.length > 0) ||
+                            wallet.accountTransactionsDocumentId) && (
+                            <button
+                              onClick={() => handleSyncWallet(wallet)}
+                              disabled={syncingWallet === wallet.wallet}
+                              className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
+                                tagChangedWallets.includes(wallet.wallet || "")
+                                  ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 animate-pulse"
+                                  : outdatedWallets.includes(
+                                        wallet.wallet || "",
+                                      )
+                                    ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 animate-pulse"
+                                    : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              } disabled:opacity-50 disabled:cursor-not-allowed`}
+                              title={
+                                tagChangedWallets.includes(wallet.wallet || "")
+                                  ? "ALERT: Tags have changed - sync required!"
+                                  : outdatedWallets.includes(
+                                        wallet.wallet || "",
+                                      )
+                                    ? "Sync needed - billing statements updated"
+                                    : wallet.accountTransactionsDocumentId
+                                      ? "Sync wallet with billing statements and transactions"
                                       : "Sync with latest billing statements"
+                              }
+                            >
+                              <RefreshCw
+                                size={16}
+                                className={
+                                  syncingWallet === wallet.wallet
+                                    ? "animate-spin"
+                                    : ""
                                 }
-                              >
-                                <RefreshCw
-                                  size={16}
-                                  className={
-                                    syncingWallet === wallet.wallet
-                                      ? "animate-spin"
-                                      : ""
-                                  }
-                                />
-                              </button>
-                            )}
+                              />
+                            </button>
+                          )}
                           <span className="text-sm font-medium text-gray-900 dark:text-white">
                             {formatCurrency(totals.actuals)}
                           </span>
@@ -419,8 +987,69 @@ export function WalletsTable({
                     >
                       {formatCurrency(totals.difference)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                      {formatCurrency(totals.payments)}
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                      {wallet.accountTransactionsDocumentId ? (
+                        // Show clickable document snippet card when transactions document is linked
+                        <button
+                          onClick={() =>
+                            setSelectedNode(
+                              wallet.accountTransactionsDocumentId!,
+                            )
+                          }
+                          className="w-full bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-2 transition-colors text-left"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <svg
+                                className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                              </svg>
+                              <div className="min-w-0">
+                                <span className="text-xs font-medium text-green-900 dark:text-green-100 block">
+                                  Transactions
+                                </span>
+                                <span className="text-xs text-green-600 dark:text-green-400">
+                                  {formatCurrency(totals.payments)}
+                                </span>
+                              </div>
+                            </div>
+                            <svg
+                              className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                              />
+                            </svg>
+                          </div>
+                        </button>
+                      ) : (
+                        // Show Add Txns button when no transactions document is linked
+                        <div className="flex items-center justify-end">
+                          <button
+                            onClick={() => handleAddTransactions(wallet)}
+                            className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-md transition-colors"
+                            title="Add transactions document for this wallet"
+                          >
+                            <Plus size={16} />
+                            <span>Add Txns</span>
+                          </button>
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                       <div className="flex items-center justify-end gap-2">
@@ -451,38 +1080,26 @@ export function WalletsTable({
 
       {/* Add Wallet Form */}
       <div className="flex items-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Wallet Name
-          </label>
-          <TextInput
-            value={newWalletName}
-            onChange={(e) => setNewWalletName(e.target.value)}
-            placeholder="Enter wallet name (optional)"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleAddWallet();
-              }
-            }}
-          />
-        </div>
         <div className="flex-1 relative">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Wallet Address
+            Select Account
           </label>
-          <TextInput
-            value={newWalletAddress}
+          <select
+            value={selectedAccountId}
             onChange={(e) => {
-              setNewWalletAddress(e.target.value);
-              setWalletError(""); // Clear error when typing
+              setSelectedAccountId(e.target.value);
+              setWalletError(""); // Clear error when selecting
             }}
-            placeholder="Enter wallet address (e.g., 0x1234...)"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleAddWallet();
-              }
-            }}
-          />
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">-- Select an account --</option>
+            {accountEntries.map((acc: any) => (
+              <option key={acc.id} value={acc.id}>
+                {acc.name} ({acc.account?.substring(0, 10)}...
+                {acc.account?.substring(acc.account.length - 4)})
+              </option>
+            ))}
+          </select>
           {walletError && (
             <div className="absolute left-0 right-0 top-full mt-1 px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md shadow-lg z-10">
               <p className="text-sm text-red-600 dark:text-red-400">
@@ -491,10 +1108,53 @@ export function WalletsTable({
             </div>
           )}
         </div>
-        <Button onClick={handleAddWallet} disabled={!newWalletAddress.trim()}>
-          Add Wallet
+        <Button
+          onClick={handleAddWallet}
+          disabled={!selectedAccountId || addingWallet}
+        >
+          {addingWallet ? "Adding..." : "Add Account"}
         </Button>
       </div>
+
+      {/* Progress Notification - Bottom Right */}
+      {txProgress.show && (
+        <div className="fixed bottom-4 right-4 z-50 transition-all duration-300 ease-out">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 p-4 w-80">
+            <div className="space-y-3">
+              {/* Header with Spinner */}
+              <div className="flex items-center gap-3">
+                <RefreshCw
+                  size={20}
+                  className="animate-spin text-blue-600 dark:text-blue-500 flex-shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                    {txProgress.step}
+                  </h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Step {txProgress.current} of {txProgress.total}
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                <div
+                  className="bg-blue-600 dark:bg-blue-500 h-1.5 rounded-full transition-all duration-300 ease-in-out"
+                  style={{
+                    width: `${(txProgress.current / txProgress.total) * 100}%`,
+                  }}
+                />
+              </div>
+
+              {/* Details */}
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                {txProgress.details}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

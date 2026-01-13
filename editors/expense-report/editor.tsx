@@ -1,18 +1,65 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSelectedExpenseReportDocument } from "../../document-models/expense-report/hooks.js";
 import { actions } from "../../document-models/expense-report/index.js";
-import { DatePicker, Icon, Button } from "@powerhousedao/document-engineering";
+import { Icon, Button, Select } from "@powerhousedao/document-engineering";
 import { WalletsTable } from "./components/WalletsTable.js";
 import { AggregatedExpensesTable } from "./components/AggregatedExpensesTable.js";
 import { AddBillingStatementModal } from "./components/AddBillingStatementModal.js";
 import { ExpenseReportPDF } from "./components/ExpenseReportPDF.js";
 import { pdf } from "@react-pdf/renderer";
-import { PDFViewer } from "@react-pdf/renderer";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
   useParentFolderForSelectedNode,
 } from "@powerhousedao/reactor-browser";
+import { useSyncWallet } from "./hooks/useSyncWallet.js";
+import { RefreshCw } from "lucide-react";
+
+// Helper function to generate month options from January 2025 to current month
+function generateMonthOptions() {
+  const options: Array<{ label: string; value: string }> = [];
+  const startDate = new Date(2025, 0, 1); // January 2025
+  const currentDate = new Date();
+
+  const date = new Date(startDate);
+
+  while (date <= currentDate) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const monthName = date.toLocaleDateString("en-US", { month: "long" });
+    const label = `${monthName} ${year}`;
+
+    // Value format: YYYY-MM (e.g., "2025-01")
+    const value = `${year}-${String(month + 1).padStart(2, "0")}`;
+
+    options.push({ label, value });
+
+    // Move to next month
+    date.setMonth(date.getMonth() + 1);
+  }
+
+  // Reverse to show most recent first
+  return options.reverse();
+}
+
+// Helper function to get start and end dates for a given month
+function getMonthDateRange(yearMonth: string) {
+  const [year, month] = yearMonth.split("-").map(Number);
+
+  // First day of month at 00:00:00 UTC
+  const periodStart = new Date(
+    Date.UTC(year, month - 1, 1, 0, 0, 0, 0),
+  ).toISOString();
+
+  // Last day of month at 23:59:59.999 UTC
+  // Get the last day by using day 0 of the next month
+  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const periodEnd = new Date(
+    Date.UTC(year, month - 1, lastDay, 23, 59, 59, 999),
+  ).toISOString();
+
+  return { periodStart, periodEnd };
+}
 
 export default function Editor() {
   const [document, dispatch] = useSelectedExpenseReportDocument();
@@ -24,25 +71,18 @@ export default function Editor() {
   const [periodEnd, setPeriodEnd] = useState<string>(
     document?.state.global.periodEnd || ""
   );
+  const [isSyncingAll, setIsSyncingAll] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>(
+    document?.state.global.periodStart || ""
+  );
+  const [isPeriodChanged, setIsPeriodChanged] = useState(false);
+  const [isEditingPeriod, setIsEditingPeriod] = useState(false);
+  const [periodDisplayLabel, setPeriodDisplayLabel] = useState<string>(
+    document?.state.global.periodStart || ""
+  );
 
-  const { wallets, groups } = document?.state.global || {};
-
-  // Handle period date changes
-  const handlePeriodStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPeriodStart(value);
-    if (value) {
-      dispatch?.(actions.setPeriodStart({ periodStart: value }));
-    }
-  };
-
-  const handlePeriodEndChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPeriodEnd(value);
-    if (value) {
-      dispatch?.(actions.setPeriodEnd({ periodEnd: value }));
-    }
-  };
+  const { wallets = [], groups = [] } = document?.state.global || {};
+  const { syncWallet } = useSyncWallet();
 
   // Handle wallet selection for adding billing statements
   const handleAddBillingStatement = (walletAddress: string) => {
@@ -56,6 +96,41 @@ export default function Editor() {
     setSelectedWallet(null);
   };
 
+  // Handle sync all wallets
+  const handleSyncAllWallets = () => {
+    if (!periodStart || !periodEnd) {
+      alert(
+        "Please set the period start and end dates before syncing wallet transactions.",
+      );
+      return;
+    }
+
+    setIsSyncingAll(true);
+
+    // Sync all wallets that have either billing statements or transactions
+    wallets?.forEach((wallet) => {
+      if (
+        wallet.wallet &&
+        ((wallet.billingStatements && wallet.billingStatements.length > 0) ||
+          wallet.accountTransactionsDocumentId)
+      ) {
+        syncWallet(
+          wallet.wallet,
+          (wallet.lineItems || []).filter((item) => item !== null),
+          (wallet.billingStatements || []).filter((id) => id !== null),
+          groups,
+          wallets,
+          wallet.accountTransactionsDocumentId,
+          periodStart,
+          periodEnd,
+          dispatch,
+        );
+      }
+    });
+
+    setIsSyncingAll(false);
+  };
+
   // Handle PDF export
   const handleExportPDF = async () => {
     try {
@@ -63,8 +138,8 @@ export default function Editor() {
         <ExpenseReportPDF
           periodStart={periodStart}
           periodEnd={periodEnd}
-          wallets={wallets || []}
-          groups={groups || []}
+          wallets={wallets}
+          groups={groups}
         />
       ).toBlob();
 
@@ -124,19 +199,48 @@ export default function Editor() {
                     <div className="flex items-center justify-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                       <div className="flex items-center gap-2">
                         <span className="font-medium">Period:</span>
-                        <DatePicker
-                          name="periodStart"
-                          value={periodStart}
-                          onChange={handlePeriodStartChange}
-                          className="bg-white"
-                        />
-                        <span>to</span>
-                        <DatePicker
-                          name="periodEnd"
-                          value={periodEnd}
-                          onChange={handlePeriodEndChange}
-                          className="bg-white"
-                        />
+                        {isEditingPeriod ? (
+                          <>
+                            <Select
+                              options={generateMonthOptions()}
+                              value={selectedPeriod}
+                              onChange={(value) =>
+                                setSelectedPeriod(value as string)
+                              }
+                              className="min-w-[200px]"
+                            />
+                            {isPeriodChanged && (
+                              <Button
+                                variant="default"
+                                onClick={() => {
+                                  setIsEditingPeriod(false);
+                                  setIsPeriodChanged(false);
+                                  setPeriodDisplayLabel(selectedPeriod);
+                                }}
+                                className="text-sm"
+                              >
+                                Set Period
+                              </Button>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {periodDisplayLabel}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              onClick={() => {
+                                setIsEditingPeriod(true);
+                                setIsPeriodChanged(false);
+                                setPeriodDisplayLabel(selectedPeriod);
+                              }}
+                              className="text-sm"
+                            >
+                              Change
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -154,16 +258,30 @@ export default function Editor() {
 
             {/* Wallets Section */}
             <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                   Wallets
                 </h2>
+                <Button
+                  variant="ghost"
+                  onClick={handleSyncAllWallets}
+                  disabled={isSyncingAll}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw
+                    size={16}
+                    className={isSyncingAll ? "animate-spin" : ""}
+                  />
+                  <span>{isSyncingAll ? "Syncing..." : "Sync All"}</span>
+                </Button>
               </div>
               <div className="p-6">
                 <WalletsTable
                   wallets={wallets || []}
                   groups={groups || []}
                   onAddBillingStatement={handleAddBillingStatement}
+                  periodStart={periodStart}
+                  periodEnd={periodEnd}
                   dispatch={dispatch}
                 />
               </div>
@@ -188,23 +306,6 @@ export default function Editor() {
                 </div>
               </section>
             )}
-
-            {/* Live PDF Preview */}
-            {/* <div className="mt-8 border border-gray-200 rounded-lg overflow-hidden">
-            <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-              <h3 className="text-lg font-semibold">PDF Preview</h3>
-            </div>
-            <div style={{ height: "1000px" }}>
-              <PDFViewer width="100%" height="100%">
-                <ExpenseReportPDF
-                  periodStart={periodStart}
-                  periodEnd={periodEnd}
-                  wallets={wallets}
-                  groups={groups}
-                />
-              </PDFViewer>
-            </div>
-          </div> */}
           </div>
         </div>
 
