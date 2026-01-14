@@ -80,7 +80,7 @@ export const snapshotReportTransactionsOperations: SnapshotReportTransactionsOpe
           const counterPartyAccount = state.snapshotAccounts.find(
             (acc) =>
               acc.accountAddress.toLowerCase() ===
-              tx.counterParty.toLowerCase(),
+              tx.counterParty?.toLowerCase(),
           );
 
           if (counterPartyAccount) {

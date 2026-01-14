@@ -14,6 +14,7 @@ import {
   setReportConfig,
   addSnapshotAccount,
   addTransaction,
+  setOwnerId,
 } from "../../document-models/snapshot-report/gen/creators.js";
 import { useSyncSnapshotAccount } from "./hooks/useSyncSnapshotAccount.js";
 import { formatBalance } from "./utils/balanceCalculations.js";
@@ -45,6 +46,7 @@ export default function Editor() {
     endDate,
     snapshotAccounts,
     accountsDocumentId,
+    ownerId,
   } = document.state.global;
 
   // Filter for Accounts documents
@@ -351,6 +353,21 @@ export default function Editor() {
                   onChange={(e) => handleSetReportName(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Q4 2024 Treasury Report"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Owner ID
+                </label>
+                <input
+                  type="text"
+                  value={ownerId || ""}
+                  onChange={(e) =>
+                    dispatch?.(setOwnerId({ ownerId: e.target.value }))
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter owner ID"
                 />
               </div>
 
