@@ -8,8 +8,8 @@ import { Invoice } from "./invoice/module.js";
 import { SnapshotReportEditor } from "./snapshot-report-editor/module.js";
 
 export const editors: EditorModule[] = [
-  AccountsEditor,
   AccountTransactionsEditor,
+  AccountsEditor,
   BillingStatement,
   ContributorBilling,
   ExpenseReport,

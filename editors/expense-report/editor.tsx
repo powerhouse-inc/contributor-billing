@@ -240,76 +240,75 @@ export default function Editor() {
   }
 
   return (
-    <div>
+    <div className="flex flex-col h-full w-full overflow-hidden">
       <DocumentToolbar document={document} onClose={handleClose} />
-      <div className="ph-default-styles flex flex-col h-full w-full bg-gray-50 dark:bg-gray-900">
+      <div className="ph-default-styles flex flex-col flex-1 min-h-0 w-full bg-gray-50 dark:bg-gray-900">
         {/* Main Content */}
-        <div className="flex-1 overflow-auto px-8 py-6">
-          <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex-1 overflow-auto px-3 sm:px-4 lg:px-6 py-4">
+          <div className="w-full max-w-none space-y-4 lg:space-y-6">
             {/* Header Section */}
             <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="px-6 py-6">
-                <div className="relative">
-                  <div className="text-center">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              <div className="px-4 sm:px-6 py-4 sm:py-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="text-center sm:text-left flex-1">
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4">
                       Expense Report
                     </h1>
-                    <div className="flex items-center justify-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">Period:</span>
-                        {isEditingPeriod ? (
-                          <>
-                            <Select
-                              options={monthOptions}
-                              value={selectedPeriod}
-                              onChange={(value) =>
-                                handlePeriodChange(value as string)
-                              }
-                              className="min-w-[200px]"
-                            />
-                            {isPeriodChanged && (
-                              <Button
-                                variant="default"
-                                onClick={handleConfirmPeriod}
-                                className="text-sm"
-                              >
-                                Set Period
-                              </Button>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <span className="font-semibold text-gray-900 dark:text-white">
-                              {periodDisplayLabel}
-                            </span>
+                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                      <span className="font-medium">Period:</span>
+                      {isEditingPeriod ? (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Select
+                            options={monthOptions}
+                            value={selectedPeriod}
+                            onChange={(value) =>
+                              handlePeriodChange(value as string)
+                            }
+                            className="min-w-[160px] sm:min-w-[200px]"
+                          />
+                          {isPeriodChanged && (
                             <Button
-                              variant="ghost"
-                              onClick={handleEditPeriod}
+                              variant="default"
+                              onClick={handleConfirmPeriod}
                               className="text-sm"
                             >
-                              Change
+                              Set Period
                             </Button>
-                          </>
-                        )}
-                      </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-900 dark:text-white">
+                            {periodDisplayLabel}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            onClick={handleEditPeriod}
+                            className="text-sm"
+                          >
+                            Change
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <Button
                     variant="ghost"
                     onClick={handleExportPDF}
-                    className="absolute top-0 right-0 flex items-center gap-2"
+                    className="flex items-center justify-center gap-2 shrink-0"
                   >
                     <Icon name="ExportPdf" size={18} />
-                    Export to PDF
+                    <span className="hidden sm:inline">Export to PDF</span>
+                    <span className="sm:hidden">PDF</span>
                   </Button>
                 </div>
               </div>
             </section>
 
             {/* Wallets Section */}
-            <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                   Wallets
                 </h2>
                 <Button
@@ -322,10 +321,12 @@ export default function Editor() {
                     size={16}
                     className={isSyncingAll ? "animate-spin" : ""}
                   />
-                  <span>{isSyncingAll ? "Syncing..." : "Sync All"}</span>
+                  <span className="hidden sm:inline">
+                    {isSyncingAll ? "Syncing..." : "Sync All"}
+                  </span>
                 </Button>
               </div>
-              <div className="p-6">
+              <div className="p-3 sm:p-4 lg:p-6 overflow-x-auto">
                 <WalletsTable
                   wallets={wallets}
                   groups={groups}
@@ -339,13 +340,13 @@ export default function Editor() {
 
             {/* Aggregated Expenses Section */}
             {wallets.length > 0 && (
-              <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                     {breakdownTitle}
                   </h2>
                 </div>
-                <div className="p-6">
+                <div className="p-3 sm:p-4 lg:p-6 overflow-x-auto">
                   <AggregatedExpensesTable
                     wallets={wallets}
                     groups={groups}

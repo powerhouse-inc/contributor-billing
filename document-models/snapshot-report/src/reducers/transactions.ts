@@ -14,7 +14,9 @@ export const snapshotReportTransactionsOperations: SnapshotReportTransactionsOpe
         (t) => t.id === action.input.id,
       );
       if (existingTransaction) {
-        throw new Error(`Transaction with ID ${action.input.id} already exists`);
+        throw new Error(
+          `Transaction with ID ${action.input.id} already exists`,
+        );
       }
 
       const newTransaction = {

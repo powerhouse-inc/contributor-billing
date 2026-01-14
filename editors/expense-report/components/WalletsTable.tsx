@@ -756,250 +756,280 @@ export function WalletsTable({
     <div className="space-y-4">
       {/* Wallets Table */}
       {wallets.length > 0 ? (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-800">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Wallet
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Monthly Budget
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Forecast
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  <div className="flex items-center justify-end gap-2">
-                    {needsSync && (
-                      <button
-                        onClick={() => {
-                          // Sync all outdated wallets
-                          [...tagChangedWallets, ...outdatedWallets].forEach(
-                            (walletAddress) => {
-                              const wallet = wallets.find(
-                                (w) => w.wallet === walletAddress,
-                              );
-                              if (wallet) {
-                                handleSyncWallet(wallet);
-                              }
-                            },
-                          );
-                        }}
-                        disabled={syncingWallet !== null}
-                        className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
-                          tagChangedWallets.length > 0
-                            ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 animate-pulse"
-                            : "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 animate-pulse"
-                        } disabled:opacity-50 disabled:cursor-not-allowed`}
-                        title={
-                          tagChangedWallets.length > 0
-                            ? "ALERT: Tags have changed in billing statements - sync all wallets!"
-                            : "Sync all wallets with latest billing statements"
-                        }
-                      >
-                        <RefreshCw
-                          size={16}
-                          className={
-                            syncingWallet !== null ? "animate-spin" : ""
+        <div className="overflow-x-auto -mx-3 sm:-mx-4 lg:-mx-6">
+          <div className="inline-block min-w-full align-middle px-3 sm:px-4 lg:px-6">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-auto">
+              <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                  <th className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[140px]">
+                    Wallet
+                  </th>
+                  <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                    <span className="hidden sm:inline">Monthly Budget</span>
+                    <span className="sm:hidden">Budget</span>
+                  </th>
+                  <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Forecast
+                  </th>
+                  <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <div className="flex items-center justify-end gap-2">
+                      {needsSync && (
+                        <button
+                          onClick={() => {
+                            // Sync all outdated wallets
+                            [...tagChangedWallets, ...outdatedWallets].forEach(
+                              (walletAddress) => {
+                                const wallet = wallets.find(
+                                  (w) => w.wallet === walletAddress,
+                                );
+                                if (wallet) {
+                                  handleSyncWallet(wallet);
+                                }
+                              },
+                            );
+                          }}
+                          disabled={syncingWallet !== null}
+                          className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
+                            tagChangedWallets.length > 0
+                              ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 animate-pulse"
+                              : "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 animate-pulse"
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
+                          title={
+                            tagChangedWallets.length > 0
+                              ? "ALERT: Tags have changed in billing statements - sync all wallets!"
+                              : "Sync all wallets with latest billing statements"
                           }
-                        />
-                      </button>
-                    )}
-                    <span>Actuals</span>
-                  </div>
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Difference
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Payments
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-              {wallets.map((wallet) => {
-                const totals = calculateWalletTotals(wallet);
-
-                return (
-                  <tr
-                    key={wallet.wallet}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {editingWallet === wallet.wallet ? (
-                        <div className="flex items-center gap-2">
-                          <TextInput
-                            value={editingName}
-                            onChange={(e) => setEditingName(e.target.value)}
-                            placeholder="Enter wallet name"
-                            className="flex-1"
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                handleSaveEditName(wallet.wallet || "");
-                              } else if (e.key === "Escape") {
-                                handleCancelEditName();
-                              }
-                            }}
-                            autoFocus
+                        >
+                          <RefreshCw
+                            size={16}
+                            className={
+                              syncingWallet !== null ? "animate-spin" : ""
+                            }
                           />
-                          <button
-                            onClick={() =>
-                              handleSaveEditName(wallet.wallet || "")
-                            }
-                            className="inline-flex items-center justify-center w-7 h-7 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md transition-colors"
-                            title="Save"
-                          >
-                            <Check size={14} />
-                          </button>
-                          <button
-                            onClick={handleCancelEditName}
-                            className="inline-flex items-center justify-center w-7 h-7 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded-md transition-colors"
-                            title="Cancel"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">
-                            {wallet.name || "Unnamed Wallet"}
-                          </span>
-                          <button
-                            onClick={() => handleStartEditName(wallet)}
-                            className="inline-flex items-center justify-center w-6 h-6 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-                            title="Edit name"
-                          >
-                            <Pencil size={12} />
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleCopyAddress(wallet.wallet || "")
-                            }
-                            className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 font-mono hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-                            title={`Copy address: ${wallet.wallet}`}
-                          >
-                            {formatAddress(wallet.wallet || "")}
-                            {copiedWallet === wallet.wallet ? (
-                              <CheckCheck
-                                size={12}
-                                className="text-green-500"
-                              />
-                            ) : (
-                              <Copy size={12} />
-                            )}
-                          </button>
-                          {/* <button className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 font-mono hover:bg-blue-100 dark:hover:bg-gray-700 rounded transition-colors">
+                        </button>
+                      )}
+                      <span>Actuals</span>
+                    </div>
+                  </th>
+                  <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <span className="hidden sm:inline">Difference</span>
+                    <span className="sm:hidden">Diff</span>
+                  </th>
+                  <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <span className="hidden sm:inline">Payments</span>
+                    <span className="sm:hidden">Pay</span>
+                  </th>
+                  <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                {wallets.map((wallet) => {
+                  const totals = calculateWalletTotals(wallet);
+
+                  return (
+                    <tr
+                      key={wallet.wallet}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    >
+                      <td className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        {editingWallet === wallet.wallet ? (
+                          <div className="flex items-center gap-2">
+                            <TextInput
+                              value={editingName}
+                              onChange={(e) => setEditingName(e.target.value)}
+                              placeholder="Enter wallet name"
+                              className="flex-1"
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  handleSaveEditName(wallet.wallet || "");
+                                } else if (e.key === "Escape") {
+                                  handleCancelEditName();
+                                }
+                              }}
+                              autoFocus
+                            />
+                            <button
+                              onClick={() =>
+                                handleSaveEditName(wallet.wallet || "")
+                              }
+                              className="inline-flex items-center justify-center w-7 h-7 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md transition-colors"
+                              title="Save"
+                            >
+                              <Check size={14} />
+                            </button>
+                            <button
+                              onClick={handleCancelEditName}
+                              className="inline-flex items-center justify-center w-7 h-7 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded-md transition-colors"
+                              title="Cancel"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                              {wallet.name || "Unnamed Wallet"}
+                            </span>
+                            <button
+                              onClick={() => handleStartEditName(wallet)}
+                              className="inline-flex items-center justify-center w-6 h-6 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                              title="Edit name"
+                            >
+                              <Pencil size={12} />
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleCopyAddress(wallet.wallet || "")
+                              }
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 font-mono hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                              title={`Copy address: ${wallet.wallet}`}
+                            >
+                              {formatAddress(wallet.wallet || "")}
+                              {copiedWallet === wallet.wallet ? (
+                                <CheckCheck
+                                  size={12}
+                                  className="text-green-500"
+                                />
+                              ) : (
+                                <Copy size={12} />
+                              )}
+                            </button>
+                            {/* <button className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 font-mono hover:bg-blue-100 dark:hover:bg-gray-700 rounded transition-colors">
                             View Txns
                           </button> */}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                      {formatCurrency(totals.budget)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
-                      {formatCurrency(totals.forecast)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                      {totals.actuals === 0 &&
-                      (!wallet.billingStatements ||
-                        wallet.billingStatements.length === 0) ? (
-                        // When actuals is 0 and no billing statements, only show the Add Bills button
-                        <div className="flex items-center justify-end">
-                          <button
-                            onClick={() =>
-                              onAddBillingStatement(wallet.wallet || "")
-                            }
-                            className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors"
-                            title="Add billing statement for this wallet"
-                          >
-                            <Plus size={16} />
-                            <span>Add Bills</span>
-                          </button>
-                        </div>
-                      ) : (
-                        // When actuals is not 0 or has billing statements, show compact buttons + value horizontally
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() =>
-                              onAddBillingStatement(wallet.wallet || "")
-                            }
-                            className="inline-flex items-center justify-center w-8 h-8 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors"
-                            title="Add billing statement for this wallet"
-                          >
-                            <Plus size={16} />
-                          </button>
-                          {((wallet.billingStatements &&
-                            wallet.billingStatements.length > 0) ||
-                            wallet.accountTransactionsDocumentId) && (
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-2 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                        {formatCurrency(totals.budget)}
+                      </td>
+                      <td className="px-2 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                        {formatCurrency(totals.forecast)}
+                      </td>
+                      <td className="px-2 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm">
+                        {totals.actuals === 0 &&
+                        (!wallet.billingStatements ||
+                          wallet.billingStatements.length === 0) ? (
+                          // When actuals is 0 and no billing statements, only show the Add Bills button
+                          <div className="flex items-center justify-end">
                             <button
-                              onClick={() => handleSyncWallet(wallet)}
-                              disabled={syncingWallet === wallet.wallet}
-                              className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
-                                tagChangedWallets.includes(wallet.wallet || "")
-                                  ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 animate-pulse"
-                                  : outdatedWallets.includes(
-                                        wallet.wallet || "",
-                                      )
-                                    ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 animate-pulse"
-                                    : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
-                              } disabled:opacity-50 disabled:cursor-not-allowed`}
-                              title={
-                                tagChangedWallets.includes(wallet.wallet || "")
-                                  ? "ALERT: Tags have changed - sync required!"
-                                  : outdatedWallets.includes(
-                                        wallet.wallet || "",
-                                      )
-                                    ? "Sync needed - billing statements updated"
-                                    : wallet.accountTransactionsDocumentId
-                                      ? "Sync wallet with billing statements and transactions"
-                                      : "Sync with latest billing statements"
+                              onClick={() =>
+                                onAddBillingStatement(wallet.wallet || "")
                               }
+                              className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors"
+                              title="Add billing statement for this wallet"
                             >
-                              <RefreshCw
-                                size={16}
-                                className={
-                                  syncingWallet === wallet.wallet
-                                    ? "animate-spin"
-                                    : ""
-                                }
-                              />
+                              <Plus size={16} />
+                              <span>Add Bills</span>
                             </button>
-                          )}
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">
-                            {formatCurrency(totals.actuals)}
-                          </span>
-                        </div>
-                      )}
-                    </td>
-                    <td
-                      className={`px-6 py-4 whitespace-nowrap text-right text-sm font-medium ${
-                        totals.difference > 0
-                          ? "text-red-600 dark:text-red-400"
-                          : totals.difference < 0
-                            ? "text-green-600 dark:text-green-400"
-                            : "text-gray-900 dark:text-white"
-                      }`}
-                    >
-                      {formatCurrency(totals.difference)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                      {wallet.accountTransactionsDocumentId ? (
-                        // Show clickable document snippet card when transactions document is linked
-                        <button
-                          onClick={() =>
-                            setSelectedNode(
-                              wallet.accountTransactionsDocumentId!,
-                            )
-                          }
-                          className="w-full bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-2 transition-colors text-left"
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
+                          </div>
+                        ) : (
+                          // When actuals is not 0 or has billing statements, show compact buttons + value horizontally
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() =>
+                                onAddBillingStatement(wallet.wallet || "")
+                              }
+                              className="inline-flex items-center justify-center w-8 h-8 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors"
+                              title="Add billing statement for this wallet"
+                            >
+                              <Plus size={16} />
+                            </button>
+                            {((wallet.billingStatements &&
+                              wallet.billingStatements.length > 0) ||
+                              wallet.accountTransactionsDocumentId) && (
+                              <button
+                                onClick={() => handleSyncWallet(wallet)}
+                                disabled={syncingWallet === wallet.wallet}
+                                className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
+                                  tagChangedWallets.includes(
+                                    wallet.wallet || "",
+                                  )
+                                    ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 animate-pulse"
+                                    : outdatedWallets.includes(
+                                          wallet.wallet || "",
+                                        )
+                                      ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 animate-pulse"
+                                      : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                title={
+                                  tagChangedWallets.includes(
+                                    wallet.wallet || "",
+                                  )
+                                    ? "ALERT: Tags have changed - sync required!"
+                                    : outdatedWallets.includes(
+                                          wallet.wallet || "",
+                                        )
+                                      ? "Sync needed - billing statements updated"
+                                      : wallet.accountTransactionsDocumentId
+                                        ? "Sync wallet with billing statements and transactions"
+                                        : "Sync with latest billing statements"
+                                }
+                              >
+                                <RefreshCw
+                                  size={16}
+                                  className={
+                                    syncingWallet === wallet.wallet
+                                      ? "animate-spin"
+                                      : ""
+                                  }
+                                />
+                              </button>
+                            )}
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                              {formatCurrency(totals.actuals)}
+                            </span>
+                          </div>
+                        )}
+                      </td>
+                      <td
+                        className={`px-2 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm font-medium ${
+                          totals.difference > 0
+                            ? "text-red-600 dark:text-red-400"
+                            : totals.difference < 0
+                              ? "text-green-600 dark:text-green-400"
+                              : "text-gray-900 dark:text-white"
+                        }`}
+                      >
+                        {formatCurrency(totals.difference)}
+                      </td>
+                      <td className="px-2 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm">
+                        {wallet.accountTransactionsDocumentId ? (
+                          // Show clickable document snippet card when transactions document is linked
+                          <button
+                            onClick={() =>
+                              setSelectedNode(
+                                wallet.accountTransactionsDocumentId!,
+                              )
+                            }
+                            className="w-full bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-2 transition-colors text-left"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <svg
+                                  className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                  />
+                                </svg>
+                                <div className="min-w-0">
+                                  <span className="text-xs font-medium text-green-900 dark:text-green-100 block">
+                                    Transactions
+                                  </span>
+                                  <span className="text-xs text-green-600 dark:text-green-400">
+                                    {formatCurrency(totals.payments)}
+                                  </span>
+                                </div>
+                              </div>
                               <svg
                                 className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0"
                                 fill="none"
@@ -1010,68 +1040,48 @@ export function WalletsTable({
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
                                   strokeWidth={2}
-                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                  d="M9 5l7 7-7 7"
                                 />
                               </svg>
-                              <div className="min-w-0">
-                                <span className="text-xs font-medium text-green-900 dark:text-green-100 block">
-                                  Transactions
-                                </span>
-                                <span className="text-xs text-green-600 dark:text-green-400">
-                                  {formatCurrency(totals.payments)}
-                                </span>
-                              </div>
                             </div>
-                            <svg
-                              className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                          </button>
+                        ) : (
+                          // Show Add Txns button when no transactions document is linked
+                          <div className="flex items-center justify-end">
+                            <button
+                              onClick={() => handleAddTransactions(wallet)}
+                              className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-md transition-colors"
+                              title="Add transactions document for this wallet"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 5l7 7-7 7"
-                              />
-                            </svg>
+                              <Plus size={16} />
+                              <span>Add Txns</span>
+                            </button>
                           </div>
-                        </button>
-                      ) : (
-                        // Show Add Txns button when no transactions document is linked
-                        <div className="flex items-center justify-end">
+                        )}
+                      </td>
+                      <td className="px-2 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm">
+                        <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => handleAddTransactions(wallet)}
-                            className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-md transition-colors"
-                            title="Add transactions document for this wallet"
+                            onClick={() =>
+                              handleRemoveWallet(wallet.wallet || "")
+                            }
+                            className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                            title="Remove wallet"
                           >
-                            <Plus size={16} />
-                            <span>Add Txns</span>
+                            <Trash2 size={14} className="sm:hidden" />
+                            <Trash2 size={16} className="hidden sm:block" />
                           </button>
                         </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() =>
-                            handleRemoveWallet(wallet.wallet || "")
-                          }
-                          className="inline-flex items-center justify-center w-8 h-8 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
-                          title="Remove wallet"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-8 sm:py-12 text-gray-500 dark:text-gray-400">
           <p className="text-sm">
             No wallets added yet. Add a wallet to get started.
           </p>
@@ -1079,7 +1089,7 @@ export function WalletsTable({
       )}
 
       {/* Add Wallet Form */}
-      <div className="flex items-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex flex-col sm:flex-row sm:items-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex-1 relative">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Select Account

@@ -611,10 +611,7 @@ export function LineItemsTable({
               <Tag className="w-4 h-4" />
               <span>Manage Tags</span>
             </button>
-            <RWAButton
-              disabled={isAddingNew}
-              onClick={handleAddClick}
-            >
+            <RWAButton disabled={isAddingNew} onClick={handleAddClick}>
               Add Line Item
             </RWAButton>
           </div>
@@ -801,7 +798,6 @@ export function LineItemsTable({
           </div>
         )}
       </div>
-
     </div>
   );
 }

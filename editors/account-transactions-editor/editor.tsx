@@ -289,7 +289,13 @@ export function Editor() {
               (document.state.global.transactions || []).length > 0
             }
             onSetAccount={(address, name) => {
-              dispatch(setAccount({ id: generateId(), account: address || "", name: name || "" }));
+              dispatch(
+                setAccount({
+                  id: generateId(),
+                  account: address || "",
+                  name: name || "",
+                }),
+              );
             }}
           />
 

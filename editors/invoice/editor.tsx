@@ -674,9 +674,9 @@ export default function Editor() {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full min-h-full flex flex-col">
       <DocumentToolbar document={doc} onClose={handleClose} />
-      <div className="max-w-7xl mx-auto mt-4 px-4">
+      <div className="flex-1 max-w-7xl mx-auto w-full mt-4 px-4 pb-8">
         <ToastContainer
           position="bottom-right"
           autoClose={5000}
@@ -841,7 +841,10 @@ export default function Editor() {
         {/* Main Content Grid - Responsive: mobile stacks, tablet+ side-by-side */}
         <div
           className="grid gap-6"
-          style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))' }}
+          style={{
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(min(100%, 400px), 1fr))",
+          }}
         >
           {/* Issuer Section */}
           <div className="border border-gray-200 rounded-lg p-4 min-w-0">
@@ -964,7 +967,10 @@ export default function Editor() {
         {/* Totals Section */}
         <div
           className="grid gap-4"
-          style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))' }}
+          style={{
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
+          }}
         >
           <div>
             <div className="">

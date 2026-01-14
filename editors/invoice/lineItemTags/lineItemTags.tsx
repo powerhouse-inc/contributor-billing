@@ -219,7 +219,6 @@ export function LineItemTagsTable({
           />
         </div>
       </div>
-
     </div>
   );
 }

@@ -10,12 +10,12 @@ import {
 import { toast } from "@powerhousedao/design-system/connect";
 import type { PHDocument } from "document-model";
 import type { FileNode } from "document-drive";
-import { actions as invoiceActions } from "../../../document-models/invoice/index.js";
-import type { InvoiceTag } from "../../../document-models/invoice/gen/types.js";
-import { actions as billingStatementActions } from "../../../document-models/billing-statement/index.js";
-import { mapTags } from "../../billing-statement/lineItemTags/tagMapping.js";
-import { exportInvoicesToXeroCSV } from "../../../scripts/contributor-billing/createXeroCsv.js";
-import { exportExpenseReportCSV } from "../../../scripts/contributor-billing/createExpenseReportCsv.js";
+import { actions as invoiceActions } from "../../../../document-models/invoice/index.js";
+import type { InvoiceTag } from "../../../../document-models/invoice/gen/types.js";
+import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
+import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
+import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
+import { exportExpenseReportCSV } from "../../../../scripts/contributor-billing/createExpenseReportCsv.js";
 import { HeaderControls } from "./HeaderControls.js";
 import { InvoiceTableSection } from "./InvoiceTableSection.js";
 import { InvoiceTableRow, type InvoiceRowData } from "./InvoiceTableRow.js";

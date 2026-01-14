@@ -6,6 +6,6 @@ export const editorConfig: PHDriveEditorConfig = {
   allowedDocumentTypes: [
     "powerhouse/invoice",
     "powerhouse/billing-statement",
-    "powerhouse/expense-report"
+    "powerhouse/expense-report",
   ],
 };
