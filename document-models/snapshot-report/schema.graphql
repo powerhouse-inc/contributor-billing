@@ -16,6 +16,7 @@ scalar Amount_Crypto
 scalar Amount
 scalar Upload
 type SnapshotReportState {
+  ownerId: PHID
   accountsDocumentId: PHID
   startDate: DateTime
   endDate: DateTime
@@ -102,6 +103,7 @@ input SetReportConfigInput {
   startDate: DateTime
   endDate: DateTime
   accountsDocumentId: PHID
+  ownerId: PHID
 }
 
 input SetAccountsDocumentInput {
@@ -111,6 +113,10 @@ input SetAccountsDocumentInput {
 input SetPeriodInput {
   startDate: DateTime!
   endDate: DateTime!
+}
+
+input SetOwnerIdInput {
+  ownerId: PHID!
 }
 
 # accounts
@@ -184,4 +190,8 @@ input RemoveTransactionInput {
 input UpdateTransactionFlowTypeInput {
   id: OID!
   flowType: TransactionFlowTypeInput!
+}
+
+input RecalculateFlowTypesInput {
+  _: String
 }

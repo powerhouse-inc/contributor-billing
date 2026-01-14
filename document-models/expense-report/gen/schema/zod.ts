@@ -16,6 +16,7 @@ import type {
   RemoveLineItemInput,
   RemoveWalletInput,
   SetGroupTotalsInput,
+  SetOwnerIdInput,
   SetPeriodEndInput,
   SetPeriodStartInput,
   UpdateLineItemGroupInput,
@@ -86,6 +87,7 @@ export function ExpenseReportStateSchema(): z.ZodObject<
   return z.object({
     __typename: z.literal("ExpenseReportState").optional(),
     groups: z.array(LineItemGroupSchema()),
+    ownerId: z.string().nullable(),
     periodEnd: z.string().datetime().nullable(),
     periodStart: z.string().datetime().nullable(),
     wallets: z.array(WalletSchema()),
@@ -210,6 +212,14 @@ export function SetGroupTotalsInputSchema(): z.ZodObject<
     wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
       message: "Invalid Ethereum address format",
     }),
+  });
+}
+
+export function SetOwnerIdInputSchema(): z.ZodObject<
+  Properties<SetOwnerIdInput>
+> {
+  return z.object({
+    ownerId: z.string(),
   });
 }
 

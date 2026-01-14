@@ -35,6 +35,11 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: SnapshotReport_SetPeriodInput
     ): Int
+    SnapshotReport_setOwnerId(
+      driveId: String
+      docId: PHID
+      input: SnapshotReport_SetOwnerIdInput
+    ): Int
     SnapshotReport_addSnapshotAccount(
       driveId: String
       docId: PHID
@@ -85,6 +90,11 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: SnapshotReport_UpdateTransactionFlowTypeInput
     ): Int
+    SnapshotReport_recalculateFlowTypes(
+      driveId: String
+      docId: PHID
+      input: SnapshotReport_RecalculateFlowTypesInput
+    ): Int
   }
 
   """
@@ -95,6 +105,7 @@ export const schema: DocumentNode = gql`
     startDate: DateTime
     endDate: DateTime
     accountsDocumentId: PHID
+    ownerId: PHID
   }
   input SnapshotReport_SetAccountsDocumentInput {
     accountsDocumentId: PHID!
@@ -102,6 +113,9 @@ export const schema: DocumentNode = gql`
   input SnapshotReport_SetPeriodInput {
     startDate: DateTime!
     endDate: DateTime!
+  }
+  input SnapshotReport_SetOwnerIdInput {
+    ownerId: PHID!
   }
 
   """
@@ -171,5 +185,8 @@ export const schema: DocumentNode = gql`
   input SnapshotReport_UpdateTransactionFlowTypeInput {
     id: OID!
     flowType: SnapshotReport_TransactionFlowTypeInput!
+  }
+  input SnapshotReport_RecalculateFlowTypesInput {
+    _: String
   }
 `;

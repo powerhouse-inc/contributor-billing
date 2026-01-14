@@ -71,4 +71,52 @@ export const snapshotReportTransactionsOperations: SnapshotReportTransactionsOpe
 
       transaction.flowType = action.input.flowType;
     },
+    recalculateFlowTypesOperation(state, action) {
+      for (const account of state.snapshotAccounts) {
+        for (const tx of account.transactions) {
+          if (!tx.counterParty) continue;
+
+          // Find counter-party account
+          const counterPartyAccount = state.snapshotAccounts.find(
+            (acc) =>
+              acc.accountAddress.toLowerCase() ===
+              tx.counterParty.toLowerCase(),
+          );
+
+          if (counterPartyAccount) {
+            // Update counter-party link if missing
+            if (!tx.counterPartyAccountId) {
+              tx.counterPartyAccountId = counterPartyAccount.id;
+            }
+
+            // Recalculate flow type based on account types
+            const fromType =
+              tx.direction === "OUTFLOW"
+                ? account.type
+                : counterPartyAccount.type;
+            const toType =
+              tx.direction === "OUTFLOW"
+                ? counterPartyAccount.type
+                : account.type;
+
+            // Flow categorization rules
+            if (fromType === "Source") {
+              tx.flowType = "TopUp";
+            } else if (toType === "Source") {
+              tx.flowType = "Return";
+            } else if (toType === "Destination") {
+              tx.flowType = "TopUp";
+            } else if (fromType === "External") {
+              tx.flowType = "External";
+            } else if (fromType === "Internal" && toType === "Internal") {
+              tx.flowType = "Internal";
+            } else if (fromType === "Internal" && toType === "External") {
+              tx.flowType = "External";
+            } else {
+              tx.flowType = "External";
+            }
+          }
+        }
+      }
+    },
   };

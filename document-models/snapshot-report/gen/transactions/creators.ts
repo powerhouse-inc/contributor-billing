@@ -3,16 +3,19 @@ import {
   AddTransactionInputSchema,
   RemoveTransactionInputSchema,
   UpdateTransactionFlowTypeInputSchema,
+  RecalculateFlowTypesInputSchema,
 } from "../schema/zod.js";
 import type {
   AddTransactionInput,
   RemoveTransactionInput,
   UpdateTransactionFlowTypeInput,
+  RecalculateFlowTypesInput,
 } from "../types.js";
 import type {
   AddTransactionAction,
   RemoveTransactionAction,
   UpdateTransactionFlowTypeAction,
+  RecalculateFlowTypesAction,
 } from "./actions.js";
 
 export const addTransaction = (input: AddTransactionInput) =>
@@ -41,5 +44,14 @@ export const updateTransactionFlowType = (
     { ...input },
     undefined,
     UpdateTransactionFlowTypeInputSchema,
+    "global",
+  );
+
+export const recalculateFlowTypes = (input: RecalculateFlowTypesInput) =>
+  createAction<RecalculateFlowTypesAction>(
+    "RECALCULATE_FLOW_TYPES",
+    { ...input },
+    undefined,
+    RecalculateFlowTypesInputSchema,
     "global",
   );

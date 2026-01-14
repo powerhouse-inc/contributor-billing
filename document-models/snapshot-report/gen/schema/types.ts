@@ -88,6 +88,10 @@ export type AddTransactionInput = {
   txHash: Scalars["String"]["input"];
 };
 
+export type RecalculateFlowTypesInput = {
+  _?: InputMaybe<Scalars["String"]["input"]>;
+};
+
 export type RemoveEndingBalanceInput = {
   accountId: Scalars["OID"]["input"];
   balanceId: Scalars["OID"]["input"];
@@ -117,6 +121,10 @@ export type SetEndingBalanceInput = {
   token: Scalars["Currency"]["input"];
 };
 
+export type SetOwnerIdInput = {
+  ownerId: Scalars["PHID"]["input"];
+};
+
 export type SetPeriodInput = {
   endDate: Scalars["DateTime"]["input"];
   startDate: Scalars["DateTime"]["input"];
@@ -125,6 +133,7 @@ export type SetPeriodInput = {
 export type SetReportConfigInput = {
   accountsDocumentId?: InputMaybe<Scalars["PHID"]["input"]>;
   endDate?: InputMaybe<Scalars["DateTime"]["input"]>;
+  ownerId?: InputMaybe<Scalars["PHID"]["input"]>;
   reportName?: InputMaybe<Scalars["String"]["input"]>;
   startDate?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
@@ -151,6 +160,7 @@ export type SnapshotAccount = {
 export type SnapshotReportState = {
   accountsDocumentId: Maybe<Scalars["PHID"]["output"]>;
   endDate: Maybe<Scalars["DateTime"]["output"]>;
+  ownerId: Maybe<Scalars["PHID"]["output"]>;
   reportName: Maybe<Scalars["String"]["output"]>;
   snapshotAccounts: Array<SnapshotAccount>;
   startDate: Maybe<Scalars["DateTime"]["output"]>;

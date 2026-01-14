@@ -4,12 +4,14 @@ import type {
   AccountTypeInput,
   AddSnapshotAccountInput,
   AddTransactionInput,
+  RecalculateFlowTypesInput,
   RemoveEndingBalanceInput,
   RemoveSnapshotAccountInput,
   RemoveStartingBalanceInput,
   RemoveTransactionInput,
   SetAccountsDocumentInput,
   SetEndingBalanceInput,
+  SetOwnerIdInput,
   SetPeriodInput,
   SetReportConfigInput,
   SetStartingBalanceInput,
@@ -107,6 +109,14 @@ export function AddTransactionInputSchema(): z.ZodObject<
   });
 }
 
+export function RecalculateFlowTypesInputSchema(): z.ZodObject<
+  Properties<RecalculateFlowTypesInput>
+> {
+  return z.object({
+    _: z.string().nullish(),
+  });
+}
+
 export function RemoveEndingBalanceInputSchema(): z.ZodObject<
   Properties<RemoveEndingBalanceInput>
 > {
@@ -160,6 +170,14 @@ export function SetEndingBalanceInputSchema(): z.ZodObject<
   });
 }
 
+export function SetOwnerIdInputSchema(): z.ZodObject<
+  Properties<SetOwnerIdInput>
+> {
+  return z.object({
+    ownerId: z.string(),
+  });
+}
+
 export function SetPeriodInputSchema(): z.ZodObject<
   Properties<SetPeriodInput>
 > {
@@ -175,6 +193,7 @@ export function SetReportConfigInputSchema(): z.ZodObject<
   return z.object({
     accountsDocumentId: z.string().nullish(),
     endDate: z.string().datetime().nullish(),
+    ownerId: z.string().nullish(),
     reportName: z.string().nullish(),
     startDate: z.string().datetime().nullish(),
   });
@@ -215,6 +234,7 @@ export function SnapshotReportStateSchema(): z.ZodObject<
     __typename: z.literal("SnapshotReportState").optional(),
     accountsDocumentId: z.string().nullable(),
     endDate: z.string().datetime().nullable(),
+    ownerId: z.string().nullable(),
     reportName: z.string().nullable(),
     snapshotAccounts: z.array(SnapshotAccountSchema()),
     startDate: z.string().datetime().nullable(),

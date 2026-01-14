@@ -3,6 +3,7 @@ import {
   type SetReportConfigAction,
   type SetAccountsDocumentAction,
   type SetPeriodAction,
+  type SetOwnerIdAction,
 } from "./actions.js";
 import { type SnapshotReportState } from "../types.js";
 
@@ -20,6 +21,11 @@ export interface SnapshotReportConfigurationOperations {
   setPeriodOperation: (
     state: SnapshotReportState,
     action: SetPeriodAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  setOwnerIdOperation: (
+    state: SnapshotReportState,
+    action: SetOwnerIdAction,
     dispatch?: SignalDispatch,
   ) => void;
 }
