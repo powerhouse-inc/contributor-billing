@@ -14,6 +14,7 @@ import {
 } from "@powerhousedao/reactor-browser";
 import { useSyncWallet } from "./hooks/useSyncWallet.js";
 import { RefreshCw } from "lucide-react";
+import { setOwnerId } from "../../document-models/expense-report/gen/wallet/creators.js";
 
 // Helper function to generate month options from January 2025 to current month
 function generateMonthOptions() {
@@ -72,7 +73,7 @@ export default function Editor() {
     return <div>Loading...</div>;
   }
 
-  const { wallets, groups } = document.state.global;
+  const { wallets, groups, ownerId } = document.state.global;
   const { syncWallet } = useSyncWallet();
 
   // Derive current period from document state
@@ -255,6 +256,18 @@ export default function Editor() {
                       Expense Report
                     </h1>
                     <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">Owner ID:</span>
+                        <input
+                          type="text"
+                          value={ownerId || ""}
+                          onChange={(e) =>
+                            dispatch(setOwnerId({ ownerId: e.target.value }))
+                          }
+                          placeholder="Enter owner ID"
+                          className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
                       <span className="font-medium">Period:</span>
                       {isEditingPeriod ? (
                         <div className="flex flex-wrap items-center gap-2">

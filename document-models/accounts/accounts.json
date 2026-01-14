@@ -12,53 +12,53 @@
             "changeLog": [],
             "modules": [
                 {
-                    "description": "",
                     "id": "e89202e8-4f6e-4ca3-a326-a5846e909d83",
                     "name": "accounts",
+                    "description": "",
                     "operations": [
                         {
-                            "description": "",
-                            "errors": [],
-                            "examples": [],
                             "id": "bd25e778-a5d2-4d11-aec2-189370b9c5e1",
                             "name": "ADD_ACCOUNT",
-                            "reducer": "",
-                            "schema": "input AddAccountInput {\n  id: OID!\n  account: String!\n  name: String!\n  budgetPath: String\n  accountTransactionsId: PHID\n  chain: [String!]\n  type: AccountTypeInput!\n  owners: [String!]\n  KycAmlStatus: KycAmlStatusTypeInput\n}",
-                            "scope": "global",
-                            "template": ""
-                        },
-                        {
                             "description": "",
+                            "schema": "input AddAccountInput {\n  id: OID!\n  account: String!\n  name: String!\n  budgetPath: String\n  accountTransactionsId: PHID\n  chain: [String!]\n  type: AccountTypeInput!\n  owners: [String!]\n  KycAmlStatus: KycAmlStatusTypeInput\n}",
+                            "template": "",
+                            "reducer": "",
                             "errors": [],
                             "examples": [],
+                            "scope": "global"
+                        },
+                        {
                             "id": "0379b6aa-3494-4ec5-8813-11e4b3d9b6b3",
                             "name": "UPDATE_ACCOUNT",
-                            "reducer": "",
-                            "schema": "input UpdateAccountInput {\n    id: OID!\n    account: String\n    name: String\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: AccountTypeInput\n    owners: [String!]\n    KycAmlStatus: KycAmlStatusTypeInput\n}",
-                            "scope": "global",
-                            "template": ""
-                        },
-                        {
                             "description": "",
+                            "schema": "input UpdateAccountInput {\n    id: OID!\n    account: String\n    name: String\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: AccountTypeInput\n    owners: [String!]\n    KycAmlStatus: KycAmlStatusTypeInput\n}",
+                            "template": "",
+                            "reducer": "",
                             "errors": [],
                             "examples": [],
+                            "scope": "global"
+                        },
+                        {
                             "id": "d5de4a42-c20d-47a4-986e-1689eb174592",
                             "name": "DELETE_ACCOUNT",
-                            "reducer": "",
-                            "schema": "input DeleteAccountInput {\n    id: OID!\n}",
-                            "scope": "global",
-                            "template": ""
-                        },
-                        {
                             "description": "",
+                            "schema": "input DeleteAccountInput {\n    id: OID!\n}",
+                            "template": "",
+                            "reducer": "",
                             "errors": [],
                             "examples": [],
+                            "scope": "global"
+                        },
+                        {
                             "id": "884e8797-1f49-482e-af22-51854356a1aa",
                             "name": "UPDATE_KYC_STATUS",
-                            "reducer": "",
+                            "description": "",
                             "schema": "input UpdateKycStatusInput {\n    id: OID!\n    KycAmlStatus: KycAmlStatusTypeInput!\n}",
-                            "scope": "global",
-                            "template": ""
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
                         }
                     ]
                 }

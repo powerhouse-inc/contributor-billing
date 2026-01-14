@@ -40,7 +40,7 @@
                             "examples": [],
                             "id": "add-transaction-op-id",
                             "name": "ADD_TRANSACTION",
-                            "reducer": "",
+                            "reducer": "// Check for duplicate uniqueId to prevent duplicate transactions\nif (action.input.uniqueId) {\n  const existingTransaction = state.transactions.find(\n    (tx) => tx.details.uniqueId === action.input.uniqueId,\n  );\n  if (existingTransaction) {\n    throw new Error(\n      `Transaction with uniqueId ${action.input.uniqueId} already exists`,\n    );\n  }\n}\n\nstate.transactions.push({\n  id: action.input.id,\n  counterParty: action.input.counterParty || null,\n  amount: action.input.amount,\n  datetime: action.input.datetime,\n  details: {\n    txHash: action.input.txHash,\n    token: action.input.token,\n    blockNumber: action.input.blockNumber || null,\n    uniqueId: action.input.uniqueId || null,\n  },\n  budget: action.input.budget || null,\n  accountingPeriod: action.input.accountingPeriod,\n  direction: action.input.direction,\n});",
                             "schema": "input AddTransactionInput {\n    id: ID!\n    counterParty: EthereumAddress\n    amount: Amount_Currency!\n    datetime: DateTime!\n    txHash: String!\n    token: Currency!\n    blockNumber: Int\n    uniqueId: String\n    budget: OID\n    accountingPeriod: String!\n    direction: TransactionDirectionInput!\n}",
                             "scope": "global",
                             "template": ""

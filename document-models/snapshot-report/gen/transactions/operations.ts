@@ -3,6 +3,7 @@ import {
   type AddTransactionAction,
   type RemoveTransactionAction,
   type UpdateTransactionFlowTypeAction,
+  type RecalculateFlowTypesAction,
 } from "./actions.js";
 import { type SnapshotReportState } from "../types.js";
 
@@ -20,6 +21,11 @@ export interface SnapshotReportTransactionsOperations {
   updateTransactionFlowTypeOperation: (
     state: SnapshotReportState,
     action: UpdateTransactionFlowTypeAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  recalculateFlowTypesOperation: (
+    state: SnapshotReportState,
+    action: RecalculateFlowTypesAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

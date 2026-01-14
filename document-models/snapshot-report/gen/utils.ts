@@ -21,6 +21,7 @@ import {
 } from "./document-schema.js";
 
 export const initialGlobalState: SnapshotReportGlobalState = {
+  ownerId: null,
   accountsDocumentId: null,
   startDate: null,
   endDate: null,
@@ -30,7 +31,7 @@ export const initialGlobalState: SnapshotReportGlobalState = {
 export const initialLocalState: SnapshotReportLocalState = {};
 
 export const utils: DocumentModelUtils<SnapshotReportPHState> = {
-  fileExtension: "phsr",
+  fileExtension: "",
   createState(state) {
     return {
       ...defaultBaseState(),

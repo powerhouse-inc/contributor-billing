@@ -95,6 +95,11 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: ExpenseReport_UpdateWalletInput
     ): Int
+    ExpenseReport_setOwnerId(
+      driveId: String
+      docId: PHID
+      input: ExpenseReport_SetOwnerIdInput
+    ): Int
   }
 
   """
@@ -185,5 +190,8 @@ export const schema: DocumentNode = gql`
     name: String
     accountDocumentId: PHID
     accountTransactionsDocumentId: PHID
+  }
+  input ExpenseReport_SetOwnerIdInput {
+    ownerId: PHID!
   }
 `;

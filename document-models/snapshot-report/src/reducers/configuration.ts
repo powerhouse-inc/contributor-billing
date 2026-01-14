@@ -32,4 +32,7 @@ export const snapshotReportConfigurationOperations: SnapshotReportConfigurationO
       state.startDate = action.input.startDate;
       state.endDate = action.input.endDate;
     },
+    setOwnerIdOperation(state, action) {
+      state.ownerId = action.input.ownerId;
+    },
   };

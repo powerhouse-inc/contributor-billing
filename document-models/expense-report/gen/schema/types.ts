@@ -79,6 +79,7 @@ export type AddWalletInput = {
 
 export type ExpenseReportState = {
   groups: Array<LineItemGroup>;
+  ownerId: Maybe<Scalars["PHID"]["output"]>;
   periodEnd: Maybe<Scalars["DateTime"]["output"]>;
   periodStart: Maybe<Scalars["DateTime"]["output"]>;
   wallets: Array<Wallet>;
@@ -154,6 +155,10 @@ export type RemoveWalletInput = {
 export type SetGroupTotalsInput = {
   groupTotals: GroupTotalsInput;
   wallet: Scalars["EthereumAddress"]["input"];
+};
+
+export type SetOwnerIdInput = {
+  ownerId: Scalars["PHID"]["input"];
 };
 
 export type SetPeriodEndInput = {

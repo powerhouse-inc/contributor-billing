@@ -14,6 +14,7 @@ import {
   SetReportConfigInputSchema,
   SetAccountsDocumentInputSchema,
   SetPeriodInputSchema,
+  SetOwnerIdInputSchema,
   AddSnapshotAccountInputSchema,
   UpdateSnapshotAccountTypeInputSchema,
   RemoveSnapshotAccountInputSchema,
@@ -24,6 +25,7 @@ import {
   AddTransactionInputSchema,
   RemoveTransactionInputSchema,
   UpdateTransactionFlowTypeInputSchema,
+  RecalculateFlowTypesInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<SnapshotReportPHState> = (
@@ -57,6 +59,15 @@ const stateReducer: StateReducer<SnapshotReportPHState> = (
     case "SET_PERIOD":
       SetPeriodInputSchema().parse(action.input);
       snapshotReportConfigurationOperations.setPeriodOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "SET_OWNER_ID":
+      SetOwnerIdInputSchema().parse(action.input);
+      snapshotReportConfigurationOperations.setOwnerIdOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -147,6 +158,15 @@ const stateReducer: StateReducer<SnapshotReportPHState> = (
     case "UPDATE_TRANSACTION_FLOW_TYPE":
       UpdateTransactionFlowTypeInputSchema().parse(action.input);
       snapshotReportTransactionsOperations.updateTransactionFlowTypeOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "RECALCULATE_FLOW_TYPES":
+      RecalculateFlowTypesInputSchema().parse(action.input);
+      snapshotReportTransactionsOperations.recalculateFlowTypesOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
