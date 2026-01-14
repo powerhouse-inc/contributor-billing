@@ -8,13 +8,13 @@ import {
   showCreateDocumentModal,
   useDocumentsInSelectedDrive,
 } from "@powerhousedao/reactor-browser";
-import { Wallet, FileText, Receipt } from "lucide-react";
+import { Wallet, FileText, Camera } from "lucide-react";
 import { useMemo, useState } from "react";
 
 const ICON_SIZE = 16;
 
 /** Custom view types that don't correspond to document models */
-export type CustomView = "accounts" | "expense-report" | null;
+export type CustomView = "accounts" | "expense-report" | "snapshot-report" | null;
 
 /**
  * Maps navigation section IDs to their corresponding document types.
@@ -23,6 +23,7 @@ export type CustomView = "accounts" | "expense-report" | null;
 const SECTION_TO_DOCUMENT_TYPE: Record<string, string | null> = {
   accounts: "powerhouse/accounts",
   "expense-report": "powerhouse/expense-report",
+  "snapshot-report": "powerhouse/snapshot-report",
 };
 
 /**
@@ -31,6 +32,7 @@ const SECTION_TO_DOCUMENT_TYPE: Record<string, string | null> = {
 const SECTION_TO_CUSTOM_VIEW: Record<string, CustomView> = {
   accounts: "accounts",
   "expense-report": "expense-report",
+  "snapshot-report": "snapshot-report",
 };
 
 /**
@@ -47,6 +49,11 @@ const BASE_NAVIGATION_SECTIONS: SidebarNode[] = [
     id: "expense-report",
     title: "Expense Report",
     icon: <FileText size={ICON_SIZE} />,
+  },
+  {
+    id: "snapshot-report",
+    title: "Snapshot Report",
+    icon: <Camera size={ICON_SIZE} />,
   },
 ];
 
@@ -170,8 +177,15 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
 
   return (
     <SidebarProvider nodes={navigationSections}>
+      <style>
+        {`
+          .folder-tree-sidebar .sidebar__item-caret--no-children {
+            visibility: hidden;
+          }
+        `}
+      </style>
       <Sidebar
-        className="pt-1"
+        className="pt-1 folder-tree-sidebar"
         nodes={navigationSections}
         activeNodeId={activeNodeId}
         onActiveNodeChange={handleActiveNodeChange}
