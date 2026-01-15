@@ -21,6 +21,7 @@ import type {
   SnapshotTransaction,
 } from "../../../document-models/snapshot-report/gen/types.js";
 import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
+import { calculateTransactionFlowInfo } from "../utils/flowTypeCalculations.js";
 
 export function useSyncSnapshotAccount() {
   const documents = useDocumentsInSelectedDrive();
@@ -33,6 +34,7 @@ export function useSyncSnapshotAccount() {
     startDate: string | null | undefined,
     endDate: string | null | undefined,
     dispatch: any,
+    allSnapshotAccounts: SnapshotAccount[] = [],
   ): Promise<{
     success: boolean;
     message: string;
@@ -122,6 +124,17 @@ export function useSyncSnapshotAccount() {
 
       // Add filtered transactions
       for (const tx of periodTransactions) {
+        // Calculate flow type before dispatch so it's stored in operation history
+        const { flowType, counterPartyAccountId } =
+          calculateTransactionFlowInfo(
+            tx.direction,
+            snapshotAccount.type,
+            tx.counterParty,
+            allSnapshotAccounts.length > 0
+              ? allSnapshotAccounts
+              : [snapshotAccount],
+          );
+
         dispatch(
           transactionsActions.addTransaction({
             accountId: snapshotAccount.id,
@@ -134,8 +147,8 @@ export function useSyncSnapshotAccount() {
             token: tx.details?.token || "",
             blockNumber: tx.details?.blockNumber || undefined,
             direction: tx.direction,
-            flowType: undefined,
-            counterPartyAccountId: undefined,
+            flowType: flowType,
+            counterPartyAccountId: counterPartyAccountId || undefined,
           }),
         );
       }
@@ -188,7 +201,7 @@ export function useSyncSnapshotAccount() {
         );
       });
 
-      balances.forEach((balance, token) => {
+      balances.forEach((balance, _token) => {
         const balanceId = generateId();
         dispatch(
           balancesActions.setStartingBalance({
@@ -213,7 +226,7 @@ export function useSyncSnapshotAccount() {
         );
       });
 
-      balances.forEach((balance, token) => {
+      balances.forEach((balance, _token) => {
         const balanceId = generateId();
         dispatch(
           balancesActions.setEndingBalance({

@@ -18,6 +18,7 @@ import {
 } from "../../document-models/snapshot-report/gen/creators.js";
 import { useSyncSnapshotAccount } from "./hooks/useSyncSnapshotAccount.js";
 import { formatBalance } from "./utils/balanceCalculations.js";
+import { calculateTransactionFlowInfo } from "./utils/flowTypeCalculations.js";
 import { actions as accountsActions } from "../../document-models/accounts/index.js";
 
 export default function Editor() {
@@ -96,6 +97,7 @@ export default function Editor() {
         startDate,
         endDate,
         dispatch,
+        snapshotAccounts,
       );
 
       if (result.success) {
@@ -201,6 +203,33 @@ export default function Editor() {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
+    // Build a combined list of existing + newly imported accounts for flow type calculation
+    // This ensures counter-party lookups work even for accounts being imported in the same batch
+    const allAccountsForLookup = [
+      ...snapshotAccounts,
+      ...Array.from(selectedAccountIds)
+        .map((accountId) => {
+          const account = availableAccounts.find(
+            (acc: any) => acc.id === accountId,
+          );
+          if (account && !existingAccountIds.has(accountId) && account.type) {
+            return {
+              id: generateId(), // Temporary ID for lookup
+              accountId: account.id,
+              accountAddress: account.account as string,
+              accountName: account.name as string,
+              type: account.type as string,
+              accountTransactionsId: account.accountTransactionsId || null,
+              startingBalances: [],
+              endingBalances: [],
+              transactions: [],
+            };
+          }
+          return null;
+        })
+        .filter(Boolean),
+    ];
+
     for (const accountId of selectedAccountIds) {
       const account = availableAccounts.find(
         (acc: any) => acc.id === accountId,
@@ -247,6 +276,15 @@ export default function Editor() {
 
             // Add each transaction to the snapshot account
             for (const tx of filteredTransactions) {
+              // Calculate flow type before dispatch so it's stored in operation history
+              const { flowType, counterPartyAccountId } =
+                calculateTransactionFlowInfo(
+                  tx.direction,
+                  account.type,
+                  tx.counterParty,
+                  allAccountsForLookup as any[],
+                );
+
               dispatch?.(
                 addTransaction({
                   accountId: snapshotAccountId,
@@ -259,8 +297,8 @@ export default function Editor() {
                   token: tx.details?.token || "",
                   blockNumber: tx.details?.blockNumber || undefined,
                   direction: tx.direction,
-                  flowType: undefined, // Can be set later
-                  counterPartyAccountId: undefined, // Can be set later if counterParty matches another account
+                  flowType: flowType,
+                  counterPartyAccountId: counterPartyAccountId || undefined,
                 }),
               );
             }
@@ -678,7 +716,17 @@ export default function Editor() {
                                       <span className="text-gray-500">
                                         Flow Type:
                                       </span>
-                                      <span className="ml-2 px-2 py-0.5 bg-gray-100 rounded text-xs">
+                                      <span
+                                        className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
+                                          tx.flowType === "TopUp"
+                                            ? "bg-green-100 text-green-800"
+                                            : tx.flowType === "Return"
+                                              ? "bg-orange-100 text-orange-800"
+                                              : tx.flowType === "Internal"
+                                                ? "bg-purple-100 text-purple-800"
+                                                : "bg-red-100 text-red-800"
+                                        }`}
+                                      >
                                         {tx.flowType}
                                       </span>
                                     </div>
