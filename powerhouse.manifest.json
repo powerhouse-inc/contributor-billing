@@ -30,6 +30,10 @@
         {
             "id": "powerhouse/snapshot-report",
             "name": "Snapshot Report"
+        },
+        {
+            "id": "powerhouse/service-subscriptions",
+            "name": "ServiceSubscriptions"
         }
     ],
     "editors": [
@@ -81,6 +85,13 @@
             "id": "contributor-billing",
             "name": "Contributor Billing",
             "driveEditor": "contributor-billing"
+        },
+        {
+            "id": "builder-team-admin",
+            "name": "Builder Team Admin",
+            "documentTypes": [
+                "powerhouse/document-drive"
+            ]
         }
     ],
     "subgraphs": [],

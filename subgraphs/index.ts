@@ -6,3 +6,4 @@ export * as BillingStatementSubgraph from "./billing-statement/index.js";
 export * as ExpenseReportSubgraph from "./expense-report/index.js";
 export * as SnapshotReportSubgraph from "./snapshot-report/index.js";
 export * as AccTxsAddonSubgraph from "./acc-txs-addon/index.js";
+export * as ServiceSubscriptionsSubgraph from "./service-subscriptions/index.js";

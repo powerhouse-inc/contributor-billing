@@ -14,7 +14,11 @@ import { useMemo, useState } from "react";
 const ICON_SIZE = 16;
 
 /** Custom view types that don't correspond to document models */
-export type CustomView = "accounts" | "expense-report" | "snapshot-report" | null;
+export type CustomView =
+  | "accounts"
+  | "expense-report"
+  | "snapshot-report"
+  | null;
 
 /**
  * Maps navigation section IDs to their corresponding document types.
@@ -152,7 +156,8 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
           onCustomViewChange?.(null);
           setSelectedNode(existingDocId);
         } else {
-          // Show create document modal for accounts
+          // Clear selected node to create document at drive root, not in current folder
+          setSelectedNode("");
           showCreateDocumentModal(documentType);
         }
       }
@@ -170,7 +175,8 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
       // Navigate to the existing document
       setSelectedNode(existingDocId);
     } else {
-      // Create a new document
+      // Clear selected node to create document at drive root, not in current folder
+      setSelectedNode("");
       showCreateDocumentModal(documentType);
     }
   };
