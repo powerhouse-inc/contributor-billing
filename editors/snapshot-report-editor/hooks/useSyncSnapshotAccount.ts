@@ -16,6 +16,7 @@ import {
   transactionsActions,
 } from "../../../document-models/snapshot-report/index.js";
 import { calculateBalances } from "../utils/balanceCalculations.js";
+import { deriveTransactionsForAccount } from "../utils/deriveTransactions.js";
 import type {
   SnapshotAccount,
   SnapshotTransaction,
@@ -49,6 +50,18 @@ export function useSyncSnapshotAccount() {
     }
 
     try {
+      // Handle non-Internal accounts differently - derive from Internal accounts
+      if (snapshotAccount.type !== "Internal") {
+        return await syncNonInternalAccount(
+          snapshotAccount,
+          startDate,
+          endDate,
+          dispatch,
+          allSnapshotAccounts,
+        );
+      }
+
+      // For Internal accounts: sync from AccountTransactions document
       // Step 1: Ensure account transactions document exists
       let accountTransactionsDocId = snapshotAccount.accountTransactionsId;
 
@@ -186,6 +199,7 @@ export function useSyncSnapshotAccount() {
         allTransactionsForBalance,
         startDate,
         endDate,
+        snapshotAccount.type,
       );
 
       // Update starting balances
@@ -246,6 +260,166 @@ export function useSyncSnapshotAccount() {
       };
     } catch (error) {
       console.error("[useSyncSnapshotAccount] Error syncing account:", error);
+      return {
+        success: false,
+        message: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      };
+    }
+  };
+
+  /**
+   * Sync a non-Internal account by deriving transactions from Internal accounts
+   */
+  const syncNonInternalAccount = async (
+    snapshotAccount: SnapshotAccount,
+    startDate: string,
+    endDate: string,
+    dispatch: any,
+    allSnapshotAccounts: SnapshotAccount[],
+  ): Promise<{
+    success: boolean;
+    message: string;
+    transactionsAdded?: number;
+    documentId?: string;
+  }> => {
+    try {
+      // Get Internal accounts with their transactions
+      const internalAccounts = allSnapshotAccounts.filter(
+        (acc) => acc.type === "Internal",
+      );
+
+      if (internalAccounts.length === 0) {
+        return {
+          success: false,
+          message:
+            "No Internal accounts found. Import Internal accounts first to derive transactions.",
+        };
+      }
+
+      // Derive transactions from Internal accounts
+      const derivedTransactions = deriveTransactionsForAccount(
+        snapshotAccount,
+        internalAccounts,
+      );
+
+      // Filter to period for snapshot
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const periodTransactions = derivedTransactions.filter((tx) => {
+        const txDate = new Date(tx.datetime);
+        return txDate >= start && txDate <= end;
+      });
+
+      // Remove existing transactions for this account
+      const existingTxIds = snapshotAccount.transactions.map((tx) => tx.id);
+      existingTxIds.forEach((txId) => {
+        dispatch(transactionsActions.removeTransaction({ id: txId }));
+      });
+
+      // Add derived transactions
+      for (const tx of periodTransactions) {
+        dispatch(
+          transactionsActions.addTransaction({
+            accountId: snapshotAccount.id,
+            id: tx.id,
+            transactionId: tx.transactionId,
+            counterParty: tx.counterParty,
+            amount: tx.amount,
+            datetime: tx.datetime,
+            txHash: tx.txHash,
+            token: tx.token,
+            blockNumber: tx.blockNumber ?? undefined,
+            direction: tx.direction,
+            flowType: tx.flowType,
+            counterPartyAccountId: tx.counterPartyAccountId,
+          }),
+        );
+      }
+
+      // Calculate balances using ALL derived transactions (not just period)
+      // This gives us cumulative "funds provided" / "funds received"
+      const allTransactionsForBalance: SnapshotTransaction[] =
+        derivedTransactions.map((tx) => ({
+          id: tx.id,
+          transactionId: tx.transactionId,
+          counterParty: tx.counterParty,
+          amount: tx.amount,
+          datetime: tx.datetime,
+          txHash: tx.txHash,
+          token: tx.token,
+          blockNumber: tx.blockNumber,
+          direction: tx.direction,
+          flowType: tx.flowType,
+          counterPartyAccountId: tx.counterPartyAccountId,
+        }));
+
+      const balances = calculateBalances(
+        allTransactionsForBalance,
+        startDate,
+        endDate,
+        snapshotAccount.type,
+      );
+
+      // Update starting balances
+      const existingStartingBalanceIds = snapshotAccount.startingBalances.map(
+        (b) => b.id,
+      );
+      existingStartingBalanceIds.forEach((balanceId) => {
+        dispatch(
+          balancesActions.removeStartingBalance({
+            accountId: snapshotAccount.id,
+            balanceId,
+          }),
+        );
+      });
+
+      balances.forEach((balance, _token) => {
+        const balanceId = generateId();
+        dispatch(
+          balancesActions.setStartingBalance({
+            accountId: snapshotAccount.id,
+            balanceId,
+            token: balance.token,
+            amount: balance.opening,
+          }),
+        );
+      });
+
+      // Update ending balances
+      const existingEndingBalanceIds = snapshotAccount.endingBalances.map(
+        (b) => b.id,
+      );
+      existingEndingBalanceIds.forEach((balanceId) => {
+        dispatch(
+          balancesActions.removeEndingBalance({
+            accountId: snapshotAccount.id,
+            balanceId,
+          }),
+        );
+      });
+
+      balances.forEach((balance, _token) => {
+        const balanceId = generateId();
+        dispatch(
+          balancesActions.setEndingBalance({
+            accountId: snapshotAccount.id,
+            balanceId,
+            token: balance.token,
+            amount: balance.closing,
+          }),
+        );
+      });
+
+      return {
+        success: true,
+        message: `Derived ${periodTransactions.length} transactions from Internal accounts`,
+        transactionsAdded: periodTransactions.length,
+      };
+    } catch (error) {
+      console.error(
+        "[useSyncSnapshotAccount] Error syncing non-Internal account:",
+        error,
+      );
       return {
         success: false,
         message: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,

@@ -19,7 +19,11 @@ import {
 import { useSyncSnapshotAccount } from "./hooks/useSyncSnapshotAccount.js";
 import { formatBalance } from "./utils/balanceCalculations.js";
 import { calculateTransactionFlowInfo } from "./utils/flowTypeCalculations.js";
+import { deriveTransactionsForAccount } from "./utils/deriveTransactions.js";
 import { actions as accountsActions } from "../../document-models/accounts/index.js";
+import {
+  transactionsActions,
+} from "../../document-models/snapshot-report/index.js";
 
 export default function Editor() {
   const [document, dispatch] = useSelectedSnapshotReportDocument();
@@ -203,8 +207,15 @@ export default function Editor() {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
+    // Track newly imported accounts for two-pass import
+    const newlyImportedAccounts: Array<{
+      snapshotAccountId: string;
+      accountAddress: string;
+      accountType: string;
+      accountTransactionsId?: string;
+    }> = [];
+
     // Build a combined list of existing + newly imported accounts for flow type calculation
-    // This ensures counter-party lookups work even for accounts being imported in the same batch
     const allAccountsForLookup = [
       ...snapshotAccounts,
       ...Array.from(selectedAccountIds)
@@ -214,7 +225,7 @@ export default function Editor() {
           );
           if (account && !existingAccountIds.has(accountId) && account.type) {
             return {
-              id: generateId(), // Temporary ID for lookup
+              id: generateId(),
               accountId: account.id,
               accountAddress: account.account as string,
               accountName: account.name as string,
@@ -230,6 +241,9 @@ export default function Editor() {
         .filter(Boolean),
     ];
 
+    // FIRST PASS: Import all accounts
+    // - Internal accounts: Import with transactions from AccountTransactions doc
+    // - Non-Internal accounts: Import account only (transactions derived later)
     for (const accountId of selectedAccountIds) {
       const account = availableAccounts.find(
         (acc: any) => acc.id === accountId,
@@ -255,8 +269,17 @@ export default function Editor() {
           }),
         );
 
-        // If the account has linked transactions, import them
-        if (account.accountTransactionsId) {
+        // Track for second pass
+        newlyImportedAccounts.push({
+          snapshotAccountId,
+          accountAddress: account.account,
+          accountType: account.type,
+          accountTransactionsId: account.accountTransactionsId,
+        });
+
+        // Only import transactions for Internal accounts
+        // Non-Internal accounts will derive transactions from Internal accounts
+        if (account.type === "Internal" && account.accountTransactionsId) {
           const txDoc = documentsInDrive.find(
             (doc) =>
               doc.header.id === account.accountTransactionsId &&
@@ -276,7 +299,6 @@ export default function Editor() {
 
             // Add each transaction to the snapshot account
             for (const tx of filteredTransactions) {
-              // Calculate flow type before dispatch so it's stored in operation history
               const { flowType, counterPartyAccountId } =
                 calculateTransactionFlowInfo(
                   tx.direction,
@@ -306,8 +328,83 @@ export default function Editor() {
         }
       }
     }
+
+    // SECOND PASS: Derive transactions for non-Internal accounts
+    // We need to wait a moment for state to update, then derive
+    // For now, user can click "Sync" on non-Internal accounts to derive
+    // TODO: Implement auto-derive after import completes
+
     setIsAccountPickerOpen(false);
     setSelectedAccountIds(new Set());
+  };
+
+  /**
+   * Derive transactions for a non-Internal account from Internal accounts
+   * This finds all transactions in Internal accounts where the counter-party
+   * matches the non-Internal account's address
+   */
+  const handleDeriveTransactions = async (accountId: string) => {
+    const account = snapshotAccounts.find((a) => a.id === accountId);
+    if (!account || account.type === "Internal") {
+      return;
+    }
+
+    const internalAccounts = snapshotAccounts.filter(
+      (a) => a.type === "Internal",
+    );
+    if (internalAccounts.length === 0) {
+      alert("No Internal accounts found. Import Internal accounts first.");
+      return;
+    }
+
+    // Get derived transactions
+    const derivedTxs = deriveTransactionsForAccount(account, internalAccounts);
+
+    // Remove existing transactions for this account
+    for (const tx of account.transactions) {
+      dispatch?.(transactionsActions.removeTransaction({ id: tx.id }));
+    }
+
+    // Add derived transactions
+    for (const tx of derivedTxs) {
+      dispatch?.(
+        addTransaction({
+          accountId: account.id,
+          id: tx.id,
+          transactionId: tx.transactionId,
+          counterParty: tx.counterParty,
+          amount: tx.amount,
+          datetime: tx.datetime,
+          txHash: tx.txHash,
+          token: tx.token,
+          blockNumber: tx.blockNumber ?? undefined,
+          direction: tx.direction,
+          flowType: tx.flowType,
+          counterPartyAccountId: tx.counterPartyAccountId,
+        }),
+      );
+    }
+  };
+
+  /**
+   * Derive transactions for all non-Internal accounts
+   */
+  const handleDeriveAllNonInternal = async () => {
+    const internalAccounts = snapshotAccounts.filter(
+      (a) => a.type === "Internal",
+    );
+    if (internalAccounts.length === 0) {
+      alert("No Internal accounts found. Import Internal accounts first.");
+      return;
+    }
+
+    const nonInternalAccounts = snapshotAccounts.filter(
+      (a) => a.type !== "Internal",
+    );
+
+    for (const account of nonInternalAccounts) {
+      await handleDeriveTransactions(account.id);
+    }
   };
 
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {

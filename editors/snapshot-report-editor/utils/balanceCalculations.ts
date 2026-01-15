@@ -4,7 +4,10 @@
  */
 
 import type { SnapshotTransaction } from "../../../document-models/snapshot-report/gen/types.js";
-import type { Scalars } from "../../../document-models/snapshot-report/gen/schema/types.js";
+import type {
+  Scalars,
+  AccountType,
+} from "../../../document-models/snapshot-report/gen/schema/types.js";
 
 export type Amount_Currency = Scalars["Amount_Currency"]["output"];
 
@@ -15,16 +18,46 @@ export interface TokenBalance {
 }
 
 /**
+ * Calculate the effect of a transaction on balance based on account type
+ *
+ * - Internal accounts: Standard balance (INFLOW +, OUTFLOW -)
+ * - Source accounts: Track "cumulative provided" (OUTFLOW = funds sent to team = positive)
+ * - Destination accounts: Track "cumulative received" (INFLOW = funds received from team = positive)
+ * - External accounts: Net flows with team (standard balance)
+ */
+function getTransactionEffect(
+  direction: string,
+  amountValue: number,
+  accountType?: string,
+): number {
+  // For Source accounts: OUTFLOW means funds provided (positive)
+  if (accountType === "Source") {
+    return direction === "OUTFLOW" ? amountValue : -amountValue;
+  }
+
+  // For Destination accounts: INFLOW means funds received (positive)
+  if (accountType === "Destination") {
+    return direction === "INFLOW" ? amountValue : -amountValue;
+  }
+
+  // For Internal and External accounts: Standard balance
+  // INFLOW = positive, OUTFLOW = negative
+  return direction === "INFLOW" ? amountValue : -amountValue;
+}
+
+/**
  * Calculate opening and closing balances for all tokens from transactions
  * @param transactions - All transactions for the account
  * @param startDate - Period start date (ISO string)
  * @param endDate - Period end date (ISO string)
+ * @param accountType - Optional account type for type-specific balance logic
  * @returns Map of token to balance information
  */
 export function calculateBalances(
   transactions: SnapshotTransaction[],
   startDate: string,
   endDate: string,
+  accountType?: AccountType,
 ): Map<string, TokenBalance> {
   const balances = new Map<string, TokenBalance>();
   const start = new Date(startDate);
@@ -45,40 +78,42 @@ export function calculateBalances(
     }
 
     const balance = balances.get(token)!;
-    const amountValue = parseFloat(
-      typeof tx.amount === "object" && tx.amount?.value !== undefined
-        ? tx.amount.value
-        : String(tx.amount).split(" ")[0] || "0",
-    );
+    let amountStr: string;
+    const txAmount = tx.amount as { value?: string; unit?: string } | string;
+    if (typeof txAmount === "object" && txAmount?.value !== undefined) {
+      amountStr = txAmount.value;
+    } else if (typeof txAmount === "string") {
+      amountStr = txAmount.split(" ")[0] || "0";
+    } else {
+      amountStr = "0";
+    }
+    const amountValue = parseFloat(amountStr);
+
+    const effect = getTransactionEffect(tx.direction, amountValue, accountType);
 
     // Calculate opening balance (transactions before period start)
     if (txDate < start) {
-      if (tx.direction === "INFLOW") {
-        const currentOpening = parseFloat(balance.opening.value || "0");
-        balance.opening.value = (currentOpening + amountValue).toString();
-      } else if (tx.direction === "OUTFLOW") {
-        const currentOpening = parseFloat(balance.opening.value || "0");
-        balance.opening.value = (currentOpening - amountValue).toString();
-      }
+      const currentOpening = parseFloat(balance.opening.value || "0");
+      balance.opening.value = (currentOpening + effect).toString();
     }
 
-    // Calculate closing balance (opening + transactions during period)
+    // Calculate period change (transactions during period)
     if (txDate >= start && txDate <= end) {
-      if (tx.direction === "INFLOW") {
-        const currentClosing = parseFloat(balance.closing.value || "0");
-        balance.closing.value = (currentClosing + amountValue).toString();
-      } else if (tx.direction === "OUTFLOW") {
-        const currentClosing = parseFloat(balance.closing.value || "0");
-        balance.closing.value = (currentClosing - amountValue).toString();
-      }
+      const currentClosing = parseFloat(balance.closing.value || "0");
+      balance.closing.value = (currentClosing + effect).toString();
     }
   });
 
   // Finalize closing balances (opening + period changes)
+  // Clamp to 0 if very small negative (floating-point precision errors)
   balances.forEach((balance) => {
     const openingValue = parseFloat(balance.opening.value || "0");
     const periodChange = parseFloat(balance.closing.value || "0");
-    balance.closing.value = (openingValue + periodChange).toString();
+    const closingValue = openingValue + periodChange;
+
+    // Clamp small negative values to 0 (floating-point precision fix)
+    balance.opening.value = Math.max(0, openingValue).toString();
+    balance.closing.value = Math.max(0, closingValue).toString();
   });
 
   return balances;
@@ -92,5 +127,6 @@ export function formatBalance(amount: Amount_Currency): string {
     const value = parseFloat(amount.value);
     return `${value.toFixed(6)} ${amount.unit || ""}`.trim();
   }
-  return String(amount);
+  // Amount_Currency should always be an object with value/unit
+  return "0";
 }
