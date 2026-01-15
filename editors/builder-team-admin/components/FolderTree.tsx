@@ -12,14 +12,26 @@ import {
   isFileNodeKind,
 } from "@powerhousedao/reactor-browser";
 import type { Node, FolderNode, FileNode } from "document-drive";
-import { CreditCard, FileText, User, Users, Folder } from "lucide-react";
+import {
+  CreditCard,
+  FileText,
+  User,
+  Users,
+  Folder,
+  Camera,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 const ICON_SIZE = 16;
 const EXPENSE_REPORTS_FOLDER_NAME = "Expense Reports";
+const SNAPSHOT_REPORTS_FOLDER_NAME = "Snapshot Reports";
 
 /** Custom view types that don't correspond to document models */
-export type CustomView = "team-members" | "expense-reports" | null;
+export type CustomView =
+  | "team-members"
+  | "expense-reports"
+  | "snapshot-reports"
+  | null;
 
 /**
  * Maps navigation section IDs to their corresponding document types.
@@ -31,6 +43,7 @@ const SECTION_TO_DOCUMENT_TYPE: Record<string, string | null> = {
   "team-members": null, // Uses custom TeamMembers component
   "service-subscriptions": "powerhouse/service-subscriptions",
   "expense-reports": null, // Uses custom ExpenseReports component
+  "snapshot-reports": null, // Uses custom SnapshotReports component
 };
 
 /**
@@ -39,11 +52,12 @@ const SECTION_TO_DOCUMENT_TYPE: Record<string, string | null> = {
 const SECTION_TO_CUSTOM_VIEW: Record<string, CustomView> = {
   "team-members": "team-members",
   "expense-reports": "expense-reports",
+  "snapshot-reports": "snapshot-reports",
 };
 
 /**
  * Base navigation sections for the Builder Team Admin drive.
- * The expense-reports section will have dynamic children added based on folder contents.
+ * The expense-reports and snapshot-reports sections will have dynamic children added based on folder contents.
  */
 const BASE_NAVIGATION_SECTIONS: SidebarNode[] = [
   {
@@ -65,6 +79,11 @@ const BASE_NAVIGATION_SECTIONS: SidebarNode[] = [
     id: "expense-reports",
     title: "Expense Reports",
     icon: <FileText size={ICON_SIZE} />,
+  },
+  {
+    id: "snapshot-reports",
+    title: "Snapshot Reports",
+    icon: <Camera size={ICON_SIZE} />,
   },
 ];
 
@@ -139,6 +158,16 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
     );
   }, [driveDocument]);
 
+  // Find the "Snapshot Reports" folder in the drive
+  const snapshotReportsFolder = useMemo(() => {
+    if (!driveDocument) return null;
+    const nodes = driveDocument.state.global.nodes;
+    return nodes.find(
+      (node: Node): node is FolderNode =>
+        isFolderNodeKind(node) && node.name === SNAPSHOT_REPORTS_FOLDER_NAME,
+    );
+  }, [driveDocument]);
+
   // Build a set of all node IDs that are within the Expense Reports folder tree
   const expenseReportsNodeIds = useMemo(() => {
     const nodeIds = new Set<string>();
@@ -162,19 +191,48 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
     return nodeIds;
   }, [expenseReportsFolder, driveDocument]);
 
-  // Build navigation sections with dynamic expense reports children
+  // Build a set of all node IDs that are within the Snapshot Reports folder tree
+  const snapshotReportsNodeIds = useMemo(() => {
+    const nodeIds = new Set<string>();
+    if (!snapshotReportsFolder || !driveDocument) return nodeIds;
+
+    const allNodes = driveDocument.state.global.nodes;
+
+    // Recursively collect all node IDs within the Snapshot Reports folder
+    const collectNodeIds = (parentId: string) => {
+      nodeIds.add(parentId);
+      for (const node of allNodes) {
+        if (isFolderNodeKind(node) && node.parentFolder === parentId) {
+          collectNodeIds(node.id);
+        } else if (isFileNodeKind(node) && node.parentFolder === parentId) {
+          nodeIds.add(node.id);
+        }
+      }
+    };
+
+    collectNodeIds(snapshotReportsFolder.id);
+    return nodeIds;
+  }, [snapshotReportsFolder, driveDocument]);
+
+  // Build navigation sections with dynamic expense reports and snapshot reports children
   const navigationSections = useMemo(() => {
-    if (!expenseReportsFolder || !driveDocument) {
+    if (!driveDocument) {
       return BASE_NAVIGATION_SECTIONS;
     }
 
     const allNodes = driveDocument.state.global.nodes;
-    const expenseReportsChildren = buildSidebarNodesFromFolder(
-      expenseReportsFolder.id,
-      allNodes,
-    );
 
-    // Replace the expense-reports section with one that has children
+    // Build expense reports children
+    const expenseReportsChildren = expenseReportsFolder
+      ? buildSidebarNodesFromFolder(expenseReportsFolder.id, allNodes)
+      : [];
+
+    // Build snapshot reports children
+    const snapshotReportsChildren = snapshotReportsFolder
+      ? buildSidebarNodesFromFolder(snapshotReportsFolder.id, allNodes)
+      : [];
+
+    // Replace the sections with ones that have children
     return BASE_NAVIGATION_SECTIONS.map((section) => {
       if (
         section.id === "expense-reports" &&
@@ -185,9 +243,18 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
           children: expenseReportsChildren,
         };
       }
+      if (
+        section.id === "snapshot-reports" &&
+        snapshotReportsChildren.length > 0
+      ) {
+        return {
+          ...section,
+          children: snapshotReportsChildren,
+        };
+      }
       return section;
     });
-  }, [expenseReportsFolder, driveDocument]);
+  }, [expenseReportsFolder, snapshotReportsFolder, driveDocument]);
 
   // Check if builder profile document exists - don't show sidebar if it doesn't
   const hasBuilderProfile = useMemo(() => {
@@ -230,6 +297,25 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
       if (driveNode && isFolderNodeKind(driveNode)) {
         // It's a folder - navigate to it within the expense reports view
         onCustomViewChange?.("expense-reports");
+        setSelectedNode(node.id);
+      } else if (driveNode && isFileNodeKind(driveNode)) {
+        // It's a document - open the document editor
+        onCustomViewChange?.(null);
+        setSelectedNode(node.id);
+      }
+      return;
+    }
+
+    // Check if this is a child node within the Snapshot Reports folder
+    if (snapshotReportsNodeIds.has(node.id)) {
+      // Check if it's a folder or a document
+      const driveNode = driveDocument?.state.global.nodes.find(
+        (n: Node) => n.id === node.id,
+      );
+
+      if (driveNode && isFolderNodeKind(driveNode)) {
+        // It's a folder - navigate to it within the snapshot reports view
+        onCustomViewChange?.("snapshot-reports");
         setSelectedNode(node.id);
       } else if (driveNode && isFileNodeKind(driveNode)) {
         // It's a document - open the document editor

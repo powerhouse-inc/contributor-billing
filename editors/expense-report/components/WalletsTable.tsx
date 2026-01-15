@@ -1176,7 +1176,9 @@ export function WalletsTable({
                     );
 
                     if (walletExists) {
-                      setWalletError("This account is already added to the report");
+                      setWalletError(
+                        "This account is already added to the report",
+                      );
                       setSelectedAccountId("");
                       return;
                     }
@@ -1192,7 +1194,8 @@ export function WalletsTable({
                       dispatch(
                         actions.updateWallet({
                           address: selectedAccount.account,
-                          accountDocumentId: selectedAccount.accountsDocumentId || undefined,
+                          accountDocumentId:
+                            selectedAccount.accountsDocumentId || undefined,
                           accountTransactionsDocumentId:
                             selectedAccount.accountTransactionsId || undefined,
                         }),
@@ -1233,104 +1236,104 @@ export function WalletsTable({
           {/* Manual wallet entry toggle - right side */}
           <div>
             <button
-            type="button"
-            onClick={() => {
-              setShowManualEntry(!showManualEntry);
-              setManualWalletError("");
-            }}
-            className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
-          >
-            {showManualEntry ? (
-              <ChevronUp size={16} />
-            ) : (
-              <ChevronDown size={16} />
-            )}
-            <span>Add wallet manually</span>
-          </button>
+              type="button"
+              onClick={() => {
+                setShowManualEntry(!showManualEntry);
+                setManualWalletError("");
+              }}
+              className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+            >
+              {showManualEntry ? (
+                <ChevronUp size={16} />
+              ) : (
+                <ChevronDown size={16} />
+              )}
+              <span>Add wallet manually</span>
+            </button>
 
-          {/* Manual entry form - collapsible */}
-          {showManualEntry && (
-            <div className="mt-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 space-y-3 animate-in slide-in-from-top-2 duration-200">
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Wallet Address
-                    <span className="text-red-500 ml-0.5">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={manualWalletAddress}
-                    onChange={(e) => {
-                      setManualWalletAddress(e.target.value);
+            {/* Manual entry form - collapsible */}
+            {showManualEntry && (
+              <div className="mt-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 space-y-3 animate-in slide-in-from-top-2 duration-200">
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Wallet Address
+                      <span className="text-red-500 ml-0.5">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={manualWalletAddress}
+                      onChange={(e) => {
+                        setManualWalletAddress(e.target.value);
+                        setManualWalletError("");
+                      }}
+                      placeholder="0x..."
+                      className={`w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                        manualWalletError
+                          ? "border-red-300 dark:border-red-600"
+                          : "border-gray-300 dark:border-gray-600"
+                      }`}
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Enter a valid Ethereum address (0x + 40 hex characters)
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Wallet Name
+                      <span className="text-gray-400 dark:text-gray-500 ml-1 font-normal">
+                        (optional)
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      value={manualWalletName}
+                      onChange={(e) => setManualWalletName(e.target.value)}
+                      placeholder="e.g., Operations Wallet"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleAddManualWallet();
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Error message */}
+                {manualWalletError && (
+                  <div className="px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                    <p className="text-sm text-red-600 dark:text-red-400">
+                      {manualWalletError}
+                    </p>
+                  </div>
+                )}
+
+                {/* Action buttons */}
+                <div className="flex items-center gap-2 pt-1">
+                  <Button
+                    onClick={handleAddManualWallet}
+                    disabled={!manualWalletAddress.trim() || addingManualWallet}
+                  >
+                    {addingManualWallet ? "Adding..." : "Add Wallet"}
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowManualEntry(false);
+                      setManualWalletAddress("");
+                      setManualWalletName("");
                       setManualWalletError("");
                     }}
-                    placeholder="0x..."
-                    className={`w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                      manualWalletError
-                        ? "border-red-300 dark:border-red-600"
-                        : "border-gray-300 dark:border-gray-600"
-                    }`}
-                  />
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Enter a valid Ethereum address (0x + 40 hex characters)
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Wallet Name
-                    <span className="text-gray-400 dark:text-gray-500 ml-1 font-normal">
-                      (optional)
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    value={manualWalletName}
-                    onChange={(e) => setManualWalletName(e.target.value)}
-                    placeholder="e.g., Operations Wallet"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleAddManualWallet();
-                      }
-                    }}
-                  />
+                    className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
-
-              {/* Error message */}
-              {manualWalletError && (
-                <div className="px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-                  <p className="text-sm text-red-600 dark:text-red-400">
-                    {manualWalletError}
-                  </p>
-                </div>
-              )}
-
-              {/* Action buttons */}
-              <div className="flex items-center gap-2 pt-1">
-                <Button
-                  onClick={handleAddManualWallet}
-                  disabled={!manualWalletAddress.trim() || addingManualWallet}
-                >
-                  {addingManualWallet ? "Adding..." : "Add Wallet"}
-                </Button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowManualEntry(false);
-                    setManualWalletAddress("");
-                    setManualWalletName("");
-                    setManualWalletError("");
-                  }}
-                  className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
         </div>
       </div>
 
