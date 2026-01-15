@@ -6,6 +6,7 @@
 import {
   useDocumentsInSelectedDrive,
   useSelectedDrive,
+  dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import { generateId } from "document-model/core";
 import { accountTransactionsService } from "../../accounts-editor/services/accountTransactionsService.js";
@@ -36,6 +37,7 @@ export function useSyncSnapshotAccount() {
     endDate: string | null | undefined,
     dispatch: any,
     allSnapshotAccounts: SnapshotAccount[] = [],
+    snapshotDocumentId?: string,
   ): Promise<{
     success: boolean;
     message: string;
@@ -58,6 +60,7 @@ export function useSyncSnapshotAccount() {
           endDate,
           dispatch,
           allSnapshotAccounts,
+          snapshotDocumentId,
         );
       }
 
@@ -128,46 +131,31 @@ export function useSyncSnapshotAccount() {
         return txDate >= start && txDate <= end;
       });
 
-      // Step 4: Update snapshot report transactions
-      // Remove existing transactions for this account
-      const existingTxIds = snapshotAccount.transactions.map((tx) => tx.id);
-      existingTxIds.forEach((txId) => {
-        dispatch(transactionsActions.removeTransaction({ id: txId }));
-      });
+      // Step 4: Check if transactions have changed before updating
+      // Compare by transactionId to detect actual changes
+      const existingTransactionIds = new Set(
+        snapshotAccount.transactions.map((tx) => tx.transactionId),
+      );
+      const newTransactionIds = new Set(
+        periodTransactions.map((tx: any) => tx.id as string),
+      );
 
-      // Add filtered transactions
-      for (const tx of periodTransactions) {
-        // Calculate flow type before dispatch so it's stored in operation history
-        const { flowType, counterPartyAccountId } =
-          calculateTransactionFlowInfo(
-            tx.direction,
-            snapshotAccount.type,
-            tx.counterParty,
-            allSnapshotAccounts.length > 0
-              ? allSnapshotAccounts
-              : [snapshotAccount],
-          );
+      // Check if the sets are identical (no changes needed)
+      const hasChanges =
+        existingTransactionIds.size !== newTransactionIds.size ||
+        [...existingTransactionIds].some((id) => !newTransactionIds.has(id)) ||
+        [...newTransactionIds].some((id) => !existingTransactionIds.has(id));
 
-        dispatch(
-          transactionsActions.addTransaction({
-            accountId: snapshotAccount.id,
-            id: generateId(),
-            transactionId: tx.id,
-            counterParty: tx.counterParty || undefined,
-            amount: tx.amount,
-            datetime: tx.datetime,
-            txHash: tx.details?.txHash || "",
-            token: tx.details?.token || "",
-            blockNumber: tx.details?.blockNumber || undefined,
-            direction: tx.direction,
-            flowType: flowType,
-            counterPartyAccountId: counterPartyAccountId || undefined,
-          }),
-        );
+      if (!hasChanges) {
+        return {
+          success: true,
+          message: "No changes detected - already in sync",
+          transactionsAdded: snapshotAccount.transactions.length,
+          documentId: accountTransactionsDocId,
+        };
       }
 
-      // Step 5: Calculate and update balances
-      // Get all transactions (including those before period for opening balance)
+      // Step 5: Calculate balances BEFORE making any changes
       // Map account transactions format to snapshot transaction format
       const allTransactionsForBalance: SnapshotTransaction[] =
         allTransactions.map((tx: any): SnapshotTransaction => {
@@ -181,8 +169,8 @@ export function useSyncSnapshotAccount() {
                 : "");
 
           return {
-            id: String(tx.id), // Ensure it's a string (OID)
-            transactionId: String(tx.id), // transactionId is String type
+            id: String(tx.id),
+            transactionId: String(tx.id),
             counterParty: tx.counterParty || null,
             amount: tx.amount,
             datetime: tx.datetime,
@@ -202,55 +190,97 @@ export function useSyncSnapshotAccount() {
         snapshotAccount.type,
       );
 
-      // Update starting balances
-      const existingStartingBalanceIds = snapshotAccount.startingBalances.map(
-        (b) => b.id,
-      );
-      existingStartingBalanceIds.forEach((balanceId) => {
-        dispatch(
+      // Build all actions into a single batch for efficiency
+      const allActions: any[] = [];
+
+      // 1. Remove existing transactions
+      snapshotAccount.transactions.forEach((tx) => {
+        allActions.push(
+          transactionsActions.removeTransaction({ id: tx.id }),
+        );
+      });
+
+      // 2. Add new transactions
+      for (const tx of periodTransactions) {
+        const { flowType, counterPartyAccountId } =
+          calculateTransactionFlowInfo(
+            tx.direction,
+            snapshotAccount.type,
+            tx.counterParty,
+            allSnapshotAccounts.length > 0
+              ? allSnapshotAccounts
+              : [snapshotAccount],
+          );
+
+        allActions.push(
+          transactionsActions.addTransaction({
+            accountId: snapshotAccount.id,
+            id: generateId(),
+            transactionId: tx.id,
+            counterParty: tx.counterParty || undefined,
+            amount: tx.amount,
+            datetime: tx.datetime,
+            txHash: tx.details?.txHash || "",
+            token: tx.details?.token || "",
+            blockNumber: tx.details?.blockNumber || undefined,
+            direction: tx.direction,
+            flowType: flowType,
+            counterPartyAccountId: counterPartyAccountId || undefined,
+          }),
+        );
+      }
+
+      // 3. Remove existing starting balances
+      snapshotAccount.startingBalances.forEach((b) => {
+        allActions.push(
           balancesActions.removeStartingBalance({
             accountId: snapshotAccount.id,
-            balanceId,
+            balanceId: b.id,
           }),
         );
       });
 
-      balances.forEach((balance, _token) => {
-        const balanceId = generateId();
-        dispatch(
+      // 4. Add new starting balances
+      balances.forEach((balance) => {
+        allActions.push(
           balancesActions.setStartingBalance({
             accountId: snapshotAccount.id,
-            balanceId,
+            balanceId: generateId(),
             token: balance.token,
             amount: balance.opening,
           }),
         );
       });
 
-      // Update ending balances
-      const existingEndingBalanceIds = snapshotAccount.endingBalances.map(
-        (b) => b.id,
-      );
-      existingEndingBalanceIds.forEach((balanceId) => {
-        dispatch(
+      // 5. Remove existing ending balances
+      snapshotAccount.endingBalances.forEach((b) => {
+        allActions.push(
           balancesActions.removeEndingBalance({
             accountId: snapshotAccount.id,
-            balanceId,
+            balanceId: b.id,
           }),
         );
       });
 
-      balances.forEach((balance, _token) => {
-        const balanceId = generateId();
-        dispatch(
+      // 6. Add new ending balances
+      balances.forEach((balance) => {
+        allActions.push(
           balancesActions.setEndingBalance({
             accountId: snapshotAccount.id,
-            balanceId,
+            balanceId: generateId(),
             token: balance.token,
             amount: balance.closing,
           }),
         );
       });
+
+      // Dispatch all actions in a single batch if we have a document ID
+      if (snapshotDocumentId && allActions.length > 0) {
+        await dispatchActions(allActions, snapshotDocumentId);
+      } else {
+        // Fallback to individual dispatches if no document ID
+        allActions.forEach((action) => dispatch(action));
+      }
 
       return {
         success: true,
@@ -276,6 +306,7 @@ export function useSyncSnapshotAccount() {
     endDate: string,
     dispatch: any,
     allSnapshotAccounts: SnapshotAccount[],
+    snapshotDocumentId?: string,
   ): Promise<{
     success: boolean;
     message: string;
@@ -310,34 +341,28 @@ export function useSyncSnapshotAccount() {
         return txDate >= start && txDate <= end;
       });
 
-      // Remove existing transactions for this account
-      const existingTxIds = snapshotAccount.transactions.map((tx) => tx.id);
-      existingTxIds.forEach((txId) => {
-        dispatch(transactionsActions.removeTransaction({ id: txId }));
-      });
+      // Check if transactions have changed before updating
+      const existingTransactionIds = new Set(
+        snapshotAccount.transactions.map((tx) => tx.transactionId),
+      );
+      const newTransactionIds = new Set(
+        periodTransactions.map((tx) => tx.transactionId),
+      );
 
-      // Add derived transactions
-      for (const tx of periodTransactions) {
-        dispatch(
-          transactionsActions.addTransaction({
-            accountId: snapshotAccount.id,
-            id: tx.id,
-            transactionId: tx.transactionId,
-            counterParty: tx.counterParty,
-            amount: tx.amount,
-            datetime: tx.datetime,
-            txHash: tx.txHash,
-            token: tx.token,
-            blockNumber: tx.blockNumber ?? undefined,
-            direction: tx.direction,
-            flowType: tx.flowType,
-            counterPartyAccountId: tx.counterPartyAccountId,
-          }),
-        );
+      const hasChanges =
+        existingTransactionIds.size !== newTransactionIds.size ||
+        [...existingTransactionIds].some((id) => !newTransactionIds.has(id)) ||
+        [...newTransactionIds].some((id) => !existingTransactionIds.has(id));
+
+      if (!hasChanges) {
+        return {
+          success: true,
+          message: "No changes detected - already in sync",
+          transactionsAdded: snapshotAccount.transactions.length,
+        };
       }
 
       // Calculate balances using ALL derived transactions (not just period)
-      // This gives us cumulative "funds provided" / "funds received"
       const allTransactionsForBalance: SnapshotTransaction[] =
         derivedTransactions.map((tx) => ({
           id: tx.id,
@@ -360,55 +385,87 @@ export function useSyncSnapshotAccount() {
         snapshotAccount.type,
       );
 
-      // Update starting balances
-      const existingStartingBalanceIds = snapshotAccount.startingBalances.map(
-        (b) => b.id,
-      );
-      existingStartingBalanceIds.forEach((balanceId) => {
-        dispatch(
+      // Build all actions into a single batch for efficiency
+      const allActions: any[] = [];
+
+      // 1. Remove existing transactions
+      snapshotAccount.transactions.forEach((tx) => {
+        allActions.push(
+          transactionsActions.removeTransaction({ id: tx.id }),
+        );
+      });
+
+      // 2. Add derived transactions
+      for (const tx of periodTransactions) {
+        allActions.push(
+          transactionsActions.addTransaction({
+            accountId: snapshotAccount.id,
+            id: tx.id,
+            transactionId: tx.transactionId,
+            counterParty: tx.counterParty,
+            amount: tx.amount,
+            datetime: tx.datetime,
+            txHash: tx.txHash,
+            token: tx.token,
+            blockNumber: tx.blockNumber ?? undefined,
+            direction: tx.direction,
+            flowType: tx.flowType,
+            counterPartyAccountId: tx.counterPartyAccountId,
+          }),
+        );
+      }
+
+      // 3. Remove existing starting balances
+      snapshotAccount.startingBalances.forEach((b) => {
+        allActions.push(
           balancesActions.removeStartingBalance({
             accountId: snapshotAccount.id,
-            balanceId,
+            balanceId: b.id,
           }),
         );
       });
 
-      balances.forEach((balance, _token) => {
-        const balanceId = generateId();
-        dispatch(
+      // 4. Add new starting balances
+      balances.forEach((balance) => {
+        allActions.push(
           balancesActions.setStartingBalance({
             accountId: snapshotAccount.id,
-            balanceId,
+            balanceId: generateId(),
             token: balance.token,
             amount: balance.opening,
           }),
         );
       });
 
-      // Update ending balances
-      const existingEndingBalanceIds = snapshotAccount.endingBalances.map(
-        (b) => b.id,
-      );
-      existingEndingBalanceIds.forEach((balanceId) => {
-        dispatch(
+      // 5. Remove existing ending balances
+      snapshotAccount.endingBalances.forEach((b) => {
+        allActions.push(
           balancesActions.removeEndingBalance({
             accountId: snapshotAccount.id,
-            balanceId,
+            balanceId: b.id,
           }),
         );
       });
 
-      balances.forEach((balance, _token) => {
-        const balanceId = generateId();
-        dispatch(
+      // 6. Add new ending balances
+      balances.forEach((balance) => {
+        allActions.push(
           balancesActions.setEndingBalance({
             accountId: snapshotAccount.id,
-            balanceId,
+            balanceId: generateId(),
             token: balance.token,
             amount: balance.closing,
           }),
         );
       });
+
+      // Dispatch all actions in a single batch if we have a document ID
+      if (snapshotDocumentId && allActions.length > 0) {
+        await dispatchActions(allActions, snapshotDocumentId);
+      } else {
+        // Fallback to individual dispatches if no document ID
+        allActions.forEach((action) => dispatch(action));
+      }
 
       return {
         success: true,

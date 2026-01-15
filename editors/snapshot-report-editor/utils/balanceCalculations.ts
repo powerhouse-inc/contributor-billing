@@ -105,15 +105,21 @@ export function calculateBalances(
   });
 
   // Finalize closing balances (opening + period changes)
-  // Clamp to 0 if very small negative (floating-point precision errors)
+  // Fix floating-point precision errors (e.g., -0.0000001 → 0)
+  const fixPrecision = (value: number): number => {
+    // Only fix values very close to zero (floating-point errors)
+    // Allow real negative balances for non-Internal accounts
+    if (Math.abs(value) < 1e-10) return 0;
+    return value;
+  };
+
   balances.forEach((balance) => {
     const openingValue = parseFloat(balance.opening.value || "0");
     const periodChange = parseFloat(balance.closing.value || "0");
     const closingValue = openingValue + periodChange;
 
-    // Clamp small negative values to 0 (floating-point precision fix)
-    balance.opening.value = Math.max(0, openingValue).toString();
-    balance.closing.value = Math.max(0, closingValue).toString();
+    balance.opening.value = fixPrecision(openingValue).toString();
+    balance.closing.value = fixPrecision(closingValue).toString();
   });
 
   return balances;
