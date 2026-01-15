@@ -16,6 +16,7 @@ import {
   type SetPeriodEndAction,
   type UpdateWalletAction,
   type SetOwnerIdAction,
+  type SetStatusAction,
 } from "./actions.js";
 import { type ExpenseReportState } from "../types.js";
 
@@ -98,6 +99,11 @@ export interface ExpenseReportWalletOperations {
   setOwnerIdOperation: (
     state: ExpenseReportState,
     action: SetOwnerIdAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  setStatusOperation: (
+    state: ExpenseReportState,
+    action: SetStatusAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

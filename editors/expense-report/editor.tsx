@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSelectedExpenseReportDocument } from "../../document-models/expense-report/hooks.js";
-import { actions } from "../../document-models/expense-report/index.js";
+import { actions, type ExpenseReportStatus } from "../../document-models/expense-report/index.js";
 import { Icon, Button, Select } from "@powerhousedao/document-engineering";
 import { WalletsTable } from "./components/WalletsTable.js";
 import { AggregatedExpensesTable } from "./components/AggregatedExpensesTable.js";
@@ -305,6 +305,22 @@ export default function Editor() {
                         </Button>
                       </div>
                     )}
+                  </div>
+                  {/* Status */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Status:
+                    </span>
+                    <Select
+                      options={[
+                        { label: "Draft", value: "DRAFT" },
+                        { label: "Review", value: "REVIEW" },
+                        { label: "Final", value: "FINAL" },
+                      ]}
+                      value={document.state.global.status}
+                      onChange={(value) => dispatch(actions.setStatus({ status: value as ExpenseReportStatus }))}
+                      className="min-w-[180px]"
+                    />
                   </div>
                   {/* Owner ID */}
                   <div className="flex items-center gap-2">

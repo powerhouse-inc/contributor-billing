@@ -14,6 +14,7 @@ import { createDocument } from "./utils.js";
 export function defaultGlobalState(): ExpenseReportGlobalState {
   return {
     ownerId: null,
+    status: "DRAFT",
     wallets: [],
     groups: [
       {
