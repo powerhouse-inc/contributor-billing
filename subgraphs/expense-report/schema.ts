@@ -100,6 +100,11 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: ExpenseReport_SetOwnerIdInput
     ): Int
+    ExpenseReport_setStatus(
+      driveId: String
+      docId: PHID
+      input: ExpenseReport_SetStatusInput
+    ): Int
   }
 
   """
@@ -193,5 +198,14 @@ export const schema: DocumentNode = gql`
   }
   input ExpenseReport_SetOwnerIdInput {
     ownerId: PHID!
+  }
+  input ExpenseReport_SetStatusInput {
+    status: ExpenseReport_ExpenseReportStatusInput!
+  }
+
+  enum ExpenseReport_ExpenseReportStatusInput {
+    DRAFT
+    REVIEW
+    FINAL
   }
 `;

@@ -1,6 +1,6 @@
 ---
 title: Use toSorted() Instead of sort() for Immutability
-impact: MEDIUM
+impact: MEDIUM-HIGH
 impactDescription: prevents mutation bugs in React state
 tags: javascript, arrays, immutability, react, state, mutation
 ---
@@ -37,10 +37,10 @@ function UserList({ users }: { users: User[] }) {
 
 **Why this matters in React:**
 
-1. **Props/state mutations break React's immutability model** - React expects props and state to be treated as read-only
-2. **Causes stale closure bugs** - Mutating arrays inside closures (callbacks, effects) can lead to unexpected behavior
+1. Props/state mutations break React's immutability model - React expects props and state to be treated as read-only
+2. Causes stale closure bugs - Mutating arrays inside closures (callbacks, effects) can lead to unexpected behavior
 
-**Browser support:**
+**Browser support (fallback for older browsers):**
 
 `.toSorted()` is available in all modern browsers (Chrome 110+, Safari 16+, Firefox 115+, Node.js 20+). For older environments, use spread operator:
 

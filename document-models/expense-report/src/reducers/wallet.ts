@@ -239,4 +239,7 @@ export const expenseReportWalletOperations: ExpenseReportWalletOperations = {
   setOwnerIdOperation(state, action) {
     state.ownerId = action.input.ownerId;
   },
+  setStatusOperation(state, action) {
+    state.status = action.input.status
+  }
 };

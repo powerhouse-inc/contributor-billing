@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSelectedExpenseReportDocument } from "../../document-models/expense-report/hooks.js";
-import { actions } from "../../document-models/expense-report/index.js";
+import { actions, type ExpenseReportStatus } from "../../document-models/expense-report/index.js";
 import { Icon, Button, Select } from "@powerhousedao/document-engineering";
 import { WalletsTable } from "./components/WalletsTable.js";
 import { AggregatedExpensesTable } from "./components/AggregatedExpensesTable.js";
@@ -250,70 +250,93 @@ export default function Editor() {
             {/* Header Section */}
             <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="px-4 sm:px-6 py-4 sm:py-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="text-center sm:text-left flex-1">
-                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4">
-                      Expense Report
-                    </h1>
-                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-sm text-gray-600 dark:text-gray-400">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">Owner ID:</span>
-                        <input
-                          type="text"
-                          value={ownerId || ""}
-                          onChange={(e) =>
-                            dispatch(setOwnerId({ ownerId: e.target.value }))
-                          }
-                          placeholder="Enter owner ID"
-                          className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <span className="font-medium">Period:</span>
-                      {isEditingPeriod ? (
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Select
-                            options={monthOptions}
-                            value={selectedPeriod}
-                            onChange={(value) =>
-                              handlePeriodChange(value as string)
-                            }
-                            className="min-w-[160px] sm:min-w-[200px]"
-                          />
-                          {isPeriodChanged && (
-                            <Button
-                              variant="default"
-                              onClick={handleConfirmPeriod}
-                              className="text-sm"
-                            >
-                              Set Period
-                            </Button>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-gray-900 dark:text-white">
-                            {periodDisplayLabel}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            onClick={handleEditPeriod}
-                            className="text-sm"
-                          >
-                            Change
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                {/* Top row: Title and Export button */}
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
+                    Expense Report
+                  </h1>
                   <Button
                     variant="ghost"
                     onClick={handleExportPDF}
-                    className="flex items-center justify-center gap-2 shrink-0"
+                    className="flex items-center gap-2 shrink-0"
                   >
                     <Icon name="ExportPdf" size={18} />
-                    <span className="hidden sm:inline">Export to PDF</span>
-                    <span className="sm:hidden">PDF</span>
+                    <span>Export to PDF</span>
                   </Button>
+                </div>
+                {/* Owner ID and Period - horizontal layout */}
+                <div className="flex flex-wrap justify-between gap-12">
+                  {/* Period */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Period:
+                    </span>
+                    {isEditingPeriod ? (
+                      <div className="flex items-center gap-2">
+                        <Select
+                          options={monthOptions}
+                          value={selectedPeriod}
+                          onChange={(value) =>
+                            handlePeriodChange(value as string)
+                          }
+                          className="min-w-[180px]"
+                        />
+                        {isPeriodChanged && (
+                          <Button
+                            variant="default"
+                            onClick={handleConfirmPeriod}
+                            className="text-sm"
+                          >
+                            Set Period
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-gray-900 dark:text-white">
+                          {periodDisplayLabel}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          onClick={handleEditPeriod}
+                          className="text-sm"
+                        >
+                          Change
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  {/* Status */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Status:
+                    </span>
+                    <Select
+                      options={[
+                        { label: "Draft", value: "DRAFT" },
+                        { label: "Review", value: "REVIEW" },
+                        { label: "Final", value: "FINAL" },
+                      ]}
+                      value={document.state.global.status}
+                      onChange={(value) => dispatch(actions.setStatus({ status: value as ExpenseReportStatus }))}
+                      className="min-w-[180px]"
+                    />
+                  </div>
+                  {/* Owner ID */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Owner ID:
+                    </span>
+                    <input
+                      type="text"
+                      value={ownerId || ""}
+                      onChange={(e) =>
+                        dispatch(setOwnerId({ ownerId: e.target.value }))
+                      }
+                      placeholder="Enter owner ID"
+                      className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-48"
+                    />
+                  </div>
                 </div>
               </div>
             </section>

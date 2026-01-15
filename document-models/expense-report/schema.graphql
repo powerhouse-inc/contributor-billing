@@ -17,10 +17,17 @@ scalar Amount
 scalar Upload
 type ExpenseReportState {
   ownerId: PHID
+  status: ExpenseReportStatus!
   wallets: [Wallet!]!
   groups: [LineItemGroup!]!
   periodStart: DateTime
   periodEnd: DateTime
+}
+
+enum ExpenseReportStatus {
+  DRAFT
+  REVIEW
+  FINAL
 }
 
 type Wallet {
@@ -165,4 +172,14 @@ input UpdateWalletInput {
 
 input SetOwnerIdInput {
   ownerId: PHID!
+}
+
+input SetStatusInput {
+  status: ExpenseReportStatusInput!
+}
+
+enum ExpenseReportStatusInput {
+  DRAFT
+  REVIEW
+  FINAL
 }

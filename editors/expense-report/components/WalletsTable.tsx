@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button, TextInput } from "@powerhousedao/document-engineering";
 import {
   Plus,
@@ -9,7 +9,12 @@ import {
   Copy,
   CheckCheck,
   RefreshCw,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
+
+// Ethereum address regex - matches 0x followed by 40 hex characters
+const ETH_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
 import type {
   Wallet,
   LineItemGroup,
@@ -59,6 +64,13 @@ export function WalletsTable({
   const [copiedWallet, setCopiedWallet] = useState<string | null>(null);
   const [syncingWallet, setSyncingWallet] = useState<string | null>(null);
   const [addingWallet, setAddingWallet] = useState(false);
+
+  // Manual wallet entry state
+  const [showManualEntry, setShowManualEntry] = useState(false);
+  const [manualWalletAddress, setManualWalletAddress] = useState("");
+  const [manualWalletName, setManualWalletName] = useState("");
+  const [manualWalletError, setManualWalletError] = useState("");
+  const [addingManualWallet, setAddingManualWallet] = useState(false);
 
   // State for handling newly created transaction documents
   const [pendingTxDoc, setPendingTxDoc] = useState<{
@@ -383,7 +395,7 @@ export function WalletsTable({
     fetchAndAddTransactions();
   }, [pendingTxDoc, pendingDocument, pendingDocDispatch, isProcessing]);
 
-  const handleAddWallet = async () => {
+  const handleAddWallet = () => {
     if (!selectedAccountId) {
       setWalletError("Please select an account");
       return;
@@ -438,6 +450,63 @@ export function WalletsTable({
       setWalletError("Failed to add wallet. Please try again.");
     } finally {
       setAddingWallet(false);
+    }
+  };
+
+  // Validate Ethereum address
+  const validateEthAddress = useCallback((address: string): boolean => {
+    return ETH_ADDRESS_REGEX.test(address);
+  }, []);
+
+  // Handle manual wallet addition
+  const handleAddManualWallet = () => {
+    const trimmedAddress = manualWalletAddress.trim();
+    const trimmedName = manualWalletName.trim();
+
+    // Validate address
+    if (!trimmedAddress) {
+      setManualWalletError("Please enter a wallet address");
+      return;
+    }
+
+    if (!validateEthAddress(trimmedAddress)) {
+      setManualWalletError(
+        "Invalid Ethereum address. Must be 0x followed by 40 hex characters.",
+      );
+      return;
+    }
+
+    // Check if wallet already exists
+    const walletExists = wallets.some(
+      (w) => w.wallet?.toLowerCase() === trimmedAddress.toLowerCase(),
+    );
+
+    if (walletExists) {
+      setManualWalletError("This wallet is already added to the report");
+      return;
+    }
+
+    setAddingManualWallet(true);
+    setManualWalletError("");
+
+    try {
+      // Add the wallet to the expense report
+      dispatch(
+        actions.addWallet({
+          wallet: trimmedAddress,
+          name: trimmedName || undefined,
+        }),
+      );
+
+      // Clear inputs and collapse manual entry
+      setManualWalletAddress("");
+      setManualWalletName("");
+      setShowManualEntry(false);
+    } catch (error) {
+      console.error("Error adding manual wallet:", error);
+      setManualWalletError("Failed to add wallet. Please try again.");
+    } finally {
+      setAddingManualWallet(false);
     }
   };
 
@@ -756,22 +825,25 @@ export function WalletsTable({
     <div className="space-y-4">
       {/* Wallets Table */}
       {wallets.length > 0 ? (
-        <div className="overflow-x-auto -mx-3 sm:-mx-4 lg:-mx-6">
-          <div className="inline-block min-w-full align-middle px-3 sm:px-4 lg:px-6">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-auto">
+        <div className="w-full overflow-x-auto">
+          <div className="min-w-max">
+            <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider min-w-[140px]">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Wallet
                   </th>
-                  <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
-                    <span className="hidden sm:inline">Monthly Budget</span>
-                    <span className="sm:hidden">Budget</span>
+                  {/* Monthly Budget column - hidden for now, may be needed in the future
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                    Monthly Budget
                   </th>
-                  <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  */}
+                  {/* Forecast column - hidden for now, may be needed in the future
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Forecast
                   </th>
-                  <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  */}
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     <div className="flex items-center justify-end gap-2">
                       {needsSync && (
                         <button
@@ -811,16 +883,16 @@ export function WalletsTable({
                       <span>Actuals</span>
                     </div>
                   </th>
-                  <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    <span className="hidden sm:inline">Difference</span>
-                    <span className="sm:hidden">Diff</span>
+                  {/* Difference column - hidden for now, may be needed in the future
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Difference
                   </th>
-                  <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    <span className="hidden sm:inline">Payments</span>
-                    <span className="sm:hidden">Pay</span>
+                  */}
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Payments
                   </th>
-                  <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    <span className="sr-only">Actions</span>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -833,7 +905,7 @@ export function WalletsTable({
                       key={wallet.wallet}
                       className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                     >
-                      <td className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         {editingWallet === wallet.wallet ? (
                           <div className="flex items-center gap-2">
                             <TextInput
@@ -896,19 +968,20 @@ export function WalletsTable({
                                 <Copy size={12} />
                               )}
                             </button>
-                            {/* <button className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 font-mono hover:bg-blue-100 dark:hover:bg-gray-700 rounded transition-colors">
-                            View Txns
-                          </button> */}
                           </div>
                         )}
                       </td>
-                      <td className="px-2 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                      {/* Monthly Budget column - hidden for now, may be needed in the future
+                      <td className="px-3 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                         {formatCurrency(totals.budget)}
                       </td>
-                      <td className="px-2 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
+                      */}
+                      {/* Forecast column - hidden for now, may be needed in the future
+                      <td className="px-3 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                         {formatCurrency(totals.forecast)}
                       </td>
-                      <td className="px-2 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm">
+                      */}
+                      <td className="px-3 py-3 whitespace-nowrap text-right text-sm">
                         {totals.actuals === 0 &&
                         (!wallet.billingStatements ||
                           wallet.billingStatements.length === 0) ? (
@@ -984,8 +1057,9 @@ export function WalletsTable({
                           </div>
                         )}
                       </td>
+                      {/* Difference column - hidden for now, may be needed in the future
                       <td
-                        className={`px-2 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm font-medium ${
+                        className={`px-3 py-3 whitespace-nowrap text-right text-sm font-medium ${
                           totals.difference > 0
                             ? "text-red-600 dark:text-red-400"
                             : totals.difference < 0
@@ -995,7 +1069,8 @@ export function WalletsTable({
                       >
                         {formatCurrency(totals.difference)}
                       </td>
-                      <td className="px-2 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm">
+                      */}
+                      <td className="px-3 py-3 whitespace-nowrap text-right text-sm">
                         {wallet.accountTransactionsDocumentId ? (
                           // Show clickable document snippet card when transactions document is linked
                           <button
@@ -1004,34 +1079,11 @@ export function WalletsTable({
                                 wallet.accountTransactionsDocumentId!,
                               )
                             }
-                            className="w-full bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-2 transition-colors text-left"
+                            className="bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-800 rounded px-2 py-1 transition-colors text-left"
                           >
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2">
-                                <svg
-                                  className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                  />
-                                </svg>
-                                <div className="min-w-0">
-                                  <span className="text-xs font-medium text-green-900 dark:text-green-100 block">
-                                    Transactions
-                                  </span>
-                                  <span className="text-xs text-green-600 dark:text-green-400">
-                                    {formatCurrency(totals.payments)}
-                                  </span>
-                                </div>
-                              </div>
+                            <div className="flex items-center gap-1.5">
                               <svg
-                                className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0"
+                                className="w-3 h-3 text-green-600 dark:text-green-400 flex-shrink-0"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -1040,9 +1092,17 @@ export function WalletsTable({
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
                                   strokeWidth={2}
-                                  d="M9 5l7 7-7 7"
+                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                               </svg>
+                              <div className="min-w-0">
+                                <span className="text-[10px] font-medium text-green-900 dark:text-green-100 block leading-tight">
+                                  Transactions
+                                </span>
+                                <span className="text-xs text-green-600 dark:text-green-400">
+                                  {formatCurrency(totals.payments)}
+                                </span>
+                              </div>
                             </div>
                           </button>
                         ) : (
@@ -1059,17 +1119,16 @@ export function WalletsTable({
                           </div>
                         )}
                       </td>
-                      <td className="px-2 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-sm">
+                      <td className="px-3 py-3 whitespace-nowrap text-right text-sm">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() =>
                               handleRemoveWallet(wallet.wallet || "")
                             }
-                            className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                            className="inline-flex items-center justify-center w-8 h-8 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
                             title="Remove wallet"
                           >
-                            <Trash2 size={14} className="sm:hidden" />
-                            <Trash2 size={16} className="hidden sm:block" />
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </td>
@@ -1088,42 +1147,194 @@ export function WalletsTable({
         </div>
       )}
 
-      {/* Add Wallet Form */}
-      <div className="flex flex-col sm:flex-row sm:items-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex-1 relative">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Select Account
-          </label>
-          <select
-            value={selectedAccountId}
-            onChange={(e) => {
-              setSelectedAccountId(e.target.value);
-              setWalletError(""); // Clear error when selecting
-            }}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">-- Select an account --</option>
-            {accountEntries.map((acc: any) => (
-              <option key={acc.id} value={acc.id}>
-                {acc.name} ({acc.account?.substring(0, 10)}...
-                {acc.account?.substring(acc.account.length - 4)})
-              </option>
-            ))}
-          </select>
-          {walletError && (
-            <div className="absolute left-0 right-0 top-full mt-1 px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md shadow-lg z-10">
-              <p className="text-sm text-red-600 dark:text-red-400">
-                {walletError}
-              </p>
-            </div>
-          )}
+      {/* Add Wallet Section */}
+      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+        {/* Horizontal layout: Select Account (left) and Manual Entry (right) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Select from existing accounts - left side */}
+          <div className="w-full">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Select Account
+            </label>
+            <select
+              value={selectedAccountId}
+              onChange={(e) => {
+                const accountId = e.target.value;
+                setSelectedAccountId(accountId);
+                setWalletError("");
+
+                // Auto-add wallet when an account is selected
+                if (accountId) {
+                  const selectedAccount = accountEntries.find(
+                    (acc: any) => acc.id === accountId,
+                  );
+
+                  if (selectedAccount) {
+                    // Check if wallet already exists
+                    const walletExists = wallets.some(
+                      (w) => w.wallet === selectedAccount.account,
+                    );
+
+                    if (walletExists) {
+                      setWalletError(
+                        "This account is already added to the report",
+                      );
+                      setSelectedAccountId("");
+                      return;
+                    }
+
+                    // Add the wallet
+                    try {
+                      dispatch(
+                        actions.addWallet({
+                          wallet: selectedAccount.account,
+                          name: selectedAccount.name || undefined,
+                        }),
+                      );
+                      dispatch(
+                        actions.updateWallet({
+                          address: selectedAccount.account,
+                          accountDocumentId:
+                            selectedAccount.accountsDocumentId || undefined,
+                          accountTransactionsDocumentId:
+                            selectedAccount.accountTransactionsId || undefined,
+                        }),
+                      );
+                      // Reset selection after adding
+                      setSelectedAccountId("");
+                    } catch (error) {
+                      console.error("Error adding wallet:", error);
+                      setWalletError("Failed to add wallet. Please try again.");
+                      setSelectedAccountId("");
+                    }
+                  }
+                }
+              }}
+              className={`w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                walletError
+                  ? "border-red-300 dark:border-red-600"
+                  : "border-gray-300 dark:border-gray-600"
+              }`}
+            >
+              <option value="">-- Select an account to add --</option>
+              {accountEntries.map((acc: any) => (
+                <option key={acc.id} value={acc.id}>
+                  {acc.name} ({acc.account?.substring(0, 10)}...
+                  {acc.account?.substring(acc.account.length - 4)})
+                </option>
+              ))}
+            </select>
+            {walletError && (
+              <div className="mt-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {walletError}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Manual wallet entry toggle - right side */}
+          <div>
+            <button
+              type="button"
+              onClick={() => {
+                setShowManualEntry(!showManualEntry);
+                setManualWalletError("");
+              }}
+              className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+            >
+              {showManualEntry ? (
+                <ChevronUp size={16} />
+              ) : (
+                <ChevronDown size={16} />
+              )}
+              <span>Add wallet manually</span>
+            </button>
+
+            {/* Manual entry form - collapsible */}
+            {showManualEntry && (
+              <div className="mt-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 space-y-3 animate-in slide-in-from-top-2 duration-200">
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Wallet Address
+                      <span className="text-red-500 ml-0.5">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={manualWalletAddress}
+                      onChange={(e) => {
+                        setManualWalletAddress(e.target.value);
+                        setManualWalletError("");
+                      }}
+                      placeholder="0x..."
+                      className={`w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                        manualWalletError
+                          ? "border-red-300 dark:border-red-600"
+                          : "border-gray-300 dark:border-gray-600"
+                      }`}
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Enter a valid Ethereum address (0x + 40 hex characters)
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Wallet Name
+                      <span className="text-gray-400 dark:text-gray-500 ml-1 font-normal">
+                        (optional)
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      value={manualWalletName}
+                      onChange={(e) => setManualWalletName(e.target.value)}
+                      placeholder="e.g., Operations Wallet"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleAddManualWallet();
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Error message */}
+                {manualWalletError && (
+                  <div className="px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                    <p className="text-sm text-red-600 dark:text-red-400">
+                      {manualWalletError}
+                    </p>
+                  </div>
+                )}
+
+                {/* Action buttons */}
+                <div className="flex items-center gap-2 pt-1">
+                  <Button
+                    onClick={handleAddManualWallet}
+                    disabled={!manualWalletAddress.trim() || addingManualWallet}
+                  >
+                    {addingManualWallet ? "Adding..." : "Add Wallet"}
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowManualEntry(false);
+                      setManualWalletAddress("");
+                      setManualWalletName("");
+                      setManualWalletError("");
+                    }}
+                    className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        <Button
-          onClick={handleAddWallet}
-          disabled={!selectedAccountId || addingWallet}
-        >
-          {addingWallet ? "Adding..." : "Add Account"}
-        </Button>
       </div>
 
       {/* Progress Notification - Bottom Right */}

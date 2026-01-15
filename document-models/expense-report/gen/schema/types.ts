@@ -82,8 +82,13 @@ export type ExpenseReportState = {
   ownerId: Maybe<Scalars["PHID"]["output"]>;
   periodEnd: Maybe<Scalars["DateTime"]["output"]>;
   periodStart: Maybe<Scalars["DateTime"]["output"]>;
+  status: ExpenseReportStatus | `${ExpenseReportStatus}`;
   wallets: Array<Wallet>;
 };
+
+export type ExpenseReportStatus = "DRAFT" | "FINAL" | "REVIEW";
+
+export type ExpenseReportStatusInput = "DRAFT" | "FINAL" | "REVIEW";
 
 export type GroupTotals = {
   group: Maybe<Scalars["ID"]["output"]>;
@@ -167,6 +172,10 @@ export type SetPeriodEndInput = {
 
 export type SetPeriodStartInput = {
   periodStart: Scalars["DateTime"]["input"];
+};
+
+export type SetStatusInput = {
+  status: ExpenseReportStatusInput | `${ExpenseReportStatusInput}`;
 };
 
 export type UpdateLineItemGroupInput = {

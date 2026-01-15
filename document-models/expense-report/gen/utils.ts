@@ -22,6 +22,7 @@ import {
 
 export const initialGlobalState: ExpenseReportGlobalState = {
   ownerId: null,
+  status: "DRAFT",
   wallets: [],
   groups: [
     {

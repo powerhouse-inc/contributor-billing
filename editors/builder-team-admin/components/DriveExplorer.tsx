@@ -8,6 +8,7 @@ import {
 } from "@powerhousedao/reactor-browser";
 import { useMemo, useState } from "react";
 import { ExpenseReports } from "./expense-reports.js";
+import { SnapshotReports } from "./snapshot-reports.js";
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
@@ -107,6 +108,10 @@ export function DriveExplorer({ children }: EditorProps) {
 
     if (customView === "expense-reports") {
       return <ExpenseReports />;
+    }
+
+    if (customView === "snapshot-reports") {
+      return <SnapshotReports />;
     }
 
     // Default: folder contents
