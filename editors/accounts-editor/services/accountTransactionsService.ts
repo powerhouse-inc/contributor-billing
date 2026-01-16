@@ -175,27 +175,24 @@ export class AccountTransactionsService {
               createdNode.id,
             );
 
-            // Dispatch all actions one at a time for reliability
-            for (let i = 0; i < transactionActions.length; i++) {
+            // Batch dispatch transactions 100 at a time for better performance
+            const BATCH_SIZE = 100;
+            for (let i = 0; i < transactionActions.length; i += BATCH_SIZE) {
               try {
-                const result = await dispatchActions(
-                  [transactionActions[i]],
-                  createdNode.id,
-                );
+                const batch = transactionActions.slice(i, i + BATCH_SIZE);
+                const result = await dispatchActions(batch, createdNode.id);
                 if (i === 0) {
                   console.log(
-                    `[AccountTransactionsService] First dispatch result:`,
+                    `[AccountTransactionsService] First batch dispatch result:`,
                     result,
                   );
                 }
-                if ((i + 1) % 10 === 0) {
-                  console.log(
-                    `[AccountTransactionsService] Dispatched ${i + 1}/${transactionActions.length} transactions`,
-                  );
-                }
+                console.log(
+                  `[AccountTransactionsService] Dispatched batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(transactionActions.length / BATCH_SIZE)} (${Math.min(i + BATCH_SIZE, transactionActions.length)}/${transactionActions.length} transactions)`,
+                );
               } catch (dispatchError) {
                 console.error(
-                  `[AccountTransactionsService] ERROR dispatching transaction ${i + 1}:`,
+                  `[AccountTransactionsService] ERROR dispatching batch starting at ${i}:`,
                   dispatchError,
                 );
                 throw dispatchError;
@@ -351,14 +348,14 @@ export class AccountTransactionsService {
         });
 
       if (transactionActions.length > 0) {
-        // Dispatch actions one at a time for reliability
-        for (let i = 0; i < transactionActions.length; i++) {
-          await dispatchActions([transactionActions[i]], documentId);
-          if ((i + 1) % 10 === 0) {
-            console.log(
-              `[AccountTransactionsService] Synced ${i + 1}/${transactionActions.length} transactions`,
-            );
-          }
+        // Batch dispatch transactions 100 at a time for better performance
+        const BATCH_SIZE = 100;
+        for (let i = 0; i < transactionActions.length; i += BATCH_SIZE) {
+          const batch = transactionActions.slice(i, i + BATCH_SIZE);
+          await dispatchActions(batch, documentId);
+          console.log(
+            `[AccountTransactionsService] Synced batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(transactionActions.length / BATCH_SIZE)} (${Math.min(i + BATCH_SIZE, transactionActions.length)}/${transactionActions.length} transactions)`,
+          );
         }
         console.log(
           `[AccountTransactionsService] Successfully synced all ${transactionActions.length} transactions`,

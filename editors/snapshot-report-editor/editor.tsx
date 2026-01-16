@@ -18,7 +18,10 @@ import {
 } from "../../document-models/snapshot-report/gen/creators.js";
 import { useSyncSnapshotAccount } from "./hooks/useSyncSnapshotAccount.js";
 import { formatBalance } from "./utils/balanceCalculations.js";
+import { calculateTransactionFlowInfo } from "./utils/flowTypeCalculations.js";
+import { deriveTransactionsForAccount } from "./utils/deriveTransactions.js";
 import { actions as accountsActions } from "../../document-models/accounts/index.js";
+import { transactionsActions } from "../../document-models/snapshot-report/index.js";
 
 export default function Editor() {
   const [document, dispatch] = useSelectedSnapshotReportDocument();
@@ -96,6 +99,8 @@ export default function Editor() {
         startDate,
         endDate,
         dispatch,
+        snapshotAccounts,
+        document?.header?.id,
       );
 
       if (result.success) {
@@ -128,7 +133,7 @@ export default function Editor() {
     }
   };
 
-  // Handle sync all accounts
+  // Handle sync all accounts - parallel with concurrency limit
   const handleSyncAll = async () => {
     if (!startDate || !endDate) {
       alert(
@@ -138,10 +143,55 @@ export default function Editor() {
     }
 
     setIsSyncingAll(true);
+    const accountUpdates: Array<{ id: string; accountTransactionsId: string }> =
+      [];
+    const CONCURRENCY_LIMIT = 5;
 
     try {
-      for (const snapshotAccount of snapshotAccounts) {
-        await handleSyncAccount(snapshotAccount);
+      // Process accounts in batches of 5 for parallel execution
+      for (let i = 0; i < snapshotAccounts.length; i += CONCURRENCY_LIMIT) {
+        const batch = snapshotAccounts.slice(i, i + CONCURRENCY_LIMIT);
+        await Promise.all(
+          batch.map(async (account) => {
+            const accountEntry = accountEntryMap.get(account.accountId);
+
+            setSyncingAccounts((prev) => new Set(prev).add(account.id));
+
+            try {
+              const result = await syncAccount(
+                account,
+                accountEntry,
+                accountsDocumentId || undefined,
+                startDate,
+                endDate,
+                dispatch,
+                snapshotAccounts,
+                document?.header?.id,
+              );
+
+              if (result.documentId && accountEntry) {
+                accountUpdates.push({
+                  id: accountEntry.id,
+                  accountTransactionsId: result.documentId,
+                });
+              }
+            } finally {
+              setSyncingAccounts((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(account.id);
+                return newSet;
+              });
+            }
+          }),
+        );
+      }
+
+      // Single batch update to Accounts document
+      if (accountUpdates.length > 0 && accountsDocumentId) {
+        await dispatchActions(
+          accountUpdates.map((u) => accountsActions.updateAccount(u)),
+          accountsDocumentId,
+        );
       }
     } finally {
       setIsSyncingAll(false);
@@ -201,6 +251,43 @@ export default function Editor() {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
+    // Track newly imported accounts for two-pass import
+    const newlyImportedAccounts: Array<{
+      snapshotAccountId: string;
+      accountAddress: string;
+      accountType: string;
+      accountTransactionsId?: string;
+    }> = [];
+
+    // Build a combined list of existing + newly imported accounts for flow type calculation
+    const allAccountsForLookup = [
+      ...snapshotAccounts,
+      ...Array.from(selectedAccountIds)
+        .map((accountId) => {
+          const account = availableAccounts.find(
+            (acc: any) => acc.id === accountId,
+          );
+          if (account && !existingAccountIds.has(accountId) && account.type) {
+            return {
+              id: generateId(),
+              accountId: account.id,
+              accountAddress: account.account as string,
+              accountName: account.name as string,
+              type: account.type as string,
+              accountTransactionsId: account.accountTransactionsId || null,
+              startingBalances: [],
+              endingBalances: [],
+              transactions: [],
+            };
+          }
+          return null;
+        })
+        .filter(Boolean),
+    ];
+
+    // FIRST PASS: Import all accounts
+    // - Internal accounts: Import with transactions from AccountTransactions doc
+    // - Non-Internal accounts: Import account only (transactions derived later)
     for (const accountId of selectedAccountIds) {
       const account = availableAccounts.find(
         (acc: any) => acc.id === accountId,
@@ -226,8 +313,17 @@ export default function Editor() {
           }),
         );
 
-        // If the account has linked transactions, import them
-        if (account.accountTransactionsId) {
+        // Track for second pass
+        newlyImportedAccounts.push({
+          snapshotAccountId,
+          accountAddress: account.account,
+          accountType: account.type,
+          accountTransactionsId: account.accountTransactionsId,
+        });
+
+        // Only import transactions for Internal accounts
+        // Non-Internal accounts will derive transactions from Internal accounts
+        if (account.type === "Internal" && account.accountTransactionsId) {
           const txDoc = documentsInDrive.find(
             (doc) =>
               doc.header.id === account.accountTransactionsId &&
@@ -247,6 +343,14 @@ export default function Editor() {
 
             // Add each transaction to the snapshot account
             for (const tx of filteredTransactions) {
+              const { flowType, counterPartyAccountId } =
+                calculateTransactionFlowInfo(
+                  tx.direction,
+                  account.type,
+                  tx.counterParty,
+                  allAccountsForLookup as any[],
+                );
+
               dispatch?.(
                 addTransaction({
                   accountId: snapshotAccountId,
@@ -259,8 +363,8 @@ export default function Editor() {
                   token: tx.details?.token || "",
                   blockNumber: tx.details?.blockNumber || undefined,
                   direction: tx.direction,
-                  flowType: undefined, // Can be set later
-                  counterPartyAccountId: undefined, // Can be set later if counterParty matches another account
+                  flowType: flowType,
+                  counterPartyAccountId: counterPartyAccountId || undefined,
                 }),
               );
             }
@@ -268,8 +372,83 @@ export default function Editor() {
         }
       }
     }
+
+    // SECOND PASS: Derive transactions for non-Internal accounts
+    // We need to wait a moment for state to update, then derive
+    // For now, user can click "Sync" on non-Internal accounts to derive
+    // TODO: Implement auto-derive after import completes
+
     setIsAccountPickerOpen(false);
     setSelectedAccountIds(new Set());
+  };
+
+  /**
+   * Derive transactions for a non-Internal account from Internal accounts
+   * This finds all transactions in Internal accounts where the counter-party
+   * matches the non-Internal account's address
+   */
+  const handleDeriveTransactions = async (accountId: string) => {
+    const account = snapshotAccounts.find((a) => a.id === accountId);
+    if (!account || account.type === "Internal") {
+      return;
+    }
+
+    const internalAccounts = snapshotAccounts.filter(
+      (a) => a.type === "Internal",
+    );
+    if (internalAccounts.length === 0) {
+      alert("No Internal accounts found. Import Internal accounts first.");
+      return;
+    }
+
+    // Get derived transactions
+    const derivedTxs = deriveTransactionsForAccount(account, internalAccounts);
+
+    // Remove existing transactions for this account
+    for (const tx of account.transactions) {
+      dispatch?.(transactionsActions.removeTransaction({ id: tx.id }));
+    }
+
+    // Add derived transactions
+    for (const tx of derivedTxs) {
+      dispatch?.(
+        addTransaction({
+          accountId: account.id,
+          id: tx.id,
+          transactionId: tx.transactionId,
+          counterParty: tx.counterParty,
+          amount: tx.amount,
+          datetime: tx.datetime,
+          txHash: tx.txHash,
+          token: tx.token,
+          blockNumber: tx.blockNumber ?? undefined,
+          direction: tx.direction,
+          flowType: tx.flowType,
+          counterPartyAccountId: tx.counterPartyAccountId,
+        }),
+      );
+    }
+  };
+
+  /**
+   * Derive transactions for all non-Internal accounts
+   */
+  const handleDeriveAllNonInternal = async () => {
+    const internalAccounts = snapshotAccounts.filter(
+      (a) => a.type === "Internal",
+    );
+    if (internalAccounts.length === 0) {
+      alert("No Internal accounts found. Import Internal accounts first.");
+      return;
+    }
+
+    const nonInternalAccounts = snapshotAccounts.filter(
+      (a) => a.type !== "Internal",
+    );
+
+    for (const account of nonInternalAccounts) {
+      await handleDeriveTransactions(account.id);
+    }
   };
 
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -467,8 +646,58 @@ export default function Editor() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {snapshotAccounts.map((account: any) => (
+            <div className="space-y-6">
+              {/* Group accounts by type in flow order: Source → Internal → Destination → External */}
+              {(
+                [
+                  {
+                    type: "Source",
+                    label: "Source",
+                    borderClass: "border-emerald-300",
+                    badgeClass: "bg-emerald-100 text-emerald-800",
+                  },
+                  {
+                    type: "Internal",
+                    label: "Internal",
+                    borderClass: "border-blue-300",
+                    badgeClass: "bg-blue-100 text-blue-800",
+                  },
+                  {
+                    type: "Destination",
+                    label: "Destination",
+                    borderClass: "border-amber-300",
+                    badgeClass: "bg-amber-100 text-amber-800",
+                  },
+                  {
+                    type: "External",
+                    label: "External",
+                    borderClass: "border-gray-300",
+                    badgeClass: "bg-gray-100 text-gray-800",
+                  },
+                ] as const
+              ).map(({ type, label, borderClass, badgeClass }) => {
+                const accountsOfType = snapshotAccounts.filter(
+                  (a: any) => a.type === type,
+                );
+                if (accountsOfType.length === 0) return null;
+
+                return (
+                  <div key={type}>
+                    <div
+                      className={`flex items-center gap-2 mb-3 pb-2 border-b-2 ${borderClass}`}
+                    >
+                      <span
+                        className={`px-2 py-0.5 text-xs font-semibold rounded ${badgeClass}`}
+                      >
+                        {label}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {accountsOfType.length} account
+                        {accountsOfType.length !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    <div className="space-y-4">
+                      {accountsOfType.map((account: any) => (
                 <div
                   key={account.id}
                   className="border border-gray-200 rounded-lg overflow-hidden"
@@ -503,7 +732,17 @@ export default function Editor() {
                         <p className="text-sm text-gray-600">
                           {account.accountAddress}
                         </p>
-                        <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                        <span
+                          className={`inline-block mt-2 px-3 py-1 text-xs font-medium rounded-full ${
+                            account.type === "Source"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : account.type === "Internal"
+                                ? "bg-blue-100 text-blue-800"
+                                : account.type === "Destination"
+                                  ? "bg-amber-100 text-amber-800"
+                                  : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
                           {account.type}
                         </span>
                       </div>
@@ -518,52 +757,82 @@ export default function Editor() {
                     </div>
 
                     {/* Balances Display */}
-                    {(account.startingBalances.length > 0 ||
-                      account.endingBalances.length > 0) && (
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        <h4 className="text-sm font-semibold text-gray-700 mb-2">
-                          Balances
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {account.startingBalances.map((balance: any) => {
-                            const endingBalance = account.endingBalances.find(
-                              (eb: any) => eb.token === balance.token,
-                            );
-                            return (
-                              <div
-                                key={balance.id}
-                                className="bg-gray-50 rounded p-2 text-sm"
-                              >
-                                <div className="font-medium text-gray-700 mb-1">
-                                  {balance.token}
-                                </div>
-                                <div className="text-xs text-gray-600 space-y-1">
-                                  <div>
-                                    Opening:{" "}
-                                    <span className="font-medium">
-                                      {formatBalance(balance.amount)}
-                                    </span>
+                    {(() => {
+                      // Helper to check if a balance is non-zero
+                      const isNonZero = (amount: any) => {
+                        const value = parseFloat(amount?.value || "0");
+                        return value !== 0;
+                      };
+
+                      // Filter to non-zero balances
+                      const nonZeroStarting = account.startingBalances.filter(
+                        (b: any) => {
+                          const endingBalance = account.endingBalances.find(
+                            (eb: any) => eb.token === b.token,
+                          );
+                          return (
+                            isNonZero(b.amount) ||
+                            (endingBalance && isNonZero(endingBalance.amount))
+                          );
+                        },
+                      );
+
+                      const endingOnlyBalances = account.endingBalances.filter(
+                        (eb: any) =>
+                          !account.startingBalances.some(
+                            (sb: any) => sb.token === eb.token,
+                          ) && isNonZero(eb.amount),
+                      );
+
+                      const hasBalances =
+                        nonZeroStarting.length > 0 ||
+                        endingOnlyBalances.length > 0;
+
+                      if (!hasBalances) return null;
+
+                      return (
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                            Balances
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {nonZeroStarting.map((balance: any) => {
+                              const endingBalance = account.endingBalances.find(
+                                (eb: any) => eb.token === balance.token,
+                              );
+                              return (
+                                <div
+                                  key={balance.id}
+                                  className="bg-gray-50 rounded p-2 text-sm"
+                                >
+                                  <div className="font-medium text-gray-700 mb-1">
+                                    {balance.token}
                                   </div>
-                                  {endingBalance && (
+                                  <div
+                                    className="text-xs text-gray-600 space-y-1"
+                                    style={{
+                                      fontVariantNumeric: "tabular-nums",
+                                    }}
+                                  >
                                     <div>
-                                      Closing:{" "}
+                                      Opening:{" "}
                                       <span className="font-medium">
-                                        {formatBalance(endingBalance.amount)}
+                                        {formatBalance(balance.amount)}
                                       </span>
                                     </div>
-                                  )}
+                                    {endingBalance && (
+                                      <div>
+                                        Closing:{" "}
+                                        <span className="font-medium">
+                                          {formatBalance(endingBalance.amount)}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            );
-                          })}
-                          {account.endingBalances
-                            .filter(
-                              (eb: any) =>
-                                !account.startingBalances.some(
-                                  (sb: any) => sb.token === eb.token,
-                                ),
-                            )
-                            .map((balance: any) => (
+                              );
+                            })}
+                            {endingOnlyBalances.map((balance: any) => (
                               <div
                                 key={balance.id}
                                 className="bg-gray-50 rounded p-2 text-sm"
@@ -571,7 +840,10 @@ export default function Editor() {
                                 <div className="font-medium text-gray-700 mb-1">
                                   {balance.token}
                                 </div>
-                                <div className="text-xs text-gray-600">
+                                <div
+                                  className="text-xs text-gray-600"
+                                  style={{ fontVariantNumeric: "tabular-nums" }}
+                                >
                                   <div>
                                     Closing:{" "}
                                     <span className="font-medium">
@@ -581,9 +853,10 @@ export default function Editor() {
                                 </div>
                               </div>
                             ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     {/* Expand/Collapse Button */}
                     {account.transactions.length > 0 && (
@@ -678,7 +951,17 @@ export default function Editor() {
                                       <span className="text-gray-500">
                                         Flow Type:
                                       </span>
-                                      <span className="ml-2 px-2 py-0.5 bg-gray-100 rounded text-xs">
+                                      <span
+                                        className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
+                                          tx.flowType === "TopUp"
+                                            ? "bg-green-100 text-green-800"
+                                            : tx.flowType === "Return"
+                                              ? "bg-orange-100 text-orange-800"
+                                              : tx.flowType === "Internal"
+                                                ? "bg-purple-100 text-purple-800"
+                                                : "bg-red-100 text-red-800"
+                                        }`}
+                                      >
                                         {tx.flowType}
                                       </span>
                                     </div>
@@ -706,8 +989,12 @@ export default function Editor() {
                         </div>
                       </div>
                     )}
-                </div>
-              ))}
+                      </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -764,7 +1051,17 @@ export default function Editor() {
                                 <p className="text-sm text-gray-600">
                                   {account.account}
                                 </p>
-                                <span className="inline-block mt-2 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                                <span
+                                  className={`inline-block mt-2 px-2 py-1 text-xs rounded ${
+                                    account.type === "Source"
+                                      ? "bg-emerald-100 text-emerald-800"
+                                      : account.type === "Internal"
+                                        ? "bg-blue-100 text-blue-800"
+                                        : account.type === "Destination"
+                                          ? "bg-amber-100 text-amber-800"
+                                          : "bg-gray-100 text-gray-700"
+                                  }`}
+                                >
                                   {account.type || "External"}
                                 </span>
                               </div>

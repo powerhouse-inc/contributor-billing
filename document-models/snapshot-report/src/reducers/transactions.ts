@@ -71,7 +71,7 @@ export const snapshotReportTransactionsOperations: SnapshotReportTransactionsOpe
 
       transaction.flowType = action.input.flowType;
     },
-    recalculateFlowTypesOperation(state, action) {
+    recalculateFlowTypesOperation(state, _action) {
       for (const account of state.snapshotAccounts) {
         for (const tx of account.transactions) {
           if (!tx.counterParty) continue;
