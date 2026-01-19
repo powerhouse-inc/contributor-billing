@@ -192,15 +192,14 @@ export default function Editor() {
     return option ? option.label : selectedPeriod;
   }, [selectedPeriod, monthOptions]);
 
-  // Use reportPeriodStart/End if available, fallback to startDate/endDate for backwards compatibility
-  const effectiveStartDate = reportPeriodStart || startDate;
-  const effectiveEndDate = reportPeriodEnd || endDate;
+  // Note: startDate/endDate are used for transaction filtering (the actual date range to fetch)
+  // reportPeriodStart/End are used for the reporting period label (e.g., "January 2025")
 
   // Handle sync for a single account
   const handleSyncAccount = async (snapshotAccount: any) => {
-    if (!effectiveStartDate || !effectiveEndDate) {
+    if (!startDate || !endDate) {
       alert(
-        "Please set the report period (start and end dates) before syncing",
+        "Please set the Snapshot Period (start and end dates) before syncing",
       );
       return;
     }
@@ -213,8 +212,8 @@ export default function Editor() {
         snapshotAccount,
         accountEntry,
         accountsDocumentId || undefined,
-        effectiveStartDate,
-        effectiveEndDate,
+        startDate,
+        endDate,
         dispatch,
         snapshotAccounts,
         document?.header?.id,
@@ -252,9 +251,9 @@ export default function Editor() {
 
   // Handle sync all accounts - parallel with concurrency limit
   const handleSyncAll = async () => {
-    if (!effectiveStartDate || !effectiveEndDate) {
+    if (!startDate || !endDate) {
       alert(
-        "Please set the report period (start and end dates) before syncing",
+        "Please set the Snapshot Period (start and end dates) before syncing",
       );
       return;
     }
@@ -279,8 +278,8 @@ export default function Editor() {
                 account,
                 accountEntry,
                 accountsDocumentId || undefined,
-                effectiveStartDate,
-                effectiveEndDate,
+                startDate,
+                endDate,
                 dispatch,
                 snapshotAccounts,
                 document?.header?.id,
@@ -358,15 +357,15 @@ export default function Editor() {
   };
 
   const handleImportAccounts = async () => {
-    if (!documentsInDrive || !effectiveStartDate || !effectiveEndDate) {
+    if (!documentsInDrive || !startDate || !endDate) {
       alert(
         "Please set the report period (start and end dates) before importing accounts",
       );
       return;
     }
 
-    const start = new Date(effectiveStartDate);
-    const end = new Date(effectiveEndDate);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
     // Track newly imported accounts for two-pass import
     const newlyImportedAccounts: Array<{
@@ -767,7 +766,7 @@ export default function Editor() {
               {snapshotAccounts.length > 0 && (
                 <button
                   onClick={handleSyncAll}
-                  disabled={isSyncingAll || !effectiveStartDate || !effectiveEndDate}
+                  disabled={isSyncingAll || !startDate || !endDate}
                   className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <RefreshCw
@@ -862,8 +861,8 @@ export default function Editor() {
                                     onClick={() => handleSyncAccount(account)}
                                     disabled={
                                       syncingAccounts.has(account.id) ||
-                                      !effectiveStartDate ||
-                                      !effectiveEndDate
+                                      !startDate ||
+                                      !endDate
                                     }
                                     className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Sync account transactions and balances"
