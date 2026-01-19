@@ -7,3 +7,4 @@ export { Invoice } from "./invoice/module.js";
 export { SnapshotReportEditor } from "./snapshot-report-editor/module.js";
 export { ExpenseReport } from "./expense-report/module.js";
 export { ServiceSubscriptionsEditor } from "./service-subscriptions-editor/module.js";
+export { ServiceOfferingEditor } from "./service-offering-editor/module.js";

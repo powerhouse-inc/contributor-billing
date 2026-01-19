@@ -9,3 +9,4 @@ export { ExpenseReport } from "./expense-report/module.js";
 export { Invoice } from "./invoice/module.js";
 export { SnapshotReport } from "./snapshot-report/module.js";
 export { ServiceSubscriptions } from "./service-subscriptions/module.js";
+export { ServiceOffering } from "./service-offering/module.js";

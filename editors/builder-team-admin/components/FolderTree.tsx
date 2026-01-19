@@ -19,6 +19,7 @@ import {
   Users,
   Folder,
   Camera,
+  Package,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -42,6 +43,7 @@ const SECTION_TO_DOCUMENT_TYPE: Record<string, string | null> = {
   "builder-profile": "powerhouse/builder-profile",
   "team-members": null, // Uses custom TeamMembers component
   "service-subscriptions": "powerhouse/service-subscriptions",
+  "service-offering": "powerhouse/service-offering",
   "expense-reports": null, // Uses custom ExpenseReports component
   "snapshot-reports": null, // Uses custom SnapshotReports component
 };
@@ -74,6 +76,11 @@ const BASE_NAVIGATION_SECTIONS: SidebarNode[] = [
     id: "service-subscriptions",
     title: "Service Subscriptions",
     icon: <CreditCard size={ICON_SIZE} />,
+  },
+  {
+    id: "service-offering",
+    title: "Service Offering",
+    icon: <Package size={ICON_SIZE} />,
   },
   {
     id: "expense-reports",
