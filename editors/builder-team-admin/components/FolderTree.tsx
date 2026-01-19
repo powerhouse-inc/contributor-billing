@@ -12,6 +12,7 @@ import {
   isFileNodeKind,
 } from "@powerhousedao/reactor-browser";
 import type { Node, FolderNode, FileNode } from "document-drive";
+import type { BuilderProfileState } from "@powerhousedao/builder-profile/document-models/builder-profile";
 import {
   CreditCard,
   FileText,
@@ -221,6 +222,24 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
     return nodeIds;
   }, [snapshotReportsFolder, driveDocument]);
 
+  // Find the builder profile document and get its state
+  const builderProfileDocument = useMemo(() => {
+    if (!documentsInDrive) return null;
+    return documentsInDrive.find(
+      (doc) => doc.header.documentType === "powerhouse/builder-profile",
+    );
+  }, [documentsInDrive]);
+
+  // Check if builder profile document exists - don't show sidebar if it doesn't
+  const hasBuilderProfile = builderProfileDocument !== null;
+
+  // Get the isOperator flag from the builder profile state
+  const isOperator = useMemo(() => {
+    if (!builderProfileDocument) return false;
+    const state = (builderProfileDocument.state as unknown as { global: BuilderProfileState })?.global;
+    return state?.isOperator ?? false;
+  }, [builderProfileDocument]);
+
   // Build navigation sections with dynamic expense reports and snapshot reports children
   const navigationSections = useMemo(() => {
     if (!driveDocument) {
@@ -239,37 +258,45 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
       ? buildSidebarNodesFromFolder(snapshotReportsFolder.id, allNodes)
       : [];
 
-    // Replace the sections with ones that have children
-    return BASE_NAVIGATION_SECTIONS.map((section) => {
-      if (
-        section.id === "expense-reports" &&
-        expenseReportsChildren.length > 0
-      ) {
-        return {
-          ...section,
-          children: expenseReportsChildren,
-        };
-      }
-      if (
-        section.id === "snapshot-reports" &&
-        snapshotReportsChildren.length > 0
-      ) {
-        return {
-          ...section,
-          children: snapshotReportsChildren,
-        };
-      }
-      return section;
-    });
-  }, [expenseReportsFolder, snapshotReportsFolder, driveDocument]);
-
-  // Check if builder profile document exists - don't show sidebar if it doesn't
-  const hasBuilderProfile = useMemo(() => {
-    if (!documentsInDrive) return false;
-    return documentsInDrive.some(
-      (doc) => doc.header.documentType === "powerhouse/builder-profile",
-    );
-  }, [documentsInDrive]);
+    // Filter and transform the sections based on isOperator flag
+    return BASE_NAVIGATION_SECTIONS
+      // Hide "Service Offering" when isOperator is false
+      .filter((section) => {
+        if (section.id === "service-offering" && !isOperator) {
+          return false;
+        }
+        return true;
+      })
+      // Transform sections with dynamic content
+      .map((section) => {
+        // Change "Builder Profile" to "Operator Profile" when isOperator is true
+        if (section.id === "builder-profile" && isOperator) {
+          return {
+            ...section,
+            title: "Operator Profile",
+          };
+        }
+        if (
+          section.id === "expense-reports" &&
+          expenseReportsChildren.length > 0
+        ) {
+          return {
+            ...section,
+            children: expenseReportsChildren,
+          };
+        }
+        if (
+          section.id === "snapshot-reports" &&
+          snapshotReportsChildren.length > 0
+        ) {
+          return {
+            ...section,
+            children: snapshotReportsChildren,
+          };
+        }
+        return section;
+      });
+  }, [expenseReportsFolder, snapshotReportsFolder, driveDocument, isOperator]);
 
   // Create a map of document type to existing document (first one found)
   const existingDocumentsByType = useMemo(() => {
