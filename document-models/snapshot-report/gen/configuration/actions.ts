@@ -4,6 +4,8 @@ import type {
   SetAccountsDocumentInput,
   SetPeriodInput,
   SetOwnerIdInput,
+  SetPeriodStartInput,
+  SetPeriodEndInput,
 } from "../types.js";
 
 export type SetReportConfigAction = Action & {
@@ -22,9 +24,19 @@ export type SetOwnerIdAction = Action & {
   type: "SET_OWNER_ID";
   input: SetOwnerIdInput;
 };
+export type SetPeriodStartAction = Action & {
+  type: "SET_PERIOD_START";
+  input: SetPeriodStartInput;
+};
+export type SetPeriodEndAction = Action & {
+  type: "SET_PERIOD_END";
+  input: SetPeriodEndInput;
+};
 
 export type SnapshotReportConfigurationAction =
   | SetReportConfigAction
   | SetAccountsDocumentAction
   | SetPeriodAction
-  | SetOwnerIdAction;
+  | SetOwnerIdAction
+  | SetPeriodStartAction
+  | SetPeriodEndAction;

@@ -18,6 +18,8 @@ export function defaultGlobalState(): SnapshotReportGlobalState {
     startDate: null,
     endDate: null,
     reportName: null,
+    reportPeriodStart: null,
+    reportPeriodEnd: null,
     snapshotAccounts: [],
   };
 }

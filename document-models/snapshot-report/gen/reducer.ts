@@ -15,6 +15,8 @@ import {
   SetAccountsDocumentInputSchema,
   SetPeriodInputSchema,
   SetOwnerIdInputSchema,
+  SetPeriodStartInputSchema,
+  SetPeriodEndInputSchema,
   AddSnapshotAccountInputSchema,
   UpdateSnapshotAccountTypeInputSchema,
   RemoveSnapshotAccountInputSchema,
@@ -68,6 +70,24 @@ const stateReducer: StateReducer<SnapshotReportPHState> = (
     case "SET_OWNER_ID":
       SetOwnerIdInputSchema().parse(action.input);
       snapshotReportConfigurationOperations.setOwnerIdOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "SET_PERIOD_START":
+      SetPeriodStartInputSchema().parse(action.input);
+      snapshotReportConfigurationOperations.setPeriodStartOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "SET_PERIOD_END":
+      SetPeriodEndInputSchema().parse(action.input);
+      snapshotReportConfigurationOperations.setPeriodEndOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

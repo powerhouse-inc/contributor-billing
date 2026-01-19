@@ -19,7 +19,10 @@
       "mcp__reactor-mcp__addActions",
       "mcp__reactor-mcp__getDocumentModelSchema",
       "mcp__reactor-mcp__getDocument",
-      "Bash(bun run lint:fix:*)"
+      "Bash(bun run lint:fix:*)",
+      "Bash(bun run generate:*)",
+      "mcp__reactor-mcp__getDrives",
+      "mcp__reactor-mcp__getDocuments"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

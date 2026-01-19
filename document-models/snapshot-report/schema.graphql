@@ -21,6 +21,8 @@ type SnapshotReportState {
   startDate: DateTime
   endDate: DateTime
   reportName: String
+  reportPeriodStart: DateTime
+  reportPeriodEnd: DateTime
   snapshotAccounts: [SnapshotAccount!]!
 }
 
@@ -117,6 +119,14 @@ input SetPeriodInput {
 
 input SetOwnerIdInput {
   ownerId: PHID!
+}
+
+input SetPeriodStartInput {
+  periodStart: DateTime!
+}
+
+input SetPeriodEndInput {
+  periodEnd: DateTime!
 }
 
 # accounts

@@ -12,6 +12,8 @@ import type {
   SetAccountsDocumentInput,
   SetPeriodInput,
   SetOwnerIdInput,
+  SetPeriodStartInput,
+  SetPeriodEndInput,
   AddSnapshotAccountInput,
   UpdateSnapshotAccountTypeInput,
   RemoveSnapshotAccountInput,
@@ -198,6 +200,50 @@ export const getResolvers = (
 
         if (result.status !== "SUCCESS") {
           throw new Error(result.error?.message ?? "Failed to setOwnerId");
+        }
+
+        return true;
+      },
+
+      SnapshotReport_setPeriodStart: async (
+        _: unknown,
+        args: { docId: string; input: SetPeriodStartInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<SnapshotReportDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.setPeriodStart(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setPeriodStart");
+        }
+
+        return true;
+      },
+
+      SnapshotReport_setPeriodEnd: async (
+        _: unknown,
+        args: { docId: string; input: SetPeriodEndInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<SnapshotReportDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.setPeriodEnd(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setPeriodEnd");
         }
 
         return true;

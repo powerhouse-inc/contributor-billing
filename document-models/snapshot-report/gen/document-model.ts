@@ -73,6 +73,29 @@ export const documentModel: DocumentModelGlobalState = {
               template:
                 "Set the owner ID (builder team) for the snapshot report",
             },
+            {
+              description: "",
+              errors: [],
+              examples: [],
+              id: "80c12645-0005-4534-b578-52a40582d18e",
+              name: "SET_PERIOD_START",
+              reducer: "",
+              schema:
+                "input SetPeriodStartInput {\n  periodStart: DateTime!\n}",
+              scope: "global",
+              template: "",
+            },
+            {
+              description: "",
+              errors: [],
+              examples: [],
+              id: "05d31622-9b31-493a-948b-c817867ce5eb",
+              name: "SET_PERIOD_END",
+              reducer: "",
+              schema: "input SetPeriodEndInput {\n  periodEnd: DateTime!\n}",
+              scope: "global",
+              template: "",
+            },
           ],
         },
         {
@@ -349,9 +372,9 @@ export const documentModel: DocumentModelGlobalState = {
         global: {
           examples: [],
           initialValue:
-            '"{\\n  \\"ownerId\\": null,\\n  \\"accountsDocumentId\\": null,\\n  \\"startDate\\": null,\\n  \\"endDate\\": null,\\n  \\"reportName\\": null,\\n  \\"snapshotAccounts\\": []\\n}"',
+            '"{\\"ownerId\\": null, \\"accountsDocumentId\\": null, \\"startDate\\": null, \\"endDate\\": null, \\"reportName\\": null, \\"reportPeriodStart\\": null, \\"reportPeriodEnd\\": null, \\"snapshotAccounts\\": []}"',
           schema:
-            "type SnapshotReportState {\n  ownerId: PHID\n  accountsDocumentId: PHID\n  startDate: DateTime\n  endDate: DateTime\n  reportName: String\n  snapshotAccounts: [SnapshotAccount!]!\n}\n\ntype SnapshotAccount {\n  id: OID!\n  accountId: OID!\n  accountAddress: String!\n  accountName: String!\n  type: AccountType!\n  accountTransactionsId: PHID\n  startingBalances: [TokenBalance!]!\n  endingBalances: [TokenBalance!]!\n  transactions: [SnapshotTransaction!]!\n}\n\ntype TokenBalance {\n  id: OID!\n  token: Currency!\n  amount: Amount_Currency!\n}\n\ntype SnapshotTransaction {\n  id: OID!\n  transactionId: String!\n  counterParty: EthereumAddress\n  amount: Amount_Currency!\n  datetime: DateTime!\n  txHash: String!\n  token: Currency!\n  blockNumber: Int\n  direction: TransactionDirection!\n  flowType: TransactionFlowType\n  counterPartyAccountId: OID\n}\n\nenum AccountType {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum AccountTypeInput {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum TransactionDirection {\n  INFLOW\n  OUTFLOW\n}\n\nenum TransactionDirectionInput {\n  INFLOW\n  OUTFLOW\n}\n\nenum TransactionFlowType {\n  TopUp\n  Return\n  Internal\n  External\n}\n\nenum TransactionFlowTypeInput {\n  TopUp\n  Return\n  Internal\n  External\n}",
+            "type SnapshotReportState {\n  ownerId: PHID\n  accountsDocumentId: PHID\n  startDate: DateTime\n  endDate: DateTime\n  reportName: String\n  reportPeriodStart: DateTime\n  reportPeriodEnd: DateTime\n  snapshotAccounts: [SnapshotAccount!]!\n}\n\ntype SnapshotAccount {\n  id: OID!\n  accountId: OID!\n  accountAddress: String!\n  accountName: String!\n  type: AccountType!\n  accountTransactionsId: PHID\n  startingBalances: [TokenBalance!]!\n  endingBalances: [TokenBalance!]!\n  transactions: [SnapshotTransaction!]!\n}\n\ntype TokenBalance {\n  id: OID!\n  token: Currency!\n  amount: Amount_Currency!\n}\n\ntype SnapshotTransaction {\n  id: OID!\n  transactionId: String!\n  counterParty: EthereumAddress\n  amount: Amount_Currency!\n  datetime: DateTime!\n  txHash: String!\n  token: Currency!\n  blockNumber: Int\n  direction: TransactionDirection!\n  flowType: TransactionFlowType\n  counterPartyAccountId: OID\n}\n\nenum AccountType {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum AccountTypeInput {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum TransactionDirection {\n  INFLOW\n  OUTFLOW\n}\n\nenum TransactionDirectionInput {\n  INFLOW\n  OUTFLOW\n}\n\nenum TransactionFlowType {\n  TopUp\n  Return\n  Internal\n  External\n}\n\nenum TransactionFlowTypeInput {\n  TopUp\n  Return\n  Internal\n  External\n}",
         },
         local: {
           examples: [],

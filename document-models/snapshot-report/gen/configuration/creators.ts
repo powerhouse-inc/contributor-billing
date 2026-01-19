@@ -4,18 +4,24 @@ import {
   SetAccountsDocumentInputSchema,
   SetPeriodInputSchema,
   SetOwnerIdInputSchema,
+  SetPeriodStartInputSchema,
+  SetPeriodEndInputSchema,
 } from "../schema/zod.js";
 import type {
   SetReportConfigInput,
   SetAccountsDocumentInput,
   SetPeriodInput,
   SetOwnerIdInput,
+  SetPeriodStartInput,
+  SetPeriodEndInput,
 } from "../types.js";
 import type {
   SetReportConfigAction,
   SetAccountsDocumentAction,
   SetPeriodAction,
   SetOwnerIdAction,
+  SetPeriodStartAction,
+  SetPeriodEndAction,
 } from "./actions.js";
 
 export const setReportConfig = (input: SetReportConfigInput) =>
@@ -51,5 +57,23 @@ export const setOwnerId = (input: SetOwnerIdInput) =>
     { ...input },
     undefined,
     SetOwnerIdInputSchema,
+    "global",
+  );
+
+export const setPeriodStart = (input: SetPeriodStartInput) =>
+  createAction<SetPeriodStartAction>(
+    "SET_PERIOD_START",
+    { ...input },
+    undefined,
+    SetPeriodStartInputSchema,
+    "global",
+  );
+
+export const setPeriodEnd = (input: SetPeriodEndInput) =>
+  createAction<SetPeriodEndAction>(
+    "SET_PERIOD_END",
+    { ...input },
+    undefined,
+    SetPeriodEndInputSchema,
     "global",
   );

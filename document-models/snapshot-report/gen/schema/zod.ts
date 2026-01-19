@@ -12,7 +12,9 @@ import type {
   SetAccountsDocumentInput,
   SetEndingBalanceInput,
   SetOwnerIdInput,
+  SetPeriodEndInput,
   SetPeriodInput,
+  SetPeriodStartInput,
   SetReportConfigInput,
   SetStartingBalanceInput,
   SnapshotAccount,
@@ -178,12 +180,28 @@ export function SetOwnerIdInputSchema(): z.ZodObject<
   });
 }
 
+export function SetPeriodEndInputSchema(): z.ZodObject<
+  Properties<SetPeriodEndInput>
+> {
+  return z.object({
+    periodEnd: z.string().datetime(),
+  });
+}
+
 export function SetPeriodInputSchema(): z.ZodObject<
   Properties<SetPeriodInput>
 > {
   return z.object({
     endDate: z.string().datetime(),
     startDate: z.string().datetime(),
+  });
+}
+
+export function SetPeriodStartInputSchema(): z.ZodObject<
+  Properties<SetPeriodStartInput>
+> {
+  return z.object({
+    periodStart: z.string().datetime(),
   });
 }
 
@@ -236,6 +254,8 @@ export function SnapshotReportStateSchema(): z.ZodObject<
     endDate: z.string().datetime().nullable(),
     ownerId: z.string().nullable(),
     reportName: z.string().nullable(),
+    reportPeriodEnd: z.string().datetime().nullable(),
+    reportPeriodStart: z.string().datetime().nullable(),
     snapshotAccounts: z.array(SnapshotAccountSchema()),
     startDate: z.string().datetime().nullable(),
   });

@@ -82,7 +82,7 @@ export type ExpenseReportState = {
   ownerId: Maybe<Scalars["PHID"]["output"]>;
   periodEnd: Maybe<Scalars["DateTime"]["output"]>;
   periodStart: Maybe<Scalars["DateTime"]["output"]>;
-  status: ExpenseReportStatus;
+  status: ExpenseReportStatus | `${ExpenseReportStatus}`;
   wallets: Array<Wallet>;
 };
 
@@ -175,7 +175,7 @@ export type SetPeriodStartInput = {
 };
 
 export type SetStatusInput = {
-  status: ExpenseReportStatusInput;
+  status: ExpenseReportStatusInput | `${ExpenseReportStatusInput}`;
 };
 
 export type UpdateLineItemGroupInput = {

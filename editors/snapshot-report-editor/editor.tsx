@@ -1,5 +1,5 @@
 import { generateId } from "document-model/core";
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   useDocumentsInSelectedDrive,
   useParentFolderForSelectedNode,
@@ -7,13 +7,15 @@ import {
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
-import { DatePicker } from "@powerhousedao/document-engineering";
+import { Button, Select, DatePicker } from "@powerhousedao/document-engineering";
 import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { useSelectedSnapshotReportDocument } from "../hooks/useSnapshotReportDocument.js";
 import {
   setReportConfig,
   addSnapshotAccount,
   addTransaction,
+  setPeriodStart,
+  setPeriodEnd,
 } from "../../document-models/snapshot-report/gen/creators.js";
 import { SetOwner } from "./components/SetOwner.js";
 import { useSyncSnapshotAccount } from "./hooks/useSyncSnapshotAccount.js";
@@ -22,6 +24,52 @@ import { calculateTransactionFlowInfo } from "./utils/flowTypeCalculations.js";
 import { deriveTransactionsForAccount } from "./utils/deriveTransactions.js";
 import { actions as accountsActions } from "../../document-models/accounts/index.js";
 import { transactionsActions } from "../../document-models/snapshot-report/index.js";
+
+// Helper function to generate month options from January 2025 to current month
+function generateMonthOptions() {
+  const options: Array<{ label: string; value: string }> = [];
+  const startDate = new Date(2025, 0, 1); // January 2025
+  const currentDate = new Date();
+
+  const date = new Date(startDate);
+
+  while (date <= currentDate) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const monthName = date.toLocaleDateString("en-US", { month: "long" });
+    const label = `${monthName} ${year}`;
+
+    // Value format: YYYY-MM (e.g., "2025-01")
+    const value = `${year}-${String(month + 1).padStart(2, "0")}`;
+
+    options.push({ label, value });
+
+    // Move to next month
+    date.setMonth(date.getMonth() + 1);
+  }
+
+  // Reverse to show most recent first
+  return options.reverse();
+}
+
+// Helper function to get start and end dates for a given month
+function getMonthDateRange(yearMonth: string) {
+  const [year, month] = yearMonth.split("-").map(Number);
+
+  // First day of month at 00:00:00 UTC
+  const periodStart = new Date(
+    Date.UTC(year, month - 1, 1, 0, 0, 0, 0),
+  ).toISOString();
+
+  // Last day of month at 23:59:59.999 UTC
+  // Get the last day by using day 0 of the next month
+  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const periodEnd = new Date(
+    Date.UTC(year, month - 1, lastDay, 23, 59, 59, 999),
+  ).toISOString();
+
+  return { periodStart, periodEnd };
+}
 
 export default function Editor() {
   const [document, dispatch] = useSelectedSnapshotReportDocument();
@@ -50,6 +98,8 @@ export default function Editor() {
     snapshotAccounts,
     accountsDocumentId,
     ownerId,
+    reportPeriodStart,
+    reportPeriodEnd,
   } = document.state.global;
 
   // Filter for Accounts documents
@@ -79,9 +129,76 @@ export default function Editor() {
     availableAccounts.map((acc: any) => [acc.id, acc]),
   );
 
+  // Local state for the selected period (before confirmation)
+  const [selectedPeriod, setSelectedPeriod] = useState<string>(() => {
+    if (reportPeriodStart) {
+      const date = new Date(reportPeriodStart);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    }
+    // Default to current month
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
+
+  // Track if the selected period differs from the saved period
+  const savedPeriod = useMemo(() => {
+    if (reportPeriodStart) {
+      const date = new Date(reportPeriodStart);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    }
+    return "";
+  }, [reportPeriodStart]);
+
+  // Track if we're in editing mode
+  const [isEditingPeriod, setIsEditingPeriod] = useState(!savedPeriod);
+
+  const isPeriodChanged = selectedPeriod !== savedPeriod;
+
+  // Update selected period when document period changes externally
+  useEffect(() => {
+    if (savedPeriod && savedPeriod !== selectedPeriod) {
+      setSelectedPeriod(savedPeriod);
+    }
+  }, [savedPeriod]);
+
+  // Handle period dropdown change (doesn't save yet)
+  const handlePeriodChange = (value: string) => {
+    setSelectedPeriod(value);
+  };
+
+  // Handle period confirmation (saves to document)
+  const handleConfirmPeriod = () => {
+    const { periodStart, periodEnd } = getMonthDateRange(selectedPeriod);
+
+    // Dispatch both start and end dates
+    dispatch?.(setPeriodStart({ periodStart }));
+    dispatch?.(setPeriodEnd({ periodEnd }));
+
+    // Exit editing mode
+    setIsEditingPeriod(false);
+  };
+
+  // Handle starting to edit the period
+  const handleEditPeriod = () => {
+    setIsEditingPeriod(true);
+  };
+
+  // Generate month options
+  const monthOptions = useMemo(() => generateMonthOptions(), []);
+
+  // Get the formatted display label for the current period
+  const periodDisplayLabel = useMemo(() => {
+    const option = monthOptions.find((opt) => opt.value === selectedPeriod);
+    return option ? option.label : selectedPeriod;
+  }, [selectedPeriod, monthOptions]);
+
+  // Use reportPeriodStart/End if available, fallback to startDate/endDate for backwards compatibility
+  const effectiveStartDate = reportPeriodStart || startDate;
+  const effectiveEndDate = reportPeriodEnd || endDate;
+
   // Handle sync for a single account
   const handleSyncAccount = async (snapshotAccount: any) => {
-    if (!startDate || !endDate) {
+    if (!effectiveStartDate || !effectiveEndDate) {
       alert(
         "Please set the report period (start and end dates) before syncing",
       );
@@ -96,8 +213,8 @@ export default function Editor() {
         snapshotAccount,
         accountEntry,
         accountsDocumentId || undefined,
-        startDate,
-        endDate,
+        effectiveStartDate,
+        effectiveEndDate,
         dispatch,
         snapshotAccounts,
         document?.header?.id,
@@ -135,7 +252,7 @@ export default function Editor() {
 
   // Handle sync all accounts - parallel with concurrency limit
   const handleSyncAll = async () => {
-    if (!startDate || !endDate) {
+    if (!effectiveStartDate || !effectiveEndDate) {
       alert(
         "Please set the report period (start and end dates) before syncing",
       );
@@ -162,8 +279,8 @@ export default function Editor() {
                 account,
                 accountEntry,
                 accountsDocumentId || undefined,
-                startDate,
-                endDate,
+                effectiveStartDate,
+                effectiveEndDate,
                 dispatch,
                 snapshotAccounts,
                 document?.header?.id,
@@ -241,15 +358,15 @@ export default function Editor() {
   };
 
   const handleImportAccounts = async () => {
-    if (!documentsInDrive || !startDate || !endDate) {
+    if (!documentsInDrive || !effectiveStartDate || !effectiveEndDate) {
       alert(
         "Please set the report period (start and end dates) before importing accounts",
       );
       return;
     }
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = new Date(effectiveStartDate);
+    const end = new Date(effectiveEndDate);
 
     // Track newly imported accounts for two-pass import
     const newlyImportedAccounts: Array<{
@@ -451,6 +568,7 @@ export default function Editor() {
     }
   };
 
+  // Handlers for the legacy startDate/endDate fields (DatePicker approach)
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const dateValue = e.target.value;
     if (!dateValue) return;
@@ -580,7 +698,45 @@ export default function Editor() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Period
+                Reporting Period
+              </label>
+              {isEditingPeriod ? (
+                <div className="flex items-center gap-2">
+                  <Select
+                    options={monthOptions}
+                    value={selectedPeriod}
+                    onChange={(value) => handlePeriodChange(value as string)}
+                    className="min-w-[180px]"
+                  />
+                  {isPeriodChanged && (
+                    <Button
+                      variant="default"
+                      onClick={handleConfirmPeriod}
+                      className="text-sm"
+                    >
+                      Set Period
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-bold text-gray-900">
+                    {periodDisplayLabel}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    onClick={handleEditPeriod}
+                    className="text-sm"
+                  >
+                    Change
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Snapshot Period
               </label>
               <div className="flex gap-2 items-center">
                 <DatePicker
@@ -611,7 +767,7 @@ export default function Editor() {
               {snapshotAccounts.length > 0 && (
                 <button
                   onClick={handleSyncAll}
-                  disabled={isSyncingAll || !startDate || !endDate}
+                  disabled={isSyncingAll || !effectiveStartDate || !effectiveEndDate}
                   className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <RefreshCw
@@ -706,8 +862,8 @@ export default function Editor() {
                                     onClick={() => handleSyncAccount(account)}
                                     disabled={
                                       syncingAccounts.has(account.id) ||
-                                      !startDate ||
-                                      !endDate
+                                      !effectiveStartDate ||
+                                      !effectiveEndDate
                                     }
                                     className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Sync account transactions and balances"

@@ -40,6 +40,16 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: SnapshotReport_SetOwnerIdInput
     ): Int
+    SnapshotReport_setPeriodStart(
+      driveId: String
+      docId: PHID
+      input: SnapshotReport_SetPeriodStartInput
+    ): Int
+    SnapshotReport_setPeriodEnd(
+      driveId: String
+      docId: PHID
+      input: SnapshotReport_SetPeriodEndInput
+    ): Int
     SnapshotReport_addSnapshotAccount(
       driveId: String
       docId: PHID
@@ -116,6 +126,12 @@ export const schema: DocumentNode = gql`
   }
   input SnapshotReport_SetOwnerIdInput {
     ownerId: PHID!
+  }
+  input SnapshotReport_SetPeriodStartInput {
+    periodStart: DateTime!
+  }
+  input SnapshotReport_SetPeriodEndInput {
+    periodEnd: DateTime!
   }
 
   """

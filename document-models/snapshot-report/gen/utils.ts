@@ -26,6 +26,8 @@ export const initialGlobalState: SnapshotReportGlobalState = {
   startDate: null,
   endDate: null,
   reportName: null,
+  reportPeriodStart: null,
+  reportPeriodEnd: null,
   snapshotAccounts: [],
 };
 export const initialLocalState: SnapshotReportLocalState = {};
