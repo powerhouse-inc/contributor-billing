@@ -1,4 +1,4 @@
-import { generateId } from "document-model/core";
+import { generateId, setName } from "document-model";
 import { useState, useMemo, useEffect } from "react";
 import {
   useDocumentsInSelectedDrive,
@@ -132,8 +132,9 @@ export default function Editor() {
   // Local state for the selected period (before confirmation)
   const [selectedPeriod, setSelectedPeriod] = useState<string>(() => {
     if (reportPeriodStart) {
+      // Use UTC methods to avoid timezone issues
       const date = new Date(reportPeriodStart);
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
     }
     // Default to current month
     const now = new Date();
@@ -143,8 +144,9 @@ export default function Editor() {
   // Track if the selected period differs from the saved period
   const savedPeriod = useMemo(() => {
     if (reportPeriodStart) {
+      // Use UTC methods to avoid timezone issues
       const date = new Date(reportPeriodStart);
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
     }
     return "";
   }, [reportPeriodStart]);
@@ -170,9 +172,20 @@ export default function Editor() {
   const handleConfirmPeriod = () => {
     const { periodStart, periodEnd } = getMonthDateRange(selectedPeriod);
 
-    // Dispatch both start and end dates
+    // Get the formatted month label (e.g., "January 2025") - timezone agnostic
+    const [year, month] = selectedPeriod.split("-").map(Number);
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December",
+    ];
+    const monthLabel = `${monthNames[month - 1]} ${year}`;
+
+    // Dispatch period dates
     dispatch?.(setPeriodStart({ periodStart }));
     dispatch?.(setPeriodEnd({ periodEnd }));
+
+    // Auto-set document name based on reporting period
+    dispatch?.(setName(`${monthLabel} - Snapshot Report`));
 
     // Exit editing mode
     setIsEditingPeriod(false);
