@@ -7,77 +7,62 @@ import {
   setSelectedNode,
   showCreateDocumentModal,
   useDocumentsInSelectedDrive,
+  useSelectedDrive,
+  isFileNodeKind,
 } from "@powerhousedao/reactor-browser";
-import { Wallet, FileText, Camera } from "lucide-react";
+import {
+  Wallet,
+  FileText,
+  Building2,
+  Calendar,
+  CreditCard,
+  BarChart3,
+  Camera,
+} from "lucide-react";
 import { useMemo, useState } from "react";
+import { useBillingFolderStructure } from "../hooks/useBillingFolderStructure.js";
 
 const ICON_SIZE = 16;
 
-/** Custom view types that don't correspond to document models */
-export type CustomView =
-  | "accounts"
-  | "expense-report"
-  | "snapshot-report"
-  | null;
+/** Folder types for content routing */
+export type FolderType = "payments" | "reporting" | "month" | "billing" | null;
 
-/**
- * Maps navigation section IDs to their corresponding document types.
- * When a section is clicked, the corresponding document type will be created or navigated to.
- */
-const SECTION_TO_DOCUMENT_TYPE: Record<string, string | null> = {
-  accounts: "powerhouse/accounts",
-  "expense-report": "powerhouse/expense-report",
-  "snapshot-report": "powerhouse/snapshot-report",
-};
-
-/**
- * Maps navigation section IDs to custom view identifiers.
- */
-const SECTION_TO_CUSTOM_VIEW: Record<string, CustomView> = {
-  accounts: "accounts",
-  "expense-report": "expense-report",
-  "snapshot-report": "snapshot-report",
-};
-
-/**
- * Base navigation sections for the Contributor Billing drive.
- * The accounts section will have dynamic children based on account-transactions documents.
- */
-const BASE_NAVIGATION_SECTIONS: SidebarNode[] = [
-  {
-    id: "accounts",
-    title: "Accounts",
-    icon: <Wallet size={ICON_SIZE} />,
-  },
-  {
-    id: "expense-report",
-    title: "Expense Report",
-    icon: <FileText size={ICON_SIZE} />,
-  },
-  {
-    id: "snapshot-report",
-    title: "Snapshot Report",
-    icon: <Camera size={ICON_SIZE} />,
-  },
-];
+/** Selected folder info for content routing */
+export interface SelectedFolderInfo {
+  folderId: string;
+  folderType: FolderType;
+  monthName?: string;
+}
 
 type FolderTreeProps = {
-  onCustomViewChange?: (view: CustomView) => void;
+  onFolderSelect?: (folderInfo: SelectedFolderInfo | null) => void;
 };
 
 /**
- * Sidebar navigation component with hardcoded navigation sections.
- * Displays Accounts as the main section.
- * If an accounts document exists, clicking shows its editor.
- * If it doesn't exist, clicking shows the create document modal.
- * Account-transactions documents are shown as children of the Accounts node.
+ * Sidebar navigation component with:
+ * - Accounts section (with account-transactions children)
+ * - Billing folder structure (Month > Payments/Reporting)
  */
-export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
-  const [activeNodeId, setActiveNodeId] = useState<string>(
-    BASE_NAVIGATION_SECTIONS[0].id,
-  );
+export function FolderTree({ onFolderSelect }: FolderTreeProps) {
+  const [activeNodeId, setActiveNodeId] = useState<string>("accounts");
 
   const documentsInDrive = useDocumentsInSelectedDrive();
+  const [driveDocument] = useSelectedDrive();
+  const { billingFolder, monthFolders, paymentsFolderIds, reportingFolderIds } =
+    useBillingFolderStructure();
+
+  // Build a map of document ID to parent folder ID
+  const documentParentMap = useMemo(() => {
+    const map = new Map<string, string | null>();
+    if (!driveDocument) return map;
+    const nodes = driveDocument.state.global.nodes;
+    for (const node of nodes) {
+      if (isFileNodeKind(node)) {
+        map.set(node.id, node.parentFolder);
+      }
+    }
+    return map;
+  }, [driveDocument]);
 
   // Find all account-transactions documents in the drive
   const accountTransactionsDocuments = useMemo(() => {
@@ -96,7 +81,39 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
     return nodeIds;
   }, [accountTransactionsDocuments]);
 
-  // Build navigation sections with dynamic account-transactions children
+  // Find accounts document
+  const accountsDocument = useMemo(() => {
+    if (!documentsInDrive) return null;
+    return documentsInDrive.find(
+      (doc) => doc.header.documentType === "powerhouse/accounts",
+    );
+  }, [documentsInDrive]);
+
+  // Find report documents (expense + snapshot) and build ID set for lookup
+  const { reportDocuments, reportDocumentIds } = useMemo(() => {
+    if (!documentsInDrive)
+      return { reportDocuments: [], reportDocumentIds: new Set<string>() };
+    const docs = documentsInDrive.filter(
+      (doc) =>
+        doc.header.documentType === "powerhouse/expense-report" ||
+        doc.header.documentType === "powerhouse/snapshot-report",
+    );
+    return {
+      reportDocuments: docs,
+      reportDocumentIds: new Set(docs.map((d) => d.header.id)),
+    };
+  }, [documentsInDrive]);
+
+  // Build month folder IDs set for quick lookup
+  const monthFolderIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const info of monthFolders.values()) {
+      ids.add(info.folder.id);
+    }
+    return ids;
+  }, [monthFolders]);
+
+  // Build navigation sections
   const navigationSections = useMemo(() => {
     // Build account-transactions children nodes
     const accountTransactionsChildren: SidebarNode[] =
@@ -106,79 +123,201 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
         icon: <FileText size={ICON_SIZE} />,
       }));
 
-    // Replace the accounts section with one that has children if any exist
-    return BASE_NAVIGATION_SECTIONS.map((section) => {
-      if (section.id === "accounts" && accountTransactionsChildren.length > 0) {
-        return {
-          ...section,
-          children: accountTransactionsChildren,
-        };
-      }
-      return section;
-    });
-  }, [accountTransactionsDocuments]);
+    // Build Billing folder children (month folders)
+    const billingChildren: SidebarNode[] = [];
 
-  // Create a map of document type to existing document (first one found)
-  const existingDocumentsByType = useMemo(() => {
-    const map: Record<string, string | undefined> = {};
-    if (!documentsInDrive) return map;
+    // Sort months by date (most recent first)
+    const sortedMonths = Array.from(monthFolders.entries()).sort(
+      ([nameA], [nameB]) => {
+        // Parse "January 2025" format
+        const dateA = new Date(nameA);
+        const dateB = new Date(nameB);
+        return dateB.getTime() - dateA.getTime(); // Most recent first
+      },
+    );
 
-    for (const doc of documentsInDrive) {
-      const docType = doc.header.documentType;
-      // Only store the first document of each type (singleton pattern)
-      if (!map[docType]) {
-        map[docType] = doc.header.id;
+    for (const [monthName, info] of sortedMonths) {
+      const monthChildren: SidebarNode[] = [];
+
+      if (info.paymentsFolder) {
+        monthChildren.push({
+          id: info.paymentsFolder.id,
+          title: "Payments",
+          icon: <CreditCard size={ICON_SIZE} />,
+        });
       }
+
+      if (info.reportingFolder) {
+        // Filter reports that belong to this specific reporting folder OR match the month
+        // Extract just the month part (e.g., "January" from "January 2026")
+        const monthPart = monthName.split(" ")[0]?.toLowerCase() || "";
+        const yearPart = monthName.split(" ")[1] || "";
+
+        const folderReports = reportDocuments.filter((doc) => {
+          const parentId = documentParentMap.get(doc.header.id);
+          // Include if stored in this reporting folder
+          if (parentId === info.reportingFolder?.id) return true;
+          // Include if stored in the month folder directly
+          if (parentId === info.folder.id) return true;
+          // Include if report name contains the month name (with or without year)
+          const docName = doc.header.name?.toLowerCase() || "";
+          if (docName.includes(monthName.toLowerCase())) return true;
+          // Check if name contains month part and optionally the year
+          if (monthPart && docName.includes(monthPart)) {
+            // If year is in the name, make sure it matches
+            if (yearPart && docName.includes(yearPart)) return true;
+            // If no year in name, still include it
+            if (!yearPart || !docName.match(/\d{4}/)) return true;
+          }
+          return false;
+        });
+        const reportingChildren: SidebarNode[] = folderReports.map((doc) => ({
+          id: doc.header.id,
+          title: doc.header.name || "Untitled Report",
+          icon:
+            doc.header.documentType === "powerhouse/snapshot-report" ? (
+              <Camera size={ICON_SIZE} />
+            ) : (
+              <FileText size={ICON_SIZE} />
+            ),
+        }));
+
+        monthChildren.push({
+          id: info.reportingFolder.id,
+          title: "Reporting",
+          icon: <BarChart3 size={ICON_SIZE} />,
+          children:
+            reportingChildren.length > 0 ? reportingChildren : undefined,
+        });
+      }
+
+      billingChildren.push({
+        id: info.folder.id,
+        title: monthName,
+        icon: <Calendar size={ICON_SIZE} />,
+        children: monthChildren.length > 0 ? monthChildren : undefined,
+      });
     }
-    return map;
-  }, [documentsInDrive]);
+
+    const sections: SidebarNode[] = [
+      // Accounts section
+      {
+        id: "accounts",
+        title: "Accounts",
+        icon: <Wallet size={ICON_SIZE} />,
+        children:
+          accountTransactionsChildren.length > 0
+            ? accountTransactionsChildren
+            : undefined,
+      },
+      // Billing folder structure
+      {
+        id: billingFolder?.id || "billing-placeholder",
+        title: "Billing",
+        icon: <Building2 size={ICON_SIZE} />,
+        children: billingChildren.length > 0 ? billingChildren : undefined,
+      },
+    ];
+
+    return sections;
+  }, [
+    accountTransactionsDocuments,
+    billingFolder,
+    monthFolders,
+    reportDocuments,
+    documentParentMap,
+  ]);
 
   const handleActiveNodeChange = (node: SidebarNode) => {
     setActiveNodeId(node.id);
 
     // Check if this is an account-transactions child node
     if (accountTransactionsNodeIds.has(node.id)) {
-      // It's an account-transactions document - open the document editor
-      onCustomViewChange?.(null);
+      onFolderSelect?.(null);
       setSelectedNode(node.id);
       return;
     }
 
-    // Check if this section has a custom view
-    const customView = SECTION_TO_CUSTOM_VIEW[node.id];
-    if (customView) {
-      // For accounts, check if document exists
-      const documentType = SECTION_TO_DOCUMENT_TYPE[node.id];
-      if (documentType) {
-        const existingDocId = existingDocumentsByType[documentType];
-        if (existingDocId) {
-          // Navigate to the existing accounts document
-          onCustomViewChange?.(null);
-          setSelectedNode(existingDocId);
-        } else {
-          // Clear selected node to create document at drive root, not in current folder
-          setSelectedNode("");
-          showCreateDocumentModal(documentType);
-        }
+    // Check if this is an expense or snapshot report document
+    if (reportDocumentIds.has(node.id)) {
+      onFolderSelect?.(null);
+      setSelectedNode(node.id);
+      return;
+    }
+
+    // Check if clicking Accounts section
+    if (node.id === "accounts") {
+      if (accountsDocument) {
+        onFolderSelect?.(null);
+        setSelectedNode(accountsDocument.header.id);
+      } else {
+        setSelectedNode("");
+        showCreateDocumentModal("powerhouse/accounts");
       }
       return;
     }
 
-    // Clear custom view when navigating to a document
-    onCustomViewChange?.(null);
-
-    const documentType = SECTION_TO_DOCUMENT_TYPE[node.id];
-    if (!documentType) return;
-
-    const existingDocId = existingDocumentsByType[documentType];
-    if (existingDocId) {
-      // Navigate to the existing document
-      setSelectedNode(existingDocId);
-    } else {
-      // Clear selected node to create document at drive root, not in current folder
+    // Check if clicking Billing folder
+    if (node.id === billingFolder?.id || node.id === "billing-placeholder") {
+      onFolderSelect?.({
+        folderId: billingFolder?.id || "",
+        folderType: "billing",
+      });
       setSelectedNode("");
-      showCreateDocumentModal(documentType);
+      return;
     }
+
+    // Check if clicking a month folder
+    if (monthFolderIds.has(node.id)) {
+      // Find the month name for this folder
+      for (const [monthName, info] of monthFolders.entries()) {
+        if (info.folder.id === node.id) {
+          onFolderSelect?.({
+            folderId: node.id,
+            folderType: "month",
+            monthName,
+          });
+          setSelectedNode("");
+          return;
+        }
+      }
+    }
+
+    // Check if clicking a Payments folder
+    if (paymentsFolderIds.has(node.id)) {
+      // Find the month name for this payments folder
+      for (const [monthName, info] of monthFolders.entries()) {
+        if (info.paymentsFolder?.id === node.id) {
+          onFolderSelect?.({
+            folderId: node.id,
+            folderType: "payments",
+            monthName,
+          });
+          setSelectedNode("");
+          return;
+        }
+      }
+    }
+
+    // Check if clicking a Reporting folder
+    if (reportingFolderIds.has(node.id)) {
+      // Find the month name for this reporting folder
+      for (const [monthName, info] of monthFolders.entries()) {
+        if (info.reportingFolder?.id === node.id) {
+          onFolderSelect?.({
+            folderId: node.id,
+            folderType: "reporting",
+            monthName,
+          });
+          setSelectedNode("");
+          return;
+        }
+      }
+    }
+
+    // Default: clear selection
+    onFolderSelect?.(null);
+    setSelectedNode("");
   };
 
   return (
@@ -203,7 +342,7 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
         initialWidth={256}
         defaultLevel={2}
         handleOnTitleClick={() => {
-          onCustomViewChange?.(null);
+          onFolderSelect?.(null);
           setSelectedNode("");
         }}
       />

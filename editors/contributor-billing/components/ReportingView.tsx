@@ -1,0 +1,159 @@
+import {
+  useDocumentsInSelectedDrive,
+  setSelectedNode,
+  showCreateDocumentModal,
+} from "@powerhousedao/reactor-browser";
+import { useMemo } from "react";
+import { FileText, Camera, Plus } from "lucide-react";
+
+interface ReportingViewProps {
+  folderId: string;
+  monthName?: string;
+}
+
+/**
+ * View for the Reporting folder showing Expense Reports and Snapshot Reports
+ */
+export function ReportingView({
+  folderId: _folderId,
+  monthName,
+}: ReportingViewProps) {
+  const documentsInDrive = useDocumentsInSelectedDrive();
+
+  // Find expense reports and snapshot reports in this folder
+  // Note: For now we show all reports in the drive - folder filtering can be added later
+  const { expenseReports, snapshotReports } = useMemo(() => {
+    if (!documentsInDrive) {
+      return { expenseReports: [], snapshotReports: [] };
+    }
+
+    const expense = documentsInDrive.filter(
+      (doc) => doc.header.documentType === "powerhouse/expense-report",
+    );
+    const snapshot = documentsInDrive.filter(
+      (doc) => doc.header.documentType === "powerhouse/snapshot-report",
+    );
+
+    return { expenseReports: expense, snapshotReports: snapshot };
+  }, [documentsInDrive]);
+
+  const handleOpenDocument = (docId: string) => {
+    setSelectedNode(docId);
+  };
+
+  const handleCreateExpenseReport = () => {
+    showCreateDocumentModal("powerhouse/expense-report");
+  };
+
+  const handleCreateSnapshotReport = () => {
+    showCreateDocumentModal("powerhouse/snapshot-report");
+  };
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">
+          Reporting {monthName ? `- ${monthName}` : ""}
+        </h1>
+        <p className="text-gray-600">
+          Manage expense reports and snapshot reports
+          {monthName ? ` for ${monthName}` : ""}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Expense Reports Section */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-600" />
+              <h2 className="text-lg font-semibold text-gray-900">
+                Expense Reports
+              </h2>
+            </div>
+            <button
+              onClick={handleCreateExpenseReport}
+              className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              New
+            </button>
+          </div>
+
+          {expenseReports.length === 0 ? (
+            <p className="text-gray-500 text-sm">No expense reports yet</p>
+          ) : (
+            <div className="space-y-2">
+              {expenseReports.map((doc) => (
+                <button
+                  key={doc.header.id}
+                  onClick={() => handleOpenDocument(doc.header.id)}
+                  className="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-md transition-colors border border-gray-100"
+                >
+                  <FileText className="w-4 h-4 text-gray-400" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {doc.header.name || "Untitled"}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Modified:{" "}
+                      {new Date(
+                        doc.header.lastModifiedAtUtcIso || Date.now(),
+                      ).toLocaleDateString()}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Snapshot Reports Section */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Camera className="w-5 h-5 text-purple-600" />
+              <h2 className="text-lg font-semibold text-gray-900">
+                Snapshot Reports
+              </h2>
+            </div>
+            <button
+              onClick={handleCreateSnapshotReport}
+              className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-purple-600 hover:bg-purple-50 rounded-md transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              New
+            </button>
+          </div>
+
+          {snapshotReports.length === 0 ? (
+            <p className="text-gray-500 text-sm">No snapshot reports yet</p>
+          ) : (
+            <div className="space-y-2">
+              {snapshotReports.map((doc) => (
+                <button
+                  key={doc.header.id}
+                  onClick={() => handleOpenDocument(doc.header.id)}
+                  className="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-md transition-colors border border-gray-100"
+                >
+                  <Camera className="w-4 h-4 text-gray-400" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {doc.header.name || "Untitled"}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Modified:{" "}
+                      {new Date(
+                        doc.header.lastModifiedAtUtcIso || Date.now(),
+                      ).toLocaleDateString()}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

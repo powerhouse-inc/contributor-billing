@@ -1,7 +1,8 @@
 import type { EditorProps } from "document-model";
 import { ToastContainer } from "@powerhousedao/design-system/connect";
+import { useState } from "react";
 import { DriveContents } from "./DriveContents.js";
-import { FolderTree } from "./FolderTree.js";
+import { FolderTree, type SelectedFolderInfo } from "./FolderTree.js";
 
 /**
  * Main drive explorer component for Contributor Billing.
@@ -11,10 +12,18 @@ export function DriveExplorer({ children }: EditorProps) {
   // if a document is selected then its editor will be passed as children
   const showDocumentEditor = !!children;
 
+  // Track which folder is selected for content routing
+  const [selectedFolder, setSelectedFolder] =
+    useState<SelectedFolderInfo | null>(null);
+
+  const handleFolderSelect = (folderInfo: SelectedFolderInfo | null) => {
+    setSelectedFolder(folderInfo);
+  };
+
   return (
     <div className="flex h-full w-full overflow-hidden">
       {/* Sidebar - resizable, managed by Sidebar component */}
-      <FolderTree />
+      <FolderTree onFolderSelect={handleFolderSelect} />
 
       {/* Toast notifications */}
       <ToastContainer
@@ -32,13 +41,13 @@ export function DriveExplorer({ children }: EditorProps) {
 
       {/* Main content area - takes remaining space, scrollable */}
       <div className="flex-1 min-w-0 h-full overflow-auto">
-        {/* Conditional rendering: Document editor or Operational Hub */}
+        {/* Conditional rendering: Document editor or folder content */}
         {showDocumentEditor ? (
           /* Document editor view */
           <div className="min-h-full">{children}</div>
         ) : (
-          /* Operational Hub view */
-          <DriveContents />
+          /* Folder content view */
+          <DriveContents selectedFolder={selectedFolder} />
         )}
       </div>
     </div>
