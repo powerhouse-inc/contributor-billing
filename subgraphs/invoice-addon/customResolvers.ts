@@ -203,7 +203,7 @@ export const Invoice_uploadInvoicePdfChunk = async (
         const responseData = {
           invoiceData: claudeResult.invoiceData,
           processingMetadata: {
-            provider: "claude-haiku-4.5",
+            provider: "claude-sonnet-4-20250514",
             processingTimeMs: processingTime,
             processingTimestamp: new Date().toISOString(),
           },
