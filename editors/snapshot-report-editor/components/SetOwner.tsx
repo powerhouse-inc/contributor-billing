@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDrives } from "@powerhousedao/reactor-browser";
-import { setOwnerId } from "../../../document-models/expense-report/gen/wallet/creators.js";
-import type { ExpenseReportDocument } from "../../../document-models/expense-report/gen/types.js";
+import { setOwnerId } from "../../../document-models/snapshot-report/gen/configuration/creators.js";
+import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/gen/types.js";
 import {
   useAddReportToRemoteDrive,
   useOwnerDriveActions,
@@ -194,7 +194,7 @@ export function SetOwner({ ownerId, dispatch }: SetOwnerProps) {
 
 type OwnerDriveActionsProps = {
   ownerDriveId: string;
-  selectedDocument: ExpenseReportDocument | undefined;
+  selectedDocument: SnapshotReportDocument | undefined;
   ownerName: string;
 };
 
@@ -207,7 +207,7 @@ function OwnerDriveActions({
     addReportToOwnerDrive,
     canAddReportToOwnerDrive,
     driveDocumentId,
-    expenseReportNodeIds,
+    snapshotReportNodeIds,
   } = useOwnerDriveActions(ownerDriveId, selectedDocument);
   const [addStatus, setAddStatus] = useState<"idle" | "adding" | "added">(
     "idle",
@@ -217,7 +217,7 @@ function OwnerDriveActions({
   const isAlreadyAdded =
     !!selectedDocumentId &&
     driveDocumentId === ownerDriveId &&
-    expenseReportNodeIds.includes(selectedDocumentId);
+    snapshotReportNodeIds.includes(selectedDocumentId);
 
   useEffect(() => {
     if (isAlreadyAdded) {
@@ -228,7 +228,7 @@ function OwnerDriveActions({
   }, [
     isAlreadyAdded,
     selectedDocumentId,
-    expenseReportNodeIds,
+    snapshotReportNodeIds,
     ownerDriveId,
     driveDocumentId,
   ]);
@@ -245,7 +245,7 @@ function OwnerDriveActions({
   if (addStatus === "added") {
     return (
       <span className="text-xs font-medium text-green-600 dark:text-green-400">
-        ✓ Expense Report is added to {ownerName}
+        Snapshot Report is added to {ownerName}
       </span>
     );
   }

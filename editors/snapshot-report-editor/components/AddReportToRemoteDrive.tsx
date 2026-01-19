@@ -5,11 +5,11 @@ import {
   useDriveById,
 } from "@powerhousedao/reactor-browser";
 import { addFile } from "document-drive";
-import { useSelectedExpenseReportDocument } from "../../../document-models/expense-report/hooks.js";
-import type { ExpenseReportDocument } from "../../../document-models/expense-report/gen/types.js";
+import { useSelectedSnapshotReportDocument } from "../../hooks/useSnapshotReportDocument.js";
+import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/gen/types.js";
 
 export function useAddReportToRemoteDrive(ownerIdOverride?: string | null) {
-  const [selectedDocument] = useSelectedExpenseReportDocument();
+  const [selectedDocument] = useSelectedSnapshotReportDocument();
   const drives = useDrives();
   const ownerId =
     ownerIdOverride ?? selectedDocument?.state?.global?.ownerId ?? "";
@@ -44,7 +44,7 @@ export function useAddReportToRemoteDrive(ownerIdOverride?: string | null) {
 
 export function useOwnerDriveActions(
   ownerDriveId: string,
-  selectedDocument: ExpenseReportDocument | undefined,
+  selectedDocument: SnapshotReportDocument | undefined,
 ) {
   const [driveDocument, dispatch] = useDriveById(ownerDriveId);
   const driveDocumentId = driveDocument?.header?.id;
@@ -52,21 +52,21 @@ export function useOwnerDriveActions(
     ownerDriveId && driveDocumentId === ownerDriveId,
   );
 
-  const expenseReportFolderId = useMemo(() => {
+  const snapshotReportFolderId = useMemo(() => {
     if (!isDriveAligned) return undefined;
     return driveDocument?.state?.global?.nodes?.find(
-      (node) => node.kind === "folder" && node.name === "Expense Reports",
+      (node) => node.kind === "folder" && node.name === "Snapshot Reports",
     )?.id;
   }, [driveDocument, isDriveAligned]);
 
-  const expenseReportNodeIds = useMemo(() => {
+  const snapshotReportNodeIds = useMemo(() => {
     if (!isDriveAligned || !driveDocument?.state?.global?.nodes) return [];
     return driveDocument.state.global.nodes
       .filter(
         (node) =>
           node.kind === "file" &&
           "documentType" in node &&
-          node.documentType === "powerhouse/expense-report",
+          node.documentType === "powerhouse/snapshot-report",
       )
       .map((node) => node.id);
   }, [driveDocument, isDriveAligned]);
@@ -83,16 +83,16 @@ export function useOwnerDriveActions(
       !selectedDocument?.header?.id
     )
       return false;
-    let targetFolderId = expenseReportFolderId;
+    let targetFolderId = snapshotReportFolderId;
     if (!targetFolderId) {
-      const newFolder = await addFolder(ownerDriveId, "Expense Reports");
+      const newFolder = await addFolder(ownerDriveId, "Snapshot Reports");
       targetFolderId = newFolder?.id;
     }
     if (!targetFolderId) return false;
     dispatch(
       addFile({
         name: selectedDocument.header.name,
-        documentType: "powerhouse/expense-report",
+        documentType: "powerhouse/snapshot-report",
         id: selectedDocument.header.id,
         parentFolder: targetFolderId,
       }),
@@ -103,7 +103,7 @@ export function useOwnerDriveActions(
   return {
     addReportToOwnerDrive,
     canAddReportToOwnerDrive,
-    expenseReportNodeIds,
+    snapshotReportNodeIds,
     driveDocumentId,
   };
 }

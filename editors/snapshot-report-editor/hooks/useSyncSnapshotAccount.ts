@@ -195,9 +195,7 @@ export function useSyncSnapshotAccount() {
 
       // 1. Remove existing transactions
       snapshotAccount.transactions.forEach((tx) => {
-        allActions.push(
-          transactionsActions.removeTransaction({ id: tx.id }),
-        );
+        allActions.push(transactionsActions.removeTransaction({ id: tx.id }));
       });
 
       // 2. Add new transactions
@@ -390,9 +388,7 @@ export function useSyncSnapshotAccount() {
 
       // 1. Remove existing transactions
       snapshotAccount.transactions.forEach((tx) => {
-        allActions.push(
-          transactionsActions.removeTransaction({ id: tx.id }),
-        );
+        allActions.push(transactionsActions.removeTransaction({ id: tx.id }));
       });
 
       // 2. Add derived transactions

@@ -1,6 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSelectedExpenseReportDocument } from "../../document-models/expense-report/hooks.js";
-import { actions, type ExpenseReportStatus } from "../../document-models/expense-report/index.js";
+import {
+  actions,
+  type ExpenseReportStatus,
+} from "../../document-models/expense-report/index.js";
 import { Icon, Button, Select } from "@powerhousedao/document-engineering";
 import { WalletsTable } from "./components/WalletsTable.js";
 import { AggregatedExpensesTable } from "./components/AggregatedExpensesTable.js";
@@ -318,7 +321,13 @@ export default function Editor() {
                         { label: "Final", value: "FINAL" },
                       ]}
                       value={document.state.global.status}
-                      onChange={(value) => dispatch(actions.setStatus({ status: value as ExpenseReportStatus }))}
+                      onChange={(value) =>
+                        dispatch(
+                          actions.setStatus({
+                            status: value as ExpenseReportStatus,
+                          }),
+                        )
+                      }
                       className="min-w-[180px]"
                     />
                   </div>

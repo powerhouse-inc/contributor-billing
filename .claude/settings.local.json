@@ -2,13 +2,11 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
-      "Bash(npm run tsc:*)",
-      "Bash(npm run lint:*)",
+      "Bash(bun run tsc:*)",
+      "Bash(bun run lint:*)",
       "Bash(ls:*)",
       "Bash(bun run lint:fix:*)",
-      "Bash(bun run lint:*)",
       "Bash(grep:*)",
-      "Bash(bun run tsc:*)",
       "Bash(python /home/duo/Powerhouse/demo/new-contributor-billing/scripts/with_server.py:*)",
       "Bash(python:*)",
       "Bash(python3:*)",
@@ -20,7 +18,8 @@
       "Bash(git add:*)",
       "mcp__reactor-mcp__addActions",
       "mcp__reactor-mcp__getDocumentModelSchema",
-      "mcp__reactor-mcp__getDocument"
+      "mcp__reactor-mcp__getDocument",
+      "Bash(bun run lint:fix:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

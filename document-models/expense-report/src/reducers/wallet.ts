@@ -240,6 +240,6 @@ export const expenseReportWalletOperations: ExpenseReportWalletOperations = {
     state.ownerId = action.input.ownerId;
   },
   setStatusOperation(state, action) {
-    state.status = action.input.status
-  }
+    state.status = action.input.status;
+  },
 };

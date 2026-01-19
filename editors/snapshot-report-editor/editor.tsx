@@ -14,8 +14,8 @@ import {
   setReportConfig,
   addSnapshotAccount,
   addTransaction,
-  setOwnerId,
 } from "../../document-models/snapshot-report/gen/creators.js";
+import { SetOwner } from "./components/SetOwner.js";
 import { useSyncSnapshotAccount } from "./hooks/useSyncSnapshotAccount.js";
 import { formatBalance } from "./utils/balanceCalculations.js";
 import { calculateTransactionFlowInfo } from "./utils/flowTypeCalculations.js";
@@ -537,17 +537,9 @@ export default function Editor() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Owner ID
+                  Owner
                 </label>
-                <input
-                  type="text"
-                  value={ownerId || ""}
-                  onChange={(e) =>
-                    dispatch?.(setOwnerId({ ownerId: e.target.value }))
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter owner ID"
-                />
+                <SetOwner ownerId={ownerId} dispatch={dispatch} />
               </div>
 
               <div>
@@ -698,298 +690,314 @@ export default function Editor() {
                     </div>
                     <div className="space-y-4">
                       {accountsOfType.map((account: any) => (
-                <div
-                  key={account.id}
-                  className="border border-gray-200 rounded-lg overflow-hidden"
-                >
-                  {/* Header - Always Visible */}
-                  <div className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold">
-                            {account.accountName}
-                          </h3>
-                          <button
-                            onClick={() => handleSyncAccount(account)}
-                            disabled={
-                              syncingAccounts.has(account.id) ||
-                              !startDate ||
-                              !endDate
-                            }
-                            className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Sync account transactions and balances"
-                          >
-                            <RefreshCw
-                              className={`w-4 h-4 ${
-                                syncingAccounts.has(account.id)
-                                  ? "animate-spin text-blue-600"
-                                  : "text-gray-600"
-                              }`}
-                            />
-                          </button>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          {account.accountAddress}
-                        </p>
-                        <span
-                          className={`inline-block mt-2 px-3 py-1 text-xs font-medium rounded-full ${
-                            account.type === "Source"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : account.type === "Internal"
-                                ? "bg-blue-100 text-blue-800"
-                                : account.type === "Destination"
-                                  ? "bg-amber-100 text-amber-800"
-                                  : "bg-gray-100 text-gray-800"
-                          }`}
+                        <div
+                          key={account.id}
+                          className="border border-gray-200 rounded-lg overflow-hidden"
                         >
-                          {account.type}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600">
-                          Transactions: {account.transactions.length}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Tokens: {account.startingBalances.length}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Balances Display */}
-                    {(() => {
-                      // Helper to check if a balance is non-zero
-                      const isNonZero = (amount: any) => {
-                        const value = parseFloat(amount?.value || "0");
-                        return value !== 0;
-                      };
-
-                      // Filter to non-zero balances
-                      const nonZeroStarting = account.startingBalances.filter(
-                        (b: any) => {
-                          const endingBalance = account.endingBalances.find(
-                            (eb: any) => eb.token === b.token,
-                          );
-                          return (
-                            isNonZero(b.amount) ||
-                            (endingBalance && isNonZero(endingBalance.amount))
-                          );
-                        },
-                      );
-
-                      const endingOnlyBalances = account.endingBalances.filter(
-                        (eb: any) =>
-                          !account.startingBalances.some(
-                            (sb: any) => sb.token === eb.token,
-                          ) && isNonZero(eb.amount),
-                      );
-
-                      const hasBalances =
-                        nonZeroStarting.length > 0 ||
-                        endingOnlyBalances.length > 0;
-
-                      if (!hasBalances) return null;
-
-                      return (
-                        <div className="mt-4 pt-4 border-t border-gray-200">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">
-                            Balances
-                          </h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {nonZeroStarting.map((balance: any) => {
-                              const endingBalance = account.endingBalances.find(
-                                (eb: any) => eb.token === balance.token,
-                              );
-                              return (
-                                <div
-                                  key={balance.id}
-                                  className="bg-gray-50 rounded p-2 text-sm"
-                                >
-                                  <div className="font-medium text-gray-700 mb-1">
-                                    {balance.token}
-                                  </div>
-                                  <div
-                                    className="text-xs text-gray-600 space-y-1"
-                                    style={{
-                                      fontVariantNumeric: "tabular-nums",
-                                    }}
+                          {/* Header - Always Visible */}
+                          <div className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h3 className="font-semibold">
+                                    {account.accountName}
+                                  </h3>
+                                  <button
+                                    onClick={() => handleSyncAccount(account)}
+                                    disabled={
+                                      syncingAccounts.has(account.id) ||
+                                      !startDate ||
+                                      !endDate
+                                    }
+                                    className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Sync account transactions and balances"
                                   >
-                                    <div>
-                                      Opening:{" "}
-                                      <span className="font-medium">
-                                        {formatBalance(balance.amount)}
-                                      </span>
-                                    </div>
-                                    {endingBalance && (
-                                      <div>
-                                        Closing:{" "}
-                                        <span className="font-medium">
-                                          {formatBalance(endingBalance.amount)}
-                                        </span>
+                                    <RefreshCw
+                                      className={`w-4 h-4 ${
+                                        syncingAccounts.has(account.id)
+                                          ? "animate-spin text-blue-600"
+                                          : "text-gray-600"
+                                      }`}
+                                    />
+                                  </button>
+                                </div>
+                                <p className="text-sm text-gray-600">
+                                  {account.accountAddress}
+                                </p>
+                                <span
+                                  className={`inline-block mt-2 px-3 py-1 text-xs font-medium rounded-full ${
+                                    account.type === "Source"
+                                      ? "bg-emerald-100 text-emerald-800"
+                                      : account.type === "Internal"
+                                        ? "bg-blue-100 text-blue-800"
+                                        : account.type === "Destination"
+                                          ? "bg-amber-100 text-amber-800"
+                                          : "bg-gray-100 text-gray-800"
+                                  }`}
+                                >
+                                  {account.type}
+                                </span>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-gray-600">
+                                  Transactions: {account.transactions.length}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  Tokens: {account.startingBalances.length}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Balances Display */}
+                            {(() => {
+                              // Helper to check if a balance is non-zero
+                              const isNonZero = (amount: any) => {
+                                const value = parseFloat(amount?.value || "0");
+                                return value !== 0;
+                              };
+
+                              // Filter to non-zero balances
+                              const nonZeroStarting =
+                                account.startingBalances.filter((b: any) => {
+                                  const endingBalance =
+                                    account.endingBalances.find(
+                                      (eb: any) => eb.token === b.token,
+                                    );
+                                  return (
+                                    isNonZero(b.amount) ||
+                                    (endingBalance &&
+                                      isNonZero(endingBalance.amount))
+                                  );
+                                });
+
+                              const endingOnlyBalances =
+                                account.endingBalances.filter(
+                                  (eb: any) =>
+                                    !account.startingBalances.some(
+                                      (sb: any) => sb.token === eb.token,
+                                    ) && isNonZero(eb.amount),
+                                );
+
+                              const hasBalances =
+                                nonZeroStarting.length > 0 ||
+                                endingOnlyBalances.length > 0;
+
+                              if (!hasBalances) return null;
+
+                              return (
+                                <div className="mt-4 pt-4 border-t border-gray-200">
+                                  <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                                    Balances
+                                  </h4>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {nonZeroStarting.map((balance: any) => {
+                                      const endingBalance =
+                                        account.endingBalances.find(
+                                          (eb: any) =>
+                                            eb.token === balance.token,
+                                        );
+                                      return (
+                                        <div
+                                          key={balance.id}
+                                          className="bg-gray-50 rounded p-2 text-sm"
+                                        >
+                                          <div className="font-medium text-gray-700 mb-1">
+                                            {balance.token}
+                                          </div>
+                                          <div
+                                            className="text-xs text-gray-600 space-y-1"
+                                            style={{
+                                              fontVariantNumeric:
+                                                "tabular-nums",
+                                            }}
+                                          >
+                                            <div>
+                                              Opening:{" "}
+                                              <span className="font-medium">
+                                                {formatBalance(balance.amount)}
+                                              </span>
+                                            </div>
+                                            {endingBalance && (
+                                              <div>
+                                                Closing:{" "}
+                                                <span className="font-medium">
+                                                  {formatBalance(
+                                                    endingBalance.amount,
+                                                  )}
+                                                </span>
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                    {endingOnlyBalances.map((balance: any) => (
+                                      <div
+                                        key={balance.id}
+                                        className="bg-gray-50 rounded p-2 text-sm"
+                                      >
+                                        <div className="font-medium text-gray-700 mb-1">
+                                          {balance.token}
+                                        </div>
+                                        <div
+                                          className="text-xs text-gray-600"
+                                          style={{
+                                            fontVariantNumeric: "tabular-nums",
+                                          }}
+                                        >
+                                          <div>
+                                            Closing:{" "}
+                                            <span className="font-medium">
+                                              {formatBalance(balance.amount)}
+                                            </span>
+                                          </div>
+                                        </div>
                                       </div>
-                                    )}
+                                    ))}
                                   </div>
                                 </div>
                               );
-                            })}
-                            {endingOnlyBalances.map((balance: any) => (
-                              <div
-                                key={balance.id}
-                                className="bg-gray-50 rounded p-2 text-sm"
+                            })()}
+
+                            {/* Expand/Collapse Button */}
+                            {account.transactions.length > 0 && (
+                              <button
+                                onClick={() =>
+                                  handleToggleAccountExpansion(account.id)
+                                }
+                                className="mt-3 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
                               >
-                                <div className="font-medium text-gray-700 mb-1">
-                                  {balance.token}
-                                </div>
-                                <div
-                                  className="text-xs text-gray-600"
-                                  style={{ fontVariantNumeric: "tabular-nums" }}
-                                >
-                                  <div>
-                                    Closing:{" "}
-                                    <span className="font-medium">
-                                      {formatBalance(balance.amount)}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
+                                {expandedAccounts.has(account.id) ? (
+                                  <>
+                                    <ChevronUp className="w-4 h-4" />
+                                    <span>Hide Transactions</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <ChevronDown className="w-4 h-4" />
+                                    <span>Show Transactions</span>
+                                  </>
+                                )}
+                              </button>
+                            )}
                           </div>
-                        </div>
-                      );
-                    })()}
 
-                    {/* Expand/Collapse Button */}
-                    {account.transactions.length > 0 && (
-                      <button
-                        onClick={() => handleToggleAccountExpansion(account.id)}
-                        className="mt-3 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
-                      >
-                        {expandedAccounts.has(account.id) ? (
-                          <>
-                            <ChevronUp className="w-4 h-4" />
-                            <span>Hide Transactions</span>
-                          </>
-                        ) : (
-                          <>
-                            <ChevronDown className="w-4 h-4" />
-                            <span>Show Transactions</span>
-                          </>
-                        )}
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Expandable Transaction List */}
-                  {expandedAccounts.has(account.id) &&
-                    account.transactions.length > 0 && (
-                      <div className="border-t border-gray-200 bg-gray-50">
-                        <div className="p-4">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                            Transactions ({account.transactions.length})
-                          </h4>
-                          <div className="space-y-2">
-                            {account.transactions.map((tx: any) => (
-                              <div
-                                key={tx.id}
-                                className="bg-white border border-gray-200 rounded p-3 text-sm"
-                              >
-                                <div className="grid grid-cols-2 gap-2">
-                                  {/* Transaction Details Grid */}
-                                  <div>
-                                    <span className="text-gray-500">
-                                      Direction:
-                                    </span>
-                                    <span
-                                      className={`ml-2 font-medium ${
-                                        tx.direction === "INFLOW"
-                                          ? "text-green-600"
-                                          : "text-red-600"
-                                      }`}
-                                    >
-                                      {tx.direction}
-                                    </span>
-                                  </div>
-                                  <div>
-                                    <span className="text-gray-500">
-                                      Amount:
-                                    </span>
-                                    <span className="ml-2 font-medium">
-                                      {typeof tx.amount === "object" &&
-                                      tx.amount?.value !== undefined
-                                        ? `${tx.amount.value} ${tx.amount.unit || tx.token}`
-                                        : `${tx.amount} ${tx.token}`}
-                                    </span>
-                                  </div>
-                                  <div>
-                                    <span className="text-gray-500">Date:</span>
-                                    <span className="ml-2">
-                                      {new Date(
-                                        tx.datetime,
-                                      ).toLocaleDateString()}
-                                    </span>
-                                  </div>
-                                  <div>
-                                    <span className="text-gray-500">Time:</span>
-                                    <span className="ml-2">
-                                      {new Date(
-                                        tx.datetime,
-                                      ).toLocaleTimeString()}
-                                    </span>
-                                  </div>
-                                  {tx.counterParty && (
-                                    <div className="col-span-2">
-                                      <span className="text-gray-500">
-                                        Counter Party:
-                                      </span>
-                                      <span className="ml-2 font-mono text-xs">
-                                        {tx.counterParty}
-                                      </span>
-                                    </div>
-                                  )}
-                                  {tx.flowType && (
-                                    <div>
-                                      <span className="text-gray-500">
-                                        Flow Type:
-                                      </span>
-                                      <span
-                                        className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
-                                          tx.flowType === "TopUp"
-                                            ? "bg-green-100 text-green-800"
-                                            : tx.flowType === "Return"
-                                              ? "bg-orange-100 text-orange-800"
-                                              : tx.flowType === "Internal"
-                                                ? "bg-purple-100 text-purple-800"
-                                                : "bg-red-100 text-red-800"
-                                        }`}
+                          {/* Expandable Transaction List */}
+                          {expandedAccounts.has(account.id) &&
+                            account.transactions.length > 0 && (
+                              <div className="border-t border-gray-200 bg-gray-50">
+                                <div className="p-4">
+                                  <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                                    Transactions ({account.transactions.length})
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {account.transactions.map((tx: any) => (
+                                      <div
+                                        key={tx.id}
+                                        className="bg-white border border-gray-200 rounded p-3 text-sm"
                                       >
-                                        {tx.flowType}
-                                      </span>
-                                    </div>
-                                  )}
-                                  <div className="col-span-2">
-                                    <span className="text-gray-500">
-                                      Tx Hash:
-                                    </span>
-                                    <a
-                                      href={`https://etherscan.io/tx/${tx.txHash}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="ml-2 text-blue-600 hover:underline font-mono text-xs"
-                                    >
-                                      {tx.txHash.substring(0, 10)}...
-                                      {tx.txHash.substring(
-                                        tx.txHash.length - 8,
-                                      )}
-                                    </a>
+                                        <div className="grid grid-cols-2 gap-2">
+                                          {/* Transaction Details Grid */}
+                                          <div>
+                                            <span className="text-gray-500">
+                                              Direction:
+                                            </span>
+                                            <span
+                                              className={`ml-2 font-medium ${
+                                                tx.direction === "INFLOW"
+                                                  ? "text-green-600"
+                                                  : "text-red-600"
+                                              }`}
+                                            >
+                                              {tx.direction}
+                                            </span>
+                                          </div>
+                                          <div>
+                                            <span className="text-gray-500">
+                                              Amount:
+                                            </span>
+                                            <span className="ml-2 font-medium">
+                                              {typeof tx.amount === "object" &&
+                                              tx.amount?.value !== undefined
+                                                ? `${tx.amount.value} ${tx.amount.unit || tx.token}`
+                                                : `${tx.amount} ${tx.token}`}
+                                            </span>
+                                          </div>
+                                          <div>
+                                            <span className="text-gray-500">
+                                              Date:
+                                            </span>
+                                            <span className="ml-2">
+                                              {new Date(
+                                                tx.datetime,
+                                              ).toLocaleDateString()}
+                                            </span>
+                                          </div>
+                                          <div>
+                                            <span className="text-gray-500">
+                                              Time:
+                                            </span>
+                                            <span className="ml-2">
+                                              {new Date(
+                                                tx.datetime,
+                                              ).toLocaleTimeString()}
+                                            </span>
+                                          </div>
+                                          {tx.counterParty && (
+                                            <div className="col-span-2">
+                                              <span className="text-gray-500">
+                                                Counter Party:
+                                              </span>
+                                              <span className="ml-2 font-mono text-xs">
+                                                {tx.counterParty}
+                                              </span>
+                                            </div>
+                                          )}
+                                          {tx.flowType && (
+                                            <div>
+                                              <span className="text-gray-500">
+                                                Flow Type:
+                                              </span>
+                                              <span
+                                                className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
+                                                  tx.flowType === "TopUp"
+                                                    ? "bg-green-100 text-green-800"
+                                                    : tx.flowType === "Return"
+                                                      ? "bg-orange-100 text-orange-800"
+                                                      : tx.flowType ===
+                                                          "Internal"
+                                                        ? "bg-purple-100 text-purple-800"
+                                                        : "bg-red-100 text-red-800"
+                                                }`}
+                                              >
+                                                {tx.flowType}
+                                              </span>
+                                            </div>
+                                          )}
+                                          <div className="col-span-2">
+                                            <span className="text-gray-500">
+                                              Tx Hash:
+                                            </span>
+                                            <a
+                                              href={`https://etherscan.io/tx/${tx.txHash}`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="ml-2 text-blue-600 hover:underline font-mono text-xs"
+                                            >
+                                              {tx.txHash.substring(0, 10)}...
+                                              {tx.txHash.substring(
+                                                tx.txHash.length - 8,
+                                              )}
+                                            </a>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
                                   </div>
                                 </div>
                               </div>
-                            ))}
-                          </div>
+                            )}
                         </div>
-                      </div>
-                    )}
-                      </div>
                       ))}
                     </div>
                   </div>
