@@ -1,13 +1,15 @@
-import { Calendar, Plus, ChevronDown, Building2 } from "lucide-react";
+import { Plus, ChevronDown, Building2, CreditCard, FileText } from "lucide-react";
 import {
   useBillingFolderStructure,
   formatMonthName,
 } from "../hooks/useBillingFolderStructure.js";
 import {
   useDocumentsInSelectedDrive,
-  setSelectedNode,
+  useSelectedDrive,
+  isFileNodeKind,
 } from "@powerhousedao/reactor-browser";
 import { useState, useMemo, useRef, useEffect } from "react";
+import { MonthlyReporting } from "./MonthlyReporting.js";
 import type { SelectedFolderInfo } from "./FolderTree.js";
 
 interface BillingOverviewProps {
@@ -15,7 +17,7 @@ interface BillingOverviewProps {
 }
 
 /**
- * Overview for the Billing folder showing all months
+ * Overview for the Billing folder showing payment stats and monthly reporting
  */
 export function BillingOverview({ onFolderSelect }: BillingOverviewProps) {
   const {
@@ -23,11 +25,13 @@ export function BillingOverview({ onFolderSelect }: BillingOverviewProps) {
     monthFolders,
     createMonthFolder,
     createBillingFolder,
+    paymentsFolderIds,
   } = useBillingFolderStructure();
   const [isCreating, setIsCreating] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const documentsInDrive = useDocumentsInSelectedDrive();
+  const [driveDocument] = useSelectedDrive();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -62,54 +66,62 @@ export function BillingOverview({ onFolderSelect }: BillingOverviewProps) {
     return months;
   }, [monthFolders]);
 
-  // Pre-compute report stats for all months at once (memoized)
-  const monthStats = useMemo(() => {
-    const stats = new Map<
-      string,
-      {
-        hasExpense: boolean;
-        hasSnapshot: boolean;
-        expenseStatus: string | null;
-      }
-    >();
-    if (!documentsInDrive) return stats;
-
-    for (const [monthName] of monthFolders.entries()) {
-      const monthLower = monthName.toLowerCase();
-
-      const expenseReport = documentsInDrive.find(
-        (doc) =>
-          doc.header.documentType === "powerhouse/expense-report" &&
-          doc.header.name?.toLowerCase().includes(monthLower),
-      );
-      const snapshotReport = documentsInDrive.find(
-        (doc) =>
-          doc.header.documentType === "powerhouse/snapshot-report" &&
-          doc.header.name?.toLowerCase().includes(monthLower),
-      );
-
-      const expenseStatus = expenseReport
-        ? (expenseReport.state as { global?: { status?: string } }).global
-            ?.status || "DRAFT"
-        : null;
-
-      stats.set(monthName, {
-        hasExpense: !!expenseReport,
-        hasSnapshot: !!snapshotReport,
-        expenseStatus,
-      });
+  // Calculate payment stats across all months
+  const paymentStats = useMemo(() => {
+    if (!documentsInDrive || !driveDocument) {
+      return { totalInvoices: 0, totalAmount: 0, pendingCount: 0, paidCount: 0 };
     }
-    return stats;
-  }, [documentsInDrive, monthFolders]);
 
-  // Sort months by date (most recent first)
-  const sortedMonths = Array.from(monthFolders.entries()).sort(
-    ([nameA], [nameB]) => {
-      const dateA = new Date(nameA);
-      const dateB = new Date(nameB);
-      return dateB.getTime() - dateA.getTime();
-    },
-  );
+    const nodes = driveDocument.state.global.nodes;
+
+    // Get all invoice file IDs that are in any payments folder
+    const invoiceIds = new Set(
+      nodes
+        .filter(
+          (n) =>
+            isFileNodeKind(n) &&
+            paymentsFolderIds.has(n.parentFolder || "") &&
+            n.documentType === "powerhouse/invoice",
+        )
+        .map((n) => n.id),
+    );
+
+    // Filter invoices in payments folders
+    const invoices = documentsInDrive.filter(
+      (doc) =>
+        doc.header.documentType === "powerhouse/invoice" &&
+        invoiceIds.has(doc.header.id),
+    );
+
+    let totalAmount = 0;
+    let pendingCount = 0;
+    let paidCount = 0;
+
+    for (const invoice of invoices) {
+      const state = invoice.state as {
+        global?: { totalPriceTaxIncl?: number; status?: string };
+      };
+      totalAmount += state.global?.totalPriceTaxIncl || 0;
+
+      const status = state.global?.status?.toUpperCase() || "DRAFT";
+      if (
+        status === "PAYMENTSENT" ||
+        status === "PAYMENTRECEIVED" ||
+        status === "PAYMENTCLOSED"
+      ) {
+        paidCount++;
+      } else if (status !== "REJECTED" && status !== "CANCELLED") {
+        pendingCount++;
+      }
+    }
+
+    return {
+      totalInvoices: invoices.length,
+      totalAmount,
+      pendingCount,
+      paidCount,
+    };
+  }, [documentsInDrive, driveDocument, paymentsFolderIds]);
 
   const handleCreateMonth = async (monthName: string) => {
     setIsCreating(true);
@@ -162,6 +174,7 @@ export function BillingOverview({ onFolderSelect }: BillingOverviewProps) {
 
   return (
     <div>
+      {/* Header with Add Month button */}
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Billing</h1>
@@ -211,73 +224,61 @@ export function BillingOverview({ onFolderSelect }: BillingOverviewProps) {
         </div>
       </div>
 
-      {sortedMonths.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-          <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-lg font-medium text-gray-900 mb-2">
-            No months yet
-          </h2>
-          <p className="text-gray-600 mb-4">
-            Click &quot;Add Month&quot; to create your first billing month
-          </p>
+      {/* Payment Stats */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <CreditCard className="w-5 h-5 text-blue-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Payment Summary
+            </h2>
+            <p className="text-sm text-gray-600">
+              Overview of all invoices across billing months
+            </p>
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sortedMonths.map(([monthName, info]) => {
-            const stats = monthStats.get(monthName) || {
-              hasExpense: false,
-              hasSnapshot: false,
-              expenseStatus: null,
-            };
-            const handleMonthClick = () => {
-              setSelectedNode(info.folder.id);
-              onFolderSelect?.({
-                folderId: info.folder.id,
-                folderType: "month",
-                monthName,
-              });
-            };
-            return (
-              <button
-                key={info.folder.id}
-                onClick={handleMonthClick}
-                className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-blue-300 transition-all text-left cursor-pointer"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Calendar className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    {monthName}
-                  </h2>
-                </div>
-                <div className="space-y-2 text-sm text-gray-600">
-                  <div className="flex items-center justify-between">
-                    <span>Expense Report</span>
-                    <span
-                      className={
-                        stats.hasExpense ? "text-blue-600" : "text-gray-400"
-                      }
-                    >
-                      {stats.hasExpense ? stats.expenseStatus : "None"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Snapshot Report</span>
-                    <span
-                      className={
-                        stats.hasSnapshot ? "text-blue-600" : "text-gray-400"
-                      }
-                    >
-                      {stats.hasSnapshot ? "Yes" : "None"}
-                    </span>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <FileText className="w-4 h-4 text-gray-500" />
+              <span className="text-sm text-gray-600">Total Invoices</span>
+            </div>
+            <p className="text-xl font-bold text-gray-900">
+              {paymentStats.totalInvoices}
+            </p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <CreditCard className="w-4 h-4 text-gray-500" />
+              <span className="text-sm text-gray-600">Total Amount</span>
+            </div>
+            <p className="text-xl font-bold text-gray-900">
+              ${paymentStats.totalAmount.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </p>
+          </div>
+          <div className="bg-amber-50 rounded-lg p-3">
+            <span className="text-sm text-amber-600">Pending</span>
+            <p className="text-xl font-bold text-amber-700">
+              {paymentStats.pendingCount}
+            </p>
+          </div>
+          <div className="bg-green-50 rounded-lg p-3">
+            <span className="text-sm text-green-600">Paid</span>
+            <p className="text-xl font-bold text-green-700">
+              {paymentStats.paidCount}
+            </p>
+          </div>
         </div>
-      )}
+      </div>
+
+      {/* Monthly Reporting */}
+      <MonthlyReporting onFolderSelect={onFolderSelect} showAllMonths />
     </div>
   );
 }

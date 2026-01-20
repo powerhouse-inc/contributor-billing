@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { HeaderStats } from "./InvoiceTable/HeaderStats.js";
 import { InvoiceTableContainer } from "./InvoiceTable/InvoiceTableContainer.js";
 import { ReportingView } from "./ReportingView.js";
-import { MonthOverview } from "./MonthOverview.js";
 import { BillingOverview } from "./BillingOverview.js";
 import { DashboardHome } from "./DashboardHome.js";
 import type { SelectedFolderInfo } from "./FolderTree.js";
@@ -59,21 +58,6 @@ export function DriveContents({
           <ReportingView
             folderId={selectedFolder.folderId}
             monthName={selectedFolder.monthName}
-          />
-        </Suspense>
-      </div>
-    );
-  }
-
-  // Month folder - show overview of both Payments and Reporting
-  if (selectedFolder.folderType === "month") {
-    return (
-      <div className="container mx-auto flex-1 overflow-y-auto p-4">
-        <Suspense>
-          <MonthOverview
-            folderId={selectedFolder.folderId}
-            monthName={selectedFolder.monthName}
-            onFolderSelect={onFolderSelect}
           />
         </Suspense>
       </div>

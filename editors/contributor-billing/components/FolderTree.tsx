@@ -25,7 +25,7 @@ import { useBillingFolderStructure } from "../hooks/useBillingFolderStructure.js
 const ICON_SIZE = 16;
 
 /** Folder types for content routing */
-export type FolderType = "payments" | "reporting" | "month" | "billing" | null;
+export type FolderType = "payments" | "reporting" | "billing" | null;
 
 /** Selected folder info for content routing */
 export interface SelectedFolderInfo {
@@ -91,6 +91,15 @@ export function FolderTree({
     return nodeIds;
   }, [accountTransactionsDocuments]);
 
+  // Build a set of month folder IDs for quick lookup
+  const monthFolderIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const [, info] of monthFolders.entries()) {
+      ids.add(info.folder.id);
+    }
+    return ids;
+  }, [monthFolders]);
+
   // Find accounts document
   const accountsDocument = useMemo(() => {
     if (!documentsInDrive) return null;
@@ -113,15 +122,6 @@ export function FolderTree({
       reportDocumentIds: new Set(docs.map((d) => d.header.id)),
     };
   }, [documentsInDrive]);
-
-  // Build month folder IDs set for quick lookup
-  const monthFolderIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const info of monthFolders.values()) {
-      ids.add(info.folder.id);
-    }
-    return ids;
-  }, [monthFolders]);
 
   // Build navigation sections
   const navigationSections = useMemo(() => {
@@ -262,20 +262,9 @@ export function FolderTree({
       return;
     }
 
-    // Check if clicking a month folder
+    // Check if clicking a month folder - just let it expand, don't navigate or select
     if (monthFolderIds.has(node.id)) {
-      // Find the month name for this folder
-      for (const [monthName, info] of monthFolders.entries()) {
-        if (info.folder.id === node.id) {
-          onFolderSelect?.({
-            folderId: node.id,
-            folderType: "month",
-            monthName,
-          });
-          setSelectedNode("");
-          return;
-        }
-      }
+      return;
     }
 
     // Check if clicking a Payments folder

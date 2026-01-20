@@ -7,9 +7,11 @@ import {
   useDocumentsInSelectedDrive,
   useOnDropFile,
   useSelectedDrive,
+  dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import type { PHBaseState, PHDocument } from "document-model";
 import type { FileNode } from "document-drive";
+import { moveNode } from "document-drive";
 import { InvoiceTable } from "./InvoiceTable.js";
 
 interface InvoiceTableContainerProps {
@@ -47,6 +49,8 @@ export function InvoiceTableContainer({
   const onDropFile = useOnDropFile();
 
   // Handle file drop
+  const driveId = driveDocument?.header.id;
+
   const handleDrop = useCallback(
     async (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
@@ -55,45 +59,39 @@ export function InvoiceTableContainer({
       const files = Array.from(event.dataTransfer.files);
       if (files.length === 0) return;
 
-      if (!onDropFile) return;
+      if (!onDropFile || !driveId) return;
 
       // Track all files being processed
       files.forEach((file) => pendingFilesRef.current.add(file));
 
-      // Process all files
+      // Process all files - React state updates automatically via hooks
       const filePromises = files.map(async (file) => {
         try {
-          await onDropFile(file, (progress) => {
-            // Handle progress updates if needed
+          const fileNode = await onDropFile(file, (progress) => {
             if (progress.stage === "complete" || progress.stage === "failed") {
               pendingFilesRef.current.delete(file);
-
-              // If all files are done, reload the page
-              if (pendingFilesRef.current.size === 0) {
-                window.location.reload();
-              }
             }
           });
+
+          // Move the uploaded file to the correct folder
+          if (fileNode && folderId) {
+            await dispatchActions(
+              moveNode({
+                srcFolder: fileNode.id,
+                targetParentFolder: folderId,
+              }),
+              driveId,
+            );
+          }
         } catch (error) {
           console.error("Error dropping file:", error);
           pendingFilesRef.current.delete(file);
-
-          // If all files are done (including failed ones), reload
-          if (pendingFilesRef.current.size === 0) {
-            window.location.reload();
-          }
         }
       });
 
-      // Wait for all files to complete
       await Promise.allSettled(filePromises);
-
-      // Final check - reload if all files are done
-      if (pendingFilesRef.current.size === 0) {
-        window.location.reload();
-      }
     },
-    [onDropFile],
+    [onDropFile, driveId, folderId],
   );
 
   const handleDragOver = useCallback(
