@@ -1,0 +1,388 @@
+import type { DocumentModelGlobalState } from "document-model";
+
+export const documentModel: DocumentModelGlobalState = {
+  author: {
+    name: "Powerhouse",
+    website: "https://www.powerhouse.inc/",
+  },
+  description:
+    "Document model for creating snapshot reports that track fund flows through categorized accounts over a specified accounting period",
+  extension: "",
+  id: "powerhouse/snapshot-report",
+  name: "Snapshot Report",
+  specifications: [
+    {
+      changeLog: [],
+      modules: [
+        {
+          description: "Operations for configuring the snapshot report",
+          id: "config",
+          name: "configuration",
+          operations: [
+            {
+              description:
+                "Set the report configuration including name, period, and accounts document reference",
+              errors: [],
+              examples: [],
+              id: "set-report-config",
+              name: "SET_REPORT_CONFIG",
+              reducer:
+                "if (action.input.reportName !== undefined && action.input.reportName !== null) {\n  state.reportName = action.input.reportName;\n}\nif (action.input.startDate !== undefined && action.input.startDate !== null) {\n  state.startDate = action.input.startDate;\n}\nif (action.input.endDate !== undefined && action.input.endDate !== null) {\n  state.endDate = action.input.endDate;\n}\nif (action.input.accountsDocumentId !== undefined && action.input.accountsDocumentId !== null) {\n  state.accountsDocumentId = action.input.accountsDocumentId;\n}\nif (action.input.ownerId !== undefined && action.input.ownerId !== null) {\n  state.ownerId = action.input.ownerId;\n}",
+              schema:
+                "input SetReportConfigInput {\n  reportName: String\n  startDate: DateTime\n  endDate: DateTime\n  accountsDocumentId: PHID\n  ownerId: PHID\n}",
+              scope: "global",
+              template:
+                "Set the report configuration including name, period, and accounts document reference",
+            },
+            {
+              description: "Link the snapshot report to an Accounts document",
+              errors: [],
+              examples: [],
+              id: "set-accounts-document",
+              name: "SET_ACCOUNTS_DOCUMENT",
+              reducer:
+                "state.accountsDocumentId = action.input.accountsDocumentId;",
+              schema:
+                "input SetAccountsDocumentInput {\n  accountsDocumentId: PHID!\n}",
+              scope: "global",
+              template: "Link the snapshot report to an Accounts document",
+            },
+            {
+              description: "Set the accounting period for the snapshot report",
+              errors: [],
+              examples: [],
+              id: "set-period",
+              name: "SET_PERIOD",
+              reducer:
+                "state.startDate = action.input.startDate;\nstate.endDate = action.input.endDate;",
+              schema:
+                "input SetPeriodInput {\n  startDate: DateTime!\n  endDate: DateTime!\n}",
+              scope: "global",
+              template: "Set the accounting period for the snapshot report",
+            },
+            {
+              description:
+                "Set the owner ID (builder team) for the snapshot report",
+              errors: [],
+              examples: [],
+              id: "set-owner-id",
+              name: "SET_OWNER_ID",
+              reducer: "state.ownerId = action.input.ownerId;",
+              schema: "input SetOwnerIdInput {\n  ownerId: PHID!\n}",
+              scope: "global",
+              template:
+                "Set the owner ID (builder team) for the snapshot report",
+            },
+            {
+              description: "",
+              errors: [],
+              examples: [],
+              id: "80c12645-0005-4534-b578-52a40582d18e",
+              name: "SET_PERIOD_START",
+              reducer: "",
+              schema:
+                "input SetPeriodStartInput {\n  periodStart: DateTime!\n}",
+              scope: "global",
+              template: "",
+            },
+            {
+              description: "",
+              errors: [],
+              examples: [],
+              id: "05d31622-9b31-493a-948b-c817867ce5eb",
+              name: "SET_PERIOD_END",
+              reducer: "",
+              schema: "input SetPeriodEndInput {\n  periodEnd: DateTime!\n}",
+              scope: "global",
+              template: "",
+            },
+          ],
+        },
+        {
+          description: "Operations for managing snapshot accounts",
+          id: "accounts",
+          name: "accounts",
+          operations: [
+            {
+              description: "Add an account to the snapshot report",
+              errors: [
+                {
+                  code: "DUPLICATE_ACCOUNT",
+                  description:
+                    "An account with this ID already exists in the snapshot",
+                  id: "duplicate-account-error",
+                  name: "DuplicateAccountError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "add-snapshot-account",
+              name: "ADD_SNAPSHOT_ACCOUNT",
+              reducer:
+                "const existingAccount = state.snapshotAccounts.find(a => a.id === action.input.id);\nif (existingAccount) {\n  throw new DuplicateAccountError(`Account with ID ${action.input.id} already exists`);\n}\n\nconst newAccount = {\n  id: action.input.id,\n  accountId: action.input.accountId,\n  accountAddress: action.input.accountAddress,\n  accountName: action.input.accountName,\n  type: action.input.type,\n  accountTransactionsId: action.input.accountTransactionsId || null,\n  startingBalances: [],\n  endingBalances: [],\n  transactions: []\n};\n\nstate.snapshotAccounts.push(newAccount);",
+              schema:
+                "input AddSnapshotAccountInput {\n  id: OID!\n  accountId: OID!\n  accountAddress: String!\n  accountName: String!\n  type: AccountTypeInput!\n  accountTransactionsId: PHID\n}",
+              scope: "global",
+              template: "Add an account to the snapshot report",
+            },
+            {
+              description:
+                "Update the type categorization of a snapshot account",
+              errors: [
+                {
+                  code: "UPDATE_ACCOUNT_TYPE_ACCOUNT_NOT_FOUND",
+                  description:
+                    "The specified account was not found in the snapshot",
+                  id: "account-not-found-error",
+                  name: "UpdateAccountTypeNotFoundError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "update-account-type",
+              name: "UPDATE_SNAPSHOT_ACCOUNT_TYPE",
+              reducer:
+                "const account = state.snapshotAccounts.find(a => a.id === action.input.id);\nif (!account) {\n  throw new UpdateAccountTypeNotFoundError(`Account with ID ${action.input.id} not found`);\n}\n\naccount.type = action.input.type;",
+              schema:
+                "input UpdateSnapshotAccountTypeInput {\n  id: OID!\n  type: AccountTypeInput!\n}",
+              scope: "global",
+              template: "Update the type categorization of a snapshot account",
+            },
+            {
+              description: "Remove an account from the snapshot report",
+              errors: [
+                {
+                  code: "REMOVE_ACCOUNT_NOT_FOUND",
+                  description:
+                    "The specified account was not found in the snapshot",
+                  id: "account-not-found-error-2",
+                  name: "RemoveAccountNotFoundError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "remove-snapshot-account",
+              name: "REMOVE_SNAPSHOT_ACCOUNT",
+              reducer:
+                "const accountIndex = state.snapshotAccounts.findIndex(a => a.id === action.input.id);\nif (accountIndex === -1) {\n  throw new RemoveAccountNotFoundError(`Account with ID ${action.input.id} not found`);\n}\n\nstate.snapshotAccounts.splice(accountIndex, 1);",
+              schema: "input RemoveSnapshotAccountInput {\n  id: OID!\n}",
+              scope: "global",
+              template: "Remove an account from the snapshot report",
+            },
+          ],
+        },
+        {
+          description: "Operations for managing account token balances",
+          id: "balances",
+          name: "balances",
+          operations: [
+            {
+              description:
+                "Set or update a starting balance for a token in a snapshot account",
+              errors: [
+                {
+                  code: "SET_STARTING_BALANCE_ACCOUNT_NOT_FOUND",
+                  description:
+                    "The specified account was not found in the snapshot",
+                  id: "account-not-found-error-3",
+                  name: "SetStartingBalanceAccountNotFoundError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "set-starting-balance",
+              name: "SET_STARTING_BALANCE",
+              reducer:
+                "const account = state.snapshotAccounts.find(a => a.id === action.input.accountId);\nif (!account) {\n  throw new SetStartingBalanceAccountNotFoundError(`Account with ID ${action.input.accountId} not found`);\n}\n\nconst existingBalance = account.startingBalances.find(b => b.id === action.input.balanceId);\nif (existingBalance) {\n  existingBalance.token = action.input.token;\n  existingBalance.amount = action.input.amount;\n} else {\n  account.startingBalances.push({\n    id: action.input.balanceId,\n    token: action.input.token,\n    amount: action.input.amount\n  });\n}",
+              schema:
+                "input SetStartingBalanceInput {\n  accountId: OID!\n  balanceId: OID!\n  token: Currency!\n  amount: Amount_Currency!\n}",
+              scope: "global",
+              template:
+                "Set or update a starting balance for a token in a snapshot account",
+            },
+            {
+              description:
+                "Set or update an ending balance for a token in a snapshot account",
+              errors: [
+                {
+                  code: "SET_ENDING_BALANCE_ACCOUNT_NOT_FOUND",
+                  description:
+                    "The specified account was not found in the snapshot",
+                  id: "account-not-found-error-4",
+                  name: "SetEndingBalanceAccountNotFoundError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "set-ending-balance",
+              name: "SET_ENDING_BALANCE",
+              reducer:
+                "const account = state.snapshotAccounts.find(a => a.id === action.input.accountId);\nif (!account) {\n  throw new SetEndingBalanceAccountNotFoundError(`Account with ID ${action.input.accountId} not found`);\n}\n\nconst existingBalance = account.endingBalances.find(b => b.id === action.input.balanceId);\nif (existingBalance) {\n  existingBalance.token = action.input.token;\n  existingBalance.amount = action.input.amount;\n} else {\n  account.endingBalances.push({\n    id: action.input.balanceId,\n    token: action.input.token,\n    amount: action.input.amount\n  });\n}",
+              schema:
+                "input SetEndingBalanceInput {\n  accountId: OID!\n  balanceId: OID!\n  token: Currency!\n  amount: Amount_Currency!\n}",
+              scope: "global",
+              template:
+                "Set or update an ending balance for a token in a snapshot account",
+            },
+            {
+              description:
+                "Remove a starting balance entry from a snapshot account",
+              errors: [
+                {
+                  code: "REMOVE_STARTING_BALANCE_NOT_FOUND",
+                  description: "The specified balance was not found",
+                  id: "balance-not-found-error",
+                  name: "RemoveStartingBalanceNotFoundError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "remove-starting-balance",
+              name: "REMOVE_STARTING_BALANCE",
+              reducer:
+                "const account = state.snapshotAccounts.find(a => a.id === action.input.accountId);\nif (!account) {\n  throw new SetStartingBalanceAccountNotFoundError(`Account with ID ${action.input.accountId} not found`);\n}\n\nconst balanceIndex = account.startingBalances.findIndex(b => b.id === action.input.balanceId);\nif (balanceIndex === -1) {\n  throw new RemoveStartingBalanceNotFoundError(`Balance with ID ${action.input.balanceId} not found`);\n}\n\naccount.startingBalances.splice(balanceIndex, 1);",
+              schema:
+                "input RemoveStartingBalanceInput {\n  accountId: OID!\n  balanceId: OID!\n}",
+              scope: "global",
+              template:
+                "Remove a starting balance entry from a snapshot account",
+            },
+            {
+              description:
+                "Remove an ending balance entry from a snapshot account",
+              errors: [
+                {
+                  code: "REMOVE_ENDING_BALANCE_NOT_FOUND",
+                  description: "The specified balance was not found",
+                  id: "balance-not-found-error-2",
+                  name: "RemoveEndingBalanceNotFoundError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "remove-ending-balance",
+              name: "REMOVE_ENDING_BALANCE",
+              reducer:
+                "const account = state.snapshotAccounts.find(a => a.id === action.input.accountId);\nif (!account) {\n  throw new SetEndingBalanceAccountNotFoundError(`Account with ID ${action.input.accountId} not found`);\n}\n\nconst balanceIndex = account.endingBalances.findIndex(b => b.id === action.input.balanceId);\nif (balanceIndex === -1) {\n  throw new RemoveEndingBalanceNotFoundError(`Balance with ID ${action.input.balanceId} not found`);\n}\n\naccount.endingBalances.splice(balanceIndex, 1);",
+              schema:
+                "input RemoveEndingBalanceInput {\n  accountId: OID!\n  balanceId: OID!\n}",
+              scope: "global",
+              template:
+                "Remove an ending balance entry from a snapshot account",
+            },
+          ],
+        },
+        {
+          description: "Operations for managing snapshot transactions",
+          id: "transactions",
+          name: "transactions",
+          operations: [
+            {
+              description:
+                "Add a transaction to the snapshot with enrichment data",
+              errors: [
+                {
+                  code: "DUPLICATE_TRANSACTION",
+                  description:
+                    "A transaction with this ID already exists in the snapshot",
+                  id: "duplicate-transaction-error",
+                  name: "DuplicateTransactionError",
+                  template: "",
+                },
+                {
+                  code: "ADD_TRANSACTION_ACCOUNT_NOT_FOUND",
+                  description:
+                    "The specified account was not found in the snapshot",
+                  id: "account-not-found-error-5",
+                  name: "AddTransactionAccountNotFoundError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "add-transaction",
+              name: "ADD_TRANSACTION",
+              reducer:
+                'const account = state.snapshotAccounts.find(a => a.id === action.input.accountId);\nif (!account) {\n  throw new AddTransactionAccountNotFoundError(`Account with ID ${action.input.accountId} not found`);\n}\n\nconst existingTransaction = account.transactions.find(t => t.id === action.input.id);\nif (existingTransaction) {\n  throw new DuplicateTransactionError(`Transaction with ID ${action.input.id} already exists`);\n}\n\n// AUTO-CATEGORIZATION: Determine flow type and counter-party account ID\nlet flowType = action.input.flowType || null;\nlet counterPartyAccountId = action.input.counterPartyAccountId || null;\n\nif (action.input.counterParty) {\n  // Find counter-party account in snapshot\n  const counterPartyAccount = state.snapshotAccounts.find(\n    (acc) => acc.accountAddress.toLowerCase() === action.input.counterParty.toLowerCase(),\n  );\n\n  if (counterPartyAccount) {\n    // Auto-link counter-party account\n    counterPartyAccountId = counterPartyAccount.id;\n\n    // Auto-categorize flow type if not explicitly provided\n    if (!flowType) {\n      // Determine sender and receiver types based on transaction direction\n      const fromType =\n        action.input.direction === "OUTFLOW"\n          ? account.type\n          : counterPartyAccount.type;\n      const toType =\n        action.input.direction === "OUTFLOW"\n          ? counterPartyAccount.type\n          : account.type;\n\n      // Flow categorization rules\n      if (fromType === "Source") {\n        flowType = "TopUp";\n      } else if (toType === "Source") {\n        flowType = "Return";\n      } else if (toType === "Destination") {\n        flowType = "TopUp";\n      } else if (fromType === "External") {\n        flowType = "External";\n      } else if (fromType === "Internal" && toType === "Internal") {\n        flowType = "Internal";\n      } else if (fromType === "Internal" && toType === "External") {\n        flowType = "External";\n      } else {\n        flowType = "External";\n      }\n    }\n  } else if (!flowType) {\n    // FALLBACK: Counter-party not found in snapshot, default to External\n    flowType = "External";\n  }\n} else if (!flowType) {\n  // FALLBACK: No counter-party provided, default to External\n  flowType = "External";\n}\n\nconst newTransaction = {\n  id: action.input.id,\n  transactionId: action.input.transactionId,\n  counterParty: action.input.counterParty || null,\n  amount: action.input.amount,\n  datetime: action.input.datetime,\n  txHash: action.input.txHash,\n  token: action.input.token,\n  blockNumber: action.input.blockNumber || null,\n  direction: action.input.direction,\n  flowType: flowType,\n  counterPartyAccountId: counterPartyAccountId,\n};\n\naccount.transactions.push(newTransaction);',
+              schema:
+                "input AddTransactionInput {\n  accountId: OID!\n  id: OID!\n  transactionId: String!\n  counterParty: EthereumAddress\n  amount: Amount_Currency!\n  datetime: DateTime!\n  txHash: String!\n  token: Currency!\n  blockNumber: Int\n  direction: TransactionDirectionInput!\n  flowType: TransactionFlowTypeInput\n  counterPartyAccountId: OID\n}\n",
+              scope: "global",
+              template:
+                "Add a transaction to the snapshot with enrichment data",
+            },
+            {
+              description: "Remove a transaction from the snapshot",
+              errors: [
+                {
+                  code: "REMOVE_TRANSACTION_NOT_FOUND",
+                  description: "The specified transaction was not found",
+                  id: "transaction-not-found-error",
+                  name: "RemoveTransactionNotFoundError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "remove-transaction",
+              name: "REMOVE_TRANSACTION",
+              reducer:
+                "let found = false;\n\nfor (const account of state.snapshotAccounts) {\n  const transactionIndex = account.transactions.findIndex(t => t.id === action.input.id);\n  if (transactionIndex !== -1) {\n    account.transactions.splice(transactionIndex, 1);\n    found = true;\n    break;\n  }\n}\n\nif (!found) {\n  throw new RemoveTransactionNotFoundError(`Transaction with ID ${action.input.id} not found`);\n}",
+              schema: "input RemoveTransactionInput {\n  id: OID!\n}",
+              scope: "global",
+              template: "Remove a transaction from the snapshot",
+            },
+            {
+              description:
+                "Update the flow type categorization of a transaction",
+              errors: [
+                {
+                  code: "UPDATE_FLOW_TYPE_TRANSACTION_NOT_FOUND",
+                  description: "The specified transaction was not found",
+                  id: "transaction-not-found-error-2",
+                  name: "UpdateFlowTypeTransactionNotFoundError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "update-flow-type",
+              name: "UPDATE_TRANSACTION_FLOW_TYPE",
+              reducer:
+                "let transaction = null;\n\nfor (const account of state.snapshotAccounts) {\n  transaction = account.transactions.find(t => t.id === action.input.id);\n  if (transaction) {\n    break;\n  }\n}\n\nif (!transaction) {\n  throw new UpdateFlowTypeTransactionNotFoundError(`Transaction with ID ${action.input.id} not found`);\n}\n\ntransaction.flowType = action.input.flowType;",
+              schema:
+                "input UpdateTransactionFlowTypeInput {\n  id: OID!\n  flowType: TransactionFlowTypeInput!\n}",
+              scope: "global",
+              template: "Update the flow type categorization of a transaction",
+            },
+            {
+              description:
+                "Recalculate all transaction flow types based on current account types and counter-party relationships",
+              errors: [],
+              examples: [],
+              id: "recalculate-flow-types",
+              name: "RECALCULATE_FLOW_TYPES",
+              reducer:
+                'for (const account of state.snapshotAccounts) {\n  for (const tx of account.transactions) {\n    if (!tx.counterParty) continue;\n\n    // Find counter-party account\n    const counterPartyAccount = state.snapshotAccounts.find(\n      (acc) => acc.accountAddress.toLowerCase() === tx.counterParty.toLowerCase(),\n    );\n\n    if (counterPartyAccount) {\n      // Update counter-party link if missing\n      if (!tx.counterPartyAccountId) {\n        tx.counterPartyAccountId = counterPartyAccount.id;\n      }\n\n      // Recalculate flow type based on account types\n      const fromType =\n        tx.direction === "OUTFLOW" ? account.type : counterPartyAccount.type;\n      const toType =\n        tx.direction === "OUTFLOW" ? counterPartyAccount.type : account.type;\n\n      // Flow categorization rules\n      if (fromType === "Source") {\n        tx.flowType = "TopUp";\n      } else if (toType === "Source") {\n        tx.flowType = "Return";\n      } else if (toType === "Destination") {\n        tx.flowType = "TopUp";\n      } else if (fromType === "External") {\n        tx.flowType = "External";\n      } else if (fromType === "Internal" && toType === "Internal") {\n        tx.flowType = "Internal";\n      } else if (fromType === "Internal" && toType === "External") {\n        tx.flowType = "External";\n      } else {\n        tx.flowType = "External";\n      }\n    }\n  }\n}',
+              schema: "input RecalculateFlowTypesInput {\n  _: String\n}",
+              scope: "global",
+              template:
+                "Recalculate all transaction flow types based on current account types",
+            },
+          ],
+        },
+      ],
+      state: {
+        global: {
+          examples: [],
+          initialValue:
+            '"{\\"ownerId\\": null, \\"accountsDocumentId\\": null, \\"startDate\\": null, \\"endDate\\": null, \\"reportName\\": null, \\"reportPeriodStart\\": null, \\"reportPeriodEnd\\": null, \\"snapshotAccounts\\": []}"',
+          schema:
+            "type SnapshotReportState {\n  ownerId: PHID\n  accountsDocumentId: PHID\n  startDate: DateTime\n  endDate: DateTime\n  reportName: String\n  reportPeriodStart: DateTime\n  reportPeriodEnd: DateTime\n  snapshotAccounts: [SnapshotAccount!]!\n}\n\ntype SnapshotAccount {\n  id: OID!\n  accountId: OID!\n  accountAddress: String!\n  accountName: String!\n  type: AccountType!\n  accountTransactionsId: PHID\n  startingBalances: [TokenBalance!]!\n  endingBalances: [TokenBalance!]!\n  transactions: [SnapshotTransaction!]!\n}\n\ntype TokenBalance {\n  id: OID!\n  token: Currency!\n  amount: Amount_Currency!\n}\n\ntype SnapshotTransaction {\n  id: OID!\n  transactionId: String!\n  counterParty: EthereumAddress\n  amount: Amount_Currency!\n  datetime: DateTime!\n  txHash: String!\n  token: Currency!\n  blockNumber: Int\n  direction: TransactionDirection!\n  flowType: TransactionFlowType\n  counterPartyAccountId: OID\n}\n\nenum AccountType {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum AccountTypeInput {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum TransactionDirection {\n  INFLOW\n  OUTFLOW\n}\n\nenum TransactionDirectionInput {\n  INFLOW\n  OUTFLOW\n}\n\nenum TransactionFlowType {\n  TopUp\n  Return\n  Internal\n  External\n}\n\nenum TransactionFlowTypeInput {\n  TopUp\n  Return\n  Internal\n  External\n}",
+        },
+        local: {
+          examples: [],
+          initialValue: '""',
+          schema: "",
+        },
+      },
+      version: 1,
+    },
+  ],
+};

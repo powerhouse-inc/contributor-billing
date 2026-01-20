@@ -1,4 +1,4 @@
-import { type ChangeEvent, useState } from "react";
+import { useState } from "react";
 import type { EditorProps } from "document-model";
 import {
   type BillingStatementDocument,

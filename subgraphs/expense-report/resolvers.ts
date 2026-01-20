@@ -23,6 +23,8 @@ import type {
   SetPeriodStartInput,
   SetPeriodEndInput,
   UpdateWalletInput,
+  SetOwnerIdInput,
+  SetStatusInput,
 } from "@powerhousedao/contributor-billing/document-models/expense-report";
 
 export const getResolvers = (
@@ -449,6 +451,47 @@ export const getResolvers = (
 
         if (result.status !== "SUCCESS") {
           throw new Error(result.error?.message ?? "Failed to updateWallet");
+        }
+
+        return true;
+      },
+
+      ExpenseReport_setOwnerId: async (
+        _: unknown,
+        args: { docId: string; input: SetOwnerIdInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ExpenseReportDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.setOwnerId(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setOwnerId");
+        }
+
+        return true;
+      },
+
+      ExpenseReport_setStatus: async (
+        _: unknown,
+        args: { docId: string; input: SetStatusInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ExpenseReportDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(docId, actions.setStatus(input));
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setStatus");
         }
 
         return true;

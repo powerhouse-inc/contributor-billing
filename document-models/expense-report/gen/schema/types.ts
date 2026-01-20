@@ -79,10 +79,16 @@ export type AddWalletInput = {
 
 export type ExpenseReportState = {
   groups: Array<LineItemGroup>;
+  ownerId: Maybe<Scalars["PHID"]["output"]>;
   periodEnd: Maybe<Scalars["DateTime"]["output"]>;
   periodStart: Maybe<Scalars["DateTime"]["output"]>;
+  status: ExpenseReportStatus | `${ExpenseReportStatus}`;
   wallets: Array<Wallet>;
 };
+
+export type ExpenseReportStatus = "DRAFT" | "FINAL" | "REVIEW";
+
+export type ExpenseReportStatusInput = "DRAFT" | "FINAL" | "REVIEW";
 
 export type GroupTotals = {
   group: Maybe<Scalars["ID"]["output"]>;
@@ -156,12 +162,20 @@ export type SetGroupTotalsInput = {
   wallet: Scalars["EthereumAddress"]["input"];
 };
 
+export type SetOwnerIdInput = {
+  ownerId: Scalars["PHID"]["input"];
+};
+
 export type SetPeriodEndInput = {
   periodEnd: Scalars["DateTime"]["input"];
 };
 
 export type SetPeriodStartInput = {
   periodStart: Scalars["DateTime"]["input"];
+};
+
+export type SetStatusInput = {
+  status: ExpenseReportStatusInput | `${ExpenseReportStatusInput}`;
 };
 
 export type UpdateLineItemGroupInput = {
@@ -183,11 +197,15 @@ export type UpdateLineItemInput = {
 };
 
 export type UpdateWalletInput = {
+  accountDocumentId?: InputMaybe<Scalars["PHID"]["input"]>;
+  accountTransactionsDocumentId?: InputMaybe<Scalars["PHID"]["input"]>;
   address: Scalars["EthereumAddress"]["input"];
   name?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type Wallet = {
+  accountDocumentId: Maybe<Scalars["PHID"]["output"]>;
+  accountTransactionsDocumentId: Maybe<Scalars["PHID"]["output"]>;
   billingStatements: Maybe<Array<Maybe<Scalars["OID"]["output"]>>>;
   lineItems: Maybe<Array<Maybe<LineItem>>>;
   name: Maybe<Scalars["String"]["output"]>;

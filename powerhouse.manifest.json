@@ -8,6 +8,14 @@
     },
     "documentModels": [
         {
+            "id": "powerhouse/accounts",
+            "name": "Accounts"
+        },
+        {
+            "id": "powerhouse/account-transactions",
+            "name": "AccountTransactions"
+        },
+        {
             "id": "powerhouse/invoice",
             "name": "Invoice"
         },
@@ -16,16 +24,80 @@
             "name": "Billing Statement"
         },
         {
-            "id": "powerhouse/integrations",
-            "name": "Integrations"
-        },
-        {
             "id": "powerhouse/expense-report",
             "name": "ExpenseReport"
+        },
+        {
+            "id": "powerhouse/snapshot-report",
+            "name": "Snapshot Report"
+        },
+        {
+            "id": "powerhouse/service-subscriptions",
+            "name": "ServiceSubscriptions"
+        },
+        {
+            "id": "powerhouse/service-offering",
+            "name": "ServiceOffering"
         }
     ],
-    "editors": [],
-    "apps": [],
+    "editors": [
+        {
+            "id": "powerhouse-accounts-editor",
+            "name": "Accounts",
+            "documentTypes": [
+                "powerhouse/accounts"
+            ]
+        },
+        {
+            "id": "powerhouse-account-transactions-editor",
+            "name": "Account Transactions",
+            "documentTypes": [
+                "powerhouse/account-transactions"
+            ]
+        },
+        {
+            "id": "powerhouse-invoice-editor",
+            "name": "Invoice",
+            "documentTypes": [
+                "powerhouse/invoice"
+            ]
+        },
+        {
+            "id": "powerhouse-billing-statement-editor",
+            "name": "Billing Statement",
+            "documentTypes": [
+                "powerhouse/billing-statement"
+            ]
+        },
+        {
+            "id": "powerhouse-expense-report-editor",
+            "name": "Expense Report",
+            "documentTypes": [
+                "powerhouse/expense-report"
+            ]
+        },
+        {
+            "id": "powerhouse-snapshot-report-editor",
+            "name": "Snapshot Report",
+            "documentTypes": [
+                "powerhouse/snapshot-report"
+            ]
+        }
+    ],
+    "apps": [
+        {
+            "id": "contributor-billing",
+            "name": "Contributor Billing",
+            "driveEditor": "contributor-billing"
+        },
+        {
+            "id": "builder-team-admin",
+            "name": "Builder Team Admin",
+            "documentTypes": [
+                "powerhouse/document-drive"
+            ]
+        }
+    ],
     "subgraphs": [],
     "importScripts": []
 }

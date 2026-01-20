@@ -206,7 +206,7 @@ export function ExpenseReportPDF({
     return lineItems
       .filter(
         (item): item is NonNullable<typeof item> =>
-          item !== null && item !== undefined
+          item !== null && item !== undefined,
       )
       .map((item): LineItemWithGroupInfo => {
         const groupInfo = item.group ? groupsMap.get(item.group) : undefined;
@@ -238,7 +238,7 @@ export function ExpenseReportPDF({
     // Find Headcount and Non-Headcount group IDs
     const headcountGroup = groups.find((g) => g.label === "Headcount Expenses");
     const nonHeadcountGroup = groups.find(
-      (g) => g.label === "Non-Headcount Expenses"
+      (g) => g.label === "Non-Headcount Expenses",
     );
 
     entries.sort(([keyA], [keyB]) => {
@@ -293,14 +293,11 @@ export function ExpenseReportPDF({
               actuals: acc.actuals + (item.actuals || 0),
               payments: acc.payments + (item.payments || 0),
             }),
-            { budget: 0, forecast: 0, actuals: 0, payments: 0 }
+            { budget: 0, forecast: 0, actuals: 0, payments: 0 },
           );
 
           return (
-            <View
-              key={wallet.wallet || walletIndex}
-              break={walletIndex > 0}
-            >
+            <View key={wallet.wallet || walletIndex} break={walletIndex > 0}>
               <View wrap={false}>
                 <Text style={styles.sectionTitle}>
                   {periodStart &&
@@ -326,7 +323,7 @@ export function ExpenseReportPDF({
                       actuals: acc.actuals + (item.actuals || 0),
                       payments: acc.payments + (item.payments || 0),
                     }),
-                    { budget: 0, forecast: 0, actuals: 0, payments: 0 }
+                    { budget: 0, forecast: 0, actuals: 0, payments: 0 },
                   );
                   const subtotalDifference =
                     subtotals.forecast - subtotals.actuals;
@@ -348,7 +345,9 @@ export function ExpenseReportPDF({
                           <Text style={[styles.headerCell, styles.actualsCol]}>
                             Actuals
                           </Text>
-                          <Text style={[styles.headerCell, styles.differenceCol]}>
+                          <Text
+                            style={[styles.headerCell, styles.differenceCol]}
+                          >
                             Difference
                           </Text>
                           <Text style={[styles.headerCell, styles.commentsCol]}>
