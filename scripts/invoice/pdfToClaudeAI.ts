@@ -1,6 +1,191 @@
 import { generateId } from "document-model";
 import { autoTagLineItems } from "./autoTagging.js";
 
+/**
+ * Attempts to repair truncated JSON by closing unclosed brackets and braces.
+ * This handles cases where Claude's response gets cut off due to max_tokens.
+ */
+function repairTruncatedJson(jsonString: string): string {
+  let repaired = jsonString.trim();
+
+  // Find the last complete JSON element (object or value in array)
+  // We need to truncate at the last complete element before adding closing brackets
+  repaired = truncateToLastCompleteElement(repaired);
+
+  // Count unclosed brackets and braces
+  let openBraces = 0;
+  let openBrackets = 0;
+  let inString = false;
+  let escapeNext = false;
+
+  for (let i = 0; i < repaired.length; i++) {
+    const char = repaired[i];
+
+    if (escapeNext) {
+      escapeNext = false;
+      continue;
+    }
+
+    if (char === "\\") {
+      escapeNext = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (!inString) {
+      if (char === "{") openBraces++;
+      else if (char === "}") openBraces--;
+      else if (char === "[") openBrackets++;
+      else if (char === "]") openBrackets--;
+    }
+  }
+
+  // Close any unclosed arrays and objects
+  // Close arrays first (they're usually inside objects)
+  while (openBrackets > 0) {
+    repaired += "]";
+    openBrackets--;
+  }
+
+  // Then close objects
+  while (openBraces > 0) {
+    repaired += "}";
+    openBraces--;
+  }
+
+  return repaired;
+}
+
+/**
+ * Truncates JSON string to the last complete element.
+ * Handles cases where truncation occurs mid-string, mid-object, or mid-array.
+ */
+function truncateToLastCompleteElement(json: string): string {
+  // Find the last closing brace or bracket that represents a complete element
+  // We scan backwards to find the last complete object "}" or complete array element
+
+  let depth = 0;
+  let inString = false;
+  let lastCompleteObjectEnd = -1;
+
+  for (let i = 0; i < json.length; i++) {
+    const char = json[i];
+    const prevChar = i > 0 ? json[i - 1] : "";
+
+    // Handle escape sequences
+    if (char === '"' && prevChar !== "\\") {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) continue;
+
+    if (char === "{" || char === "[") {
+      depth++;
+    } else if (char === "}" || char === "]") {
+      depth--;
+      // Track the position after closing braces at depth 1 (inside the lineItems array)
+      // or after any closing brace that's followed by a comma or end
+      if (char === "}") {
+        lastCompleteObjectEnd = i + 1;
+      }
+    }
+  }
+
+  // If we found a complete object, check if there's incomplete content after it
+  if (lastCompleteObjectEnd > 0 && lastCompleteObjectEnd < json.length) {
+    const remainder = json.substring(lastCompleteObjectEnd).trim();
+
+    // If what's left starts with a comma and then has incomplete content,
+    // we should truncate there
+    if (remainder.startsWith(",")) {
+      const afterComma = remainder.substring(1).trim();
+      // Check if the content after the comma is incomplete (starts with { but doesn't close)
+      if (afterComma.startsWith("{") || afterComma.startsWith('"')) {
+        // Check if this new element is complete
+        let testDepth = 0;
+        let testInString = false;
+        let isComplete = false;
+
+        for (let i = 0; i < afterComma.length; i++) {
+          const char = afterComma[i];
+          const prevChar = i > 0 ? afterComma[i - 1] : "";
+
+          if (char === '"' && prevChar !== "\\") {
+            testInString = !testInString;
+            continue;
+          }
+
+          if (testInString) continue;
+
+          if (char === "{" || char === "[") testDepth++;
+          else if (char === "}" || char === "]") {
+            testDepth--;
+            if (testDepth === 0 && char === "}") {
+              isComplete = true;
+              break;
+            }
+          }
+        }
+
+        // If the element after the comma is incomplete, truncate before the comma
+        if (!isComplete) {
+          return json.substring(0, lastCompleteObjectEnd);
+        }
+      }
+    }
+  }
+
+  // Alternative approach: find the last complete line item by looking for the pattern
+  // "},\n    {" and ensure the last one is complete
+  const lineItemPattern = /\},\s*\{[^}]*$/;
+  const match = json.match(lineItemPattern);
+
+  if (match && match.index !== undefined) {
+    // There's an incomplete line item at the end
+    // Truncate just before the comma that starts the incomplete item
+    const truncateAt = match.index + 1; // Keep the closing }
+    return json.substring(0, truncateAt);
+  }
+
+  // Check if we're in the middle of a string value
+  // Count quotes to see if we're inside a string
+  let quoteCount = 0;
+  for (let i = 0; i < json.length; i++) {
+    if (json[i] === '"' && (i === 0 || json[i - 1] !== "\\")) {
+      quoteCount++;
+    }
+  }
+
+  // If odd number of quotes, we're inside a string - find and remove the incomplete part
+  if (quoteCount % 2 === 1) {
+    // Find the last property that started (look for last '": ' or '":')
+    const lastPropStart = Math.max(
+      json.lastIndexOf('": "'),
+      json.lastIndexOf('":"'),
+    );
+
+    if (lastPropStart > 0) {
+      // Find the comma or opening brace before this property
+      let searchFrom = lastPropStart;
+      while (searchFrom > 0 && json[searchFrom] !== "," && json[searchFrom] !== "{") {
+        searchFrom--;
+      }
+
+      if (json[searchFrom] === ",") {
+        // Remove the incomplete property by truncating at the comma
+        return json.substring(0, searchFrom);
+      }
+    }
+  }
+
+  return json;
+}
+
 export async function uploadPdfAndGetJsonClaude(inputDoc: string) {
   try {
     console.log("Starting PDF upload and processing with Claude AI");
@@ -170,11 +355,13 @@ Please analyze this PDF invoice document and extract the following information i
 }
 
 Extract only the data that is clearly visible in the PDF. If a field is not present, use null. Be very careful with numbers - preserve the exact values without modification. For dates, convert to YYYY-MM-DD format. For currencies, use standard 3-letter codes (USD, EUR, GBP, etc.).
+
+IMPORTANT: You MUST output valid, complete JSON. Do not truncate or abbreviate the output. Include all line items.
 `;
 
     const requestBody = {
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 4000,
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 32000,
       messages: [
         {
           role: "user",
@@ -215,6 +402,14 @@ Extract only the data that is clearly visible in the PDF. If a field is not pres
     const result = await response.json();
     console.log("PDF processed successfully with Claude AI");
 
+    // Check if the response was truncated due to max_tokens
+    const stopReason = result.stop_reason;
+    if (stopReason === "max_tokens") {
+      console.warn(
+        "Warning: Claude response was truncated due to max_tokens limit",
+      );
+    }
+
     // Extract JSON from Claude's response
     const responseText = result.content[0]?.text;
     if (!responseText) {
@@ -230,7 +425,11 @@ Extract only the data that is clearly visible in the PDF. If a field is not pres
         responseText.match(/\{[\s\S]*\}/);
 
       if (jsonMatch) {
-        const jsonString = jsonMatch[1] || jsonMatch[0];
+        let jsonString = jsonMatch[1] || jsonMatch[0];
+
+        // Attempt to repair truncated JSON if needed
+        jsonString = repairTruncatedJson(jsonString);
+
         invoiceData = JSON.parse(jsonString);
       } else {
         // Fallback: try to parse the entire response as JSON
@@ -239,7 +438,20 @@ Extract only the data that is clearly visible in the PDF. If a field is not pres
     } catch (parseError) {
       console.error("Failed to parse Claude response as JSON:", parseError);
       console.error("Response text:", responseText);
-      throw new Error("Failed to parse Claude response as valid JSON");
+
+      // Try one more time with aggressive repair
+      try {
+        const jsonMatch = responseText.match(/\{[\s\S]*/);
+        if (jsonMatch) {
+          const repairedJson = repairTruncatedJson(jsonMatch[0]);
+          invoiceData = JSON.parse(repairedJson);
+          console.log("Successfully repaired truncated JSON");
+        } else {
+          throw new Error("Failed to parse Claude response as valid JSON");
+        }
+      } catch {
+        throw new Error("Failed to parse Claude response as valid JSON");
+      }
     }
 
     // Process the invoice data to ensure it matches our expected format

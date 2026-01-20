@@ -15,6 +15,8 @@ import type {
   SetPeriodStartInput,
   SetPeriodEndInput,
   UpdateWalletInput,
+  SetOwnerIdInput,
+  SetStatusInput,
 } from "../types.js";
 
 export type AddWalletAction = Action & {
@@ -77,6 +79,14 @@ export type UpdateWalletAction = Action & {
   type: "UPDATE_WALLET";
   input: UpdateWalletInput;
 };
+export type SetOwnerIdAction = Action & {
+  type: "SET_OWNER_ID";
+  input: SetOwnerIdInput;
+};
+export type SetStatusAction = Action & {
+  type: "SET_STATUS";
+  input: SetStatusInput;
+};
 
 export type ExpenseReportWalletAction =
   | AddWalletAction
@@ -93,4 +103,6 @@ export type ExpenseReportWalletAction =
   | RemoveGroupTotalsAction
   | SetPeriodStartAction
   | SetPeriodEndAction
-  | UpdateWalletAction;
+  | UpdateWalletAction
+  | SetOwnerIdAction
+  | SetStatusAction;

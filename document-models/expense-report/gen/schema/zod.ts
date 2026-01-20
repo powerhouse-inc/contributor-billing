@@ -5,6 +5,8 @@ import type {
   AddLineItemInput,
   AddWalletInput,
   ExpenseReportState,
+  ExpenseReportStatus,
+  ExpenseReportStatusInput,
   GroupTotals,
   GroupTotalsInput,
   LineItem,
@@ -16,8 +18,10 @@ import type {
   RemoveLineItemInput,
   RemoveWalletInput,
   SetGroupTotalsInput,
+  SetOwnerIdInput,
   SetPeriodEndInput,
   SetPeriodStartInput,
+  SetStatusInput,
   UpdateLineItemGroupInput,
   UpdateLineItemInput,
   UpdateWalletInput,
@@ -36,6 +40,14 @@ export const isDefinedNonNullAny = (v: any): v is definedNonNullAny =>
 export const definedNonNullAnySchema = z
   .any()
   .refine((v) => isDefinedNonNullAny(v));
+
+export const ExpenseReportStatusSchema = z.enum(["DRAFT", "FINAL", "REVIEW"]);
+
+export const ExpenseReportStatusInputSchema = z.enum([
+  "DRAFT",
+  "FINAL",
+  "REVIEW",
+]);
 
 export function AddBillingStatementInputSchema(): z.ZodObject<
   Properties<AddBillingStatementInput>
@@ -92,8 +104,10 @@ export function ExpenseReportStateSchema(): z.ZodObject<
   return z.object({
     __typename: z.literal("ExpenseReportState").optional(),
     groups: z.array(LineItemGroupSchema()),
+    ownerId: z.string().nullable(),
     periodEnd: z.string().datetime().nullable(),
     periodStart: z.string().datetime().nullable(),
+    status: ExpenseReportStatusSchema,
     wallets: z.array(WalletSchema()),
   });
 }
@@ -229,6 +243,14 @@ export function SetGroupTotalsInputSchema(): z.ZodObject<
   });
 }
 
+export function SetOwnerIdInputSchema(): z.ZodObject<
+  Properties<SetOwnerIdInput>
+> {
+  return z.object({
+    ownerId: z.string(),
+  });
+}
+
 export function SetPeriodEndInputSchema(): z.ZodObject<
   Properties<SetPeriodEndInput>
 > {
@@ -242,6 +264,14 @@ export function SetPeriodStartInputSchema(): z.ZodObject<
 > {
   return z.object({
     periodStart: z.string().datetime(),
+  });
+}
+
+export function SetStatusInputSchema(): z.ZodObject<
+  Properties<SetStatusInput>
+> {
+  return z.object({
+    status: z.lazy(() => ExpenseReportStatusInputSchema),
   });
 }
 
@@ -279,6 +309,8 @@ export function UpdateWalletInputSchema(): z.ZodObject<
   Properties<UpdateWalletInput>
 > {
   return z.object({
+    accountDocumentId: z.string().nullish(),
+    accountTransactionsDocumentId: z.string().nullish(),
     address: z
       .string()
       .regex(/^0x[a-fA-F0-9]{40}$/, {
@@ -291,6 +323,8 @@ export function UpdateWalletInputSchema(): z.ZodObject<
 export function WalletSchema(): z.ZodObject<Properties<Wallet>> {
   return z.object({
     __typename: z.literal("Wallet").optional(),
+    accountDocumentId: z.string().nullable(),
+    accountTransactionsDocumentId: z.string().nullable(),
     billingStatements: z.array(z.string().nullable()).nullable(),
     lineItems: z.array(LineItemSchema().nullable()).nullable(),
     name: z.string().nullable(),

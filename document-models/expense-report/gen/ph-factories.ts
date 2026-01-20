@@ -13,6 +13,8 @@ import { createDocument } from "./utils.js";
 
 export function defaultGlobalState(): ExpenseReportGlobalState {
   return {
+    ownerId: null,
+    status: "DRAFT",
     wallets: [],
     groups: [
       {
@@ -76,79 +78,79 @@ export function defaultGlobalState(): ExpenseReportGlobalState {
         parentId: "4971def8-64f8-4eab-b69b-a869d10452c2",
       },
       {
+        id: "465367d1-636a-45a1-9e43-4a48dd074918",
         label: "Budget",
         parentId: null,
-        id: "465367d1-636a-45a1-9e43-4a48dd074918",
       },
       {
+        id: "aa5b7188-2231-445e-9f3d-7e5d1ce5754f",
         label: "Interest Income",
         parentId: null,
-        id: "aa5b7188-2231-445e-9f3d-7e5d1ce5754f",
       },
       {
+        id: "d1e9bd15-930d-4faa-ba61-8f2a3b1d0e8f",
         label: "Other Income Expense (Non-operating)",
         parentId: null,
-        id: "d1e9bd15-930d-4faa-ba61-8f2a3b1d0e8f",
       },
       {
+        id: "133b762c-a240-4a42-8bf6-9c29b3675f91",
         label: "Other Income",
         parentId: null,
-        id: "133b762c-a240-4a42-8bf6-9c29b3675f91",
       },
       {
+        id: "1c61e841-c599-4c38-944a-7c9450c27d17",
         label: "Current Asset",
         parentId: null,
-        id: "1c61e841-c599-4c38-944a-7c9450c27d17",
       },
       {
+        id: "5a33a954-09d0-4ddd-95fc-c56853de4dbd",
         label: "Fixed Asset",
         parentId: null,
-        id: "5a33a954-09d0-4ddd-95fc-c56853de4dbd",
       },
       {
+        id: "75130e59-7c11-44ae-980c-eaa4968a4a56",
         label: "Non-Current Asset",
         parentId: null,
-        id: "75130e59-7c11-44ae-980c-eaa4968a4a56",
       },
       {
+        id: "b3091879-f549-4227-beef-c8d4947be2e7",
         label: "Current Liability",
         parentId: null,
-        id: "b3091879-f549-4227-beef-c8d4947be2e7",
       },
       {
+        id: "2f64aca7-38db-4ff4-8cc5-8e0952c23151",
         label: "Non-current Liability",
         parentId: null,
-        id: "2f64aca7-38db-4ff4-8cc5-8e0952c23151",
       },
       {
+        id: "42e480eb-9790-49ed-af35-3ab124af556e",
         label: "Owner Equity",
         parentId: null,
-        id: "42e480eb-9790-49ed-af35-3ab124af556e",
       },
       {
+        id: "248f0af0-74b1-4fd9-9e7f-3d723f5c4c56",
         label: "Equity",
         parentId: null,
-        id: "248f0af0-74b1-4fd9-9e7f-3d723f5c4c56",
       },
       {
+        id: "5044752a-5618-4ab2-90b7-54b5d95e38cf",
         label: "Adjustment A/C",
         parentId: null,
-        id: "5044752a-5618-4ab2-90b7-54b5d95e38cf",
       },
       {
+        id: "566fede7-b593-43d0-84b6-50301e5a84ed",
         label: "Temporary Holding Account",
         parentId: null,
-        id: "566fede7-b593-43d0-84b6-50301e5a84ed",
       },
       {
+        id: "f0077e3f-2931-4637-8715-ba3a01ce3786",
         label: "Other",
         parentId: null,
-        id: "f0077e3f-2931-4637-8715-ba3a01ce3786",
       },
       {
+        id: "470504f0-a89f-4555-a46e-667c74240238",
         label: "Internal Transfers",
         parentId: null,
-        id: "470504f0-a89f-4555-a46e-667c74240238",
       },
     ],
     periodStart: null,

@@ -15,6 +15,8 @@ import {
   SetPeriodStartInputSchema,
   SetPeriodEndInputSchema,
   UpdateWalletInputSchema,
+  SetOwnerIdInputSchema,
+  SetStatusInputSchema,
 } from "../schema/zod.js";
 import type {
   AddWalletInput,
@@ -32,6 +34,8 @@ import type {
   SetPeriodStartInput,
   SetPeriodEndInput,
   UpdateWalletInput,
+  SetOwnerIdInput,
+  SetStatusInput,
 } from "../types.js";
 import type {
   AddWalletAction,
@@ -49,6 +53,8 @@ import type {
   SetPeriodStartAction,
   SetPeriodEndAction,
   UpdateWalletAction,
+  SetOwnerIdAction,
+  SetStatusAction,
 } from "./actions.js";
 
 export const addWallet = (input: AddWalletInput) =>
@@ -183,5 +189,23 @@ export const updateWallet = (input: UpdateWalletInput) =>
     { ...input },
     undefined,
     UpdateWalletInputSchema,
+    "global",
+  );
+
+export const setOwnerId = (input: SetOwnerIdInput) =>
+  createAction<SetOwnerIdAction>(
+    "SET_OWNER_ID",
+    { ...input },
+    undefined,
+    SetOwnerIdInputSchema,
+    "global",
+  );
+
+export const setStatus = (input: SetStatusInput) =>
+  createAction<SetStatusAction>(
+    "SET_STATUS",
+    { ...input },
+    undefined,
+    SetStatusInputSchema,
     "global",
   );

@@ -81,9 +81,6 @@ export default function Editor() {
   // Get the parent folder node for the currently selected node
   const parentFolder = useParentFolderForSelectedNode();
 
-  // Mobile header menu state
-  const [mobileHeaderOpen, setMobileHeaderOpen] = useState(false);
-
   // Initialize hooks with safe defaults that don't depend on state being available
   const [fiatMode, setFiatMode] = useState(false);
   const [uploadDropdownOpen, setUploadDropdownOpen] = useState(false);
@@ -677,9 +674,9 @@ export default function Editor() {
   }
 
   return (
-    <div>
+    <div className="w-full min-h-full flex flex-col">
       <DocumentToolbar document={doc} onClose={handleClose} />
-      <div className="container mx-auto mt-4">
+      <div className="flex-1 max-w-7xl mx-auto w-full mt-4 px-4 pb-8">
         <ToastContainer
           position="bottom-right"
           autoClose={5000}
@@ -692,26 +689,28 @@ export default function Editor() {
           pauseOnHover
           theme="light"
         />
-        {/* Header Section - Responsive with collapsible mobile menu */}
+        {/* Header Section */}
         <div className="mb-6">
-          {/* Desktop/Tablet Header - visible from md breakpoint up */}
-          <div className="hidden md:flex flex-row items-center justify-between gap-4">
+          {/* Header - responsive via flex-wrap */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
             {/* Left side with Invoice title, input, and upload */}
-            <div className="flex flex-row items-center gap-4 flex-wrap">
+            <div className="flex flex-wrap items-center gap-4">
               <h1 className="text-3xl font-bold whitespace-nowrap">Invoice</h1>
-              <InputField
-                placeholder={"Add invoice number"}
-                value={invoiceNoInput}
-                handleInputChange={(e) => setInvoiceNoInput(e.target.value)}
-                onBlur={(e) => {
-                  const newValue = e.target.value;
-                  if (newValue !== state.invoiceNo) {
-                    dispatch(actions.editInvoice({ invoiceNo: newValue }));
-                  }
-                }}
-                input={invoiceNoInput}
-                validation={invoiceValidation}
-              />
+              <div className="min-w-[200px]">
+                <InputField
+                  placeholder={"Add invoice number"}
+                  value={invoiceNoInput}
+                  handleInputChange={(e) => setInvoiceNoInput(e.target.value)}
+                  onBlur={(e) => {
+                    const newValue = e.target.value;
+                    if (newValue !== state.invoiceNo) {
+                      dispatch(actions.editInvoice({ invoiceNo: newValue }));
+                    }
+                  }}
+                  input={invoiceNoInput}
+                  validation={invoiceValidation}
+                />
+              </div>
 
               {/* Upload Dropdown Button */}
               <div className="relative" ref={uploadDropdownRef}>
@@ -837,219 +836,18 @@ export default function Editor() {
               />
             </div>
           </div>
-
-          {/* Mobile Header - visible below md breakpoint */}
-          <div className="md:hidden">
-            {/* Mobile Header Bar */}
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-bold">Invoice</h1>
-              <button
-                onClick={() => setMobileHeaderOpen(!mobileHeaderOpen)}
-                className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer"
-                aria-label="Toggle invoice settings"
-              >
-                {mobileHeaderOpen ? (
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                    />
-                  </svg>
-                )}
-              </button>
-            </div>
-
-            {/* Current Settings Summary */}
-            {!mobileHeaderOpen && (
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                <span className="font-medium">
-                  {state.invoiceNo || "No invoice #"}
-                </span>
-                <span>•</span>
-                <span>{state.currency}</span>
-                <span>•</span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                  {state.status}
-                </span>
-              </div>
-            )}
-
-            {/* Collapsible Menu */}
-            {mobileHeaderOpen && (
-              <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4 shadow-sm">
-                {/* Invoice Number */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Invoice Number
-                  </label>
-                  <InputField
-                    placeholder={"Add invoice number"}
-                    value={invoiceNoInput}
-                    handleInputChange={(e) => setInvoiceNoInput(e.target.value)}
-                    onBlur={(e) => {
-                      const newValue = e.target.value;
-                      if (newValue !== state.invoiceNo) {
-                        dispatch(actions.editInvoice({ invoiceNo: newValue }));
-                      }
-                    }}
-                    input={invoiceNoInput}
-                    validation={invoiceValidation}
-                  />
-                </div>
-
-                {/* Currency */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Currency
-                  </label>
-                  <CurrencyForm
-                    currency={state.currency}
-                    handleInputChange={(e) => {
-                      handleCurrencyChange(e.target.value);
-                    }}
-                    validation={currencyValidation}
-                  />
-                </div>
-
-                {/* Status */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
-                  </label>
-                  <SelectField
-                    options={STATUS_OPTIONS}
-                    value={state.status}
-                    onChange={(value) => handleStatusChange(value as Status)}
-                  />
-                </div>
-
-                {/* Action Buttons */}
-                <div className="space-y-2 pt-2 border-t border-gray-200">
-                  {/* Upload Button */}
-                  <div className="relative" ref={uploadDropdownRef}>
-                    <button
-                      onClick={() => setUploadDropdownOpen(!uploadDropdownOpen)}
-                      className="w-full inline-flex items-center justify-center h-10 px-4 rounded bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors cursor-pointer"
-                      disabled={isPdfLoading}
-                    >
-                      {isPdfLoading ? "Processing..." : "Upload File"}
-                      <svg
-                        className="w-4 h-4 ml-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 9l-7 7-7-7"
-                        ></path>
-                      </svg>
-                    </button>
-
-                    {uploadDropdownOpen && !isPdfLoading && (
-                      <div className="absolute z-10 mt-1 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                        <div className="py-1" role="menu">
-                          <label className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                            Upload UBL
-                            <input
-                              accept=".xml"
-                              className="hidden"
-                              onChange={(e) => {
-                                handleFileUpload(e);
-                                setUploadDropdownOpen(false);
-                              }}
-                              type="file"
-                            />
-                          </label>
-                          <PDFUploader
-                            dispatch={dispatch}
-                            changeDropdownOpen={setUploadDropdownOpen}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Export Button */}
-                  <div className="relative" ref={exportDropdownRef}>
-                    <button
-                      onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
-                      className="w-full inline-flex items-center justify-center h-10 px-4 rounded bg-black hover:bg-gray-800 text-white font-medium transition-colors cursor-pointer"
-                    >
-                      Export File
-                      <svg
-                        className="w-4 h-4 ml-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 9l-7 7-7-7"
-                        ></path>
-                      </svg>
-                    </button>
-
-                    {exportDropdownOpen && (
-                      <div className="absolute z-10 mt-1 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                        <div className="py-1" role="menu">
-                          <button
-                            onClick={() => {
-                              handleExportUBL();
-                              setExportDropdownOpen(false);
-                            }}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                          >
-                            Export UBL
-                          </button>
-                          <button
-                            onClick={() => {
-                              handleExportPDF();
-                              setExportDropdownOpen(false);
-                            }}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                          >
-                            Export PDF
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Main Content Grid - Responsive: mobile stacks, tablet+ side-by-side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 lg:gap-4">
+        <div
+          className="grid gap-6"
+          style={{
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(min(100%, 400px), 1fr))",
+          }}
+        >
           {/* Issuer Section */}
-          <div className="border-0 lg:border lg:border-gray-200 lg:rounded-lg p-0 lg:p-4">
+          <div className="border border-gray-200 rounded-lg p-4 min-w-0">
             <h3 className="text-lg font-semibold mb-4">Issuer</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="mb-2">
@@ -1115,7 +913,7 @@ export default function Editor() {
           </div>
 
           {/* Payer Section */}
-          <div className="border-0 lg:border lg:border-gray-200 lg:rounded-lg p-0 lg:p-4">
+          <div className="border border-gray-200 rounded-lg p-4 min-w-0">
             <h3 className="text-lg font-semibold mb-4">Payer</h3>
             <div className="mb-2 w-64">
               <label className="block mb-1 text-sm">Due Date:</label>
@@ -1167,8 +965,14 @@ export default function Editor() {
         </div>
 
         {/* Totals Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="col-span-1">
+        <div
+          className="grid gap-4"
+          style={{
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
+          }}
+        >
+          <div>
             <div className="">
               <Textarea
                 label="Notes"
@@ -1190,7 +994,7 @@ export default function Editor() {
               />
             </div>
           </div>
-          <div className="col-span-1">
+          <div>
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 shadow-sm h-32">
               <div className="">
                 <div className="flex justify-between text-gray-700">

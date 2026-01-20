@@ -1,7 +1,7 @@
 import type { EditorProps } from "document-model";
 import { ToastContainer } from "@powerhousedao/design-system/connect";
-import { HeaderStats } from "./HeaderStats.js";
-import { InvoiceTableContainer } from "./InvoiceTableContainer.js";
+import { DriveContents } from "./DriveContents.js";
+import { FolderTree } from "./FolderTree.js";
 
 /**
  * Main drive explorer component for Contributor Billing.
@@ -12,7 +12,10 @@ export function DriveExplorer({ children }: EditorProps) {
   const showDocumentEditor = !!children;
 
   return (
-    <div className="contributor-billing-explorer h-full overflow-y-auto">
+    <div className="flex h-full w-full overflow-hidden">
+      {/* Sidebar - resizable, managed by Sidebar component */}
+      <FolderTree />
+
       {/* Toast notifications */}
       <ToastContainer
         position="bottom-right"
@@ -27,17 +30,17 @@ export function DriveExplorer({ children }: EditorProps) {
         theme="light"
       />
 
-      {/* Conditional rendering: Document editor or Operational Hub */}
-      {showDocumentEditor ? (
-        /* Document editor view */
-        children
-      ) : (
-        /* Operational Hub view */
-        <div className="container mx-auto p-4 space-y-4">
-          <HeaderStats />
-          <InvoiceTableContainer />
-        </div>
-      )}
+      {/* Main content area - takes remaining space, scrollable */}
+      <div className="flex-1 min-w-0 h-full overflow-auto">
+        {/* Conditional rendering: Document editor or Operational Hub */}
+        {showDocumentEditor ? (
+          /* Document editor view */
+          <div className="min-h-full">{children}</div>
+        ) : (
+          /* Operational Hub view */
+          <DriveContents />
+        )}
+      </div>
     </div>
   );
 }
