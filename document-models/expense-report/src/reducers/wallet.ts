@@ -1,5 +1,64 @@
 import type { ExpenseReportWalletOperations } from "@powerhousedao/contributor-billing/document-models/expense-report";
 
+type GroupTotalsDelta = {
+  totalBudget: number;
+  totalForecast: number;
+  totalActuals: number;
+  totalPayments: number;
+};
+
+function getLineItemTotals(lineItem: {
+  budget?: number | null;
+  actuals?: number | null;
+  forecast?: number | null;
+  payments?: number | null;
+}): GroupTotalsDelta {
+  return {
+    totalBudget: lineItem.budget ?? 0,
+    totalForecast: lineItem.forecast ?? 0,
+    totalActuals: lineItem.actuals ?? 0,
+    totalPayments: lineItem.payments ?? 0,
+  };
+}
+
+function applyTotalsDelta(
+  wallet: {
+    totals?: Array<{
+      group?: string | null;
+      totalBudget?: number | null;
+      totalForecast?: number | null;
+      totalActuals?: number | null;
+      totalPayments?: number | null;
+    } | null> | null;
+  },
+  groupId: string | null | undefined,
+  delta: GroupTotalsDelta,
+) {
+  if (!groupId) {
+    return;
+  }
+  if (!wallet.totals) {
+    wallet.totals = [];
+  }
+  const existing = wallet.totals.find((t) => t && t.group === groupId) || null;
+  if (existing) {
+    existing.totalBudget = (existing.totalBudget ?? 0) + delta.totalBudget;
+    existing.totalForecast =
+      (existing.totalForecast ?? 0) + delta.totalForecast;
+    existing.totalActuals = (existing.totalActuals ?? 0) + delta.totalActuals;
+    existing.totalPayments =
+      (existing.totalPayments ?? 0) + delta.totalPayments;
+  } else {
+    wallet.totals.push({
+      group: groupId,
+      totalBudget: delta.totalBudget,
+      totalForecast: delta.totalForecast,
+      totalActuals: delta.totalActuals,
+      totalPayments: delta.totalPayments,
+    });
+  }
+}
+
 export const expenseReportWalletOperations: ExpenseReportWalletOperations = {
   addWalletOperation(state, action) {
     // Add new wallet to the wallets array
@@ -68,6 +127,7 @@ export const expenseReportWalletOperations: ExpenseReportWalletOperations = {
         comments: action.input.lineItem.comments ?? null,
       };
       wallet.lineItems.push(lineItem);
+      applyTotalsDelta(wallet, lineItem.group, getLineItemTotals(lineItem));
     }
   },
 
@@ -79,38 +139,65 @@ export const expenseReportWalletOperations: ExpenseReportWalletOperations = {
         (item) => item && item.id === action.input.lineItemId,
       );
       if (lineItem) {
+        const previousGroup = lineItem.group ?? null;
+        const previousTotals = getLineItemTotals(lineItem);
+        let nextGroup = previousGroup;
+        const nextTotals = { ...previousTotals };
         if (action.input.label !== undefined && action.input.label !== null) {
           lineItem.label = action.input.label;
         }
         if (action.input.group !== undefined && action.input.group !== null) {
           lineItem.group = action.input.group;
+          nextGroup = action.input.group;
         }
         if (action.input.budget !== undefined && action.input.budget !== null) {
           lineItem.budget = action.input.budget;
+          nextTotals.totalBudget = action.input.budget;
         }
         if (
           action.input.actuals !== undefined &&
           action.input.actuals !== null
         ) {
           lineItem.actuals = action.input.actuals;
+          nextTotals.totalActuals = action.input.actuals;
         }
         if (
           action.input.forecast !== undefined &&
           action.input.forecast !== null
         ) {
           lineItem.forecast = action.input.forecast;
+          nextTotals.totalForecast = action.input.forecast;
         }
         if (
           action.input.payments !== undefined &&
           action.input.payments !== null
         ) {
           lineItem.payments = action.input.payments;
+          nextTotals.totalPayments = action.input.payments;
         }
         if (
           action.input.comments !== undefined &&
           action.input.comments !== null
         ) {
           lineItem.comments = action.input.comments;
+        }
+        if (previousGroup === nextGroup) {
+          applyTotalsDelta(wallet, nextGroup, {
+            totalBudget: nextTotals.totalBudget - previousTotals.totalBudget,
+            totalForecast:
+              nextTotals.totalForecast - previousTotals.totalForecast,
+            totalActuals: nextTotals.totalActuals - previousTotals.totalActuals,
+            totalPayments:
+              nextTotals.totalPayments - previousTotals.totalPayments,
+          });
+        } else {
+          applyTotalsDelta(wallet, previousGroup, {
+            totalBudget: -previousTotals.totalBudget,
+            totalForecast: -previousTotals.totalForecast,
+            totalActuals: -previousTotals.totalActuals,
+            totalPayments: -previousTotals.totalPayments,
+          });
+          applyTotalsDelta(wallet, nextGroup, nextTotals);
         }
       }
     }

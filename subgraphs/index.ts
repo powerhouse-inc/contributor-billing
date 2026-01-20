@@ -8,3 +8,4 @@ export * as SnapshotReportSubgraph from "./snapshot-report/index.js";
 export * as AccTxsAddonSubgraph from "./acc-txs-addon/index.js";
 export * as ServiceSubscriptionsSubgraph from "./service-subscriptions/index.js";
 export * as ServiceOfferingSubgraph from "./service-offering/index.js";
+export * as BudgetStatementsSubgraph from "./budget-statements/index.js";

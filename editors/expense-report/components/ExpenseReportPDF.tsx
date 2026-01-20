@@ -261,7 +261,7 @@ export function ExpenseReportPDF({
     return entries.map(([key, items]) => ({
       parentLabel:
         key === "uncategorized"
-          ? "Uncategorised"
+          ? "Uncategorized"
           : items[0]?.parentGroupLabel || "Unknown",
       items,
     }));
@@ -400,7 +400,7 @@ export function ExpenseReportPDF({
                             }
                           >
                             <Text style={[styles.cell, styles.categoryCol]}>
-                              {item.groupLabel || item.label || "Uncategorised"}
+                              {item.groupLabel || item.label || "Uncategorized"}
                             </Text>
                             <Text style={[styles.cellRight, styles.budgetCol]}>
                               {formatNumber(item.budget)}
