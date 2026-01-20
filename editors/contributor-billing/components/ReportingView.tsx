@@ -20,22 +20,27 @@ export function ReportingView({
 }: ReportingViewProps) {
   const documentsInDrive = useDocumentsInSelectedDrive();
 
-  // Find expense reports and snapshot reports in this folder
-  // Note: For now we show all reports in the drive - folder filtering can be added later
+  // Find expense reports and snapshot reports that match this month
   const { expenseReports, snapshotReports } = useMemo(() => {
-    if (!documentsInDrive) {
+    if (!documentsInDrive || !monthName) {
       return { expenseReports: [], snapshotReports: [] };
     }
 
+    const monthLower = monthName.toLowerCase();
+
     const expense = documentsInDrive.filter(
-      (doc) => doc.header.documentType === "powerhouse/expense-report",
+      (doc) =>
+        doc.header.documentType === "powerhouse/expense-report" &&
+        doc.header.name?.toLowerCase().includes(monthLower),
     );
     const snapshot = documentsInDrive.filter(
-      (doc) => doc.header.documentType === "powerhouse/snapshot-report",
+      (doc) =>
+        doc.header.documentType === "powerhouse/snapshot-report" &&
+        doc.header.name?.toLowerCase().includes(monthLower),
     );
 
     return { expenseReports: expense, snapshotReports: snapshot };
-  }, [documentsInDrive]);
+  }, [documentsInDrive, monthName]);
 
   const handleOpenDocument = (docId: string) => {
     setSelectedNode(docId);

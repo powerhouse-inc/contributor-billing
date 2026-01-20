@@ -16,14 +16,25 @@ export function DriveExplorer({ children }: EditorProps) {
   const [selectedFolder, setSelectedFolder] =
     useState<SelectedFolderInfo | null>(null);
 
+  // Track active node in sidebar for visual selection sync
+  const [activeNodeId, setActiveNodeId] = useState<string>("accounts");
+
   const handleFolderSelect = (folderInfo: SelectedFolderInfo | null) => {
     setSelectedFolder(folderInfo);
+    // Update sidebar selection when folder is selected
+    if (folderInfo) {
+      setActiveNodeId(folderInfo.folderId);
+    }
   };
 
   return (
     <div className="flex h-full w-full overflow-hidden">
       {/* Sidebar - resizable, managed by Sidebar component */}
-      <FolderTree onFolderSelect={handleFolderSelect} />
+      <FolderTree
+        onFolderSelect={handleFolderSelect}
+        activeNodeId={activeNodeId}
+        onActiveNodeIdChange={setActiveNodeId}
+      />
 
       {/* Toast notifications */}
       <ToastContainer
@@ -47,7 +58,10 @@ export function DriveExplorer({ children }: EditorProps) {
           <div className="min-h-full">{children}</div>
         ) : (
           /* Folder content view */
-          <DriveContents selectedFolder={selectedFolder} />
+          <DriveContents
+            selectedFolder={selectedFolder}
+            onFolderSelect={handleFolderSelect}
+          />
         )}
       </div>
     </div>

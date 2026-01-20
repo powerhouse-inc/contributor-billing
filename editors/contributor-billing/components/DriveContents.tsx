@@ -8,10 +8,14 @@ import type { SelectedFolderInfo } from "./FolderTree.js";
 
 interface DriveContentsProps {
   selectedFolder: SelectedFolderInfo | null;
+  onFolderSelect?: (folderInfo: SelectedFolderInfo | null) => void;
 }
 
 /** Shows the content based on the selected folder */
-export function DriveContents({ selectedFolder }: DriveContentsProps) {
+export function DriveContents({
+  selectedFolder,
+  onFolderSelect,
+}: DriveContentsProps) {
   // Default view (no folder selected or root) - show the payments/invoice view
   if (!selectedFolder) {
     return (
@@ -71,6 +75,7 @@ export function DriveContents({ selectedFolder }: DriveContentsProps) {
           <MonthOverview
             folderId={selectedFolder.folderId}
             monthName={selectedFolder.monthName}
+            onFolderSelect={onFolderSelect}
           />
         </Suspense>
       </div>
@@ -82,7 +87,7 @@ export function DriveContents({ selectedFolder }: DriveContentsProps) {
     return (
       <div className="container mx-auto flex-1 overflow-y-auto p-4">
         <Suspense>
-          <BillingOverview />
+          <BillingOverview onFolderSelect={onFolderSelect} />
         </Suspense>
       </div>
     );

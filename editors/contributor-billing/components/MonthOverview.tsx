@@ -3,10 +3,13 @@ import {
   useBillingFolderStructure,
   type MonthFolderInfo,
 } from "../hooks/useBillingFolderStructure.js";
+import { setSelectedNode } from "@powerhousedao/reactor-browser";
+import type { SelectedFolderInfo } from "./FolderTree.js";
 
 interface MonthOverviewProps {
   folderId: string;
   monthName?: string;
+  onFolderSelect?: (folderInfo: SelectedFolderInfo | null) => void;
 }
 
 /**
@@ -15,6 +18,7 @@ interface MonthOverviewProps {
 export function MonthOverview({
   folderId: _folderId,
   monthName,
+  onFolderSelect,
 }: MonthOverviewProps) {
   const { monthFolders } = useBillingFolderStructure();
 
@@ -22,6 +26,28 @@ export function MonthOverview({
   const monthInfo: MonthFolderInfo | undefined = monthName
     ? monthFolders.get(monthName)
     : undefined;
+
+  const handlePaymentsClick = () => {
+    if (monthInfo?.paymentsFolder) {
+      setSelectedNode(monthInfo.paymentsFolder.id);
+      onFolderSelect?.({
+        folderId: monthInfo.paymentsFolder.id,
+        folderType: "payments",
+        monthName,
+      });
+    }
+  };
+
+  const handleReportingClick = () => {
+    if (monthInfo?.reportingFolder) {
+      setSelectedNode(monthInfo.reportingFolder.id);
+      onFolderSelect?.({
+        folderId: monthInfo.reportingFolder.id,
+        folderType: "reporting",
+        monthName,
+      });
+    }
+  };
 
   return (
     <div>
@@ -36,7 +62,11 @@ export function MonthOverview({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Payments Card */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+        <button
+          onClick={handlePaymentsClick}
+          disabled={!monthInfo?.paymentsFolder}
+          className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md hover:border-blue-300 transition-all text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-blue-100 rounded-lg">
@@ -59,15 +89,14 @@ export function MonthOverview({
               track payment status.
             </p>
           </div>
-          {monthInfo?.paymentsFolder && (
-            <p className="mt-2 text-xs text-gray-400">
-              Click on "Payments" in the sidebar to view
-            </p>
-          )}
-        </div>
+        </button>
 
         {/* Reporting Card */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+        <button
+          onClick={handleReportingClick}
+          disabled={!monthInfo?.reportingFolder}
+          className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md hover:border-purple-300 transition-all text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-purple-100 rounded-lg">
@@ -90,12 +119,7 @@ export function MonthOverview({
               and auditing.
             </p>
           </div>
-          {monthInfo?.reportingFolder && (
-            <p className="mt-2 text-xs text-gray-400">
-              Click on "Reporting" in the sidebar to view
-            </p>
-          )}
-        </div>
+        </button>
       </div>
     </div>
   );

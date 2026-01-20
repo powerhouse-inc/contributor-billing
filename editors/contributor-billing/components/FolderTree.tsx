@@ -36,6 +36,8 @@ export interface SelectedFolderInfo {
 
 type FolderTreeProps = {
   onFolderSelect?: (folderInfo: SelectedFolderInfo | null) => void;
+  activeNodeId?: string;
+  onActiveNodeIdChange?: (nodeId: string) => void;
 };
 
 /**
@@ -43,8 +45,15 @@ type FolderTreeProps = {
  * - Accounts section (with account-transactions children)
  * - Billing folder structure (Month > Payments/Reporting)
  */
-export function FolderTree({ onFolderSelect }: FolderTreeProps) {
-  const [activeNodeId, setActiveNodeId] = useState<string>("accounts");
+export function FolderTree({
+  onFolderSelect,
+  activeNodeId: controlledActiveNodeId,
+  onActiveNodeIdChange,
+}: FolderTreeProps) {
+  // Use controlled state if provided, otherwise use local state
+  const [localActiveNodeId, setLocalActiveNodeId] = useState<string>("accounts");
+  const activeNodeId = controlledActiveNodeId ?? localActiveNodeId;
+  const setActiveNodeId = onActiveNodeIdChange ?? setLocalActiveNodeId;
 
   const documentsInDrive = useDocumentsInSelectedDrive();
   const [driveDocument] = useSelectedDrive();
@@ -148,28 +157,13 @@ export function FolderTree({ onFolderSelect }: FolderTreeProps) {
       }
 
       if (info.reportingFolder) {
-        // Filter reports that belong to this specific reporting folder OR match the month
-        // Extract just the month part (e.g., "January" from "January 2026")
-        const monthPart = monthName.split(" ")[0]?.toLowerCase() || "";
-        const yearPart = monthName.split(" ")[1] || "";
+        // Filter reports that match this specific month by name
+        const monthLower = monthName.toLowerCase();
 
         const folderReports = reportDocuments.filter((doc) => {
-          const parentId = documentParentMap.get(doc.header.id);
-          // Include if stored in this reporting folder
-          if (parentId === info.reportingFolder?.id) return true;
-          // Include if stored in the month folder directly
-          if (parentId === info.folder.id) return true;
-          // Include if report name contains the month name (with or without year)
           const docName = doc.header.name?.toLowerCase() || "";
-          if (docName.includes(monthName.toLowerCase())) return true;
-          // Check if name contains month part and optionally the year
-          if (monthPart && docName.includes(monthPart)) {
-            // If year is in the name, make sure it matches
-            if (yearPart && docName.includes(yearPart)) return true;
-            // If no year in name, still include it
-            if (!yearPart || !docName.match(/\d{4}/)) return true;
-          }
-          return false;
+          // Only include if report name contains the full month name (e.g., "january 2026")
+          return docName.includes(monthLower);
         });
         const reportingChildren: SidebarNode[] = folderReports.map((doc) => ({
           id: doc.header.id,
