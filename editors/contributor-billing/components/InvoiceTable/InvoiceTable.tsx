@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import {
   addDocument,
   dispatchActions,
@@ -10,6 +10,7 @@ import {
 import { toast } from "@powerhousedao/design-system/connect";
 import type { PHDocument } from "document-model";
 import type { FileNode } from "document-drive";
+import { moveNode } from "document-drive";
 import { actions as invoiceActions } from "../../../../document-models/invoice/index.js";
 import type { InvoiceTag } from "../../../../document-models/invoice/gen/types.js";
 import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
@@ -112,6 +113,8 @@ interface InvoiceTableProps {
   onStatusChange: (value: string | string[]) => void;
   onRowSelection: (rowId: string, checked: boolean, rowStatus: string) => void;
   canExportSelectedRows: () => boolean;
+  /** The month name (e.g., "January 2026") for checking existing reports */
+  monthName?: string;
 }
 
 // Table header component
@@ -152,14 +155,23 @@ export const InvoiceTable = ({
   onStatusChange,
   onRowSelection,
   canExportSelectedRows,
+  monthName,
 }: InvoiceTableProps) => {
   const [selectedDrive] = useSelectedDrive();
 
-  // State to track when export actions complete, triggering page refresh
-  const [actionsCompleted, setActionsCompleted] = useState(0);
-
   // Get documents directly from the hook - this will automatically update when documents change
   const documentsInDrive = useDocumentsInSelectedDrive() || [];
+
+  // Check if an expense report already exists for the current month
+  const existingExpenseReport = useMemo(() => {
+    if (!monthName || !documentsInDrive) return null;
+    const monthLower = monthName.toLowerCase();
+    return documentsInDrive.find(
+      (doc) =>
+        doc.header.documentType === "powerhouse/expense-report" &&
+        doc.header.name?.toLowerCase().includes(monthLower),
+    );
+  }, [documentsInDrive, monthName]);
 
   // Build a set of file IDs from the files prop for quick lookup
   const fileIds = useMemo(() => {
@@ -170,13 +182,6 @@ export const InvoiceTable = ({
   const allDocuments = useMemo(() => {
     return documentsInDrive.filter((doc) => fileIds.has(doc.header.id));
   }, [documentsInDrive, fileIds]);
-
-  // Refresh page when actions complete to ensure state is updated
-  useEffect(() => {
-    if (actionsCompleted > 0) {
-      window.location.reload();
-    }
-  }, [actionsCompleted]);
 
   // Helper function to map invoice document to InvoiceRowData
   const mapInvoiceToRowData = (doc: PHDocument): InvoiceRowData => {
@@ -359,6 +364,18 @@ export const InvoiceTable = ({
         return;
       }
 
+      // Move billing statement to the same folder as the invoice
+      const targetFolder = invoiceFile?.parentFolder;
+      if (targetFolder && selectedDrive?.header.id) {
+        await dispatchActions(
+          moveNode({
+            srcFolder: createdNode.id,
+            targetParentFolder: targetFolder,
+          }),
+          selectedDrive.header.id,
+        );
+      }
+
       // Prepare billing statement data
       const billingStatementData = {
         dateIssued: invoiceState.dateIssued?.trim()
@@ -423,7 +440,6 @@ export const InvoiceTable = ({
 
       if (tagActions.length > 0) {
         await dispatchActions(tagActions, createdNode.id);
-        window.location.reload();
       }
 
       toast("Billing statement created successfully", { type: "success" });
@@ -467,9 +483,6 @@ export const InvoiceTable = ({
         );
       }
       setSelected({});
-
-      // Trigger page refresh after all actions complete
-      setActionsCompleted((prev) => prev + 1);
     } catch (error: unknown) {
       console.error("Error exporting invoices:", error);
       const err = error as { missingExpenseTagInvoices?: string[] };
@@ -684,6 +697,7 @@ export const InvoiceTable = ({
         integrationsDoc={integrationsDoc}
         hasBillingStatements={hasBillingStatements}
         expenseReportDoc={expenseReportDoc}
+        existingExpenseReportForMonth={existingExpenseReport}
         onCreateOrOpenExpenseReport={handleCreateOrOpenExpenseReport}
         selected={selected}
         handleCreateBillingStatement={handleCreateBillingStatement}

@@ -44,7 +44,10 @@ export function DriveContents({
           <HeaderStats folderId={selectedFolder.folderId} />
         </Suspense>
         <Suspense>
-          <InvoiceTableContainer folderId={selectedFolder.folderId} />
+          <InvoiceTableContainer
+            folderId={selectedFolder.folderId}
+            monthName={selectedFolder.monthName}
+          />
         </Suspense>
       </div>
     );

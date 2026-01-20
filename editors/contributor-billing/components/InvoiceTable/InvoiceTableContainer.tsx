@@ -17,6 +17,8 @@ import { InvoiceTable } from "./InvoiceTable.js";
 interface InvoiceTableContainerProps {
   /** The ID of the payments folder to filter invoices by */
   folderId: string;
+  /** The month name (e.g., "January 2026") for checking existing reports */
+  monthName?: string;
 }
 
 /**
@@ -25,6 +27,7 @@ interface InvoiceTableContainerProps {
  */
 export function InvoiceTableContainer({
   folderId,
+  monthName,
 }: InvoiceTableContainerProps) {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
@@ -190,6 +193,7 @@ export function InvoiceTableContainer({
         onStatusChange={handleStatusChange}
         onRowSelection={handleRowSelection}
         canExportSelectedRows={canExportSelectedRows}
+        monthName={monthName}
       />
     </div>
   );

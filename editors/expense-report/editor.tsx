@@ -156,19 +156,20 @@ export default function Editor() {
     setIsEditingPeriod(false);
   };
 
-  // Handle starting to edit the period
-  const handleEditPeriod = () => {
-    setIsEditingPeriod(true);
-  };
-
   // Generate month options
   const monthOptions = useMemo(() => generateMonthOptions(), []);
 
   // Get the formatted display label for the current period
   const periodDisplayLabel = useMemo(() => {
-    const option = monthOptions.find((opt) => opt.value === selectedPeriod);
-    return option ? option.label : selectedPeriod;
-  }, [selectedPeriod, monthOptions]);
+    if (!periodStart) return selectedPeriod;
+    const date = new Date(periodStart);
+    const monthName = date.toLocaleDateString("en-US", {
+      month: "long",
+      timeZone: "UTC",
+    });
+    const year = date.getUTCFullYear();
+    return `${monthName} ${year}`;
+  }, [periodStart, selectedPeriod]);
 
   // Handle wallet selection for adding billing statements
   const handleAddBillingStatement = (walletAddress: string) => {
@@ -319,18 +320,9 @@ export default function Editor() {
                         )}
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-gray-900 dark:text-white">
-                          {periodDisplayLabel}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          onClick={handleEditPeriod}
-                          className="text-sm"
-                        >
-                          Change
-                        </Button>
-                      </div>
+                      <span className="text-lg font-bold text-gray-900 dark:text-white">
+                        {periodDisplayLabel}
+                      </span>
                     )}
                   </div>
                   {/* Status */}
