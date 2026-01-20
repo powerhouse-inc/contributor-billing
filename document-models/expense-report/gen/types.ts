@@ -3,6 +3,7 @@ import type { ExpenseReportAction } from "./actions.js";
 import type { ExpenseReportState as ExpenseReportGlobalState } from "./schema/types.js";
 
 type ExpenseReportLocalState = Record<PropertyKey, never>;
+
 type ExpenseReportPHState = PHBaseState & {
   global: ExpenseReportGlobalState;
   local: ExpenseReportLocalState;

@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { ResourceTemplatePHState } from "./types.js";
+import type { ResourceTemplatePHState } from "@powerhousedao/contributor-billing/document-models/resource-template";
 
 import { resourceTemplateTemplateManagementOperations } from "../src/reducers/template-management.js";
 import { resourceTemplateAudienceManagementOperations } from "../src/reducers/audience-management.js";
@@ -43,187 +43,246 @@ const stateReducer: StateReducer<ResourceTemplatePHState> = (
   if (isDocumentAction(action)) {
     return state;
   }
-
   switch (action.type) {
-    case "UPDATE_TEMPLATE_INFO":
+    case "UPDATE_TEMPLATE_INFO": {
       UpdateTemplateInfoInputSchema().parse(action.input);
+
       resourceTemplateTemplateManagementOperations.updateTemplateInfoOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "UPDATE_TEMPLATE_STATUS":
+      break;
+    }
+
+    case "UPDATE_TEMPLATE_STATUS": {
       UpdateTemplateStatusInputSchema().parse(action.input);
+
       resourceTemplateTemplateManagementOperations.updateTemplateStatusOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_OPERATOR":
+      break;
+    }
+
+    case "SET_OPERATOR": {
       SetOperatorInputSchema().parse(action.input);
+
       resourceTemplateTemplateManagementOperations.setOperatorOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_TEMPLATE_ID":
+      break;
+    }
+
+    case "SET_TEMPLATE_ID": {
       SetTemplateIdInputSchema().parse(action.input);
+
       resourceTemplateTemplateManagementOperations.setTemplateIdOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_TARGET_AUDIENCE":
+      break;
+    }
+
+    case "ADD_TARGET_AUDIENCE": {
       AddTargetAudienceInputSchema().parse(action.input);
+
       resourceTemplateAudienceManagementOperations.addTargetAudienceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_TARGET_AUDIENCE":
+      break;
+    }
+
+    case "REMOVE_TARGET_AUDIENCE": {
       RemoveTargetAudienceInputSchema().parse(action.input);
+
       resourceTemplateAudienceManagementOperations.removeTargetAudienceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_FACET_TARGET":
+      break;
+    }
+
+    case "SET_FACET_TARGET": {
       SetFacetTargetInputSchema().parse(action.input);
+
       resourceTemplateFacetTargetingOperations.setFacetTargetOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_FACET_TARGET":
+      break;
+    }
+
+    case "REMOVE_FACET_TARGET": {
       RemoveFacetTargetInputSchema().parse(action.input);
+
       resourceTemplateFacetTargetingOperations.removeFacetTargetOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_FACET_OPTION":
+      break;
+    }
+
+    case "ADD_FACET_OPTION": {
       AddFacetOptionInputSchema().parse(action.input);
+
       resourceTemplateFacetTargetingOperations.addFacetOptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_FACET_OPTION":
+      break;
+    }
+
+    case "REMOVE_FACET_OPTION": {
       RemoveFacetOptionInputSchema().parse(action.input);
+
       resourceTemplateFacetTargetingOperations.removeFacetOptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_SETUP_SERVICES":
+      break;
+    }
+
+    case "SET_SETUP_SERVICES": {
       SetSetupServicesInputSchema().parse(action.input);
+
       resourceTemplateServiceCategoryManagementOperations.setSetupServicesOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_RECURRING_SERVICES":
+      break;
+    }
+
+    case "SET_RECURRING_SERVICES": {
       SetRecurringServicesInputSchema().parse(action.input);
+
       resourceTemplateServiceCategoryManagementOperations.setRecurringServicesOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_SERVICE":
+      break;
+    }
+
+    case "ADD_SERVICE": {
       AddServiceInputSchema().parse(action.input);
+
       resourceTemplateServiceManagementOperations.addServiceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "UPDATE_SERVICE":
+      break;
+    }
+
+    case "UPDATE_SERVICE": {
       UpdateServiceInputSchema().parse(action.input);
+
       resourceTemplateServiceManagementOperations.updateServiceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "DELETE_SERVICE":
+      break;
+    }
+
+    case "DELETE_SERVICE": {
       DeleteServiceInputSchema().parse(action.input);
+
       resourceTemplateServiceManagementOperations.deleteServiceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_FACET_BINDING":
+      break;
+    }
+
+    case "ADD_FACET_BINDING": {
       AddFacetBindingInputSchema().parse(action.input);
+
       resourceTemplateServiceManagementOperations.addFacetBindingOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_FACET_BINDING":
+      break;
+    }
+
+    case "REMOVE_FACET_BINDING": {
       RemoveFacetBindingInputSchema().parse(action.input);
+
       resourceTemplateServiceManagementOperations.removeFacetBindingOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_OPTION_GROUP":
+      break;
+    }
+
+    case "ADD_OPTION_GROUP": {
       AddOptionGroupInputSchema().parse(action.input);
+
       resourceTemplateOptionGroupManagementOperations.addOptionGroupOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "UPDATE_OPTION_GROUP":
+      break;
+    }
+
+    case "UPDATE_OPTION_GROUP": {
       UpdateOptionGroupInputSchema().parse(action.input);
+
       resourceTemplateOptionGroupManagementOperations.updateOptionGroupOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "DELETE_OPTION_GROUP":
+      break;
+    }
+
+    case "DELETE_OPTION_GROUP": {
       DeleteOptionGroupInputSchema().parse(action.input);
+
       resourceTemplateOptionGroupManagementOperations.deleteOptionGroupOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
+
       break;
+    }
 
     default:
       return state;

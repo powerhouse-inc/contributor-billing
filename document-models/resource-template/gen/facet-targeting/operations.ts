@@ -1,11 +1,11 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type SetFacetTargetAction,
-  type RemoveFacetTargetAction,
-  type AddFacetOptionAction,
-  type RemoveFacetOptionAction,
+import type {
+  SetFacetTargetAction,
+  RemoveFacetTargetAction,
+  AddFacetOptionAction,
+  RemoveFacetOptionAction,
 } from "./actions.js";
-import { type ResourceTemplateState } from "../types.js";
+import type { ResourceTemplateState } from "../types.js";
 
 export interface ResourceTemplateFacetTargetingOperations {
   setFacetTargetOperation: (

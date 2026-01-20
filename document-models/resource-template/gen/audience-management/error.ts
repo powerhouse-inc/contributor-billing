@@ -19,10 +19,6 @@ export class AudienceNotFoundError extends Error implements ReducerError {
 }
 
 export const errors = {
-  AddTargetAudience: {
-    DuplicateAudienceIdError,
-  },
-  RemoveTargetAudience: {
-    AudienceNotFoundError,
-  },
+  AddTargetAudience: { DuplicateAudienceIdError },
+  RemoveTargetAudience: { AudienceNotFoundError },
 };

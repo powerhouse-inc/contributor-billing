@@ -3,6 +3,7 @@ import type { InvoiceAction } from "./actions.js";
 import type { InvoiceState as InvoiceGlobalState } from "./schema/types.js";
 
 type InvoiceLocalState = Record<PropertyKey, never>;
+
 type InvoicePHState = PHBaseState & {
   global: InvoiceGlobalState;
   local: InvoiceLocalState;

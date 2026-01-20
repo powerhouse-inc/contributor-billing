@@ -1,12 +1,12 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddServiceAction,
-  type UpdateServiceAction,
-  type DeleteServiceAction,
-  type AddFacetBindingAction,
-  type RemoveFacetBindingAction,
+import type {
+  AddServiceAction,
+  UpdateServiceAction,
+  DeleteServiceAction,
+  AddFacetBindingAction,
+  RemoveFacetBindingAction,
 } from "./actions.js";
-import { type ServiceOfferingState } from "../types.js";
+import type { ServiceOfferingState } from "../types.js";
 
 export interface ServiceOfferingServiceManagementOperations {
   addServiceOperation: (

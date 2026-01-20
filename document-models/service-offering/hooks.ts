@@ -1,15 +1,18 @@
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import {
+  useDocumentById,
   useDocumentsInSelectedDrive,
   useDocumentsInSelectedFolder,
-  useDocumentById,
   useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import type {
-  ServiceOfferingDocument,
   ServiceOfferingAction,
+  ServiceOfferingDocument,
 } from "@powerhousedao/contributor-billing/document-models/service-offering";
-import { isServiceOfferingDocument } from "./gen/document-schema.js";
+import {
+  assertIsServiceOfferingDocument,
+  isServiceOfferingDocument,
+} from "./gen/document-schema.js";
 
 /** Hook to get a ServiceOffering document by its id */
 export function useServiceOfferingDocumentById(
@@ -23,12 +26,14 @@ export function useServiceOfferingDocumentById(
 }
 
 /** Hook to get the selected ServiceOffering document */
-export function useSelectedServiceOfferingDocument():
-  | [ServiceOfferingDocument, DocumentDispatch<ServiceOfferingAction>]
-  | [undefined, undefined] {
+export function useSelectedServiceOfferingDocument(): [
+  ServiceOfferingDocument,
+  DocumentDispatch<ServiceOfferingAction>,
+] {
   const [document, dispatch] = useSelectedDocument();
-  if (!isServiceOfferingDocument(document)) return [undefined, undefined];
-  return [document, dispatch];
+
+  assertIsServiceOfferingDocument(document);
+  return [document, dispatch] as const;
 }
 
 /** Hook to get all ServiceOffering documents in the selected drive */

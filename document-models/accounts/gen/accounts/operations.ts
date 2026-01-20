@@ -1,11 +1,11 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddAccountAction,
-  type UpdateAccountAction,
-  type DeleteAccountAction,
-  type UpdateKycStatusAction,
+import type {
+  AddAccountAction,
+  UpdateAccountAction,
+  DeleteAccountAction,
+  UpdateKycStatusAction,
 } from "./actions.js";
-import { type AccountsState } from "../types.js";
+import type { AccountsState } from "../types.js";
 
 export interface AccountsAccountsOperations {
   addAccountOperation: (

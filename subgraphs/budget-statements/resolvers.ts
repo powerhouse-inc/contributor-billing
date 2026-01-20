@@ -14,8 +14,8 @@ interface BuilderProfileState {
 
 // Helper to create a period key from start and end dates
 const getPeriodKey = (
-  periodStart: string | null,
-  periodEnd: string | null,
+  periodStart: string | null | undefined,
+  periodEnd: string | null | undefined,
 ): string | null => {
   if (!periodStart || !periodEnd) return null;
   // Normalize dates to YYYY-MM-DD format for consistent matching
@@ -495,7 +495,7 @@ function buildExpenseReportData(doc: ExpenseReportDocument) {
  * Get counter party name from account-transactions document
  */
 function getCounterPartyName(
-  counterPartyAccountId: string | null,
+  counterPartyAccountId: string | null | undefined,
   accountTransactionsDocs: Map<string, AccountTransactionsDocument>,
 ): string {
   if (!counterPartyAccountId) return "";

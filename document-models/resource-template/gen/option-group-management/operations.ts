@@ -1,10 +1,10 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddOptionGroupAction,
-  type UpdateOptionGroupAction,
-  type DeleteOptionGroupAction,
+import type {
+  AddOptionGroupAction,
+  UpdateOptionGroupAction,
+  DeleteOptionGroupAction,
 } from "./actions.js";
-import { type ResourceTemplateState } from "../types.js";
+import type { ResourceTemplateState } from "../types.js";
 
 export interface ResourceTemplateOptionGroupManagementOperations {
   addOptionGroupOperation: (

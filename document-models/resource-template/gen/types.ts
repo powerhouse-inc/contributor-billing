@@ -3,6 +3,7 @@ import type { ResourceTemplateAction } from "./actions.js";
 import type { ResourceTemplateState as ResourceTemplateGlobalState } from "./schema/types.js";
 
 type ResourceTemplateLocalState = Record<PropertyKey, never>;
+
 type ResourceTemplatePHState = PHBaseState & {
   global: ResourceTemplateGlobalState;
   local: ResourceTemplateLocalState;

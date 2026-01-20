@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   AddFacetBindingInput,
   AddFacetOptionInput,
@@ -49,7 +49,7 @@ import type {
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -254,7 +254,7 @@ export function OptionGroupSchema(): z.ZodObject<Properties<OptionGroup>> {
   return z.object({
     __typename: z.literal("OptionGroup").optional(),
     defaultSelected: z.boolean(),
-    description: z.string().nullable(),
+    description: z.string().nullish(),
     id: z.string(),
     isAddOn: z.boolean(),
     name: z.string(),
@@ -343,13 +343,13 @@ export function SelectResourceTemplateInputSchema(): z.ZodObject<
 export function ServiceSchema(): z.ZodObject<Properties<Service>> {
   return z.object({
     __typename: z.literal("Service").optional(),
-    description: z.string().nullable(),
-    displayOrder: z.number().nullable(),
-    facetBindings: z.array(ResourceFacetBindingSchema()),
+    description: z.string().nullish(),
+    displayOrder: z.number().nullish(),
+    facetBindings: z.array(z.lazy(() => ResourceFacetBindingSchema())),
     id: z.string(),
     isSetupFormation: z.boolean(),
-    optionGroupId: z.string().nullable(),
-    parentServiceId: z.string().nullable(),
+    optionGroupId: z.string().nullish(),
+    parentServiceId: z.string().nullish(),
     title: z.string(),
   });
 }
@@ -359,14 +359,14 @@ export function ServiceLevelBindingSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ServiceLevelBinding").optional(),
-    annexes: z.string().nullable(),
-    customValue: z.string().nullable(),
+    annexes: z.string().nullish(),
+    customValue: z.string().nullish(),
     id: z.string(),
     level: ServiceLevelSchema,
-    optionGroupId: z.string().nullable(),
+    optionGroupId: z.string().nullish(),
     serviceId: z.string(),
-    setupFee: z.number().nullable(),
-    variations: z.string().nullable(),
+    setupFee: z.number().nullish(),
+    variations: z.string().nullish(),
   });
 }
 
@@ -375,22 +375,22 @@ export function ServiceOfferingStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ServiceOfferingState").optional(),
-    description: z.string().nullable(),
-    facetTargets: z.array(FacetTargetSchema()),
+    description: z.string().nullish(),
+    facetTargets: z.array(z.lazy(() => FacetTargetSchema())),
     id: z.string(),
-    infoLink: z.string().url().nullable(),
+    infoLink: z.string().url().nullish(),
     lastModified: z.string().datetime(),
     operatorId: z.string(),
-    optionGroups: z.array(OptionGroupSchema()),
+    optionGroups: z.array(z.lazy(() => OptionGroupSchema())),
     recurringServices: z.array(z.string()),
-    resourceTemplateId: z.string().nullable(),
-    services: z.array(ServiceSchema()),
+    resourceTemplateId: z.string().nullish(),
+    services: z.array(z.lazy(() => ServiceSchema())),
     setupServices: z.array(z.string()),
     status: ServiceStatusSchema,
     summary: z.string(),
-    targetAudiences: z.array(TargetAudienceSchema()),
-    thumbnailUrl: z.string().url().nullable(),
-    tiers: z.array(ServiceSubscriptionTierSchema()),
+    targetAudiences: z.array(z.lazy(() => TargetAudienceSchema())),
+    thumbnailUrl: z.string().url().nullish(),
+    tiers: z.array(z.lazy(() => ServiceSubscriptionTierSchema())),
     title: z.string(),
   });
 }
@@ -400,10 +400,10 @@ export function ServicePricingSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ServicePricing").optional(),
-    amount: z.number().nullable(),
+    amount: z.number().nullish(),
     billingCycle: BillingCycleSchema,
     currency: z.string(),
-    setupFee: z.number().nullable(),
+    setupFee: z.number().nullish(),
   });
 }
 
@@ -412,13 +412,13 @@ export function ServiceSubscriptionTierSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ServiceSubscriptionTier").optional(),
-    description: z.string().nullable(),
+    description: z.string().nullish(),
     id: z.string(),
     isCustomPricing: z.boolean(),
     name: z.string(),
-    pricing: ServicePricingSchema(),
-    serviceLevels: z.array(ServiceLevelBindingSchema()),
-    usageLimits: z.array(ServiceUsageLimitSchema()),
+    pricing: z.lazy(() => ServicePricingSchema()),
+    serviceLevels: z.array(z.lazy(() => ServiceLevelBindingSchema())),
+    usageLimits: z.array(z.lazy(() => ServiceUsageLimitSchema())),
   });
 }
 
@@ -428,10 +428,10 @@ export function ServiceUsageLimitSchema(): z.ZodObject<
   return z.object({
     __typename: z.literal("ServiceUsageLimit").optional(),
     id: z.string(),
-    limit: z.number().nullable(),
+    limit: z.number().nullish(),
     metric: z.string(),
-    notes: z.string().nullable(),
-    resetPeriod: ResetPeriodSchema.nullable(),
+    notes: z.string().nullish(),
+    resetPeriod: ResetPeriodSchema.nullish(),
     serviceId: z.string(),
   });
 }
@@ -489,7 +489,7 @@ export function TargetAudienceSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("TargetAudience").optional(),
-    color: z.string().nullable(),
+    color: z.string().nullish(),
     id: z.string(),
     label: z.string(),
   });

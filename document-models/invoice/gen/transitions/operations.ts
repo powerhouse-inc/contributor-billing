@@ -1,19 +1,19 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type CancelAction,
-  type IssueAction,
-  type ResetAction,
-  type RejectAction,
-  type AcceptAction,
-  type ReinstateAction,
-  type SchedulePaymentAction,
-  type ReapprovePaymentAction,
-  type RegisterPaymentTxAction,
-  type ReportPaymentIssueAction,
-  type ConfirmPaymentAction,
-  type ClosePaymentAction,
+import type {
+  CancelAction,
+  IssueAction,
+  ResetAction,
+  RejectAction,
+  AcceptAction,
+  ReinstateAction,
+  SchedulePaymentAction,
+  ReapprovePaymentAction,
+  RegisterPaymentTxAction,
+  ReportPaymentIssueAction,
+  ConfirmPaymentAction,
+  ClosePaymentAction,
 } from "./actions.js";
-import { type InvoiceState } from "../types.js";
+import type { InvoiceState } from "../types.js";
 
 export interface InvoiceTransitionsOperations {
   cancelOperation: (

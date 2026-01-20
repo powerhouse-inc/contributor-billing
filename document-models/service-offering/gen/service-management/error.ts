@@ -67,21 +67,9 @@ export class BindingNotFoundError extends Error implements ReducerError {
 }
 
 export const errors = {
-  AddService: {
-    DuplicateServiceIdError,
-  },
-  UpdateService: {
-    UpdateServiceNotFoundError,
-  },
-  DeleteService: {
-    DeleteServiceNotFoundError,
-  },
-  AddFacetBinding: {
-    AddFacetServiceNotFoundError,
-    DuplicateBindingIdError,
-  },
-  RemoveFacetBinding: {
-    RemoveFacetServiceNotFoundError,
-    BindingNotFoundError,
-  },
+  AddService: { DuplicateServiceIdError },
+  UpdateService: { UpdateServiceNotFoundError },
+  DeleteService: { DeleteServiceNotFoundError },
+  AddFacetBinding: { AddFacetServiceNotFoundError, DuplicateBindingIdError },
+  RemoveFacetBinding: { RemoveFacetServiceNotFoundError, BindingNotFoundError },
 };

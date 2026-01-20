@@ -845,7 +845,7 @@ function TierCard({ tier, accent, dispatch, onDelete }: TierCardProps) {
         : tier.pricing.amount;
     const newCycle = billingCycle || tier.pricing.billingCycle;
 
-    if (!isCustomPricing && (newAmount === null || isNaN(newAmount))) return;
+    if (!isCustomPricing && (newAmount == null || isNaN(newAmount))) return;
 
     dispatch(
       updateTierPricing({

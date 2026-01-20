@@ -1,9 +1,9 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddTargetAudienceAction,
-  type RemoveTargetAudienceAction,
+import type {
+  AddTargetAudienceAction,
+  RemoveTargetAudienceAction,
 } from "./actions.js";
-import { type ResourceTemplateState } from "../types.js";
+import type { ResourceTemplateState } from "../types.js";
 
 export interface ResourceTemplateAudienceManagementOperations {
   addTargetAudienceOperation: (

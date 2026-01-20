@@ -1,15 +1,18 @@
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import {
+  useDocumentById,
   useDocumentsInSelectedDrive,
   useDocumentsInSelectedFolder,
-  useDocumentById,
   useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import type {
-  InvoiceDocument,
   InvoiceAction,
+  InvoiceDocument,
 } from "@powerhousedao/contributor-billing/document-models/invoice";
-import { isInvoiceDocument } from "./gen/document-schema.js";
+import {
+  assertIsInvoiceDocument,
+  isInvoiceDocument,
+} from "./gen/document-schema.js";
 
 /** Hook to get a Invoice document by its id */
 export function useInvoiceDocumentById(
@@ -21,12 +24,14 @@ export function useInvoiceDocumentById(
 }
 
 /** Hook to get the selected Invoice document */
-export function useSelectedInvoiceDocument():
-  | [InvoiceDocument, DocumentDispatch<InvoiceAction>]
-  | [undefined, undefined] {
+export function useSelectedInvoiceDocument(): [
+  InvoiceDocument,
+  DocumentDispatch<InvoiceAction>,
+] {
   const [document, dispatch] = useSelectedDocument();
-  if (!isInvoiceDocument(document)) return [undefined, undefined];
-  return [document, dispatch];
+
+  assertIsInvoiceDocument(document);
+  return [document, dispatch] as const;
 }
 
 /** Hook to get all Invoice documents in the selected drive */
