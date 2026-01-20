@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useCallback } from "react";
+import { useMemo, useCallback } from "react";
 import {
   isFolderNodeKind,
   addFolder,
@@ -9,6 +9,12 @@ import type { FolderNode, Node } from "document-drive";
 const BILLING_FOLDER_NAME = "Billing";
 const PAYMENTS_FOLDER_NAME = "Payments";
 const REPORTING_FOLDER_NAME = "Reporting";
+
+// Module-level tracking to prevent duplicate folder creation across all hook instances
+const globalCreationState = {
+  createdBillingFolderForDrives: new Set<string>(),
+  creatingMonths: new Set<string>(), // Format: "driveId:monthName"
+};
 
 export interface MonthFolderInfo {
   folder: FolderNode;
@@ -23,6 +29,8 @@ export interface UseBillingFolderStructureResult {
   monthFolders: Map<string, MonthFolderInfo>;
   /** The current month's folder info, or null if not created yet */
   currentMonthFolder: MonthFolderInfo | null;
+  /** Create the Billing folder if it doesn't exist */
+  createBillingFolder: () => Promise<void>;
   /** Create a new month folder with Payments and Reporting subfolders */
   createMonthFolder: (monthName: string) => Promise<void>;
   /** Check if a folder is a Payments folder */
@@ -69,13 +77,7 @@ export function getCurrentMonthName(): string {
  */
 export function useBillingFolderStructure(): UseBillingFolderStructureResult {
   const [driveDocument] = useSelectedDrive();
-
-  // Track folder creation state to prevent duplicate creation
-  const creationStateRef = useRef({
-    hasCreatedBillingFolder: false,
-    hasCreatedCurrentMonth: false,
-    creatingMonths: new Set<string>(),
-  });
+  const driveId = driveDocument?.header.id;
 
   // Find the "Billing" root folder
   const billingFolder = useMemo(() => {
@@ -166,12 +168,13 @@ export function useBillingFolderStructure(): UseBillingFolderStructureResult {
   // Create a new month folder with Payments and Reporting subfolders
   const createMonthFolder = useCallback(
     async (monthName: string) => {
-      if (!driveDocument || !billingFolder) return;
+      if (!driveId || !billingFolder) return;
       if (monthFolders.has(monthName)) return; // Already exists
-      if (creationStateRef.current.creatingMonths.has(monthName)) return; // Already creating
 
-      creationStateRef.current.creatingMonths.add(monthName);
-      const driveId = driveDocument.header.id;
+      const creationKey = `${driveId}:${monthName}`;
+      if (globalCreationState.creatingMonths.has(creationKey)) return; // Already creating
+
+      globalCreationState.creatingMonths.add(creationKey);
 
       try {
         // Create month folder
@@ -196,45 +199,26 @@ export function useBillingFolderStructure(): UseBillingFolderStructureResult {
           error,
         );
       } finally {
-        creationStateRef.current.creatingMonths.delete(monthName);
+        globalCreationState.creatingMonths.delete(creationKey);
       }
     },
-    [driveDocument, billingFolder, monthFolders],
+    [driveId, billingFolder, monthFolders],
   );
 
-  // Auto-create Billing folder if it doesn't exist
-  useEffect(() => {
-    if (
-      !driveDocument ||
-      billingFolder ||
-      creationStateRef.current.hasCreatedBillingFolder
-    )
-      return;
+  // Create the Billing folder if it doesn't exist (called manually)
+  const createBillingFolder = useCallback(async () => {
+    if (!driveId || billingFolder) return;
+    if (globalCreationState.createdBillingFolderForDrives.has(driveId)) return;
 
-    creationStateRef.current.hasCreatedBillingFolder = true;
-    const driveId = driveDocument.header.id;
-    void addFolder(driveId, BILLING_FOLDER_NAME);
-  }, [driveDocument, billingFolder]);
-
-  // Auto-create current month folder if it doesn't exist
-  useEffect(() => {
-    if (
-      !driveDocument ||
-      !billingFolder ||
-      currentMonthFolder ||
-      creationStateRef.current.hasCreatedCurrentMonth
-    )
-      return;
-
-    creationStateRef.current.hasCreatedCurrentMonth = true;
-    const currentMonth = getCurrentMonthName();
-    void createMonthFolder(currentMonth);
-  }, [driveDocument, billingFolder, currentMonthFolder, createMonthFolder]);
+    globalCreationState.createdBillingFolderForDrives.add(driveId);
+    await addFolder(driveId, BILLING_FOLDER_NAME);
+  }, [driveId, billingFolder]);
 
   return {
     billingFolder,
     monthFolders,
     currentMonthFolder,
+    createBillingFolder,
     createMonthFolder,
     isPaymentsFolder,
     isReportingFolder,

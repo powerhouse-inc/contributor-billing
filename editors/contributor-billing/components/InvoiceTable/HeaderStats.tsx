@@ -1,8 +1,9 @@
 import { Select } from "@powerhousedao/document-engineering/ui";
 import { useState, useEffect, useMemo } from "react";
 import {
-  useFileNodesInSelectedDrive,
   useGetDocuments,
+  useSelectedDrive,
+  isFileNodeKind,
 } from "@powerhousedao/reactor-browser";
 import { getExchangeRate } from "../../utils/exchangeRate.js";
 import { Tooltip, TooltipProvider } from "@powerhousedao/design-system/ui";
@@ -21,17 +22,30 @@ const currencyList = [
   { ticker: "CHF", crypto: false },
 ];
 
-export const HeaderStats = () => {
+interface HeaderStatsProps {
+  /** The ID of the payments folder to filter invoices by */
+  folderId: string;
+}
+
+export const HeaderStats = ({ folderId }: HeaderStatsProps) => {
   const [selectedCurrency, setSelectedCurrency] = useState("USD");
   const [totalExpenses, setTotalExpenses] = useState(0);
-  const files = useFileNodesInSelectedDrive();
-  const invoiceFiles = useMemo(
-    () =>
-      files
-        ?.filter((file) => file.documentType === "powerhouse/invoice")
-        .map((file) => file.id),
-    [files],
-  );
+  const [driveDocument] = useSelectedDrive();
+
+  // Filter invoice files to only those in the specific payments folder
+  const invoiceFiles = useMemo(() => {
+    if (!driveDocument) return [];
+    const nodes = driveDocument.state.global.nodes;
+    return nodes
+      .filter(
+        (node) =>
+          isFileNodeKind(node) &&
+          node.parentFolder === folderId &&
+          node.documentType === "powerhouse/invoice",
+      )
+      .map((node) => node.id);
+  }, [driveDocument, folderId]);
+
   const invoices = useGetDocuments(invoiceFiles) as InvoiceDocument[];
 
   useEffect(() => {

@@ -4,6 +4,7 @@ import { InvoiceTableContainer } from "./InvoiceTable/InvoiceTableContainer.js";
 import { ReportingView } from "./ReportingView.js";
 import { MonthOverview } from "./MonthOverview.js";
 import { BillingOverview } from "./BillingOverview.js";
+import { DashboardHome } from "./DashboardHome.js";
 import type { SelectedFolderInfo } from "./FolderTree.js";
 
 interface DriveContentsProps {
@@ -16,15 +17,12 @@ export function DriveContents({
   selectedFolder,
   onFolderSelect,
 }: DriveContentsProps) {
-  // Default view (no folder selected or root) - show the payments/invoice view
+  // Default view (no folder selected or root) - show the dashboard home
   if (!selectedFolder) {
     return (
       <div className="container mx-auto flex-1 overflow-y-auto p-4">
         <Suspense>
-          <HeaderStats />
-        </Suspense>
-        <Suspense>
-          <InvoiceTableContainer />
+          <DashboardHome onFolderSelect={onFolderSelect} />
         </Suspense>
       </div>
     );
@@ -44,10 +42,10 @@ export function DriveContents({
           </p>
         </div>
         <Suspense>
-          <HeaderStats />
+          <HeaderStats folderId={selectedFolder.folderId} />
         </Suspense>
         <Suspense>
-          <InvoiceTableContainer />
+          <InvoiceTableContainer folderId={selectedFolder.folderId} />
         </Suspense>
       </div>
     );
@@ -93,14 +91,11 @@ export function DriveContents({
     );
   }
 
-  // Fallback - show default view
+  // Fallback - show dashboard home
   return (
     <div className="container mx-auto flex-1 overflow-y-auto p-4">
       <Suspense>
-        <HeaderStats />
-      </Suspense>
-      <Suspense>
-        <InvoiceTableContainer />
+        <DashboardHome onFolderSelect={onFolderSelect} />
       </Suspense>
     </div>
   );

@@ -17,11 +17,13 @@ export function DriveExplorer({ children }: EditorProps) {
     useState<SelectedFolderInfo | null>(null);
 
   // Track active node in sidebar for visual selection sync
-  const [activeNodeId, setActiveNodeId] = useState<string>("accounts");
+  // Empty string means no selection (home page)
+  const [activeNodeId, setActiveNodeId] = useState<string>("");
 
   const handleFolderSelect = (folderInfo: SelectedFolderInfo | null) => {
     setSelectedFolder(folderInfo);
-    // Update sidebar selection when folder is selected
+    // Only update sidebar selection when explicitly selecting a folder
+    // When folderInfo is null (opening a document), let the sidebar keep its current selection
     if (folderInfo) {
       setActiveNodeId(folderInfo.folderId);
     }

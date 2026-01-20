@@ -7,7 +7,11 @@ import {
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
-import { Button, Select, DatePicker } from "@powerhousedao/document-engineering";
+import {
+  Button,
+  Select,
+  DatePicker,
+} from "@powerhousedao/document-engineering";
 import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { useSelectedSnapshotReportDocument } from "../hooks/useSnapshotReportDocument.js";
 import {
@@ -175,8 +179,18 @@ export default function Editor() {
     // Get the formatted month label (e.g., "January 2025") - timezone agnostic
     const [year, month] = selectedPeriod.split("-").map(Number);
     const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December",
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ];
     const monthLabel = `${monthNames[month - 1]} ${year}`;
 

@@ -130,8 +130,18 @@ export default function Editor() {
     // Get the formatted month label (e.g., "January 2025") - timezone agnostic
     const [year, month] = selectedPeriod.split("-").map(Number);
     const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December",
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ];
     const monthLabel = `${monthNames[month - 1]} ${year}`;
 

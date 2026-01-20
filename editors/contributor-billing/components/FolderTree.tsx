@@ -51,7 +51,8 @@ export function FolderTree({
   onActiveNodeIdChange,
 }: FolderTreeProps) {
   // Use controlled state if provided, otherwise use local state
-  const [localActiveNodeId, setLocalActiveNodeId] = useState<string>("accounts");
+  // Empty string means no selection (home page)
+  const [localActiveNodeId, setLocalActiveNodeId] = useState<string>("");
   const activeNodeId = controlledActiveNodeId ?? localActiveNodeId;
   const setActiveNodeId = onActiveNodeIdChange ?? setLocalActiveNodeId;
 
@@ -338,6 +339,7 @@ export function FolderTree({
         handleOnTitleClick={() => {
           onFolderSelect?.(null);
           setSelectedNode("");
+          setActiveNodeId("");
         }}
       />
     </SidebarProvider>

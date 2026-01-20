@@ -159,7 +159,17 @@ export const InvoiceTable = ({
   const [actionsCompleted, setActionsCompleted] = useState(0);
 
   // Get documents directly from the hook - this will automatically update when documents change
-  const allDocuments = useDocumentsInSelectedDrive() || [];
+  const documentsInDrive = useDocumentsInSelectedDrive() || [];
+
+  // Build a set of file IDs from the files prop for quick lookup
+  const fileIds = useMemo(() => {
+    return new Set(files.map((f) => f.id));
+  }, [files]);
+
+  // Filter documents to only those in the current folder (matching the files prop)
+  const allDocuments = useMemo(() => {
+    return documentsInDrive.filter((doc) => fileIds.has(doc.header.id));
+  }, [documentsInDrive, fileIds]);
 
   // Refresh page when actions complete to ensure state is updated
   useEffect(() => {

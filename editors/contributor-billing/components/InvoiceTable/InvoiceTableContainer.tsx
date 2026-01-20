@@ -1,32 +1,47 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import {
-  useNodesInSelectedDriveOrFolder,
   isFileNodeKind,
   useDocumentModelModules,
   type VetraDocumentModelModule,
   showCreateDocumentModal,
   useDocumentsInSelectedDrive,
   useOnDropFile,
+  useSelectedDrive,
 } from "@powerhousedao/reactor-browser";
 import type { PHBaseState, PHDocument } from "document-model";
+import type { FileNode } from "document-drive";
 import { InvoiceTable } from "./InvoiceTable.js";
+
+interface InvoiceTableContainerProps {
+  /** The ID of the payments folder to filter invoices by */
+  folderId: string;
+}
 
 /**
  * Container that renders the InvoiceTable.
  * Uses useNodesInSelectedDriveOrFolder pattern to avoid freeze issues.
  */
-export function InvoiceTableContainer() {
+export function InvoiceTableContainer({
+  folderId,
+}: InvoiceTableContainerProps) {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const pendingFilesRef = useRef<Set<File>>(new Set());
 
   const documentModelModules = useDocumentModelModules();
-
-  // Use the simple pattern - just nodes, no document fetching
-  const nodes = useNodesInSelectedDriveOrFolder();
-  const fileNodes = nodes.filter((n) => isFileNodeKind(n));
+  const [driveDocument] = useSelectedDrive();
   const allDocuments = useDocumentsInSelectedDrive();
+
+  // Filter file nodes to only those in the specific payments folder
+  // Access drive nodes directly (same approach as HeaderStats)
+  const fileNodes = useMemo(() => {
+    if (!driveDocument) return [];
+    const nodes = driveDocument.state.global.nodes;
+    return nodes.filter(
+      (n) => isFileNodeKind(n) && n.parentFolder === folderId,
+    ) as FileNode[];
+  }, [driveDocument, folderId]);
 
   // Get the drop file handler
   const onDropFile = useOnDropFile();

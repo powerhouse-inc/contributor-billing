@@ -1,4 +1,4 @@
-import { Calendar, Plus, ChevronDown } from "lucide-react";
+import { Calendar, Plus, ChevronDown, Building2 } from "lucide-react";
 import {
   useBillingFolderStructure,
   formatMonthName,
@@ -18,7 +18,12 @@ interface BillingOverviewProps {
  * Overview for the Billing folder showing all months
  */
 export function BillingOverview({ onFolderSelect }: BillingOverviewProps) {
-  const { monthFolders, createMonthFolder } = useBillingFolderStructure();
+  const {
+    billingFolder,
+    monthFolders,
+    createMonthFolder,
+    createBillingFolder,
+  } = useBillingFolderStructure();
   const [isCreating, setIsCreating] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -57,35 +62,45 @@ export function BillingOverview({ onFolderSelect }: BillingOverviewProps) {
     return months;
   }, [monthFolders]);
 
-  // Get report stats per month (filter by month name in document name)
-  const getMonthStats = (monthName: string) => {
-    if (!documentsInDrive) {
-      return { hasExpense: false, hasSnapshot: false, expenseStatus: null };
+  // Pre-compute report stats for all months at once (memoized)
+  const monthStats = useMemo(() => {
+    const stats = new Map<
+      string,
+      {
+        hasExpense: boolean;
+        hasSnapshot: boolean;
+        expenseStatus: string | null;
+      }
+    >();
+    if (!documentsInDrive) return stats;
+
+    for (const [monthName] of monthFolders.entries()) {
+      const monthLower = monthName.toLowerCase();
+
+      const expenseReport = documentsInDrive.find(
+        (doc) =>
+          doc.header.documentType === "powerhouse/expense-report" &&
+          doc.header.name?.toLowerCase().includes(monthLower),
+      );
+      const snapshotReport = documentsInDrive.find(
+        (doc) =>
+          doc.header.documentType === "powerhouse/snapshot-report" &&
+          doc.header.name?.toLowerCase().includes(monthLower),
+      );
+
+      const expenseStatus = expenseReport
+        ? (expenseReport.state as { global?: { status?: string } }).global
+            ?.status || "DRAFT"
+        : null;
+
+      stats.set(monthName, {
+        hasExpense: !!expenseReport,
+        hasSnapshot: !!snapshotReport,
+        expenseStatus,
+      });
     }
-    const monthLower = monthName.toLowerCase();
-
-    const expenseReport = documentsInDrive.find(
-      (doc) =>
-        doc.header.documentType === "powerhouse/expense-report" &&
-        doc.header.name?.toLowerCase().includes(monthLower),
-    );
-    const snapshotReport = documentsInDrive.find(
-      (doc) =>
-        doc.header.documentType === "powerhouse/snapshot-report" &&
-        doc.header.name?.toLowerCase().includes(monthLower),
-    );
-
-    const expenseStatus = expenseReport
-      ? (expenseReport.state as { global?: { status?: string } }).global
-          ?.status || "DRAFT"
-      : null;
-
-    return {
-      hasExpense: !!expenseReport,
-      hasSnapshot: !!snapshotReport,
-      expenseStatus,
-    };
-  };
+    return stats;
+  }, [documentsInDrive, monthFolders]);
 
   // Sort months by date (most recent first)
   const sortedMonths = Array.from(monthFolders.entries()).sort(
@@ -105,6 +120,45 @@ export function BillingOverview({ onFolderSelect }: BillingOverviewProps) {
       setIsCreating(false);
     }
   };
+
+  const handleSetupBilling = async () => {
+    setIsCreating(true);
+    try {
+      await createBillingFolder();
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  // Show setup prompt if Billing folder doesn't exist
+  if (!billingFolder) {
+    return (
+      <div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Billing</h1>
+          <p className="text-gray-600">
+            Manage monthly billing, payments, and reports
+          </p>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+          <Building2 className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+          <h2 className="text-lg font-medium text-gray-900 mb-2">
+            Set up Billing
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Create the Billing folder to start managing monthly billing cycles
+          </p>
+          <button
+            onClick={() => void handleSetupBilling()}
+            disabled={isCreating}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isCreating ? "Creating..." : "Set up Billing"}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -170,7 +224,11 @@ export function BillingOverview({ onFolderSelect }: BillingOverviewProps) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sortedMonths.map(([monthName, info]) => {
-            const stats = getMonthStats(monthName);
+            const stats = monthStats.get(monthName) || {
+              hasExpense: false,
+              hasSnapshot: false,
+              expenseStatus: null,
+            };
             const handleMonthClick = () => {
               setSelectedNode(info.folder.id);
               onFolderSelect?.({

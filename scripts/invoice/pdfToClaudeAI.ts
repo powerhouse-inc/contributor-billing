@@ -172,7 +172,12 @@ function truncateToLastCompleteElement(json: string): string {
     if (lastPropStart > 0) {
       // Find the comma or opening brace before this property
       let searchFrom = lastPropStart;
-      while (searchFrom > 0 && json[searchFrom] !== "," && json[searchFrom] !== "{") {
+
+      while (
+        searchFrom > 0 &&
+        json[searchFrom] !== "," &&
+        json[searchFrom] !== "{"
+      ) {
         searchFrom--;
       }
 
