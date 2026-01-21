@@ -198,7 +198,7 @@ export function AddBillingStatementModal({
           const group = groups.find((g) => g.id === groupId);
           categoryAggregation.set(categoryKey, {
             groupId: groupId,
-            groupLabel: group?.label || "Uncategorised",
+            groupLabel: group?.label || "Uncategorized",
             budget: 0,
             actuals: billingLineItem.totalPriceCash || 0,
             forecast: 0,

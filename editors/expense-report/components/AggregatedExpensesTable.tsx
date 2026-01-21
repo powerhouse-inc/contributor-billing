@@ -286,7 +286,7 @@ export function AggregatedExpensesTable({
       items.push({
         lineItemId: item.id || "",
         groupId: item.group || "uncategorized",
-        groupLabel: item.groupLabel || "Uncategorised",
+        groupLabel: item.groupLabel || "Uncategorized",
         parentGroupId: item.parentGroupId,
         parentGroupLabel: item.parentGroupLabel,
         budget: item.budget || 0,
@@ -537,7 +537,7 @@ export function AggregatedExpensesTable({
               const subtotals = calculateSubtotal(items);
               const parentLabel =
                 parentKey === "uncategorized"
-                  ? "Uncategorised"
+                  ? "Uncategorized"
                   : items[0]?.parentGroupLabel || "Other";
 
               return (

@@ -142,7 +142,7 @@ export function useSyncWallet() {
 
       lineItems.forEach((billingLineItem: BillingStatementLineItem) => {
         const groupId = mapTagToGroup(billingLineItem);
-        const categoryKey = groupId || "uncategorized";
+        const categoryKey = groupId || "Uncategorized";
 
         const existing = categoryAggregation.get(categoryKey);
 
@@ -173,16 +173,16 @@ export function useSyncWallet() {
       );
 
       if (transactionPayments > 0) {
-        // Add payments to "uncategorized" category
-        const uncategorized = categoryAggregation.get("uncategorized");
+        // Add payments to "Uncategorized" category
+        const Uncategorized = categoryAggregation.get("Uncategorized");
 
-        if (uncategorized) {
-          // Update existing uncategorized category with payments
-          uncategorized.payments = transactionPayments;
+        if (Uncategorized) {
+          // Update existing Uncategorized category with payments
+          Uncategorized.payments = transactionPayments;
         } else {
-          // Create new uncategorized category entry with payments
-          categoryAggregation.set("uncategorized", {
-            groupId: null,
+          // Create new Uncategorized category entry with payments
+          categoryAggregation.set("Uncategorized", {
+            groupId: "121482a1-b69f-4511-g46f-267c24450238",
             groupLabel: "Uncategorized",
             budget: 0,
             actuals: 0,
