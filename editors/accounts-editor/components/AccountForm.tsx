@@ -131,10 +131,22 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
                   content={
                     <div className="text-xs">
                       <div className="font-semibold mb-1">Account Types:</div>
-                      <div><strong>Source:</strong> Origin of funds (e.g., revenue streams)</div>
-                      <div><strong>Internal:</strong> Accounts within your organization</div>
-                      <div><strong>Destination:</strong> Where funds are sent (e.g., payments)</div>
-                      <div><strong>External:</strong> Third-party accounts outside your org</div>
+                      <div>
+                        <strong>Source:</strong> Origin of funds (e.g., revenue
+                        streams)
+                      </div>
+                      <div>
+                        <strong>Internal:</strong> Accounts within your
+                        organization
+                      </div>
+                      <div>
+                        <strong>Destination:</strong> Where funds are sent
+                        (e.g., payments)
+                      </div>
+                      <div>
+                        <strong>External:</strong> Third-party accounts outside
+                        your org
+                      </div>
                     </div>
                   }
                   side="right"
