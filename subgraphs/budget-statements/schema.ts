@@ -10,7 +10,8 @@ export const schema: DocumentNode = gql`
   }
 
   input budgetStatementsFilter {
-    teamId: PHID!
+    teamId: PHID
+    networkSlug: String
   }
 
   type BudgetStatement {
