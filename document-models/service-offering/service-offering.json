@@ -534,6 +534,51 @@
                             "schema": "input SetRecurringServicesInput {\n    services: [String!]!\n    lastModified: DateTime!\n}",
                             "scope": "global",
                             "template": ""
+                        },
+                        {
+                            "description": "Selects a resource template for this service offering",
+                            "errors": [
+                                {
+                                    "code": "TEMPLATE_ALREADY_SELECTED",
+                                    "description": "A resource template has already been selected. Use CHANGE_RESOURCE_TEMPLATE to change it.",
+                                    "id": "template-already-selected",
+                                    "name": "TemplateAlreadySelectedError",
+                                    "template": ""
+                                }
+                            ],
+                            "examples": [],
+                            "id": "select-resource-template",
+                            "name": "SELECT_RESOURCE_TEMPLATE",
+                            "reducer": "if (state.resourceTemplateId) {\n    throw new TemplateAlreadySelectedError('A resource template has already been selected. Use CHANGE_RESOURCE_TEMPLATE to change it.');\n}\nstate.resourceTemplateId = action.input.resourceTemplateId;\nstate.lastModified = action.input.lastModified;",
+                            "schema": "input SelectResourceTemplateInput {\n    resourceTemplateId: PHID!\n    lastModified: DateTime!\n}",
+                            "scope": "global",
+                            "template": "Selects a resource template for this service offering"
+                        },
+                        {
+                            "description": "Changes the resource template for this service offering",
+                            "errors": [
+                                {
+                                    "code": "NO_TEMPLATE_SELECTED",
+                                    "description": "No resource template has been selected yet. Use SELECT_RESOURCE_TEMPLATE first.",
+                                    "id": "no-template-selected",
+                                    "name": "NoTemplateSelectedError",
+                                    "template": ""
+                                },
+                                {
+                                    "code": "TEMPLATE_MISMATCH",
+                                    "description": "The previous template ID does not match the currently selected template.",
+                                    "id": "template-mismatch",
+                                    "name": "TemplateMismatchError",
+                                    "template": ""
+                                }
+                            ],
+                            "examples": [],
+                            "id": "change-resource-template",
+                            "name": "CHANGE_RESOURCE_TEMPLATE",
+                            "reducer": "if (!state.resourceTemplateId) {\n    throw new NoTemplateSelectedError('No resource template has been selected yet. Use SELECT_RESOURCE_TEMPLATE first.');\n}\nif (state.resourceTemplateId !== action.input.previousTemplateId) {\n    throw new TemplateMismatchError('The previous template ID does not match the currently selected template.');\n}\nstate.resourceTemplateId = action.input.newTemplateId;\nstate.lastModified = action.input.lastModified;",
+                            "schema": "input ChangeResourceTemplateInput {\n    previousTemplateId: PHID!\n    newTemplateId: PHID!\n    lastModified: DateTime!\n}",
+                            "scope": "global",
+                            "template": "Changes the resource template for this service offering"
                         }
                     ]
                 },
@@ -605,8 +650,8 @@
             "state": {
                 "global": {
                     "examples": [],
-                    "initialValue": "{\n    \"id\": \"\",\n    \"operatorId\": \"\",\n    \"title\": \"\",\n    \"summary\": \"\",\n    \"description\": null,\n    \"thumbnailUrl\": null,\n    \"infoLink\": null,\n    \"status\": \"DRAFT\",\n    \"lastModified\": \"1970-01-01T00:00:00.000Z\",\n    \"targetAudiences\": [],\n    \"setupServices\": [],\n    \"recurringServices\": [],\n    \"facetTargets\": [],\n    \"services\": [],\n    \"tiers\": [],\n    \"optionGroups\": []\n}",
-                    "schema": "type ServiceOfferingState {\n    id: PHID!\n    operatorId: PHID!\n    title: String!\n    summary: String!\n    description: String\n    thumbnailUrl: URL\n    infoLink: URL\n    status: ServiceStatus!\n    lastModified: DateTime!\n    targetAudiences: [TargetAudience!]!\n    setupServices: [String!]!\n    recurringServices: [String!]!\n    facetTargets: [FacetTarget!]!\n    services: [Service!]!\n    tiers: [ServiceSubscriptionTier!]!\n    optionGroups: [OptionGroup!]!\n}\n\nenum ServiceStatus {\n    DRAFT\n    COMING_SOON\n    ACTIVE\n    DEPRECATED\n}\n\ntype TargetAudience {\n    id: OID!\n    label: String!\n    color: String\n}\n\ntype FacetTarget {\n    id: OID!\n    categoryKey: String!\n    categoryLabel: String!\n    selectedOptions: [String!]!\n}\n\ntype Service {\n    id: OID!\n    title: String!\n    description: String\n    displayOrder: Int\n    parentServiceId: OID\n    isSetupFormation: Boolean!\n    optionGroupId: OID\n    facetBindings: [ResourceFacetBinding!]!\n}\n\ntype ResourceFacetBinding {\n    id: OID!\n    facetName: String!\n    facetType: PHID!\n    supportedOptions: [OID!]!\n}\n\ntype ServiceSubscriptionTier {\n    id: OID!\n    name: String!\n    description: String\n    isCustomPricing: Boolean!\n    pricing: ServicePricing!\n    serviceLevels: [ServiceLevelBinding!]!\n    usageLimits: [ServiceUsageLimit!]!\n}\n\ntype ServicePricing {\n    amount: Amount_Money\n    currency: Currency!\n    billingCycle: BillingCycle!\n    setupFee: Amount_Money\n}\n\nenum BillingCycle {\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n    ONE_TIME\n}\n\ntype ServiceLevelBinding {\n    id: OID!\n    serviceId: OID!\n    level: ServiceLevel!\n    customValue: String\n    variations: String\n    annexes: String\n    setupFee: Amount_Money\n    optionGroupId: OID\n}\n\nenum ServiceLevel {\n    INCLUDED\n    NOT_INCLUDED\n    OPTIONAL\n    CUSTOM\n    VARIABLE\n    NOT_APPLICABLE\n}\n\ntype ServiceUsageLimit {\n    id: OID!\n    serviceId: OID!\n    metric: String!\n    limit: Int\n    resetPeriod: ResetPeriod\n    notes: String\n}\n\nenum ResetPeriod {\n    HOURLY\n    DAILY\n    WEEKLY\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n}\n\ntype OptionGroup {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n}"
+                    "initialValue": "{\n    \"id\": \"\",\n    \"operatorId\": \"\",\n    \"resourceTemplateId\": null,\n    \"title\": \"\",\n    \"summary\": \"\",\n    \"description\": null,\n    \"thumbnailUrl\": null,\n    \"infoLink\": null,\n    \"status\": \"DRAFT\",\n    \"lastModified\": \"1970-01-01T00:00:00.000Z\",\n    \"targetAudiences\": [],\n    \"setupServices\": [],\n    \"recurringServices\": [],\n    \"facetTargets\": [],\n    \"services\": [],\n    \"tiers\": [],\n    \"optionGroups\": []\n}",
+                    "schema": "type ServiceOfferingState {\n    id: PHID!\n    operatorId: PHID!\n    resourceTemplateId: PHID\n    title: String!\n    summary: String!\n    description: String\n    thumbnailUrl: URL\n    infoLink: URL\n    status: ServiceStatus!\n    lastModified: DateTime!\n    targetAudiences: [TargetAudience!]!\n    setupServices: [String!]!\n    recurringServices: [String!]!\n    facetTargets: [FacetTarget!]!\n    services: [Service!]!\n    tiers: [ServiceSubscriptionTier!]!\n    optionGroups: [OptionGroup!]!\n}\n\nenum ServiceStatus {\n    DRAFT\n    COMING_SOON\n    ACTIVE\n    DEPRECATED\n}\n\ntype TargetAudience {\n    id: OID!\n    label: String!\n    color: String\n}\n\ntype FacetTarget {\n    id: OID!\n    categoryKey: String!\n    categoryLabel: String!\n    selectedOptions: [String!]!\n}\n\ntype Service {\n    id: OID!\n    title: String!\n    description: String\n    displayOrder: Int\n    parentServiceId: OID\n    isSetupFormation: Boolean!\n    optionGroupId: OID\n    facetBindings: [ResourceFacetBinding!]!\n}\n\ntype ResourceFacetBinding {\n    id: OID!\n    facetName: String!\n    facetType: PHID!\n    supportedOptions: [OID!]!\n}\n\ntype ServiceSubscriptionTier {\n    id: OID!\n    name: String!\n    description: String\n    isCustomPricing: Boolean!\n    pricing: ServicePricing!\n    serviceLevels: [ServiceLevelBinding!]!\n    usageLimits: [ServiceUsageLimit!]!\n}\n\ntype ServicePricing {\n    amount: Amount_Money\n    currency: Currency!\n    billingCycle: BillingCycle!\n    setupFee: Amount_Money\n}\n\nenum BillingCycle {\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n    ONE_TIME\n}\n\ntype ServiceLevelBinding {\n    id: OID!\n    serviceId: OID!\n    level: ServiceLevel!\n    customValue: String\n    variations: String\n    annexes: String\n    setupFee: Amount_Money\n    optionGroupId: OID\n}\n\nenum ServiceLevel {\n    INCLUDED\n    NOT_INCLUDED\n    OPTIONAL\n    CUSTOM\n    VARIABLE\n    NOT_APPLICABLE\n}\n\ntype ServiceUsageLimit {\n    id: OID!\n    serviceId: OID!\n    metric: String!\n    limit: Int\n    resetPeriod: ResetPeriod\n    notes: String\n}\n\nenum ResetPeriod {\n    HOURLY\n    DAILY\n    WEEKLY\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n}\n\ntype OptionGroup {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n}"
                 },
                 "local": {
                     "examples": [],

@@ -9,6 +9,7 @@ import type {
   AddTierInput,
   AddUsageLimitInput,
   BillingCycle,
+  ChangeResourceTemplateInput,
   DeleteOptionGroupInput,
   DeleteServiceInput,
   DeleteTierInput,
@@ -22,6 +23,7 @@ import type {
   RemoveUsageLimitInput,
   ResetPeriod,
   ResourceFacetBinding,
+  SelectResourceTemplateInput,
   Service,
   ServiceLevel,
   ServiceLevelBinding,
@@ -201,6 +203,16 @@ export function AddUsageLimitInputSchema(): z.ZodObject<
   });
 }
 
+export function ChangeResourceTemplateInputSchema(): z.ZodObject<
+  Properties<ChangeResourceTemplateInput>
+> {
+  return z.object({
+    lastModified: z.string().datetime(),
+    newTemplateId: z.string(),
+    previousTemplateId: z.string(),
+  });
+}
+
 export function DeleteOptionGroupInputSchema(): z.ZodObject<
   Properties<DeleteOptionGroupInput>
 > {
@@ -319,6 +331,15 @@ export function ResourceFacetBindingSchema(): z.ZodObject<
   });
 }
 
+export function SelectResourceTemplateInputSchema(): z.ZodObject<
+  Properties<SelectResourceTemplateInput>
+> {
+  return z.object({
+    lastModified: z.string().datetime(),
+    resourceTemplateId: z.string(),
+  });
+}
+
 export function ServiceSchema(): z.ZodObject<Properties<Service>> {
   return z.object({
     __typename: z.literal("Service").optional(),
@@ -362,6 +383,7 @@ export function ServiceOfferingStateSchema(): z.ZodObject<
     operatorId: z.string(),
     optionGroups: z.array(OptionGroupSchema()),
     recurringServices: z.array(z.string()),
+    resourceTemplateId: z.string().nullable(),
     services: z.array(ServiceSchema()),
     setupServices: z.array(z.string()),
     status: ServiceStatusSchema,

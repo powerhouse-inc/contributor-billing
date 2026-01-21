@@ -15,6 +15,7 @@ export function defaultGlobalState(): ServiceOfferingGlobalState {
   return {
     id: "",
     operatorId: "",
+    resourceTemplateId: null,
     title: "",
     summary: "",
     description: null,

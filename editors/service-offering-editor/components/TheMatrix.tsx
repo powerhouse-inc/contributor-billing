@@ -497,6 +497,12 @@ const matrixStyles = `
   /* Metric Row */
   .matrix__metric-row {
     background: inherit;
+    cursor: pointer;
+    transition: var(--so-transition-fast);
+  }
+
+  .matrix__metric-row:hover {
+    background: rgba(124, 58, 237, 0.08);
   }
 
   .matrix__metric-cell {
@@ -508,11 +514,58 @@ const matrixStyles = `
     z-index: 10;
   }
 
+  .matrix__metric-name-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
   .matrix__metric-name {
     font-family: var(--so-font-sans);
     font-size: 0.6875rem;
     font-style: italic;
     color: var(--so-slate-500);
+  }
+
+  .matrix__metric-actions {
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: var(--so-transition-fast);
+  }
+
+  .matrix__metric-row:hover .matrix__metric-actions {
+    opacity: 1;
+  }
+
+  .matrix__metric-btn {
+    padding: 0.125rem;
+    background: transparent;
+    border: none;
+    color: var(--so-slate-400);
+    cursor: pointer;
+    border-radius: var(--so-radius-sm);
+    transition: var(--so-transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .matrix__metric-btn:hover {
+    background: var(--so-slate-200);
+  }
+
+  .matrix__metric-btn--edit:hover {
+    color: var(--so-violet-600);
+  }
+
+  .matrix__metric-btn--remove:hover {
+    color: var(--so-rose-600);
+  }
+
+  .matrix__metric-btn-icon {
+    width: 0.75rem;
+    height: 0.75rem;
   }
 
   .matrix__metric-value-cell {
@@ -524,6 +577,38 @@ const matrixStyles = `
   .matrix__metric-value {
     font-size: 0.6875rem;
     color: var(--so-slate-500);
+  }
+
+  /* Add Metric Button on Service Row */
+  .matrix__service-cell-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .matrix__add-metric-btn {
+    opacity: 0.6;
+    font-family: var(--so-font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--so-violet-600);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--so-radius-sm);
+    transition: var(--so-transition-fast);
+    white-space: nowrap;
+  }
+
+  .matrix__service-row:hover .matrix__add-metric-btn {
+    opacity: 1;
+  }
+
+  .matrix__add-metric-btn:hover {
+    background: var(--so-violet-100);
+    color: var(--so-violet-700);
   }
 
   /* Add Service Row */
@@ -1321,6 +1406,17 @@ export function TheMatrix({
     ANONYMITY: "high-anonymity",
   });
 
+  // Metric editing modal state
+  const [metricModal, setMetricModal] = useState<{
+    serviceId: string;
+    metric: string | null; // null means adding new metric
+  } | null>(null);
+  const [metricName, setMetricName] = useState("");
+  const [metricLimits, setMetricLimits] = useState<Record<string, string>>({});
+  const [metricEnabledTiers, setMetricEnabledTiers] = useState<Set<string>>(
+    new Set(),
+  );
+
   const getServiceGroup = (service: Service): string | null => {
     // Services now have optionGroupId directly on them
     return service.optionGroupId || null;
@@ -1487,6 +1583,124 @@ export function TheMatrix({
     setNewServiceName("");
     setNewServiceDescription("");
     setNewServiceSelectedTiers(new Set());
+  };
+
+  // Metric modal handlers
+  const handleAddMetric = (serviceId: string) => {
+    setMetricModal({ serviceId, metric: null });
+    setMetricName("");
+    // Initialize limits for all tiers to empty string
+    const initialLimits: Record<string, string> = {};
+    // For new metrics, enable all tiers by default
+    const allTierIds = new Set<string>();
+    tiers.forEach((tier) => {
+      initialLimits[tier.id] = "";
+      allTierIds.add(tier.id);
+    });
+    setMetricLimits(initialLimits);
+    setMetricEnabledTiers(allTierIds);
+  };
+
+  const handleEditMetric = (serviceId: string, metric: string) => {
+    setMetricModal({ serviceId, metric });
+    setMetricName(metric);
+    // Initialize limits with existing values and track which tiers have this metric
+    const existingLimits: Record<string, string> = {};
+    const enabledTiers = new Set<string>();
+    tiers.forEach((tier) => {
+      const usageLimit = tier.usageLimits.find(
+        (ul) => ul.serviceId === serviceId && ul.metric === metric,
+      );
+      // Load value from either limit (numeric) or notes (string)
+      existingLimits[tier.id] =
+        usageLimit?.limit?.toString() || usageLimit?.notes || "";
+      if (usageLimit) {
+        enabledTiers.add(tier.id);
+      }
+    });
+    setMetricLimits(existingLimits);
+    setMetricEnabledTiers(enabledTiers);
+  };
+
+  const handleRemoveMetric = (serviceId: string, metric: string) => {
+    // Remove this metric from all tiers
+    tiers.forEach((tier) => {
+      const usageLimit = tier.usageLimits.find(
+        (ul) => ul.serviceId === serviceId && ul.metric === metric,
+      );
+      if (usageLimit) {
+        dispatch(
+          removeUsageLimit({
+            tierId: tier.id,
+            limitId: usageLimit.id,
+            lastModified: new Date().toISOString(),
+          }),
+        );
+      }
+    });
+  };
+
+  const handleSaveMetric = () => {
+    if (!metricModal || !metricName.trim()) return;
+
+    const { serviceId, metric: originalMetric } = metricModal;
+    const now = new Date().toISOString();
+
+    tiers.forEach((tier) => {
+      const isEnabled = metricEnabledTiers.has(tier.id);
+      const limitValue = metricLimits[tier.id];
+      const existingLimit = originalMetric
+        ? tier.usageLimits.find(
+            (ul) => ul.serviceId === serviceId && ul.metric === originalMetric,
+          )
+        : null;
+
+      // Check if value is numeric or string
+      const parsedLimit = limitValue ? parseInt(limitValue, 10) : null;
+      const isNumeric = parsedLimit !== null && !isNaN(parsedLimit);
+
+      if (existingLimit && !isEnabled) {
+        // Remove limit - tier was disabled
+        dispatch(
+          removeUsageLimit({
+            tierId: tier.id,
+            limitId: existingLimit.id,
+            lastModified: now,
+          }),
+        );
+      } else if (existingLimit && isEnabled) {
+        // Update existing limit - use limit for numeric values, notes for strings
+        dispatch(
+          updateUsageLimit({
+            tierId: tier.id,
+            limitId: existingLimit.id,
+            metric: metricName.trim(),
+            limit: isNumeric ? parsedLimit : null,
+            notes: !isNumeric && limitValue ? limitValue.trim() : null,
+            lastModified: now,
+          }),
+        );
+      } else if (!existingLimit && isEnabled) {
+        // Add new limit - use limit for numeric values, notes for strings
+        dispatch(
+          addUsageLimit({
+            tierId: tier.id,
+            limitId: generateId(),
+            serviceId,
+            metric: metricName.trim(),
+            limit: isNumeric ? parsedLimit : null,
+            notes: !isNumeric && limitValue ? limitValue.trim() : null,
+            resetPeriod: "MONTHLY",
+            lastModified: now,
+          }),
+        );
+      }
+    });
+
+    setMetricModal(null);
+    setMetricName("");
+    setMetricLimits({});
+    setMetricEnabledTiers(new Set());
   };
 
   const getLevelDisplay = (
@@ -1690,6 +1904,9 @@ export function TheMatrix({
                   setupFee={groupSetupFees[group.id]}
                   onAddService={openAddServiceModal}
                   selectedTierIdx={selectedTierIdx}
+                  onAddMetric={handleAddMetric}
+                  onEditMetric={handleEditMetric}
+                  onRemoveMetric={handleRemoveMetric}
                 />
               ))}
 
@@ -1719,6 +1936,9 @@ export function TheMatrix({
                   dispatch={dispatch}
                   setupFee={groupSetupFees[UNGROUPED_ID]}
                   selectedTierIdx={selectedTierIdx}
+                  onAddMetric={handleAddMetric}
+                  onEditMetric={handleEditMetric}
+                  onRemoveMetric={handleRemoveMetric}
                 />
               )}
 
@@ -1765,6 +1985,9 @@ export function TheMatrix({
                   onAddService={openAddServiceModal}
                   selectedTierIdx={selectedTierIdx}
                   dispatch={dispatch}
+                  onAddMetric={handleAddMetric}
+                  onEditMetric={handleEditMetric}
+                  onRemoveMetric={handleRemoveMetric}
                 />
               ))}
 
@@ -1793,6 +2016,9 @@ export function TheMatrix({
                   handleSetServiceLevel={handleSetServiceLevel}
                   dispatch={dispatch}
                   selectedTierIdx={selectedTierIdx}
+                  onAddMetric={handleAddMetric}
+                  onEditMetric={handleEditMetric}
+                  onRemoveMetric={handleRemoveMetric}
                 />
               )}
 
@@ -1827,6 +2053,9 @@ export function TheMatrix({
                   dispatch={dispatch}
                   onAddService={openAddServiceModal}
                   selectedTierIdx={selectedTierIdx}
+                  onAddMetric={handleAddMetric}
+                  onEditMetric={handleEditMetric}
+                  onRemoveMetric={handleRemoveMetric}
                 />
               ))}
 
@@ -1988,6 +2217,151 @@ export function TheMatrix({
             </div>
           </div>
         )}
+
+        {/* Metric Edit Modal */}
+        {metricModal && (
+          <div className="matrix__modal-overlay">
+            <div className="matrix__modal matrix__modal--wide">
+              <h3 className="matrix__modal-title">
+                {metricModal.metric ? "Edit Metric" : "Add Metric"}
+              </h3>
+
+              <div className="matrix__modal-field">
+                <label className="matrix__modal-label">Metric Name</label>
+                <input
+                  type="text"
+                  value={metricName}
+                  onChange={(e) => setMetricName(e.target.value)}
+                  placeholder="e.g., API Calls, Storage, Users"
+                  className="matrix__modal-input"
+                  autoFocus
+                />
+              </div>
+
+              <div className="matrix__modal-field">
+                <label className="matrix__modal-label">
+                  Pricing Tiers & Values
+                </label>
+                <p
+                  className="matrix__modal-hint"
+                  style={{ marginBottom: "0.75rem" }}
+                >
+                  Enable the metric for each tier and set values.
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.5rem",
+                  }}
+                >
+                  {tiers.map((tier) => {
+                    const isEnabled = metricEnabledTiers.has(tier.id);
+                    return (
+                      <div
+                        key={tier.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.75rem",
+                          padding: "0.5rem",
+                          borderRadius: "6px",
+                          background: isEnabled
+                            ? "rgba(124, 58, 237, 0.05)"
+                            : "#f8fafc",
+                          border: isEnabled
+                            ? "1px solid rgba(124, 58, 237, 0.2)"
+                            : "1px solid #e2e8f0",
+                          transition: "all 0.15s ease",
+                        }}
+                      >
+                        <label
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                            cursor: "pointer",
+                            minWidth: "120px",
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isEnabled}
+                            onChange={(e) => {
+                              setMetricEnabledTiers((prev) => {
+                                const next = new Set(prev);
+                                if (e.target.checked) {
+                                  next.add(tier.id);
+                                } else {
+                                  next.delete(tier.id);
+                                }
+                                return next;
+                              });
+                            }}
+                            style={{
+                              width: "16px",
+                              height: "16px",
+                              accentColor: "#7c3aed",
+                              cursor: "pointer",
+                            }}
+                          />
+                          <span
+                            style={{
+                              fontWeight: 600,
+                              color: isEnabled ? "#334155" : "#94a3b8",
+                              fontSize: "0.875rem",
+                            }}
+                          >
+                            {tier.name}
+                          </span>
+                        </label>
+                        <input
+                          type="text"
+                          value={metricLimits[tier.id] || ""}
+                          onChange={(e) =>
+                            setMetricLimits((prev) => ({
+                              ...prev,
+                              [tier.id]: e.target.value,
+                            }))
+                          }
+                          placeholder={isEnabled ? "Enter value" : "—"}
+                          className="matrix__modal-input"
+                          disabled={!isEnabled}
+                          style={{
+                            flex: 1,
+                            opacity: isEnabled ? 1 : 0.5,
+                            cursor: isEnabled ? "text" : "not-allowed",
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="matrix__modal-actions">
+                <button
+                  onClick={() => {
+                    setMetricModal(null);
+                    setMetricName("");
+                    setMetricLimits({});
+                    setMetricEnabledTiers(new Set());
+                  }}
+                  className="matrix__modal-btn matrix__modal-btn--cancel"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveMetric}
+                  disabled={!metricName.trim() || metricEnabledTiers.size === 0}
+                  className="matrix__modal-btn matrix__modal-btn--primary"
+                >
+                  {metricModal.metric ? "Save Changes" : "Add Metric"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
@@ -2028,6 +2402,9 @@ interface ServiceGroupSectionProps {
   setupFee?: number | null;
   onAddService?: (groupId: string, isSetupFormation: boolean) => void;
   selectedTierIdx: number;
+  onAddMetric: (serviceId: string) => void;
+  onEditMetric: (serviceId: string, metric: string) => void;
+  onRemoveMetric: (serviceId: string, metric: string) => void;
 }
 
 function ServiceGroupSection({
@@ -2047,6 +2424,9 @@ function ServiceGroupSection({
   setupFee,
   onAddService,
   selectedTierIdx,
+  onAddMetric,
+  onEditMetric,
+  onRemoveMetric,
 }: ServiceGroupSectionProps) {
   const showGroup = services.length > 0 || onAddService;
   if (!showGroup) return null;
@@ -2116,6 +2496,9 @@ function ServiceGroupSection({
             selectedCell={selectedCell}
             setSelectedCell={setSelectedCell}
             selectedTierIdx={selectedTierIdx}
+            onAddMetric={onAddMetric}
+            onEditMetric={onEditMetric}
+            onRemoveMetric={onRemoveMetric}
           />
         );
       })}
@@ -2210,6 +2593,9 @@ interface ServiceRowWithMetricsProps {
   selectedCell: { serviceId: string; tierId: string } | null;
   setSelectedCell: (cell: { serviceId: string; tierId: string } | null) => void;
   selectedTierIdx: number;
+  onAddMetric: (serviceId: string) => void;
+  onEditMetric: (serviceId: string, metric: string) => void;
+  onRemoveMetric: (serviceId: string, metric: string) => void;
 }
 
 function ServiceRowWithMetrics({
@@ -2223,12 +2609,27 @@ function ServiceRowWithMetrics({
   selectedCell,
   setSelectedCell,
   selectedTierIdx,
+  onAddMetric,
+  onEditMetric,
+  onRemoveMetric,
 }: ServiceRowWithMetricsProps) {
   return (
     <>
       <tr className={`matrix__service-row ${rowClass}`}>
         <td className={`matrix__service-cell ${rowClass}`}>
-          <span className="matrix__service-title">{service.title}</span>
+          <div className="matrix__service-cell-wrapper">
+            <span className="matrix__service-title">{service.title}</span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddMetric(service.id);
+              }}
+              className="matrix__add-metric-btn"
+              title="Add metric to this service"
+            >
+              + Metric
+            </button>
+          </div>
         </td>
         {tiers.map((tier, tierIdx) => {
           const serviceLevel = getServiceLevelForTier(service.id, tier);
@@ -2266,9 +2667,58 @@ function ServiceRowWithMetrics({
         <tr
           key={`${service.id}-${metric}`}
           className={`matrix__metric-row ${rowClass}`}
+          onClick={() => onEditMetric(service.id, metric)}
         >
           <td className={`matrix__metric-cell ${rowClass}`}>
-            <span className="matrix__metric-name">{metric}</span>
+            <div className="matrix__metric-name-wrapper">
+              <span className="matrix__metric-name">{metric}</span>
+              <div className="matrix__metric-actions">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEditMetric(service.id, metric);
+                  }}
+                  className="matrix__metric-btn matrix__metric-btn--edit"
+                  title="Edit metric"
+                >
+                  <svg
+                    className="matrix__metric-btn-icon"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemoveMetric(service.id, metric);
+                  }}
+                  className="matrix__metric-btn matrix__metric-btn--remove"
+                  title="Remove metric"
+                >
+                  <svg
+                    className="matrix__metric-btn-icon"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </td>
           {tiers.map((tier, tierIdx) => {
             const usageLimit = getUsageLimitForMetric(service.id, metric, tier);
@@ -2286,7 +2736,7 @@ function ServiceRowWithMetrics({
                   {usageLimit
                     ? usageLimit.limit
                       ? `Up to ${usageLimit.limit}`
-                      : "Unlimited"
+                      : usageLimit.notes || "Unlimited"
                     : "—"}
                 </span>
               </td>
@@ -2404,13 +2854,16 @@ function ServiceLevelDetailPanel({
 
   const handleAddLimit = () => {
     if (!newMetric.trim()) return;
+    const parsedLimit = newLimit ? parseInt(newLimit, 10) : null;
+    const isNumeric = parsedLimit !== null && !isNaN(parsedLimit);
     dispatch(
       addUsageLimit({
         tierId: tier.id,
         limitId: generateId(),
         serviceId: service.id,
         metric: newMetric.trim(),
-        limit: newLimit ? parseInt(newLimit) : undefined,
+        limit: isNumeric ? parsedLimit : undefined,
+        notes: !isNumeric && newLimit ? newLimit.trim() : undefined,
         resetPeriod: "MONTHLY",
         lastModified: new Date().toISOString(),
       }),
@@ -2504,47 +2957,12 @@ function ServiceLevelDetailPanel({
 
         <div className="matrix__panel-body">
           <div>
-            <label className="matrix__panel-section-label">Service Level</label>
-            <div className="matrix__panel-level-grid">
-              {SERVICE_LEVELS.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => handleSetLevel(option.value)}
-                  className={`matrix__panel-level-btn ${
-                    serviceLevel?.level === option.value
-                      ? "matrix__panel-level-btn--active"
-                      : ""
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {serviceLevel?.level === "CUSTOM" && (
-            <div>
-              <label className="matrix__panel-section-label">
-                Custom Value
-              </label>
-              <input
-                type="text"
-                value={customValue}
-                onChange={(e) => setCustomValue(e.target.value)}
-                onBlur={handleUpdateCustomValue}
-                placeholder="e.g., Expedited, Basic, Pro"
-                className="matrix__panel-input"
-              />
-            </div>
-          )}
-
-          <div>
             <div className="matrix__panel-limits-header">
               <label
                 className="matrix__panel-section-label"
                 style={{ marginBottom: 0 }}
               >
-                Usage Limits / Metrics
+                Metrics
               </label>
               <button
                 onClick={() => setIsAddingMetric(true)}
@@ -2587,18 +3005,16 @@ function ServiceLevelDetailPanel({
                   />
                 </div>
                 <div>
-                  <label className="matrix__panel-edit-label">
-                    Limit Value
-                  </label>
+                  <label className="matrix__panel-edit-label">Value</label>
                   <input
                     type="text"
                     value={newLimit}
                     onChange={(e) => setNewLimit(e.target.value)}
-                    placeholder="e.g., 100, 5, leave empty for Unlimited"
+                    placeholder="e.g., 100, Unlimited, Custom"
                     className="matrix__panel-input"
                   />
                   <p className="matrix__panel-edit-hint">
-                    Enter a number or leave empty for &quot;Unlimited&quot;
+                    Enter a value or leave empty
                   </p>
                 </div>
                 <div className="matrix__panel-edit-actions">
@@ -2650,15 +3066,20 @@ function MetricLimitItem({
 }: MetricLimitItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editMetric, setEditMetric] = useState(limit.metric);
-  const [editLimit, setEditLimit] = useState(limit.limit?.toString() || "");
+  const [editLimit, setEditLimit] = useState(
+    limit.limit?.toString() || limit.notes || "",
+  );
 
   const handleSave = () => {
+    const parsedLimit = editLimit ? parseInt(editLimit, 10) : null;
+    const isNumeric = parsedLimit !== null && !isNaN(parsedLimit);
     dispatch(
       updateUsageLimit({
         tierId,
         limitId: limit.id,
         metric: editMetric.trim() || limit.metric,
-        limit: editLimit ? parseInt(editLimit) : undefined,
+        limit: isNumeric ? parsedLimit : undefined,
+        notes: !isNumeric && editLimit ? editLimit.trim() : undefined,
         lastModified: new Date().toISOString(),
       }),
     );
@@ -2667,7 +3088,7 @@ function MetricLimitItem({
 
   const handleCancel = () => {
     setEditMetric(limit.metric);
-    setEditLimit(limit.limit?.toString() || "");
+    setEditLimit(limit.limit?.toString() || limit.notes || "");
     setIsEditing(false);
   };
 
@@ -2686,16 +3107,16 @@ function MetricLimitItem({
           />
         </div>
         <div>
-          <label className="matrix__panel-edit-label">Limit Value</label>
+          <label className="matrix__panel-edit-label">Value</label>
           <input
             type="text"
             value={editLimit}
             onChange={(e) => setEditLimit(e.target.value)}
-            placeholder="e.g., 3, Unlimited, As needed"
+            placeholder="e.g., 100, Unlimited, Custom"
             className="matrix__panel-input"
           />
           <p className="matrix__panel-edit-hint">
-            Can be numeric (3) or descriptive (Unlimited, Custom)
+            Enter a value or leave empty
           </p>
         </div>
         <div className="matrix__panel-edit-actions">
@@ -2724,7 +3145,7 @@ function MetricLimitItem({
       >
         <div className="matrix__panel-limit-metric">{limit.metric}</div>
         <div className="matrix__panel-limit-value">
-          {limit.limit ? `Up to ${limit.limit}` : "Unlimited"}
+          {limit.limit ?? limit.notes ?? "—"}
         </div>
       </div>
       <div className="matrix__panel-limit-actions">

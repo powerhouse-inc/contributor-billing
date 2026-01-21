@@ -8,3 +8,4 @@ export { SnapshotReportEditor } from "./snapshot-report-editor/module.js";
 export { ExpenseReport } from "./expense-report/module.js";
 export { ServiceSubscriptionsEditor } from "./service-subscriptions-editor/module.js";
 export { ServiceOfferingEditor } from "./service-offering-editor/module.js";
+export { ResourceTemplateEditor } from "./resource-template-editor/module.js";

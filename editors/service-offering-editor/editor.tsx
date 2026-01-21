@@ -2,7 +2,7 @@ import { useState } from "react";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import { useSelectedServiceOfferingDocument } from "../../document-models/service-offering/hooks.js";
 import { TabNavigation, type TabId } from "./components/TabNavigation.js";
-import { ScopeAndFacets } from "./components/ScopeAndFacets.js";
+import { ResourceTemplateSelector } from "./components/ResourceTemplateSelector.js";
 import {
   ServiceCatalog,
   type GroupMetadata,
@@ -60,7 +60,9 @@ export default function ServiceOfferingEditor() {
   const renderTabContent = () => {
     switch (activeTab) {
       case "scope-facets":
-        return <ScopeAndFacets document={document} dispatch={dispatch} />;
+        return (
+          <ResourceTemplateSelector document={document} dispatch={dispatch} />
+        );
       case "service-catalog":
         return (
           <ServiceCatalog

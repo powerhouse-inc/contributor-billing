@@ -9,6 +9,7 @@ import {
 import { useMemo, useState } from "react";
 import { ExpenseReports } from "./expense-reports.js";
 import { SnapshotReports } from "./snapshot-reports.js";
+import { ResourcesServices } from "./ResourcesServices.js";
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
@@ -112,6 +113,10 @@ export function DriveExplorer({ children }: EditorProps) {
 
     if (customView === "snapshot-reports") {
       return <SnapshotReports />;
+    }
+
+    if (customView === "resources-services") {
+      return <ResourcesServices />;
     }
 
     // Default: folder contents

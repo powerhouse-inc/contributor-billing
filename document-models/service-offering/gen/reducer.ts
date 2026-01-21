@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { ServiceOfferingPHState } from "@powerhousedao/contributor-billing/document-models/service-offering";
+import type { ServiceOfferingPHState } from "./types.js";
 
 import { serviceOfferingServiceManagementOperations } from "../src/reducers/service-management.js";
 import { serviceOfferingTierManagementOperations } from "../src/reducers/tier-management.js";
@@ -38,6 +38,8 @@ import {
   RemoveFacetOptionInputSchema,
   SetSetupServicesInputSchema,
   SetRecurringServicesInputSchema,
+  SelectResourceTemplateInputSchema,
+  ChangeResourceTemplateInputSchema,
   AddOptionGroupInputSchema,
   UpdateOptionGroupInputSchema,
   DeleteOptionGroupInputSchema,
@@ -290,6 +292,24 @@ const stateReducer: StateReducer<ServiceOfferingPHState> = (
     case "SET_RECURRING_SERVICES":
       SetRecurringServicesInputSchema().parse(action.input);
       serviceOfferingOfferingManagementOperations.setRecurringServicesOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "SELECT_RESOURCE_TEMPLATE":
+      SelectResourceTemplateInputSchema().parse(action.input);
+      serviceOfferingOfferingManagementOperations.selectResourceTemplateOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "CHANGE_RESOURCE_TEMPLATE":
+      ChangeResourceTemplateInputSchema().parse(action.input);
+      serviceOfferingOfferingManagementOperations.changeResourceTemplateOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

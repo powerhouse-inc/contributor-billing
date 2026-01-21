@@ -18,6 +18,7 @@ scalar Upload
 type ServiceOfferingState {
     id: PHID!
     operatorId: PHID!
+    resourceTemplateId: PHID
     title: String!
     summary: String!
     description: String
@@ -354,6 +355,17 @@ input SetSetupServicesInput {
 
 input SetRecurringServicesInput {
     services: [String!]!
+    lastModified: DateTime!
+}
+
+input SelectResourceTemplateInput {
+    resourceTemplateId: PHID!
+    lastModified: DateTime!
+}
+
+input ChangeResourceTemplateInput {
+    previousTemplateId: PHID!
+    newTemplateId: PHID!
     lastModified: DateTime!
 }
 
