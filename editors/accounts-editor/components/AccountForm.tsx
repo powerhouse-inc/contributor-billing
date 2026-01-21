@@ -5,6 +5,8 @@ import {
   FormLabel,
   StringField,
 } from "@powerhousedao/document-engineering";
+import { Tooltip, TooltipProvider } from "@powerhousedao/design-system/ui";
+import { Info } from "lucide-react";
 import type {
   AccountEntry,
   AccountTypeInput,
@@ -122,9 +124,25 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Account Type <span className="text-red-500">*</span>
-            </label>
+            <TooltipProvider delayDuration={0}>
+              <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-2">
+                Account Type <span className="text-red-500">*</span>
+                <Tooltip
+                  content={
+                    <div className="text-xs">
+                      <div className="font-semibold mb-1">Account Types:</div>
+                      <div><strong>Source:</strong> Origin of funds (e.g., revenue streams)</div>
+                      <div><strong>Internal:</strong> Accounts within your organization</div>
+                      <div><strong>Destination:</strong> Where funds are sent (e.g., payments)</div>
+                      <div><strong>External:</strong> Third-party accounts outside your org</div>
+                    </div>
+                  }
+                  side="right"
+                >
+                  <Info className="w-4 h-4 text-gray-400 cursor-help" />
+                </Tooltip>
+              </label>
+            </TooltipProvider>
             <select
               name="accountType"
               value={formData.type}
