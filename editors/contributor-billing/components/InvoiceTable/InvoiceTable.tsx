@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import {
   addDocument,
   dispatchActions,
@@ -104,7 +104,10 @@ interface InvoiceTableProps {
       | ((prev: Record<string, boolean>) => Record<string, boolean>),
   ) => void;
   filteredDocumentModels: VetraDocumentModelModule[];
-  onSelectDocumentModel: (model: VetraDocumentModelModule) => void;
+  onSelectDocumentModel: (
+    model: VetraDocumentModelModule,
+    name: string,
+  ) => void;
   getDocDispatcher: (
     id: string,
   ) => [PHDocument, (action: unknown) => Promise<void>] | null;
@@ -112,6 +115,10 @@ interface InvoiceTableProps {
   onStatusChange: (value: string | string[]) => void;
   onRowSelection: (rowId: string, checked: boolean, rowStatus: string) => void;
   canExportSelectedRows: () => boolean;
+  /** The month name (e.g., "January 2026") for checking existing reports */
+  monthName?: string;
+  /** The sibling Reporting folder ID where expense reports should be created */
+  reportingFolderId?: string;
 }
 
 // Table header component
@@ -152,21 +159,57 @@ export const InvoiceTable = ({
   onStatusChange,
   onRowSelection,
   canExportSelectedRows,
+  monthName,
+  reportingFolderId,
 }: InvoiceTableProps) => {
   const [selectedDrive] = useSelectedDrive();
 
-  // State to track when export actions complete, triggering page refresh
-  const [actionsCompleted, setActionsCompleted] = useState(0);
-
   // Get documents directly from the hook - this will automatically update when documents change
-  const allDocuments = useDocumentsInSelectedDrive() || [];
+  const documentsInDrive = useDocumentsInSelectedDrive() || [];
 
-  // Refresh page when actions complete to ensure state is updated
-  useEffect(() => {
-    if (actionsCompleted > 0) {
-      window.location.reload();
+  // Check if an expense report already exists for the current month
+  const existingExpenseReport = useMemo(() => {
+    if (!monthName || !documentsInDrive) return null;
+    const monthLower = monthName.toLowerCase();
+    return documentsInDrive.find(
+      (doc) =>
+        doc.header.documentType === "powerhouse/expense-report" &&
+        doc.header.name?.toLowerCase().includes(monthLower),
+    );
+  }, [documentsInDrive, monthName]);
+
+  // Build a set of file IDs from the files prop for quick lookup
+  const fileIds = useMemo(() => {
+    return new Set(files.map((f) => f.id));
+  }, [files]);
+
+  // Build a map of document IDs to documents for quick lookup
+  const documentsById = useMemo(() => {
+    const map = new Map<string, PHDocument>();
+    for (const doc of documentsInDrive) {
+      map.set(doc.header.id, doc);
     }
-  }, [actionsCompleted]);
+    return map;
+  }, [documentsInDrive]);
+
+  // Filter documents to only those in the current folder (matching the files prop)
+  const allDocuments = useMemo(() => {
+    const filtered = documentsInDrive.filter((doc) =>
+      fileIds.has(doc.header.id),
+    );
+    return filtered;
+  }, [documentsInDrive, fileIds]);
+
+  // Find files that are in the folder but don't have document content loaded yet
+  // These are "loading" files that need to show a placeholder
+  const loadingFileIds = useMemo(() => {
+    return files
+      .filter(
+        (f) =>
+          f.documentType === "powerhouse/invoice" && !documentsById.has(f.id),
+      )
+      .map((f) => f.id);
+  }, [files, documentsById]);
 
   // Helper function to map invoice document to InvoiceRowData
   const mapInvoiceToRowData = (doc: PHDocument): InvoiceRowData => {
@@ -333,12 +376,16 @@ export const InvoiceTable = ({
       invoiceDoc.state as unknown as { global: InvoiceGlobalState }
     ).global;
 
+    // Get the target folder (same as invoice's folder)
+    const targetFolder = invoiceFile?.parentFolder;
+
     try {
+      // Create billing statement directly in the target folder (avoids race condition with move)
       const createdNode = await addDocument(
         selectedDrive?.header.id || "",
         `bill-${invoiceFile?.name || id}`,
         "powerhouse/billing-statement",
-        undefined,
+        targetFolder ?? undefined, // Create directly in the payments folder
         undefined,
         undefined,
         "powerhouse-billing-statement-editor",
@@ -413,7 +460,6 @@ export const InvoiceTable = ({
 
       if (tagActions.length > 0) {
         await dispatchActions(tagActions, createdNode.id);
-        window.location.reload();
       }
 
       toast("Billing statement created successfully", { type: "success" });
@@ -457,9 +503,6 @@ export const InvoiceTable = ({
         );
       }
       setSelected({});
-
-      // Trigger page refresh after all actions complete
-      setActionsCompleted((prev) => prev + 1);
     } catch (error: unknown) {
       console.error("Error exporting invoices:", error);
       const err = error as { missingExpenseTagInvoices?: string[] };
@@ -550,10 +593,31 @@ export const InvoiceTable = ({
     }
   };
 
-  // Check for expense report document - simple computed value
-  const expenseReportDoc = files.find(
-    (file) => file.documentType === "powerhouse/expense-report",
-  );
+  // Check for expense report document in the Reporting folder (not Payments folder)
+  // We need to look at documentsInDrive and check if any expense report is in the reportingFolderId
+  const expenseReportDoc = useMemo(() => {
+    if (!reportingFolderId || !selectedDrive) return undefined;
+
+    // Get all nodes from the drive to check parent folders
+    const nodes = selectedDrive.state.global.nodes;
+
+    // Find expense report documents that are in the reporting folder
+    for (const doc of documentsInDrive) {
+      if (doc.header.documentType === "powerhouse/expense-report") {
+        // Find the file node to check its parent folder
+        const fileNode = nodes.find((n) => n.id === doc.header.id);
+        if (
+          fileNode &&
+          "parentFolder" in fileNode &&
+          fileNode.parentFolder === reportingFolderId
+        ) {
+          // Return the file node (for consistency with the rest of the code)
+          return fileNode as FileNode;
+        }
+      }
+    }
+    return undefined;
+  }, [documentsInDrive, reportingFolderId, selectedDrive]);
 
   // Check if billing statements exist - memoized to update when allDocuments changes
   const hasBillingStatements = useMemo(() => {
@@ -576,7 +640,7 @@ export const InvoiceTable = ({
           selectedDrive?.header.id || "",
           "expense-report",
           "powerhouse/expense-report",
-          undefined,
+          reportingFolderId, // Create in the Reporting folder (sibling of Payments)
           undefined,
           undefined,
           "powerhouse-expense-report-editor",
@@ -674,6 +738,7 @@ export const InvoiceTable = ({
         integrationsDoc={integrationsDoc}
         hasBillingStatements={hasBillingStatements}
         expenseReportDoc={expenseReportDoc}
+        existingExpenseReportForMonth={existingExpenseReport}
         onCreateOrOpenExpenseReport={handleCreateOrOpenExpenseReport}
         selected={selected}
         handleCreateBillingStatement={handleCreateBillingStatement}
@@ -711,6 +776,64 @@ export const InvoiceTable = ({
       {renderSection("PAYMENTCLOSED", "Payment Closed", paymentClosed)}
       {renderSection("REJECTED", "Rejected", rejected)}
       {renderSection("OTHER", "Other", otherInvoices)}
+
+      {/* Loading section for files that haven't loaded yet */}
+      {loadingFileIds.length > 0 && (
+        <InvoiceTableSection
+          title="Loading"
+          count={loadingFileIds.length}
+          color="bg-gray-100 text-gray-600"
+        >
+          <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-300 overflow-hidden">
+            <thead>
+              <tr className="bg-gray-50 font-medium text-gray-500 text-xs">
+                <th className="px-2 py-2 w-8 rounded-tl-sm" />
+                <th className="px-2 py-2 text-center">Invoice</th>
+                <th className="px-2 py-2 text-center">Invoice No.</th>
+                <th className="px-2 py-2 text-center">Issue Date</th>
+                <th className="px-2 py-2 text-center">Due Date</th>
+                <th className="px-2 py-2 text-center">Currency</th>
+                <th className="px-2 py-2 text-center">Amount</th>
+                <th className="px-2 py-2 rounded-tr-sm text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loadingFileIds.map((id) => {
+                const file = files.find((f) => f.id === id);
+                return (
+                  <tr
+                    key={id}
+                    className="border-t border-gray-200 animate-pulse"
+                  >
+                    <td className="px-2 py-2" />
+                    <td className="px-2 py-2 text-center text-gray-400">
+                      {file?.name || "Loading..."}
+                    </td>
+                    <td className="px-2 py-2 text-center">
+                      <div className="h-4 bg-gray-200 rounded w-16 mx-auto" />
+                    </td>
+                    <td className="px-2 py-2 text-center">
+                      <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
+                    </td>
+                    <td className="px-2 py-2 text-center">
+                      <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
+                    </td>
+                    <td className="px-2 py-2 text-center">
+                      <div className="h-4 bg-gray-200 rounded w-12 mx-auto" />
+                    </td>
+                    <td className="px-2 py-2 text-center">
+                      <div className="h-4 bg-gray-200 rounded w-16 mx-auto" />
+                    </td>
+                    <td className="px-2 py-2 text-center">
+                      <span className="text-xs text-gray-400">Loading...</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </InvoiceTableSection>
+      )}
     </div>
   );
 };

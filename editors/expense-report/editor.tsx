@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { setName } from "document-model";
 import { useSelectedExpenseReportDocument } from "../../document-models/expense-report/hooks.js";
 import {
   actions,
@@ -14,7 +15,10 @@ import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
   useParentFolderForSelectedNode,
+  useSelectedDrive,
+  isFolderNodeKind,
 } from "@powerhousedao/reactor-browser";
+import type { FolderNode } from "document-drive";
 import { useSyncWallet } from "./hooks/useSyncWallet.js";
 import { RefreshCw } from "lucide-react";
 import { SetOwner } from "./components/SetOwner.js";
@@ -86,8 +90,9 @@ export default function Editor() {
   // Local state for the selected period (before confirmation)
   const [selectedPeriod, setSelectedPeriod] = useState<string>(() => {
     if (periodStart) {
+      // Use UTC methods to avoid timezone issues
       const date = new Date(periodStart);
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
     }
     // Default to current month
     const now = new Date();
@@ -97,8 +102,9 @@ export default function Editor() {
   // Track if the selected period differs from the saved period
   const savedPeriod = useMemo(() => {
     if (periodStart) {
+      // Use UTC methods to avoid timezone issues
       const date = new Date(periodStart);
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
     }
     return "";
   }, [periodStart]);
@@ -124,17 +130,33 @@ export default function Editor() {
   const handleConfirmPeriod = () => {
     const { periodStart, periodEnd } = getMonthDateRange(selectedPeriod);
 
-    // Dispatch both start and end dates
+    // Get the formatted month label (e.g., "January 2025") - timezone agnostic
+    const [year, month] = selectedPeriod.split("-").map(Number);
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const monthLabel = `${monthNames[month - 1]} ${year}`;
+
+    // Dispatch period dates
     dispatch(actions.setPeriodStart({ periodStart }));
     dispatch(actions.setPeriodEnd({ periodEnd }));
 
+    // Auto-set document name based on reporting period
+    dispatch(setName(`${monthLabel} - Expense Report`));
+
     // Exit editing mode
     setIsEditingPeriod(false);
-  };
-
-  // Handle starting to edit the period
-  const handleEditPeriod = () => {
-    setIsEditingPeriod(true);
   };
 
   // Generate month options
@@ -142,9 +164,15 @@ export default function Editor() {
 
   // Get the formatted display label for the current period
   const periodDisplayLabel = useMemo(() => {
-    const option = monthOptions.find((opt) => opt.value === selectedPeriod);
-    return option ? option.label : selectedPeriod;
-  }, [selectedPeriod, monthOptions]);
+    if (!periodStart) return selectedPeriod;
+    const date = new Date(periodStart);
+    const monthName = date.toLocaleDateString("en-US", {
+      month: "long",
+      timeZone: "UTC",
+    });
+    const year = date.getUTCFullYear();
+    return `${monthName} ${year}`;
+  }, [periodStart, selectedPeriod]);
 
   // Handle wallet selection for adding billing statements
   const handleAddBillingStatement = (walletAddress: string) => {
@@ -236,8 +264,53 @@ export default function Editor() {
     return `${month} ${year} Breakdown`;
   }, [periodStart]);
 
-  // Get the parent folder node for the currently selected node
+  // Get the parent folder node for the currently selected node (this is the Reporting folder)
   const parentFolder = useParentFolderForSelectedNode();
+  const [driveDocument] = useSelectedDrive();
+
+  // Find the sibling "Payments" folder dynamically
+  // Structure: Month Folder -> Reporting (where expense report lives) | Payments (sibling)
+  // We find the expense report's file node, get its parent (Reporting), then find the sibling Payments folder
+  const paymentsFolderId = useMemo(() => {
+    if (!driveDocument || !document) return null;
+
+    const nodes = driveDocument.state.global.nodes;
+    const expenseReportId = document.header.id;
+
+    // Find the expense report's file node in the drive
+    const expenseReportFileNode = nodes.find(
+      (node) => node.id === expenseReportId,
+    );
+
+    if (!expenseReportFileNode) return null;
+
+    // Get the Reporting folder (parent of expense report)
+    const reportingFolderId = expenseReportFileNode.parentFolder;
+    if (!reportingFolderId) return null;
+
+    // Find the Reporting folder node to get its parent (month folder)
+    const reportingFolder = nodes.find(
+      (node): node is FolderNode =>
+        isFolderNodeKind(node) && node.id === reportingFolderId,
+    );
+
+    if (!reportingFolder) return null;
+
+    // Get the month folder (parent of Reporting)
+    const monthFolderId = reportingFolder.parentFolder;
+    if (!monthFolderId) return null;
+
+    // Find the "Payments" sibling folder under the same month folder
+    const paymentsFolder = nodes.find(
+      (node): node is FolderNode =>
+        isFolderNodeKind(node) &&
+        node.parentFolder === monthFolderId &&
+        node.name === "Payments",
+    );
+
+    return paymentsFolder?.id ?? null;
+  }, [driveDocument, document]);
+
   // Set the selected node to the parent folder node (close the editor)
   function handleClose() {
     setSelectedNode(parentFolder?.id);
@@ -295,18 +368,9 @@ export default function Editor() {
                         )}
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-gray-900 dark:text-white">
-                          {periodDisplayLabel}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          onClick={handleEditPeriod}
-                          className="text-sm"
-                        >
-                          Change
-                        </Button>
-                      </div>
+                      <span className="text-lg font-bold text-gray-900 dark:text-white">
+                        {periodDisplayLabel}
+                      </span>
                     )}
                   </div>
                   {/* Status */}
@@ -400,6 +464,7 @@ export default function Editor() {
             walletAddress={selectedWallet}
             dispatch={dispatch}
             groups={groups}
+            paymentsFolderId={paymentsFolderId}
           />
         )}
       </div>

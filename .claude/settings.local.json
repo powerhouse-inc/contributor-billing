@@ -24,7 +24,9 @@
       "mcp__reactor-mcp__getDrives",
       "mcp__reactor-mcp__getDocuments",
       "Bash(node --check:*)",
-      "Bash(bun build:*)"
+      "Bash(bun build:*)",
+      "Bash(npm run lint:fix:*)",
+      "Bash(bun eslint:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

@@ -236,7 +236,9 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
   // Get the isOperator flag from the builder profile state
   const isOperator = useMemo(() => {
     if (!builderProfileDocument) return false;
-    const state = (builderProfileDocument.state as unknown as { global: BuilderProfileState })?.global;
+    const state = (
+      builderProfileDocument.state as unknown as { global: BuilderProfileState }
+    )?.global;
     return state?.isOperator ?? false;
   }, [builderProfileDocument]);
 
@@ -259,43 +261,45 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
       : [];
 
     // Filter and transform the sections based on isOperator flag
-    return BASE_NAVIGATION_SECTIONS
-      // Hide "Service Offering" when isOperator is false
-      .filter((section) => {
-        if (section.id === "service-offering" && !isOperator) {
-          return false;
-        }
-        return true;
-      })
-      // Transform sections with dynamic content
-      .map((section) => {
-        // Change "Builder Profile" to "Operator Profile" when isOperator is true
-        if (section.id === "builder-profile" && isOperator) {
-          return {
-            ...section,
-            title: "Operator Profile",
-          };
-        }
-        if (
-          section.id === "expense-reports" &&
-          expenseReportsChildren.length > 0
-        ) {
-          return {
-            ...section,
-            children: expenseReportsChildren,
-          };
-        }
-        if (
-          section.id === "snapshot-reports" &&
-          snapshotReportsChildren.length > 0
-        ) {
-          return {
-            ...section,
-            children: snapshotReportsChildren,
-          };
-        }
-        return section;
-      });
+    return (
+      BASE_NAVIGATION_SECTIONS
+        // Hide "Service Offering" when isOperator is false
+        .filter((section) => {
+          if (section.id === "service-offering" && !isOperator) {
+            return false;
+          }
+          return true;
+        })
+        // Transform sections with dynamic content
+        .map((section) => {
+          // Change "Builder Profile" to "Operator Profile" when isOperator is true
+          if (section.id === "builder-profile" && isOperator) {
+            return {
+              ...section,
+              title: "Operator Profile",
+            };
+          }
+          if (
+            section.id === "expense-reports" &&
+            expenseReportsChildren.length > 0
+          ) {
+            return {
+              ...section,
+              children: expenseReportsChildren,
+            };
+          }
+          if (
+            section.id === "snapshot-reports" &&
+            snapshotReportsChildren.length > 0
+          ) {
+            return {
+              ...section,
+              children: snapshotReportsChildren,
+            };
+          }
+          return section;
+        })
+    );
   }, [expenseReportsFolder, snapshotReportsFolder, driveDocument, isOperator]);
 
   // Create a map of document type to existing document (first one found)
