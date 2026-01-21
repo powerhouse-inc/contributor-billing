@@ -35,10 +35,7 @@ function parseMonthDates(monthName: string): {
 /**
  * View for the Reporting folder showing Expense Reports and Snapshot Reports
  */
-export function ReportingView({
-  folderId,
-  monthName,
-}: ReportingViewProps) {
+export function ReportingView({ folderId, monthName }: ReportingViewProps) {
   const documentsInDrive = useDocumentsInSelectedDrive();
   const [selectedDrive] = useSelectedDrive();
   const [isCreating, setIsCreating] = useState(false);

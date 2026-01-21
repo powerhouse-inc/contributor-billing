@@ -1,14 +1,17 @@
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import {
   isFileNodeKind,
   useDocumentModelModules,
   type VetraDocumentModelModule,
-  showCreateDocumentModal,
+  type FileUploadProgress,
   useDocumentsInSelectedDrive,
-  useOnDropFile,
   useSelectedDrive,
+  useOnDropFile,
   dispatchActions,
+  addDocument,
+  setSelectedNode,
 } from "@powerhousedao/reactor-browser";
+import { toast } from "@powerhousedao/design-system/connect";
 import type { PHBaseState, PHDocument } from "document-model";
 import type { FileNode } from "document-drive";
 import { moveNode } from "document-drive";
@@ -19,6 +22,8 @@ interface InvoiceTableContainerProps {
   folderId: string;
   /** The month name (e.g., "January 2026") for checking existing reports */
   monthName?: string;
+  /** The sibling Reporting folder ID where expense reports should be created */
+  reportingFolderId?: string;
 }
 
 /**
@@ -28,11 +33,18 @@ interface InvoiceTableContainerProps {
 export function InvoiceTableContainer({
   folderId,
   monthName,
+  reportingFolderId,
 }: InvoiceTableContainerProps) {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const pendingFilesRef = useRef<Set<File>>(new Set());
+
+  // Track file names that were dropped into THIS specific folder view
+  // Using state (not ref) so changes trigger re-renders and useEffect runs
+  const [droppedFileNames, setDroppedFileNames] = useState<Map<string, string>>(
+    () => new Map(),
+  );
 
   const documentModelModules = useDocumentModelModules();
   const [driveDocument] = useSelectedDrive();
@@ -43,9 +55,10 @@ export function InvoiceTableContainer({
   const fileNodes = useMemo(() => {
     if (!driveDocument) return [];
     const nodes = driveDocument.state.global.nodes;
-    return nodes.filter(
+    const fileNodesInFolder = nodes.filter(
       (n) => isFileNodeKind(n) && n.parentFolder === folderId,
     ) as FileNode[];
+    return fileNodesInFolder;
   }, [driveDocument, folderId]);
 
   // Get the drop file handler
@@ -53,6 +66,56 @@ export function InvoiceTableContainer({
 
   // Handle file drop
   const driveId = driveDocument?.header.id;
+
+  // Watch for files that we explicitly dropped and move them if needed
+  // This handles the case where conflict resolution creates files at root
+  useEffect(() => {
+    if (!driveDocument || !driveId || !folderId) return;
+    if (droppedFileNames.size === 0) return;
+
+    const nodes = driveDocument.state.global.nodes;
+
+    // Check each file name we're tracking
+    for (const [fileName, targetFolderId] of droppedFileNames.entries()) {
+      // Only process if this is the target folder for this file
+      if (targetFolderId !== folderId) continue;
+
+      // Find the file by name that's not in the correct folder
+      // Also match files with similar names (e.g., "freshInvoice (1)" matches "freshInvoice")
+      const fileNode = nodes.find((n) => {
+        if (!isFileNodeKind(n)) return false;
+        const fn = n;
+        // Only match invoice documents
+        if (fn.documentType !== "powerhouse/invoice") return false;
+        // Check if file is not in the target folder (at root or elsewhere)
+        if (fn.parentFolder === targetFolderId) return false;
+        // Match exact name or name with conflict suffix like "(1)"
+        const nameMatches =
+          fn.name === fileName || fn.name.startsWith(fileName + " (");
+        return nameMatches;
+      }) as FileNode | undefined;
+
+      if (fileNode) {
+        // Remove from tracking since we found it
+        setDroppedFileNames((prev) => {
+          const next = new Map(prev);
+          next.delete(fileName);
+          return next;
+        });
+
+        // Move the file to the correct folder
+        dispatchActions(
+          moveNode({
+            srcFolder: fileNode.id,
+            targetParentFolder: targetFolderId,
+          }),
+          driveId,
+        ).catch((error) => {
+          console.error("[InvoiceTableContainer] Move failed:", error);
+        });
+      }
+    }
+  }, [driveDocument, driveId, folderId, droppedFileNames]);
 
   const handleDrop = useCallback(
     async (event: React.DragEvent<HTMLDivElement>) => {
@@ -64,31 +127,79 @@ export function InvoiceTableContainer({
 
       if (!onDropFile || !driveId) return;
 
+      // Filter to only accept .phd files (Powerhouse document archives)
+      const phdFiles = files.filter((file) => file.name.endsWith(".phd"));
+      const rejectedFiles = files.filter((file) => !file.name.endsWith(".phd"));
+
+      // Show error for rejected files
+      if (rejectedFiles.length > 0) {
+        const rejectedNames = rejectedFiles.map((f) => f.name).join(", ");
+        toast(
+          `Only .phd files (Powerhouse documents) can be dropped here. Rejected: ${rejectedNames}`,
+          { type: "error" },
+        );
+      }
+
+      if (phdFiles.length === 0) return;
+
       // Track all files being processed
-      files.forEach((file) => pendingFilesRef.current.add(file));
+      const fileBaseNames: string[] = [];
+      phdFiles.forEach((file) => {
+        pendingFilesRef.current.add(file);
+        const fileBaseName = file.name.replace(/\.phd$/, "");
+        fileBaseNames.push(fileBaseName);
+      });
+
+      // Update state to track file names -> target folder
+      // This triggers useEffect to check for misplaced files
+      setDroppedFileNames((prev) => {
+        const next = new Map(prev);
+        fileBaseNames.forEach((name) => next.set(name, folderId));
+        return next;
+      });
 
       // Process all files - React state updates automatically via hooks
-      const filePromises = files.map(async (file) => {
+      const filePromises = phdFiles.map(async (file) => {
+        const fileBaseName = file.name.replace(/\.phd$/, "");
         try {
-          const fileNode = await onDropFile(file, (progress) => {
-            if (progress.stage === "complete" || progress.stage === "failed") {
-              pendingFilesRef.current.delete(file);
-            }
-          });
+          const fileNode = await onDropFile(
+            file,
+            (progress: FileUploadProgress) => {
+              if (
+                progress.stage === "complete" ||
+                progress.stage === "failed"
+              ) {
+                pendingFilesRef.current.delete(file);
+              }
+            },
+          );
 
           // Move the uploaded file to the correct folder
           if (fileNode && folderId) {
-            await dispatchActions(
-              moveNode({
-                srcFolder: fileNode.id,
-                targetParentFolder: folderId,
-              }),
-              driveId,
-            );
+            try {
+              await dispatchActions(
+                moveNode({
+                  srcFolder: fileNode.id,
+                  targetParentFolder: folderId,
+                }),
+                driveId,
+              );
+              // Successfully moved, remove from tracking
+              setDroppedFileNames((prev) => {
+                const next = new Map(prev);
+                next.delete(fileBaseName);
+                return next;
+              });
+            } catch (moveError) {
+              console.error("[InvoiceTableContainer] Move failed:", moveError);
+              // Keep in tracking so useEffect can retry
+            }
           }
+          // If fileNode is null (conflict resolution), keep in tracking so useEffect can handle it
         } catch (error) {
           console.error("Error dropping file:", error);
           pendingFilesRef.current.delete(file);
+          // Keep in tracking - conflict resolution might still create the file
         }
       });
 
@@ -138,12 +249,42 @@ export function InvoiceTableContainer({
     [],
   );
 
-  // Handle document model selection for create modal
+  // Handle document model selection - create invoice directly in the payments folder
   const onSelectDocumentModel = useCallback(
-    (documentModel: VetraDocumentModelModule) => {
-      showCreateDocumentModal(documentModel.id);
+    async (documentModel: VetraDocumentModelModule, name: string) => {
+      if (!driveId) {
+        toast("No drive selected", { type: "error" });
+        return;
+      }
+
+      try {
+        // Create a new invoice document directly in the payments folder
+        const createdNode = await addDocument(
+          driveId,
+          name,
+          documentModel.id,
+          folderId, // Create directly in the payments folder
+          undefined,
+          undefined,
+          "powerhouse-invoice-editor",
+        );
+
+        if (createdNode?.id) {
+          // Small delay to allow the drive state to sync before selecting the node
+          // This prevents the Sidebar from trying to find a node that doesn't exist yet
+          setTimeout(() => {
+            setSelectedNode(createdNode.id);
+          }, 100);
+          toast("Invoice created successfully", { type: "success" });
+        } else {
+          toast("Failed to create invoice", { type: "error" });
+        }
+      } catch (error) {
+        console.error("Error creating invoice:", error);
+        toast("Failed to create invoice", { type: "error" });
+      }
     },
-    [],
+    [driveId, folderId],
   );
 
   // Determine if CSV export should be enabled based on selected rows
@@ -194,6 +335,7 @@ export function InvoiceTableContainer({
         onRowSelection={handleRowSelection}
         canExportSelectedRows={canExportSelectedRows}
         monthName={monthName}
+        reportingFolderId={reportingFolderId}
       />
     </div>
   );

@@ -32,6 +32,10 @@ export interface SelectedFolderInfo {
   folderId: string;
   folderType: FolderType;
   monthName?: string;
+  /** The sibling Reporting folder ID (when in Payments folder context) */
+  reportingFolderId?: string;
+  /** The sibling Payments folder ID (when in Reporting folder context) */
+  paymentsFolderId?: string;
 }
 
 type FolderTreeProps = {
@@ -122,6 +126,20 @@ export function FolderTree({
       reportDocumentIds: new Set(docs.map((d) => d.header.id)),
     };
   }, [documentsInDrive]);
+
+  // Generate a stable key based on the node structure to force Sidebar remount when nodes change
+  // This works around a bug in the Sidebar component where toggle state isn't updated for new nodes
+  const sidebarKey = useMemo(() => {
+    const nodeIds: string[] = [];
+    for (const [, info] of monthFolders.entries()) {
+      nodeIds.push(info.folder.id);
+      if (info.paymentsFolder) nodeIds.push(info.paymentsFolder.id);
+      if (info.reportingFolder) nodeIds.push(info.reportingFolder.id);
+    }
+    // Include document count to detect when documents are added/removed
+    const docCount = documentsInDrive?.length ?? 0;
+    return `${nodeIds.join("-")}-${docCount}`;
+  }, [monthFolders, documentsInDrive?.length]);
 
   // Build navigation sections
   const navigationSections = useMemo(() => {
@@ -276,6 +294,7 @@ export function FolderTree({
             folderId: node.id,
             folderType: "payments",
             monthName,
+            reportingFolderId: info.reportingFolder?.id,
           });
           setSelectedNode("");
           return;
@@ -292,6 +311,7 @@ export function FolderTree({
             folderId: node.id,
             folderType: "reporting",
             monthName,
+            paymentsFolderId: info.paymentsFolder?.id,
           });
           setSelectedNode("");
           return;
@@ -314,6 +334,7 @@ export function FolderTree({
         `}
       </style>
       <Sidebar
+        key={sidebarKey}
         className="pt-1 folder-tree-sidebar"
         nodes={navigationSections}
         activeNodeId={activeNodeId}

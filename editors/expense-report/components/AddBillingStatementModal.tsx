@@ -1,6 +1,11 @@
 import { useState, useMemo } from "react";
 import { Button } from "@powerhousedao/document-engineering";
-import { useDocumentsInSelectedDrive } from "@powerhousedao/reactor-browser";
+import {
+  useDocumentsInSelectedDrive,
+  useSelectedDrive,
+  isFileNodeKind,
+} from "@powerhousedao/reactor-browser";
+import type { FileNode } from "document-drive";
 import { generateId } from "document-model";
 import { X, FileText, Check } from "lucide-react";
 import type { LineItemGroup } from "../../../document-models/expense-report/gen/types.js";
@@ -13,6 +18,8 @@ interface AddBillingStatementModalProps {
   walletAddress: string;
   dispatch: any;
   groups: LineItemGroup[];
+  /** The Payments folder ID to filter billing statements by. If not provided, shows all billing statements in the drive. */
+  paymentsFolderId?: string | null;
 }
 
 // Mapping of fusion labels to group IDs
@@ -50,8 +57,10 @@ export function AddBillingStatementModal({
   walletAddress,
   dispatch,
   groups,
+  paymentsFolderId,
 }: AddBillingStatementModalProps) {
   const documents = useDocumentsInSelectedDrive();
+  const [driveDocument] = useSelectedDrive();
   const [selectedStatements, setSelectedStatements] = useState<Set<string>>(
     new Set(),
   );
@@ -79,21 +88,39 @@ export function AddBillingStatementModal({
     return ids;
   }, [documents, walletAddress]);
 
-  // Get billing statement documents from the drive
+  // Get billing statement documents from the drive, filtered by the Payments folder
   const billingStatements = useMemo(() => {
-    if (!documents) return [];
+    if (!documents || !driveDocument) return [];
 
+    // Get all file nodes from the drive
+    const nodes = driveDocument.state.global.nodes;
+
+    // If we have a payments folder ID, filter billing statements to only those in that folder
+    // Otherwise, show all billing statements (fallback for editors used outside contributor billing)
     return documents
-      .filter(
-        (doc: any) =>
-          doc.header.documentType === "powerhouse/billing-statement",
-      )
+      .filter((doc: any) => {
+        if (doc.header.documentType !== "powerhouse/billing-statement") {
+          return false;
+        }
+
+        // If we have a payments folder, only include billing statements in that folder
+        if (paymentsFolderId) {
+          const fileNode = nodes.find(
+            (node): node is FileNode =>
+              isFileNodeKind(node) && node.id === doc.header.id,
+          );
+          return fileNode?.parentFolder === paymentsFolderId;
+        }
+
+        // Fallback: include all billing statements if no payments folder context
+        return true;
+      })
       .map((doc: any) => ({
         id: doc.header.id,
         name: doc.header.name,
         document: doc, // Full document with state
       }));
-  }, [documents]);
+  }, [documents, driveDocument, paymentsFolderId]);
 
   // Filter billing statements based on search term
   const filteredStatements = useMemo(() => {

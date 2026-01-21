@@ -71,10 +71,7 @@ export function MonthlyReporting({
   }, []);
 
   // Get report info for a specific month
-  const getReportInfo = (
-    month: string,
-    type: string,
-  ): ReportInfo => {
+  const getReportInfo = (month: string, type: string): ReportInfo => {
     const emptyColors = { bg: "bg-gray-100", text: "text-gray-500" };
     const emptyReport: ReportInfo = {
       exists: false,

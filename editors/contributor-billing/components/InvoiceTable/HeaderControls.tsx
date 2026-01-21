@@ -33,7 +33,9 @@ interface HeaderControlsProps {
   hasBillingStatements?: boolean;
   expenseReportDoc?: FileNode;
   /** Existing expense report for the current month (to prevent duplicates) */
-  existingExpenseReportForMonth?: { header: { id: string; name?: string } } | null;
+  existingExpenseReportForMonth?: {
+    header: { id: string; name?: string };
+  } | null;
   onCreateOrOpenExpenseReport?: () => void;
   selected?: Record<string, boolean>;
   handleCreateBillingStatement: (id: string) => Promise<void>;
@@ -214,7 +216,11 @@ export const HeaderControls = ({
             }`}
             onClick={onCreateOrOpenExpenseReport}
             disabled={!hasBillingStatements || !!existingExpenseReportForMonth}
-            title={existingExpenseReportForMonth ? "Expense report already exists for this month" : undefined}
+            title={
+              existingExpenseReportForMonth
+                ? "Expense report already exists for this month"
+                : undefined
+            }
           >
             {expenseReportDoc ? "Expense Report" : "Create Expense Report"}
           </button>

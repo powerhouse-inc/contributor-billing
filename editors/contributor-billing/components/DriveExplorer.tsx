@@ -22,9 +22,10 @@ export function DriveExplorer({ children }: EditorProps) {
 
   const handleFolderSelect = (folderInfo: SelectedFolderInfo | null) => {
     setSelectedFolder(folderInfo);
-    // Only update sidebar selection when explicitly selecting a folder
+    // Only update sidebar selection when explicitly selecting a folder with a valid ID
     // When folderInfo is null (opening a document), let the sidebar keep its current selection
-    if (folderInfo) {
+    // When folderId is empty (e.g., billing folder doesn't exist yet), don't update sidebar
+    if (folderInfo && folderInfo.folderId) {
       setActiveNodeId(folderInfo.folderId);
     }
   };

@@ -1,4 +1,10 @@
-import { Plus, ChevronDown, Building2, CreditCard, FileText } from "lucide-react";
+import {
+  Plus,
+  ChevronDown,
+  Building2,
+  CreditCard,
+  FileText,
+} from "lucide-react";
 import {
   useBillingFolderStructure,
   formatMonthName,
@@ -69,7 +75,12 @@ export function BillingOverview({ onFolderSelect }: BillingOverviewProps) {
   // Calculate payment stats across all months
   const paymentStats = useMemo(() => {
     if (!documentsInDrive || !driveDocument) {
-      return { totalInvoices: 0, totalAmount: 0, pendingCount: 0, paidCount: 0 };
+      return {
+        totalInvoices: 0,
+        totalAmount: 0,
+        pendingCount: 0,
+        paidCount: 0,
+      };
     }
 
     const nodes = driveDocument.state.global.nodes;
@@ -256,7 +267,8 @@ export function BillingOverview({ onFolderSelect }: BillingOverviewProps) {
               <span className="text-sm text-gray-600">Total Amount</span>
             </div>
             <p className="text-xl font-bold text-gray-900">
-              ${paymentStats.totalAmount.toLocaleString("en-US", {
+              $
+              {paymentStats.totalAmount.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}

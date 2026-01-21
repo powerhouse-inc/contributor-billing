@@ -15,7 +15,10 @@ import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
   useParentFolderForSelectedNode,
+  useSelectedDrive,
+  isFolderNodeKind,
 } from "@powerhousedao/reactor-browser";
+import type { FolderNode } from "document-drive";
 import { useSyncWallet } from "./hooks/useSyncWallet.js";
 import { RefreshCw } from "lucide-react";
 import { SetOwner } from "./components/SetOwner.js";
@@ -261,8 +264,53 @@ export default function Editor() {
     return `${month} ${year} Breakdown`;
   }, [periodStart]);
 
-  // Get the parent folder node for the currently selected node
+  // Get the parent folder node for the currently selected node (this is the Reporting folder)
   const parentFolder = useParentFolderForSelectedNode();
+  const [driveDocument] = useSelectedDrive();
+
+  // Find the sibling "Payments" folder dynamically
+  // Structure: Month Folder -> Reporting (where expense report lives) | Payments (sibling)
+  // We find the expense report's file node, get its parent (Reporting), then find the sibling Payments folder
+  const paymentsFolderId = useMemo(() => {
+    if (!driveDocument || !document) return null;
+
+    const nodes = driveDocument.state.global.nodes;
+    const expenseReportId = document.header.id;
+
+    // Find the expense report's file node in the drive
+    const expenseReportFileNode = nodes.find(
+      (node) => node.id === expenseReportId,
+    );
+
+    if (!expenseReportFileNode) return null;
+
+    // Get the Reporting folder (parent of expense report)
+    const reportingFolderId = expenseReportFileNode.parentFolder;
+    if (!reportingFolderId) return null;
+
+    // Find the Reporting folder node to get its parent (month folder)
+    const reportingFolder = nodes.find(
+      (node): node is FolderNode =>
+        isFolderNodeKind(node) && node.id === reportingFolderId,
+    );
+
+    if (!reportingFolder) return null;
+
+    // Get the month folder (parent of Reporting)
+    const monthFolderId = reportingFolder.parentFolder;
+    if (!monthFolderId) return null;
+
+    // Find the "Payments" sibling folder under the same month folder
+    const paymentsFolder = nodes.find(
+      (node): node is FolderNode =>
+        isFolderNodeKind(node) &&
+        node.parentFolder === monthFolderId &&
+        node.name === "Payments",
+    );
+
+    return paymentsFolder?.id ?? null;
+  }, [driveDocument, document]);
+
   // Set the selected node to the parent folder node (close the editor)
   function handleClose() {
     setSelectedNode(parentFolder?.id);
@@ -416,6 +464,7 @@ export default function Editor() {
             walletAddress={selectedWallet}
             dispatch={dispatch}
             groups={groups}
+            paymentsFolderId={paymentsFolderId}
           />
         )}
       </div>

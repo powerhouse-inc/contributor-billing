@@ -55,12 +55,11 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
   };
 
   const handleOpenBilling = () => {
-    if (billingFolder) {
-      onFolderSelect?.({
-        folderId: billingFolder.id,
-        folderType: "billing",
-      });
-    }
+    // Navigate to billing view - BillingOverview handles the case when folder doesn't exist
+    onFolderSelect?.({
+      folderId: billingFolder?.id || "",
+      folderType: "billing",
+    });
   };
 
   const isSetupComplete = setupProgress.completed === setupProgress.total;

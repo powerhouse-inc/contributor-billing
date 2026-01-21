@@ -30,7 +30,10 @@ export function DriveContents({
   // Payments folder - show invoice table
   if (selectedFolder.folderType === "payments") {
     return (
-      <div className="container mx-auto flex-1 overflow-y-auto p-4">
+      <div
+        key={selectedFolder.folderId}
+        className="container mx-auto flex-1 overflow-y-auto p-4"
+      >
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-gray-900">
             Payments - {selectedFolder.monthName}
@@ -47,6 +50,7 @@ export function DriveContents({
           <InvoiceTableContainer
             folderId={selectedFolder.folderId}
             monthName={selectedFolder.monthName}
+            reportingFolderId={selectedFolder.reportingFolderId}
           />
         </Suspense>
       </div>
