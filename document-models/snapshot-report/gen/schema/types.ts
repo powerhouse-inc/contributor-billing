@@ -73,7 +73,7 @@ export type AddSnapshotAccountInput = {
   accountName: Scalars["String"]["input"];
   accountTransactionsId?: InputMaybe<Scalars["PHID"]["input"]>;
   id: Scalars["OID"]["input"];
-  type: AccountTypeInput | `${AccountTypeInput}`;
+  type: AccountTypeInput;
 };
 
 export type AddTransactionInput = {
@@ -83,10 +83,8 @@ export type AddTransactionInput = {
   counterParty?: InputMaybe<Scalars["EthereumAddress"]["input"]>;
   counterPartyAccountId?: InputMaybe<Scalars["OID"]["input"]>;
   datetime: Scalars["DateTime"]["input"];
-  direction: TransactionDirectionInput | `${TransactionDirectionInput}`;
-  flowType?: InputMaybe<
-    TransactionFlowTypeInput | `${TransactionFlowTypeInput}`
-  >;
+  direction: TransactionDirectionInput;
+  flowType?: InputMaybe<TransactionFlowTypeInput>;
   id: Scalars["OID"]["input"];
   token: Scalars["Currency"]["input"];
   transactionId: Scalars["String"]["input"];
@@ -167,7 +165,7 @@ export type SnapshotAccount = {
   id: Scalars["OID"]["output"];
   startingBalances: Array<TokenBalance>;
   transactions: Array<SnapshotTransaction>;
-  type: AccountType | `${AccountType}`;
+  type: AccountType;
 };
 
 export type SnapshotReportState = {
@@ -187,8 +185,8 @@ export type SnapshotTransaction = {
   counterParty: Maybe<Scalars["EthereumAddress"]["output"]>;
   counterPartyAccountId: Maybe<Scalars["OID"]["output"]>;
   datetime: Scalars["DateTime"]["output"];
-  direction: TransactionDirection | `${TransactionDirection}`;
-  flowType: Maybe<TransactionFlowType | `${TransactionFlowType}`>;
+  direction: TransactionDirection;
+  flowType: Maybe<TransactionFlowType>;
   id: Scalars["OID"]["output"];
   token: Scalars["Currency"]["output"];
   transactionId: Scalars["String"]["output"];
@@ -221,10 +219,10 @@ export type TransactionFlowTypeInput =
 
 export type UpdateSnapshotAccountTypeInput = {
   id: Scalars["OID"]["input"];
-  type: AccountTypeInput | `${AccountTypeInput}`;
+  type: AccountTypeInput;
 };
 
 export type UpdateTransactionFlowTypeInput = {
-  flowType: TransactionFlowTypeInput | `${TransactionFlowTypeInput}`;
+  flowType: TransactionFlowTypeInput;
   id: Scalars["OID"]["input"];
 };
