@@ -62,6 +62,7 @@ type Service {
     displayOrder: Int
     parentServiceId: OID
     isSetupFormation: Boolean!
+    isPremiumExclusive: Boolean!
     optionGroupId: OID
     facetBindings: [ResourceFacetBinding!]!
 }
@@ -156,6 +157,7 @@ input AddServiceInput {
     parentServiceId: OID
     displayOrder: Int
     isSetupFormation: Boolean
+    isPremiumExclusive: Boolean
     optionGroupId: OID
     lastModified: DateTime!
 }
@@ -167,6 +169,7 @@ input UpdateServiceInput {
     parentServiceId: OID
     displayOrder: Int
     isSetupFormation: Boolean
+    isPremiumExclusive: Boolean
     optionGroupId: OID
     lastModified: DateTime!
 }

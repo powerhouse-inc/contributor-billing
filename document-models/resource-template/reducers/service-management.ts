@@ -1,6 +1,6 @@
-import type { ServiceOfferingServiceManagementOperations } from "@powerhousedao/contributor-billing/document-models/service-offering";
+import type { ResourceTemplateServiceManagementOperations } from "@powerhousedao/contributor-billing/document-models/resource-template";
 
-export const serviceOfferingServiceManagementOperations: ServiceOfferingServiceManagementOperations =
+export const resourceTemplateServiceManagementOperations: ResourceTemplateServiceManagementOperations =
   {
     addServiceOperation(state, action) {
       state.services.push({
@@ -10,7 +10,6 @@ export const serviceOfferingServiceManagementOperations: ServiceOfferingServiceM
         parentServiceId: action.input.parentServiceId || null,
         displayOrder: action.input.displayOrder || null,
         isSetupFormation: action.input.isSetupFormation || false,
-        isPremiumExclusive: action.input.isPremiumExclusive || false,
         optionGroupId: action.input.optionGroupId || null,
         facetBindings: [],
       });
@@ -43,12 +42,6 @@ export const serviceOfferingServiceManagementOperations: ServiceOfferingServiceM
         ) {
           service.isSetupFormation = action.input.isSetupFormation;
         }
-        if (
-          action.input.isPremiumExclusive !== undefined &&
-          action.input.isPremiumExclusive !== null
-        ) {
-          service.isPremiumExclusive = action.input.isPremiumExclusive;
-        }
         if (action.input.optionGroupId !== undefined) {
           service.optionGroupId = action.input.optionGroupId || null;
         }
@@ -60,11 +53,6 @@ export const serviceOfferingServiceManagementOperations: ServiceOfferingServiceM
         (s) => s.id === action.input.id,
       );
       if (serviceIndex !== -1) {
-        state.tiers.forEach((tier) => {
-          tier.serviceLevels = tier.serviceLevels.filter(
-            (sl) => sl.serviceId !== action.input.id,
-          );
-        });
         state.services.splice(serviceIndex, 1);
       }
       state.lastModified = action.input.lastModified;

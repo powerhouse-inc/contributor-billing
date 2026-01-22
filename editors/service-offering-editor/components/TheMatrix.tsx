@@ -10,7 +10,7 @@ import type {
   ServiceLevelBinding,
   OptionGroup,
   ServiceUsageLimit,
-} from "../../../document-models/service-offering/gen/types.js";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   addServiceLevel,
   updateServiceLevel,
@@ -18,6 +18,7 @@ import {
   updateUsageLimit,
   removeUsageLimit,
   addService,
+  updateService,
 } from "../../../document-models/service-offering/gen/creators.js";
 
 interface TheMatrixProps {
@@ -469,6 +470,319 @@ const matrixStyles = `
     color: var(--so-slate-700);
   }
 
+  /* Premium Only Badge - Exclusivity Signal (Toggle Button) */
+  .matrix__premium-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    margin-left: 0.5rem;
+    font-size: 0.5625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all var(--so-transition-fast);
+    font-family: var(--so-font-sans);
+  }
+
+  .matrix__premium-badge--active {
+    color: var(--so-amber-700);
+    background: linear-gradient(135deg, var(--so-amber-100) 0%, var(--so-amber-50) 100%);
+    border: 1px solid var(--so-amber-200);
+  }
+
+  .matrix__premium-badge--active:hover {
+    background: linear-gradient(135deg, var(--so-amber-200) 0%, var(--so-amber-100) 100%);
+    border-color: var(--so-amber-300);
+  }
+
+  .matrix__premium-badge--inactive {
+    color: var(--so-slate-400);
+    background: var(--so-slate-50);
+    border: 1px dashed var(--so-slate-200);
+    opacity: 0.6;
+  }
+
+  .matrix__premium-badge--inactive:hover {
+    opacity: 1;
+    color: var(--so-amber-600);
+    background: var(--so-amber-50);
+    border: 1px dashed var(--so-amber-300);
+  }
+
+  .matrix__premium-badge--active svg {
+    width: 0.625rem;
+    height: 0.625rem;
+    fill: var(--so-amber-500);
+    stroke: var(--so-amber-600);
+  }
+
+  .matrix__premium-badge--inactive svg {
+    width: 0.625rem;
+    height: 0.625rem;
+    fill: none;
+    stroke: currentColor;
+  }
+
+  /* Incomplete Services Warning */
+  .matrix__incomplete-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    background: var(--so-amber-50);
+    border: 1px solid var(--so-amber-200);
+    border-radius: var(--so-radius-md);
+    animation: matrix-warning-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes matrix-warning-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    50% { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1); }
+  }
+
+  .matrix__incomplete-icon {
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--so-amber-600);
+  }
+
+  .matrix__incomplete-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .matrix__incomplete-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .matrix__incomplete-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--so-amber-800);
+  }
+
+  .matrix__incomplete-text {
+    font-size: 0.8125rem;
+    color: var(--so-amber-700);
+    line-height: 1.5;
+  }
+
+  .matrix__incomplete-text strong {
+    font-weight: 600;
+    color: var(--so-amber-900);
+  }
+
+  /* Bulk Actions Toolbar */
+  .matrix__bulk-actions {
+    margin-bottom: 1rem;
+  }
+
+  .matrix__bulk-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    font-family: var(--so-font-sans);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--so-slate-600);
+    background: var(--so-slate-100);
+    border: 1px solid var(--so-slate-200);
+    border-radius: var(--so-radius-md);
+    cursor: pointer;
+    transition: all var(--so-transition-fast);
+  }
+
+  .matrix__bulk-toggle:hover {
+    background: var(--so-slate-200);
+    color: var(--so-slate-700);
+  }
+
+  .matrix__bulk-toggle svg:first-child {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .matrix__bulk-toggle-arrow {
+    width: 0.875rem;
+    height: 0.875rem;
+    margin-left: auto;
+    transition: transform var(--so-transition-fast);
+  }
+
+  .matrix__bulk-toggle-arrow--open {
+    transform: rotate(180deg);
+  }
+
+  .matrix__bulk-panel {
+    margin-top: 0.75rem;
+    padding: 1rem;
+    background: var(--so-slate-50);
+    border: 1px solid var(--so-slate-200);
+    border-radius: var(--so-radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: so-scale-in var(--so-transition-fast) ease-out;
+  }
+
+  .matrix__bulk-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .matrix__bulk-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--so-slate-500);
+  }
+
+  .matrix__bulk-buttons,
+  .matrix__bulk-copy {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .matrix__bulk-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    font-family: var(--so-font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: var(--so-radius-sm);
+    border: 1px solid;
+    cursor: pointer;
+    transition: all var(--so-transition-fast);
+  }
+
+  .matrix__bulk-btn svg {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .matrix__bulk-btn--include {
+    background: var(--so-emerald-50);
+    border-color: var(--so-emerald-200);
+    color: var(--so-emerald-700);
+  }
+
+  .matrix__bulk-btn--include:hover {
+    background: var(--so-emerald-100);
+    border-color: var(--so-emerald-300);
+  }
+
+  .matrix__bulk-btn--clear {
+    background: var(--so-rose-50);
+    border-color: var(--so-rose-200);
+    color: var(--so-rose-700);
+  }
+
+  .matrix__bulk-btn--clear:hover {
+    background: var(--so-rose-100);
+    border-color: var(--so-rose-300);
+  }
+
+  .matrix__bulk-btn--copy {
+    background: var(--so-sky-50);
+    border-color: var(--so-sky-200);
+    color: var(--so-sky-700);
+  }
+
+  .matrix__bulk-btn--copy:hover {
+    background: var(--so-sky-100);
+    border-color: var(--so-sky-300);
+  }
+
+  /* Pattern Presets Section */
+  .matrix__bulk-patterns {
+    border-top: 1px dashed var(--so-slate-200);
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .matrix__bulk-label-icon {
+    width: 1rem;
+    height: 1rem;
+    vertical-align: middle;
+    margin-right: 0.25rem;
+  }
+
+  .matrix__pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .matrix__pattern-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.875rem 0.75rem;
+    background: linear-gradient(135deg, var(--so-white) 0%, var(--so-slate-50) 100%);
+    border: 1px solid var(--so-slate-200);
+    border-radius: var(--so-radius-md);
+    cursor: pointer;
+    transition: all var(--so-transition-fast);
+    text-align: center;
+  }
+
+  .matrix__pattern-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--so-shadow-md);
+    border-color: var(--so-violet-300);
+    background: linear-gradient(135deg, var(--so-violet-50) 0%, var(--so-white) 100%);
+  }
+
+  .matrix__pattern-btn:active {
+    transform: translateY(0);
+  }
+
+  .matrix__pattern-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .matrix__pattern-name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--so-slate-700);
+  }
+
+  .matrix__pattern-desc {
+    font-size: 0.6875rem;
+    color: var(--so-slate-500);
+    line-height: 1.3;
+  }
+
+  .matrix__pattern-btn--simple {
+    padding: 0.625rem 0.75rem;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .matrix__pattern-btn--simple .matrix__pattern-icon {
+    font-size: 1rem;
+  }
+
+  .matrix__pattern-btn--simple .matrix__pattern-name {
+    font-size: 0.75rem;
+  }
+
   .matrix__level-cell {
     padding: 0.625rem 1rem;
     text-align: center;
@@ -492,6 +806,41 @@ const matrixStyles = `
   .matrix__level-value {
     font-family: var(--so-font-sans);
     font-weight: 500;
+  }
+
+  /* Loss Aversion Styling for NOT_INCLUDED */
+  .matrix__level-cell--not-included {
+    position: relative;
+    background: repeating-linear-gradient(
+      135deg,
+      transparent,
+      transparent 8px,
+      rgba(148, 163, 184, 0.08) 8px,
+      rgba(148, 163, 184, 0.08) 16px
+    );
+  }
+
+  .matrix__level-cell--not-included:hover .matrix__upgrade-hint {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .matrix__upgrade-hint {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    font-size: 0.5625rem;
+    font-weight: 500;
+    color: var(--so-violet-600);
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.15s ease-out;
+    pointer-events: none;
+  }
+
+  .matrix__level-value--not-included {
+    opacity: 0.6;
   }
 
   /* Metric Row */
@@ -1417,6 +1766,9 @@ export function TheMatrix({
     new Set(),
   );
 
+  // Bulk actions state
+  const [showBulkActions, setShowBulkActions] = useState(false);
+
   const getServiceGroup = (service: Service): string | null => {
     // Services now have optionGroupId directly on them
     return service.optionGroupId || null;
@@ -1482,6 +1834,21 @@ export function TheMatrix({
     return Array.from(metricsSet);
   };
 
+  // Incomplete services detection - services not assigned to any tier
+  const incompleteServices = useMemo(() => {
+    if (tiers.length === 0) return [];
+
+    return services.filter((service) => {
+      // Check if service is included in at least one tier
+      const isIncludedAnywhere = tiers.some((tier) =>
+        tier.serviceLevels.some(
+          (sl) => sl.serviceId === service.id && sl.level === "INCLUDED",
+        ),
+      );
+      return !isIncludedAnywhere;
+    });
+  }, [services, tiers]);
+
   const getUsageLimitForMetric = (
     serviceId: string,
     metric: string,
@@ -1531,6 +1898,192 @@ export function TheMatrix({
         next.add(groupId);
       }
       return next;
+    });
+  };
+
+  // Bulk action handlers
+  const handleBulkIncludeAllInTier = (tierId: string) => {
+    const now = new Date().toISOString();
+    const tier = tiers.find((t) => t.id === tierId);
+    if (!tier) return;
+
+    services.forEach((service) => {
+      const existingLevel = tier.serviceLevels.find(
+        (sl) => sl.serviceId === service.id,
+      );
+      if (!existingLevel) {
+        dispatch(
+          addServiceLevel({
+            tierId,
+            serviceLevelId: generateId(),
+            serviceId: service.id,
+            level: "INCLUDED",
+            optionGroupId: service.optionGroupId || undefined,
+            lastModified: now,
+          }),
+        );
+      } else if (existingLevel.level !== "INCLUDED") {
+        dispatch(
+          updateServiceLevel({
+            tierId,
+            serviceLevelId: existingLevel.id,
+            level: "INCLUDED",
+            lastModified: now,
+          }),
+        );
+      }
+    });
+  };
+
+  const handleBulkClearTier = (tierId: string) => {
+    const now = new Date().toISOString();
+    const tier = tiers.find((t) => t.id === tierId);
+    if (!tier) return;
+
+    tier.serviceLevels.forEach((sl) => {
+      dispatch(
+        updateServiceLevel({
+          tierId,
+          serviceLevelId: sl.id,
+          level: "NOT_INCLUDED",
+          lastModified: now,
+        }),
+      );
+    });
+  };
+
+  const handleBulkCopyFromTier = (
+    sourceTierId: string,
+    targetTierId: string,
+  ) => {
+    const now = new Date().toISOString();
+    const sourceTier = tiers.find((t) => t.id === sourceTierId);
+    const targetTier = tiers.find((t) => t.id === targetTierId);
+    if (!sourceTier || !targetTier) return;
+
+    services.forEach((service) => {
+      const sourceLevel = sourceTier.serviceLevels.find(
+        (sl) => sl.serviceId === service.id,
+      );
+      const targetLevel = targetTier.serviceLevels.find(
+        (sl) => sl.serviceId === service.id,
+      );
+      const newLevel = sourceLevel?.level || "NOT_INCLUDED";
+
+      if (!targetLevel) {
+        dispatch(
+          addServiceLevel({
+            tierId: targetTierId,
+            serviceLevelId: generateId(),
+            serviceId: service.id,
+            level: newLevel,
+            optionGroupId: service.optionGroupId || undefined,
+            lastModified: now,
+          }),
+        );
+      } else if (targetLevel.level !== newLevel) {
+        dispatch(
+          updateServiceLevel({
+            tierId: targetTierId,
+            serviceLevelId: targetLevel.id,
+            level: newLevel,
+            lastModified: now,
+          }),
+        );
+      }
+    });
+  };
+
+  // Common Pattern Presets - apply marketing psychology patterns across all tiers
+  const handleApplyPattern = (patternId: string) => {
+    const now = new Date().toISOString();
+    const tierCount = tiers.length;
+    if (tierCount === 0) return;
+
+    // Pattern definitions
+    const patterns: Record<
+      string,
+      (
+        serviceIdx: number,
+        tierIdx: number,
+        totalServices: number,
+        totalTiers: number,
+      ) => ServiceLevel
+    > = {
+      // Good-Better-Best: Progressive inclusion (50% → 75% → 100%)
+      "good-better-best": (serviceIdx, tierIdx, totalServices, totalTiers) => {
+        const servicePosition = serviceIdx / totalServices;
+        const tierPosition = tierIdx / (totalTiers - 1 || 1);
+        // Lower tiers get fewer services
+        const threshold = 0.5 + tierPosition * 0.5;
+        return servicePosition < threshold ? "INCLUDED" : "NOT_INCLUDED";
+      },
+      // Premium Only: Top services only in top tier
+      "premium-only": (serviceIdx, tierIdx, totalServices, totalTiers) => {
+        const isTopTier = tierIdx === totalTiers - 1;
+        const isPremiumService = serviceIdx < Math.ceil(totalServices * 0.3);
+        if (isPremiumService) {
+          return isTopTier ? "INCLUDED" : "NOT_INCLUDED";
+        }
+        return "INCLUDED";
+      },
+      // Core + Upgrades: Core included everywhere, extras are optional
+      "core-upgrades": (serviceIdx, tierIdx, totalServices) => {
+        const isCoreService = serviceIdx < Math.ceil(totalServices * 0.5);
+        if (isCoreService) {
+          return "INCLUDED";
+        }
+        return "OPTIONAL";
+      },
+      // Ascending: Each tier adds more services
+      ascending: (serviceIdx, tierIdx, totalServices, totalTiers) => {
+        const servicesPerTier = Math.ceil(totalServices / totalTiers);
+        const includedUpTo = (tierIdx + 1) * servicesPerTier;
+        return serviceIdx < includedUpTo ? "INCLUDED" : "NOT_INCLUDED";
+      },
+      // All Included: Everything included in all tiers
+      "all-included": () => "INCLUDED",
+      // All Optional: Everything optional in all tiers
+      "all-optional": () => "OPTIONAL",
+    };
+
+    const pattern = patterns[patternId];
+    if (!pattern) return;
+
+    services.forEach((service, serviceIdx) => {
+      tiers.forEach((tier, tierIdx) => {
+        const newLevel = pattern(
+          serviceIdx,
+          tierIdx,
+          services.length,
+          tierCount,
+        );
+        const existingLevel = tier.serviceLevels.find(
+          (sl) => sl.serviceId === service.id,
+        );
+
+        if (!existingLevel) {
+          dispatch(
+            addServiceLevel({
+              tierId: tier.id,
+              serviceLevelId: generateId(),
+              serviceId: service.id,
+              level: newLevel,
+              optionGroupId: service.optionGroupId || undefined,
+              lastModified: now,
+            }),
+          );
+        } else if (existingLevel.level !== newLevel) {
+          dispatch(
+            updateServiceLevel({
+              tierId: tier.id,
+              serviceLevelId: existingLevel.id,
+              level: newLevel,
+              lastModified: now,
+            }),
+          );
+        }
+      });
     });
   };
 
@@ -1638,6 +2191,18 @@ export function TheMatrix({
         );
       }
     });
+  };
+
+  const handleTogglePremiumExclusive = (serviceId: string) => {
+    const service = services.find((s) => s.id === serviceId);
+    if (!service) return;
+    dispatch(
+      updateService({
+        id: serviceId,
+        isPremiumExclusive: !service.isPremiumExclusive,
+        lastModified: new Date().toISOString(),
+      }),
+    );
   };
 
   const handleSaveMetric = () => {
@@ -1819,6 +2384,244 @@ export function TheMatrix({
           )}
         </div>
 
+        {/* Bulk Actions Toolbar */}
+        {services.length > 0 && tiers.length > 0 && (
+          <div className="matrix__bulk-actions">
+            <button
+              type="button"
+              onClick={() => setShowBulkActions(!showBulkActions)}
+              className="matrix__bulk-toggle"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M4 6h16M4 12h16M4 18h7" />
+              </svg>
+              Bulk Actions
+              <svg
+                className={`matrix__bulk-toggle-arrow ${showBulkActions ? "matrix__bulk-toggle-arrow--open" : ""}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {showBulkActions && (
+              <div className="matrix__bulk-panel">
+                <div className="matrix__bulk-section">
+                  <span className="matrix__bulk-label">
+                    Include all services in:
+                  </span>
+                  <div className="matrix__bulk-buttons">
+                    {tiers.map((tier) => (
+                      <button
+                        key={tier.id}
+                        type="button"
+                        onClick={() => handleBulkIncludeAllInTier(tier.id)}
+                        className="matrix__bulk-btn matrix__bulk-btn--include"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M5 12l5 5L20 7" />
+                        </svg>
+                        {tier.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="matrix__bulk-section">
+                  <span className="matrix__bulk-label">Clear all from:</span>
+                  <div className="matrix__bulk-buttons">
+                    {tiers.map((tier) => (
+                      <button
+                        key={tier.id}
+                        type="button"
+                        onClick={() => handleBulkClearTier(tier.id)}
+                        className="matrix__bulk-btn matrix__bulk-btn--clear"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        {tier.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {tiers.length >= 2 && (
+                  <div className="matrix__bulk-section">
+                    <span className="matrix__bulk-label">
+                      Copy configuration:
+                    </span>
+                    <div className="matrix__bulk-copy">
+                      {tiers.map((sourceTier, idx) =>
+                        tiers
+                          .filter((_, i) => i !== idx)
+                          .map((targetTier) => (
+                            <button
+                              key={`${sourceTier.id}-${targetTier.id}`}
+                              type="button"
+                              onClick={() =>
+                                handleBulkCopyFromTier(
+                                  sourceTier.id,
+                                  targetTier.id,
+                                )
+                              }
+                              className="matrix__bulk-btn matrix__bulk-btn--copy"
+                            >
+                              {sourceTier.name} → {targetTier.name}
+                            </button>
+                          )),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Pattern Presets - Marketing Psychology Patterns */}
+                <div className="matrix__bulk-section matrix__bulk-patterns">
+                  <span className="matrix__bulk-label">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="matrix__bulk-label-icon"
+                    >
+                      <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Apply Pattern Preset:
+                  </span>
+                  <div className="matrix__pattern-grid">
+                    <button
+                      type="button"
+                      onClick={() => handleApplyPattern("good-better-best")}
+                      className="matrix__pattern-btn"
+                      title="Progressive inclusion: Basic tier gets 50%, mid-tier 75%, top tier 100%"
+                    >
+                      <span className="matrix__pattern-icon">📈</span>
+                      <span className="matrix__pattern-name">
+                        Good-Better-Best
+                      </span>
+                      <span className="matrix__pattern-desc">
+                        Progressive inclusion
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplyPattern("premium-only")}
+                      className="matrix__pattern-btn"
+                      title="Top 30% services exclusive to premium tier, rest included everywhere"
+                    >
+                      <span className="matrix__pattern-icon">⭐</span>
+                      <span className="matrix__pattern-name">
+                        Premium Exclusives
+                      </span>
+                      <span className="matrix__pattern-desc">
+                        Top services in top tier only
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplyPattern("core-upgrades")}
+                      className="matrix__pattern-btn"
+                      title="Core services included, extras as optional add-ons"
+                    >
+                      <span className="matrix__pattern-icon">🎯</span>
+                      <span className="matrix__pattern-name">
+                        Core + Add-ons
+                      </span>
+                      <span className="matrix__pattern-desc">
+                        Half included, half optional
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplyPattern("ascending")}
+                      className="matrix__pattern-btn"
+                      title="Each tier unlocks more services progressively"
+                    >
+                      <span className="matrix__pattern-icon">🪜</span>
+                      <span className="matrix__pattern-name">
+                        Ascending Tiers
+                      </span>
+                      <span className="matrix__pattern-desc">
+                        Each tier unlocks more
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplyPattern("all-included")}
+                      className="matrix__pattern-btn matrix__pattern-btn--simple"
+                      title="Everything included in all tiers"
+                    >
+                      <span className="matrix__pattern-icon">✓</span>
+                      <span className="matrix__pattern-name">All Included</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplyPattern("all-optional")}
+                      className="matrix__pattern-btn matrix__pattern-btn--simple"
+                      title="Everything optional in all tiers"
+                    >
+                      <span className="matrix__pattern-icon">◐</span>
+                      <span className="matrix__pattern-name">All Optional</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Incomplete Services Warning */}
+        {incompleteServices.length > 0 && (
+          <div className="matrix__incomplete-warning">
+            <div className="matrix__incomplete-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="matrix__incomplete-content">
+              <span className="matrix__incomplete-title">
+                {incompleteServices.length} service
+                {incompleteServices.length !== 1 ? "s" : ""} not configured
+              </span>
+              <span className="matrix__incomplete-text">
+                The following services are not included in any tier:{" "}
+                <strong>
+                  {incompleteServices
+                    .slice(0, 3)
+                    .map((s) => s.title)
+                    .join(", ")}
+                </strong>
+                {incompleteServices.length > 3 &&
+                  ` and ${incompleteServices.length - 3} more`}
+              </span>
+            </div>
+          </div>
+        )}
+
         <div className="matrix__table-wrap">
           <table className="matrix__table">
             <thead>
@@ -1907,6 +2710,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
+                  onTogglePremiumExclusive={handleTogglePremiumExclusive}
                 />
               ))}
 
@@ -1939,6 +2743,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
+                  onTogglePremiumExclusive={handleTogglePremiumExclusive}
                 />
               )}
 
@@ -1988,6 +2793,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
+                  onTogglePremiumExclusive={handleTogglePremiumExclusive}
                 />
               ))}
 
@@ -2019,6 +2825,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
+                  onTogglePremiumExclusive={handleTogglePremiumExclusive}
                 />
               )}
 
@@ -2056,6 +2863,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
+                  onTogglePremiumExclusive={handleTogglePremiumExclusive}
                 />
               ))}
 
@@ -2405,6 +3213,7 @@ interface ServiceGroupSectionProps {
   onAddMetric: (serviceId: string) => void;
   onEditMetric: (serviceId: string, metric: string) => void;
   onRemoveMetric: (serviceId: string, metric: string) => void;
+  onTogglePremiumExclusive: (serviceId: string) => void;
 }
 
 function ServiceGroupSection({
@@ -2427,6 +3236,7 @@ function ServiceGroupSection({
   onAddMetric,
   onEditMetric,
   onRemoveMetric,
+  onTogglePremiumExclusive,
 }: ServiceGroupSectionProps) {
   const showGroup = services.length > 0 || onAddService;
   if (!showGroup) return null;
@@ -2499,6 +3309,7 @@ function ServiceGroupSection({
             onAddMetric={onAddMetric}
             onEditMetric={onEditMetric}
             onRemoveMetric={onRemoveMetric}
+            onTogglePremiumExclusive={onTogglePremiumExclusive}
           />
         );
       })}
@@ -2596,6 +3407,7 @@ interface ServiceRowWithMetricsProps {
   onAddMetric: (serviceId: string) => void;
   onEditMetric: (serviceId: string, metric: string) => void;
   onRemoveMetric: (serviceId: string, metric: string) => void;
+  onTogglePremiumExclusive: (serviceId: string) => void;
 }
 
 function ServiceRowWithMetrics({
@@ -2612,13 +3424,39 @@ function ServiceRowWithMetrics({
   onAddMetric,
   onEditMetric,
   onRemoveMetric,
+  onTogglePremiumExclusive,
 }: ServiceRowWithMetricsProps) {
+  // Use persisted isPremiumExclusive field from document state
+  const isPremiumExclusive = service.isPremiumExclusive;
+
   return (
     <>
       <tr className={`matrix__service-row ${rowClass}`}>
         <td className={`matrix__service-cell ${rowClass}`}>
           <div className="matrix__service-cell-wrapper">
             <span className="matrix__service-title">{service.title}</span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onTogglePremiumExclusive(service.id);
+              }}
+              className={`matrix__premium-badge ${isPremiumExclusive ? "matrix__premium-badge--active" : "matrix__premium-badge--inactive"}`}
+              title={
+                isPremiumExclusive
+                  ? "Click to remove premium exclusive status"
+                  : "Click to mark as premium exclusive"
+              }
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+              Premium
+            </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -2637,13 +3475,25 @@ function ServiceRowWithMetrics({
           const isSelected =
             selectedCell?.serviceId === service.id &&
             selectedCell?.tierId === tier.id;
+          const isNotIncluded =
+            !serviceLevel || serviceLevel.level === "NOT_INCLUDED";
+
+          // Find next tier that has this service included (for upgrade hint)
+          const nextTierWithService = isNotIncluded
+            ? tiers.slice(tierIdx + 1).find((t) => {
+                const sl = getServiceLevelForTier(service.id, t);
+                return sl && sl.level === "INCLUDED";
+              })
+            : null;
 
           return (
             <td
               key={tier.id}
               className={`matrix__level-cell ${
                 isSelected ? "matrix__level-cell--selected" : ""
-              } ${tierIdx === selectedTierIdx ? "matrix__level-cell--highlight" : ""}`}
+              } ${tierIdx === selectedTierIdx ? "matrix__level-cell--highlight" : ""} ${
+                isNotIncluded ? "matrix__level-cell--not-included" : ""
+              }`}
               onClick={() =>
                 setSelectedCell(
                   isSelected
@@ -2653,11 +3503,17 @@ function ServiceRowWithMetrics({
               }
             >
               <span
-                className="matrix__level-value"
+                className={`matrix__level-value ${isNotIncluded ? "matrix__level-value--not-included" : ""}`}
                 style={{ color: display.color }}
               >
                 {display.label}
               </span>
+              {/* Loss Aversion: Show upgrade hint for NOT_INCLUDED */}
+              {isNotIncluded && nextTierWithService && (
+                <span className="matrix__upgrade-hint">
+                  In {nextTierWithService.name} →
+                </span>
+              )}
             </td>
           );
         })}

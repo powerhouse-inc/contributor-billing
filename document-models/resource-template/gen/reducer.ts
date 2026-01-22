@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { ResourceTemplatePHState } from "./types.js";
+import type { ResourceTemplatePHState } from "@powerhousedao/contributor-billing/document-models/resource-template";
 
 import { resourceTemplateTemplateManagementOperations } from "../src/reducers/template-management.js";
 import { resourceTemplateAudienceManagementOperations } from "../src/reducers/audience-management.js";

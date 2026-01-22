@@ -7,6 +7,7 @@ import { Invoice } from "./invoice/module.js";
 import { SnapshotReport } from "./snapshot-report/module.js";
 import { ServiceSubscriptions } from "./service-subscriptions/module.js";
 import { ServiceOffering } from "./service-offering/module.js";
+import { ResourceTemplate } from "./resource-template/module.js";
 
 export const documentModels: DocumentModelModule<any>[] = [
   AccountTransactions,
@@ -14,6 +15,7 @@ export const documentModels: DocumentModelModule<any>[] = [
   BillingStatement,
   ExpenseReport,
   Invoice,
+  ResourceTemplate,
   ServiceOffering,
   ServiceSubscriptions,
   SnapshotReport,

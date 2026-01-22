@@ -84,6 +84,7 @@ export type AddServiceInput = {
   description?: InputMaybe<Scalars["String"]["input"]>;
   displayOrder?: InputMaybe<Scalars["Int"]["input"]>;
   id: Scalars["OID"]["input"];
+  isPremiumExclusive?: InputMaybe<Scalars["Boolean"]["input"]>;
   isSetupFormation?: InputMaybe<Scalars["Boolean"]["input"]>;
   lastModified: Scalars["DateTime"]["input"];
   optionGroupId?: InputMaybe<Scalars["OID"]["input"]>;
@@ -237,6 +238,7 @@ export type Service = {
   displayOrder: Maybe<Scalars["Int"]["output"]>;
   facetBindings: Array<ResourceFacetBinding>;
   id: Scalars["OID"]["output"];
+  isPremiumExclusive: Scalars["Boolean"]["output"];
   isSetupFormation: Scalars["Boolean"]["output"];
   optionGroupId: Maybe<Scalars["OID"]["output"]>;
   parentServiceId: Maybe<Scalars["OID"]["output"]>;
@@ -371,6 +373,7 @@ export type UpdateServiceInput = {
   description?: InputMaybe<Scalars["String"]["input"]>;
   displayOrder?: InputMaybe<Scalars["Int"]["input"]>;
   id: Scalars["OID"]["input"];
+  isPremiumExclusive?: InputMaybe<Scalars["Boolean"]["input"]>;
   isSetupFormation?: InputMaybe<Scalars["Boolean"]["input"]>;
   lastModified: Scalars["DateTime"]["input"];
   optionGroupId?: InputMaybe<Scalars["OID"]["input"]>;

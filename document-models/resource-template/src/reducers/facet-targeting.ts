@@ -1,26 +1,25 @@
 import type { ResourceTemplateFacetTargetingOperations } from "@powerhousedao/contributor-billing/document-models/resource-template";
 
-export const resourceTemplateFacetTargetingOperations: ResourceTemplateFacetTargetingOperations =
-  {
+export const resourceTemplateFacetTargetingOperations: ResourceTemplateFacetTargetingOperations = {
     setFacetTargetOperation(state, action) {
-          const existingIndex = state.facetTargets.findIndex(ft => ft.categoryKey === action.input.categoryKey);
-          if (existingIndex !== -1) {
-              state.facetTargets[existingIndex] = {
-                  id: action.input.id,
-                  categoryKey: action.input.categoryKey,
-                  categoryLabel: action.input.categoryLabel,
-                  selectedOptions: action.input.selectedOptions
-              };
-          } else {
-              state.facetTargets.push({
-                  id: action.input.id,
-                  categoryKey: action.input.categoryKey,
-                  categoryLabel: action.input.categoryLabel,
-                  selectedOptions: action.input.selectedOptions
-              });
-          }
-          state.lastModified = action.input.lastModified;
-      },
+        const existingIndex = state.facetTargets.findIndex(ft => ft.categoryKey === action.input.categoryKey);
+        if (existingIndex !== -1) {
+            state.facetTargets[existingIndex] = {
+                id: action.input.id,
+                categoryKey: action.input.categoryKey,
+                categoryLabel: action.input.categoryLabel,
+                selectedOptions: action.input.selectedOptions
+            };
+        } else {
+            state.facetTargets.push({
+                id: action.input.id,
+                categoryKey: action.input.categoryKey,
+                categoryLabel: action.input.categoryLabel,
+                selectedOptions: action.input.selectedOptions
+            });
+        }
+        state.lastModified = action.input.lastModified;
+    },
     removeFacetTargetOperation(state, action) {
         const facetIndex = state.facetTargets.findIndex(ft => ft.categoryKey === action.input.categoryKey);
         if (facetIndex !== -1) {
@@ -44,5 +43,5 @@ export const resourceTemplateFacetTargetingOperations: ResourceTemplateFacetTarg
             }
         }
         state.lastModified = action.input.lastModified;
-    },
-  };
+    }
+};

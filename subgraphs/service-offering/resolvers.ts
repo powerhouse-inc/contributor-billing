@@ -35,6 +35,8 @@ import type {
   RemoveFacetOptionInput,
   SetSetupServicesInput,
   SetRecurringServicesInput,
+  SelectResourceTemplateInput,
+  ChangeResourceTemplateInput,
   AddOptionGroupInput,
   UpdateOptionGroupInput,
   DeleteOptionGroupInput,
@@ -744,6 +746,54 @@ export const getResolvers = (
         if (result.status !== "SUCCESS") {
           throw new Error(
             result.error?.message ?? "Failed to setRecurringServices",
+          );
+        }
+
+        return true;
+      },
+
+      ServiceOffering_selectResourceTemplate: async (
+        _: unknown,
+        args: { docId: string; input: SelectResourceTemplateInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ServiceOfferingDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.selectResourceTemplate(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to selectResourceTemplate",
+          );
+        }
+
+        return true;
+      },
+
+      ServiceOffering_changeResourceTemplate: async (
+        _: unknown,
+        args: { docId: string; input: ChangeResourceTemplateInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ServiceOfferingDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.changeResourceTemplate(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to changeResourceTemplate",
           );
         }
 

@@ -1,6 +1,6 @@
-import type { ServiceOfferingOptionGroupManagementOperations } from "@powerhousedao/contributor-billing/document-models/service-offering";
+import type { ResourceTemplateOptionGroupManagementOperations } from "@powerhousedao/contributor-billing/document-models/resource-template";
 
-export const serviceOfferingOptionGroupManagementOperations: ServiceOfferingOptionGroupManagementOperations =
+export const resourceTemplateOptionGroupManagementOperations: ResourceTemplateOptionGroupManagementOperations =
   {
     addOptionGroupOperation(state, action) {
       state.optionGroups.push({
@@ -20,11 +20,8 @@ export const serviceOfferingOptionGroupManagementOperations: ServiceOfferingOpti
         if (action.input.name) {
           optionGroup.name = action.input.name;
         }
-        if (
-          action.input.description !== undefined &&
-          action.input.description !== null
-        ) {
-          optionGroup.description = action.input.description;
+        if (action.input.description !== undefined) {
+          optionGroup.description = action.input.description || null;
         }
         if (
           action.input.isAddOn !== undefined &&
@@ -46,12 +43,10 @@ export const serviceOfferingOptionGroupManagementOperations: ServiceOfferingOpti
         (og) => og.id === action.input.id,
       );
       if (optionGroupIndex !== -1) {
-        state.tiers.forEach((tier) => {
-          tier.serviceLevels.forEach((sl) => {
-            if (sl.optionGroupId === action.input.id) {
-              sl.optionGroupId = null;
-            }
-          });
+        state.services.forEach((service) => {
+          if (service.optionGroupId === action.input.id) {
+            service.optionGroupId = null;
+          }
         });
         state.optionGroups.splice(optionGroupIndex, 1);
       }

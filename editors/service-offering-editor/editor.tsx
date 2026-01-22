@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import { useSelectedServiceOfferingDocument } from "../../document-models/service-offering/hooks.js";
-import { TabNavigation, type TabId } from "./components/TabNavigation.js";
+import { OfferingProgress } from "./components/OfferingProgress.js";
+import type { TabId } from "./components/TabNavigation.js";
 import { ResourceTemplateSelector } from "./components/ResourceTemplateSelector.js";
 import {
   ServiceCatalog,
@@ -92,7 +93,13 @@ export default function ServiceOfferingEditor() {
       <style>{editorStyles}</style>
       <DocumentToolbar />
       <div className="so-editor__container">
-        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        {/* Global Progress Component - Goal-Gradient Effect */}
+        {/* Global Progress Component - Goal-Gradient Effect with integrated navigation */}
+        <OfferingProgress
+          document={document}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
         <div className="so-editor__content">{renderTabContent()}</div>
       </div>
     </div>

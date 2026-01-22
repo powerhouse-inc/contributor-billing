@@ -155,6 +155,16 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: ServiceOffering_SetRecurringServicesInput
     ): Int
+    ServiceOffering_selectResourceTemplate(
+      driveId: String
+      docId: PHID
+      input: ServiceOffering_SelectResourceTemplateInput
+    ): Int
+    ServiceOffering_changeResourceTemplate(
+      driveId: String
+      docId: PHID
+      input: ServiceOffering_ChangeResourceTemplateInput
+    ): Int
     ServiceOffering_addOptionGroup(
       driveId: String
       docId: PHID
@@ -182,6 +192,7 @@ export const schema: DocumentNode = gql`
     parentServiceId: OID
     displayOrder: Int
     isSetupFormation: Boolean
+    isPremiumExclusive: Boolean
     optionGroupId: OID
     lastModified: DateTime!
   }
@@ -192,6 +203,7 @@ export const schema: DocumentNode = gql`
     parentServiceId: OID
     displayOrder: Int
     isSetupFormation: Boolean
+    isPremiumExclusive: Boolean
     optionGroupId: OID
     lastModified: DateTime!
   }
@@ -359,6 +371,15 @@ export const schema: DocumentNode = gql`
   }
   input ServiceOffering_SetRecurringServicesInput {
     services: [String!]!
+    lastModified: DateTime!
+  }
+  input ServiceOffering_SelectResourceTemplateInput {
+    resourceTemplateId: PHID!
+    lastModified: DateTime!
+  }
+  input ServiceOffering_ChangeResourceTemplateInput {
+    previousTemplateId: PHID!
+    newTemplateId: PHID!
     lastModified: DateTime!
   }
 

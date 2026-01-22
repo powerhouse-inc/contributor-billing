@@ -6,7 +6,7 @@ import type {
   ServiceOfferingAction,
   Service,
   OptionGroup,
-} from "../../../document-models/service-offering/gen/types.js";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   addService,
   updateService,
@@ -17,6 +17,127 @@ import {
   addServiceLevel,
   removeServiceLevel,
 } from "../../../document-models/service-offering/gen/creators.js";
+
+// Service Templates - Common services to reduce friction (Default Effect + Reduced Activation Energy)
+interface ServiceTemplate {
+  title: string;
+  description: string;
+  category: "setup" | "recurring" | "addon";
+  icon: string;
+}
+
+const SERVICE_TEMPLATES: Record<string, ServiceTemplate[]> = {
+  "Setup & Formation": [
+    {
+      title: "Entity Formation",
+      description: "Legal entity registration and setup",
+      category: "setup",
+      icon: "🏛️",
+    },
+    {
+      title: "Registered Agent",
+      description: "Registered agent designation for one year",
+      category: "setup",
+      icon: "📋",
+    },
+    {
+      title: "Operating Agreement",
+      description: "Custom operating agreement drafting",
+      category: "setup",
+      icon: "📄",
+    },
+    {
+      title: "EIN Application",
+      description: "Federal tax ID number application",
+      category: "setup",
+      icon: "🔢",
+    },
+    {
+      title: "Banking Resolution",
+      description: "Corporate banking resolution documents",
+      category: "setup",
+      icon: "🏦",
+    },
+  ],
+  "Compliance & Governance": [
+    {
+      title: "Annual Compliance Review",
+      description: "Yearly compliance status check and filings",
+      category: "recurring",
+      icon: "✓",
+    },
+    {
+      title: "Board Meeting Minutes",
+      description: "Professional minute-taking for board meetings",
+      category: "recurring",
+      icon: "📝",
+    },
+    {
+      title: "Regulatory Filing Support",
+      description: "Assistance with regulatory submissions",
+      category: "recurring",
+      icon: "📊",
+    },
+    {
+      title: "Corporate Record Maintenance",
+      description: "Ongoing corporate record keeping",
+      category: "recurring",
+      icon: "🗂️",
+    },
+  ],
+  "Accounting & Finance": [
+    {
+      title: "Bookkeeping",
+      description: "Monthly transaction recording and reconciliation",
+      category: "recurring",
+      icon: "📚",
+    },
+    {
+      title: "Financial Reporting",
+      description: "Monthly/quarterly financial statements",
+      category: "recurring",
+      icon: "📈",
+    },
+    {
+      title: "Tax Preparation",
+      description: "Annual tax return preparation and filing",
+      category: "recurring",
+      icon: "💰",
+    },
+    {
+      title: "Payroll Processing",
+      description: "Employee payroll and tax withholding",
+      category: "recurring",
+      icon: "💳",
+    },
+  ],
+  "Advisory & Support": [
+    {
+      title: "Dedicated Account Manager",
+      description: "Single point of contact for all services",
+      category: "addon",
+      icon: "👤",
+    },
+    {
+      title: "Priority Support",
+      description: "24/7 priority support line access",
+      category: "addon",
+      icon: "⭐",
+    },
+    {
+      title: "Strategic Consulting",
+      description: "Quarterly strategic review sessions",
+      category: "addon",
+      icon: "🎯",
+    },
+    {
+      title: "Legal Document Review",
+      description: "Contract and agreement review services",
+      category: "addon",
+      icon: "⚖️",
+    },
+  ],
+};
 import type {
   ServiceSubscriptionTier,
   ServiceLevelBinding,
@@ -69,6 +190,9 @@ export function ServiceCatalog({
     "setup" | "recurring" | "addon"
   >("recurring");
   const [editGroupSetupFee, setEditGroupSetupFee] = useState("");
+
+  // Service templates quick-add state
+  const [showServiceTemplates, setShowServiceTemplates] = useState(false);
 
   // Initialize metadata from existing services in groups when optionGroups change
   useEffect(() => {
@@ -262,6 +386,44 @@ export function ServiceCatalog({
     setNewService({ title: "", description: "" });
     setSelectedTierIds(new Set());
     setIsAddingService(false);
+  };
+
+  // Quick-add service from template (reduces activation energy)
+  const handleAddFromTemplate = (template: ServiceTemplate) => {
+    if (!selectedGroupId) return;
+
+    const serviceId = generateId();
+    const now = new Date().toISOString();
+
+    const isSetupFormation =
+      groupMetadata[selectedGroupId]?.isSetupFormation ?? false;
+
+    dispatch(
+      addService({
+        id: serviceId,
+        title: template.title,
+        description: template.description,
+        isSetupFormation,
+        optionGroupId: selectedGroupId,
+        lastModified: now,
+      }),
+    );
+
+    // Auto-include in all tiers for convenience (can be changed later)
+    tiers.forEach((tier) => {
+      dispatch(
+        addServiceLevel({
+          serviceLevelId: generateId(),
+          serviceId,
+          tierId: tier.id,
+          level: "INCLUDED",
+          optionGroupId: selectedGroupId,
+          lastModified: now,
+        }),
+      );
+    });
+
+    setShowServiceTemplates(false);
   };
 
   const handleUpdateService = (
@@ -657,22 +819,116 @@ export function ServiceCatalog({
               </p>
             </div>
             {selectedGroupId && (
-              <button
-                onClick={() => setIsAddingService(true)}
-                className="catalog__btn catalog__btn--primary"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+              <div className="catalog__header-actions">
+                <button
+                  onClick={() => setShowServiceTemplates(!showServiceTemplates)}
+                  className="catalog__btn catalog__btn--secondary"
+                  title="Quick-add from templates"
                 >
-                  <path d="M12 4v16m8-8H4" />
-                </svg>
-                Add Service
-              </button>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                  </svg>
+                  Templates
+                </button>
+                <button
+                  onClick={() => setIsAddingService(true)}
+                  className="catalog__btn catalog__btn--primary"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add Service
+                </button>
+              </div>
             )}
           </div>
+
+          {/* Service Templates Quick-Add Panel */}
+          {showServiceTemplates && selectedGroupId && (
+            <div className="catalog__templates-panel">
+              <div className="catalog__templates-header">
+                <h3 className="catalog__templates-title">
+                  Quick Add from Templates
+                </h3>
+                <button
+                  onClick={() => setShowServiceTemplates(false)}
+                  className="catalog__templates-close"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <p className="catalog__templates-hint">
+                Click any template to instantly add it to this group. Services
+                will be included in all tiers by default.
+              </p>
+              <div className="catalog__templates-grid">
+                {Object.entries(SERVICE_TEMPLATES).map(
+                  ([category, templates]) => (
+                    <div key={category} className="catalog__template-category">
+                      <h4 className="catalog__template-category-title">
+                        {category}
+                      </h4>
+                      <div className="catalog__template-items">
+                        {templates.map((template, idx) => {
+                          // Check if service already exists
+                          const alreadyExists = services.some(
+                            (s) =>
+                              s.title.toLowerCase() ===
+                              template.title.toLowerCase(),
+                          );
+                          return (
+                            <button
+                              key={idx}
+                              onClick={() =>
+                                !alreadyExists &&
+                                handleAddFromTemplate(template)
+                              }
+                              disabled={alreadyExists}
+                              className={`catalog__template-item ${alreadyExists ? "catalog__template-item--exists" : ""}`}
+                            >
+                              <span className="catalog__template-icon">
+                                {template.icon}
+                              </span>
+                              <div className="catalog__template-info">
+                                <span className="catalog__template-name">
+                                  {template.title}
+                                </span>
+                                <span className="catalog__template-desc">
+                                  {template.description}
+                                </span>
+                              </div>
+                              {alreadyExists && (
+                                <span className="catalog__template-badge">
+                                  Added
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ),
+                )}
+              </div>
+            </div>
+          )}
 
           {!selectedGroupId && (
             <div className="catalog__notice catalog__notice--info">
@@ -2244,5 +2500,174 @@ const styles = `
     display: flex;
     flex-direction: column;
     gap: 8px;
+  }
+
+  /* Header Actions */
+  .catalog__header-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Service Templates Panel */
+  .catalog__templates-panel {
+    background: linear-gradient(135deg, var(--so-violet-50) 0%, var(--so-slate-50) 100%);
+    border: 1px solid var(--so-violet-200);
+    border-radius: var(--so-radius-lg);
+    padding: 20px;
+    margin-bottom: 24px;
+    animation: so-scale-in var(--so-transition-fast) ease-out;
+  }
+
+  .catalog__templates-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .catalog__templates-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--so-slate-800);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .catalog__templates-title::before {
+    content: "⚡";
+  }
+
+  .catalog__templates-close {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--so-radius-sm);
+    background: transparent;
+    border: none;
+    color: var(--so-slate-400);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--so-transition-fast);
+  }
+
+  .catalog__templates-close:hover {
+    background: white;
+    color: var(--so-slate-600);
+  }
+
+  .catalog__templates-close svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .catalog__templates-hint {
+    font-size: 0.8125rem;
+    color: var(--so-slate-500);
+    margin: 0 0 16px;
+  }
+
+  .catalog__templates-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .catalog__template-category {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .catalog__template-category-title {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--so-slate-500);
+    margin: 0;
+    padding-left: 4px;
+  }
+
+  .catalog__template-items {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .catalog__template-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: white;
+    border: 1px solid var(--so-slate-200);
+    border-radius: var(--so-radius-md);
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--so-transition-fast);
+  }
+
+  .catalog__template-item:hover:not(:disabled) {
+    border-color: var(--so-violet-300);
+    background: white;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
+    transform: translateX(2px);
+  }
+
+  .catalog__template-item:active:not(:disabled) {
+    transform: translateX(0);
+  }
+
+  .catalog__template-item--exists {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .catalog__template-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .catalog__template-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .catalog__template-name {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--so-slate-800);
+  }
+
+  .catalog__template-desc {
+    font-size: 0.6875rem;
+    color: var(--so-slate-500);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .catalog__template-badge {
+    padding: 2px 8px;
+    font-size: 0.5625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--so-emerald-100);
+    color: var(--so-emerald-700);
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 900px) {
+    .catalog__templates-grid {
+      grid-template-columns: 1fr;
+    }
   }
 `;

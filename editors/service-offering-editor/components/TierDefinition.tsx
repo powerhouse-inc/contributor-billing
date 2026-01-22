@@ -6,7 +6,7 @@ import type {
   ServiceOfferingAction,
   ServiceSubscriptionTier,
   BillingCycle,
-} from "../../../document-models/service-offering/gen/types.js";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   addTier,
   updateTier,
@@ -17,6 +17,64 @@ import {
 interface TierDefinitionProps {
   document: ServiceOfferingDocument;
   dispatch: DocumentDispatch<ServiceOfferingAction>;
+}
+
+// Calculate price per day for mental accounting display
+const BILLING_CYCLE_DAYS: Record<BillingCycle, number> = {
+  MONTHLY: 30,
+  QUARTERLY: 90,
+  SEMI_ANNUAL: 180,
+  ANNUAL: 365,
+  ONE_TIME: 1,
+};
+
+function getPricePerDay(amount: number, billingCycle: BillingCycle): string {
+  if (billingCycle === "ONE_TIME") return "";
+  const perDay = amount / BILLING_CYCLE_DAYS[billingCycle];
+  return perDay.toFixed(2);
+}
+
+// Determine which tier should show "Most Popular" badge
+// Uses middle-tier heuristic (Good-Better-Best psychology)
+function getRecommendedTierIndex(tiers: ServiceSubscriptionTier[]): number {
+  if (tiers.length < 2) return -1;
+  if (tiers.length === 2) return 1; // Second tier for 2-tier setup
+  // For 3+ tiers, recommend the middle tier (or middle-right for even counts)
+  return Math.floor(tiers.length / 2);
+}
+
+// Charm Pricing - Left-digit bias pricing suggestions
+// Convert any price to nearest charm prices (ending in .99 or .97)
+function getCharmPriceSuggestions(currentPrice: number): number[] {
+  if (currentPrice <= 0) return [9.99, 19.99, 29.99];
+
+  const suggestions: number[] = [];
+  const roundedDown = Math.floor(currentPrice);
+  const roundedUp = Math.ceil(currentPrice);
+
+  // Lower charm price (X9.99 below current)
+  const lowerCharm = Math.max(0, roundedDown - (roundedDown % 10) - 1) + 9.99;
+  if (lowerCharm > 0 && lowerCharm !== currentPrice) {
+    suggestions.push(lowerCharm);
+  }
+
+  // Nearest .99 at current level
+  const nearestCharm = roundedUp - 0.01;
+  if (
+    nearestCharm > 0 &&
+    nearestCharm !== currentPrice &&
+    !suggestions.includes(nearestCharm)
+  ) {
+    suggestions.push(nearestCharm);
+  }
+
+  // Higher charm price (X9.99 above current)
+  const higherCharm = roundedUp + (10 - (roundedUp % 10)) - 0.01;
+  if (higherCharm !== currentPrice && !suggestions.includes(higherCharm)) {
+    suggestions.push(higherCharm);
+  }
+
+  return suggestions.slice(0, 3).sort((a, b) => a - b);
 }
 
 const BILLING_CYCLES: { value: BillingCycle; label: string }[] = [
@@ -37,6 +95,116 @@ const TIER_ACCENTS = [
   { color: "var(--so-amber-500)", bg: "var(--so-amber-50)", name: "amber" },
   { color: "var(--so-sky-500)", bg: "var(--so-sky-50)", name: "sky" },
   { color: "var(--so-rose-500)", bg: "var(--so-rose-50)", name: "rose" },
+];
+
+// Tier Presets - Default Effect & Activation Energy Reduction
+interface TierPreset {
+  name: string;
+  description: string;
+  icon: string;
+  tiers: Array<{
+    name: string;
+    amount: number | null;
+    billingCycle: BillingCycle;
+    isCustomPricing: boolean;
+  }>;
+}
+
+const TIER_PRESETS: TierPreset[] = [
+  {
+    name: "Standard 3-Tier",
+    description: "Basic → Professional → Enterprise",
+    icon: "📊",
+    tiers: [
+      {
+        name: "Basic",
+        amount: 99,
+        billingCycle: "MONTHLY",
+        isCustomPricing: false,
+      },
+      {
+        name: "Professional",
+        amount: 299,
+        billingCycle: "MONTHLY",
+        isCustomPricing: false,
+      },
+      {
+        name: "Enterprise",
+        amount: null,
+        billingCycle: "MONTHLY",
+        isCustomPricing: true,
+      },
+    ],
+  },
+  {
+    name: "Freemium Model",
+    description: "Free → Pro → Business",
+    icon: "🚀",
+    tiers: [
+      {
+        name: "Free",
+        amount: 0,
+        billingCycle: "MONTHLY",
+        isCustomPricing: false,
+      },
+      {
+        name: "Pro",
+        amount: 49,
+        billingCycle: "MONTHLY",
+        isCustomPricing: false,
+      },
+      {
+        name: "Business",
+        amount: 149,
+        billingCycle: "MONTHLY",
+        isCustomPricing: false,
+      },
+    ],
+  },
+  {
+    name: "Simple 2-Tier",
+    description: "Starter → Growth",
+    icon: "⚡",
+    tiers: [
+      {
+        name: "Starter",
+        amount: 79,
+        billingCycle: "MONTHLY",
+        isCustomPricing: false,
+      },
+      {
+        name: "Growth",
+        amount: 199,
+        billingCycle: "MONTHLY",
+        isCustomPricing: false,
+      },
+    ],
+  },
+  {
+    name: "Annual Focus",
+    description: "Annual pricing with discounts",
+    icon: "📅",
+    tiers: [
+      {
+        name: "Essential",
+        amount: 990,
+        billingCycle: "ANNUAL",
+        isCustomPricing: false,
+      },
+      {
+        name: "Professional",
+        amount: 2990,
+        billingCycle: "ANNUAL",
+        isCustomPricing: false,
+      },
+      {
+        name: "Enterprise",
+        amount: null,
+        billingCycle: "ANNUAL",
+        isCustomPricing: true,
+      },
+    ],
+  },
 ];
 
 const tierStyles = `
@@ -61,11 +229,48 @@ const tierStyles = `
     overflow: hidden;
     transition: var(--so-transition-base);
     animation: tier-slide-up 0.3s ease-out;
+    position: relative;
   }
 
   .tier-card:hover {
     box-shadow: var(--so-shadow-lg);
     transform: translateY(-2px);
+  }
+
+  /* Popular/Recommended Tier - Social Proof */
+  .tier-card--popular {
+    border: 2px solid var(--so-violet-300);
+    transform: scale(1.02);
+    z-index: 1;
+  }
+
+  .tier-card--popular:hover {
+    transform: scale(1.02) translateY(-2px);
+  }
+
+  .tier-card__popular-banner {
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.875rem;
+    background: linear-gradient(135deg, var(--so-violet-600) 0%, var(--so-violet-700) 100%);
+    color: white;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+    z-index: 2;
+  }
+
+  .tier-card__popular-banner svg {
+    width: 0.875rem;
+    height: 0.875rem;
   }
 
   @keyframes tier-slide-up {
@@ -238,6 +443,97 @@ const tierStyles = `
     background-repeat: no-repeat;
     background-position: right 0 center;
     background-size: 1rem;
+  }
+
+  /* Price Per Day Breakdown - Mental Accounting */
+  .tier-card__price-breakdown {
+    margin-top: 0.625rem;
+    padding-top: 0.625rem;
+    border-top: 1px dashed var(--so-slate-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .tier-card__per-day {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+  }
+
+  .tier-card__per-day-amount {
+    font-family: var(--so-font-mono);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--so-emerald-600);
+  }
+
+  .tier-card__per-day-label {
+    font-size: 0.6875rem;
+    color: var(--so-slate-500);
+  }
+
+  .tier-card__comparison {
+    font-size: 0.625rem;
+    color: var(--so-slate-400);
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  /* Charm Pricing Suggestions */
+  .tier-card__charm-pricing {
+    margin-top: 0.625rem;
+    padding-top: 0.625rem;
+    border-top: 1px dashed var(--so-slate-200);
+  }
+
+  .tier-card__charm-label {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.625rem;
+    font-weight: 500;
+    color: var(--so-violet-600);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .tier-card__charm-label svg {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .tier-card__charm-options {
+    display: flex;
+    gap: 0.375rem;
+  }
+
+  .tier-card__charm-btn {
+    padding: 0.25rem 0.625rem;
+    font-family: var(--so-font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--so-slate-600);
+    background: var(--so-slate-100);
+    border: 1px solid var(--so-slate-200);
+    border-radius: var(--so-radius-sm);
+    cursor: pointer;
+    transition: all var(--so-transition-fast);
+  }
+
+  .tier-card__charm-btn:hover {
+    background: var(--so-violet-50);
+    border-color: var(--so-violet-300);
+    color: var(--so-violet-700);
+  }
+
+  .tier-card__charm-btn--active {
+    background: var(--so-violet-100);
+    border-color: var(--so-violet-400);
+    color: var(--so-violet-700);
   }
 
   /* Description */
@@ -525,6 +821,109 @@ const tierStyles = `
     background: var(--so-slate-200);
   }
 
+  /* Tier Presets - Quick Start Templates */
+  .tier-presets {
+    background: linear-gradient(135deg, var(--so-violet-50) 0%, var(--so-sky-50) 100%);
+    border-radius: var(--so-radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--so-violet-100);
+  }
+
+  .tier-presets__header {
+    margin-bottom: 1.25rem;
+  }
+
+  .tier-presets__title {
+    font-family: var(--so-font-sans);
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--so-slate-800);
+    margin: 0 0 0.375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tier-presets__title::before {
+    content: '⚡';
+  }
+
+  .tier-presets__subtitle {
+    font-size: 0.875rem;
+    color: var(--so-slate-600);
+    margin: 0;
+  }
+
+  .tier-presets__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .tier-preset-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    background: white;
+    border: 2px solid var(--so-slate-200);
+    border-radius: var(--so-radius-md);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+  }
+
+  .tier-preset-card:hover {
+    border-color: var(--so-violet-400);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .tier-preset-card__icon {
+    font-size: 1.5rem;
+  }
+
+  .tier-preset-card__content {
+    flex: 1;
+  }
+
+  .tier-preset-card__name {
+    font-family: var(--so-font-sans);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--so-slate-800);
+    margin: 0 0 0.25rem;
+  }
+
+  .tier-preset-card__desc {
+    font-size: 0.8125rem;
+    color: var(--so-slate-500);
+    margin: 0;
+  }
+
+  .tier-preset-card__preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--so-slate-100);
+  }
+
+  .tier-preset-card__tier {
+    font-family: var(--so-font-mono);
+    font-size: 0.6875rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--so-slate-100);
+    color: var(--so-slate-600);
+    border-radius: var(--so-radius-sm);
+  }
+
+  .tier-preset-card:hover .tier-preset-card__tier {
+    background: var(--so-violet-100);
+    color: var(--so-violet-700);
+  }
+
   /* Info Notice */
   .tier-notice {
     display: flex;
@@ -614,13 +1013,75 @@ export function TierDefinition({ document, dispatch }: TierDefinitionProps) {
     );
   };
 
+  // Apply a preset tier configuration - Default Effect
+  const handleApplyPreset = (preset: TierPreset) => {
+    const now = new Date().toISOString();
+    preset.tiers.forEach((tierConfig) => {
+      dispatch(
+        addTier({
+          id: generateId(),
+          name: tierConfig.name,
+          amount: tierConfig.isCustomPricing
+            ? undefined
+            : (tierConfig.amount ?? undefined),
+          currency: "USD",
+          billingCycle: tierConfig.billingCycle,
+          isCustomPricing: tierConfig.isCustomPricing,
+          lastModified: now,
+        }),
+      );
+    });
+  };
+
   const getTierAccent = (index: number) =>
     TIER_ACCENTS[index % TIER_ACCENTS.length];
+
+  const recommendedTierIndex = getRecommendedTierIndex(tiers);
 
   return (
     <>
       <style>{tierStyles}</style>
       <div className="tier-def">
+        {/* Tier Presets - Show when no tiers exist (Default Effect) */}
+        {tiers.length === 0 && (
+          <div className="tier-presets">
+            <div className="tier-presets__header">
+              <h3 className="tier-presets__title">
+                Quick Start with a Template
+              </h3>
+              <p className="tier-presets__subtitle">
+                Choose a pricing structure to get started quickly, or create
+                custom tiers below
+              </p>
+            </div>
+            <div className="tier-presets__grid">
+              {TIER_PRESETS.map((preset) => (
+                <button
+                  key={preset.name}
+                  onClick={() => handleApplyPreset(preset)}
+                  className="tier-preset-card"
+                >
+                  <span className="tier-preset-card__icon">{preset.icon}</span>
+                  <div className="tier-preset-card__content">
+                    <h4 className="tier-preset-card__name">{preset.name}</h4>
+                    <p className="tier-preset-card__desc">
+                      {preset.description}
+                    </p>
+                  </div>
+                  <div className="tier-preset-card__preview">
+                    {preset.tiers.map((t, i) => (
+                      <span key={i} className="tier-preset-card__tier">
+                        {t.name}
+                        {t.isCustomPricing ? "" : ` $${t.amount}`}
+                      </span>
+                    ))}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="tier-def__grid">
           {tiers.map((tier, index) => (
             <TierCard
@@ -629,6 +1090,7 @@ export function TierDefinition({ document, dispatch }: TierDefinitionProps) {
               accent={getTierAccent(index)}
               dispatch={dispatch}
               onDelete={() => handleDeleteTier(tier.id)}
+              isRecommended={index === recommendedTierIndex}
             />
           ))}
 
@@ -794,9 +1256,16 @@ interface TierCardProps {
   accent: { color: string; bg: string; name: string };
   dispatch: DocumentDispatch<ServiceOfferingAction>;
   onDelete: () => void;
+  isRecommended?: boolean;
 }
 
-function TierCard({ tier, accent, dispatch, onDelete }: TierCardProps) {
+function TierCard({
+  tier,
+  accent,
+  dispatch,
+  onDelete,
+  isRecommended,
+}: TierCardProps) {
   const [localName, setLocalName] = useState(tier.name);
   const [localAmount, setLocalAmount] = useState(
     tier.pricing.amount?.toString() || "",
@@ -858,7 +1327,16 @@ function TierCard({ tier, accent, dispatch, onDelete }: TierCardProps) {
   };
 
   return (
-    <div className="tier-card">
+    <div className={`tier-card ${isRecommended ? "tier-card--popular" : ""}`}>
+      {/* Most Popular Badge - Social Proof */}
+      {isRecommended && (
+        <div className="tier-card__popular-banner">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+          Most Popular
+        </div>
+      )}
       <div className="tier-card__accent" style={{ background: accent.color }} />
 
       <div className="tier-card__body">
@@ -945,6 +1423,67 @@ function TierCard({ tier, accent, dispatch, onDelete }: TierCardProps) {
                 ))}
               </select>
             </div>
+            {/* Price Per Day - Mental Accounting */}
+            {localAmount &&
+              parseFloat(localAmount) > 0 &&
+              localBillingCycle !== "ONE_TIME" && (
+                <div className="tier-card__price-breakdown">
+                  <div className="tier-card__per-day">
+                    <span className="tier-card__per-day-amount">
+                      $
+                      {getPricePerDay(
+                        parseFloat(localAmount),
+                        localBillingCycle,
+                      )}
+                    </span>
+                    <span className="tier-card__per-day-label">/day</span>
+                  </div>
+                  {parseFloat(localAmount) > 0 &&
+                    parseFloat(
+                      getPricePerDay(
+                        parseFloat(localAmount),
+                        localBillingCycle,
+                      ),
+                    ) < 10 && (
+                      <span className="tier-card__comparison">
+                        Less than a coffee
+                      </span>
+                    )}
+                </div>
+              )}
+            {/* Charm Pricing Suggestions - Left-Digit Bias */}
+            {localAmount && parseFloat(localAmount) > 0 && (
+              <div className="tier-card__charm-pricing">
+                <span className="tier-card__charm-label">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Charm prices:
+                </span>
+                <div className="tier-card__charm-options">
+                  {getCharmPriceSuggestions(parseFloat(localAmount)).map(
+                    (price) => (
+                      <button
+                        key={price}
+                        type="button"
+                        onClick={() => {
+                          setLocalAmount(price.toFixed(2));
+                          handlePricingChange(price.toFixed(2));
+                        }}
+                        className={`tier-card__charm-btn ${parseFloat(localAmount) === price ? "tier-card__charm-btn--active" : ""}`}
+                      >
+                        ${price.toFixed(2).replace(/\.00$/, "")}
+                      </button>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

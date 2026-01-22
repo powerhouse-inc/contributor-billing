@@ -5,11 +5,13 @@ import type {
   ServiceOfferingDocument,
   ServiceOfferingAction,
   Service,
-} from "../../../document-models/service-offering/gen/types.js";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   addService,
   updateService,
   deleteService,
+  addFacetBinding,
+  removeFacetBinding,
 } from "../../../document-models/service-offering/gen/creators.js";
 
 interface ServicesListProps {

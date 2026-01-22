@@ -3,7 +3,7 @@ import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import type {
   ServiceOfferingDocument,
   ServiceOfferingAction,
-} from "../../../document-models/service-offering/gen/types.js";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   selectResourceTemplate,
   changeResourceTemplate,
@@ -16,7 +16,7 @@ import { useResourceTemplateDocumentsInSelectedDrive } from "../../../document-m
 import type {
   ResourceTemplateDocument,
   ResourceTemplateGlobalState,
-} from "../../../document-models/resource-template/gen/types.js";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 
 interface ResourceTemplateSelectorProps {
   document: ServiceOfferingDocument;
@@ -88,6 +88,26 @@ export function ResourceTemplateSelector({
   const otherTemplates = filteredTemplates.filter(
     (t) => t.state.global.status !== "ACTIVE",
   );
+
+  // Determine recommended template (Social Proof / Authority Bias)
+  // The most complete active template is recommended
+  const recommendedTemplateId = useMemo(() => {
+    if (!activeTemplates || activeTemplates.length === 0) return null;
+
+    // Score templates by completeness (more services, facets, audiences = better)
+    const scored = activeTemplates.map((t) => ({
+      id: t.header.id,
+      score:
+        t.state.global.services.length * 3 + // Services weighted highest
+        t.state.global.facetTargets.length * 2 +
+        t.state.global.targetAudiences.length +
+        (t.state.global.description ? 2 : 0) +
+        (t.state.global.thumbnailUrl ? 1 : 0),
+    }));
+
+    const best = scored.sort((a, b) => b.score - a.score)[0];
+    return best?.id || null;
+  }, [activeTemplates]);
 
   // If a template is selected and user is not changing, show the detail view with facet selection
   if (selectedTemplate && !showingSelector) {
@@ -199,6 +219,9 @@ export function ResourceTemplateSelector({
                         key={template.header.id}
                         template={template}
                         isSelected={currentTemplateId === template.header.id}
+                        isRecommended={
+                          template.header.id === recommendedTemplateId
+                        }
                         onSelect={() => handleSelectTemplate(template)}
                       />
                     ))}
@@ -236,10 +259,16 @@ export function ResourceTemplateSelector({
 interface TemplateCardProps {
   template: ResourceTemplateDocument;
   isSelected: boolean;
+  isRecommended?: boolean;
   onSelect: () => void;
 }
 
-function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
+function TemplateCard({
+  template,
+  isSelected,
+  isRecommended,
+  onSelect,
+}: TemplateCardProps) {
   const { state } = template;
   const globalState = state.global;
 
@@ -249,8 +278,21 @@ function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
     <button
       type="button"
       onClick={onSelect}
-      className={`rts-card ${isSelected ? "rts-card--selected" : ""}`}
+      className={`rts-card ${isSelected ? "rts-card--selected" : ""} ${isRecommended ? "rts-card--recommended" : ""}`}
     >
+      {isRecommended && !isSelected && (
+        <div className="rts-card__recommended">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+          Recommended
+        </div>
+      )}
       <div className="rts-card__header">
         {globalState.thumbnailUrl ? (
           <div
@@ -407,6 +449,21 @@ function TemplateDetailView({
     },
     [offeringFacetTargets, dispatch],
   );
+
+  // Calculate facet completion progress (Goal-Gradient Effect)
+  const facetProgress = useMemo(() => {
+    const totalOptions = globalState.facetTargets.reduce(
+      (sum, facet) => sum + facet.selectedOptions.length,
+      0,
+    );
+    const selectedOptions = offeringFacetTargets.reduce(
+      (sum, facet) => sum + facet.selectedOptions.length,
+      0,
+    );
+    const percent =
+      totalOptions > 0 ? Math.round((selectedOptions / totalOptions) * 100) : 0;
+    return { total: totalOptions, selected: selectedOptions, percent };
+  }, [globalState.facetTargets, offeringFacetTargets]);
 
   return (
     <div className="rtd-container">
@@ -612,22 +669,39 @@ function TemplateDetailView({
       {/* Facet Targeting - Interactive Selection */}
       {globalState.facetTargets.length > 0 && (
         <section className="rtd-card">
-          <div className="rtd-card__header">
-            <div className="rtd-card__icon rtd-card__icon--sky">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.75"
-              >
-                <path d="M3 6h18M7 12h10M10 18h4" />
-              </svg>
+          <div className="rtd-card__header rtd-card__header--with-progress">
+            <div className="rtd-card__header-left">
+              <div className="rtd-card__icon rtd-card__icon--sky">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                >
+                  <path d="M3 6h18M7 12h10M10 18h4" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="rtd-card__title">Facet Targeting</h3>
+                <p className="rtd-card__subtitle">
+                  Select which facet options apply to this offering
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="rtd-card__title">Facet Targeting</h3>
-              <p className="rtd-card__subtitle">
-                Select which facet options apply to this offering
-              </p>
+            {/* Goal-Gradient Progress Indicator */}
+            <div className="rtd-facet-progress">
+              <div className="rtd-facet-progress__bar">
+                <div
+                  className="rtd-facet-progress__fill"
+                  style={{ width: `${facetProgress.percent}%` }}
+                />
+              </div>
+              <span className="rtd-facet-progress__text">
+                {facetProgress.selected} of {facetProgress.total} selected
+                {facetProgress.percent === 100 && (
+                  <span className="rtd-facet-progress__complete"> ✓</span>
+                )}
+              </span>
             </div>
           </div>
           <div className="rtd-facets">
@@ -1115,6 +1189,43 @@ const styles = `
     height: 16px;
   }
 
+  /* Recommended Badge - Social Proof */
+  .rts-card--recommended {
+    border-color: var(--rts-amber);
+    box-shadow: 0 0 0 1px var(--rts-amber), 0 4px 16px rgba(245, 158, 11, 0.15);
+  }
+
+  .rts-card--recommended:hover {
+    border-color: var(--rts-amber);
+    box-shadow: 0 0 0 1px var(--rts-amber), 0 6px 20px rgba(245, 158, 11, 0.2);
+  }
+
+  .rts-card__recommended {
+    position: absolute;
+    top: -1px;
+    right: 40px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: white;
+    background: linear-gradient(135deg, var(--rts-amber) 0%, #d97706 100%);
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+    z-index: 5;
+  }
+
+  .rts-card__recommended svg {
+    width: 12px;
+    height: 12px;
+    fill: currentColor;
+    stroke: currentColor;
+  }
+
   /* Empty State */
   .rts-empty {
     padding: 48px;
@@ -1342,6 +1453,52 @@ const styles = `
     align-items: flex-start;
     gap: 14px;
     margin-bottom: 16px;
+  }
+
+  .rtd-card__header--with-progress {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .rtd-card__header-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  /* Goal-Gradient Progress Bar for Facet Selection */
+  .rtd-facet-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    min-width: 140px;
+  }
+
+  .rtd-facet-progress__bar {
+    width: 100%;
+    height: 6px;
+    background: var(--rts-border-light);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .rtd-facet-progress__fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--rts-sky), var(--rts-emerald));
+    border-radius: 100px;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .rtd-facet-progress__text {
+    font-size: 0.6875rem;
+    color: var(--rts-ink-muted);
+    font-weight: 500;
+  }
+
+  .rtd-facet-progress__complete {
+    color: var(--rts-emerald);
+    font-weight: 600;
   }
 
   .rtd-card__icon {

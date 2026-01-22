@@ -1,7 +1,7 @@
 import type { DocumentModelModule } from "document-model";
 import { createState } from "document-model";
 import { defaultBaseState } from "document-model/core";
-import type { ResourceTemplatePHState } from "./gen/types.js";
+import type { ResourceTemplatePHState } from "@powerhousedao/contributor-billing/document-models/resource-template";
 import {
   actions,
   documentModel,

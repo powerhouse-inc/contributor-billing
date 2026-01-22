@@ -1,20 +1,19 @@
 import type { ResourceTemplateServiceManagementOperations } from "@powerhousedao/contributor-billing/document-models/resource-template";
 
-export const resourceTemplateServiceManagementOperations: ResourceTemplateServiceManagementOperations =
-  {
+export const resourceTemplateServiceManagementOperations: ResourceTemplateServiceManagementOperations = {
     addServiceOperation(state, action) {
-          state.services.push({
-              id: action.input.id,
-              title: action.input.title,
-              description: action.input.description || null,
-              parentServiceId: action.input.parentServiceId || null,
-              displayOrder: action.input.displayOrder || null,
-              isSetupFormation: action.input.isSetupFormation || false,
-              optionGroupId: action.input.optionGroupId || null,
-              facetBindings: []
-          });
-          state.lastModified = action.input.lastModified;
-      },
+        state.services.push({
+            id: action.input.id,
+            title: action.input.title,
+            description: action.input.description || null,
+            parentServiceId: action.input.parentServiceId || null,
+            displayOrder: action.input.displayOrder || null,
+            isSetupFormation: action.input.isSetupFormation || false,
+            optionGroupId: action.input.optionGroupId || null,
+            facetBindings: []
+        });
+        state.lastModified = action.input.lastModified;
+    },
     updateServiceOperation(state, action) {
         const service = state.services.find(s => s.id === action.input.id);
         if (service) {
@@ -67,5 +66,5 @@ export const resourceTemplateServiceManagementOperations: ResourceTemplateServic
             }
         }
         state.lastModified = action.input.lastModified;
-    },
-  };
+    }
+};

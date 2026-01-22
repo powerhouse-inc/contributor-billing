@@ -1,17 +1,16 @@
 import type { ResourceTemplateOptionGroupManagementOperations } from "@powerhousedao/contributor-billing/document-models/resource-template";
 
-export const resourceTemplateOptionGroupManagementOperations: ResourceTemplateOptionGroupManagementOperations =
-  {
+export const resourceTemplateOptionGroupManagementOperations: ResourceTemplateOptionGroupManagementOperations = {
     addOptionGroupOperation(state, action) {
-          state.optionGroups.push({
-              id: action.input.id,
-              name: action.input.name,
-              description: action.input.description || null,
-              isAddOn: action.input.isAddOn,
-              defaultSelected: action.input.defaultSelected
-          });
-          state.lastModified = action.input.lastModified;
-      },
+        state.optionGroups.push({
+            id: action.input.id,
+            name: action.input.name,
+            description: action.input.description || null,
+            isAddOn: action.input.isAddOn,
+            defaultSelected: action.input.defaultSelected
+        });
+        state.lastModified = action.input.lastModified;
+    },
     updateOptionGroupOperation(state, action) {
         const optionGroup = state.optionGroups.find(og => og.id === action.input.id);
         if (optionGroup) {
@@ -41,5 +40,5 @@ export const resourceTemplateOptionGroupManagementOperations: ResourceTemplateOp
             state.optionGroups.splice(optionGroupIndex, 1);
         }
         state.lastModified = action.input.lastModified;
-    },
-  };
+    }
+};

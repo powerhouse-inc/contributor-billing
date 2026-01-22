@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { ServiceOfferingPHState } from "./types.js";
+import type { ServiceOfferingPHState } from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 import { serviceOfferingServiceManagementOperations } from "../src/reducers/service-management.js";
 import { serviceOfferingTierManagementOperations } from "../src/reducers/tier-management.js";

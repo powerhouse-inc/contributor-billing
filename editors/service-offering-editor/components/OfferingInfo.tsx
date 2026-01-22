@@ -3,7 +3,7 @@ import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import type {
   ServiceOfferingDocument,
   ServiceOfferingAction,
-} from "../../../document-models/service-offering/gen/types.js";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   updateOfferingInfo,
   updateOfferingStatus,

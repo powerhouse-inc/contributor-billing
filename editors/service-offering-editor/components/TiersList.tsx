@@ -8,7 +8,7 @@ import type {
   Service,
   ServiceLevelBinding,
   ServiceUsageLimit,
-} from "../../../document-models/service-offering/gen/types.js";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   addTier,
   updateTier,

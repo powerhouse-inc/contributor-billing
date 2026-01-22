@@ -342,18 +342,18 @@ export const documentModel: DocumentModelGlobalState = {
               description: "Removes a facet binding from a service",
               errors: [
                 {
-                  code: "REMOVE_FACET_SERVICE_NOT_FOUND",
-                  description: "Service with the specified ID does not exist",
                   id: "service-not-found-remove-binding",
                   name: "RemoveFacetServiceNotFoundError",
+                  code: "REMOVE_FACET_SERVICE_NOT_FOUND",
+                  description: "Service with the specified ID does not exist",
                   template: "",
                 },
                 {
+                  id: "binding-not-found",
+                  name: "BindingNotFoundError",
                   code: "BINDING_NOT_FOUND",
                   description:
                     "Facet binding with the specified ID does not exist",
-                  id: "binding-not-found",
-                  name: "BindingNotFoundError",
                   template: "",
                 },
               ],
@@ -375,69 +375,69 @@ export const documentModel: DocumentModelGlobalState = {
           name: "Option Group Management",
           operations: [
             {
+              id: "add-option-group",
+              name: "ADD_OPTION_GROUP",
               description: "Adds a new option group",
+              schema:
+                "input AddOptionGroupInput {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n    lastModified: DateTime!\n}",
+              template: "Adds a new option group",
+              reducer:
+                "state.optionGroups.push({\n    id: action.input.id,\n    name: action.input.name,\n    description: action.input.description || null,\n    isAddOn: action.input.isAddOn,\n    defaultSelected: action.input.defaultSelected\n});\nstate.lastModified = action.input.lastModified;",
               errors: [
                 {
-                  code: "DUPLICATE_OPTION_GROUP_ID",
-                  description: "An option group with this ID already exists",
                   id: "duplicate-option-group-id",
                   name: "DuplicateOptionGroupIdError",
+                  code: "DUPLICATE_OPTION_GROUP_ID",
+                  description: "An option group with this ID already exists",
                   template: "",
                 },
               ],
               examples: [],
-              id: "add-option-group",
-              name: "ADD_OPTION_GROUP",
-              reducer:
-                "state.optionGroups.push({\n    id: action.input.id,\n    name: action.input.name,\n    description: action.input.description || null,\n    isAddOn: action.input.isAddOn,\n    defaultSelected: action.input.defaultSelected\n});\nstate.lastModified = action.input.lastModified;",
-              schema:
-                "input AddOptionGroupInput {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "Adds a new option group",
             },
             {
+              id: "update-option-group",
+              name: "UPDATE_OPTION_GROUP",
               description: "Updates an existing option group",
+              schema:
+                "input UpdateOptionGroupInput {\n    id: OID!\n    name: String\n    description: String\n    isAddOn: Boolean\n    defaultSelected: Boolean\n    lastModified: DateTime!\n}",
+              template: "Updates an existing option group",
+              reducer:
+                "const optionGroup = state.optionGroups.find(og => og.id === action.input.id);\nif (optionGroup) {\n    if (action.input.name) {\n        optionGroup.name = action.input.name;\n    }\n    if (action.input.description !== undefined) {\n        optionGroup.description = action.input.description || null;\n    }\n    if (action.input.isAddOn !== undefined && action.input.isAddOn !== null) {\n        optionGroup.isAddOn = action.input.isAddOn;\n    }\n    if (action.input.defaultSelected !== undefined && action.input.defaultSelected !== null) {\n        optionGroup.defaultSelected = action.input.defaultSelected;\n    }\n}\nstate.lastModified = action.input.lastModified;",
               errors: [
                 {
+                  id: "option-group-not-found",
+                  name: "UpdateOptionGroupNotFoundError",
                   code: "UPDATE_OPTION_GROUP_NOT_FOUND",
                   description:
                     "Option group with the specified ID does not exist",
-                  id: "option-group-not-found",
-                  name: "UpdateOptionGroupNotFoundError",
                   template: "",
                 },
               ],
               examples: [],
-              id: "update-option-group",
-              name: "UPDATE_OPTION_GROUP",
-              reducer:
-                "const optionGroup = state.optionGroups.find(og => og.id === action.input.id);\nif (optionGroup) {\n    if (action.input.name) {\n        optionGroup.name = action.input.name;\n    }\n    if (action.input.description !== undefined) {\n        optionGroup.description = action.input.description || null;\n    }\n    if (action.input.isAddOn !== undefined && action.input.isAddOn !== null) {\n        optionGroup.isAddOn = action.input.isAddOn;\n    }\n    if (action.input.defaultSelected !== undefined && action.input.defaultSelected !== null) {\n        optionGroup.defaultSelected = action.input.defaultSelected;\n    }\n}\nstate.lastModified = action.input.lastModified;",
-              schema:
-                "input UpdateOptionGroupInput {\n    id: OID!\n    name: String\n    description: String\n    isAddOn: Boolean\n    defaultSelected: Boolean\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "Updates an existing option group",
             },
             {
+              id: "delete-option-group",
+              name: "DELETE_OPTION_GROUP",
               description: "Removes an option group from the template",
+              schema:
+                "input DeleteOptionGroupInput {\n    id: OID!\n    lastModified: DateTime!\n}",
+              template: "Removes an option group from the template",
+              reducer:
+                "const optionGroupIndex = state.optionGroups.findIndex(og => og.id === action.input.id);\nif (optionGroupIndex !== -1) {\n    state.services.forEach(service => {\n        if (service.optionGroupId === action.input.id) {\n            service.optionGroupId = null;\n        }\n    });\n    state.optionGroups.splice(optionGroupIndex, 1);\n}\nstate.lastModified = action.input.lastModified;",
               errors: [
                 {
+                  id: "option-group-not-found-delete",
+                  name: "DeleteOptionGroupNotFoundError",
                   code: "DELETE_OPTION_GROUP_NOT_FOUND",
                   description:
                     "Option group with the specified ID does not exist",
-                  id: "option-group-not-found-delete",
-                  name: "DeleteOptionGroupNotFoundError",
                   template: "",
                 },
               ],
               examples: [],
-              id: "delete-option-group",
-              name: "DELETE_OPTION_GROUP",
-              reducer:
-                "const optionGroupIndex = state.optionGroups.findIndex(og => og.id === action.input.id);\nif (optionGroupIndex !== -1) {\n    state.services.forEach(service => {\n        if (service.optionGroupId === action.input.id) {\n            service.optionGroupId = null;\n        }\n    });\n    state.optionGroups.splice(optionGroupIndex, 1);\n}\nstate.lastModified = action.input.lastModified;",
-              schema:
-                "input DeleteOptionGroupInput {\n    id: OID!\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "Removes an option group from the template",
             },
           ],
         },
