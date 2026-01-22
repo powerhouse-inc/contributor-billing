@@ -87,6 +87,7 @@ enum TransactionFlowType {
   Return
   Internal
   External
+  Swap
 }
 
 enum TransactionFlowTypeInput {
@@ -94,6 +95,7 @@ enum TransactionFlowTypeInput {
   Return
   Internal
   External
+  Swap
 }
 
 
