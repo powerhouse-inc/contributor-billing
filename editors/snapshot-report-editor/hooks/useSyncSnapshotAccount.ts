@@ -34,7 +34,10 @@ function calculateNonInternalStartingBalances(
   startDate: string,
 ): Map<string, Map<string, { value: string; unit: string }>> {
   const start = new Date(startDate);
-  const result = new Map<string, Map<string, { value: string; unit: string }>>();
+  const result = new Map<
+    string,
+    Map<string, { value: string; unit: string }>
+  >();
 
   for (const account of nonInternalAccounts) {
     const addressLower = account.accountAddress.toLowerCase();
@@ -42,21 +45,30 @@ function calculateNonInternalStartingBalances(
 
     // Find pre-period transactions where this account is counter-party
     for (const tx of allTransactions) {
-      if (!tx.counterParty || tx.counterParty.toLowerCase() !== addressLower) continue;
+      if (!tx.counterParty || tx.counterParty.toLowerCase() !== addressLower)
+        continue;
       const txDate = new Date(tx.datetime);
       if (txDate >= start) continue;
 
       const token = tx.details?.token || tx.token || "";
       const amountObj = tx.amount as { value?: string; unit?: string } | string;
       const amountValue = parseFloat(
-        typeof amountObj === "object" ? amountObj.value || "0" : String(amountObj).split(" ")[0]
+        typeof amountObj === "object"
+          ? amountObj.value || "0"
+          : String(amountObj).split(" ")[0],
       );
 
       // Invert direction: Internal OUTFLOW = non-Internal INFLOW
-      const invertedDirection = tx.direction === "OUTFLOW" ? "INFLOW" : "OUTFLOW";
-      const effect = account.type === "Source"
-        ? (invertedDirection === "OUTFLOW" ? amountValue : -amountValue)
-        : (invertedDirection === "INFLOW" ? amountValue : -amountValue);
+      const invertedDirection =
+        tx.direction === "OUTFLOW" ? "INFLOW" : "OUTFLOW";
+      const effect =
+        account.type === "Source"
+          ? invertedDirection === "OUTFLOW"
+            ? amountValue
+            : -amountValue
+          : invertedDirection === "INFLOW"
+            ? amountValue
+            : -amountValue;
 
       tokenBalances.set(token, (tokenBalances.get(token) || 0) + effect);
     }
@@ -338,7 +350,10 @@ export function useSyncSnapshotAccount() {
           // Remove existing starting balances for this account
           account.startingBalances.forEach((b) => {
             allActions.push(
-              balancesActions.removeStartingBalance({ accountId, balanceId: b.id }),
+              balancesActions.removeStartingBalance({
+                accountId,
+                balanceId: b.id,
+              }),
             );
           });
 

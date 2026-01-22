@@ -160,6 +160,8 @@ export function defaultGlobalState(): ExpenseReportGlobalState {
     ],
     periodStart: null,
     periodEnd: null,
+    startDate: null,
+    endDate: null,
   };
 }
 

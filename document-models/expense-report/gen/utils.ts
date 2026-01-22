@@ -168,6 +168,8 @@ export const initialGlobalState: ExpenseReportGlobalState = {
   ],
   periodStart: null,
   periodEnd: null,
+  startDate: null,
+  endDate: null,
 };
 export const initialLocalState: ExpenseReportLocalState = {};
 

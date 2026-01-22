@@ -20,6 +20,7 @@ import type {
   SetGroupTotalsInput,
   SetOwnerIdInput,
   SetPeriodEndInput,
+  SetPeriodInput,
   SetPeriodStartInput,
   SetStatusInput,
   UpdateLineItemGroupInput,
@@ -97,10 +98,12 @@ export function ExpenseReportStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ExpenseReportState").optional(),
+    endDate: z.string().datetime().nullable(),
     groups: z.array(LineItemGroupSchema()),
     ownerId: z.string().nullable(),
     periodEnd: z.string().datetime().nullable(),
     periodStart: z.string().datetime().nullable(),
+    startDate: z.string().datetime().nullable(),
     status: ExpenseReportStatusSchema,
     wallets: z.array(WalletSchema()),
   });
@@ -240,6 +243,15 @@ export function SetPeriodEndInputSchema(): z.ZodObject<
 > {
   return z.object({
     periodEnd: z.string().datetime(),
+  });
+}
+
+export function SetPeriodInputSchema(): z.ZodObject<
+  Properties<SetPeriodInput>
+> {
+  return z.object({
+    endDate: z.string().datetime().nullish(),
+    startDate: z.string().datetime().nullish(),
   });
 }
 
