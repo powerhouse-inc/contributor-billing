@@ -64,6 +64,7 @@ export const TransactionFlowTypeSchema = z.enum([
   "External",
   "Internal",
   "Return",
+  "Swap",
   "TopUp",
 ]);
 
@@ -71,6 +72,7 @@ export const TransactionFlowTypeInputSchema = z.enum([
   "External",
   "Internal",
   "Return",
+  "Swap",
   "TopUp",
 ]);
 
