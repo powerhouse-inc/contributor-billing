@@ -1022,11 +1022,17 @@ export default function Editor() {
                                           {balance.token}
                                         </div>
                                         <div
-                                          className="text-xs text-gray-600"
+                                          className="text-xs text-gray-600 space-y-1"
                                           style={{
                                             fontVariantNumeric: "tabular-nums",
                                           }}
                                         >
+                                          <div>
+                                            Opening:{" "}
+                                            <span className="font-medium">
+                                              0.000000 {balance.token}
+                                            </span>
+                                          </div>
                                           <div>
                                             Closing:{" "}
                                             <span className="font-medium">
@@ -1073,7 +1079,11 @@ export default function Editor() {
                                     Transactions ({account.transactions.length})
                                   </h4>
                                   <div className="space-y-2">
-                                    {account.transactions.map((tx: any) => (
+                                    {[...account.transactions]
+                                      .sort((a: any, b: any) =>
+                                        new Date(b.datetime).getTime() - new Date(a.datetime).getTime()
+                                      )
+                                      .map((tx: any) => (
                                       <div
                                         key={tx.id}
                                         className="bg-white border border-gray-200 rounded p-3 text-sm"
@@ -1149,7 +1159,9 @@ export default function Editor() {
                                                       : tx.flowType ===
                                                           "Internal"
                                                         ? "bg-purple-100 text-purple-800"
-                                                        : "bg-red-100 text-red-800"
+                                                        : tx.flowType === "Swap"
+                                                          ? "bg-blue-100 text-blue-800"
+                                                          : "bg-red-100 text-red-800"
                                                 }`}
                                               >
                                                 {tx.flowType}

@@ -25,6 +25,54 @@ import type {
 import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
 import { calculateTransactionFlowInfo } from "../utils/flowTypeCalculations.js";
 
+/**
+ * Calculate starting balances for non-Internal accounts from Internal account transactions
+ */
+function calculateNonInternalStartingBalances(
+  allTransactions: any[],
+  nonInternalAccounts: SnapshotAccount[],
+  startDate: string,
+): Map<string, Map<string, { value: string; unit: string }>> {
+  const start = new Date(startDate);
+  const result = new Map<string, Map<string, { value: string; unit: string }>>();
+
+  for (const account of nonInternalAccounts) {
+    const addressLower = account.accountAddress.toLowerCase();
+    const tokenBalances = new Map<string, number>();
+
+    // Find pre-period transactions where this account is counter-party
+    for (const tx of allTransactions) {
+      if (!tx.counterParty || tx.counterParty.toLowerCase() !== addressLower) continue;
+      const txDate = new Date(tx.datetime);
+      if (txDate >= start) continue;
+
+      const token = tx.details?.token || tx.token || "";
+      const amountObj = tx.amount as { value?: string; unit?: string } | string;
+      const amountValue = parseFloat(
+        typeof amountObj === "object" ? amountObj.value || "0" : String(amountObj).split(" ")[0]
+      );
+
+      // Invert direction: Internal OUTFLOW = non-Internal INFLOW
+      const invertedDirection = tx.direction === "OUTFLOW" ? "INFLOW" : "OUTFLOW";
+      const effect = account.type === "Source"
+        ? (invertedDirection === "OUTFLOW" ? amountValue : -amountValue)
+        : (invertedDirection === "INFLOW" ? amountValue : -amountValue);
+
+      tokenBalances.set(token, (tokenBalances.get(token) || 0) + effect);
+    }
+
+    const balances = new Map<string, { value: string; unit: string }>();
+    tokenBalances.forEach((value, token) => {
+      if (Math.abs(value) > 1e-10) {
+        balances.set(token, { value: value.toString(), unit: token });
+      }
+    });
+    result.set(account.id, balances);
+  }
+
+  return result;
+}
+
 export function useSyncSnapshotAccount() {
   const documents = useDocumentsInSelectedDrive();
   const [selectedDrive] = useSelectedDrive();
@@ -271,6 +319,42 @@ export function useSyncSnapshotAccount() {
           }),
         );
       });
+
+      // 7. Update starting balances for non-Internal accounts from this Internal's transactions
+      const nonInternalAccounts = allSnapshotAccounts.filter(
+        (a) => a.type !== "Internal" && a.id !== snapshotAccount.id,
+      );
+      if (nonInternalAccounts.length > 0) {
+        const nonInternalBalances = calculateNonInternalStartingBalances(
+          allTransactions,
+          nonInternalAccounts,
+          startDate,
+        );
+
+        nonInternalBalances.forEach((tokenBalances, accountId) => {
+          const account = allSnapshotAccounts.find((a) => a.id === accountId);
+          if (!account) return;
+
+          // Remove existing starting balances for this account
+          account.startingBalances.forEach((b) => {
+            allActions.push(
+              balancesActions.removeStartingBalance({ accountId, balanceId: b.id }),
+            );
+          });
+
+          // Add new starting balances
+          tokenBalances.forEach((amount, token) => {
+            allActions.push(
+              balancesActions.setStartingBalance({
+                accountId,
+                balanceId: generateId(),
+                token,
+                amount,
+              }),
+            );
+          });
+        });
+      }
 
       // Dispatch all actions in a single batch if we have a document ID
       if (snapshotDocumentId && allActions.length > 0) {
