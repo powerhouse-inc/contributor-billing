@@ -26,6 +26,8 @@ type ExpenseReportState {
   groups: [LineItemGroup!]!
   periodStart: DateTime
   periodEnd: DateTime
+  startDate: DateTime
+  endDate: DateTime
 }
 
 enum ExpenseReportStatus {
@@ -184,4 +186,9 @@ enum ExpenseReportStatusInput {
   DRAFT
   REVIEW
   FINAL
+}
+
+input SetPeriodInput {
+  startDate: DateTime
+  endDate: DateTime
 }

@@ -25,6 +25,7 @@ import {
   UpdateWalletInputSchema,
   SetOwnerIdInputSchema,
   SetStatusInputSchema,
+  SetPeriodInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<ExpenseReportPHState> = (
@@ -239,6 +240,15 @@ const stateReducer: StateReducer<ExpenseReportPHState> = (
 
       break;
     }
+
+    case "SET_PERIOD":
+      SetPeriodInputSchema().parse(action.input);
+      expenseReportWalletOperations.setPeriodOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
 
     default:
       return state;

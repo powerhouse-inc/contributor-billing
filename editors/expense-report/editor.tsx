@@ -93,8 +93,16 @@ export default function Editor() {
   const periodEnd = document.state.global.periodEnd || "";
 
   // Derive snapshot period from document state (for transaction filtering)
-  const snapshotStart = (document.state.global as any).snapshotStart || "";
-  const snapshotEnd = (document.state.global as any).snapshotEnd || "";
+  // Support both old field names (snapshotStart/snapshotEnd) and new ones (startDate/endDate)
+  const globalState = document.state.global as Record<string, unknown>;
+  const startDate =
+    (document.state.global.startDate as string) ||
+    (globalState.snapshotStart as string) ||
+    "";
+  const endDate =
+    (document.state.global.endDate as string) ||
+    (globalState.snapshotEnd as string) ||
+    "";
 
   // Local state for the selected period (before confirmation)
   const [selectedPeriod, setSelectedPeriod] = useState<string>(() => {
@@ -169,9 +177,7 @@ export default function Editor() {
   };
 
   // Handle snapshot period date changes
-  const handleSnapshotStartChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const dateValue = e.target.value;
     if (!dateValue) return;
 
@@ -181,12 +187,10 @@ export default function Editor() {
     const date = new Date(dateString + "T00:00:00.000Z");
     if (isNaN(date.getTime())) return;
 
-    dispatch(
-      (actions as any).setSnapshotPeriod({ snapshotStart: date.toISOString() }),
-    );
+    dispatch(actions.setPeriod({ startDate: date.toISOString() }));
   };
 
-  const handleSnapshotEndChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const dateValue = e.target.value;
     if (!dateValue) return;
 
@@ -196,11 +200,7 @@ export default function Editor() {
     const endOfDay = new Date(dateString + "T23:59:59.999Z");
     if (isNaN(endOfDay.getTime())) return;
 
-    dispatch(
-      (actions as any).setSnapshotPeriod({
-        snapshotEnd: endOfDay.toISOString(),
-      }),
-    );
+    dispatch(actions.setPeriod({ endDate: endOfDay.toISOString() }));
   };
 
   // Generate month options
@@ -233,8 +233,8 @@ export default function Editor() {
   // Handle sync all wallets
   const handleSyncAllWallets = () => {
     // Use snapshot period for transaction filtering if available, otherwise fall back to reporting period
-    const filterStart = snapshotStart || periodStart;
-    const filterEnd = snapshotEnd || periodEnd;
+    const filterStart = startDate || periodStart;
+    const filterEnd = endDate || periodEnd;
 
     if (!filterStart || !filterEnd) {
       alert(
@@ -432,17 +432,17 @@ export default function Editor() {
                     </span>
                     <div className="flex items-center gap-2">
                       <DatePicker
-                        name="snapshotStart"
-                        value={snapshotStart ? snapshotStart.split("T")[0] : ""}
-                        onChange={handleSnapshotStartChange}
+                        name="startDate"
+                        value={startDate ? startDate.split("T")[0] : ""}
+                        onChange={handleStartDateChange}
                         dateFormat="YYYY-MM-DD"
                         className="w-36"
                       />
                       <span className="text-gray-500">to</span>
                       <DatePicker
-                        name="snapshotEnd"
-                        value={snapshotEnd ? snapshotEnd.split("T")[0] : ""}
-                        onChange={handleSnapshotEndChange}
+                        name="endDate"
+                        value={endDate ? endDate.split("T")[0] : ""}
+                        onChange={handleEndDateChange}
                         dateFormat="YYYY-MM-DD"
                         className="w-36"
                       />
