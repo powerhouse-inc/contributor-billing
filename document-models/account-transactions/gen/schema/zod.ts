@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   Account,
   AccountTransactionsState,
@@ -18,7 +18,7 @@ import type {
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -37,15 +37,15 @@ export const TransactionDirectionInputSchema = z.enum(["INFLOW", "OUTFLOW"]);
 export function AccountSchema(): z.ZodObject<Properties<Account>> {
   return z.object({
     __typename: z.literal("Account").optional(),
-    KycAmlStatus: z.string().nullable(),
+    KycAmlStatus: z.string().nullish(),
     account: z.string(),
-    accountTransactionsId: z.string().nullable(),
-    budgetPath: z.string().nullable(),
-    chain: z.array(z.string()).nullable(),
+    accountTransactionsId: z.string().nullish(),
+    budgetPath: z.string().nullish(),
+    chain: z.array(z.string()).nullish(),
     id: z.string(),
     name: z.string(),
-    owners: z.array(z.string()).nullable(),
-    type: z.string().nullable(),
+    owners: z.array(z.string()).nullish(),
+    type: z.string().nullish(),
   });
 }
 
@@ -54,9 +54,9 @@ export function AccountTransactionsStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("AccountTransactionsState").optional(),
-    account: AccountSchema(),
-    budgets: z.array(BudgetSchema()),
-    transactions: z.array(TransactionEntrySchema()),
+    account: z.lazy(() => AccountSchema()),
+    budgets: z.array(z.lazy(() => BudgetSchema())),
+    transactions: z.array(z.lazy(() => TransactionEntrySchema())),
   });
 }
 
@@ -84,7 +84,7 @@ export function AddTransactionInputSchema(): z.ZodObject<
       })
       .nullish(),
     datetime: z.string().datetime(),
-    direction: z.lazy(() => TransactionDirectionInputSchema),
+    direction: TransactionDirectionInputSchema,
     id: z.string(),
     token: z.string(),
     txHash: z.string(),
@@ -96,7 +96,7 @@ export function BudgetSchema(): z.ZodObject<Properties<Budget>> {
   return z.object({
     __typename: z.literal("Budget").optional(),
     id: z.string(),
-    name: z.string().nullable(),
+    name: z.string().nullish(),
   });
 }
 
@@ -137,10 +137,10 @@ export function TransactionDetailsSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("TransactionDetails").optional(),
-    blockNumber: z.number().nullable(),
+    blockNumber: z.number().nullish(),
     token: z.string(),
     txHash: z.string(),
-    uniqueId: z.string().nullable(),
+    uniqueId: z.string().nullish(),
   });
 }
 
@@ -151,15 +151,15 @@ export function TransactionEntrySchema(): z.ZodObject<
     __typename: z.literal("TransactionEntry").optional(),
     accountingPeriod: z.string(),
     amount: z.object({ unit: z.string(), value: z.string() }),
-    budget: z.string().nullable(),
+    budget: z.string().nullish(),
     counterParty: z
       .string()
       .regex(/^0x[a-fA-F0-9]{40}$/, {
         message: "Invalid Ethereum address format",
       })
-      .nullable(),
+      .nullish(),
     datetime: z.string().datetime(),
-    details: TransactionDetailsSchema(),
+    details: z.lazy(() => TransactionDetailsSchema()),
     direction: TransactionDirectionSchema,
     id: z.string(),
   });
@@ -189,7 +189,7 @@ export function UpdateTransactionInputSchema(): z.ZodObject<
       })
       .nullish(),
     datetime: z.string().datetime().nullish(),
-    direction: z.lazy(() => TransactionDirectionInputSchema.nullish()),
+    direction: TransactionDirectionInputSchema.nullish(),
     id: z.string(),
     token: z.string().nullish(),
     txHash: z.string().nullish(),

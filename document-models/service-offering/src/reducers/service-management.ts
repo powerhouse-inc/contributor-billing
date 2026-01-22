@@ -43,12 +43,6 @@ export const serviceOfferingServiceManagementOperations: ServiceOfferingServiceM
         ) {
           service.isSetupFormation = action.input.isSetupFormation;
         }
-        if (
-          action.input.isPremiumExclusive !== undefined &&
-          action.input.isPremiumExclusive !== null
-        ) {
-          service.isPremiumExclusive = action.input.isPremiumExclusive;
-        }
         if (action.input.optionGroupId !== undefined) {
           service.optionGroupId = action.input.optionGroupId || null;
         }

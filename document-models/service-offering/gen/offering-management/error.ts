@@ -70,23 +70,10 @@ export class TemplateMismatchError extends Error implements ReducerError {
 }
 
 export const errors = {
-  AddTargetAudience: {
-    DuplicateTargetAudienceIdError,
-  },
-  RemoveTargetAudience: {
-    TargetAudienceNotFoundError,
-  },
-  RemoveFacetTarget: {
-    FacetTargetNotFoundError,
-  },
-  AddFacetOption: {
-    AddFacetOptionTargetNotFoundError,
-  },
-  SelectResourceTemplate: {
-    TemplateAlreadySelectedError,
-  },
-  ChangeResourceTemplate: {
-    NoTemplateSelectedError,
-    TemplateMismatchError,
-  },
+  AddTargetAudience: { DuplicateTargetAudienceIdError },
+  RemoveTargetAudience: { TargetAudienceNotFoundError },
+  RemoveFacetTarget: { FacetTargetNotFoundError },
+  AddFacetOption: { AddFacetOptionTargetNotFoundError },
+  SelectResourceTemplate: { TemplateAlreadySelectedError },
+  ChangeResourceTemplate: { NoTemplateSelectedError, TemplateMismatchError },
 };

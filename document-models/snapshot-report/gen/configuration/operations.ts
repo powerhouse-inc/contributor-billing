@@ -1,13 +1,13 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type SetReportConfigAction,
-  type SetAccountsDocumentAction,
-  type SetPeriodAction,
-  type SetOwnerIdAction,
-  type SetPeriodStartAction,
-  type SetPeriodEndAction,
+import type {
+  SetReportConfigAction,
+  SetAccountsDocumentAction,
+  SetPeriodAction,
+  SetOwnerIdAction,
+  SetPeriodStartAction,
+  SetPeriodEndAction,
 } from "./actions.js";
-import { type SnapshotReportState } from "../types.js";
+import type { SnapshotReportState } from "../types.js";
 
 export interface SnapshotReportConfigurationOperations {
   setReportConfigOperation: (

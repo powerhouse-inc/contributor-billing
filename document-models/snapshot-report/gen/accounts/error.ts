@@ -32,13 +32,7 @@ export class RemoveAccountNotFoundError extends Error implements ReducerError {
 }
 
 export const errors = {
-  AddSnapshotAccount: {
-    DuplicateAccountError,
-  },
-  UpdateSnapshotAccountType: {
-    UpdateAccountTypeNotFoundError,
-  },
-  RemoveSnapshotAccount: {
-    RemoveAccountNotFoundError,
-  },
+  AddSnapshotAccount: { DuplicateAccountError },
+  UpdateSnapshotAccountType: { UpdateAccountTypeNotFoundError },
+  RemoveSnapshotAccount: { RemoveAccountNotFoundError },
 };

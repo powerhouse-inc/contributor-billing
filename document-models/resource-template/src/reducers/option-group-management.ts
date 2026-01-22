@@ -2,43 +2,53 @@ import type { ResourceTemplateOptionGroupManagementOperations } from "@powerhous
 
 export const resourceTemplateOptionGroupManagementOperations: ResourceTemplateOptionGroupManagementOperations = {
     addOptionGroupOperation(state, action) {
-        state.optionGroups.push({
-            id: action.input.id,
-            name: action.input.name,
-            description: action.input.description || null,
-            isAddOn: action.input.isAddOn,
-            defaultSelected: action.input.defaultSelected
-        });
-        state.lastModified = action.input.lastModified;
+      state.optionGroups.push({
+        id: action.input.id,
+        name: action.input.name,
+        description: action.input.description || null,
+        isAddOn: action.input.isAddOn,
+        defaultSelected: action.input.defaultSelected,
+      });
+      state.lastModified = action.input.lastModified;
     },
     updateOptionGroupOperation(state, action) {
-        const optionGroup = state.optionGroups.find(og => og.id === action.input.id);
-        if (optionGroup) {
-            if (action.input.name) {
-                optionGroup.name = action.input.name;
-            }
-            if (action.input.description !== undefined) {
-                optionGroup.description = action.input.description || null;
-            }
-            if (action.input.isAddOn !== undefined && action.input.isAddOn !== null) {
-                optionGroup.isAddOn = action.input.isAddOn;
-            }
-            if (action.input.defaultSelected !== undefined && action.input.defaultSelected !== null) {
-                optionGroup.defaultSelected = action.input.defaultSelected;
-            }
+      const optionGroup = state.optionGroups.find(
+        (og) => og.id === action.input.id,
+      );
+      if (optionGroup) {
+        if (action.input.name) {
+          optionGroup.name = action.input.name;
         }
-        state.lastModified = action.input.lastModified;
+        if (action.input.description !== undefined) {
+          optionGroup.description = action.input.description || null;
+        }
+        if (
+          action.input.isAddOn !== undefined &&
+          action.input.isAddOn !== null
+        ) {
+          optionGroup.isAddOn = action.input.isAddOn;
+        }
+        if (
+          action.input.defaultSelected !== undefined &&
+          action.input.defaultSelected !== null
+        ) {
+          optionGroup.defaultSelected = action.input.defaultSelected;
+        }
+      }
+      state.lastModified = action.input.lastModified;
     },
     deleteOptionGroupOperation(state, action) {
-        const optionGroupIndex = state.optionGroups.findIndex(og => og.id === action.input.id);
-        if (optionGroupIndex !== -1) {
-            state.services.forEach(service => {
-                if (service.optionGroupId === action.input.id) {
-                    service.optionGroupId = null;
-                }
-            });
-            state.optionGroups.splice(optionGroupIndex, 1);
-        }
-        state.lastModified = action.input.lastModified;
-    }
-};
+      const optionGroupIndex = state.optionGroups.findIndex(
+        (og) => og.id === action.input.id,
+      );
+      if (optionGroupIndex !== -1) {
+        state.services.forEach((service) => {
+          if (service.optionGroupId === action.input.id) {
+            service.optionGroupId = null;
+          }
+        });
+        state.optionGroups.splice(optionGroupIndex, 1);
+      }
+      state.lastModified = action.input.lastModified;
+    },
+  };

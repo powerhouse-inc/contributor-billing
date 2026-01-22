@@ -11,6 +11,7 @@ import {
 
 /** Document model module for the Todo List document type */
 export const ResourceTemplate: DocumentModelModule<ResourceTemplatePHState> = {
+  version: 1,
   reducer,
   actions,
   utils,

@@ -169,18 +169,10 @@ export class RemoveUsageLimitNotFoundError
 }
 
 export const errors = {
-  AddTier: {
-    DuplicateTierIdError,
-  },
-  UpdateTier: {
-    UpdateTierNotFoundError,
-  },
-  UpdateTierPricing: {
-    UpdatePricingTierNotFoundError,
-  },
-  DeleteTier: {
-    DeleteTierNotFoundError,
-  },
+  AddTier: { DuplicateTierIdError },
+  UpdateTier: { UpdateTierNotFoundError },
+  UpdateTierPricing: { UpdatePricingTierNotFoundError },
+  DeleteTier: { DeleteTierNotFoundError },
   AddServiceLevel: {
     AddServiceLevelTierNotFoundError,
     DuplicateServiceLevelIdError,
@@ -193,10 +185,7 @@ export const errors = {
     RemoveServiceLevelTierNotFoundError,
     RemoveServiceLevelNotFoundError,
   },
-  AddUsageLimit: {
-    AddUsageLimitTierNotFoundError,
-    DuplicateUsageLimitIdError,
-  },
+  AddUsageLimit: { AddUsageLimitTierNotFoundError, DuplicateUsageLimitIdError },
   UpdateUsageLimit: {
     UpdateUsageLimitTierNotFoundError,
     UpdateUsageLimitNotFoundError,

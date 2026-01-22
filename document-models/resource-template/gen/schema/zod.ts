@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   AddFacetBindingInput,
   AddFacetOptionInput,
@@ -30,7 +30,7 @@ import type {
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -143,7 +143,7 @@ export function OptionGroupSchema(): z.ZodObject<Properties<OptionGroup>> {
   return z.object({
     __typename: z.literal("OptionGroup").optional(),
     defaultSelected: z.boolean(),
-    description: z.string().nullable(),
+    description: z.string().nullish(),
     id: z.string(),
     isAddOn: z.boolean(),
     name: z.string(),
@@ -205,20 +205,20 @@ export function ResourceTemplateStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ResourceTemplateState").optional(),
-    description: z.string().nullable(),
-    facetTargets: z.array(FacetTargetSchema()),
+    description: z.string().nullish(),
+    facetTargets: z.array(z.lazy(() => FacetTargetSchema())),
     id: z.string(),
-    infoLink: z.string().url().nullable(),
+    infoLink: z.string().url().nullish(),
     lastModified: z.string().datetime(),
     operatorId: z.string(),
-    optionGroups: z.array(OptionGroupSchema()),
+    optionGroups: z.array(z.lazy(() => OptionGroupSchema())),
     recurringServices: z.array(z.string()),
-    services: z.array(ServiceSchema()),
+    services: z.array(z.lazy(() => ServiceSchema())),
     setupServices: z.array(z.string()),
     status: TemplateStatusSchema,
     summary: z.string(),
-    targetAudiences: z.array(TargetAudienceSchema()),
-    thumbnailUrl: z.string().url().nullable(),
+    targetAudiences: z.array(z.lazy(() => TargetAudienceSchema())),
+    thumbnailUrl: z.string().url().nullish(),
     title: z.string(),
   });
 }
@@ -226,13 +226,13 @@ export function ResourceTemplateStateSchema(): z.ZodObject<
 export function ServiceSchema(): z.ZodObject<Properties<Service>> {
   return z.object({
     __typename: z.literal("Service").optional(),
-    description: z.string().nullable(),
-    displayOrder: z.number().nullable(),
-    facetBindings: z.array(ResourceFacetBindingSchema()),
+    description: z.string().nullish(),
+    displayOrder: z.number().nullish(),
+    facetBindings: z.array(z.lazy(() => ResourceFacetBindingSchema())),
     id: z.string(),
     isSetupFormation: z.boolean(),
-    optionGroupId: z.string().nullable(),
-    parentServiceId: z.string().nullable(),
+    optionGroupId: z.string().nullish(),
+    parentServiceId: z.string().nullish(),
     title: z.string(),
   });
 }
@@ -290,7 +290,7 @@ export function TargetAudienceSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("TargetAudience").optional(),
-    color: z.string().nullable(),
+    color: z.string().nullish(),
     id: z.string(),
     label: z.string(),
   });

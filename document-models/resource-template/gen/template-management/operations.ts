@@ -1,11 +1,11 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type UpdateTemplateInfoAction,
-  type UpdateTemplateStatusAction,
-  type SetOperatorAction,
-  type SetTemplateIdAction,
+import type {
+  UpdateTemplateInfoAction,
+  UpdateTemplateStatusAction,
+  SetOperatorAction,
+  SetTemplateIdAction,
 } from "./actions.js";
-import { type ResourceTemplateState } from "../types.js";
+import type { ResourceTemplateState } from "../types.js";
 
 export interface ResourceTemplateTemplateManagementOperations {
   updateTemplateInfoOperation: (

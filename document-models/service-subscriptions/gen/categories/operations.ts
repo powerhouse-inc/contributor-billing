@@ -1,10 +1,10 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddCategoryAction,
-  type UpdateCategoryAction,
-  type DeleteCategoryAction,
+import type {
+  AddCategoryAction,
+  UpdateCategoryAction,
+  DeleteCategoryAction,
 } from "./actions.js";
-import { type ServiceSubscriptionsState } from "../types.js";
+import type { ServiceSubscriptionsState } from "../types.js";
 
 export interface ServiceSubscriptionsCategoriesOperations {
   addCategoryOperation: (

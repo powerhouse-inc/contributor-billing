@@ -3,7 +3,7 @@ import type { FileNode } from "document-drive";
 import {
   useDocumentsInSelectedDrive,
   useDrives,
-  useGetDocuments,
+  useDocuments,
   useDocumentById,
 } from "@powerhousedao/reactor-browser";
 import {
@@ -206,7 +206,7 @@ export function ContributorsSection({}) {
   }, [builderProfileNodesWithDriveId]);
 
   // Fetch all builder profile documents from all drives
-  const builderProfileDocuments = useGetDocuments(builderPhids);
+  const builderProfileDocuments = useDocuments(builderPhids);
 
   // Create a map of PHID to document for quick lookup (local drives)
   const localBuilderProfileMap = useMemo(() => {
@@ -214,7 +214,7 @@ export function ContributorsSection({}) {
     if (!builderProfileDocuments) return map;
     builderProfileDocuments.forEach((doc) => {
       if (doc.header.documentType === "powerhouse/builder-profile") {
-        map.set(doc.header.id, doc as BuilderProfileDocument);
+        map.set(doc.header.id, doc as unknown as BuilderProfileDocument);
       }
     });
     return map;

@@ -1,24 +1,24 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddWalletAction,
-  type RemoveWalletAction,
-  type AddBillingStatementAction,
-  type RemoveBillingStatementAction,
-  type AddLineItemAction,
-  type UpdateLineItemAction,
-  type RemoveLineItemAction,
-  type AddLineItemGroupAction,
-  type UpdateLineItemGroupAction,
-  type RemoveLineItemGroupAction,
-  type SetGroupTotalsAction,
-  type RemoveGroupTotalsAction,
-  type SetPeriodStartAction,
-  type SetPeriodEndAction,
-  type UpdateWalletAction,
-  type SetOwnerIdAction,
-  type SetStatusAction,
+import type {
+  AddWalletAction,
+  RemoveWalletAction,
+  AddBillingStatementAction,
+  RemoveBillingStatementAction,
+  AddLineItemAction,
+  UpdateLineItemAction,
+  RemoveLineItemAction,
+  AddLineItemGroupAction,
+  UpdateLineItemGroupAction,
+  RemoveLineItemGroupAction,
+  SetGroupTotalsAction,
+  RemoveGroupTotalsAction,
+  SetPeriodStartAction,
+  SetPeriodEndAction,
+  UpdateWalletAction,
+  SetOwnerIdAction,
+  SetStatusAction,
 } from "./actions.js";
-import { type ExpenseReportState } from "../types.js";
+import type { ExpenseReportState } from "../types.js";
 
 export interface ExpenseReportWalletOperations {
   addWalletOperation: (

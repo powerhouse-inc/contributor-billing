@@ -2,11 +2,11 @@ import type { ResourceTemplateServiceCategoryManagementOperations } from "@power
 
 export const resourceTemplateServiceCategoryManagementOperations: ResourceTemplateServiceCategoryManagementOperations = {
     setSetupServicesOperation(state, action) {
-        state.setupServices = action.input.services;
-        state.lastModified = action.input.lastModified;
+      state.setupServices = action.input.services;
+      state.lastModified = action.input.lastModified;
     },
     setRecurringServicesOperation(state, action) {
-        state.recurringServices = action.input.services;
-        state.lastModified = action.input.lastModified;
-    }
-};
+      state.recurringServices = action.input.services;
+      state.lastModified = action.input.lastModified;
+    },
+  };

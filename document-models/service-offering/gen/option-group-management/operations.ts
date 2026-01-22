@@ -1,10 +1,10 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddOptionGroupAction,
-  type UpdateOptionGroupAction,
-  type DeleteOptionGroupAction,
+import type {
+  AddOptionGroupAction,
+  UpdateOptionGroupAction,
+  DeleteOptionGroupAction,
 } from "./actions.js";
-import { type ServiceOfferingState } from "../types.js";
+import type { ServiceOfferingState } from "../types.js";
 
 export interface ServiceOfferingOptionGroupManagementOperations {
   addOptionGroupOperation: (

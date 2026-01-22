@@ -206,8 +206,12 @@ export default function Editor() {
       ) {
         syncWallet(
           wallet.wallet,
-          (wallet.lineItems || []).filter((item) => item !== null),
-          (wallet.billingStatements || []).filter((id) => id !== null),
+          (wallet.lineItems || []).filter(
+            (item): item is NonNullable<typeof item> => item != null,
+          ),
+          (wallet.billingStatements || []).filter(
+            (id): id is NonNullable<typeof id> => id != null,
+          ),
           groups,
           wallets,
           wallet.accountTransactionsDocumentId,

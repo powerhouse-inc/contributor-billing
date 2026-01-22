@@ -23,13 +23,17 @@ function getLineItemTotals(lineItem: {
 
 function applyTotalsDelta(
   wallet: {
-    totals?: Array<{
-      group?: string | null;
-      totalBudget?: number | null;
-      totalForecast?: number | null;
-      totalActuals?: number | null;
-      totalPayments?: number | null;
-    } | null> | null;
+    totals?: Array<
+      | {
+          group?: string | null;
+          totalBudget?: number | null;
+          totalForecast?: number | null;
+          totalActuals?: number | null;
+          totalPayments?: number | null;
+        }
+      | null
+      | undefined
+    > | null;
   },
   groupId: string | null | undefined,
   delta: GroupTotalsDelta,

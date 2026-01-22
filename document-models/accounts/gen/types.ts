@@ -3,6 +3,7 @@ import type { AccountsAction } from "./actions.js";
 import type { AccountsState as AccountsGlobalState } from "./schema/types.js";
 
 type AccountsLocalState = Record<PropertyKey, never>;
+
 type AccountsPHState = PHBaseState & {
   global: AccountsGlobalState;
   local: AccountsLocalState;

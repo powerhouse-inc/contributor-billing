@@ -446,13 +446,13 @@ export const documentModel: DocumentModelGlobalState = {
         global: {
           examples: [],
           initialValue:
-            '"{\\n    \\"id\\": \\"\\",\\n    \\"operatorId\\": \\"\\",\\n    \\"title\\": \\"\\",\\n    \\"summary\\": \\"\\",\\n    \\"description\\": null,\\n    \\"thumbnailUrl\\": null,\\n    \\"infoLink\\": null,\\n    \\"status\\": \\"DRAFT\\",\\n    \\"lastModified\\": \\"1970-01-01T00:00:00.000Z\\",\\n    \\"targetAudiences\\": [],\\n    \\"setupServices\\": [],\\n    \\"recurringServices\\": [],\\n    \\"facetTargets\\": [],\\n    \\"services\\": [],\\n    \\"optionGroups\\": []\\n}"',
+            '{\n    "id": "",\n    "operatorId": "",\n    "title": "",\n    "summary": "",\n    "description": null,\n    "thumbnailUrl": null,\n    "infoLink": null,\n    "status": "DRAFT",\n    "lastModified": "1970-01-01T00:00:00.000Z",\n    "targetAudiences": [],\n    "setupServices": [],\n    "recurringServices": [],\n    "facetTargets": [],\n    "services": [],\n    "optionGroups": []\n}',
           schema:
             "type ResourceTemplateState {\n    id: PHID!\n    operatorId: PHID!\n    title: String!\n    summary: String!\n    description: String\n    thumbnailUrl: URL\n    infoLink: URL\n    status: TemplateStatus!\n    lastModified: DateTime!\n    targetAudiences: [TargetAudience!]!\n    setupServices: [String!]!\n    recurringServices: [String!]!\n    facetTargets: [FacetTarget!]!\n    services: [Service!]!\n    optionGroups: [OptionGroup!]!\n}\n\nenum TemplateStatus {\n    DRAFT\n    COMING_SOON\n    ACTIVE\n    DEPRECATED\n}\n\ntype TargetAudience {\n    id: OID!\n    label: String!\n    color: String\n}\n\ntype FacetTarget {\n    id: OID!\n    categoryKey: String!\n    categoryLabel: String!\n    selectedOptions: [String!]!\n}\n\ntype Service {\n    id: OID!\n    title: String!\n    description: String\n    displayOrder: Int\n    parentServiceId: OID\n    isSetupFormation: Boolean!\n    optionGroupId: OID\n    facetBindings: [ResourceFacetBinding!]!\n}\n\ntype ResourceFacetBinding {\n    id: OID!\n    facetName: String!\n    facetType: PHID!\n    supportedOptions: [OID!]!\n}\n\ntype OptionGroup {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n}",
         },
         local: {
           examples: [],
-          initialValue: '""',
+          initialValue: "",
           schema: "",
         },
       },

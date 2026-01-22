@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   AcceptInput,
   AddLineItemInput,
@@ -52,7 +52,7 @@ import type {
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -141,27 +141,27 @@ export function AddPaymentInputSchema(): z.ZodObject<
 export function AddressSchema(): z.ZodObject<Properties<Address>> {
   return z.object({
     __typename: z.literal("Address").optional(),
-    city: z.string().nullable(),
-    country: z.string().nullable(),
-    extendedAddress: z.string().nullable(),
-    postalCode: z.string().nullable(),
-    stateProvince: z.string().nullable(),
-    streetAddress: z.string().nullable(),
+    city: z.string().nullish(),
+    country: z.string().nullish(),
+    extendedAddress: z.string().nullish(),
+    postalCode: z.string().nullish(),
+    stateProvince: z.string().nullish(),
+    streetAddress: z.string().nullish(),
   });
 }
 
 export function BankSchema(): z.ZodObject<Properties<Bank>> {
   return z.object({
     __typename: z.literal("Bank").optional(),
-    ABA: z.string().nullable(),
-    BIC: z.string().nullable(),
-    SWIFT: z.string().nullable(),
+    ABA: z.string().nullish(),
+    BIC: z.string().nullish(),
+    SWIFT: z.string().nullish(),
     accountNum: z.string(),
-    accountType: InvoiceAccountTypeSchema.nullable(),
-    address: AddressSchema(),
-    beneficiary: z.string().nullable(),
-    intermediaryBank: IntermediaryBankSchema().nullable(),
-    memo: z.string().nullable(),
+    accountType: InvoiceAccountTypeSchema.nullish(),
+    address: z.lazy(() => AddressSchema()),
+    beneficiary: z.string().nullish(),
+    intermediaryBank: z.lazy(() => IntermediaryBankSchema().nullish()),
+    memo: z.string().nullish(),
     name: z.string(),
   });
 }
@@ -176,7 +176,7 @@ export function ClosePaymentInputSchema(): z.ZodObject<
   Properties<ClosePaymentInput>
 > {
   return z.object({
-    closureReason: z.lazy(() => ClosureReasonInputSchema.nullish()),
+    closureReason: ClosureReasonInputSchema.nullish(),
   });
 }
 
@@ -192,8 +192,8 @@ export function ConfirmPaymentInputSchema(): z.ZodObject<
 export function ContactInfoSchema(): z.ZodObject<Properties<ContactInfo>> {
   return z.object({
     __typename: z.literal("ContactInfo").optional(),
-    email: z.string().nullable(),
-    tel: z.string().nullable(),
+    email: z.string().nullish(),
+    tel: z.string().nullish(),
   });
 }
 
@@ -230,10 +230,8 @@ export function EditIssuerBankInputSchema(): z.ZodObject<
     SWIFTIntermediary: z.string().nullish(),
     accountNum: z.string().nullish(),
     accountNumIntermediary: z.string().nullish(),
-    accountType: z.lazy(() => InvoiceAccountTypeInputSchema.nullish()),
-    accountTypeIntermediary: z.lazy(() =>
-      InvoiceAccountTypeInputSchema.nullish(),
-    ),
+    accountType: InvoiceAccountTypeInputSchema.nullish(),
+    accountTypeIntermediary: InvoiceAccountTypeInputSchema.nullish(),
     beneficiary: z.string().nullish(),
     beneficiaryIntermediary: z.string().nullish(),
     city: z.string().nullish(),
@@ -311,10 +309,8 @@ export function EditPayerBankInputSchema(): z.ZodObject<
     SWIFTIntermediary: z.string().nullish(),
     accountNum: z.string().nullish(),
     accountNumIntermediary: z.string().nullish(),
-    accountType: z.lazy(() => InvoiceAccountTypeInputSchema.nullish()),
-    accountTypeIntermediary: z.lazy(() =>
-      InvoiceAccountTypeInputSchema.nullish(),
-    ),
+    accountType: InvoiceAccountTypeInputSchema.nullish(),
+    accountTypeIntermediary: InvoiceAccountTypeInputSchema.nullish(),
     beneficiary: z.string().nullish(),
     beneficiaryIntermediary: z.string().nullish(),
     city: z.string().nullish(),
@@ -389,7 +385,7 @@ export function ExportedDataSchema(): z.ZodObject<Properties<ExportedData>> {
   return z.object({
     __typename: z.literal("ExportedData").optional(),
     exportedLineItems: z.array(z.array(z.string())),
-    timestamp: z.string().datetime().nullable(),
+    timestamp: z.string().datetime().nullish(),
   });
 }
 
@@ -398,14 +394,14 @@ export function IntermediaryBankSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("IntermediaryBank").optional(),
-    ABA: z.string().nullable(),
-    BIC: z.string().nullable(),
-    SWIFT: z.string().nullable(),
+    ABA: z.string().nullish(),
+    BIC: z.string().nullish(),
+    SWIFT: z.string().nullish(),
     accountNum: z.string(),
-    accountType: InvoiceAccountTypeSchema.nullable(),
-    address: AddressSchema(),
-    beneficiary: z.string().nullable(),
-    memo: z.string().nullable(),
+    accountType: InvoiceAccountTypeSchema.nullish(),
+    address: z.lazy(() => AddressSchema()),
+    beneficiary: z.string().nullish(),
+    memo: z.string().nullish(),
     name: z.string(),
   });
 }
@@ -418,7 +414,7 @@ export function InvoiceLineItemSchema(): z.ZodObject<
     currency: z.string(),
     description: z.string(),
     id: z.string(),
-    lineItemTag: z.array(InvoiceTagSchema()).nullable(),
+    lineItemTag: z.array(z.lazy(() => InvoiceTagSchema())).nullish(),
     quantity: z.number(),
     taxPercent: z.number(),
     totalPriceTaxExcl: z.number(),
@@ -431,21 +427,21 @@ export function InvoiceLineItemSchema(): z.ZodObject<
 export function InvoiceStateSchema(): z.ZodObject<Properties<InvoiceState>> {
   return z.object({
     __typename: z.literal("InvoiceState").optional(),
-    closureReason: ClosureReasonSchema.nullable(),
+    closureReason: ClosureReasonSchema.nullish(),
     currency: z.string(),
-    dateDelivered: z.string().datetime().nullable(),
-    dateDue: z.string().datetime().nullable(),
-    dateIssued: z.string().datetime().nullable(),
-    exported: ExportedDataSchema(),
+    dateDelivered: z.string().datetime().nullish(),
+    dateDue: z.string().datetime().nullish(),
+    dateIssued: z.string().datetime().nullish(),
+    exported: z.lazy(() => ExportedDataSchema()),
     invoiceNo: z.string(),
-    invoiceTags: z.array(InvoiceTagSchema()),
-    issuer: LegalEntitySchema(),
-    lineItems: z.array(InvoiceLineItemSchema()),
-    notes: z.string().nullable(),
-    payAfter: z.string().datetime().nullable(),
-    payer: LegalEntitySchema(),
-    payments: z.array(PaymentSchema()),
-    rejections: z.array(RejectionSchema()),
+    invoiceTags: z.array(z.lazy(() => InvoiceTagSchema())),
+    issuer: z.lazy(() => LegalEntitySchema()),
+    lineItems: z.array(z.lazy(() => InvoiceLineItemSchema())),
+    notes: z.string().nullish(),
+    payAfter: z.string().datetime().nullish(),
+    payer: z.lazy(() => LegalEntitySchema()),
+    payments: z.array(z.lazy(() => PaymentSchema())),
+    rejections: z.array(z.lazy(() => RejectionSchema())),
     status: StatusSchema,
     totalPriceTaxExcl: z.number(),
     totalPriceTaxIncl: z.number(),
@@ -456,7 +452,7 @@ export function InvoiceTagSchema(): z.ZodObject<Properties<InvoiceTag>> {
   return z.object({
     __typename: z.literal("InvoiceTag").optional(),
     dimension: z.string(),
-    label: z.string().nullable(),
+    label: z.string().nullish(),
     value: z.string(),
   });
 }
@@ -464,10 +460,10 @@ export function InvoiceTagSchema(): z.ZodObject<Properties<InvoiceTag>> {
 export function InvoiceWalletSchema(): z.ZodObject<Properties<InvoiceWallet>> {
   return z.object({
     __typename: z.literal("InvoiceWallet").optional(),
-    address: z.string().nullable(),
-    chainId: z.string().nullable(),
-    chainName: z.string().nullable(),
-    rpc: z.string().nullable(),
+    address: z.string().nullish(),
+    chainId: z.string().nullish(),
+    chainName: z.string().nullish(),
+    rpc: z.string().nullish(),
   });
 }
 
@@ -481,12 +477,12 @@ export function IssueInputSchema(): z.ZodObject<Properties<IssueInput>> {
 export function LegalEntitySchema(): z.ZodObject<Properties<LegalEntity>> {
   return z.object({
     __typename: z.literal("LegalEntity").optional(),
-    address: AddressSchema().nullable(),
-    contactInfo: ContactInfoSchema().nullable(),
-    country: z.string().nullable(),
-    id: LegalEntityIdSchema().nullable(),
-    name: z.string().nullable(),
-    paymentRouting: PaymentRoutingSchema().nullable(),
+    address: z.lazy(() => AddressSchema().nullish()),
+    contactInfo: z.lazy(() => ContactInfoSchema().nullish()),
+    country: z.string().nullish(),
+    id: z.lazy(() => LegalEntityIdSchema().nullish()),
+    name: z.string().nullish(),
+    paymentRouting: z.lazy(() => PaymentRoutingSchema().nullish()),
   });
 }
 
@@ -518,13 +514,13 @@ export function LegalEntityTaxIdSchema(): z.ZodObject<
 export function PaymentSchema(): z.ZodObject<Properties<Payment>> {
   return z.object({
     __typename: z.literal("Payment").optional(),
-    amount: z.number().nullable(),
+    amount: z.number().nullish(),
     confirmed: z.boolean(),
     id: z.string(),
-    issue: z.string().nullable(),
-    paymentDate: z.string().datetime().nullable(),
-    processorRef: z.string().nullable(),
-    txnRef: z.string().nullable(),
+    issue: z.string().nullish(),
+    paymentDate: z.string().datetime().nullish(),
+    processorRef: z.string().nullish(),
+    txnRef: z.string().nullish(),
   });
 }
 
@@ -533,8 +529,8 @@ export function PaymentRoutingSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("PaymentRouting").optional(),
-    bank: BankSchema().nullable(),
-    wallet: InvoiceWalletSchema().nullable(),
+    bank: z.lazy(() => BankSchema().nullish()),
+    wallet: z.lazy(() => InvoiceWalletSchema().nullish()),
   });
 }
 
@@ -638,10 +634,10 @@ export function SetLineItemTagInputSchema(): z.ZodObject<
 export function TokenSchema(): z.ZodObject<Properties<Token>> {
   return z.object({
     __typename: z.literal("Token").optional(),
-    chainId: z.string().nullable(),
-    chainName: z.string().nullable(),
-    evmAddress: z.string().nullable(),
-    rpc: z.string().nullable(),
-    symbol: z.string().nullable(),
+    chainId: z.string().nullish(),
+    chainName: z.string().nullish(),
+    evmAddress: z.string().nullish(),
+    rpc: z.string().nullish(),
+    symbol: z.string().nullish(),
   });
 }

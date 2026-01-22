@@ -27,70 +27,90 @@ const stateReducer: StateReducer<BillingStatementPHState> = (
   if (isDocumentAction(action)) {
     return state;
   }
-
   switch (action.type) {
-    case "EDIT_BILLING_STATEMENT":
+    case "EDIT_BILLING_STATEMENT": {
       EditBillingStatementInputSchema().parse(action.input);
+
       billingStatementGeneralOperations.editBillingStatementOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "EDIT_CONTRIBUTOR":
+      break;
+    }
+
+    case "EDIT_CONTRIBUTOR": {
       EditContributorInputSchema().parse(action.input);
+
       billingStatementGeneralOperations.editContributorOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "EDIT_STATUS":
+      break;
+    }
+
+    case "EDIT_STATUS": {
       EditStatusInputSchema().parse(action.input);
+
       billingStatementGeneralOperations.editStatusOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_LINE_ITEM":
+      break;
+    }
+
+    case "ADD_LINE_ITEM": {
       AddLineItemInputSchema().parse(action.input);
+
       billingStatementLineItemsOperations.addLineItemOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "EDIT_LINE_ITEM":
+      break;
+    }
+
+    case "EDIT_LINE_ITEM": {
       EditLineItemInputSchema().parse(action.input);
+
       billingStatementLineItemsOperations.editLineItemOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "DELETE_LINE_ITEM":
+      break;
+    }
+
+    case "DELETE_LINE_ITEM": {
       DeleteLineItemInputSchema().parse(action.input);
+
       billingStatementLineItemsOperations.deleteLineItemOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "EDIT_LINE_ITEM_TAG":
+      break;
+    }
+
+    case "EDIT_LINE_ITEM_TAG": {
       EditLineItemTagInputSchema().parse(action.input);
+
       billingStatementTagsOperations.editLineItemTagOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
+
       break;
+    }
 
     default:
       return state;

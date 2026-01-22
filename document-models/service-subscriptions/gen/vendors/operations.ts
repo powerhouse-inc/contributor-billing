@@ -1,10 +1,10 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddVendorAction,
-  type UpdateVendorAction,
-  type DeleteVendorAction,
+import type {
+  AddVendorAction,
+  UpdateVendorAction,
+  DeleteVendorAction,
 } from "./actions.js";
-import { type ServiceSubscriptionsState } from "../types.js";
+import type { ServiceSubscriptionsState } from "../types.js";
 
 export interface ServiceSubscriptionsVendorsOperations {
   addVendorOperation: (

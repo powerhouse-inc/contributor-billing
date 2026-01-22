@@ -1,9 +1,9 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type SetSetupServicesAction,
-  type SetRecurringServicesAction,
+import type {
+  SetSetupServicesAction,
+  SetRecurringServicesAction,
 } from "./actions.js";
-import { type ResourceTemplateState } from "../types.js";
+import type { ResourceTemplateState } from "../types.js";
 
 export interface ResourceTemplateServiceCategoryManagementOperations {
   setSetupServicesOperation: (

@@ -9,6 +9,7 @@ import {
 } from "./gen/creators.js";
 
 /** Actions for the ResourceTemplate document model */
+
 export const actions = {
   ...baseActions,
   ...templateManagementActions,

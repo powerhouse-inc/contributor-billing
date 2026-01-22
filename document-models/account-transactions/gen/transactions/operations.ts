@@ -1,11 +1,11 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddTransactionAction,
-  type UpdateTransactionAction,
-  type DeleteTransactionAction,
-  type UpdateTransactionPeriodAction,
+import type {
+  AddTransactionAction,
+  UpdateTransactionAction,
+  DeleteTransactionAction,
+  UpdateTransactionPeriodAction,
 } from "./actions.js";
-import { type AccountTransactionsState } from "../types.js";
+import type { AccountTransactionsState } from "../types.js";
 
 export interface AccountTransactionsTransactionsOperations {
   addTransactionOperation: (
