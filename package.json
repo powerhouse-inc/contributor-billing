@@ -99,7 +99,7 @@
     "@powerhousedao/reactor-api": "5.3.0-staging.6",
     "@powerhousedao/reactor-browser": "5.3.0-staging.6",
     "@powerhousedao/reactor-local": "5.3.0-staging.6",
-    "@powerhousedao/scalars": "staging",
+    "@powerhousedao/scalars": "latest",
     "@powerhousedao/switchboard": "5.3.0-staging.6",
     "@tailwindcss/cli": "^4.1.4",
     "@testing-library/react": "^16.3.0",

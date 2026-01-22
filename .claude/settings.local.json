@@ -26,7 +26,8 @@
       "Bash(node --check:*)",
       "Bash(bun build:*)",
       "Bash(npm run lint:fix:*)",
-      "Bash(bun eslint:*)"
+      "Bash(bun eslint:*)",
+      "Bash(bun i:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

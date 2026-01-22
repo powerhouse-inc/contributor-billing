@@ -8,6 +8,6 @@ export class InvoiceAddonSubgraph extends BaseSubgraph {
   typeDefs: DocumentNode = schema;
   resolvers = getResolvers(this);
   additionalContextFields = {};
-  async onSetup() {}
-  async onDisconnect() {}
+  async onSetup() { }
+  async onDisconnect() { }
 }

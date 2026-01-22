@@ -8,3 +8,4 @@ node_modules
 .ds_store
 .ph
 projects-import.js
+.keypair.json

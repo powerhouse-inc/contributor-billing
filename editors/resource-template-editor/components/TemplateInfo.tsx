@@ -5,7 +5,7 @@ import type {
   ResourceTemplateDocument,
   ResourceTemplateAction,
   TargetAudience,
-} from "../../../document-models/resource-template/gen/types.js";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 import {
   updateTemplateInfo,
   updateTemplateStatus,
@@ -37,6 +37,139 @@ const AUDIENCE_PRESETS = [
   { label: "Investors", color: "#6366f1" },
 ];
 
+// Service templates for quick-add functionality
+interface ServiceTemplate {
+  title: string;
+  description: string;
+  icon: string;
+}
+
+const SETUP_SERVICE_TEMPLATES: Record<string, ServiceTemplate[]> = {
+  "Entity Formation": [
+    {
+      title: "Entity Formation",
+      description: "Legal entity registration and setup",
+      icon: "🏛️",
+    },
+    {
+      title: "Registered Agent",
+      description: "Registered agent designation for one year",
+      icon: "📋",
+    },
+    {
+      title: "Operating Agreement",
+      description: "Custom operating agreement drafting",
+      icon: "📜",
+    },
+    {
+      title: "EIN Application",
+      description: "Federal tax ID number application",
+      icon: "🔢",
+    },
+    {
+      title: "Banking Resolution",
+      description: "Corporate banking resolution preparation",
+      icon: "🏦",
+    },
+  ],
+  "Initial Setup": [
+    {
+      title: "Corporate Seal & Kit",
+      description: "Official corporate seal and documentation kit",
+      icon: "🔏",
+    },
+    {
+      title: "Initial Minutes",
+      description: "Organizational meeting minutes preparation",
+      icon: "📝",
+    },
+    {
+      title: "Bylaws Drafting",
+      description: "Corporate bylaws and governance documents",
+      icon: "⚖️",
+    },
+    {
+      title: "Stock Certificates",
+      description: "Initial stock certificate issuance",
+      icon: "📃",
+    },
+    {
+      title: "Compliance Calendar",
+      description: "Annual compliance calendar setup",
+      icon: "📅",
+    },
+  ],
+};
+
+const RECURRING_SERVICE_TEMPLATES: Record<string, ServiceTemplate[]> = {
+  "Compliance & Governance": [
+    {
+      title: "Annual Compliance Review",
+      description: "Yearly compliance status check and filings",
+      icon: "✓",
+    },
+    {
+      title: "Board Meeting Minutes",
+      description: "Quarterly board meeting documentation",
+      icon: "📋",
+    },
+    {
+      title: "Regulatory Filing Support",
+      description: "Ongoing regulatory submission assistance",
+      icon: "📊",
+    },
+    {
+      title: "Corporate Record Maintenance",
+      description: "Continuous corporate record keeping",
+      icon: "🗄️",
+    },
+  ],
+  "Accounting & Finance": [
+    {
+      title: "Bookkeeping",
+      description: "Monthly bookkeeping and reconciliation",
+      icon: "📚",
+    },
+    {
+      title: "Financial Reporting",
+      description: "Quarterly financial statement preparation",
+      icon: "📈",
+    },
+    {
+      title: "Tax Preparation",
+      description: "Annual tax return preparation and filing",
+      icon: "💰",
+    },
+    {
+      title: "Payroll Processing",
+      description: "Bi-weekly payroll management",
+      icon: "💵",
+    },
+  ],
+  "Advisory & Support": [
+    {
+      title: "Dedicated Account Manager",
+      description: "Personal point of contact for all needs",
+      icon: "👤",
+    },
+    {
+      title: "Priority Support",
+      description: "Fast-track support response times",
+      icon: "⚡",
+    },
+    {
+      title: "Strategic Consulting",
+      description: "Quarterly business strategy sessions",
+      icon: "🎯",
+    },
+    {
+      title: "Legal Document Review",
+      description: "Contract and document review services",
+      icon: "🔍",
+    },
+  ],
+};
+
 export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
   const { state } = document;
   const globalState = state.global;
@@ -55,6 +188,8 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
   const [newRecurringService, setNewRecurringService] = useState("");
   const [newAudienceLabel, setNewAudienceLabel] = useState("");
   const [showAudienceInput, setShowAudienceInput] = useState(false);
+  const [showSetupTemplates, setShowSetupTemplates] = useState(false);
+  const [showRecurringTemplates, setShowRecurringTemplates] = useState(false);
   const setupServiceInputRef = useRef<HTMLInputElement>(null);
   const recurringServiceInputRef = useRef<HTMLInputElement>(null);
 
@@ -210,6 +345,28 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
     const updatedServices = globalState.recurringServices.filter(
       (_, i) => i !== index,
     );
+    dispatch(
+      setRecurringServices({
+        services: updatedServices,
+        lastModified: new Date().toISOString(),
+      }),
+    );
+  };
+
+  const handleAddSetupFromTemplate = (template: ServiceTemplate) => {
+    if (globalState.setupServices.includes(template.title)) return;
+    const updatedServices = [...globalState.setupServices, template.title];
+    dispatch(
+      setSetupServices({
+        services: updatedServices,
+        lastModified: new Date().toISOString(),
+      }),
+    );
+  };
+
+  const handleAddRecurringFromTemplate = (template: ServiceTemplate) => {
+    if (globalState.recurringServices.includes(template.title)) return;
+    const updatedServices = [...globalState.recurringServices, template.title];
     dispatch(
       setRecurringServices({
         services: updatedServices,
@@ -458,7 +615,77 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
                   One-time setup services
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowSetupTemplates(!showSetupTemplates)}
+                className={`template-editor__templates-toggle ${showSetupTemplates ? "template-editor__templates-toggle--active" : ""}`}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />
+                </svg>
+                Templates
+              </button>
             </div>
+
+            {showSetupTemplates && (
+              <div className="template-editor__templates-panel">
+                {Object.entries(SETUP_SERVICE_TEMPLATES).map(
+                  ([category, templates]) => (
+                    <div
+                      key={category}
+                      className="template-editor__template-category"
+                    >
+                      <span className="template-editor__template-category-label">
+                        {category}
+                      </span>
+                      <div className="template-editor__template-items">
+                        {templates.map((template) => {
+                          const isAdded = globalState.setupServices.includes(
+                            template.title,
+                          );
+                          return (
+                            <button
+                              key={template.title}
+                              type="button"
+                              onClick={() =>
+                                handleAddSetupFromTemplate(template)
+                              }
+                              disabled={isAdded}
+                              className={`template-editor__template-item ${isAdded ? "template-editor__template-item--added" : ""}`}
+                              title={template.description}
+                            >
+                              <span className="template-editor__template-icon">
+                                {template.icon}
+                              </span>
+                              <span className="template-editor__template-title">
+                                {template.title}
+                              </span>
+                              {isAdded && (
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.5"
+                                  className="template-editor__template-check"
+                                >
+                                  <path d="M5 12l5 5L20 7" />
+                                </svg>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ),
+                )}
+              </div>
+            )}
+
             <div className="template-editor__services">
               {globalState.setupServices.map(
                 (service: string, index: number) => (
@@ -532,7 +759,80 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
                   Ongoing services included
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setShowRecurringTemplates(!showRecurringTemplates)
+                }
+                className={`template-editor__templates-toggle template-editor__templates-toggle--amber ${showRecurringTemplates ? "template-editor__templates-toggle--active" : ""}`}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />
+                </svg>
+                Templates
+              </button>
             </div>
+
+            {showRecurringTemplates && (
+              <div className="template-editor__templates-panel template-editor__templates-panel--amber">
+                {Object.entries(RECURRING_SERVICE_TEMPLATES).map(
+                  ([category, templates]) => (
+                    <div
+                      key={category}
+                      className="template-editor__template-category"
+                    >
+                      <span className="template-editor__template-category-label">
+                        {category}
+                      </span>
+                      <div className="template-editor__template-items">
+                        {templates.map((template) => {
+                          const isAdded =
+                            globalState.recurringServices.includes(
+                              template.title,
+                            );
+                          return (
+                            <button
+                              key={template.title}
+                              type="button"
+                              onClick={() =>
+                                handleAddRecurringFromTemplate(template)
+                              }
+                              disabled={isAdded}
+                              className={`template-editor__template-item template-editor__template-item--amber ${isAdded ? "template-editor__template-item--added" : ""}`}
+                              title={template.description}
+                            >
+                              <span className="template-editor__template-icon">
+                                {template.icon}
+                              </span>
+                              <span className="template-editor__template-title">
+                                {template.title}
+                              </span>
+                              {isAdded && (
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.5"
+                                  className="template-editor__template-check"
+                                >
+                                  <path d="M5 12l5 5L20 7" />
+                                </svg>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ),
+                )}
+              </div>
+            )}
+
             <div className="template-editor__services">
               {globalState.recurringServices.map(
                 (service: string, index: number) => (
@@ -1380,6 +1680,156 @@ const styles = `
     width: 12px;
     height: 12px;
     color: white;
+  }
+
+  /* Templates Panel */
+  .template-editor__templates-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    padding: 6px 12px;
+    font-family: var(--te-font);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--te-emerald);
+    background: var(--te-emerald-light);
+    border: 1.5px solid transparent;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__templates-toggle svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .template-editor__templates-toggle:hover {
+    border-color: var(--te-emerald);
+  }
+
+  .template-editor__templates-toggle--active {
+    background: var(--te-emerald);
+    color: white;
+  }
+
+  .template-editor__templates-toggle--amber {
+    color: var(--te-amber);
+    background: var(--te-amber-light);
+  }
+
+  .template-editor__templates-toggle--amber:hover {
+    border-color: var(--te-amber);
+  }
+
+  .template-editor__templates-toggle--amber.template-editor__templates-toggle--active {
+    background: var(--te-amber);
+    color: white;
+  }
+
+  .template-editor__templates-panel {
+    background: var(--te-emerald-light);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    animation: templatesPanelSlide 0.2s ease-out;
+  }
+
+  .template-editor__templates-panel--amber {
+    background: var(--te-amber-light);
+    border-color: rgba(245, 158, 11, 0.2);
+  }
+
+  @keyframes templatesPanelSlide {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .template-editor__template-category {
+    margin-bottom: 12px;
+  }
+
+  .template-editor__template-category:last-child {
+    margin-bottom: 0;
+  }
+
+  .template-editor__template-category-label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--te-ink-muted);
+    margin-bottom: 8px;
+  }
+
+  .template-editor__template-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .template-editor__template-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    font-family: var(--te-font);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--te-ink);
+    background: var(--te-surface);
+    border: 1.5px solid var(--te-border-light);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__template-item:hover:not(:disabled) {
+    border-color: var(--te-emerald);
+    background: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+  }
+
+  .template-editor__template-item--amber:hover:not(:disabled) {
+    border-color: var(--te-amber);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+  }
+
+  .template-editor__template-item--added {
+    background: var(--te-emerald-light);
+    border-color: var(--te-emerald);
+    color: var(--te-emerald);
+    cursor: default;
+  }
+
+  .template-editor__template-item--amber.template-editor__template-item--added {
+    background: var(--te-amber-light);
+    border-color: var(--te-amber);
+    color: var(--te-amber);
+  }
+
+  .template-editor__template-icon {
+    font-size: 0.875rem;
+  }
+
+  .template-editor__template-title {
+    white-space: nowrap;
+  }
+
+  .template-editor__template-check {
+    width: 14px;
+    height: 14px;
+    margin-left: 2px;
   }
 
   /* Responsive */

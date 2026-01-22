@@ -38,6 +38,10 @@
         {
             "id": "powerhouse/service-offering",
             "name": "ServiceOffering"
+        },
+        {
+            "id": "powerhouse/resource-template",
+            "name": "ResourceTemplate"
         }
     ],
     "editors": [
