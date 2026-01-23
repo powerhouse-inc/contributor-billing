@@ -243,7 +243,7 @@ const LineItemsTable = (props: {
   return (
     <div className="w-full">
       {/* Heading */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex items-center justify-between">
         <div className="space-y-1">
           <div className="text-xs font-semibold tracking-[0.24em] text-black/60">
             LINE ITEMS
@@ -253,7 +253,7 @@ const LineItemsTable = (props: {
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-3 sm:justify-end">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => setShowTagTable(!showTagTable)}

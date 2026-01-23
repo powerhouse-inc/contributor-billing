@@ -5,7 +5,6 @@ import {
   type BillingStatementState,
   actions,
 } from "../../document-models/billing-statement/index.js";
-import { CurrencyForm } from "../invoice/components/currencyForm.js";
 import { Textarea, Select } from "@powerhousedao/document-engineering";
 import LineItemsTable from "./components/lineItemsTable.js";
 import { formatNumber } from "../invoice/lineItems.js";
@@ -65,20 +64,22 @@ export default function Editor(
           <div className="overflow-hidden rounded-2xl border border-black/10 bg-white text-[#14120f] shadow-[0_18px_50px_rgba(15,23,42,0.10)]">
             {/* Header */}
             <div className="border-b border-black/10 bg-[#efe8da] px-6 py-5 text-[#14120f]">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <div>
                   <h1 className="font-serif text-2xl tracking-tight sm:text-3xl">
                     Billing Statement
                   </h1>
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:text-right">
-                  <div className="text-black/60">Submitter</div>
-                  <div className="font-semibold text-black/90">
-                    {state.contributor}
+                <div className="flex items-center gap-8">
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="text-xs text-black/50">Submitter</div>
+                    <div className="font-semibold text-black/90">
+                      {state.contributor}
+                    </div>
                   </div>
-                  <div className="text-black/60">Status</div>
-                  <div className="flex justify-start sm:justify-end">
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="text-xs text-black/50">Status</div>
                     <span className="inline-flex items-center rounded-full border border-black/15 bg-black/5 px-3 py-1 text-xs font-semibold tracking-wide text-black/80">
                       {String(state.status || "—")}
                     </span>
@@ -89,12 +90,12 @@ export default function Editor(
 
             {/* Body */}
             <div className="px-6 py-6">
-              <div className="flex flex-col gap-3 rounded-xl border border-black/10 bg-[#efe8da] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center justify-between rounded-xl border border-black/10 bg-[#efe8da] px-4 py-3">
                 <div className="text-sm text-black/60">
                   Keep edits lightweight: double‑click a row to edit, click
                   outside to auto‑save.
                 </div>
-                <div className="flex items-center justify-between gap-3 sm:justify-end">
+                <div className="flex items-center gap-3">
                   <span className="text-xs font-semibold tracking-wide text-black/60">
                     CURRENCY
                   </span>
