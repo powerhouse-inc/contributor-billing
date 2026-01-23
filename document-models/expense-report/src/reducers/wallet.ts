@@ -333,4 +333,15 @@ export const expenseReportWalletOperations: ExpenseReportWalletOperations = {
   setStatusOperation(state, action) {
     state.status = action.input.status;
   },
+  setPeriodOperation(state, action) {
+    if (
+      action.input.startDate !== undefined &&
+      action.input.startDate !== null
+    ) {
+      state.startDate = action.input.startDate;
+    }
+    if (action.input.endDate !== undefined && action.input.endDate !== null) {
+      state.endDate = action.input.endDate;
+    }
+  },
 };

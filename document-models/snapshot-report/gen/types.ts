@@ -3,7 +3,6 @@ import type { SnapshotReportAction } from "./actions.js";
 import type { SnapshotReportState as SnapshotReportGlobalState } from "./schema/types.js";
 
 type SnapshotReportLocalState = Record<PropertyKey, never>;
-
 type SnapshotReportPHState = PHBaseState & {
   global: SnapshotReportGlobalState;
   local: SnapshotReportLocalState;

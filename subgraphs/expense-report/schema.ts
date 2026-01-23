@@ -105,6 +105,11 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: ExpenseReport_SetStatusInput
     ): Int
+    ExpenseReport_setPeriod(
+      driveId: String
+      docId: PHID
+      input: ExpenseReport_SetPeriodInput
+    ): Int
   }
 
   """
@@ -207,5 +212,9 @@ export const schema: DocumentNode = gql`
     DRAFT
     REVIEW
     FINAL
+  }
+  input ExpenseReport_SetPeriodInput {
+    startDate: DateTime
+    endDate: DateTime
   }
 `;

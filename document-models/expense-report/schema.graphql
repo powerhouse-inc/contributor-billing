@@ -1,12 +1,9 @@
-scalar Unknown
-scalar DateTime
-scalar Attachment
-scalar Address
 scalar Amount_Tokens
 scalar EthereumAddress
-scalar EmailAddress
 scalar Amount_Percentage
+scalar EmailAddress
 scalar Date
+scalar DateTime
 scalar URL
 scalar Amount_Money
 scalar OLabel
@@ -18,7 +15,6 @@ scalar Amount_Currency
 scalar Amount_Crypto
 scalar Amount
 scalar Upload
-
 type ExpenseReportState {
   ownerId: PHID
   status: ExpenseReportStatus!
@@ -26,6 +22,8 @@ type ExpenseReportState {
   groups: [LineItemGroup!]!
   periodStart: DateTime
   periodEnd: DateTime
+  startDate: DateTime
+  endDate: DateTime
 }
 
 enum ExpenseReportStatus {
@@ -68,6 +66,8 @@ type LineItem {
   payments: Float
   comments: String
 }
+
+
 
 # wallet
 
@@ -184,4 +184,9 @@ enum ExpenseReportStatusInput {
   DRAFT
   REVIEW
   FINAL
+}
+
+input SetPeriodInput {
+  startDate: DateTime
+  endDate: DateTime
 }

@@ -1,10 +1,10 @@
 import { type SignalDispatch } from "document-model";
-import type {
-  AddSnapshotAccountAction,
-  UpdateSnapshotAccountTypeAction,
-  RemoveSnapshotAccountAction,
+import {
+  type AddSnapshotAccountAction,
+  type UpdateSnapshotAccountTypeAction,
+  type RemoveSnapshotAccountAction,
 } from "./actions.js";
-import type { SnapshotReportState } from "../types.js";
+import { type SnapshotReportState } from "../types.js";
 
 export interface SnapshotReportAccountsOperations {
   addSnapshotAccountOperation: (

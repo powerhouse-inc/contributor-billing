@@ -38,210 +38,160 @@ const stateReducer: StateReducer<SnapshotReportPHState> = (
   if (isDocumentAction(action)) {
     return state;
   }
-  switch (action.type) {
-    case "SET_REPORT_CONFIG": {
-      SetReportConfigInputSchema().parse(action.input);
 
+  switch (action.type) {
+    case "SET_REPORT_CONFIG":
+      SetReportConfigInputSchema().parse(action.input);
       snapshotReportConfigurationOperations.setReportConfigOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "SET_ACCOUNTS_DOCUMENT": {
+    case "SET_ACCOUNTS_DOCUMENT":
       SetAccountsDocumentInputSchema().parse(action.input);
-
       snapshotReportConfigurationOperations.setAccountsDocumentOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "SET_PERIOD": {
+    case "SET_PERIOD":
       SetPeriodInputSchema().parse(action.input);
-
       snapshotReportConfigurationOperations.setPeriodOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "SET_OWNER_ID": {
+    case "SET_OWNER_ID":
       SetOwnerIdInputSchema().parse(action.input);
-
       snapshotReportConfigurationOperations.setOwnerIdOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "SET_PERIOD_START": {
+    case "SET_PERIOD_START":
       SetPeriodStartInputSchema().parse(action.input);
-
       snapshotReportConfigurationOperations.setPeriodStartOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "SET_PERIOD_END": {
+    case "SET_PERIOD_END":
       SetPeriodEndInputSchema().parse(action.input);
-
       snapshotReportConfigurationOperations.setPeriodEndOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "ADD_SNAPSHOT_ACCOUNT": {
+    case "ADD_SNAPSHOT_ACCOUNT":
       AddSnapshotAccountInputSchema().parse(action.input);
-
       snapshotReportAccountsOperations.addSnapshotAccountOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "UPDATE_SNAPSHOT_ACCOUNT_TYPE": {
+    case "UPDATE_SNAPSHOT_ACCOUNT_TYPE":
       UpdateSnapshotAccountTypeInputSchema().parse(action.input);
-
       snapshotReportAccountsOperations.updateSnapshotAccountTypeOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "REMOVE_SNAPSHOT_ACCOUNT": {
+    case "REMOVE_SNAPSHOT_ACCOUNT":
       RemoveSnapshotAccountInputSchema().parse(action.input);
-
       snapshotReportAccountsOperations.removeSnapshotAccountOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "SET_STARTING_BALANCE": {
+    case "SET_STARTING_BALANCE":
       SetStartingBalanceInputSchema().parse(action.input);
-
       snapshotReportBalancesOperations.setStartingBalanceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "SET_ENDING_BALANCE": {
+    case "SET_ENDING_BALANCE":
       SetEndingBalanceInputSchema().parse(action.input);
-
       snapshotReportBalancesOperations.setEndingBalanceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "REMOVE_STARTING_BALANCE": {
+    case "REMOVE_STARTING_BALANCE":
       RemoveStartingBalanceInputSchema().parse(action.input);
-
       snapshotReportBalancesOperations.removeStartingBalanceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "REMOVE_ENDING_BALANCE": {
+    case "REMOVE_ENDING_BALANCE":
       RemoveEndingBalanceInputSchema().parse(action.input);
-
       snapshotReportBalancesOperations.removeEndingBalanceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "ADD_TRANSACTION": {
+    case "ADD_TRANSACTION":
       AddTransactionInputSchema().parse(action.input);
-
       snapshotReportTransactionsOperations.addTransactionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "REMOVE_TRANSACTION": {
+    case "REMOVE_TRANSACTION":
       RemoveTransactionInputSchema().parse(action.input);
-
       snapshotReportTransactionsOperations.removeTransactionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "UPDATE_TRANSACTION_FLOW_TYPE": {
+    case "UPDATE_TRANSACTION_FLOW_TYPE":
       UpdateTransactionFlowTypeInputSchema().parse(action.input);
-
       snapshotReportTransactionsOperations.updateTransactionFlowTypeOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
-    case "RECALCULATE_FLOW_TYPES": {
+    case "RECALCULATE_FLOW_TYPES":
       RecalculateFlowTypesInputSchema().parse(action.input);
-
       snapshotReportTransactionsOperations.recalculateFlowTypesOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-
       break;
-    }
 
     default:
       return state;

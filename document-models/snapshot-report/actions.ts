@@ -7,7 +7,6 @@ import {
 } from "./gen/creators.js";
 
 /** Actions for the SnapshotReport document model */
-
 export const actions = {
   ...baseActions,
   ...configurationActions,

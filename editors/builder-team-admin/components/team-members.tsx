@@ -3,7 +3,7 @@ import type { FileNode } from "document-drive";
 import {
   useDocumentsInSelectedDrive,
   useDrives,
-  useDocuments,
+  useGetDocuments,
   useDocumentById,
 } from "@powerhousedao/reactor-browser";
 import {
@@ -206,7 +206,7 @@ export function ContributorsSection({}) {
   }, [builderProfileNodesWithDriveId]);
 
   // Fetch all builder profile documents from all drives
-  const builderProfileDocuments = useDocuments(builderPhids);
+  const builderProfileDocuments = useGetDocuments(builderPhids);
 
   // Create a map of PHID to document for quick lookup (local drives)
   const localBuilderProfileMap = useMemo(() => {

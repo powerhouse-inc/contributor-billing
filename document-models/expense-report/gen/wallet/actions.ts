@@ -1,4 +1,4 @@
-import type { Action } from "document-model";
+import { type Action } from "document-model";
 import type {
   AddWalletInput,
   RemoveWalletInput,
@@ -17,6 +17,7 @@ import type {
   UpdateWalletInput,
   SetOwnerIdInput,
   SetStatusInput,
+  SetPeriodInput,
 } from "../types.js";
 
 export type AddWalletAction = Action & {
@@ -87,6 +88,10 @@ export type SetStatusAction = Action & {
   type: "SET_STATUS";
   input: SetStatusInput;
 };
+export type SetPeriodAction = Action & {
+  type: "SET_PERIOD";
+  input: SetPeriodInput;
+};
 
 export type ExpenseReportWalletAction =
   | AddWalletAction
@@ -105,4 +110,5 @@ export type ExpenseReportWalletAction =
   | SetPeriodEndAction
   | UpdateWalletAction
   | SetOwnerIdAction
-  | SetStatusAction;
+  | SetStatusAction
+  | SetPeriodAction;

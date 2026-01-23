@@ -1,18 +1,15 @@
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import {
-  useDocumentById,
   useDocumentsInSelectedDrive,
   useDocumentsInSelectedFolder,
+  useDocumentById,
   useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import type {
-  ExpenseReportAction,
   ExpenseReportDocument,
+  ExpenseReportAction,
 } from "@powerhousedao/contributor-billing/document-models/expense-report";
-import {
-  assertIsExpenseReportDocument,
-  isExpenseReportDocument,
-} from "./gen/document-schema.js";
+import { isExpenseReportDocument } from "./gen/document-schema.js";
 
 /** Hook to get a ExpenseReport document by its id */
 export function useExpenseReportDocumentById(
@@ -26,14 +23,12 @@ export function useExpenseReportDocumentById(
 }
 
 /** Hook to get the selected ExpenseReport document */
-export function useSelectedExpenseReportDocument(): [
-  ExpenseReportDocument,
-  DocumentDispatch<ExpenseReportAction>,
-] {
+export function useSelectedExpenseReportDocument():
+  | [ExpenseReportDocument, DocumentDispatch<ExpenseReportAction>]
+  | [undefined, undefined] {
   const [document, dispatch] = useSelectedDocument();
-
-  assertIsExpenseReportDocument(document);
-  return [document, dispatch] as const;
+  if (!isExpenseReportDocument(document)) return [undefined, undefined];
+  return [document, dispatch];
 }
 
 /** Hook to get all ExpenseReport documents in the selected drive */

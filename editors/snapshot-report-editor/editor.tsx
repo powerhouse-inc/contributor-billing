@@ -1022,11 +1022,17 @@ export default function Editor() {
                                           {balance.token}
                                         </div>
                                         <div
-                                          className="text-xs text-gray-600"
+                                          className="text-xs text-gray-600 space-y-1"
                                           style={{
                                             fontVariantNumeric: "tabular-nums",
                                           }}
                                         >
+                                          <div>
+                                            Opening:{" "}
+                                            <span className="font-medium">
+                                              0.000000 {balance.token}
+                                            </span>
+                                          </div>
                                           <div>
                                             Closing:{" "}
                                             <span className="font-medium">
@@ -1073,108 +1079,118 @@ export default function Editor() {
                                     Transactions ({account.transactions.length})
                                   </h4>
                                   <div className="space-y-2">
-                                    {account.transactions.map((tx: any) => (
-                                      <div
-                                        key={tx.id}
-                                        className="bg-white border border-gray-200 rounded p-3 text-sm"
-                                      >
-                                        <div className="grid grid-cols-2 gap-2">
-                                          {/* Transaction Details Grid */}
-                                          <div>
-                                            <span className="text-gray-500">
-                                              Direction:
-                                            </span>
-                                            <span
-                                              className={`ml-2 font-medium ${
-                                                tx.direction === "INFLOW"
-                                                  ? "text-green-600"
-                                                  : "text-red-600"
-                                              }`}
-                                            >
-                                              {tx.direction}
-                                            </span>
-                                          </div>
-                                          <div>
-                                            <span className="text-gray-500">
-                                              Amount:
-                                            </span>
-                                            <span className="ml-2 font-medium">
-                                              {typeof tx.amount === "object" &&
-                                              tx.amount?.value !== undefined
-                                                ? `${tx.amount.value} ${tx.amount.unit || tx.token}`
-                                                : `${tx.amount} ${tx.token}`}
-                                            </span>
-                                          </div>
-                                          <div>
-                                            <span className="text-gray-500">
-                                              Date:
-                                            </span>
-                                            <span className="ml-2">
-                                              {new Date(
-                                                tx.datetime,
-                                              ).toLocaleDateString()}
-                                            </span>
-                                          </div>
-                                          <div>
-                                            <span className="text-gray-500">
-                                              Time:
-                                            </span>
-                                            <span className="ml-2">
-                                              {new Date(
-                                                tx.datetime,
-                                              ).toLocaleTimeString()}
-                                            </span>
-                                          </div>
-                                          {tx.counterParty && (
-                                            <div className="col-span-2">
-                                              <span className="text-gray-500">
-                                                Counter Party:
-                                              </span>
-                                              <span className="ml-2 font-mono text-xs">
-                                                {tx.counterParty}
-                                              </span>
-                                            </div>
-                                          )}
-                                          {tx.flowType && (
+                                    {[...account.transactions]
+                                      .sort(
+                                        (a: any, b: any) =>
+                                          new Date(b.datetime).getTime() -
+                                          new Date(a.datetime).getTime(),
+                                      )
+                                      .map((tx: any) => (
+                                        <div
+                                          key={tx.id}
+                                          className="bg-white border border-gray-200 rounded p-3 text-sm"
+                                        >
+                                          <div className="grid grid-cols-2 gap-2">
+                                            {/* Transaction Details Grid */}
                                             <div>
                                               <span className="text-gray-500">
-                                                Flow Type:
+                                                Direction:
                                               </span>
                                               <span
-                                                className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
-                                                  tx.flowType === "TopUp"
-                                                    ? "bg-green-100 text-green-800"
-                                                    : tx.flowType === "Return"
-                                                      ? "bg-orange-100 text-orange-800"
-                                                      : tx.flowType ===
-                                                          "Internal"
-                                                        ? "bg-purple-100 text-purple-800"
-                                                        : "bg-red-100 text-red-800"
+                                                className={`ml-2 font-medium ${
+                                                  tx.direction === "INFLOW"
+                                                    ? "text-green-600"
+                                                    : "text-red-600"
                                                 }`}
                                               >
-                                                {tx.flowType}
+                                                {tx.direction}
                                               </span>
                                             </div>
-                                          )}
-                                          <div className="col-span-2">
-                                            <span className="text-gray-500">
-                                              Tx Hash:
-                                            </span>
-                                            <a
-                                              href={`https://etherscan.io/tx/${tx.txHash}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="ml-2 text-blue-600 hover:underline font-mono text-xs"
-                                            >
-                                              {tx.txHash.substring(0, 10)}...
-                                              {tx.txHash.substring(
-                                                tx.txHash.length - 8,
-                                              )}
-                                            </a>
+                                            <div>
+                                              <span className="text-gray-500">
+                                                Amount:
+                                              </span>
+                                              <span className="ml-2 font-medium">
+                                                {typeof tx.amount ===
+                                                  "object" &&
+                                                tx.amount?.value !== undefined
+                                                  ? `${tx.amount.value} ${tx.amount.unit || tx.token}`
+                                                  : `${tx.amount} ${tx.token}`}
+                                              </span>
+                                            </div>
+                                            <div>
+                                              <span className="text-gray-500">
+                                                Date:
+                                              </span>
+                                              <span className="ml-2">
+                                                {new Date(
+                                                  tx.datetime,
+                                                ).toLocaleDateString()}
+                                              </span>
+                                            </div>
+                                            <div>
+                                              <span className="text-gray-500">
+                                                Time:
+                                              </span>
+                                              <span className="ml-2">
+                                                {new Date(
+                                                  tx.datetime,
+                                                ).toLocaleTimeString()}
+                                              </span>
+                                            </div>
+                                            {tx.counterParty && (
+                                              <div className="col-span-2">
+                                                <span className="text-gray-500">
+                                                  Counter Party:
+                                                </span>
+                                                <span className="ml-2 font-mono text-xs">
+                                                  {tx.counterParty}
+                                                </span>
+                                              </div>
+                                            )}
+                                            {tx.flowType && (
+                                              <div>
+                                                <span className="text-gray-500">
+                                                  Flow Type:
+                                                </span>
+                                                <span
+                                                  className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
+                                                    tx.flowType === "TopUp"
+                                                      ? "bg-green-100 text-green-800"
+                                                      : tx.flowType === "Return"
+                                                        ? "bg-orange-100 text-orange-800"
+                                                        : tx.flowType ===
+                                                            "Internal"
+                                                          ? "bg-purple-100 text-purple-800"
+                                                          : tx.flowType ===
+                                                              "Swap"
+                                                            ? "bg-blue-100 text-blue-800"
+                                                            : "bg-red-100 text-red-800"
+                                                  }`}
+                                                >
+                                                  {tx.flowType}
+                                                </span>
+                                              </div>
+                                            )}
+                                            <div className="col-span-2">
+                                              <span className="text-gray-500">
+                                                Tx Hash:
+                                              </span>
+                                              <a
+                                                href={`https://etherscan.io/tx/${tx.txHash}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="ml-2 text-blue-600 hover:underline font-mono text-xs"
+                                              >
+                                                {tx.txHash.substring(0, 10)}...
+                                                {tx.txHash.substring(
+                                                  tx.txHash.length - 8,
+                                                )}
+                                              </a>
+                                            </div>
                                           </div>
                                         </div>
-                                      </div>
-                                    ))}
+                                      ))}
                                   </div>
                                 </div>
                               </div>

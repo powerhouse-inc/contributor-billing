@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@powerhousedao/document-engineering";
+import { ChevronDown, ChevronUp, HelpCircle, X } from "lucide-react";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
@@ -28,6 +29,89 @@ import { accountTransactionsService } from "./services/accountTransactionsServic
 
 type ViewMode = "list" | "add" | "edit";
 
+const HELP_DISMISSED_KEY = "accountsEditor.helpDismissed";
+
+function InstructionSection({ onDismiss }: { onDismiss: () => void }) {
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  return (
+    <div className="bg-blue-50 border border-blue-200 rounded-lg overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-blue-100 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <HelpCircle className="w-5 h-5 text-blue-600" />
+          <span className="font-medium text-blue-900">
+            Getting Started with Accounts
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDismiss();
+            }}
+            className="p-1 hover:bg-blue-200 rounded text-blue-600"
+            title="Don't show again"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          {isExpanded ? (
+            <ChevronUp className="w-5 h-5 text-blue-600" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-blue-600" />
+          )}
+        </div>
+      </button>
+      {isExpanded && (
+        <div className="px-4 pb-4 text-sm text-blue-800 space-y-3">
+          <div>
+            <strong className="text-blue-900">What is an Account?</strong>
+            <p className="mt-1">
+              An account represents a wallet address or entity that participates
+              in your financial flows. This could be a treasury wallet, a
+              contributor's address, or an external service provider.
+            </p>
+          </div>
+          <div>
+            <strong className="text-blue-900">
+              Why specify an Account Type?
+            </strong>
+            <p className="mt-1">
+              The account type helps categorize how funds flow in and out,
+              making it easier to track transactions and generate accurate
+              reports. It also enables automatic flow type detection.
+            </p>
+          </div>
+          <div>
+            <strong className="text-blue-900">Account Type Meanings:</strong>
+            <ul className="mt-1 ml-4 list-disc space-y-1">
+              <li>
+                <strong>Source:</strong> Where funds originate (e.g., revenue
+                streams, grants)
+              </li>
+              <li>
+                <strong>Internal:</strong> Wallets within your organization
+              </li>
+              <li>
+                <strong>Destination:</strong> Where you send payments (e.g.,
+                contributor wallets)
+              </li>
+              <li>
+                <strong>External:</strong> Third-party accounts outside your
+                organization
+              </li>
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Editor() {
   const [document, dispatch] = useSelectedAccountsDocument();
   const parentFolder = useParentFolderForSelectedNode();
@@ -46,6 +130,17 @@ export function Editor() {
     total: number;
     account: string;
   } | null>(null);
+  const [showHelp, setShowHelp] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem(HELP_DISMISSED_KEY) !== "true";
+    }
+    return true;
+  });
+
+  function handleDismissHelp() {
+    setShowHelp(false);
+    localStorage.setItem(HELP_DISMISSED_KEY, "true");
+  }
 
   function handleClose() {
     setSelectedNode(parentFolder?.id);
@@ -142,6 +237,16 @@ export function Editor() {
         );
 
       if (result.success) {
+        // Dispatch local update to ensure UI re-renders immediately
+        // The service already dispatched to the store, but this ensures local state updates
+        if (result.documentId) {
+          dispatch(
+            updateAccount({
+              id: account.id,
+              accountTransactionsId: result.documentId,
+            }),
+          );
+        }
         alert(
           `Success! Created document and fetched ${result.transactionsAdded} transactions`,
         );
@@ -323,6 +428,10 @@ export function Editor() {
                     </Button>
                   </div>
                 </div>
+
+                {showHelp && (
+                  <InstructionSection onDismiss={handleDismissHelp} />
+                )}
 
                 {syncProgress && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

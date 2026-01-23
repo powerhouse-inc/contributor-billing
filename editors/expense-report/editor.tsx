@@ -5,7 +5,12 @@ import {
   actions,
   type ExpenseReportStatus,
 } from "../../document-models/expense-report/index.js";
-import { Icon, Button, Select } from "@powerhousedao/document-engineering";
+import {
+  Icon,
+  Button,
+  Select,
+  DatePicker,
+} from "@powerhousedao/document-engineering";
 import { WalletsTable } from "./components/WalletsTable.js";
 import { AggregatedExpensesTable } from "./components/AggregatedExpensesTable.js";
 import { AddBillingStatementModal } from "./components/AddBillingStatementModal.js";
@@ -87,6 +92,18 @@ export default function Editor() {
   const periodStart = document.state.global.periodStart || "";
   const periodEnd = document.state.global.periodEnd || "";
 
+  // Derive snapshot period from document state (for transaction filtering)
+  // Support both old field names (snapshotStart/snapshotEnd) and new ones (startDate/endDate)
+  const globalState = document.state.global as Record<string, unknown>;
+  const startDate =
+    (document.state.global.startDate as string) ||
+    (globalState.snapshotStart as string) ||
+    "";
+  const endDate =
+    (document.state.global.endDate as string) ||
+    (globalState.snapshotEnd as string) ||
+    "";
+
   // Local state for the selected period (before confirmation)
   const [selectedPeriod, setSelectedPeriod] = useState<string>(() => {
     if (periodStart) {
@@ -159,6 +176,33 @@ export default function Editor() {
     setIsEditingPeriod(false);
   };
 
+  // Handle snapshot period date changes
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const dateValue = e.target.value;
+    if (!dateValue) return;
+
+    const dateString = dateValue.split("T")[0];
+    if (!dateString) return;
+
+    const date = new Date(dateString + "T00:00:00.000Z");
+    if (isNaN(date.getTime())) return;
+
+    dispatch(actions.setPeriod({ startDate: date.toISOString() }));
+  };
+
+  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const dateValue = e.target.value;
+    if (!dateValue) return;
+
+    const dateString = dateValue.split("T")[0];
+    if (!dateString) return;
+
+    const endOfDay = new Date(dateString + "T23:59:59.999Z");
+    if (isNaN(endOfDay.getTime())) return;
+
+    dispatch(actions.setPeriod({ endDate: endOfDay.toISOString() }));
+  };
+
   // Generate month options
   const monthOptions = useMemo(() => generateMonthOptions(), []);
 
@@ -188,9 +232,13 @@ export default function Editor() {
 
   // Handle sync all wallets
   const handleSyncAllWallets = () => {
-    if (!periodStart || !periodEnd) {
+    // Use snapshot period for transaction filtering if available, otherwise fall back to reporting period
+    const filterStart = startDate || periodStart;
+    const filterEnd = endDate || periodEnd;
+
+    if (!filterStart || !filterEnd) {
       alert(
-        "Please set the period start and end dates before syncing wallet transactions.",
+        "Please set the Snapshot Period dates (or Reporting Period) before syncing wallet transactions.",
       );
       return;
     }
@@ -215,8 +263,8 @@ export default function Editor() {
           groups,
           wallets,
           wallet.accountTransactionsDocumentId,
-          periodStart,
-          periodEnd,
+          filterStart,
+          filterEnd,
           dispatch,
         );
       }
@@ -344,12 +392,12 @@ export default function Editor() {
                     <span>Export to PDF</span>
                   </Button>
                 </div>
-                {/* Owner ID and Period - horizontal layout */}
-                <div className="flex flex-wrap justify-between gap-12">
-                  {/* Period */}
+                {/* Row 1: Reporting Period, Status, Owner */}
+                <div className="flex flex-wrap items-center gap-x-8 gap-y-3 mb-4">
+                  {/* Reporting Period */}
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Period:
+                      Reporting Period:
                     </span>
                     {isEditingPeriod ? (
                       <div className="flex items-center gap-2">
@@ -396,11 +444,35 @@ export default function Editor() {
                           }),
                         )
                       }
-                      className="min-w-[180px]"
+                      className="min-w-[140px]"
                     />
                   </div>
                   {/* Owner */}
                   <SetOwner ownerId={ownerId} dispatch={dispatch} />
+                </div>
+
+                {/* Transaction Period - exact same structure as Snapshot Report editor */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Transaction Period
+                  </label>
+                  <div className="flex gap-2 items-center">
+                    <DatePicker
+                      name="startDate"
+                      value={startDate ? startDate.split("T")[0] : ""}
+                      onChange={handleStartDateChange}
+                      dateFormat="YYYY-MM-DD"
+                      className="flex-1"
+                    />
+                    <span className="self-center">to</span>
+                    <DatePicker
+                      name="endDate"
+                      value={endDate ? endDate.split("T")[0] : ""}
+                      onChange={handleEndDateChange}
+                      dateFormat="YYYY-MM-DD"
+                      className="flex-1"
+                    />
+                  </div>
                 </div>
               </div>
             </section>

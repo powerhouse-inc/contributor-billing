@@ -1,4 +1,4 @@
-import * as z from "zod";
+import { z } from "zod";
 import type {
   AccountType,
   AccountTypeInput,
@@ -30,7 +30,7 @@ import type {
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K]>;
+  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -64,6 +64,7 @@ export const TransactionFlowTypeSchema = z.enum([
   "External",
   "Internal",
   "Return",
+  "Swap",
   "TopUp",
 ]);
 
@@ -71,6 +72,7 @@ export const TransactionFlowTypeInputSchema = z.enum([
   "External",
   "Internal",
   "Return",
+  "Swap",
   "TopUp",
 ]);
 
@@ -83,7 +85,7 @@ export function AddSnapshotAccountInputSchema(): z.ZodObject<
     accountName: z.string(),
     accountTransactionsId: z.string().nullish(),
     id: z.string(),
-    type: AccountTypeInputSchema,
+    type: z.lazy(() => AccountTypeInputSchema),
   });
 }
 
@@ -102,8 +104,8 @@ export function AddTransactionInputSchema(): z.ZodObject<
       .nullish(),
     counterPartyAccountId: z.string().nullish(),
     datetime: z.string().datetime(),
-    direction: TransactionDirectionInputSchema,
-    flowType: TransactionFlowTypeInputSchema.nullish(),
+    direction: z.lazy(() => TransactionDirectionInputSchema),
+    flowType: z.lazy(() => TransactionFlowTypeInputSchema.nullish()),
     id: z.string(),
     token: z.string(),
     transactionId: z.string(),
@@ -236,11 +238,11 @@ export function SnapshotAccountSchema(): z.ZodObject<
     accountAddress: z.string(),
     accountId: z.string(),
     accountName: z.string(),
-    accountTransactionsId: z.string().nullish(),
-    endingBalances: z.array(z.lazy(() => TokenBalanceSchema())),
+    accountTransactionsId: z.string().nullable(),
+    endingBalances: z.array(TokenBalanceSchema()),
     id: z.string(),
-    startingBalances: z.array(z.lazy(() => TokenBalanceSchema())),
-    transactions: z.array(z.lazy(() => SnapshotTransactionSchema())),
+    startingBalances: z.array(TokenBalanceSchema()),
+    transactions: z.array(SnapshotTransactionSchema()),
     type: AccountTypeSchema,
   });
 }
@@ -250,14 +252,14 @@ export function SnapshotReportStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("SnapshotReportState").optional(),
-    accountsDocumentId: z.string().nullish(),
-    endDate: z.string().datetime().nullish(),
-    ownerId: z.string().nullish(),
-    reportName: z.string().nullish(),
-    reportPeriodEnd: z.string().datetime().nullish(),
-    reportPeriodStart: z.string().datetime().nullish(),
-    snapshotAccounts: z.array(z.lazy(() => SnapshotAccountSchema())),
-    startDate: z.string().datetime().nullish(),
+    accountsDocumentId: z.string().nullable(),
+    endDate: z.string().datetime().nullable(),
+    ownerId: z.string().nullable(),
+    reportName: z.string().nullable(),
+    reportPeriodEnd: z.string().datetime().nullable(),
+    reportPeriodStart: z.string().datetime().nullable(),
+    snapshotAccounts: z.array(SnapshotAccountSchema()),
+    startDate: z.string().datetime().nullable(),
   });
 }
 
@@ -267,17 +269,17 @@ export function SnapshotTransactionSchema(): z.ZodObject<
   return z.object({
     __typename: z.literal("SnapshotTransaction").optional(),
     amount: z.object({ unit: z.string(), value: z.string() }),
-    blockNumber: z.number().nullish(),
+    blockNumber: z.number().nullable(),
     counterParty: z
       .string()
       .regex(/^0x[a-fA-F0-9]{40}$/, {
         message: "Invalid Ethereum address format",
       })
-      .nullish(),
-    counterPartyAccountId: z.string().nullish(),
+      .nullable(),
+    counterPartyAccountId: z.string().nullable(),
     datetime: z.string().datetime(),
     direction: TransactionDirectionSchema,
-    flowType: TransactionFlowTypeSchema.nullish(),
+    flowType: TransactionFlowTypeSchema.nullable(),
     id: z.string(),
     token: z.string(),
     transactionId: z.string(),
@@ -299,7 +301,7 @@ export function UpdateSnapshotAccountTypeInputSchema(): z.ZodObject<
 > {
   return z.object({
     id: z.string(),
-    type: AccountTypeInputSchema,
+    type: z.lazy(() => AccountTypeInputSchema),
   });
 }
 
@@ -307,7 +309,7 @@ export function UpdateTransactionFlowTypeInputSchema(): z.ZodObject<
   Properties<UpdateTransactionFlowTypeInput>
 > {
   return z.object({
-    flowType: TransactionFlowTypeInputSchema,
+    flowType: z.lazy(() => TransactionFlowTypeInputSchema),
     id: z.string(),
   });
 }

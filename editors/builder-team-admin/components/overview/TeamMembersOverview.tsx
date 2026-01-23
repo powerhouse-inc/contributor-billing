@@ -1,6 +1,6 @@
 import { useMemo, useCallback, useState } from "react";
 import type { FileNode } from "document-drive";
-import { useDrives, useDocuments } from "@powerhousedao/reactor-browser";
+import { useDrives, useGetDocuments } from "@powerhousedao/reactor-browser";
 import type { BuilderProfileDocument } from "@powerhousedao/builder-profile/document-models/builder-profile";
 import { useRemoteBuilderProfiles } from "../../hooks/useRemoteBuilderProfiles.js";
 
@@ -48,7 +48,7 @@ export function TeamMembersOverview({
   }, [builderProfileNodesWithDriveId]);
 
   // Fetch all builder profile documents from all drives
-  const builderProfileDocuments = useDocuments(builderPhids);
+  const builderProfileDocuments = useGetDocuments(builderPhids);
 
   // Create a map of PHID to document for quick lookup (local drives)
   const localBuilderProfileMap = useMemo(() => {

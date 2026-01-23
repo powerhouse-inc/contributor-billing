@@ -1,7 +1,7 @@
 import { Select } from "@powerhousedao/document-engineering/ui";
 import { useState, useEffect, useMemo } from "react";
 import {
-  useDocuments,
+  useGetDocuments,
   useSelectedDrive,
   isFileNodeKind,
 } from "@powerhousedao/reactor-browser";
@@ -46,7 +46,7 @@ export const HeaderStats = ({ folderId }: HeaderStatsProps) => {
       .map((node) => node.id);
   }, [driveDocument, folderId]);
 
-  const invoices = useDocuments(invoiceFiles) as InvoiceDocument[];
+  const invoices = useGetDocuments(invoiceFiles) as InvoiceDocument[];
 
   useEffect(() => {
     const calculateTotalExpenses = async () => {
