@@ -50,6 +50,10 @@ export const errors = {
     DuplicateTransactionError,
     AddTransactionAccountNotFoundError,
   },
-  RemoveTransaction: { RemoveTransactionNotFoundError },
-  UpdateTransactionFlowType: { UpdateFlowTypeTransactionNotFoundError },
+  RemoveTransaction: {
+    RemoveTransactionNotFoundError,
+  },
+  UpdateTransactionFlowType: {
+    UpdateFlowTypeTransactionNotFoundError,
+  },
 };

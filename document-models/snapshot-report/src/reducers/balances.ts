@@ -10,19 +10,32 @@ export const snapshotReportBalancesOperations: SnapshotReportBalancesOperations 
         throw new Error(`Account with ID ${action.input.accountId} not found`);
       }
 
-      const existingBalance = account.startingBalances.find(
+      // First check by balanceId
+      const existingById = account.startingBalances.find(
         (b) => b.id === action.input.balanceId,
       );
-      if (existingBalance) {
-        existingBalance.token = action.input.token;
-        existingBalance.amount = action.input.amount;
-      } else {
-        account.startingBalances.push({
-          id: action.input.balanceId,
-          token: action.input.token,
-          amount: action.input.amount,
-        });
+      if (existingById) {
+        existingById.token = action.input.token;
+        existingById.amount = action.input.amount;
+        return;
       }
+
+      // Then check by token to prevent duplicates
+      const existingByToken = account.startingBalances.find(
+        (b) => b.token === action.input.token,
+      );
+      if (existingByToken) {
+        existingByToken.id = action.input.balanceId;
+        existingByToken.amount = action.input.amount;
+        return;
+      }
+
+      // Only add new if no existing balance for this token
+      account.startingBalances.push({
+        id: action.input.balanceId,
+        token: action.input.token,
+        amount: action.input.amount,
+      });
     },
     setEndingBalanceOperation(state, action) {
       const account = state.snapshotAccounts.find(
@@ -32,19 +45,32 @@ export const snapshotReportBalancesOperations: SnapshotReportBalancesOperations 
         throw new Error(`Account with ID ${action.input.accountId} not found`);
       }
 
-      const existingBalance = account.endingBalances.find(
+      // First check by balanceId
+      const existingById = account.endingBalances.find(
         (b) => b.id === action.input.balanceId,
       );
-      if (existingBalance) {
-        existingBalance.token = action.input.token;
-        existingBalance.amount = action.input.amount;
-      } else {
-        account.endingBalances.push({
-          id: action.input.balanceId,
-          token: action.input.token,
-          amount: action.input.amount,
-        });
+      if (existingById) {
+        existingById.token = action.input.token;
+        existingById.amount = action.input.amount;
+        return;
       }
+
+      // Then check by token to prevent duplicates
+      const existingByToken = account.endingBalances.find(
+        (b) => b.token === action.input.token,
+      );
+      if (existingByToken) {
+        existingByToken.id = action.input.balanceId;
+        existingByToken.amount = action.input.amount;
+        return;
+      }
+
+      // Only add new if no existing balance for this token
+      account.endingBalances.push({
+        id: action.input.balanceId,
+        token: action.input.token,
+        amount: action.input.amount,
+      });
     },
     removeStartingBalanceOperation(state, action) {
       const account = state.snapshotAccounts.find(
