@@ -11,13 +11,13 @@
   },
   "packages": [
     {
-      "packageName": "@powerhousedao/builder-profile",
-      "version": "0.0.11",
+      "packageName": "@powerhousedao/vetra",
+      "version": "latest",
       "provider": "npm"
     },
     {
-      "packageName": "@powerhousedao/vetra",
-      "version": "latest",
+      "packageName": "@powerhousedao/builder-profile",
+      "version": "0.0.12",
       "provider": "npm"
     }
   ]
