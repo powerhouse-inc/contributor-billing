@@ -1,7 +1,7 @@
 import { Select } from "@powerhousedao/document-engineering/ui";
 import { useState, useEffect, useMemo } from "react";
 import {
-  useGetDocuments,
+  useDocumentsInSelectedDrive,
   useSelectedDrive,
   isFileNodeKind,
 } from "@powerhousedao/reactor-browser";
@@ -46,11 +46,20 @@ export const HeaderStats = ({ folderId }: HeaderStatsProps) => {
       .map((node) => node.id);
   }, [driveDocument, folderId]);
 
-  const invoices = useGetDocuments(invoiceFiles) as InvoiceDocument[];
+  const allDocuments = useDocumentsInSelectedDrive() || [];
+  const invoices = useMemo(() => {
+    if (invoiceFiles.length === 0) return [];
+    const invoiceSet = new Set(invoiceFiles);
+    return allDocuments.filter(
+      (doc): doc is InvoiceDocument =>
+        doc.header.documentType === "powerhouse/invoice" &&
+        invoiceSet.has(doc.header.id),
+    );
+  }, [allDocuments, invoiceFiles]);
 
   useEffect(() => {
     const calculateTotalExpenses = async () => {
-      if (!invoices || invoices.length === 0) {
+      if (!invoices || !Array.isArray(invoices) || invoices.length === 0) {
         setTotalExpenses(0);
         return;
       }
