@@ -392,8 +392,8 @@ export default function Editor() {
                     <span>Export to PDF</span>
                   </Button>
                 </div>
-                {/* Owner ID and Period - horizontal layout */}
-                <div className="flex flex-wrap justify-between gap-12">
+                {/* Row 1: Reporting Period, Status, Owner */}
+                <div className="flex flex-wrap items-center gap-x-8 gap-y-3 mb-4">
                   {/* Reporting Period */}
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -425,29 +425,6 @@ export default function Editor() {
                       </span>
                     )}
                   </div>
-                  {/* Snapshot Period */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Snapshot Period:
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <DatePicker
-                        name="startDate"
-                        value={startDate ? startDate.split("T")[0] : ""}
-                        onChange={handleStartDateChange}
-                        dateFormat="YYYY-MM-DD"
-                        className="w-36"
-                      />
-                      <span className="text-gray-500">to</span>
-                      <DatePicker
-                        name="endDate"
-                        value={endDate ? endDate.split("T")[0] : ""}
-                        onChange={handleEndDateChange}
-                        dateFormat="YYYY-MM-DD"
-                        className="w-36"
-                      />
-                    </div>
-                  </div>
                   {/* Status */}
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -467,11 +444,35 @@ export default function Editor() {
                           }),
                         )
                       }
-                      className="min-w-[180px]"
+                      className="min-w-[140px]"
                     />
                   </div>
                   {/* Owner */}
                   <SetOwner ownerId={ownerId} dispatch={dispatch} />
+                </div>
+
+                {/* Transaction Period - exact same structure as Snapshot Report editor */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Transaction Period
+                  </label>
+                  <div className="flex gap-2 items-center">
+                    <DatePicker
+                      name="startDate"
+                      value={startDate ? startDate.split("T")[0] : ""}
+                      onChange={handleStartDateChange}
+                      dateFormat="YYYY-MM-DD"
+                      className="flex-1"
+                    />
+                    <span className="self-center">to</span>
+                    <DatePicker
+                      name="endDate"
+                      value={endDate ? endDate.split("T")[0] : ""}
+                      onChange={handleEndDateChange}
+                      dateFormat="YYYY-MM-DD"
+                      className="flex-1"
+                    />
+                  </div>
                 </div>
               </div>
             </section>

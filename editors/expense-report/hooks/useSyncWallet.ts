@@ -6,6 +6,7 @@ import type {
   LineItem,
   Wallet,
 } from "../../../document-models/expense-report/gen/types.js";
+import { isSwapAddress } from "../../snapshot-report-editor/utils/flowTypeCalculations.js";
 
 interface BillingStatementLineItem {
   id: string;
@@ -111,6 +112,9 @@ export function useSyncWallet() {
         // Exclude intergroup transactions (transactions to other wallets in this report)
         const counterParty = tx.counterParty?.toLowerCase();
         if (counterParty && walletAddresses.has(counterParty)) return sum;
+
+        // Exclude swap transactions (transactions to known swap protocols)
+        if (isSwapAddress(counterParty)) return sum;
 
         // Add the transaction amount (convert to number if it's a string)
         const amount = parseFloat(tx.amount?.value || 0);

@@ -17,10 +17,11 @@ import {
   transactionsActions,
 } from "../../../document-models/snapshot-report/index.js";
 import { calculateBalances } from "../utils/balanceCalculations.js";
-import { deriveTransactionsForAccount } from "../utils/deriveTransactions.js";
+// deriveTransactionsForAccount not used - syncNonInternalAccount fetches from AccountTransactions docs directly
 import type {
   SnapshotAccount,
   SnapshotTransaction,
+  TransactionFlowType,
 } from "../../../document-models/snapshot-report/gen/types.js";
 import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
 import { calculateTransactionFlowInfo } from "../utils/flowTypeCalculations.js";
@@ -396,6 +397,8 @@ export function useSyncSnapshotAccount() {
 
   /**
    * Sync a non-Internal account by deriving transactions from Internal accounts
+   * Uses FULL transaction history from AccountTransactions documents (not just snapshot transactions)
+   * to correctly calculate opening balances from pre-period transactions
    */
   const syncNonInternalAccount = async (
     snapshotAccount: SnapshotAccount,
@@ -411,7 +414,7 @@ export function useSyncSnapshotAccount() {
     documentId?: string;
   }> => {
     try {
-      // Get Internal accounts with their transactions
+      // Get Internal accounts
       const internalAccounts = allSnapshotAccounts.filter(
         (acc) => acc.type === "Internal",
       );
@@ -424,16 +427,100 @@ export function useSyncSnapshotAccount() {
         };
       }
 
-      // Derive transactions from Internal accounts
-      const derivedTransactions = deriveTransactionsForAccount(
-        snapshotAccount,
-        internalAccounts,
+      // For starting balance calculation, we need ALL transactions from Internal accounts,
+      // not just the ones in the snapshot. Fetch from AccountTransactions documents.
+      const accountAddressLower = snapshotAccount.accountAddress.toLowerCase();
+      const allDerivedTransactions: Array<{
+        id: string;
+        transactionId: string;
+        counterParty: string;
+        counterPartyAccountId: string;
+        amount: { value: string; unit: string };
+        datetime: string;
+        txHash: string;
+        token: string;
+        blockNumber: number | null;
+        direction: "INFLOW" | "OUTFLOW";
+        flowType: TransactionFlowType;
+      }> = [];
+
+      // Scan ALL transactions from each Internal account's AccountTransactions document
+      for (const internalAccount of internalAccounts) {
+        const accountTxDocId = internalAccount.accountTransactionsId;
+        if (!accountTxDocId) continue;
+
+        // Find the AccountTransactions document
+        const txDoc = documents?.find(
+          (doc) =>
+            doc.header.id === accountTxDocId &&
+            doc.header.documentType === "powerhouse/account-transactions",
+        ) as any;
+
+        if (!txDoc?.state?.global?.transactions) continue;
+
+        const allTxFromDoc = txDoc.state.global.transactions as any[];
+
+        // Find transactions where non-Internal account is counter-party
+        for (const tx of allTxFromDoc) {
+          if (tx.counterParty?.toLowerCase() === accountAddressLower) {
+            // Invert direction from Internal's perspective to non-Internal's perspective
+            const invertedDirection: "INFLOW" | "OUTFLOW" =
+              tx.direction === "INFLOW" ? "OUTFLOW" : "INFLOW";
+
+            // Calculate flow type
+            const flowType = calculateTransactionFlowInfo(
+              invertedDirection,
+              snapshotAccount.type,
+              internalAccount.accountAddress,
+              allSnapshotAccounts,
+            ).flowType;
+
+            // Parse amount
+            const txAmount = tx.amount as
+              | { value?: string; unit?: string }
+              | string;
+            let amount: { value: string; unit: string };
+            if (typeof txAmount === "object" && txAmount.value !== undefined) {
+              amount = {
+                value: txAmount.value,
+                unit: txAmount.unit || tx.details?.token || "",
+              };
+            } else if (typeof txAmount === "string") {
+              amount = {
+                value: txAmount.split(" ")[0] || "0",
+                unit: tx.details?.token || "",
+              };
+            } else {
+              amount = { value: "0", unit: tx.details?.token || "" };
+            }
+
+            allDerivedTransactions.push({
+              id: generateId(),
+              transactionId: tx.id,
+              counterParty: internalAccount.accountAddress,
+              counterPartyAccountId: internalAccount.id,
+              amount,
+              datetime: tx.datetime,
+              txHash: tx.details?.txHash || "",
+              token: tx.details?.token || amount.unit,
+              blockNumber: tx.details?.blockNumber ?? null,
+              direction: invertedDirection,
+              flowType,
+            });
+          }
+        }
+      }
+
+      // Sort by datetime
+      allDerivedTransactions.sort(
+        (a, b) =>
+          new Date(a.datetime).getTime() - new Date(b.datetime).getTime(),
       );
 
-      // Filter to period for snapshot
+      // Filter to period for snapshot transactions
       const start = new Date(startDate);
       const end = new Date(endDate);
-      const periodTransactions = derivedTransactions.filter((tx) => {
+      const periodTransactions = allDerivedTransactions.filter((tx) => {
         const txDate = new Date(tx.datetime);
         return txDate >= start && txDate <= end;
       });
@@ -459,9 +546,9 @@ export function useSyncSnapshotAccount() {
         };
       }
 
-      // Calculate balances using ALL derived transactions (not just period)
+      // Calculate balances using ALL derived transactions (including pre-period for opening balance)
       const allTransactionsForBalance: SnapshotTransaction[] =
-        derivedTransactions.map((tx) => ({
+        allDerivedTransactions.map((tx) => ({
           id: tx.id,
           transactionId: tx.transactionId,
           counterParty: tx.counterParty,
