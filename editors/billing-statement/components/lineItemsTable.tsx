@@ -309,7 +309,7 @@ const LineItemsTable = (props: {
                       key={item.id}
                       className="bg-blue-50/50 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.15)]"
                     >
-                      <td className="border-b border-slate-100 px-2 py-3 text-center font-mono text-xs tabular-nums text-slate-400">
+                      <td className="border-b border-slate-100 px-2 py-3 text-center text-xs text-slate-400">
                         {idx + 1}
                       </td>
                       <td className="border-b border-slate-100 px-3 py-2">
@@ -342,7 +342,7 @@ const LineItemsTable = (props: {
                           handleInputChange={(e: any) =>
                             handleInputChange("quantity", e.target.value)
                           }
-                          className="w-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-sm"
+                          className="w-24 rounded-xl border border-slate-200 bg-white px-3 py-2 text-right shadow-sm"
                         />
                       </td>
                       <td className="border-b border-slate-100 px-3 py-2">
@@ -354,7 +354,7 @@ const LineItemsTable = (props: {
                               String(e.target.value),
                             )
                           }
-                          className="w-28 rounded-xl border border-slate-200 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-sm"
+                          className="w-28 rounded-xl border border-slate-200 bg-white px-3 py-2 text-right shadow-sm"
                         />
                       </td>
                       <td className="border-b border-slate-100 px-3 py-2">
@@ -363,16 +363,16 @@ const LineItemsTable = (props: {
                           handleInputChange={(e: any) =>
                             handleInputChange("unitPricePwt", e.target.value)
                           }
-                          className="w-28 rounded-xl border border-slate-200 bg-white px-3 py-2 text-right font-mono tabular-nums shadow-sm"
+                          className="w-28 rounded-xl border border-slate-200 bg-white px-3 py-2 text-right shadow-sm"
                         />
                       </td>
-                      <td className="border-b border-slate-100 px-3 py-3 text-right font-mono tabular-nums text-slate-500">
+                      <td className="border-b border-slate-100 px-3 py-3 text-right text-slate-500">
                         {localLineItem.quantity && localLineItem.unitPriceCash
                           ? Number(localLineItem.quantity) *
                             Number(localLineItem.unitPriceCash)
                           : ""}
                       </td>
-                      <td className="border-b border-slate-100 px-3 py-3 text-right font-mono tabular-nums text-slate-500">
+                      <td className="border-b border-slate-100 px-3 py-3 text-right text-slate-500">
                         {localLineItem.quantity && localLineItem.unitPricePwt
                           ? Number(localLineItem.quantity) *
                             Number(localLineItem.unitPricePwt)
@@ -401,7 +401,7 @@ const LineItemsTable = (props: {
                         setLocalLineItem({ ...item });
                       }}
                     >
-                      <td className="border-b border-slate-50 px-2 py-3 text-center font-mono text-xs tabular-nums text-slate-400">
+                      <td className="border-b border-slate-50 px-2 py-3 text-center text-xs text-slate-400">
                         {idx + 1}
                       </td>
                       <td className="border-b border-slate-50 px-3 py-3 text-slate-700">
@@ -410,19 +410,19 @@ const LineItemsTable = (props: {
                       <td className="border-b border-slate-50 px-3 py-3 text-center text-xs font-medium tracking-wide text-slate-500">
                         {item.unit}
                       </td>
-                      <td className="border-b border-slate-50 px-3 py-3 text-right font-mono tabular-nums text-slate-700">
+                      <td className="border-b border-slate-50 px-3 py-3 text-right text-slate-700">
                         {item.quantity}
                       </td>
-                      <td className="border-b border-slate-50 px-3 py-3 text-right font-mono tabular-nums text-slate-700">
+                      <td className="border-b border-slate-50 px-3 py-3 text-right text-slate-700">
                         {formatNumber(item.unitPriceCash)}
                       </td>
-                      <td className="border-b border-slate-50 px-3 py-3 text-right font-mono tabular-nums text-slate-700">
+                      <td className="border-b border-slate-50 px-3 py-3 text-right text-slate-700">
                         {formatNumber(item.unitPricePwt)}
                       </td>
-                      <td className="border-b border-slate-50 px-3 py-3 text-right font-mono tabular-nums text-slate-700">
+                      <td className="border-b border-slate-50 px-3 py-3 text-right text-slate-700">
                         {formatNumber(item.totalPriceCash)}
                       </td>
-                      <td className="border-b border-slate-50 px-3 py-3 text-right font-mono tabular-nums text-slate-700">
+                      <td className="border-b border-slate-50 px-3 py-3 text-right text-slate-700">
                         {formatNumber(item.totalPricePwt)}
                       </td>
                       <td className="border-b border-slate-50 px-2 py-3 text-center">
@@ -443,7 +443,7 @@ const LineItemsTable = (props: {
                 )}
                 {isAddingNew && (
                   <tr className="bg-emerald-50/50 shadow-[inset_0_0_0_1px_rgba(16,185,129,0.15)]">
-                    <td className="border-b border-slate-100 px-2 py-3 text-center font-mono text-xs tabular-nums text-slate-400">
+                    <td className="border-b border-slate-100 px-2 py-3 text-center text-xs text-slate-400">
                       {state.lineItems.length + 1}
                     </td>
                     <td className="border-b border-slate-100 px-3 py-2">
