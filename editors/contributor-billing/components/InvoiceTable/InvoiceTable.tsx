@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   addDocument,
   dispatchActions,
@@ -7,7 +7,6 @@ import {
   useDocumentsInSelectedDrive,
   type VetraDocumentModelModule,
 } from "@powerhousedao/reactor-browser";
-import { toast } from "@powerhousedao/design-system/connect";
 import type { PHDocument } from "document-model";
 import type { FileNode } from "document-drive";
 import { actions as invoiceActions } from "../../../../document-models/invoice/index.js";
@@ -19,6 +18,7 @@ import { exportExpenseReportCSV } from "../../../../scripts/contributor-billing/
 import { HeaderControls } from "./HeaderControls.js";
 import { InvoiceTableSection } from "./InvoiceTableSection.js";
 import { InvoiceTableRow, type InvoiceRowData } from "./InvoiceTableRow.js";
+import { NotificationDialog } from "./NotificationDialog.js";
 
 // Helper type for invoice line item tag (partial version for state access)
 interface LineItemTagPartial {
@@ -163,6 +163,19 @@ export const InvoiceTable = ({
   reportingFolderId,
 }: InvoiceTableProps) => {
   const [selectedDrive] = useSelectedDrive();
+
+  // Notification state
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    type: "success" | "error";
+    title: string;
+    message?: string;
+    details?: string[];
+  }>({
+    show: false,
+    type: "success",
+    title: "",
+  });
 
   // Get documents directly from the hook - this will automatically update when documents change
   const documentsInDrive = useDocumentsInSelectedDrive() || [];
@@ -368,7 +381,7 @@ export const InvoiceTable = ({
     const invoiceDoc = allDocuments.find((doc) => doc.header.id === id);
 
     if (!invoiceDoc) {
-      toast("Invoice not found", { type: "error" });
+      console.error("Invoice not found");
       return;
     }
 
@@ -392,7 +405,7 @@ export const InvoiceTable = ({
       );
 
       if (!createdNode?.id) {
-        toast("Failed to create billing statement", { type: "error" });
+        console.error("Failed to create billing statement");
         return;
       }
 
@@ -462,10 +475,20 @@ export const InvoiceTable = ({
         await dispatchActions(tagActions, createdNode.id);
       }
 
-      toast("Billing statement created successfully", { type: "success" });
+      setNotification({
+        show: true,
+        type: "success",
+        title: "Billing Statement Created",
+        message: `Successfully created billing statement for ${invoiceFile?.name || id}`,
+      });
     } catch (error) {
       console.error("Error creating billing statement:", error);
-      toast("Failed to create billing statement", { type: "error" });
+      setNotification({
+        show: true,
+        type: "error",
+        title: "Creation Failed",
+        message: "Failed to create billing statement. Please try again.",
+      });
     }
   };
 
@@ -485,8 +508,6 @@ export const InvoiceTable = ({
         baseCurrency,
       );
 
-      toast("Invoices exported successfully", { type: "success" });
-
       // Update exported status on invoices
       for (const invoice of selectedInvoices) {
         const exportedInvoiceData =
@@ -503,6 +524,12 @@ export const InvoiceTable = ({
         );
       }
       setSelected({});
+      setNotification({
+        show: true,
+        type: "success",
+        title: "Export Successful",
+        message: `Successfully exported ${selectedInvoices.length} invoice${selectedInvoices.length !== 1 ? "s" : ""} to CSV`,
+      });
     } catch (error: unknown) {
       console.error("Error exporting invoices:", error);
       const err = error as { missingExpenseTagInvoices?: string[] };
@@ -512,34 +539,32 @@ export const InvoiceTable = ({
           files.find((file) => file.id === invoiceId)?.name || invoiceId,
       );
 
-      toast(
-        <>
-          Invoice Line Item Tags need to be set for:
-          <br />
-          {missingList.map((name: string) => (
-            <React.Fragment key={name}>
-              - {name}
-              <br />
-            </React.Fragment>
-          ))}
-        </>,
-        { type: "error" },
-      );
+      setNotification({
+        show: true,
+        type: "error",
+        title: "Export Failed",
+        message: "Invoice Line Item Tags need to be set before exporting.",
+        details: missingList,
+      });
     }
   };
 
   // Expense Report Export handler - simple async function
   const handleExpenseReportExport = async (baseCurrency: string) => {
-    console.log("selectedInvoices", selectedInvoices);
     try {
       await exportExpenseReportCSV(selectedInvoices, baseCurrency);
-      toast("Expense report exported successfully", { type: "success" });
       // Clear selection
       const updatedSelected = { ...selected };
       Object.keys(updatedSelected).forEach((id) => {
         updatedSelected[id] = false;
       });
       setSelected(updatedSelected);
+      setNotification({
+        show: true,
+        type: "success",
+        title: "Expense Report Exported",
+        message: `Successfully exported expense report with ${selectedInvoices.length} invoice${selectedInvoices.length !== 1 ? "s" : ""}`,
+      });
     } catch (error: unknown) {
       console.error("Error exporting expense report:", error);
       const err = error as { missingTagInvoices?: string[] };
@@ -549,19 +574,13 @@ export const InvoiceTable = ({
           files.find((file) => file.id === invoiceId)?.name || invoiceId,
       );
 
-      toast(
-        <>
-          Invoice Line Item Tags need to be set for:
-          <br />
-          {missingList.map((name: string) => (
-            <React.Fragment key={name}>
-              - {name}
-              <br />
-            </React.Fragment>
-          ))}
-        </>,
-        { type: "error" },
-      );
+      setNotification({
+        show: true,
+        type: "error",
+        title: "Export Failed",
+        message: "Invoice Line Item Tags need to be set before exporting.",
+        details: missingList,
+      });
     }
   };
 
@@ -727,8 +746,17 @@ export const InvoiceTable = ({
   };
 
   return (
-    <div className="contributor-billing-table w-full h-full bg-white rounded-lg p-4 border border-gray-200 shadow-sm mt-4 overflow-x-auto">
-      <HeaderControls
+    <>
+      <NotificationDialog
+        show={notification.show}
+        type={notification.type}
+        title={notification.title}
+        message={notification.message}
+        details={notification.details}
+        onClose={() => setNotification({ ...notification, show: false })}
+      />
+      <div className="contributor-billing-table w-full h-full bg-white rounded-lg p-4 border border-gray-200 shadow-sm mt-4 overflow-x-auto">
+        <HeaderControls
         statusOptions={statusOptions}
         selectedStatuses={selectedStatuses}
         onStatusChange={onStatusChange}
@@ -834,6 +862,7 @@ export const InvoiceTable = ({
           </table>
         </InvoiceTableSection>
       )}
-    </div>
+      </div>
+    </>
   );
 };

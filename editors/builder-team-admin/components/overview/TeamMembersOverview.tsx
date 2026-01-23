@@ -53,8 +53,12 @@ export function TeamMembersOverview({
   // Create a map of PHID to document for quick lookup (local drives)
   const localBuilderProfileMap = useMemo(() => {
     const map = new Map<string, BuilderProfileDocument>();
-    for (const doc of builderProfileDocuments) {
-      if (doc.header.documentType === "powerhouse/builder-profile") {
+    // Ensure builderProfileDocuments is an array before iterating
+    const documents = Array.isArray(builderProfileDocuments)
+      ? builderProfileDocuments
+      : [];
+    for (const doc of documents) {
+      if (doc?.header?.documentType === "powerhouse/builder-profile") {
         map.set(doc.header.id, doc as unknown as BuilderProfileDocument);
       }
     }
