@@ -27,9 +27,9 @@ export const documentModel: DocumentModelGlobalState = {
               id: "set-report-config",
               name: "SET_REPORT_CONFIG",
               reducer:
-                "if (action.input.reportName !== undefined && action.input.reportName !== null) {\n  state.reportName = action.input.reportName;\n}\nif (action.input.startDate !== undefined && action.input.startDate !== null) {\n  state.startDate = action.input.startDate;\n}\nif (action.input.endDate !== undefined && action.input.endDate !== null) {\n  state.endDate = action.input.endDate;\n}\nif (action.input.accountsDocumentId !== undefined && action.input.accountsDocumentId !== null) {\n  state.accountsDocumentId = action.input.accountsDocumentId;\n}\nif (action.input.ownerId !== undefined && action.input.ownerId !== null) {\n  state.ownerId = action.input.ownerId;\n}",
+                "if (action.input.reportName !== undefined && action.input.reportName !== null) {\n  state.reportName = action.input.reportName;\n}\nif (action.input.startDate !== undefined && action.input.startDate !== null) {\n  state.startDate = action.input.startDate;\n}\nif (action.input.endDate !== undefined && action.input.endDate !== null) {\n  state.endDate = action.input.endDate;\n}\nif (action.input.accountsDocumentId !== undefined && action.input.accountsDocumentId !== null) {\n  state.accountsDocumentId = action.input.accountsDocumentId;\n}",
               schema:
-                "input SetReportConfigInput {\n  reportName: String\n  startDate: DateTime\n  endDate: DateTime\n  accountsDocumentId: PHID\n  ownerId: PHID\n}",
+                "input SetReportConfigInput {\n  reportName: String\n  startDate: DateTime\n  endDate: DateTime\n  accountsDocumentId: PHID\n}",
               scope: "global",
               template:
                 "Set the report configuration including name, period, and accounts document reference",
@@ -62,13 +62,14 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               description:
-                "Set the owner ID (builder team) for the snapshot report",
+                "Add an owner ID (builder team) to the snapshot report",
               errors: [],
               examples: [],
               id: "set-owner-id",
-              name: "SET_OWNER_ID",
-              reducer: "state.ownerId = action.input.ownerId;",
-              schema: "input SetOwnerIdInput {\n  ownerId: PHID!\n}",
+              name: "ADD_OWNER_ID",
+              reducer:
+                "if (!state.ownerIds.includes(action.input.ownerId)) {\n  state.ownerIds.push(action.input.ownerId);\n}",
+              schema: "input AddOwnerIdInput {\n  ownerId: PHID!\n}",
               scope: "global",
               template:
                 "Set the owner ID (builder team) for the snapshot report",
@@ -95,6 +96,18 @@ export const documentModel: DocumentModelGlobalState = {
               schema: "input SetPeriodEndInput {\n  periodEnd: DateTime!\n}",
               scope: "global",
               template: "",
+            },
+            {
+              id: "remove-owner-id",
+              name: "REMOVE_OWNER_ID",
+              description: "Remove an owner ID from the snapshot report",
+              schema: "input RemoveOwnerIdInput {\n  ownerId: PHID!\n}",
+              template: "",
+              reducer:
+                "const index = state.ownerIds.indexOf(action.input.ownerId);\nif (index !== -1) {\n  state.ownerIds.splice(index, 1);\n}",
+              errors: [],
+              examples: [],
+              scope: "global",
             },
           ],
         },
@@ -372,13 +385,13 @@ export const documentModel: DocumentModelGlobalState = {
         global: {
           examples: [],
           initialValue:
-            '"{\\"ownerId\\": null, \\"accountsDocumentId\\": null, \\"startDate\\": null, \\"endDate\\": null, \\"reportName\\": null, \\"reportPeriodStart\\": null, \\"reportPeriodEnd\\": null, \\"snapshotAccounts\\": []}"',
+            '{"ownerIds": [], "accountsDocumentId": null, "startDate": null, "endDate": null, "reportName": null, "reportPeriodStart": null, "reportPeriodEnd": null, "snapshotAccounts": []}',
           schema:
-            "type SnapshotReportState {\n  ownerId: PHID\n  accountsDocumentId: PHID\n  startDate: DateTime\n  endDate: DateTime\n  reportName: String\n  reportPeriodStart: DateTime\n  reportPeriodEnd: DateTime\n  snapshotAccounts: [SnapshotAccount!]!\n}\n\ntype SnapshotAccount {\n  id: OID!\n  accountId: OID!\n  accountAddress: String!\n  accountName: String!\n  type: AccountType!\n  accountTransactionsId: PHID\n  startingBalances: [TokenBalance!]!\n  endingBalances: [TokenBalance!]!\n  transactions: [SnapshotTransaction!]!\n}\n\ntype TokenBalance {\n  id: OID!\n  token: Currency!\n  amount: Amount_Currency!\n}\n\ntype SnapshotTransaction {\n  id: OID!\n  transactionId: String!\n  counterParty: EthereumAddress\n  amount: Amount_Currency!\n  datetime: DateTime!\n  txHash: String!\n  token: Currency!\n  blockNumber: Int\n  direction: TransactionDirection!\n  flowType: TransactionFlowType\n  counterPartyAccountId: OID\n}\n\nenum AccountType {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum AccountTypeInput {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum TransactionDirection {\n  INFLOW\n  OUTFLOW\n}\n\nenum TransactionDirectionInput {\n  INFLOW\n  OUTFLOW\n}\n\nenum TransactionFlowType {\n  TopUp\n  Return\n  Internal\n  External\n  Swap\n}\n\nenum TransactionFlowTypeInput {\n  TopUp\n  Return\n  Internal\n  External\n  Swap\n}",
+            "type SnapshotReportState {\n  ownerIds: [PHID!]!\n  accountsDocumentId: PHID\n  startDate: DateTime\n  endDate: DateTime\n  reportName: String\n  reportPeriodStart: DateTime\n  reportPeriodEnd: DateTime\n  snapshotAccounts: [SnapshotAccount!]!\n}\n\ntype SnapshotAccount {\n  id: OID!\n  accountId: OID!\n  accountAddress: String!\n  accountName: String!\n  type: AccountType!\n  accountTransactionsId: PHID\n  startingBalances: [TokenBalance!]!\n  endingBalances: [TokenBalance!]!\n  transactions: [SnapshotTransaction!]!\n}\n\ntype TokenBalance {\n  id: OID!\n  token: Currency!\n  amount: Amount_Currency!\n}\n\ntype SnapshotTransaction {\n  id: OID!\n  transactionId: String!\n  counterParty: EthereumAddress\n  amount: Amount_Currency!\n  datetime: DateTime!\n  txHash: String!\n  token: Currency!\n  blockNumber: Int\n  direction: TransactionDirection!\n  flowType: TransactionFlowType\n  counterPartyAccountId: OID\n}\n\nenum AccountType {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum AccountTypeInput {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum TransactionDirection {\n  INFLOW\n  OUTFLOW\n}\n\nenum TransactionDirectionInput {\n  INFLOW\n  OUTFLOW\n}\n\nenum TransactionFlowType {\n  TopUp\n  Return\n  Internal\n  External\n  Swap\n}\n\nenum TransactionFlowTypeInput {\n  TopUp\n  Return\n  Internal\n  External\n  Swap\n}",
         },
         local: {
           examples: [],
-          initialValue: '""',
+          initialValue: "",
           schema: "",
         },
       },

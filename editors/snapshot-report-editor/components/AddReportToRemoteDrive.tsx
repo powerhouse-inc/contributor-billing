@@ -12,7 +12,7 @@ export function useAddReportToRemoteDrive(ownerIdOverride?: string | null) {
   const [selectedDocument] = useSelectedSnapshotReportDocument();
   const drives = useDrives();
   const ownerId =
-    ownerIdOverride ?? selectedDocument?.state?.global?.ownerId ?? "";
+    ownerIdOverride ?? selectedDocument?.state?.global?.ownerIds?.[0] ?? "";
 
   const ownerDrive = useMemo(() => {
     if (!drives || !ownerId) return undefined;

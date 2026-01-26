@@ -1,4 +1,4 @@
-export type Maybe<T> = T | null;
+export type Maybe<T> = T | null | undefined;
 export type InputMaybe<T> = T | null | undefined;
 export type Exact<T extends { [key: string]: unknown }> = {
   [K in keyof T]: T[K];
@@ -25,6 +25,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
+  Address: { input: `${string}:0x${string}`; output: `${string}:0x${string}` };
   Amount: {
     input: { unit?: string; value?: number };
     output: { unit?: string; value?: number };
@@ -44,6 +45,7 @@ export type Scalars = {
   Amount_Money: { input: number; output: number };
   Amount_Percentage: { input: number; output: number };
   Amount_Tokens: { input: number; output: number };
+  Attachment: { input: string; output: string };
   Currency: { input: string; output: string };
   Date: { input: string; output: string };
   DateTime: { input: string; output: string };
@@ -53,6 +55,7 @@ export type Scalars = {
   OLabel: { input: string; output: string };
   PHID: { input: string; output: string };
   URL: { input: string; output: string };
+  Unknown: { input: unknown; output: unknown };
   Upload: { input: File; output: File };
 };
 
@@ -64,13 +67,17 @@ export type AccountTypeInput =
   | "Internal"
   | "Source";
 
+export type AddOwnerIdInput = {
+  ownerId: Scalars["PHID"]["input"];
+};
+
 export type AddSnapshotAccountInput = {
   accountAddress: Scalars["String"]["input"];
   accountId: Scalars["OID"]["input"];
   accountName: Scalars["String"]["input"];
   accountTransactionsId?: InputMaybe<Scalars["PHID"]["input"]>;
   id: Scalars["OID"]["input"];
-  type: AccountTypeInput | `${AccountTypeInput}`;
+  type: AccountTypeInput;
 };
 
 export type AddTransactionInput = {
@@ -80,10 +87,8 @@ export type AddTransactionInput = {
   counterParty?: InputMaybe<Scalars["EthereumAddress"]["input"]>;
   counterPartyAccountId?: InputMaybe<Scalars["OID"]["input"]>;
   datetime: Scalars["DateTime"]["input"];
-  direction: TransactionDirectionInput | `${TransactionDirectionInput}`;
-  flowType?: InputMaybe<
-    TransactionFlowTypeInput | `${TransactionFlowTypeInput}`
-  >;
+  direction: TransactionDirectionInput;
+  flowType?: InputMaybe<TransactionFlowTypeInput>;
   id: Scalars["OID"]["input"];
   token: Scalars["Currency"]["input"];
   transactionId: Scalars["String"]["input"];
@@ -97,6 +102,10 @@ export type RecalculateFlowTypesInput = {
 export type RemoveEndingBalanceInput = {
   accountId: Scalars["OID"]["input"];
   balanceId: Scalars["OID"]["input"];
+};
+
+export type RemoveOwnerIdInput = {
+  ownerId: Scalars["PHID"]["input"];
 };
 
 export type RemoveSnapshotAccountInput = {
@@ -123,10 +132,6 @@ export type SetEndingBalanceInput = {
   token: Scalars["Currency"]["input"];
 };
 
-export type SetOwnerIdInput = {
-  ownerId: Scalars["PHID"]["input"];
-};
-
 export type SetPeriodEndInput = {
   periodEnd: Scalars["DateTime"]["input"];
 };
@@ -143,7 +148,6 @@ export type SetPeriodStartInput = {
 export type SetReportConfigInput = {
   accountsDocumentId?: InputMaybe<Scalars["PHID"]["input"]>;
   endDate?: InputMaybe<Scalars["DateTime"]["input"]>;
-  ownerId?: InputMaybe<Scalars["PHID"]["input"]>;
   reportName?: InputMaybe<Scalars["String"]["input"]>;
   startDate?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
@@ -164,13 +168,13 @@ export type SnapshotAccount = {
   id: Scalars["OID"]["output"];
   startingBalances: Array<TokenBalance>;
   transactions: Array<SnapshotTransaction>;
-  type: AccountType | `${AccountType}`;
+  type: AccountType;
 };
 
 export type SnapshotReportState = {
   accountsDocumentId: Maybe<Scalars["PHID"]["output"]>;
   endDate: Maybe<Scalars["DateTime"]["output"]>;
-  ownerId: Maybe<Scalars["PHID"]["output"]>;
+  ownerIds: Array<Scalars["PHID"]["output"]>;
   reportName: Maybe<Scalars["String"]["output"]>;
   reportPeriodEnd: Maybe<Scalars["DateTime"]["output"]>;
   reportPeriodStart: Maybe<Scalars["DateTime"]["output"]>;
@@ -184,8 +188,8 @@ export type SnapshotTransaction = {
   counterParty: Maybe<Scalars["EthereumAddress"]["output"]>;
   counterPartyAccountId: Maybe<Scalars["OID"]["output"]>;
   datetime: Scalars["DateTime"]["output"];
-  direction: TransactionDirection | `${TransactionDirection}`;
-  flowType: Maybe<TransactionFlowType | `${TransactionFlowType}`>;
+  direction: TransactionDirection;
+  flowType: Maybe<TransactionFlowType>;
   id: Scalars["OID"]["output"];
   token: Scalars["Currency"]["output"];
   transactionId: Scalars["String"]["output"];
@@ -218,10 +222,10 @@ export type TransactionFlowTypeInput =
 
 export type UpdateSnapshotAccountTypeInput = {
   id: Scalars["OID"]["input"];
-  type: AccountTypeInput | `${AccountTypeInput}`;
+  type: AccountTypeInput;
 };
 
 export type UpdateTransactionFlowTypeInput = {
-  flowType: TransactionFlowTypeInput | `${TransactionFlowTypeInput}`;
+  flowType: TransactionFlowTypeInput;
   id: Scalars["OID"]["input"];
 };

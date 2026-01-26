@@ -101,10 +101,11 @@ export default function Editor() {
     endDate,
     snapshotAccounts,
     accountsDocumentId,
-    ownerId,
+    ownerIds,
     reportPeriodStart,
     reportPeriodEnd,
   } = document.state.global;
+
 
   // Filter for Accounts documents
   const accountsDocuments = documentsInDrive
@@ -681,9 +682,9 @@ export default function Editor() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Owner
+                  Owners
                 </label>
-                <SetOwner ownerId={ownerId} dispatch={dispatch} />
+                <SetOwner ownerIds={ownerIds ?? []} dispatch={dispatch} />
               </div>
 
               <div>

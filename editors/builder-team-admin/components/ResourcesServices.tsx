@@ -267,7 +267,10 @@ export function ResourcesServices() {
                 <>
                   {" "}
                   Click "Add new" to create your first{" "}
-                  {isInResourceTemplates ? "resource template" : "service offering"}.
+                  {isInResourceTemplates
+                    ? "resource template"
+                    : "service offering"}
+                  .
                 </>
               )}
             </p>

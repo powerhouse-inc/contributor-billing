@@ -1,9 +1,12 @@
+scalar Unknown
+scalar DateTime
+scalar Attachment
+scalar Address
 scalar Amount_Tokens
 scalar EthereumAddress
-scalar Amount_Percentage
 scalar EmailAddress
+scalar Amount_Percentage
 scalar Date
-scalar DateTime
 scalar URL
 scalar Amount_Money
 scalar OLabel
@@ -15,8 +18,9 @@ scalar Amount_Currency
 scalar Amount_Crypto
 scalar Amount
 scalar Upload
+
 type SnapshotReportState {
-  ownerId: PHID
+  ownerIds: [PHID!]!
   accountsDocumentId: PHID
   startDate: DateTime
   endDate: DateTime
@@ -98,8 +102,6 @@ enum TransactionFlowTypeInput {
   Swap
 }
 
-
-
 # configuration
 
 input SetReportConfigInput {
@@ -107,7 +109,6 @@ input SetReportConfigInput {
   startDate: DateTime
   endDate: DateTime
   accountsDocumentId: PHID
-  ownerId: PHID
 }
 
 input SetAccountsDocumentInput {
@@ -119,7 +120,7 @@ input SetPeriodInput {
   endDate: DateTime!
 }
 
-input SetOwnerIdInput {
+input AddOwnerIdInput {
   ownerId: PHID!
 }
 
@@ -129,6 +130,10 @@ input SetPeriodStartInput {
 
 input SetPeriodEndInput {
   periodEnd: DateTime!
+}
+
+input RemoveOwnerIdInput {
+  ownerId: PHID!
 }
 
 # accounts

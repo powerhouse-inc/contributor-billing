@@ -1,6 +1,7 @@
 import type { ResourceTemplateTemplateManagementOperations } from "@powerhousedao/contributor-billing/document-models/resource-template";
 
-export const resourceTemplateTemplateManagementOperations: ResourceTemplateTemplateManagementOperations = {
+export const resourceTemplateTemplateManagementOperations: ResourceTemplateTemplateManagementOperations =
+  {
     updateTemplateInfoOperation(state, action) {
       if (action.input.title) {
         state.title = action.input.title;

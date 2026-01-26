@@ -1,6 +1,7 @@
 import type { ResourceTemplateServiceManagementOperations } from "@powerhousedao/contributor-billing/document-models/resource-template";
 
-export const resourceTemplateServiceManagementOperations: ResourceTemplateServiceManagementOperations = {
+export const resourceTemplateServiceManagementOperations: ResourceTemplateServiceManagementOperations =
+  {
     addServiceOperation(state, action) {
       state.services.push({
         id: action.input.id,

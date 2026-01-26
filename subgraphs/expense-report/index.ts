@@ -3,8 +3,8 @@ import type { DocumentNode } from "graphql";
 import { schema } from "./schema.js";
 import { getResolvers } from "./resolvers.js";
 
-export class InvoiceAddonSubgraph extends BaseSubgraph {
-  name = "invoice-addon";
+export class ExpenseReportSubgraph extends BaseSubgraph {
+  name = "expense-report";
   typeDefs: DocumentNode = schema;
   resolvers = getResolvers(this);
   additionalContextFields = {};

@@ -28,7 +28,7 @@ export const schema: DocumentNode = gql`
   """
   type UploadInvoicePdfChunkOutput {
     success: Boolean!
-    data: JSONObject 
+    data: JSONObject
     error: String
   }
 
@@ -37,7 +37,7 @@ export const schema: DocumentNode = gql`
   """
   type CreateRequestFinancePaymentOutput {
     success: Boolean!
-    data: JSONObject 
+    data: JSONObject
     error: String
   }
 
@@ -46,7 +46,7 @@ export const schema: DocumentNode = gql`
   """
   type ProcessGnosisPaymentOutput {
     success: Boolean!
-    data: JSONObject 
+    data: JSONObject
     error: String
   }
 `;

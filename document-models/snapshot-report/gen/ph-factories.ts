@@ -13,7 +13,7 @@ import { createDocument } from "./utils.js";
 
 export function defaultGlobalState(): SnapshotReportGlobalState {
   return {
-    ownerId: null,
+    ownerIds: [],
     accountsDocumentId: null,
     startDate: null,
     endDate: null,

@@ -73,13 +73,17 @@ export default function Editor(
 
                 <div className="flex items-center gap-10">
                   <div className="flex flex-col items-end gap-1.5">
-                    <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400">Submitter</div>
+                    <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                      Submitter
+                    </div>
                     <div className="text-sm font-medium text-slate-700">
                       {state.contributor}
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1.5">
-                    <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400">Status</div>
+                    <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                      Status
+                    </div>
                     <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
                       {String(state.status || "—")}
                     </span>

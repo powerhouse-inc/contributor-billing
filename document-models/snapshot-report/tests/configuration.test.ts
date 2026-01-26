@@ -7,15 +7,17 @@ import {
   setReportConfig,
   setAccountsDocument,
   setPeriod,
-  setOwnerId,
   SetReportConfigInputSchema,
   SetAccountsDocumentInputSchema,
   SetPeriodInputSchema,
-  SetOwnerIdInputSchema,
   setPeriodStart,
   setPeriodEnd,
   SetPeriodStartInputSchema,
   SetPeriodEndInputSchema,
+  addOwnerId,
+  removeOwnerId,
+  AddOwnerIdInputSchema,
+  RemoveOwnerIdInputSchema,
 } from "@powerhousedao/contributor-billing/document-models/snapshot-report";
 
 describe("ConfigurationOperations", () => {
@@ -68,23 +70,6 @@ describe("ConfigurationOperations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
 
-  it("should handle setOwnerId operation", () => {
-    const document = utils.createDocument();
-    const input = generateMock(SetOwnerIdInputSchema());
-
-    const updatedDocument = reducer(document, setOwnerId(input));
-
-    expect(isSnapshotReportDocument(updatedDocument)).toBe(true);
-    expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].action.type).toBe(
-      "SET_OWNER_ID",
-    );
-    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
-      input,
-    );
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
-  });
-
   it("should handle setPeriodStart operation", () => {
     const document = utils.createDocument();
     const input = generateMock(SetPeriodStartInputSchema());
@@ -112,6 +97,40 @@ describe("ConfigurationOperations", () => {
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "SET_PERIOD_END",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
+    expect(updatedDocument.operations.global[0].index).toEqual(0);
+  });
+
+  it("should handle addOwnerId operation", () => {
+    const document = utils.createDocument();
+    const input = generateMock(AddOwnerIdInputSchema());
+
+    const updatedDocument = reducer(document, addOwnerId(input));
+
+    expect(isSnapshotReportDocument(updatedDocument)).toBe(true);
+    expect(updatedDocument.operations.global).toHaveLength(1);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "ADD_OWNER_ID",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
+    expect(updatedDocument.operations.global[0].index).toEqual(0);
+  });
+
+  it("should handle removeOwnerId operation", () => {
+    const document = utils.createDocument();
+    const input = generateMock(RemoveOwnerIdInputSchema());
+
+    const updatedDocument = reducer(document, removeOwnerId(input));
+
+    expect(isSnapshotReportDocument(updatedDocument)).toBe(true);
+    expect(updatedDocument.operations.global).toHaveLength(1);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "REMOVE_OWNER_ID",
     );
     expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
       input,

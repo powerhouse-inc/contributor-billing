@@ -183,7 +183,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
             if (docType === "powerhouse/snapshot-report") {
               const snapshotDoc = doc as SnapshotReportDocument;
-              const ownerId = snapshotDoc.state.global.ownerId;
+              const ownerId = snapshotDoc.state.global.ownerIds?.[0] ?? null;
 
               // Apply filters: teamId takes precedence, then networkSlug (via allowedBuilderPhids)
               if (teamId && ownerId !== teamId) continue;
@@ -233,7 +233,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         // Group snapshot reports
         for (const snapshotDoc of snapshotReportDocs) {
           const state = snapshotDoc.state.global;
-          const ownerId = state.ownerId;
+          const ownerId = state.ownerIds?.[0] ?? null;
           if (!ownerId) continue;
 
           const periodKey = getPeriodKey(

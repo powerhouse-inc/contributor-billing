@@ -1,6 +1,7 @@
 import type { ResourceTemplateServiceCategoryManagementOperations } from "@powerhousedao/contributor-billing/document-models/resource-template";
 
-export const resourceTemplateServiceCategoryManagementOperations: ResourceTemplateServiceCategoryManagementOperations = {
+export const resourceTemplateServiceCategoryManagementOperations: ResourceTemplateServiceCategoryManagementOperations =
+  {
     setSetupServicesOperation(state, action) {
       state.setupServices = action.input.services;
       state.lastModified = action.input.lastModified;

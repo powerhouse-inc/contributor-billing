@@ -24,7 +24,6 @@ import type {
 import { AccountForm } from "./components/AccountForm.js";
 import { DocumentHeader } from "./components/DocumentHeader.js";
 import { AccountsList } from "./components/AccountsList.js";
-import { AccountsFilter } from "./components/AccountsFilter.js";
 import { accountTransactionsService } from "./services/accountTransactionsService.js";
 
 type ViewMode = "list" | "add" | "edit";
@@ -120,7 +119,6 @@ export function Editor() {
   const [editingAccount, setEditingAccount] = useState<AccountEntry | null>(
     null,
   );
-  const [filteredAccounts, setFilteredAccounts] = useState<AccountEntry[]>([]);
   const [creatingTransactionsFor, setCreatingTransactionsFor] = useState<
     string | null
   >(null);
@@ -349,10 +347,6 @@ export function Editor() {
   }
 
   const accounts = document.state.global.accounts;
-  const displayAccounts =
-    filteredAccounts.length > 0 || accounts.length === 0
-      ? filteredAccounts
-      : accounts;
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -500,25 +494,16 @@ export function Editor() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-6">
-                    {/* Filter Component */}
-                    <AccountsFilter
-                      accounts={accounts}
-                      onFilteredAccountsChange={setFilteredAccounts}
-                    />
-
-                    {/* Accounts List */}
-                    <AccountsList
-                      accounts={displayAccounts}
-                      onEdit={handleEditClick}
-                      onDelete={handleDeleteAccount}
-                      onUpdateKycStatus={handleUpdateKycStatus}
-                      onCreateTransactions={handleCreateTransactions}
-                      creatingTransactionsFor={
-                        creatingTransactionsFor || undefined
-                      }
-                    />
-                  </div>
+                  <AccountsList
+                    accounts={accounts}
+                    onEdit={handleEditClick}
+                    onDelete={handleDeleteAccount}
+                    onUpdateKycStatus={handleUpdateKycStatus}
+                    onCreateTransactions={handleCreateTransactions}
+                    creatingTransactionsFor={
+                      creatingTransactionsFor || undefined
+                    }
+                  />
                 )}
               </div>
             )}

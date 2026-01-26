@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDrives } from "@powerhousedao/reactor-browser";
-import { setOwnerId } from "../../../document-models/snapshot-report/gen/configuration/creators.js";
+import {
+  addOwnerId,
+  removeOwnerId,
+} from "../../../document-models/snapshot-report/gen/configuration/creators.js";
 import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/gen/types.js";
 import {
   useAddReportToRemoteDrive,
@@ -14,20 +17,17 @@ type BuilderProfileOption = {
 };
 
 type SetOwnerProps = {
-  ownerId?: string | null;
-  dispatch: (action: ReturnType<typeof setOwnerId>) => void;
+  ownerIds: string[];
+  dispatch: (
+    action: ReturnType<typeof addOwnerId> | ReturnType<typeof removeOwnerId>,
+  ) => void;
 };
 
-export function SetOwner({ ownerId, dispatch }: SetOwnerProps) {
+export function SetOwner({ ownerIds, dispatch }: SetOwnerProps) {
   const drives = useDrives();
   const [query, setQuery] = useState("");
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement | null>(null);
-  const {
-    ownerDriveId,
-    ownerId: resolvedOwnerId,
-    selectedDocument,
-  } = useAddReportToRemoteDrive(ownerId);
 
   const builderProfiles = useMemo<BuilderProfileOption[]>(() => {
     if (!drives) return [];
@@ -53,32 +53,35 @@ export function SetOwner({ ownerId, dispatch }: SetOwnerProps) {
       );
   }, [drives]);
 
-  const selectedProfile = useMemo(
-    () => builderProfiles.find((profile) => profile.id === ownerId),
-    [builderProfiles, ownerId],
+  // Filter out already selected owners from the picker
+  const ownerIdSet = new Set(ownerIds);
+  const availableProfiles = builderProfiles.filter(
+    (profile) => !ownerIdSet.has(profile.id),
   );
 
-  const showPicker = !ownerId || isPickerOpen;
   const normalizedQuery = query.trim().toLowerCase();
   const filteredProfiles = normalizedQuery
-    ? builderProfiles.filter((profile) =>
+    ? availableProfiles.filter((profile) =>
         profile.name.toLowerCase().includes(normalizedQuery),
       )
-    : builderProfiles.slice(0, 5);
-  const shouldShowOptions = isPickerOpen;
+    : availableProfiles.slice(0, 5);
 
   const handleSelect = (profile: BuilderProfileOption) => {
-    dispatch(setOwnerId({ ownerId: profile.id }));
+    dispatch(addOwnerId({ ownerId: profile.id }));
     setQuery("");
     setIsPickerOpen(false);
   };
 
   const handleManualSelect = (value: string) => {
     const trimmed = value.trim();
-    if (!trimmed) return;
-    dispatch(setOwnerId({ ownerId: trimmed }));
+    if (!trimmed || ownerIdSet.has(trimmed)) return;
+    dispatch(addOwnerId({ ownerId: trimmed }));
     setQuery("");
     setIsPickerOpen(false);
+  };
+
+  const handleRemoveOwner = (ownerId: string) => {
+    dispatch(removeOwnerId({ ownerId }));
   };
 
   useEffect(() => {
@@ -96,97 +99,137 @@ export function SetOwner({ ownerId, dispatch }: SetOwnerProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isPickerOpen]);
 
-  const ownerDriveMissing = !!resolvedOwnerId && !ownerDriveId;
-
   return (
-    <div className="flex items-start gap-2">
-      <span className="pt-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-        Owner:
-      </span>
-      <div className="w-full max-w-lg">
-        {showPicker ? (
-          <div className="relative" ref={pickerRef}>
-            <input
-              type="text"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              onFocus={() => setIsPickerOpen(true)}
-              placeholder="Search builder name"
-              className="w-full min-w-[320px] rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-gray-400 dark:focus:ring-gray-800"
+    <div className="space-y-3">
+      {/* List of current owners */}
+      {ownerIds.length > 0 && (
+        <div className="space-y-2">
+          {ownerIds.map((ownerId) => (
+            <OwnerCard
+              key={ownerId}
+              ownerId={ownerId}
+              builderProfiles={builderProfiles}
+              onRemove={() => handleRemoveOwner(ownerId)}
             />
-            {shouldShowOptions ? (
-              filteredProfiles.length > 0 ? (
-                <div className="absolute z-10 mt-2 w-full rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
-                  {filteredProfiles.map((profile) => (
-                    <button
-                      key={`${profile.driveId}-${profile.id}`}
-                      type="button"
-                      onClick={() => handleSelect(profile)}
-                      className="flex w-full flex-col px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800"
-                    >
-                      <span className="font-medium">{profile.name}</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {profile.id}
-                      </span>
-                    </button>
-                  ))}
+          ))}
+        </div>
+      )}
+
+      {/* Add owner picker */}
+      <div className="relative" ref={pickerRef}>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onFocus={() => setIsPickerOpen(true)}
+            placeholder={
+              ownerIds.length === 0
+                ? "Search builder name to add owner"
+                : "Add another owner..."
+            }
+            className="flex-1 min-w-[280px] rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-gray-400 dark:focus:ring-gray-800"
+          />
+        </div>
+        {isPickerOpen && (
+          <div className="absolute z-10 mt-2 w-full rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+            {filteredProfiles.length > 0 ? (
+              filteredProfiles.map((profile) => (
+                <button
+                  key={`${profile.driveId}-${profile.id}`}
+                  type="button"
+                  onClick={() => handleSelect(profile)}
+                  className="flex w-full flex-col px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800"
+                >
+                  <span className="font-medium">{profile.name}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {profile.id}
+                  </span>
+                </button>
+              ))
+            ) : (
+              <>
+                <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                  {normalizedQuery
+                    ? "No matching builders"
+                    : "No more builders available"}
                 </div>
-              ) : (
-                <div className="absolute z-10 mt-2 w-full rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
-                  <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
-                    No matching builders
-                  </div>
-                  {normalizedQuery ? (
-                    <button
-                      type="button"
-                      onClick={() => handleManualSelect(query)}
-                      className="flex w-full flex-col px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800"
-                    >
-                      <span className="font-medium">Use this ID</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {query}
-                      </span>
-                    </button>
-                  ) : null}
-                </div>
-              )
-            ) : null}
-          </div>
-        ) : (
-          <div className="rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              {selectedProfile?.name || "Unknown builder"}
-            </div>
-            <div className="mt-2">
-              <input
-                type="text"
-                value={ownerId || ""}
-                readOnly
-                className="w-full min-w-[320px] rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-mono text-gray-700 shadow-sm focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-              />
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setIsPickerOpen(true)}
-                className="text-xs font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-              >
-                Change owner
-              </button>
-              {ownerDriveMissing ? (
-                <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-                  Owner Drive Not Found
-                </span>
-              ) : ownerDriveId ? (
-                <OwnerDriveActions
-                  ownerDriveId={ownerDriveId}
-                  selectedDocument={selectedDocument}
-                  ownerName={selectedProfile?.name || "owner"}
-                />
-              ) : null}
-            </div>
+                {normalizedQuery && !ownerIdSet.has(normalizedQuery) && (
+                  <button
+                    type="button"
+                    onClick={() => handleManualSelect(query)}
+                    className="flex w-full flex-col px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800"
+                  >
+                    <span className="font-medium">Use this ID</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {query}
+                    </span>
+                  </button>
+                )}
+              </>
+            )}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+type OwnerCardProps = {
+  ownerId: string;
+  builderProfiles: BuilderProfileOption[];
+  onRemove: () => void;
+};
+
+function OwnerCard({ ownerId, builderProfiles, onRemove }: OwnerCardProps) {
+  const profile = builderProfiles.find((p) => p.id === ownerId);
+  const { ownerDriveId, selectedDocument } = useAddReportToRemoteDrive(ownerId);
+  const ownerDriveMissing = !!ownerId && !ownerDriveId;
+
+  return (
+    <div className="rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            {profile?.name || "Unknown builder"}
+          </div>
+          <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400 truncate">
+            {ownerId}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="p-1 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
+          title="Remove owner"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-3">
+        {ownerDriveMissing ? (
+          <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
+            Owner Drive Not Found
+          </span>
+        ) : ownerDriveId ? (
+          <OwnerDriveActions
+            ownerDriveId={ownerDriveId}
+            selectedDocument={selectedDocument}
+            ownerName={profile?.name || "owner"}
+          />
+        ) : null}
       </div>
     </div>
   );

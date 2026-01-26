@@ -757,111 +757,115 @@ export const InvoiceTable = ({
       />
       <div className="contributor-billing-table w-full h-full bg-white rounded-lg p-4 border border-gray-200 shadow-sm mt-4 overflow-x-auto">
         <HeaderControls
-        statusOptions={statusOptions}
-        selectedStatuses={selectedStatuses}
-        onStatusChange={onStatusChange}
-        onExport={handleCSVExport}
-        onExpenseReportExport={handleExpenseReportExport}
-        createIntegrationsDocument={createIntegrationsDocument}
-        integrationsDoc={integrationsDoc}
-        hasBillingStatements={hasBillingStatements}
-        expenseReportDoc={expenseReportDoc}
-        existingExpenseReportForMonth={existingExpenseReport}
-        onCreateOrOpenExpenseReport={handleCreateOrOpenExpenseReport}
-        selected={selected}
-        handleCreateBillingStatement={handleCreateBillingStatement}
-        setSelected={setSelected}
-        invoices={invoicesDocs}
-        billingStatements={billingStatementDocs}
-        canExportSelectedRows={canExportSelectedRows}
-      />
+          statusOptions={statusOptions}
+          selectedStatuses={selectedStatuses}
+          onStatusChange={onStatusChange}
+          onExport={handleCSVExport}
+          onExpenseReportExport={handleExpenseReportExport}
+          createIntegrationsDocument={createIntegrationsDocument}
+          integrationsDoc={integrationsDoc}
+          hasBillingStatements={hasBillingStatements}
+          expenseReportDoc={expenseReportDoc}
+          existingExpenseReportForMonth={existingExpenseReport}
+          onCreateOrOpenExpenseReport={handleCreateOrOpenExpenseReport}
+          selected={selected}
+          handleCreateBillingStatement={handleCreateBillingStatement}
+          setSelected={setSelected}
+          invoices={invoicesDocs}
+          billingStatements={billingStatementDocs}
+          canExportSelectedRows={canExportSelectedRows}
+        />
 
-      {/* Status Sections */}
-      {renderSection("DRAFT", "Draft", draft, {
-        showIssuer: false,
-        showCreateButton: true,
-      })}
-      {renderSection("ISSUED", "Issued", issued, {
-        showBillingStatement: true,
-      })}
-      {renderSection("ACCEPTED", "Accepted", accepted, {
-        showBillingStatement: true,
-      })}
-      {renderSection(
-        "PAYMENTSCHEDULED",
-        "Payment Scheduled",
-        paymentScheduled,
-        {
+        {/* Status Sections */}
+        {renderSection("DRAFT", "Draft", draft, {
+          showIssuer: false,
+          showCreateButton: true,
+        })}
+        {renderSection("ISSUED", "Issued", issued, {
           showBillingStatement: true,
-        },
-      )}
-      {renderSection("PAYMENTSENT", "Payment Sent", paymentSent, {
-        showBillingStatement: true,
-      })}
-      {renderSection("PAYMENTISSUE", "Payment Issue", paymentIssue, {
-        showBillingStatement: true,
-      })}
-      {renderSection("PAYMENTCLOSED", "Payment Closed", paymentClosed)}
-      {renderSection("REJECTED", "Rejected", rejected)}
-      {renderSection("OTHER", "Other", otherInvoices)}
+        })}
+        {renderSection("ACCEPTED", "Accepted", accepted, {
+          showBillingStatement: true,
+        })}
+        {renderSection(
+          "PAYMENTSCHEDULED",
+          "Payment Scheduled",
+          paymentScheduled,
+          {
+            showBillingStatement: true,
+          },
+        )}
+        {renderSection("PAYMENTSENT", "Payment Sent", paymentSent, {
+          showBillingStatement: true,
+        })}
+        {renderSection("PAYMENTISSUE", "Payment Issue", paymentIssue, {
+          showBillingStatement: true,
+        })}
+        {renderSection("PAYMENTCLOSED", "Payment Closed", paymentClosed)}
+        {renderSection("REJECTED", "Rejected", rejected)}
+        {renderSection("OTHER", "Other", otherInvoices)}
 
-      {/* Loading section for files that haven't loaded yet */}
-      {loadingFileIds.length > 0 && (
-        <InvoiceTableSection
-          title="Loading"
-          count={loadingFileIds.length}
-          color="bg-gray-100 text-gray-600"
-        >
-          <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-300 overflow-hidden">
-            <thead>
-              <tr className="bg-gray-50 font-medium text-gray-500 text-xs">
-                <th className="px-2 py-2 w-8 rounded-tl-sm" />
-                <th className="px-2 py-2 text-center">Invoice</th>
-                <th className="px-2 py-2 text-center">Invoice No.</th>
-                <th className="px-2 py-2 text-center">Issue Date</th>
-                <th className="px-2 py-2 text-center">Due Date</th>
-                <th className="px-2 py-2 text-center">Currency</th>
-                <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2 rounded-tr-sm text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loadingFileIds.map((id) => {
-                const file = files.find((f) => f.id === id);
-                return (
-                  <tr
-                    key={id}
-                    className="border-t border-gray-200 animate-pulse"
-                  >
-                    <td className="px-2 py-2" />
-                    <td className="px-2 py-2 text-center text-gray-400">
-                      {file?.name || "Loading..."}
-                    </td>
-                    <td className="px-2 py-2 text-center">
-                      <div className="h-4 bg-gray-200 rounded w-16 mx-auto" />
-                    </td>
-                    <td className="px-2 py-2 text-center">
-                      <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
-                    </td>
-                    <td className="px-2 py-2 text-center">
-                      <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
-                    </td>
-                    <td className="px-2 py-2 text-center">
-                      <div className="h-4 bg-gray-200 rounded w-12 mx-auto" />
-                    </td>
-                    <td className="px-2 py-2 text-center">
-                      <div className="h-4 bg-gray-200 rounded w-16 mx-auto" />
-                    </td>
-                    <td className="px-2 py-2 text-center">
-                      <span className="text-xs text-gray-400">Loading...</span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </InvoiceTableSection>
-      )}
+        {/* Loading section for files that haven't loaded yet */}
+        {loadingFileIds.length > 0 && (
+          <InvoiceTableSection
+            title="Loading"
+            count={loadingFileIds.length}
+            color="bg-gray-100 text-gray-600"
+          >
+            <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-300 overflow-hidden">
+              <thead>
+                <tr className="bg-gray-50 font-medium text-gray-500 text-xs">
+                  <th className="px-2 py-2 w-8 rounded-tl-sm" />
+                  <th className="px-2 py-2 text-center">Invoice</th>
+                  <th className="px-2 py-2 text-center">Invoice No.</th>
+                  <th className="px-2 py-2 text-center">Issue Date</th>
+                  <th className="px-2 py-2 text-center">Due Date</th>
+                  <th className="px-2 py-2 text-center">Currency</th>
+                  <th className="px-2 py-2 text-center">Amount</th>
+                  <th className="px-2 py-2 rounded-tr-sm text-center">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {loadingFileIds.map((id) => {
+                  const file = files.find((f) => f.id === id);
+                  return (
+                    <tr
+                      key={id}
+                      className="border-t border-gray-200 animate-pulse"
+                    >
+                      <td className="px-2 py-2" />
+                      <td className="px-2 py-2 text-center text-gray-400">
+                        {file?.name || "Loading..."}
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-16 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-12 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-16 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <span className="text-xs text-gray-400">
+                          Loading...
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </InvoiceTableSection>
+        )}
       </div>
     </>
   );

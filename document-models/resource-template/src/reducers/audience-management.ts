@@ -1,6 +1,7 @@
 import type { ResourceTemplateAudienceManagementOperations } from "@powerhousedao/contributor-billing/document-models/resource-template";
 
-export const resourceTemplateAudienceManagementOperations: ResourceTemplateAudienceManagementOperations = {
+export const resourceTemplateAudienceManagementOperations: ResourceTemplateAudienceManagementOperations =
+  {
     addTargetAudienceOperation(state, action) {
       state.targetAudiences.push({
         id: action.input.id,

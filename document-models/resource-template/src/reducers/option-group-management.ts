@@ -1,6 +1,7 @@
 import type { ResourceTemplateOptionGroupManagementOperations } from "@powerhousedao/contributor-billing/document-models/resource-template";
 
-export const resourceTemplateOptionGroupManagementOperations: ResourceTemplateOptionGroupManagementOperations = {
+export const resourceTemplateOptionGroupManagementOperations: ResourceTemplateOptionGroupManagementOperations =
+  {
     addOptionGroupOperation(state, action) {
       state.optionGroups.push({
         id: action.input.id,
