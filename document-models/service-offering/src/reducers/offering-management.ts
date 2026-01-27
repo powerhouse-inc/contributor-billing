@@ -3,7 +3,7 @@ import {
   NoTemplateSelectedError,
   TemplateMismatchError,
 } from "../../gen/offering-management/error.js";
-import type { ServiceOfferingOfferingManagementOperations } from "resourceServices/document-models/service-offering";
+import type { ServiceOfferingOfferingManagementOperations } from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 export const serviceOfferingOfferingManagementOperations: ServiceOfferingOfferingManagementOperations =
   {

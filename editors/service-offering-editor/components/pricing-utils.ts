@@ -1,4 +1,4 @@
-import type { BillingCycle } from "resourceServices/document-models/service-offering";
+import type { BillingCycle } from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 // Billing cycle months for monthly-equivalent calculation
 export const BILLING_CYCLE_MONTHS: Record<BillingCycle, number> = {

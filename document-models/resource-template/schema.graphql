@@ -239,6 +239,7 @@ input DeleteOptionGroupInput {
 }
 
 input AddFaqInput {
+  id: OID!
   question: String
   answer: String
 }

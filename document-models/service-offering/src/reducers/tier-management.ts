@@ -6,7 +6,7 @@ import {
   RemovePricingOptionTierNotFoundError,
   RemovePricingOptionNotFoundError,
 } from "../../gen/tier-management/error.js";
-import type { ServiceOfferingTierManagementOperations } from "resourceServices/document-models/service-offering";
+import type { ServiceOfferingTierManagementOperations } from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 export const serviceOfferingTierManagementOperations: ServiceOfferingTierManagementOperations =
   {

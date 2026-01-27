@@ -5,7 +5,7 @@ import type {
   ServiceOfferingDocument,
   ServiceOfferingAction,
   TargetAudience,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   updateOfferingInfo,
   updateOfferingStatus,

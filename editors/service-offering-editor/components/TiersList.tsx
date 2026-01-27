@@ -8,7 +8,7 @@ import type {
   Service,
   ServiceLevelBinding,
   ServiceUsageLimit,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   addTier,
   deleteTier,

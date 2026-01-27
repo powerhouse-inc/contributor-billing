@@ -6,7 +6,7 @@ import type {
   ServiceOfferingAction,
   Service,
   OptionGroup,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   addService,
   updateService,

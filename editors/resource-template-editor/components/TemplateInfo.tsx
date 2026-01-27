@@ -6,7 +6,7 @@ import type {
   ResourceTemplateAction,
   TargetAudience,
   FaqField,
-} from "resourceServices/document-models/resource-template";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 import {
   updateTemplateInfo,
   updateTemplateStatus,
@@ -331,7 +331,6 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
         id: generateId(),
         question: newFaqQuestion.trim(),
         answer: newFaqAnswer.trim(),
-        lastModified: new Date().toISOString(),
       }),
     );
     setNewFaqQuestion("");
@@ -352,7 +351,6 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
         id: editingFaqId,
         question: editingFaqQuestion.trim(),
         answer: editingFaqAnswer.trim(),
-        lastModified: new Date().toISOString(),
       }),
     );
     setEditingFaqId(null);
@@ -370,7 +368,6 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
     dispatch(
       deleteFaq({
         id,
-        lastModified: new Date().toISOString(),
       }),
     );
   };

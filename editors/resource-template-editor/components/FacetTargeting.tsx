@@ -4,7 +4,7 @@ import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import type {
   ResourceTemplateDocument,
   ResourceTemplateAction,
-} from "resourceServices/document-models/resource-template";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 import {
   setFacetTarget,
   removeFacetTarget,

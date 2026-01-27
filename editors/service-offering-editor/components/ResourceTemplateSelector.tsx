@@ -3,7 +3,7 @@ import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import type {
   ServiceOfferingDocument,
   ServiceOfferingAction,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   selectResourceTemplate,
   changeResourceTemplate,
@@ -16,7 +16,7 @@ import { useResourceTemplateDocumentsInSelectedDrive } from "../../../document-m
 import type {
   ResourceTemplateDocument,
   ResourceTemplateGlobalState,
-} from "resourceServices/document-models/resource-template";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 
 interface ResourceTemplateSelectorProps {
   document: ServiceOfferingDocument;

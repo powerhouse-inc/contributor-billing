@@ -79,6 +79,7 @@ export function AddFacetOptionInputSchema(): z.ZodObject<
 export function AddFaqInputSchema(): z.ZodObject<Properties<AddFaqInput>> {
   return z.object({
     answer: z.string().nullish(),
+    id: z.string(),
     question: z.string().nullish(),
   });
 }

@@ -396,7 +396,7 @@
               "id": "5383b824-c864-4062-a90e-f892d292a658",
               "name": "ADD_FAQ",
               "reducer": "",
-              "schema": "input AddFaqInput {\n  question: String\n  answer: String\n}",
+              "schema": "input AddFaqInput {\n  id: OID!\n  question: String\n  answer: String\n}",
               "scope": "global",
               "template": ""
             },
@@ -412,15 +412,15 @@
               "template": ""
             },
             {
-              "id": "aa7b2729-22b8-41f7-bc45-3825c1857668",
-              "name": "DELETE_FAQ",
               "description": "",
-              "schema": "input DeleteFaqInput {\n  id:OID!\n}",
-              "template": "",
-              "reducer": "",
               "errors": [],
               "examples": [],
-              "scope": "global"
+              "id": "aa7b2729-22b8-41f7-bc45-3825c1857668",
+              "name": "DELETE_FAQ",
+              "reducer": "",
+              "schema": "input DeleteFaqInput {\n  id:OID!\n}",
+              "scope": "global",
+              "template": ""
             }
           ]
         }

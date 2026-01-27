@@ -11,7 +11,7 @@ import type {
   OptionGroup,
   ServiceUsageLimit,
   BillingCycle,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   RECURRING_BILLING_CYCLES,
   BILLING_CYCLE_SHORT_LABELS,

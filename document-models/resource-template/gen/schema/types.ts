@@ -76,6 +76,7 @@ export type AddFacetOptionInput = {
 
 export type AddFaqInput = {
   answer?: InputMaybe<Scalars["String"]["input"]>;
+  id: Scalars["OID"]["input"];
   question?: InputMaybe<Scalars["String"]["input"]>;
 };
 
