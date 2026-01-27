@@ -32,10 +32,6 @@ interface HeaderControlsProps {
   canExport?: boolean;
   hasBillingStatements?: boolean;
   expenseReportDoc?: FileNode;
-  /** Existing expense report for the current month (to prevent duplicates) */
-  existingExpenseReportForMonth?: {
-    header: { id: string; name?: string };
-  } | null;
   onCreateOrOpenExpenseReport?: () => void;
   selected?: Record<string, boolean>;
   handleCreateBillingStatement: (id: string) => Promise<void>;
@@ -56,7 +52,6 @@ export const HeaderControls = ({
   integrationsDoc,
   hasBillingStatements = false,
   expenseReportDoc,
-  existingExpenseReportForMonth,
   onCreateOrOpenExpenseReport,
   selected = {},
   handleCreateBillingStatement,
@@ -210,19 +205,14 @@ export const HeaderControls = ({
           <button
             type="button"
             className={`bg-white border border-gray-300 rounded px-3 py-1.5 text-sm font-medium transition-colors ${
-              hasBillingStatements && !existingExpenseReportForMonth
+              hasBillingStatements
                 ? "hover:bg-gray-50"
                 : "opacity-50 cursor-not-allowed"
             }`}
             onClick={onCreateOrOpenExpenseReport}
-            disabled={!hasBillingStatements || !!existingExpenseReportForMonth}
-            title={
-              existingExpenseReportForMonth
-                ? "Expense report already exists for this month"
-                : undefined
-            }
+            disabled={!hasBillingStatements}
           >
-            {expenseReportDoc ? "Expense Report" : "Create Expense Report"}
+            + Expense Report
           </button>
           <button
             type="button"

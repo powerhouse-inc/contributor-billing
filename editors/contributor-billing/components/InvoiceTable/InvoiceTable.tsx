@@ -69,6 +69,17 @@ interface BillingStatementGlobalState {
   contributor?: string;
 }
 
+/**
+ * Format month name like "January 2026" to "01-2026"
+ */
+function formatMonthCode(monthName: string): string {
+  const date = new Date(monthName + " 1");
+  if (isNaN(date.getTime())) return monthName;
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month}-${year}`;
+}
+
 // Status options for filter
 export const statusOptions = [
   { label: "Draft", value: "DRAFT" },
@@ -180,14 +191,16 @@ export const InvoiceTable = ({
   // Get documents directly from the hook - this will automatically update when documents change
   const documentsInDrive = useDocumentsInSelectedDrive() || [];
 
-  // Check if an expense report already exists for the current month
-  const existingExpenseReport = useMemo(() => {
-    if (!monthName || !documentsInDrive) return null;
+  // Get all expense reports for the current month (matches both old "January 2026" and new "01-2026" formats)
+  const expenseReportsForMonth = useMemo(() => {
+    if (!monthName || !documentsInDrive) return [];
+    const monthCode = formatMonthCode(monthName);
     const monthLower = monthName.toLowerCase();
-    return documentsInDrive.find(
+    return documentsInDrive.filter(
       (doc) =>
         doc.header.documentType === "powerhouse/expense-report" &&
-        doc.header.name?.toLowerCase().includes(monthLower),
+        (doc.header.name?.includes(monthCode) ||
+          doc.header.name?.toLowerCase().includes(monthLower)),
     );
   }, [documentsInDrive, monthName]);
 
@@ -645,29 +658,29 @@ export const InvoiceTable = ({
     );
   }, [allDocuments]);
 
-  // Create or open expense report - simple async function
-  const handleCreateOrOpenExpenseReport = async () => {
-    if (expenseReportDoc) {
-      setSelectedNode(expenseReportDoc.id);
-    } else {
-      const expenseReportModel = filteredDocumentModels.find(
-        (model) => model.id === "powerhouse/expense-report",
+  // Create a new expense report
+  const handleCreateExpenseReport = async () => {
+    const expenseReportModel = filteredDocumentModels.find(
+      (model) => model.id === "powerhouse/expense-report",
+    );
+
+    if (expenseReportModel && monthName) {
+      const monthCode = formatMonthCode(monthName);
+      const reportNumber = expenseReportsForMonth.length + 1;
+      const reportName = `${monthCode} Expense Report ${reportNumber}`;
+
+      const createdNode = await addDocument(
+        selectedDrive?.header.id || "",
+        reportName,
+        "powerhouse/expense-report",
+        reportingFolderId, // Create in the Reporting folder (sibling of Payments)
+        undefined,
+        undefined,
+        "powerhouse-expense-report-editor",
       );
 
-      if (expenseReportModel) {
-        const createdNode = await addDocument(
-          selectedDrive?.header.id || "",
-          "expense-report",
-          "powerhouse/expense-report",
-          reportingFolderId, // Create in the Reporting folder (sibling of Payments)
-          undefined,
-          undefined,
-          "powerhouse-expense-report-editor",
-        );
-
-        if (createdNode?.id) {
-          setSelectedNode(createdNode.id);
-        }
+      if (createdNode?.id) {
+        setSelectedNode(createdNode.id);
       }
     }
   };
@@ -766,8 +779,7 @@ export const InvoiceTable = ({
           integrationsDoc={integrationsDoc}
           hasBillingStatements={hasBillingStatements}
           expenseReportDoc={expenseReportDoc}
-          existingExpenseReportForMonth={existingExpenseReport}
-          onCreateOrOpenExpenseReport={handleCreateOrOpenExpenseReport}
+          onCreateOrOpenExpenseReport={handleCreateExpenseReport}
           selected={selected}
           handleCreateBillingStatement={handleCreateBillingStatement}
           setSelected={setSelected}

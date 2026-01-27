@@ -26,6 +26,17 @@ import type { OperationalHubProfileDocument } from "../../../document-models/ope
 
 const ICON_SIZE = 16;
 
+/**
+ * Format month name like "January 2026" to "01-2026"
+ */
+function formatMonthCode(monthName: string): string {
+  const date = new Date(monthName + " 1");
+  if (isNaN(date.getTime())) return monthName;
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month}-${year}`;
+}
+
 /** Folder types for content routing */
 export type FolderType = "payments" | "reporting" | "billing" | null;
 
@@ -211,8 +222,8 @@ export function FolderTree({
     [validDocumentIds],
   );
 
-  // Generate a stable key based on the node structure to force Sidebar remount when nodes change
-  // This works around a bug in the Sidebar component where toggle state isn't updated for new nodes
+  // Generate a stable key based on the folder structure to force Sidebar remount when folders change
+  // Only tracks folder IDs - not document count, to prevent sidebar collapse when documents are added
   const sidebarKey = useMemo(() => {
     const nodeIds: string[] = [];
     for (const [, info] of monthFolders.entries()) {
@@ -220,10 +231,8 @@ export function FolderTree({
       if (info.paymentsFolder) nodeIds.push(info.paymentsFolder.id);
       if (info.reportingFolder) nodeIds.push(info.reportingFolder.id);
     }
-    // Include document count to detect when documents are added/removed
-    const docCount = documentsInDrive?.length ?? 0;
-    return `${nodeIds.join("-")}-${docCount}`;
-  }, [monthFolders, documentsInDrive?.length]);
+    return nodeIds.join("-") || "empty";
+  }, [monthFolders]);
 
   // Build navigation sections
   const navigationSections = useMemo(() => {
@@ -260,13 +269,16 @@ export function FolderTree({
       }
 
       if (info.reportingFolder) {
-        // Filter reports that match this specific month by name
+        // Filter reports that match this specific month by name (matches both old "January 2026" and new "01-2026" formats)
         const monthLower = monthName.toLowerCase();
+        const monthCode = formatMonthCode(monthName);
 
         const folderReports = reportDocuments.filter((doc) => {
-          const docName = doc.header.name?.toLowerCase() || "";
-          // Only include if report name contains the full month name (e.g., "january 2026")
-          return docName.includes(monthLower);
+          const docName = doc.header.name || "";
+          return (
+            docName.toLowerCase().includes(monthLower) ||
+            docName.includes(monthCode)
+          );
         });
         const reportingChildren: SidebarNode[] = folderReports.map((doc) => ({
           id: doc.header.id,
@@ -441,7 +453,10 @@ export function FolderTree({
         nodes={navigationSections}
         activeNodeId={sanitizedActiveNodeId}
         onActiveNodeChange={handleActiveNodeChange}
-        sidebarTitle={operationalHubProfileDocument?.state?.global?.name || "Operational Hub"}
+        sidebarTitle={
+          operationalHubProfileDocument?.state?.global?.name ||
+          "Operational Hub"
+        }
         showSearchBar={false}
         resizable={true}
         allowPinning={false}

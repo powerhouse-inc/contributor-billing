@@ -88,7 +88,8 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
       {
         done: monthFolders.size > 0,
         label: "Set up your billing",
-        description: "Add your first month, pay invoices and complete reporting",
+        description:
+          "Add your first month, pay invoices and complete reporting",
         onClick: handleOpenBilling,
       },
     ];

@@ -33,6 +33,17 @@ function parseMonthDates(monthName: string): {
 }
 
 /**
+ * Format month name like "January 2026" to "01-2026"
+ */
+function formatMonthCode(monthName: string): string {
+  const date = new Date(monthName + " 1");
+  if (isNaN(date.getTime())) return monthName;
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month}-${year}`;
+}
+
+/**
  * View for the Reporting folder showing Expense Reports and Snapshot Reports
  */
 export function ReportingView({ folderId, monthName }: ReportingViewProps) {
@@ -40,23 +51,26 @@ export function ReportingView({ folderId, monthName }: ReportingViewProps) {
   const [selectedDrive] = useSelectedDrive();
   const [isCreating, setIsCreating] = useState(false);
 
-  // Find expense reports and snapshot reports that match this month
+  // Find expense reports and snapshot reports that match this month (matches both old "January 2026" and new "01-2026" formats)
   const { expenseReports, snapshotReports } = useMemo(() => {
     if (!documentsInDrive || !monthName) {
       return { expenseReports: [], snapshotReports: [] };
     }
 
     const monthLower = monthName.toLowerCase();
+    const monthCode = formatMonthCode(monthName);
 
     const expense = documentsInDrive.filter(
       (doc) =>
         doc.header.documentType === "powerhouse/expense-report" &&
-        doc.header.name?.toLowerCase().includes(monthLower),
+        (doc.header.name?.toLowerCase().includes(monthLower) ||
+          doc.header.name?.includes(monthCode)),
     );
     const snapshot = documentsInDrive.filter(
       (doc) =>
         doc.header.documentType === "powerhouse/snapshot-report" &&
-        doc.header.name?.toLowerCase().includes(monthLower),
+        (doc.header.name?.toLowerCase().includes(monthLower) ||
+          doc.header.name?.includes(monthCode)),
     );
 
     return { expenseReports: expense, snapshotReports: snapshot };
@@ -73,7 +87,9 @@ export function ReportingView({ folderId, monthName }: ReportingViewProps) {
     setIsCreating(true);
 
     try {
-      const reportName = `${monthName} - Expense Report`;
+      const monthCode = formatMonthCode(monthName);
+      const reportNumber = expenseReports.length + 1;
+      const reportName = `${monthCode} Expense Report ${reportNumber}`;
       const createdNode = await addDocument(
         driveId,
         reportName,
@@ -193,17 +209,20 @@ export function ReportingView({ folderId, monthName }: ReportingViewProps) {
               <h2 className="text-lg font-semibold text-gray-900">
                 Expense Reports
               </h2>
+              {expenseReports.length > 0 && (
+                <span className="text-sm text-gray-500">
+                  ({expenseReports.length})
+                </span>
+              )}
             </div>
-            {expenseReports.length === 0 && (
-              <button
-                onClick={() => void handleCreateExpenseReport()}
-                disabled={isCreating}
-                className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Plus className="w-4 h-4" />
-                {isCreating ? "Creating..." : "New"}
-              </button>
-            )}
+            <button
+              onClick={() => void handleCreateExpenseReport()}
+              disabled={isCreating}
+              className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Plus className="w-4 h-4" />
+              {isCreating ? "Creating..." : "New"}
+            </button>
           </div>
 
           {expenseReports.length === 0 ? (
