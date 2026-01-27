@@ -1,10 +1,10 @@
 {
-    "name": "",
-    "description": "",
-    "category": "",
+    "name": "Contributor Billing",
+    "description": "The invoice package offers contributors of decentralized and open organisations a way to get paid via their legal entity or governmental identity.",
+    "category": "Finance",
     "publisher": {
-        "name": "",
-        "url": ""
+        "name": "Powerhouse",
+        "url": "https://powerhouse.inc"
     },
     "documentModels": [
         {
