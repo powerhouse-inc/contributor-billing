@@ -19,7 +19,7 @@ import {
   BarChart3,
   Camera,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useBillingFolderStructure } from "../hooks/useBillingFolderStructure.js";
 
 const ICON_SIZE = 16;
@@ -126,6 +126,79 @@ export function FolderTree({
       reportDocumentIds: new Set(docs.map((d) => d.header.id)),
     };
   }, [documentsInDrive]);
+
+  // Build a set of all valid document IDs for safe selection
+  const validDocumentIds = useMemo(() => {
+    if (!documentsInDrive) return new Set<string>();
+    return new Set(documentsInDrive.map((doc) => doc.header.id));
+  }, [documentsInDrive]);
+
+  // Build a set of all valid node IDs (documents + folders + special IDs)
+  const validNodeIds = useMemo(() => {
+    const ids = new Set<string>();
+
+    // Add special IDs
+    ids.add("accounts");
+    ids.add("billing-placeholder");
+
+    // Add billing folder ID
+    if (billingFolder?.id) {
+      ids.add(billingFolder.id);
+    }
+
+    // Add all document IDs
+    for (const docId of validDocumentIds) {
+      ids.add(docId);
+    }
+
+    // Add all folder IDs (month folders, payments folders, reporting folders)
+    for (const info of monthFolders.values()) {
+      ids.add(info.folder.id);
+      if (info.paymentsFolder) {
+        ids.add(info.paymentsFolder.id);
+      }
+      if (info.reportingFolder) {
+        ids.add(info.reportingFolder.id);
+      }
+    }
+
+    return ids;
+  }, [validDocumentIds, billingFolder, monthFolders]);
+
+  // Sanitize activeNodeId - if it's not a valid node, use empty string
+  const sanitizedActiveNodeId = useMemo(() => {
+    // Empty string is always valid
+    if (activeNodeId === "") return "";
+    // Check if the ID is valid
+    if (validNodeIds.has(activeNodeId)) return activeNodeId;
+    // Invalid ID, clear it
+    console.warn(
+      `[FolderTree] activeNodeId ${activeNodeId} is not a valid node, clearing selection`,
+    );
+    return "";
+  }, [activeNodeId, validNodeIds]);
+
+  // Safe wrapper for setSelectedNode that verifies document exists
+  const safeSetSelectedNode = useCallback(
+    (nodeId: string) => {
+      // Empty string is valid (clears selection)
+      if (nodeId === "") {
+        setSelectedNode("");
+        return;
+      }
+      // Only select if the document exists
+      if (validDocumentIds.has(nodeId)) {
+        setSelectedNode(nodeId);
+      } else {
+        // Document doesn't exist, clear selection instead of throwing
+        console.warn(
+          `[FolderTree] Document with id ${nodeId} not found, clearing selection`,
+        );
+        setSelectedNode("");
+      }
+    },
+    [validDocumentIds],
+  );
 
   // Generate a stable key based on the node structure to force Sidebar remount when nodes change
   // This works around a bug in the Sidebar component where toggle state isn't updated for new nodes
@@ -247,14 +320,14 @@ export function FolderTree({
     // Check if this is an account-transactions child node
     if (accountTransactionsNodeIds.has(node.id)) {
       onFolderSelect?.(null);
-      setSelectedNode(node.id);
+      safeSetSelectedNode(node.id);
       return;
     }
 
     // Check if this is an expense or snapshot report document
     if (reportDocumentIds.has(node.id)) {
       onFolderSelect?.(null);
-      setSelectedNode(node.id);
+      safeSetSelectedNode(node.id);
       return;
     }
 
@@ -262,9 +335,9 @@ export function FolderTree({
     if (node.id === "accounts") {
       if (accountsDocument) {
         onFolderSelect?.(null);
-        setSelectedNode(accountsDocument.header.id);
+        safeSetSelectedNode(accountsDocument.header.id);
       } else {
-        setSelectedNode("");
+        safeSetSelectedNode("");
         showCreateDocumentModal("powerhouse/accounts");
       }
       return;
@@ -276,7 +349,7 @@ export function FolderTree({
         folderId: billingFolder?.id || "",
         folderType: "billing",
       });
-      setSelectedNode("");
+      safeSetSelectedNode("");
       return;
     }
 
@@ -296,7 +369,7 @@ export function FolderTree({
             monthName,
             reportingFolderId: info.reportingFolder?.id,
           });
-          setSelectedNode("");
+          safeSetSelectedNode("");
           return;
         }
       }
@@ -313,7 +386,7 @@ export function FolderTree({
             monthName,
             paymentsFolderId: info.paymentsFolder?.id,
           });
-          setSelectedNode("");
+          safeSetSelectedNode("");
           return;
         }
       }
@@ -321,7 +394,7 @@ export function FolderTree({
 
     // Default: clear selection
     onFolderSelect?.(null);
-    setSelectedNode("");
+    safeSetSelectedNode("");
   };
 
   return (
@@ -337,7 +410,7 @@ export function FolderTree({
         key={sidebarKey}
         className="pt-1 folder-tree-sidebar"
         nodes={navigationSections}
-        activeNodeId={activeNodeId}
+        activeNodeId={sanitizedActiveNodeId}
         onActiveNodeChange={handleActiveNodeChange}
         sidebarTitle="Operational Hub Navigation"
         showSearchBar={false}
@@ -348,7 +421,7 @@ export function FolderTree({
         defaultLevel={2}
         handleOnTitleClick={() => {
           onFolderSelect?.(null);
-          setSelectedNode("");
+          safeSetSelectedNode("");
           setActiveNodeId("");
         }}
       />

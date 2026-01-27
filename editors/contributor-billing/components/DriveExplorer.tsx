@@ -3,6 +3,7 @@ import { ToastContainer } from "@powerhousedao/design-system/connect";
 import { useState } from "react";
 import { DriveContents } from "./DriveContents.js";
 import { FolderTree, type SelectedFolderInfo } from "./FolderTree.js";
+import { FolderTreeErrorBoundary } from "./FolderTreeErrorBoundary.js";
 
 /**
  * Main drive explorer component for Contributor Billing.
@@ -33,11 +34,13 @@ export function DriveExplorer({ children }: EditorProps) {
   return (
     <div className="flex h-full w-full overflow-hidden">
       {/* Sidebar - resizable, managed by Sidebar component */}
-      <FolderTree
-        onFolderSelect={handleFolderSelect}
-        activeNodeId={activeNodeId}
-        onActiveNodeIdChange={setActiveNodeId}
-      />
+      <FolderTreeErrorBoundary>
+        <FolderTree
+          onFolderSelect={handleFolderSelect}
+          activeNodeId={activeNodeId}
+          onActiveNodeIdChange={setActiveNodeId}
+        />
+      </FolderTreeErrorBoundary>
 
       {/* Toast notifications */}
       <ToastContainer
