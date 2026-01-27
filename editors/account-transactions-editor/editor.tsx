@@ -6,7 +6,6 @@ import {
   useParentFolderForSelectedNode,
 } from "@powerhousedao/reactor-browser";
 import { generateId } from "document-model/core";
-import { setName } from "document-model";
 import { useSelectedAccountTransactionsDocument } from "../hooks/useAccountTransactionsDocument.js";
 import {
   addTransaction,
@@ -21,7 +20,6 @@ import type {
 import { TransactionsTable } from "./components/TransactionsTable.js";
 import { TransactionForm } from "./components/TransactionForm.js";
 import { AccountSection } from "./components/AccountSection.js";
-import { DocumentHeader } from "./components/DocumentHeader.js";
 import { alchemyIntegration } from "./alchemyIntegration.js";
 
 type ViewMode = "list" | "add" | "edit";
@@ -278,11 +276,6 @@ export function Editor() {
 
       <div className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <DocumentHeader
-            document={document}
-            onNameChange={(name) => dispatch(setName(name))}
-          />
-
           <AccountSection
             account={document.state.global.account}
             hasFetchedTransactions={

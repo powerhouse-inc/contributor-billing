@@ -8,7 +8,6 @@ import {
   useSelectedDrive,
 } from "@powerhousedao/reactor-browser";
 import { generateId } from "document-model/core";
-import { setName } from "document-model";
 import { useSelectedAccountsDocument } from "../hooks/useAccountsDocument.js";
 import {
   addAccount,
@@ -22,7 +21,6 @@ import type {
   KycAmlStatusTypeInput,
 } from "../../document-models/accounts/gen/schema/types.js";
 import { AccountForm } from "./components/AccountForm.js";
-import { DocumentHeader } from "./components/DocumentHeader.js";
 import { AccountsList } from "./components/AccountsList.js";
 import { accountTransactionsService } from "./services/accountTransactionsService.js";
 
@@ -360,12 +358,7 @@ export function Editor() {
 
       <div className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <DocumentHeader
-            document={document}
-            onNameChange={(name) => dispatch(setName(name))}
-          />
-
-          <div className="mt-8">
+          <div>
             {viewMode === "list" && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">

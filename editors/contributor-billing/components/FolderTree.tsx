@@ -18,9 +18,11 @@ import {
   CreditCard,
   BarChart3,
   Camera,
+  User,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useBillingFolderStructure } from "../hooks/useBillingFolderStructure.js";
+import type { OperationalHubProfileDocument } from "../../../document-models/operational-hub-profile/gen/types.js";
 
 const ICON_SIZE = 16;
 
@@ -112,6 +114,14 @@ export function FolderTree({
     );
   }, [documentsInDrive]);
 
+  // Find operational hub profile document
+  const operationalHubProfileDocument = useMemo(() => {
+    if (!documentsInDrive) return null;
+    return documentsInDrive.find(
+      (doc) => doc.header.documentType === "powerhouse/operational-hub-profile",
+    ) as OperationalHubProfileDocument | undefined;
+  }, [documentsInDrive]);
+
   // Find report documents (expense + snapshot) and build ID set for lookup
   const { reportDocuments, reportDocumentIds } = useMemo(() => {
     if (!documentsInDrive)
@@ -138,6 +148,7 @@ export function FolderTree({
     const ids = new Set<string>();
 
     // Add special IDs
+    ids.add("operational-hub-profile");
     ids.add("accounts");
     ids.add("billing-placeholder");
 
@@ -286,6 +297,12 @@ export function FolderTree({
     }
 
     const sections: SidebarNode[] = [
+      // Operational Hub Profile section (at the top, like Builder Profile in builder-team-admin)
+      {
+        id: "operational-hub-profile",
+        title: "Operational Hub Profile",
+        icon: <User size={ICON_SIZE} />,
+      },
       // Accounts section
       {
         id: "accounts",
@@ -316,6 +333,18 @@ export function FolderTree({
 
   const handleActiveNodeChange = (node: SidebarNode) => {
     setActiveNodeId(node.id);
+
+    // Check if clicking Operational Hub Profile section
+    if (node.id === "operational-hub-profile") {
+      if (operationalHubProfileDocument) {
+        onFolderSelect?.(null);
+        safeSetSelectedNode(operationalHubProfileDocument.header.id);
+      } else {
+        safeSetSelectedNode("");
+        showCreateDocumentModal("powerhouse/operational-hub-profile");
+      }
+      return;
+    }
 
     // Check if this is an account-transactions child node
     if (accountTransactionsNodeIds.has(node.id)) {
@@ -412,7 +441,7 @@ export function FolderTree({
         nodes={navigationSections}
         activeNodeId={sanitizedActiveNodeId}
         onActiveNodeChange={handleActiveNodeChange}
-        sidebarTitle="Operational Hub Navigation"
+        sidebarTitle={operationalHubProfileDocument?.state?.global?.name || "Operational Hub"}
         showSearchBar={false}
         resizable={true}
         allowPinning={false}
