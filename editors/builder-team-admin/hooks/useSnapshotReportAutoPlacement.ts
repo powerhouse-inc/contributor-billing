@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import {
   isFolderNodeKind,
   isFileNodeKind,
@@ -11,6 +11,14 @@ import type { FolderNode, FileNode, Node } from "document-drive";
 import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/gen/types.js";
 
 const SNAPSHOT_REPORTS_FOLDER_NAME = "Snapshot Reports";
+
+// Module-level tracking to prevent duplicate folder creation across all hook instances
+// This is necessary because the hook may be used in multiple components simultaneously
+const globalCreationState = {
+  createdSnapshotReportsFolderForDrives: new Set<string>(),
+  creatingYearFolders: new Map<string, Set<string>>(), // driveId -> Set of years being created
+  processedDocs: new Map<string, Set<string>>(), // driveId -> Set of doc IDs processed
+};
 
 interface UseSnapshotReportAutoPlacementResult {
   /** The Snapshot Reports folder node, or null if it doesn't exist yet */
@@ -37,10 +45,15 @@ export function useSnapshotReportAutoPlacement(): UseSnapshotReportAutoPlacement
   const [driveDocument] = useSelectedDrive();
   const documentsInDrive = useDocumentsInSelectedDrive();
   const { onMoveNode } = useNodeActions();
+  const driveId = driveDocument?.header.id;
 
-  // Track which documents have been processed for auto-placement
-  const processedDocsRef = useRef<Set<string>>(new Set());
-  const hasCreatedFolder = useRef(false);
+  // Initialize module-level tracking sets for this drive if needed
+  if (driveId && !globalCreationState.creatingYearFolders.has(driveId)) {
+    globalCreationState.creatingYearFolders.set(driveId, new Set());
+  }
+  if (driveId && !globalCreationState.processedDocs.has(driveId)) {
+    globalCreationState.processedDocs.set(driveId, new Set());
+  }
 
   // Find the "Snapshot Reports" folder in the drive
   const snapshotReportsFolder = useMemo(() => {
@@ -107,13 +120,13 @@ export function useSnapshotReportAutoPlacement(): UseSnapshotReportAutoPlacement
 
   // Create folder if it doesn't exist
   useEffect(() => {
-    if (!driveDocument || snapshotReportsFolder || hasCreatedFolder.current)
+    if (!driveId || snapshotReportsFolder) return;
+    if (globalCreationState.createdSnapshotReportsFolderForDrives.has(driveId))
       return;
 
-    hasCreatedFolder.current = true;
-    const driveId = driveDocument.header.id;
+    globalCreationState.createdSnapshotReportsFolderForDrives.add(driveId);
     void addFolder(driveId, SNAPSHOT_REPORTS_FOLDER_NAME);
-  }, [driveDocument, snapshotReportsFolder]);
+  }, [driveId, snapshotReportsFolder]);
 
   // Get year folders that exist directly under the Snapshot Reports folder
   const yearFolders = useMemo(() => {
@@ -135,10 +148,13 @@ export function useSnapshotReportAutoPlacement(): UseSnapshotReportAutoPlacement
   // Auto-place snapshot reports into year folders based on startDate
   // This monitors ALL snapshot reports in the drive, not just those in the Snapshot Reports folder
   useEffect(() => {
-    if (!driveDocument || !snapshotReportsFolder || !documentsInDrive) return;
+    if (!driveId || !snapshotReportsFolder || !documentsInDrive) return;
 
-    const driveId = driveDocument.header.id;
-    const allNodes = driveDocument.state.global.nodes;
+    const allNodes = driveDocument?.state.global.nodes ?? [];
+    const processedDocs = globalCreationState.processedDocs.get(driveId);
+    const creatingYearFolders =
+      globalCreationState.creatingYearFolders.get(driveId);
+    if (!processedDocs || !creatingYearFolders) return;
 
     // Find ALL snapshot report file nodes that are NOT inside the Snapshot Reports folder tree
     // These need to be moved into the proper location
@@ -167,7 +183,7 @@ export function useSnapshotReportAutoPlacement(): UseSnapshotReportAutoPlacement
     // Process each snapshot report
     for (const fileNode of nodesToProcess) {
       // Skip if already processed
-      if (processedDocsRef.current.has(fileNode.id)) continue;
+      if (processedDocs.has(fileNode.id)) continue;
 
       // Find the corresponding document to get startDate
       const doc = documentsInDrive.find(
@@ -182,7 +198,7 @@ export function useSnapshotReportAutoPlacement(): UseSnapshotReportAutoPlacement
       if (!startDate) {
         // No period defined - move to root of Snapshot Reports folder
         // (this signals something might be wrong with the document)
-        processedDocsRef.current.add(fileNode.id);
+        processedDocs.add(fileNode.id);
 
         // Only move if not already in the Snapshot Reports folder
         if (!snapshotReportsFolderNodeIds.has(fileNode.id)) {
@@ -192,7 +208,7 @@ export function useSnapshotReportAutoPlacement(): UseSnapshotReportAutoPlacement
                 `Failed to move snapshot report to Snapshot Reports folder:`,
                 error,
               );
-              processedDocsRef.current.delete(fileNode.id);
+              processedDocs.delete(fileNode.id);
             },
           );
         }
@@ -203,7 +219,7 @@ export function useSnapshotReportAutoPlacement(): UseSnapshotReportAutoPlacement
       const year = new Date(startDate).getFullYear().toString();
 
       // Mark as processed immediately to prevent duplicate processing
-      processedDocsRef.current.add(fileNode.id);
+      processedDocs.add(fileNode.id);
 
       // Check if year folder exists
       const existingYearFolder = yearFolders.get(year);
@@ -216,9 +232,16 @@ export function useSnapshotReportAutoPlacement(): UseSnapshotReportAutoPlacement
             error,
           );
           // Remove from processed so it can be retried
-          processedDocsRef.current.delete(fileNode.id);
+          processedDocs.delete(fileNode.id);
         });
+      } else if (creatingYearFolders.has(year)) {
+        // Year folder is being created by another document - remove from processed
+        // so it can be retried on the next effect run when the folder exists
+        processedDocs.delete(fileNode.id);
       } else {
+        // Mark this year as being created to prevent race conditions
+        creatingYearFolders.add(year);
+
         // Create year folder first, then move the document
         addFolder(driveId, year, snapshotReportsFolder.id)
           .then((newFolder) => {
@@ -233,11 +256,16 @@ export function useSnapshotReportAutoPlacement(): UseSnapshotReportAutoPlacement
               error,
             );
             // Remove from processed so it can be retried
-            processedDocsRef.current.delete(fileNode.id);
+            processedDocs.delete(fileNode.id);
+          })
+          .finally(() => {
+            // Clean up the creating flag when done (success or failure)
+            creatingYearFolders.delete(year);
           });
       }
     }
   }, [
+    driveId,
     driveDocument,
     snapshotReportsFolder,
     documentsInDrive,

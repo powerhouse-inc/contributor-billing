@@ -1,5 +1,6 @@
 import { useMemo, useCallback, useState, useEffect } from "react";
 import type { FileNode } from "document-drive";
+import type { PHDocument } from "document-model";
 import {
   useDocumentsInSelectedDrive,
   useDrives,
@@ -205,18 +206,39 @@ export function ContributorsSection({}) {
     return builderProfileNodesWithDriveId.map(({ node }) => node.id);
   }, [builderProfileNodesWithDriveId]);
 
+  // Get the document fetcher function
+  const getDocuments = useGetDocuments();
+
+  // State to hold fetched builder profile documents
+  const [builderProfileDocuments, setBuilderProfileDocuments] = useState<
+    PHDocument[]
+  >([]);
+
   // Fetch all builder profile documents from all drives
-  const builderProfileDocuments = useGetDocuments(builderPhids);
+  useEffect(() => {
+    if (builderPhids.length === 0) {
+      setBuilderProfileDocuments([]);
+      return;
+    }
+
+    getDocuments(builderPhids)
+      .then((docs) => {
+        setBuilderProfileDocuments(docs);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch builder profile documents:", error);
+        setBuilderProfileDocuments([]);
+      });
+  }, [builderPhids, getDocuments]);
 
   // Create a map of PHID to document for quick lookup (local drives)
   const localBuilderProfileMap = useMemo(() => {
     const map = new Map<string, BuilderProfileDocument>();
-    if (!builderProfileDocuments) return map;
-    builderProfileDocuments.forEach((doc) => {
+    for (const doc of builderProfileDocuments) {
       if (doc.header.documentType === "powerhouse/builder-profile") {
         map.set(doc.header.id, doc as unknown as BuilderProfileDocument);
       }
-    });
+    }
     return map;
   }, [builderProfileDocuments]);
 

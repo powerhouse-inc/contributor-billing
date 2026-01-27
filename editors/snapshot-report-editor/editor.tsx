@@ -106,7 +106,6 @@ export default function Editor() {
     reportPeriodEnd,
   } = document.state.global;
 
-
   // Filter for Accounts documents
   const accountsDocuments = documentsInDrive
     ? documentsInDrive.filter(

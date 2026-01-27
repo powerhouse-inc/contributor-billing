@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import {
   isFolderNodeKind,
   isFileNodeKind,
@@ -11,6 +11,14 @@ import type { FolderNode, FileNode, Node } from "document-drive";
 import type { ExpenseReportDocument } from "../../../document-models/expense-report/gen/types.js";
 
 const EXPENSE_REPORTS_FOLDER_NAME = "Expense Reports";
+
+// Module-level tracking to prevent duplicate folder creation across all hook instances
+// This is necessary because the hook may be used in multiple components simultaneously
+const globalCreationState = {
+  createdExpenseReportsFolderForDrives: new Set<string>(),
+  creatingYearFolders: new Map<string, Set<string>>(), // driveId -> Set of years being created
+  processedDocs: new Map<string, Set<string>>(), // driveId -> Set of doc IDs processed
+};
 
 interface UseExpenseReportAutoPlacementResult {
   /** The Expense Reports folder node, or null if it doesn't exist yet */
@@ -37,10 +45,15 @@ export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementRe
   const [driveDocument] = useSelectedDrive();
   const documentsInDrive = useDocumentsInSelectedDrive();
   const { onMoveNode } = useNodeActions();
+  const driveId = driveDocument?.header.id;
 
-  // Track which documents have been processed for auto-placement
-  const processedDocsRef = useRef<Set<string>>(new Set());
-  const hasCreatedFolder = useRef(false);
+  // Initialize module-level tracking sets for this drive if needed
+  if (driveId && !globalCreationState.creatingYearFolders.has(driveId)) {
+    globalCreationState.creatingYearFolders.set(driveId, new Set());
+  }
+  if (driveId && !globalCreationState.processedDocs.has(driveId)) {
+    globalCreationState.processedDocs.set(driveId, new Set());
+  }
 
   // Find the "Expense Reports" folder in the drive
   const expenseReportsFolder = useMemo(() => {
@@ -107,13 +120,13 @@ export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementRe
 
   // Create folder if it doesn't exist
   useEffect(() => {
-    if (!driveDocument || expenseReportsFolder || hasCreatedFolder.current)
+    if (!driveId || expenseReportsFolder) return;
+    if (globalCreationState.createdExpenseReportsFolderForDrives.has(driveId))
       return;
 
-    hasCreatedFolder.current = true;
-    const driveId = driveDocument.header.id;
+    globalCreationState.createdExpenseReportsFolderForDrives.add(driveId);
     void addFolder(driveId, EXPENSE_REPORTS_FOLDER_NAME);
-  }, [driveDocument, expenseReportsFolder]);
+  }, [driveId, expenseReportsFolder]);
 
   // Get year folders that exist directly under the Expense Reports folder
   const yearFolders = useMemo(() => {
@@ -135,10 +148,13 @@ export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementRe
   // Auto-place expense reports into year folders based on periodStart
   // This monitors ALL expense reports in the drive, not just those in the Expense Reports folder
   useEffect(() => {
-    if (!driveDocument || !expenseReportsFolder || !documentsInDrive) return;
+    if (!driveId || !expenseReportsFolder || !documentsInDrive) return;
 
-    const driveId = driveDocument.header.id;
-    const allNodes = driveDocument.state.global.nodes;
+    const allNodes = driveDocument?.state.global.nodes ?? [];
+    const processedDocs = globalCreationState.processedDocs.get(driveId);
+    const creatingYearFolders =
+      globalCreationState.creatingYearFolders.get(driveId);
+    if (!processedDocs || !creatingYearFolders) return;
 
     // Find ALL expense report file nodes that are NOT inside the Expense Reports folder tree
     // These need to be moved into the proper location
@@ -167,7 +183,7 @@ export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementRe
     // Process each expense report
     for (const fileNode of nodesToProcess) {
       // Skip if already processed
-      if (processedDocsRef.current.has(fileNode.id)) continue;
+      if (processedDocs.has(fileNode.id)) continue;
 
       // Find the corresponding document to get periodStart
       const doc = documentsInDrive.find(
@@ -182,7 +198,7 @@ export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementRe
       if (!periodStart) {
         // No period defined - move to root of Expense Reports folder
         // (this signals something might be wrong with the document)
-        processedDocsRef.current.add(fileNode.id);
+        processedDocs.add(fileNode.id);
 
         // Only move if not already in the Expense Reports folder
         if (!expenseReportsFolderNodeIds.has(fileNode.id)) {
@@ -191,7 +207,7 @@ export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementRe
               `Failed to move expense report to Expense Reports folder:`,
               error,
             );
-            processedDocsRef.current.delete(fileNode.id);
+            processedDocs.delete(fileNode.id);
           });
         }
         continue;
@@ -201,7 +217,7 @@ export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementRe
       const year = new Date(periodStart).getFullYear().toString();
 
       // Mark as processed immediately to prevent duplicate processing
-      processedDocsRef.current.add(fileNode.id);
+      processedDocs.add(fileNode.id);
 
       // Check if year folder exists
       const existingYearFolder = yearFolders.get(year);
@@ -214,9 +230,16 @@ export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementRe
             error,
           );
           // Remove from processed so it can be retried
-          processedDocsRef.current.delete(fileNode.id);
+          processedDocs.delete(fileNode.id);
         });
+      } else if (creatingYearFolders.has(year)) {
+        // Year folder is being created by another document - remove from processed
+        // so it can be retried on the next effect run when the folder exists
+        processedDocs.delete(fileNode.id);
       } else {
+        // Mark this year as being created to prevent race conditions
+        creatingYearFolders.add(year);
+
         // Create year folder first, then move the document
         addFolder(driveId, year, expenseReportsFolder.id)
           .then((newFolder) => {
@@ -231,11 +254,16 @@ export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementRe
               error,
             );
             // Remove from processed so it can be retried
-            processedDocsRef.current.delete(fileNode.id);
+            processedDocs.delete(fileNode.id);
+          })
+          .finally(() => {
+            // Clean up the creating flag when done (success or failure)
+            creatingYearFolders.delete(year);
           });
       }
     }
   }, [
+    driveId,
     driveDocument,
     expenseReportsFolder,
     documentsInDrive,
