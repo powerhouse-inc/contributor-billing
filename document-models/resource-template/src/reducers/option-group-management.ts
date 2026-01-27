@@ -53,13 +53,18 @@ export const resourceTemplateOptionGroupManagementOperations: ResourceTemplateOp
       state.lastModified = action.input.lastModified;
     },
     addFaqOperation(state, action) {
+      if (!state.faqFields) {
+        state.faqFields = [];
+      }
       state.faqFields.push({
         id: action.input.id,
         question: action.input.question || null,
         answer: action.input.answer || null,
+        displayOrder: action.input.displayOrder,
       });
     },
     updateFaqOperation(state, action) {
+      if (!state.faqFields) return;
       const faqField = state.faqFields.find((f) => f.id === action.input.id);
       if (faqField) {
         if (action.input.question !== undefined) {
@@ -71,11 +76,21 @@ export const resourceTemplateOptionGroupManagementOperations: ResourceTemplateOp
       }
     },
     deleteFaqOperation(state, action) {
+      if (!state.faqFields) return;
       const faqIndex = state.faqFields.findIndex(
         (f) => f.id === action.input.id,
       );
       if (faqIndex !== -1) {
         state.faqFields.splice(faqIndex, 1);
       }
+    },
+    reorderFaqsOperation(state, action) {
+      action.input.faqIds.forEach((id, index) => {
+        const faq = state.faqFields?.find((f) => f.id === id);
+        if (faq) {
+          faq.displayOrder = index;
+        }
+      });
+      state.lastModified = action.input.lastModified;
     },
   };

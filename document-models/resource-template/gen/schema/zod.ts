@@ -1,11 +1,14 @@
 import * as z from "zod";
 import type {
+  AddContentSectionInput,
   AddFacetBindingInput,
   AddFacetOptionInput,
   AddFaqInput,
   AddOptionGroupInput,
   AddServiceInput,
   AddTargetAudienceInput,
+  ContentSection,
+  DeleteContentSectionInput,
   DeleteFaqInput,
   DeleteOptionGroupInput,
   DeleteServiceInput,
@@ -16,6 +19,8 @@ import type {
   RemoveFacetOptionInput,
   RemoveFacetTargetInput,
   RemoveTargetAudienceInput,
+  ReorderContentSectionsInput,
+  ReorderFaqsInput,
   ResourceFacetBinding,
   ResourceTemplateState,
   Service,
@@ -26,6 +31,7 @@ import type {
   SetTemplateIdInput,
   TargetAudience,
   TemplateStatus,
+  UpdateContentSectionInput,
   UpdateFaqInput,
   UpdateOptionGroupInput,
   UpdateServiceInput,
@@ -53,6 +59,18 @@ export const TemplateStatusSchema = z.enum([
   "DRAFT",
 ]);
 
+export function AddContentSectionInputSchema(): z.ZodObject<
+  Properties<AddContentSectionInput>
+> {
+  return z.object({
+    content: z.string(),
+    displayOrder: z.number(),
+    id: z.string(),
+    lastModified: z.string().datetime(),
+    title: z.string(),
+  });
+}
+
 export function AddFacetBindingInputSchema(): z.ZodObject<
   Properties<AddFacetBindingInput>
 > {
@@ -79,6 +97,7 @@ export function AddFacetOptionInputSchema(): z.ZodObject<
 export function AddFaqInputSchema(): z.ZodObject<Properties<AddFaqInput>> {
   return z.object({
     answer: z.string().nullish(),
+    displayOrder: z.number(),
     id: z.string(),
     question: z.string().nullish(),
   });
@@ -123,6 +142,27 @@ export function AddTargetAudienceInputSchema(): z.ZodObject<
   });
 }
 
+export function ContentSectionSchema(): z.ZodObject<
+  Properties<ContentSection>
+> {
+  return z.object({
+    __typename: z.literal("ContentSection").optional(),
+    content: z.string(),
+    displayOrder: z.number(),
+    id: z.string(),
+    title: z.string(),
+  });
+}
+
+export function DeleteContentSectionInputSchema(): z.ZodObject<
+  Properties<DeleteContentSectionInput>
+> {
+  return z.object({
+    id: z.string(),
+    lastModified: z.string().datetime(),
+  });
+}
+
 export function DeleteFaqInputSchema(): z.ZodObject<
   Properties<DeleteFaqInput>
 > {
@@ -163,6 +203,7 @@ export function FaqFieldSchema(): z.ZodObject<Properties<FaqField>> {
   return z.object({
     __typename: z.literal("FaqField").optional(),
     answer: z.string().nullish(),
+    displayOrder: z.number(),
     id: z.string(),
     question: z.string().nullish(),
   });
@@ -217,6 +258,24 @@ export function RemoveTargetAudienceInputSchema(): z.ZodObject<
   });
 }
 
+export function ReorderContentSectionsInputSchema(): z.ZodObject<
+  Properties<ReorderContentSectionsInput>
+> {
+  return z.object({
+    lastModified: z.string().datetime(),
+    sectionIds: z.array(z.string()),
+  });
+}
+
+export function ReorderFaqsInputSchema(): z.ZodObject<
+  Properties<ReorderFaqsInput>
+> {
+  return z.object({
+    faqIds: z.array(z.string()),
+    lastModified: z.string().datetime(),
+  });
+}
+
 export function ResourceFacetBindingSchema(): z.ZodObject<
   Properties<ResourceFacetBinding>
 > {
@@ -234,9 +293,10 @@ export function ResourceTemplateStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ResourceTemplateState").optional(),
+    contentSections: z.array(z.lazy(() => ContentSectionSchema())),
     description: z.string().nullish(),
     facetTargets: z.array(z.lazy(() => FacetTargetSchema())),
-    faqFields: z.array(z.lazy(() => FaqFieldSchema())),
+    faqFields: z.array(z.lazy(() => FaqFieldSchema())).nullish(),
     id: z.string(),
     infoLink: z.string().url().nullish(),
     lastModified: z.string().datetime(),
@@ -323,6 +383,18 @@ export function TargetAudienceSchema(): z.ZodObject<
     color: z.string().nullish(),
     id: z.string(),
     label: z.string(),
+  });
+}
+
+export function UpdateContentSectionInputSchema(): z.ZodObject<
+  Properties<UpdateContentSectionInput>
+> {
+  return z.object({
+    content: z.string().nullish(),
+    displayOrder: z.number().nullish(),
+    id: z.string(),
+    lastModified: z.string().datetime(),
+    title: z.string().nullish(),
   });
 }
 

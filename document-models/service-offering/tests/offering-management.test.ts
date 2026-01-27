@@ -16,6 +16,8 @@ import {
   removeFacetOption,
   setSetupServices,
   setRecurringServices,
+  selectResourceTemplate,
+  changeResourceTemplate,
   UpdateOfferingInfoInputSchema,
   UpdateOfferingStatusInputSchema,
   SetOperatorInputSchema,
@@ -28,8 +30,6 @@ import {
   RemoveFacetOptionInputSchema,
   SetSetupServicesInputSchema,
   SetRecurringServicesInputSchema,
-  selectResourceTemplate,
-  changeResourceTemplate,
   SelectResourceTemplateInputSchema,
   ChangeResourceTemplateInputSchema,
 } from "@powerhousedao/contributor-billing/document-models/service-offering";

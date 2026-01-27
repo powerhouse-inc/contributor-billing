@@ -8,7 +8,7 @@ export const serviceOfferingServiceManagementOperations: ServiceOfferingServiceM
         title: action.input.title,
         description: action.input.description || null,
         parentServiceId: action.input.parentServiceId || null,
-        displayOrder: action.input.displayOrder || null,
+        displayOrder: action.input.displayOrder ?? null,
         isSetupFormation: action.input.isSetupFormation || false,
         isPremiumExclusive: action.input.isPremiumExclusive || false,
         optionGroupId: action.input.optionGroupId || null,

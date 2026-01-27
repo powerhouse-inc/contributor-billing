@@ -37,6 +37,7 @@ export const initialGlobalState: ResourceTemplateGlobalState = {
   services: [],
   optionGroups: [],
   faqFields: [],
+  contentSections: [],
 };
 export const initialLocalState: ResourceTemplateLocalState = {};
 

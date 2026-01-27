@@ -16,6 +16,8 @@ import {
   AddFaqInputSchema,
   UpdateFaqInputSchema,
   DeleteFaqInputSchema,
+  reorderFaqs,
+  ReorderFaqsInputSchema,
 } from "@powerhousedao/contributor-billing/document-models/resource-template";
 
 describe("OptionGroupManagementOperations", () => {
@@ -109,6 +111,23 @@ describe("OptionGroupManagementOperations", () => {
     expect(isResourceTemplateDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe("DELETE_FAQ");
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
+    expect(updatedDocument.operations.global[0].index).toEqual(0);
+  });
+
+  it("should handle reorderFaqs operation", () => {
+    const document = utils.createDocument();
+    const input = generateMock(ReorderFaqsInputSchema());
+
+    const updatedDocument = reducer(document, reorderFaqs(input));
+
+    expect(isResourceTemplateDocument(updatedDocument)).toBe(true);
+    expect(updatedDocument.operations.global).toHaveLength(1);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "REORDER_FAQS",
+    );
     expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
       input,
     );

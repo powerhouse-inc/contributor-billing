@@ -6,6 +6,7 @@ import type {
   ResourceTemplateAction,
   TargetAudience,
   FaqField,
+  ContentSection,
 } from "@powerhousedao/contributor-billing/document-models/resource-template";
 import {
   updateTemplateInfo,
@@ -18,6 +19,11 @@ import {
   addFaq,
   updateFaq,
   deleteFaq,
+  reorderFaqs,
+  addContentSection,
+  updateContentSection,
+  deleteContentSection,
+  reorderContentSections,
 } from "../../../document-models/resource-template/gen/creators.js";
 
 interface TemplateInfoProps {
@@ -138,6 +144,14 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
   const [editingFaqId, setEditingFaqId] = useState<string | null>(null);
   const [editingFaqQuestion, setEditingFaqQuestion] = useState("");
   const [editingFaqAnswer, setEditingFaqAnswer] = useState("");
+  const [newSectionTitle, setNewSectionTitle] = useState("");
+  const [newSectionContent, setNewSectionContent] = useState("");
+  const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
+  const [editingSectionTitle, setEditingSectionTitle] = useState("");
+  const [editingSectionContent, setEditingSectionContent] = useState("");
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(),
+  );
   const setupServiceInputRef = useRef<HTMLInputElement>(null);
   const recurringServiceInputRef = useRef<HTMLInputElement>(null);
 
@@ -323,7 +337,51 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
     );
   };
 
+  const handleMoveSetupService = (index: number, direction: "up" | "down") => {
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= globalState.setupServices.length) return;
+
+    const reorderedServices = [...globalState.setupServices];
+    [reorderedServices[index], reorderedServices[newIndex]] = [
+      reorderedServices[newIndex],
+      reorderedServices[index],
+    ];
+
+    dispatch(
+      setSetupServices({
+        services: reorderedServices,
+        lastModified: new Date().toISOString(),
+      }),
+    );
+  };
+
+  const handleMoveRecurringService = (
+    index: number,
+    direction: "up" | "down",
+  ) => {
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= globalState.recurringServices.length) return;
+
+    const reorderedServices = [...globalState.recurringServices];
+    [reorderedServices[index], reorderedServices[newIndex]] = [
+      reorderedServices[newIndex],
+      reorderedServices[index],
+    ];
+
+    dispatch(
+      setRecurringServices({
+        services: reorderedServices,
+        lastModified: new Date().toISOString(),
+      }),
+    );
+  };
+
   // FAQ Handlers
+  const faqFields = globalState.faqFields || [];
+  const sortedFaqs = [...faqFields].sort(
+    (a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0),
+  );
+
   const handleAddFaq = () => {
     if (!newFaqQuestion.trim() || !newFaqAnswer.trim()) return;
     dispatch(
@@ -331,10 +389,29 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
         id: generateId(),
         question: newFaqQuestion.trim(),
         answer: newFaqAnswer.trim(),
+        displayOrder: faqFields.length,
       }),
     );
     setNewFaqQuestion("");
     setNewFaqAnswer("");
+  };
+
+  const handleMoveFaq = (index: number, direction: "up" | "down") => {
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= sortedFaqs.length) return;
+
+    const reorderedIds = sortedFaqs.map((f) => f.id);
+    [reorderedIds[index], reorderedIds[newIndex]] = [
+      reorderedIds[newIndex],
+      reorderedIds[index],
+    ];
+
+    dispatch(
+      reorderFaqs({
+        faqIds: reorderedIds,
+        lastModified: new Date().toISOString(),
+      }),
+    );
   };
 
   const handleStartEditFaq = (faq: FaqField) => {
@@ -370,6 +447,98 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
         id,
       }),
     );
+  };
+
+  // Content Section Handlers
+  const contentSections = globalState.contentSections || [];
+  const sortedSections = [...contentSections].sort(
+    (a, b) => a.displayOrder - b.displayOrder,
+  );
+
+  const handleAddContentSection = () => {
+    if (!newSectionTitle.trim() || !newSectionContent.trim()) return;
+    dispatch(
+      addContentSection({
+        id: generateId(),
+        title: newSectionTitle.trim(),
+        content: newSectionContent.trim(),
+        displayOrder: contentSections.length,
+        lastModified: new Date().toISOString(),
+      }),
+    );
+    setNewSectionTitle("");
+    setNewSectionContent("");
+  };
+
+  const handleStartEditSection = (section: ContentSection) => {
+    setEditingSectionId(section.id);
+    setEditingSectionTitle(section.title);
+    setEditingSectionContent(section.content);
+  };
+
+  const handleSaveSectionEdit = () => {
+    if (
+      !editingSectionId ||
+      !editingSectionTitle.trim() ||
+      !editingSectionContent.trim()
+    )
+      return;
+    dispatch(
+      updateContentSection({
+        id: editingSectionId,
+        title: editingSectionTitle.trim(),
+        content: editingSectionContent.trim(),
+        lastModified: new Date().toISOString(),
+      }),
+    );
+    setEditingSectionId(null);
+    setEditingSectionTitle("");
+    setEditingSectionContent("");
+  };
+
+  const handleCancelSectionEdit = () => {
+    setEditingSectionId(null);
+    setEditingSectionTitle("");
+    setEditingSectionContent("");
+  };
+
+  const handleDeleteContentSection = (id: string) => {
+    dispatch(
+      deleteContentSection({
+        id,
+        lastModified: new Date().toISOString(),
+      }),
+    );
+  };
+
+  const handleMoveSection = (index: number, direction: "up" | "down") => {
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= sortedSections.length) return;
+
+    const reorderedIds = sortedSections.map((s) => s.id);
+    [reorderedIds[index], reorderedIds[newIndex]] = [
+      reorderedIds[newIndex],
+      reorderedIds[index],
+    ];
+
+    dispatch(
+      reorderContentSections({
+        sectionIds: reorderedIds,
+        lastModified: new Date().toISOString(),
+      }),
+    );
+  };
+
+  const toggleSectionExpanded = (id: string) => {
+    setExpandedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
   };
 
   const currentStatus = STATUS_OPTIONS.find((s) => s.value === formData.status);
@@ -588,6 +757,211 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
           />
         </section>
 
+        {/* Expandable Content Sections */}
+        <section className="template-editor__card template-editor__card--full">
+          <div className="template-editor__card-header">
+            <div className="template-editor__card-icon template-editor__card-icon--indigo">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              >
+                <path d="M4 6h16M4 10h16M4 14h10M4 18h6" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="template-editor__card-title">
+                Expandable Content Sections
+              </h3>
+              <p className="template-editor__card-subtitle">
+                Add long-form article content with expandable titles
+              </p>
+            </div>
+          </div>
+
+          <div className="template-editor__sections-list">
+            {sortedSections.map((section: ContentSection, index: number) => (
+              <div
+                key={section.id}
+                className={`template-editor__section-item ${editingSectionId === section.id ? "template-editor__section-item--editing" : ""}`}
+              >
+                {editingSectionId === section.id ? (
+                  <div className="template-editor__section-edit-form">
+                    <input
+                      type="text"
+                      value={editingSectionTitle}
+                      onChange={(e) => setEditingSectionTitle(e.target.value)}
+                      className="template-editor__section-edit-title"
+                      placeholder="Section title"
+                      autoFocus
+                    />
+                    <textarea
+                      value={editingSectionContent}
+                      onChange={(e) => setEditingSectionContent(e.target.value)}
+                      className="template-editor__section-edit-content"
+                      placeholder="Section content..."
+                      rows={6}
+                    />
+                    <div className="template-editor__section-edit-actions">
+                      <button
+                        type="button"
+                        onClick={handleSaveSectionEdit}
+                        className="template-editor__section-save-btn"
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCancelSectionEdit}
+                        className="template-editor__section-cancel-btn"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="template-editor__section-reorder">
+                      <button
+                        type="button"
+                        onClick={() => handleMoveSection(index, "up")}
+                        className="template-editor__section-reorder-btn"
+                        disabled={index === 0}
+                        title="Move up"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M18 15l-6-6-6 6" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveSection(index, "down")}
+                        className="template-editor__section-reorder-btn"
+                        disabled={index === sortedSections.length - 1}
+                        title="Move down"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleSectionExpanded(section.id)}
+                      className="template-editor__section-toggle"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className={`template-editor__section-chevron ${expandedSections.has(section.id) ? "template-editor__section-chevron--expanded" : ""}`}
+                      >
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
+                    <div className="template-editor__section-main">
+                      <div
+                        className="template-editor__section-header"
+                        onClick={() => toggleSectionExpanded(section.id)}
+                      >
+                        <span className="template-editor__section-title">
+                          {section.title}
+                        </span>
+                        <span className="template-editor__section-preview">
+                          {section.content.length > 80
+                            ? `${section.content.substring(0, 80)}...`
+                            : section.content}
+                        </span>
+                      </div>
+                      {expandedSections.has(section.id) && (
+                        <div className="template-editor__section-content">
+                          {section.content}
+                        </div>
+                      )}
+                    </div>
+                    <div className="template-editor__section-actions">
+                      <button
+                        type="button"
+                        onClick={() => handleStartEditSection(section)}
+                        className="template-editor__section-action-btn"
+                        title="Edit section"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteContentSection(section.id)}
+                        className="template-editor__section-action-btn template-editor__section-action-btn--delete"
+                        title="Delete section"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                        </svg>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Add new section form */}
+          <div className="template-editor__section-add-form">
+            <input
+              type="text"
+              value={newSectionTitle}
+              onChange={(e) => setNewSectionTitle(e.target.value)}
+              placeholder="New section title..."
+              className="template-editor__section-new-title"
+            />
+            <textarea
+              value={newSectionContent}
+              onChange={(e) => setNewSectionContent(e.target.value)}
+              placeholder="Section content (long-form article content)..."
+              className="template-editor__section-new-content"
+              rows={4}
+            />
+            {(newSectionTitle || newSectionContent) && (
+              <button
+                type="button"
+                onClick={handleAddContentSection}
+                className="template-editor__section-add-btn"
+                disabled={!newSectionTitle.trim() || !newSectionContent.trim()}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M12 5v14M5 12h14" strokeWidth="2" />
+                </svg>
+                Add Section
+              </button>
+            )}
+          </div>
+        </section>
+
         {/* FAQ Section */}
         <section className="template-editor__card template-editor__card--full">
           <div className="template-editor__card-header">
@@ -614,7 +988,7 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
           </div>
 
           <div className="template-editor__faq-list">
-            {globalState.faqFields.map((faq: FaqField, index: number) => (
+            {sortedFaqs.map((faq: FaqField, index: number) => (
               <div
                 key={faq.id}
                 className={`template-editor__faq-item ${editingFaqId === faq.id ? "template-editor__faq-item--editing" : ""}`}
@@ -655,6 +1029,40 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
                   </div>
                 ) : (
                   <>
+                    <div className="template-editor__faq-reorder">
+                      <button
+                        type="button"
+                        onClick={() => handleMoveFaq(index, "up")}
+                        className="template-editor__faq-reorder-btn"
+                        disabled={index === 0}
+                        title="Move up"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M18 15l-6-6-6 6" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveFaq(index, "down")}
+                        className="template-editor__faq-reorder-btn"
+                        disabled={index === sortedFaqs.length - 1}
+                        title="Move down"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      </button>
+                    </div>
                     <div className="template-editor__faq-number">
                       {index + 1}
                     </div>
@@ -854,6 +1262,40 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
               {globalState.setupServices.map(
                 (service: string, index: number) => (
                   <div key={index} className="template-editor__service">
+                    <div className="template-editor__service-reorder">
+                      <button
+                        type="button"
+                        onClick={() => handleMoveSetupService(index, "up")}
+                        className="template-editor__service-reorder-btn"
+                        disabled={index === 0}
+                        title="Move up"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M18 15l-6-6-6 6" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveSetupService(index, "down")}
+                        className="template-editor__service-reorder-btn"
+                        disabled={index === globalState.setupServices.length - 1}
+                        title="Move down"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      </button>
+                    </div>
                     <span className="template-editor__service-bullet" />
                     <span className="template-editor__service-text">
                       {service}
@@ -1001,6 +1443,40 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
               {globalState.recurringServices.map(
                 (service: string, index: number) => (
                   <div key={index} className="template-editor__service">
+                    <div className="template-editor__service-reorder">
+                      <button
+                        type="button"
+                        onClick={() => handleMoveRecurringService(index, "up")}
+                        className="template-editor__service-reorder-btn"
+                        disabled={index === 0}
+                        title="Move up"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M18 15l-6-6-6 6" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveRecurringService(index, "down")}
+                        className="template-editor__service-reorder-btn"
+                        disabled={index === globalState.recurringServices.length - 1}
+                        title="Move down"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      </button>
+                    </div>
                     <span className="template-editor__service-bullet template-editor__service-bullet--recurring" />
                     <span className="template-editor__service-text">
                       {service}
@@ -1631,6 +2107,48 @@ const styles = `
     height: 14px;
   }
 
+  .template-editor__service-reorder {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .template-editor__service:hover .template-editor__service-reorder {
+    opacity: 1;
+  }
+
+  .template-editor__service-reorder-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 14px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    color: var(--te-ink-muted);
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__service-reorder-btn:hover:not(:disabled) {
+    background: var(--te-emerald-light);
+    color: var(--te-emerald);
+  }
+
+  .template-editor__service-reorder-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .template-editor__service-reorder-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+
   .template-editor__add-service {
     display: flex;
     align-items: center;
@@ -2133,6 +2651,48 @@ const styles = `
     height: 16px;
   }
 
+  .template-editor__faq-reorder {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .template-editor__faq-item:hover .template-editor__faq-reorder {
+    opacity: 1;
+  }
+
+  .template-editor__faq-reorder-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 16px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--te-ink-muted);
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__faq-reorder-btn:hover:not(:disabled) {
+    background: var(--te-sky-light);
+    color: var(--te-sky);
+  }
+
+  .template-editor__faq-reorder-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .template-editor__faq-reorder-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
   .template-editor__faq-edit-form {
     flex: 1;
     display: flex;
@@ -2304,6 +2864,387 @@ const styles = `
   }
 
   .template-editor__faq-add-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Content Sections */
+  .template-editor__card-icon--indigo {
+    background: #eef2ff;
+    color: #6366f1;
+  }
+
+  .template-editor__sections-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .template-editor__section-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: var(--te-surface-raised);
+    border: 1.5px solid var(--te-border-light);
+    border-radius: 12px;
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__section-item:hover {
+    border-color: var(--te-border);
+  }
+
+  .template-editor__section-item--editing {
+    border-color: #6366f1;
+    background: #eef2ff;
+  }
+
+  .template-editor__section-reorder {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .template-editor__section-item:hover .template-editor__section-reorder {
+    opacity: 1;
+  }
+
+  .template-editor__section-reorder-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 16px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--te-ink-muted);
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__section-reorder-btn:hover:not(:disabled) {
+    background: #e0e7ff;
+    color: #6366f1;
+  }
+
+  .template-editor__section-reorder-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .template-editor__section-reorder-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .template-editor__section-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: var(--te-surface);
+    border: 1.5px solid var(--te-border-light);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--te-ink-muted);
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__section-toggle:hover {
+    border-color: #6366f1;
+    color: #6366f1;
+    background: #eef2ff;
+  }
+
+  .template-editor__section-chevron {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+  }
+
+  .template-editor__section-chevron--expanded {
+    transform: rotate(180deg);
+  }
+
+  .template-editor__section-main {
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+  }
+
+  .template-editor__section-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .template-editor__section-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--te-ink);
+    line-height: 1.4;
+  }
+
+  .template-editor__section-preview {
+    font-size: 0.8125rem;
+    color: var(--te-ink-muted);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .template-editor__section-content {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--te-border-light);
+    font-size: 0.875rem;
+    color: var(--te-ink-light);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    animation: sectionExpand 0.2s ease-out;
+  }
+
+  @keyframes sectionExpand {
+    from {
+      opacity: 0;
+      max-height: 0;
+    }
+    to {
+      opacity: 1;
+      max-height: 1000px;
+    }
+  }
+
+  .template-editor__section-actions {
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .template-editor__section-item:hover .template-editor__section-actions {
+    opacity: 1;
+  }
+
+  .template-editor__section-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: var(--te-surface);
+    border: 1.5px solid var(--te-border-light);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--te-ink-muted);
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__section-action-btn:hover {
+    border-color: #6366f1;
+    color: #6366f1;
+    background: #eef2ff;
+  }
+
+  .template-editor__section-action-btn--delete:hover {
+    border-color: var(--te-rose);
+    color: var(--te-rose);
+    background: var(--te-rose-light);
+  }
+
+  .template-editor__section-action-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .template-editor__section-edit-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .template-editor__section-edit-title {
+    font-family: var(--te-font);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    padding: 10px 14px;
+    background: var(--te-surface);
+    border: 1.5px solid var(--te-border);
+    border-radius: 8px;
+    color: var(--te-ink);
+  }
+
+  .template-editor__section-edit-title:focus {
+    outline: none;
+    border-color: #6366f1;
+  }
+
+  .template-editor__section-edit-content {
+    font-family: var(--te-font);
+    font-size: 0.875rem;
+    padding: 10px 14px;
+    background: var(--te-surface);
+    border: 1.5px solid var(--te-border);
+    border-radius: 8px;
+    color: var(--te-ink);
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
+  }
+
+  .template-editor__section-edit-content:focus {
+    outline: none;
+    border-color: #6366f1;
+  }
+
+  .template-editor__section-edit-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .template-editor__section-save-btn {
+    padding: 8px 16px;
+    font-family: var(--te-font);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: white;
+    background: #6366f1;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .template-editor__section-save-btn:hover {
+    background: #4f46e5;
+  }
+
+  .template-editor__section-cancel-btn {
+    padding: 8px 16px;
+    font-family: var(--te-font);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--te-ink-light);
+    background: var(--te-surface);
+    border: 1.5px solid var(--te-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__section-cancel-btn:hover {
+    background: var(--te-surface-raised);
+    border-color: var(--te-ink-muted);
+  }
+
+  .template-editor__section-add-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    background: var(--te-surface-raised);
+    border: 1.5px dashed var(--te-border);
+    border-radius: 12px;
+  }
+
+  .template-editor__section-new-title {
+    font-family: var(--te-font);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    padding: 10px 14px;
+    background: var(--te-surface);
+    border: 1.5px solid var(--te-border-light);
+    border-radius: 8px;
+    color: var(--te-ink);
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__section-new-title:hover {
+    border-color: var(--te-border);
+  }
+
+  .template-editor__section-new-title:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px #eef2ff;
+  }
+
+  .template-editor__section-new-title::placeholder {
+    color: var(--te-ink-muted);
+    font-weight: 400;
+  }
+
+  .template-editor__section-new-content {
+    font-family: var(--te-font);
+    font-size: 0.875rem;
+    padding: 10px 14px;
+    background: var(--te-surface);
+    border: 1.5px solid var(--te-border-light);
+    border-radius: 8px;
+    color: var(--te-ink);
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__section-new-content:hover {
+    border-color: var(--te-border);
+  }
+
+  .template-editor__section-new-content:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px #eef2ff;
+  }
+
+  .template-editor__section-new-content::placeholder {
+    color: var(--te-ink-muted);
+  }
+
+  .template-editor__section-add-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-family: var(--te-font);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+    background: #6366f1;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__section-add-btn:hover:not(:disabled) {
+    background: #4f46e5;
+  }
+
+  .template-editor__section-add-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .template-editor__section-add-btn svg {
     width: 16px;
     height: 16px;
   }

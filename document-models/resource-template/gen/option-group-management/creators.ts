@@ -6,6 +6,7 @@ import {
   AddFaqInputSchema,
   UpdateFaqInputSchema,
   DeleteFaqInputSchema,
+  ReorderFaqsInputSchema,
 } from "../schema/zod.js";
 import type {
   AddOptionGroupInput,
@@ -14,6 +15,7 @@ import type {
   AddFaqInput,
   UpdateFaqInput,
   DeleteFaqInput,
+  ReorderFaqsInput,
 } from "../types.js";
 import type {
   AddOptionGroupAction,
@@ -22,6 +24,7 @@ import type {
   AddFaqAction,
   UpdateFaqAction,
   DeleteFaqAction,
+  ReorderFaqsAction,
 } from "./actions.js";
 
 export const addOptionGroup = (input: AddOptionGroupInput) =>
@@ -75,5 +78,14 @@ export const deleteFaq = (input: DeleteFaqInput) =>
     { ...input },
     undefined,
     DeleteFaqInputSchema,
+    "global",
+  );
+
+export const reorderFaqs = (input: ReorderFaqsInput) =>
+  createAction<ReorderFaqsAction>(
+    "REORDER_FAQS",
+    { ...input },
+    undefined,
+    ReorderFaqsInputSchema,
     "global",
   );

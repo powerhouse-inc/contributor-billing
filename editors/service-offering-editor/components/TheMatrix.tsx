@@ -233,12 +233,24 @@ const matrixStyles = `
   }
 
   .matrix__tier-header:hover:not(.matrix__tier-header--selected) {
-    background: var(--so-violet-50);
+    background: linear-gradient(180deg, var(--so-slate-50) 0%, var(--so-violet-50) 100%);
   }
 
   .matrix__tier-header--selected {
-    background: var(--so-violet-600);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
     color: var(--so-white);
+    box-shadow:
+      0 4px 12px rgba(139, 92, 246, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    position: relative;
+  }
+
+  .matrix__tier-header--selected::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, transparent 50%);
+    pointer-events: none;
   }
 
   .matrix__tier-header-inner {
@@ -257,23 +269,30 @@ const matrixStyles = `
   }
 
   .matrix__tier-header--selected .matrix__tier-radio {
-    border-color: var(--so-white);
-    background: var(--so-violet-600);
-    box-shadow: inset 0 0 0 3px var(--so-white);
+    border-color: rgba(255, 255, 255, 0.9);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    box-shadow:
+      inset 0 0 0 3px var(--so-white),
+      0 2px 4px rgba(0, 0, 0, 0.15);
   }
 
   .matrix__tier-name {
     font-family: var(--so-font-sans);
     font-weight: 600;
+    color: var(--so-slate-900);
+  }
+
+  .matrix__tier-header--selected .matrix__tier-name {
+    color: var(--so-white);
   }
 
   .matrix__tier-price {
     font-size: 0.6875rem;
-    opacity: 0.7;
+    color: var(--so-slate-500);
   }
 
   .matrix__tier-header--selected .matrix__tier-price {
-    color: var(--so-violet-200);
+    color: rgba(255, 255, 255, 0.85);
   }
 
   /* Billing Cycle Selector in Tier Header */
@@ -301,13 +320,20 @@ const matrixStyles = `
   }
 
   .matrix__tier-header--selected .matrix__tier-cycle-select {
-    background: var(--so-violet-500);
-    border-color: var(--so-violet-400);
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
     color: var(--so-white);
+    backdrop-filter: blur(4px);
+  }
+
+  .matrix__tier-header--selected .matrix__tier-cycle-select:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
   }
 
   .matrix__tier-header--selected .matrix__tier-cycle-select:focus {
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+    border-color: rgba(255, 255, 255, 0.5);
   }
 
   /* Section Header */
@@ -477,6 +503,22 @@ const matrixStyles = `
     font-family: var(--so-font-sans);
     font-size: 0.8125rem;
     color: var(--so-slate-700);
+  }
+
+  .matrix__service-title--clickable {
+    background: none;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    margin: -0.25rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all var(--so-transition-fast);
+    text-align: left;
+  }
+
+  .matrix__service-title--clickable:hover {
+    background: var(--so-slate-100);
+    color: var(--so-violet-700);
   }
 
   /* Premium Only Badge - Exclusivity Signal (Toggle Button) */
@@ -805,11 +847,12 @@ const matrixStyles = `
   }
 
   .matrix__level-cell--selected {
-    box-shadow: inset 0 0 0 2px var(--so-violet-500);
+    box-shadow: inset 0 0 0 2px #8b5cf6;
+    background: rgba(139, 92, 246, 0.08);
   }
 
   .matrix__level-cell--highlight {
-    background: var(--so-violet-50);
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.06) 0%, rgba(139, 92, 246, 0.12) 100%);
   }
 
   .matrix__level-value {
@@ -857,6 +900,7 @@ const matrixStyles = `
     background: inherit;
     cursor: pointer;
     transition: var(--so-transition-fast);
+    height: 2.25rem;
   }
 
   .matrix__metric-row:hover {
@@ -864,23 +908,47 @@ const matrixStyles = `
   }
 
   .matrix__metric-cell {
-    padding: 0.375rem 1rem;
-    padding-left: 3rem;
+    padding: 0.5rem 1rem;
+    padding-left: 7rem;
     border-bottom: 1px solid var(--so-slate-100);
     position: sticky;
     left: 0;
     z-index: 10;
+    height: 2.25rem;
+    vertical-align: middle;
   }
 
   .matrix__metric-name-wrapper {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    position: relative;
+    height: 100%;
+  }
+
+  .matrix__metric-name-wrapper::before {
+    content: "";
+    position: absolute;
+    left: -2rem;
+    top: 50%;
+    width: 1.5rem;
+    height: 1px;
+    background: var(--so-slate-300);
+  }
+
+  .matrix__metric-name-wrapper::after {
+    content: "";
+    position: absolute;
+    left: -2rem;
+    top: -100%;
+    width: 1px;
+    height: calc(100% + 50%);
+    background: var(--so-slate-300);
   }
 
   .matrix__metric-name {
     font-family: var(--so-font-sans);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-style: italic;
     color: var(--so-slate-500);
   }
@@ -956,7 +1024,7 @@ const matrixStyles = `
   .matrix__service-cell-wrapper {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 0.5rem;
   }
 
@@ -984,17 +1052,17 @@ const matrixStyles = `
     color: var(--so-violet-700);
   }
 
-  /* Service Reorder Buttons */
-  .matrix__reorder-btns {
+  /* Reorder Buttons for Service Reordering */
+  .matrix__reorder-buttons {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
     margin-right: 0.5rem;
     opacity: 0;
     transition: opacity 0.15s ease;
   }
 
-  .matrix__service-row:hover .matrix__reorder-btns {
+  .matrix__service-row:hover .matrix__reorder-buttons {
     opacity: 1;
   }
 
@@ -1005,16 +1073,17 @@ const matrixStyles = `
     width: 18px;
     height: 14px;
     padding: 0;
-    background: var(--so-slate-100);
-    border: 1px solid var(--so-slate-200);
-    border-radius: 3px;
+    border: none;
+    background: transparent;
+    color: var(--so-slate-400);
     cursor: pointer;
-    transition: all 0.1s ease;
+    border-radius: 2px;
+    transition: all 0.15s ease;
   }
 
   .matrix__reorder-btn:hover:not(:disabled) {
     background: var(--so-violet-100);
-    border-color: var(--so-violet-300);
+    color: var(--so-violet-600);
   }
 
   .matrix__reorder-btn:disabled {
@@ -1023,13 +1092,8 @@ const matrixStyles = `
   }
 
   .matrix__reorder-btn svg {
-    width: 10px;
-    height: 10px;
-    color: var(--so-slate-500);
-  }
-
-  .matrix__reorder-btn:hover:not(:disabled) svg {
-    color: var(--so-violet-600);
+    width: 12px;
+    height: 12px;
   }
 
   /* Add Service Row */
@@ -1119,8 +1183,10 @@ const matrixStyles = `
   }
 
   .matrix__grand-total-cell--selected {
-    background: var(--so-violet-600);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
     color: var(--so-white);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    position: relative;
   }
 
   /* Empty State */
@@ -1736,7 +1802,8 @@ const matrixStyles = `
   }
 
   .matrix__modal--wide {
-    width: 32rem;
+    width: min(32rem, calc(100vw - 2rem));
+    max-width: 32rem;
     max-height: 85vh;
     overflow-y: auto;
   }
@@ -1767,21 +1834,23 @@ const matrixStyles = `
 
   .matrix__modal-tier-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.625rem;
   }
 
   .matrix__modal-tier-option {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 1rem;
+    gap: 0.5rem;
+    padding: 0.75rem;
     background: #ffffff;
     border: 2px solid #cbd5e1;
     border-radius: var(--so-radius-lg);
     cursor: pointer;
     transition: all var(--so-transition-fast);
+    min-width: 0;
+    overflow: hidden;
   }
 
   .matrix__modal-tier-option:hover {
@@ -1839,16 +1908,21 @@ const matrixStyles = `
 
   .matrix__modal-tier-name {
     flex: 1;
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: #1e293b;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .matrix__modal-tier-price {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: #64748b;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .matrix__modal-tier-option--selected .matrix__modal-tier-name {
@@ -1929,6 +2003,16 @@ export function TheMatrix({
     Set<string>
   >(new Set());
 
+  // Edit service modal state
+  const [editServiceModal, setEditServiceModal] = useState<Service | null>(
+    null,
+  );
+  const [editServiceName, setEditServiceName] = useState("");
+  const [editServiceDescription, setEditServiceDescription] = useState("");
+  const [editServiceSelectedTiers, setEditServiceSelectedTiers] = useState<
+    Set<string>
+  >(new Set());
+
   const [selectedTierIdx, setSelectedTierIdx] = useState<number>(0);
 
   // Selected billing cycle per tier (for tiers with multiple pricing options)
@@ -1971,8 +2055,8 @@ export function TheMatrix({
   // Unit name for the metric (e.g., "entity", "user", "API call")
   const [metricUnitName, setMetricUnitName] = useState("");
 
-  // Bulk actions state
-  const [showBulkActions, setShowBulkActions] = useState(false);
+
+  // Service reordering state (not used - arrow buttons handle reorder directly)
 
   const getServiceGroup = (service: Service): string | null => {
     // Services now have optionGroupId directly on them
@@ -1989,6 +2073,15 @@ export function TheMatrix({
       const groupServices = groups.get(groupId) || [];
       groupServices.push(service);
       groups.set(groupId, groupServices);
+    });
+
+    // Sort services within each group by displayOrder
+    groups.forEach((groupServices, _groupId) => {
+      groupServices.sort((a, b) => {
+        const orderA = a.displayOrder ?? 999;
+        const orderB = b.displayOrder ?? 999;
+        return orderA - orderB;
+      });
     });
 
     return groups;
@@ -2106,192 +2199,6 @@ export function TheMatrix({
     });
   };
 
-  // Bulk action handlers
-  const handleBulkIncludeAllInTier = (tierId: string) => {
-    const now = new Date().toISOString();
-    const tier = tiers.find((t) => t.id === tierId);
-    if (!tier) return;
-
-    services.forEach((service) => {
-      const existingLevel = tier.serviceLevels.find(
-        (sl) => sl.serviceId === service.id,
-      );
-      if (!existingLevel) {
-        dispatch(
-          addServiceLevel({
-            tierId,
-            serviceLevelId: generateId(),
-            serviceId: service.id,
-            level: "INCLUDED",
-            optionGroupId: service.optionGroupId || undefined,
-            lastModified: now,
-          }),
-        );
-      } else if (existingLevel.level !== "INCLUDED") {
-        dispatch(
-          updateServiceLevel({
-            tierId,
-            serviceLevelId: existingLevel.id,
-            level: "INCLUDED",
-            lastModified: now,
-          }),
-        );
-      }
-    });
-  };
-
-  const handleBulkClearTier = (tierId: string) => {
-    const now = new Date().toISOString();
-    const tier = tiers.find((t) => t.id === tierId);
-    if (!tier) return;
-
-    tier.serviceLevels.forEach((sl) => {
-      dispatch(
-        updateServiceLevel({
-          tierId,
-          serviceLevelId: sl.id,
-          level: "NOT_INCLUDED",
-          lastModified: now,
-        }),
-      );
-    });
-  };
-
-  const handleBulkCopyFromTier = (
-    sourceTierId: string,
-    targetTierId: string,
-  ) => {
-    const now = new Date().toISOString();
-    const sourceTier = tiers.find((t) => t.id === sourceTierId);
-    const targetTier = tiers.find((t) => t.id === targetTierId);
-    if (!sourceTier || !targetTier) return;
-
-    services.forEach((service) => {
-      const sourceLevel = sourceTier.serviceLevels.find(
-        (sl) => sl.serviceId === service.id,
-      );
-      const targetLevel = targetTier.serviceLevels.find(
-        (sl) => sl.serviceId === service.id,
-      );
-      const newLevel = sourceLevel?.level || "NOT_INCLUDED";
-
-      if (!targetLevel) {
-        dispatch(
-          addServiceLevel({
-            tierId: targetTierId,
-            serviceLevelId: generateId(),
-            serviceId: service.id,
-            level: newLevel,
-            optionGroupId: service.optionGroupId || undefined,
-            lastModified: now,
-          }),
-        );
-      } else if (targetLevel.level !== newLevel) {
-        dispatch(
-          updateServiceLevel({
-            tierId: targetTierId,
-            serviceLevelId: targetLevel.id,
-            level: newLevel,
-            lastModified: now,
-          }),
-        );
-      }
-    });
-  };
-
-  // Common Pattern Presets - apply marketing psychology patterns across all tiers
-  const handleApplyPattern = (patternId: string) => {
-    const now = new Date().toISOString();
-    const tierCount = tiers.length;
-    if (tierCount === 0) return;
-
-    // Pattern definitions
-    const patterns: Record<
-      string,
-      (
-        serviceIdx: number,
-        tierIdx: number,
-        totalServices: number,
-        totalTiers: number,
-      ) => ServiceLevel
-    > = {
-      // Good-Better-Best: Progressive inclusion (50% → 75% → 100%)
-      "good-better-best": (serviceIdx, tierIdx, totalServices, totalTiers) => {
-        const servicePosition = serviceIdx / totalServices;
-        const tierPosition = tierIdx / (totalTiers - 1 || 1);
-        // Lower tiers get fewer services
-        const threshold = 0.5 + tierPosition * 0.5;
-        return servicePosition < threshold ? "INCLUDED" : "NOT_INCLUDED";
-      },
-      // Premium Only: Top services only in top tier
-      "premium-only": (serviceIdx, tierIdx, totalServices, totalTiers) => {
-        const isTopTier = tierIdx === totalTiers - 1;
-        const isPremiumService = serviceIdx < Math.ceil(totalServices * 0.3);
-        if (isPremiumService) {
-          return isTopTier ? "INCLUDED" : "NOT_INCLUDED";
-        }
-        return "INCLUDED";
-      },
-      // Core + Upgrades: Core included everywhere, extras are optional
-      "core-upgrades": (serviceIdx, tierIdx, totalServices) => {
-        const isCoreService = serviceIdx < Math.ceil(totalServices * 0.5);
-        if (isCoreService) {
-          return "INCLUDED";
-        }
-        return "OPTIONAL";
-      },
-      // Ascending: Each tier adds more services
-      ascending: (serviceIdx, tierIdx, totalServices, totalTiers) => {
-        const servicesPerTier = Math.ceil(totalServices / totalTiers);
-        const includedUpTo = (tierIdx + 1) * servicesPerTier;
-        return serviceIdx < includedUpTo ? "INCLUDED" : "NOT_INCLUDED";
-      },
-      // All Included: Everything included in all tiers
-      "all-included": () => "INCLUDED",
-      // All Optional: Everything optional in all tiers
-      "all-optional": () => "OPTIONAL",
-    };
-
-    const pattern = patterns[patternId];
-    if (!pattern) return;
-
-    services.forEach((service, serviceIdx) => {
-      tiers.forEach((tier, tierIdx) => {
-        const newLevel = pattern(
-          serviceIdx,
-          tierIdx,
-          services.length,
-          tierCount,
-        );
-        const existingLevel = tier.serviceLevels.find(
-          (sl) => sl.serviceId === service.id,
-        );
-
-        if (!existingLevel) {
-          dispatch(
-            addServiceLevel({
-              tierId: tier.id,
-              serviceLevelId: generateId(),
-              serviceId: service.id,
-              level: newLevel,
-              optionGroupId: service.optionGroupId || undefined,
-              lastModified: now,
-            }),
-          );
-        } else if (existingLevel.level !== newLevel) {
-          dispatch(
-            updateServiceLevel({
-              tierId: tier.id,
-              serviceLevelId: existingLevel.id,
-              level: newLevel,
-              lastModified: now,
-            }),
-          );
-        }
-      });
-    });
-  };
-
   const handleAddService = () => {
     if (!addServiceModal || !newServiceName.trim()) return;
 
@@ -2341,6 +2248,93 @@ export function TheMatrix({
     setNewServiceName("");
     setNewServiceDescription("");
     setNewServiceSelectedTiers(new Set());
+  };
+
+  const openEditServiceModal = (service: Service) => {
+    setEditServiceModal(service);
+    setEditServiceName(service.title);
+    setEditServiceDescription(service.description || "");
+    // Initialize selected tiers based on current service levels
+    const includedTiers = new Set<string>();
+    tiers.forEach((tier) => {
+      const serviceLevel = tier.serviceLevels.find(
+        (sl) => sl.serviceId === service.id,
+      );
+      if (serviceLevel && serviceLevel.level === "INCLUDED") {
+        includedTiers.add(tier.id);
+      }
+    });
+    setEditServiceSelectedTiers(includedTiers);
+  };
+
+  const handleSaveEditService = () => {
+    if (!editServiceModal || !editServiceName.trim()) return;
+    const now = new Date().toISOString();
+
+    // Update service name/description
+    dispatch(
+      updateService({
+        id: editServiceModal.id,
+        title: editServiceName.trim(),
+        description: editServiceDescription.trim() || null,
+        lastModified: now,
+      }),
+    );
+
+    // Update tier assignments
+    tiers.forEach((tier) => {
+      const existingLevel = tier.serviceLevels.find(
+        (sl) => sl.serviceId === editServiceModal.id,
+      );
+      const shouldBeIncluded = editServiceSelectedTiers.has(tier.id);
+
+      if (shouldBeIncluded && !existingLevel) {
+        // Add to tier
+        dispatch(
+          addServiceLevel({
+            tierId: tier.id,
+            serviceLevelId: generateId(),
+            serviceId: editServiceModal.id,
+            level: "INCLUDED",
+            optionGroupId: editServiceModal.optionGroupId || undefined,
+            lastModified: now,
+          }),
+        );
+      } else if (
+        shouldBeIncluded &&
+        existingLevel &&
+        existingLevel.level !== "INCLUDED"
+      ) {
+        // Update to included
+        dispatch(
+          updateServiceLevel({
+            tierId: tier.id,
+            serviceLevelId: existingLevel.id,
+            level: "INCLUDED",
+            lastModified: now,
+          }),
+        );
+      } else if (
+        !shouldBeIncluded &&
+        existingLevel &&
+        existingLevel.level === "INCLUDED"
+      ) {
+        // Remove from tier (set to NOT_INCLUDED)
+        dispatch(
+          updateServiceLevel({
+            tierId: tier.id,
+            serviceLevelId: existingLevel.id,
+            level: "NOT_INCLUDED",
+            lastModified: now,
+          }),
+        );
+      }
+    });
+
+    setEditServiceModal(null);
+    setEditServiceName("");
+    setEditServiceDescription("");
+    setEditServiceSelectedTiers(new Set());
   };
 
   // Metric modal handlers
@@ -2419,19 +2413,7 @@ export function TheMatrix({
     });
   };
 
-  const handleTogglePremiumExclusive = (serviceId: string) => {
-    const service = services.find((s) => s.id === serviceId);
-    if (!service) return;
-    dispatch(
-      updateService({
-        id: serviceId,
-        isPremiumExclusive: !service.isPremiumExclusive,
-        lastModified: new Date().toISOString(),
-      }),
-    );
-  };
-
-  // Service reordering - swap display order with adjacent service
+  // Arrow button handler for service reordering
   const handleReorderService = (
     serviceId: string,
     direction: "up" | "down",
@@ -2447,25 +2429,28 @@ export function TheMatrix({
     const currentIndex = sortedServices.findIndex((s) => s.id === serviceId);
     if (currentIndex === -1) return;
 
-    const targetIndex =
-      direction === "up" ? currentIndex - 1 : currentIndex + 1;
-    if (targetIndex < 0 || targetIndex >= sortedServices.length) return;
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
 
-    const currentService = sortedServices[currentIndex];
-    const targetService = sortedServices[targetIndex];
+    // Check bounds
+    if (newIndex < 0 || newIndex >= sortedServices.length) return;
+
     const now = new Date().toISOString();
 
-    // Swap display orders
+    // Swap the two services
+    const currentService = sortedServices[currentIndex];
+    const swapService = sortedServices[newIndex];
+
     dispatch(
       updateService({
         id: currentService.id,
-        displayOrder: targetIndex,
+        displayOrder: newIndex,
         lastModified: now,
       }),
     );
+
     dispatch(
       updateService({
-        id: targetService.id,
+        id: swapService.id,
         displayOrder: currentIndex,
         lastModified: now,
       }),
@@ -2671,210 +2656,6 @@ export function TheMatrix({
           </div>
         )}
 
-        {/* Bulk Actions Toolbar */}
-        {services.length > 0 && tiers.length > 0 && (
-          <div className="matrix__bulk-actions">
-            <button
-              type="button"
-              onClick={() => setShowBulkActions(!showBulkActions)}
-              className="matrix__bulk-toggle"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M4 6h16M4 12h16M4 18h7" />
-              </svg>
-              Bulk Actions
-              <svg
-                className={`matrix__bulk-toggle-arrow ${showBulkActions ? "matrix__bulk-toggle-arrow--open" : ""}`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            {showBulkActions && (
-              <div className="matrix__bulk-panel">
-                <div className="matrix__bulk-section">
-                  <span className="matrix__bulk-label">
-                    Include all services in:
-                  </span>
-                  <div className="matrix__bulk-buttons">
-                    {tiers.map((tier) => (
-                      <button
-                        key={tier.id}
-                        type="button"
-                        onClick={() => handleBulkIncludeAllInTier(tier.id)}
-                        className="matrix__bulk-btn matrix__bulk-btn--include"
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path d="M5 12l5 5L20 7" />
-                        </svg>
-                        {tier.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="matrix__bulk-section">
-                  <span className="matrix__bulk-label">Clear all from:</span>
-                  <div className="matrix__bulk-buttons">
-                    {tiers.map((tier) => (
-                      <button
-                        key={tier.id}
-                        type="button"
-                        onClick={() => handleBulkClearTier(tier.id)}
-                        className="matrix__bulk-btn matrix__bulk-btn--clear"
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        {tier.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {tiers.length >= 2 && (
-                  <div className="matrix__bulk-section">
-                    <span className="matrix__bulk-label">
-                      Copy configuration:
-                    </span>
-                    <div className="matrix__bulk-copy">
-                      {tiers.map((sourceTier, idx) =>
-                        tiers
-                          .filter((_, i) => i !== idx)
-                          .map((targetTier) => (
-                            <button
-                              key={`${sourceTier.id}-${targetTier.id}`}
-                              type="button"
-                              onClick={() =>
-                                handleBulkCopyFromTier(
-                                  sourceTier.id,
-                                  targetTier.id,
-                                )
-                              }
-                              className="matrix__bulk-btn matrix__bulk-btn--copy"
-                            >
-                              {sourceTier.name} → {targetTier.name}
-                            </button>
-                          )),
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Pattern Presets - Marketing Psychology Patterns */}
-                <div className="matrix__bulk-section matrix__bulk-patterns">
-                  <span className="matrix__bulk-label">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      className="matrix__bulk-label-icon"
-                    >
-                      <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    Apply Pattern Preset:
-                  </span>
-                  <div className="matrix__pattern-grid">
-                    <button
-                      type="button"
-                      onClick={() => handleApplyPattern("good-better-best")}
-                      className="matrix__pattern-btn"
-                      title="Progressive inclusion: Basic tier gets 50%, mid-tier 75%, top tier 100%"
-                    >
-                      <span className="matrix__pattern-icon">📈</span>
-                      <span className="matrix__pattern-name">
-                        Good-Better-Best
-                      </span>
-                      <span className="matrix__pattern-desc">
-                        Progressive inclusion
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleApplyPattern("premium-only")}
-                      className="matrix__pattern-btn"
-                      title="Top 30% services exclusive to premium tier, rest included everywhere"
-                    >
-                      <span className="matrix__pattern-icon">⭐</span>
-                      <span className="matrix__pattern-name">
-                        Premium Exclusives
-                      </span>
-                      <span className="matrix__pattern-desc">
-                        Top services in top tier only
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleApplyPattern("core-upgrades")}
-                      className="matrix__pattern-btn"
-                      title="Core services included, extras as optional add-ons"
-                    >
-                      <span className="matrix__pattern-icon">🎯</span>
-                      <span className="matrix__pattern-name">
-                        Core + Add-ons
-                      </span>
-                      <span className="matrix__pattern-desc">
-                        Half included, half optional
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleApplyPattern("ascending")}
-                      className="matrix__pattern-btn"
-                      title="Each tier unlocks more services progressively"
-                    >
-                      <span className="matrix__pattern-icon">🪜</span>
-                      <span className="matrix__pattern-name">
-                        Ascending Tiers
-                      </span>
-                      <span className="matrix__pattern-desc">
-                        Each tier unlocks more
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleApplyPattern("all-included")}
-                      className="matrix__pattern-btn matrix__pattern-btn--simple"
-                      title="Everything included in all tiers"
-                    >
-                      <span className="matrix__pattern-icon">✓</span>
-                      <span className="matrix__pattern-name">All Included</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleApplyPattern("all-optional")}
-                      className="matrix__pattern-btn matrix__pattern-btn--simple"
-                      title="Everything optional in all tiers"
-                    >
-                      <span className="matrix__pattern-icon">◐</span>
-                      <span className="matrix__pattern-name">All Optional</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Incomplete Services Warning */}
         {incompleteServices.length > 0 && (
@@ -3051,7 +2832,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
-                  onTogglePremiumExclusive={handleTogglePremiumExclusive}
+                                    onEditService={openEditServiceModal}
                   onReorderService={handleReorderService}
                 />
               ))}
@@ -3085,7 +2866,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
-                  onTogglePremiumExclusive={handleTogglePremiumExclusive}
+                                    onEditService={openEditServiceModal}
                   onReorderService={handleReorderService}
                 />
               )}
@@ -3136,7 +2917,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
-                  onTogglePremiumExclusive={handleTogglePremiumExclusive}
+                                    onEditService={openEditServiceModal}
                   onReorderService={handleReorderService}
                 />
               ))}
@@ -3169,7 +2950,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
-                  onTogglePremiumExclusive={handleTogglePremiumExclusive}
+                                    onEditService={openEditServiceModal}
                   onReorderService={handleReorderService}
                 />
               )}
@@ -3208,7 +2989,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
-                  onTogglePremiumExclusive={handleTogglePremiumExclusive}
+                                    onEditService={openEditServiceModal}
                   onReorderService={handleReorderService}
                 />
               ))}
@@ -3366,6 +3147,103 @@ export function TheMatrix({
                   className="matrix__modal-btn matrix__modal-btn--primary"
                 >
                   Add Service
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Service Modal */}
+        {editServiceModal && (
+          <div className="matrix__modal-overlay">
+            <div className="matrix__modal matrix__modal--wide">
+              <h3 className="matrix__modal-title">Edit Service</h3>
+
+              <div className="matrix__modal-field">
+                <label className="matrix__modal-label">Service Name</label>
+                <input
+                  type="text"
+                  value={editServiceName}
+                  onChange={(e) => setEditServiceName(e.target.value)}
+                  placeholder="Enter service name"
+                  className="matrix__modal-input"
+                  autoFocus
+                />
+              </div>
+
+              <div className="matrix__modal-field">
+                <label className="matrix__modal-label">
+                  Description (optional)
+                </label>
+                <textarea
+                  value={editServiceDescription}
+                  onChange={(e) => setEditServiceDescription(e.target.value)}
+                  placeholder="Enter description..."
+                  rows={2}
+                  className="matrix__modal-textarea"
+                />
+              </div>
+
+              {/* Tier Selection */}
+              {tiers.length > 0 && (
+                <div className="matrix__modal-field">
+                  <label className="matrix__modal-label">Include in Tiers</label>
+                  <div className="matrix__modal-tier-grid">
+                    {tiers.map((tier) => {
+                      const isSelected = editServiceSelectedTiers.has(tier.id);
+                      return (
+                        <label
+                          key={tier.id}
+                          className={`matrix__modal-tier-option ${isSelected ? "matrix__modal-tier-option--selected" : ""}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              const newSet = new Set(editServiceSelectedTiers);
+                              if (e.target.checked) {
+                                newSet.add(tier.id);
+                              } else {
+                                newSet.delete(tier.id);
+                              }
+                              setEditServiceSelectedTiers(newSet);
+                            }}
+                            className="matrix__modal-tier-checkbox"
+                          />
+                          <span className="matrix__modal-tier-name">
+                            {tier.name}
+                          </span>
+                          {tier.pricing.amount !== null && (
+                            <span className="matrix__modal-tier-price">
+                              ${tier.pricing.amount}/
+                              {tier.pricing.billingCycle.toLowerCase()}
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <div className="matrix__modal-actions">
+                <button
+                  onClick={() => {
+                    setEditServiceModal(null);
+                    setEditServiceName("");
+                    setEditServiceDescription("");
+                    setEditServiceSelectedTiers(new Set());
+                  }}
+                  className="matrix__modal-btn matrix__modal-btn--cancel"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEditService}
+                  disabled={!editServiceName.trim()}
+                  className="matrix__modal-btn matrix__modal-btn--primary"
+                >
+                  Save Changes
                 </button>
               </div>
             </div>
@@ -3690,7 +3568,7 @@ interface ServiceGroupSectionProps {
   onAddMetric: (serviceId: string) => void;
   onEditMetric: (serviceId: string, metric: string) => void;
   onRemoveMetric: (serviceId: string, metric: string) => void;
-  onTogglePremiumExclusive: (serviceId: string) => void;
+  onEditService: (service: Service) => void;
   onReorderService: (
     serviceId: string,
     direction: "up" | "down",
@@ -3718,7 +3596,7 @@ function ServiceGroupSection({
   onAddMetric,
   onEditMetric,
   onRemoveMetric,
-  onTogglePremiumExclusive,
+  onEditService,
   onReorderService,
 }: ServiceGroupSectionProps) {
   const showGroup = services.length > 0 || onAddService;
@@ -3773,7 +3651,7 @@ function ServiceGroupSection({
         </td>
       </tr>
 
-      {services.map((service, serviceIndex) => {
+      {services.map((service) => {
         const metrics = getUniqueMetricsForService(service.id);
 
         return (
@@ -3792,10 +3670,10 @@ function ServiceGroupSection({
             onAddMetric={onAddMetric}
             onEditMetric={onEditMetric}
             onRemoveMetric={onRemoveMetric}
-            onTogglePremiumExclusive={onTogglePremiumExclusive}
+            onEditService={onEditService}
             onReorderService={onReorderService}
             groupServices={services}
-            serviceIndex={serviceIndex}
+            serviceIndex={services.indexOf(service)}
           />
         );
       })}
@@ -3820,7 +3698,7 @@ function ServiceGroupSection({
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              + Add a Service
+              Add a Service
             </button>
           </td>
           <td colSpan={tiers.length} className={rowClass} />
@@ -3893,7 +3771,7 @@ interface ServiceRowWithMetricsProps {
   onAddMetric: (serviceId: string) => void;
   onEditMetric: (serviceId: string, metric: string) => void;
   onRemoveMetric: (serviceId: string, metric: string) => void;
-  onTogglePremiumExclusive: (serviceId: string) => void;
+  onEditService: (service: Service) => void;
   onReorderService: (
     serviceId: string,
     direction: "up" | "down",
@@ -3917,28 +3795,28 @@ function ServiceRowWithMetrics({
   onAddMetric,
   onEditMetric,
   onRemoveMetric,
-  onTogglePremiumExclusive,
+  onEditService,
   onReorderService,
   groupServices,
   serviceIndex,
 }: ServiceRowWithMetricsProps) {
-  // Use persisted isPremiumExclusive field from document state
-  const isPremiumExclusive = service.isPremiumExclusive;
+  const isFirst = serviceIndex === 0;
+  const isLast = serviceIndex === groupServices.length - 1;
 
   return (
     <>
       <tr className={`matrix__service-row ${rowClass}`}>
         <td className={`matrix__service-cell ${rowClass}`}>
           <div className="matrix__service-cell-wrapper">
-            {/* Reorder buttons */}
-            <div className="matrix__reorder-btns">
+            {/* Reorder arrows */}
+            <div className="matrix__reorder-buttons">
               <button
                 className="matrix__reorder-btn"
                 onClick={(e) => {
                   e.stopPropagation();
                   onReorderService(service.id, "up", groupServices);
                 }}
-                disabled={serviceIndex === 0}
+                disabled={isFirst}
                 title="Move up"
               >
                 <svg
@@ -3956,7 +3834,7 @@ function ServiceRowWithMetrics({
                   e.stopPropagation();
                   onReorderService(service.id, "down", groupServices);
                 }}
-                disabled={serviceIndex === groupServices.length - 1}
+                disabled={isLast}
                 title="Move down"
               >
                 <svg
@@ -3969,28 +3847,15 @@ function ServiceRowWithMetrics({
                 </svg>
               </button>
             </div>
-            <span className="matrix__service-title">{service.title}</span>
             <button
+              className="matrix__service-title matrix__service-title--clickable"
               onClick={(e) => {
                 e.stopPropagation();
-                onTogglePremiumExclusive(service.id);
+                onEditService(service);
               }}
-              className={`matrix__premium-badge ${isPremiumExclusive ? "matrix__premium-badge--active" : "matrix__premium-badge--inactive"}`}
-              title={
-                isPremiumExclusive
-                  ? "Click to remove premium exclusive status"
-                  : "Click to mark as premium exclusive"
-              }
+              title="Click to edit service"
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-              Premium
+              {service.title}
             </button>
             <button
               onClick={(e) => {
@@ -4139,7 +4004,10 @@ function ServiceRowWithMetrics({
                           usageLimit.unitPrice,
                           usageLimit.unitPriceCurrency || "USD",
                         )}
-                        /
+                        {usageLimit.unitName
+                          ? ` per ${usageLimit.unitName}`
+                          : ""}{" "}
+                        per{" "}
                         {BILLING_CYCLE_SHORT_LABELS[
                           usageLimit.unitPriceBillingCycle
                         ].toLowerCase()}
