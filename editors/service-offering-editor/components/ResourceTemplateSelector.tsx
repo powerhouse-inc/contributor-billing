@@ -3,7 +3,7 @@ import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import type {
   ServiceOfferingDocument,
   ServiceOfferingAction,
-} from "@powerhousedao/contributor-billing/document-models/service-offering";
+} from "resourceServices/document-models/service-offering";
 import {
   selectResourceTemplate,
   changeResourceTemplate,
@@ -16,7 +16,7 @@ import { useResourceTemplateDocumentsInSelectedDrive } from "../../../document-m
 import type {
   ResourceTemplateDocument,
   ResourceTemplateGlobalState,
-} from "@powerhousedao/contributor-billing/document-models/resource-template";
+} from "resourceServices/document-models/resource-template";
 
 interface ResourceTemplateSelectorProps {
   document: ServiceOfferingDocument;
@@ -143,11 +143,11 @@ export function ResourceTemplateSelector({
             </svg>
           </div>
           <div className="rts-header__text">
-            <h2 className="rts-header__title">Select Resource Template</h2>
+            <h2 className="rts-header__title">Select a Product</h2>
             <p className="rts-header__subtitle">
-              Choose a resource template to base this service offering on. The
-              template defines the product configuration, target audiences, and
-              available services.
+              Choose a product to base this service offering on. The product
+              defines the configuration, target audiences, and available
+              services.
             </p>
           </div>
         </div>
@@ -162,7 +162,7 @@ export function ResourceTemplateSelector({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search resource templates..."
+            placeholder="Search products..."
             className="rts-search__input"
           />
           {searchQuery && (
@@ -192,10 +192,10 @@ export function ResourceTemplateSelector({
                   <path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
               </div>
-              <h3 className="rts-empty__title">No Resource Templates Found</h3>
+              <h3 className="rts-empty__title">No Products Found</h3>
               <p className="rts-empty__desc">
-                Create a Resource Template first to define the base
-                configuration for your service offering.
+                Create a product first to define the base configuration for your
+                service offering.
               </p>
             </div>
           ) : filteredTemplates.length === 0 ? (

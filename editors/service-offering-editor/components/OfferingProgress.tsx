@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { ServiceOfferingDocument } from "@powerhousedao/contributor-billing/document-models/service-offering";
+import type { ServiceOfferingDocument } from "resourceServices/document-models/service-offering";
 import type { TabId } from "./TabNavigation.js";
 
 interface OfferingProgressProps {

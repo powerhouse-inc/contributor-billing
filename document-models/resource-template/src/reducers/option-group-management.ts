@@ -1,4 +1,4 @@
-import type { ResourceTemplateOptionGroupManagementOperations } from "@powerhousedao/contributor-billing/document-models/resource-template";
+import type { ResourceTemplateOptionGroupManagementOperations } from "resourceServices/document-models/resource-template";
 
 export const resourceTemplateOptionGroupManagementOperations: ResourceTemplateOptionGroupManagementOperations =
   {
@@ -49,6 +49,35 @@ export const resourceTemplateOptionGroupManagementOperations: ResourceTemplateOp
           }
         });
         state.optionGroups.splice(optionGroupIndex, 1);
+      }
+      state.lastModified = action.input.lastModified;
+    },
+    addFaqOperation(state, action) {
+      state.faqFields.push({
+        id: action.input.id,
+        question: action.input.question || null,
+        answer: action.input.answer || null,
+      });
+      state.lastModified = action.input.lastModified;
+    },
+    updateFaqOperation(state, action) {
+      const faqField = state.faqFields.find((f) => f.id === action.input.id);
+      if (faqField) {
+        if (action.input.question !== undefined) {
+          faqField.question = action.input.question || null;
+        }
+        if (action.input.answer !== undefined) {
+          faqField.answer = action.input.answer || null;
+        }
+      }
+      state.lastModified = action.input.lastModified;
+    },
+    deleteFaqOperation(state, action) {
+      const faqIndex = state.faqFields.findIndex(
+        (f) => f.id === action.input.id,
+      );
+      if (faqIndex !== -1) {
+        state.faqFields.splice(faqIndex, 1);
       }
       state.lastModified = action.input.lastModified;
     },

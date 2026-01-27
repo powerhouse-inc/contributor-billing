@@ -20,6 +20,9 @@ import {
   UpdateTierInputSchema,
   UpdateTierPricingInputSchema,
   DeleteTierInputSchema,
+  AddTierPricingOptionInputSchema,
+  UpdateTierPricingOptionInputSchema,
+  RemoveTierPricingOptionInputSchema,
   AddServiceLevelInputSchema,
   UpdateServiceLevelInputSchema,
   RemoveServiceLevelInputSchema,
@@ -154,6 +157,42 @@ const stateReducer: StateReducer<ServiceOfferingPHState> = (
       DeleteTierInputSchema().parse(action.input);
 
       serviceOfferingTierManagementOperations.deleteTierOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "ADD_TIER_PRICING_OPTION": {
+      AddTierPricingOptionInputSchema().parse(action.input);
+
+      serviceOfferingTierManagementOperations.addTierPricingOptionOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "UPDATE_TIER_PRICING_OPTION": {
+      UpdateTierPricingOptionInputSchema().parse(action.input);
+
+      serviceOfferingTierManagementOperations.updateTierPricingOptionOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "REMOVE_TIER_PRICING_OPTION": {
+      RemoveTierPricingOptionInputSchema().parse(action.input);
+
+      serviceOfferingTierManagementOperations.removeTierPricingOptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

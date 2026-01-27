@@ -6,7 +6,7 @@ export const documentModel: DocumentModelGlobalState = {
     website: "https://www.powerhouse.inc/",
   },
   description:
-    "Document model for defining operator service offerings with subscription tiers, facet bindings, usage limits, and pricing for the ACHRA Marketplace. ",
+    "Document model for defining operator service offerings with subscription tiers, multi-billing cycle pricing options, facet bindings, usage limits with overage pricing, for the ACHRA Marketplace.",
   extension: "",
   id: "powerhouse/service-offering",
   name: "ServiceOffering",
@@ -161,9 +161,9 @@ export const documentModel: DocumentModelGlobalState = {
               id: "add-tier",
               name: "ADD_TIER",
               reducer:
-                "state.tiers.push({\n    id: action.input.id,\n    name: action.input.name,\n    description: action.input.description || null,\n    serviceLevels: [],\n    usageLimits: [],\n    pricing: {\n        amount: action.input.amount || null,\n        currency: action.input.currency,\n        billingCycle: action.input.billingCycle,\n        setupFee: action.input.setupFee || null\n    },\n    isCustomPricing: action.input.isCustomPricing || false\n});\nstate.lastModified = action.input.lastModified;",
+                "state.tiers.push({\n    id: action.input.id,\n    name: action.input.name,\n    description: action.input.description || null,\n    serviceLevels: [],\n    usageLimits: [],\n    pricing: {\n        amount: action.input.amount || null,\n        currency: action.input.currency,\n        billingCycle: action.input.billingCycle,\n        setupFee: action.input.setupFee || null,\n        perSeatAmount: action.input.perSeatAmount || null,\n        perSeatCurrency: action.input.perSeatCurrency || null,\n        perSeatBillingCycle: action.input.perSeatBillingCycle || null,\n        perSeatLabel: action.input.perSeatLabel || null\n    },\n    pricingOptions: [],\n    isCustomPricing: action.input.isCustomPricing || false\n});\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input AddTierInput {\n    id: OID!\n    name: String!\n    description: String\n    amount: Amount_Money\n    currency: Currency!\n    billingCycle: BillingCycle!\n    setupFee: Amount_Money\n    isCustomPricing: Boolean\n    lastModified: DateTime!\n}",
+                "input AddTierInput {\n    id: OID!\n    name: String!\n    description: String\n    amount: Amount_Money\n    currency: Currency!\n    billingCycle: BillingCycle!\n    setupFee: Amount_Money\n    perSeatAmount: Amount_Money\n    perSeatCurrency: Currency\n    perSeatBillingCycle: BillingCycle\n    perSeatLabel: String\n    isCustomPricing: Boolean\n    lastModified: DateTime!\n}",
               scope: "global",
               template: "Adds a new subscription tier",
             },
@@ -203,9 +203,9 @@ export const documentModel: DocumentModelGlobalState = {
               id: "update-tier-pricing",
               name: "UPDATE_TIER_PRICING",
               reducer:
-                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    if (action.input.amount !== undefined) {\n        tier.pricing.amount = action.input.amount;\n    }\n    if (action.input.currency) {\n        tier.pricing.currency = action.input.currency;\n    }\n    if (action.input.billingCycle) {\n        tier.pricing.billingCycle = action.input.billingCycle;\n    }\n    if (action.input.setupFee !== undefined) {\n        tier.pricing.setupFee = action.input.setupFee;\n    }\n}\nstate.lastModified = action.input.lastModified;",
+                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    if (action.input.amount !== undefined) {\n        tier.pricing.amount = action.input.amount;\n    }\n    if (action.input.currency) {\n        tier.pricing.currency = action.input.currency;\n    }\n    if (action.input.billingCycle) {\n        tier.pricing.billingCycle = action.input.billingCycle;\n    }\n    if (action.input.setupFee !== undefined) {\n        tier.pricing.setupFee = action.input.setupFee;\n    }\n    if (action.input.perSeatAmount !== undefined) {\n        tier.pricing.perSeatAmount = action.input.perSeatAmount;\n    }\n    if (action.input.perSeatCurrency !== undefined) {\n        tier.pricing.perSeatCurrency = action.input.perSeatCurrency || null;\n    }\n    if (action.input.perSeatBillingCycle !== undefined) {\n        tier.pricing.perSeatBillingCycle = action.input.perSeatBillingCycle || null;\n    }\n    if (action.input.perSeatLabel !== undefined) {\n        tier.pricing.perSeatLabel = action.input.perSeatLabel || null;\n    }\n}\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input UpdateTierPricingInput {\n    tierId: OID!\n    amount: Amount_Money\n    currency: Currency\n    billingCycle: BillingCycle\n    setupFee: Amount_Money\n    lastModified: DateTime!\n}",
+                "input UpdateTierPricingInput {\n    tierId: OID!\n    amount: Amount_Money\n    currency: Currency\n    billingCycle: BillingCycle\n    setupFee: Amount_Money\n    perSeatAmount: Amount_Money\n    perSeatCurrency: Currency\n    perSeatBillingCycle: BillingCycle\n    perSeatLabel: String\n    lastModified: DateTime!\n}",
               scope: "global",
               template: "Updates pricing for a tier",
             },
@@ -229,6 +229,95 @@ export const documentModel: DocumentModelGlobalState = {
                 "input DeleteTierInput {\n    id: OID!\n    lastModified: DateTime!\n}",
               scope: "global",
               template: "Removes a tier from the offering",
+            },
+            {
+              description:
+                "Adds a pricing option with a specific billing cycle to a tier",
+              errors: [
+                {
+                  code: "ADD_PRICING_OPTION_TIER_NOT_FOUND",
+                  description: "Tier with the specified ID does not exist",
+                  id: "add-pricing-option-tier-not-found",
+                  name: "AddPricingOptionTierNotFoundError",
+                  template: "",
+                },
+                {
+                  code: "DUPLICATE_BILLING_CYCLE",
+                  description:
+                    "A pricing option with this billing cycle already exists for this tier",
+                  id: "duplicate-billing-cycle",
+                  name: "DuplicateBillingCycleError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "add-tier-pricing-option",
+              name: "ADD_TIER_PRICING_OPTION",
+              reducer:
+                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (!tier) {\n    throw new AddPricingOptionTierNotFoundError('Tier with the specified ID does not exist');\n}\nconst existingCycle = tier.pricingOptions.find(po => po.billingCycle === action.input.billingCycle);\nif (existingCycle) {\n    throw new DuplicateBillingCycleError('A pricing option with this billing cycle already exists for this tier');\n}\nconst isDefault = action.input.isDefault || tier.pricingOptions.length === 0;\nif (isDefault) {\n    tier.pricingOptions.forEach(po => { po.isDefault = false; });\n}\ntier.pricingOptions.push({\n    id: action.input.pricingOptionId,\n    billingCycle: action.input.billingCycle,\n    amount: action.input.amount,\n    currency: action.input.currency,\n    setupFee: action.input.setupFee || null,\n    perSeatAmount: action.input.perSeatAmount || null,\n    isDefault: isDefault\n});\nstate.lastModified = action.input.lastModified;",
+              schema:
+                "input AddTierPricingOptionInput {\n    tierId: OID!\n    pricingOptionId: OID!\n    billingCycle: BillingCycle!\n    amount: Amount_Money!\n    currency: Currency!\n    setupFee: Amount_Money\n    perSeatAmount: Amount_Money\n    isDefault: Boolean\n    lastModified: DateTime!\n}",
+              scope: "global",
+              template:
+                "Adds a pricing option with a specific billing cycle to a tier",
+            },
+            {
+              description: "Updates a pricing option for a tier",
+              errors: [
+                {
+                  code: "UPDATE_PRICING_OPTION_TIER_NOT_FOUND",
+                  description: "Tier with the specified ID does not exist",
+                  id: "update-pricing-option-tier-not-found",
+                  name: "UpdatePricingOptionTierNotFoundError",
+                  template: "",
+                },
+                {
+                  code: "PRICING_OPTION_NOT_FOUND",
+                  description:
+                    "Pricing option with the specified ID does not exist",
+                  id: "pricing-option-not-found",
+                  name: "PricingOptionNotFoundError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "update-tier-pricing-option",
+              name: "UPDATE_TIER_PRICING_OPTION",
+              reducer:
+                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (!tier) {\n    throw new UpdatePricingOptionTierNotFoundError('Tier with the specified ID does not exist');\n}\nconst pricingOption = tier.pricingOptions.find(po => po.id === action.input.pricingOptionId);\nif (!pricingOption) {\n    throw new PricingOptionNotFoundError('Pricing option with the specified ID does not exist');\n}\nif (action.input.amount !== undefined && action.input.amount !== null) {\n    pricingOption.amount = action.input.amount;\n}\nif (action.input.currency) {\n    pricingOption.currency = action.input.currency;\n}\nif (action.input.setupFee !== undefined) {\n    pricingOption.setupFee = action.input.setupFee || null;\n}\nif (action.input.perSeatAmount !== undefined) {\n    pricingOption.perSeatAmount = action.input.perSeatAmount || null;\n}\nif (action.input.isDefault === true) {\n    tier.pricingOptions.forEach(po => { po.isDefault = false; });\n    pricingOption.isDefault = true;\n}\nstate.lastModified = action.input.lastModified;",
+              schema:
+                "input UpdateTierPricingOptionInput {\n    tierId: OID!\n    pricingOptionId: OID!\n    amount: Amount_Money\n    currency: Currency\n    setupFee: Amount_Money\n    perSeatAmount: Amount_Money\n    isDefault: Boolean\n    lastModified: DateTime!\n}",
+              scope: "global",
+              template: "Updates a pricing option for a tier",
+            },
+            {
+              description: "Removes a pricing option from a tier",
+              errors: [
+                {
+                  code: "REMOVE_PRICING_OPTION_TIER_NOT_FOUND",
+                  description: "Tier with the specified ID does not exist",
+                  id: "remove-pricing-option-tier-not-found",
+                  name: "RemovePricingOptionTierNotFoundError",
+                  template: "",
+                },
+                {
+                  code: "REMOVE_PRICING_OPTION_NOT_FOUND",
+                  description:
+                    "Pricing option with the specified ID does not exist",
+                  id: "remove-pricing-option-not-found",
+                  name: "RemovePricingOptionNotFoundError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "remove-tier-pricing-option",
+              name: "REMOVE_TIER_PRICING_OPTION",
+              reducer:
+                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (!tier) {\n    throw new RemovePricingOptionTierNotFoundError('Tier with the specified ID does not exist');\n}\nconst optionIndex = tier.pricingOptions.findIndex(po => po.id === action.input.pricingOptionId);\nif (optionIndex === -1) {\n    throw new RemovePricingOptionNotFoundError('Pricing option with the specified ID does not exist');\n}\nconst wasDefault = tier.pricingOptions[optionIndex].isDefault;\ntier.pricingOptions.splice(optionIndex, 1);\nif (wasDefault && tier.pricingOptions.length > 0) {\n    tier.pricingOptions[0].isDefault = true;\n}\nstate.lastModified = action.input.lastModified;",
+              schema:
+                "input RemoveTierPricingOptionInput {\n    tierId: OID!\n    pricingOptionId: OID!\n    lastModified: DateTime!\n}",
+              scope: "global",
+              template: "Removes a pricing option from a tier",
             },
             {
               description: "Adds a service level binding to a tier",
@@ -317,7 +406,8 @@ export const documentModel: DocumentModelGlobalState = {
               template: "Removes a service level binding from a tier",
             },
             {
-              description: "Adds a usage limit to a tier",
+              description:
+                "Adds a usage limit to a tier with optional overage pricing",
               errors: [
                 {
                   code: "ADD_USAGE_LIMIT_TIER_NOT_FOUND",
@@ -338,14 +428,15 @@ export const documentModel: DocumentModelGlobalState = {
               id: "add-usage-limit",
               name: "ADD_USAGE_LIMIT",
               reducer:
-                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    tier.usageLimits.push({\n        id: action.input.limitId,\n        serviceId: action.input.serviceId,\n        metric: action.input.metric,\n        limit: action.input.limit || null,\n        resetPeriod: action.input.resetPeriod || null,\n        notes: action.input.notes || null\n    });\n}\nstate.lastModified = action.input.lastModified;",
+                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    tier.usageLimits.push({\n        id: action.input.limitId,\n        serviceId: action.input.serviceId,\n        metric: action.input.metric,\n        unitName: action.input.unitName || null,\n        limit: action.input.limit || null,\n        resetPeriod: action.input.resetPeriod || null,\n        notes: action.input.notes || null,\n        unitPrice: action.input.unitPrice || null,\n        unitPriceCurrency: action.input.unitPriceCurrency || null,\n        unitPriceBillingCycle: action.input.unitPriceBillingCycle || null\n    });\n}\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input AddUsageLimitInput {\n    tierId: OID!\n    limitId: OID!\n    serviceId: OID!\n    metric: String!\n    limit: Int\n    resetPeriod: ResetPeriod\n    notes: String\n    lastModified: DateTime!\n}",
+                "input AddUsageLimitInput {\n    tierId: OID!\n    limitId: OID!\n    serviceId: OID!\n    metric: String!\n    unitName: String\n    limit: Int\n    resetPeriod: ResetPeriod\n    notes: String\n    unitPrice: Amount_Money\n    unitPriceCurrency: Currency\n    unitPriceBillingCycle: BillingCycle\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "Adds a usage limit to a tier",
+              template:
+                "Adds a usage limit to a tier with optional overage pricing",
             },
             {
-              description: "Updates a usage limit",
+              description: "Updates a usage limit including overage pricing",
               errors: [
                 {
                   code: "UPDATE_USAGE_LIMIT_TIER_NOT_FOUND",
@@ -367,11 +458,11 @@ export const documentModel: DocumentModelGlobalState = {
               id: "update-usage-limit",
               name: "UPDATE_USAGE_LIMIT",
               reducer:
-                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    const usageLimit = tier.usageLimits.find(ul => ul.id === action.input.limitId);\n    if (usageLimit) {\n        if (action.input.metric) {\n            usageLimit.metric = action.input.metric;\n        }\n        if (action.input.limit !== undefined && action.input.limit !== null) {\n            usageLimit.limit = action.input.limit;\n        }\n        if (action.input.resetPeriod) {\n            usageLimit.resetPeriod = action.input.resetPeriod;\n        }\n        if (action.input.notes !== undefined && action.input.notes !== null) {\n            usageLimit.notes = action.input.notes;\n        }\n    }\n}\nstate.lastModified = action.input.lastModified;",
+                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    const usageLimit = tier.usageLimits.find(ul => ul.id === action.input.limitId);\n    if (usageLimit) {\n        if (action.input.metric) {\n            usageLimit.metric = action.input.metric;\n        }\n        if (action.input.unitName !== undefined) {\n            usageLimit.unitName = action.input.unitName || null;\n        }\n        if (action.input.limit !== undefined && action.input.limit !== null) {\n            usageLimit.limit = action.input.limit;\n        }\n        if (action.input.resetPeriod) {\n            usageLimit.resetPeriod = action.input.resetPeriod;\n        }\n        if (action.input.notes !== undefined) {\n            usageLimit.notes = action.input.notes || null;\n        }\n        if (action.input.unitPrice !== undefined) {\n            usageLimit.unitPrice = action.input.unitPrice || null;\n        }\n        if (action.input.unitPriceCurrency !== undefined) {\n            usageLimit.unitPriceCurrency = action.input.unitPriceCurrency || null;\n        }\n        if (action.input.unitPriceBillingCycle !== undefined) {\n            usageLimit.unitPriceBillingCycle = action.input.unitPriceBillingCycle || null;\n        }\n    }\n}\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input UpdateUsageLimitInput {\n    tierId: OID!\n    limitId: OID!\n    metric: String\n    limit: Int\n    resetPeriod: ResetPeriod\n    notes: String\n    lastModified: DateTime!\n}",
+                "input UpdateUsageLimitInput {\n    tierId: OID!\n    limitId: OID!\n    metric: String\n    unitName: String\n    limit: Int\n    resetPeriod: ResetPeriod\n    notes: String\n    unitPrice: Amount_Money\n    unitPriceCurrency: Currency\n    unitPriceBillingCycle: BillingCycle\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "Updates a usage limit",
+              template: "Updates a usage limit including overage pricing",
             },
             {
               description: "Removes a usage limit from a tier",
@@ -562,7 +653,7 @@ export const documentModel: DocumentModelGlobalState = {
               template: "Adds an option to a facet target",
             },
             {
-              description: "",
+              description: "Removes an option from a facet target",
               errors: [],
               examples: [],
               id: "remove-facet-option",
@@ -572,10 +663,10 @@ export const documentModel: DocumentModelGlobalState = {
               schema:
                 "input RemoveFacetOptionInput {\n    categoryKey: String!\n    optionId: String!\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "",
+              template: "Removes an option from a facet target",
             },
             {
-              description: "",
+              description: "Sets the list of setup services",
               errors: [],
               examples: [],
               id: "set-setup-services",
@@ -585,10 +676,10 @@ export const documentModel: DocumentModelGlobalState = {
               schema:
                 "input SetSetupServicesInput {\n    services: [String!]!\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "",
+              template: "Sets the list of setup services",
             },
             {
-              description: "",
+              description: "Sets the list of recurring services",
               errors: [],
               examples: [],
               id: "set-recurring-services",
@@ -598,7 +689,7 @@ export const documentModel: DocumentModelGlobalState = {
               schema:
                 "input SetRecurringServicesInput {\n    services: [String!]!\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "",
+              template: "Sets the list of recurring services",
             },
             {
               description:
@@ -737,7 +828,7 @@ export const documentModel: DocumentModelGlobalState = {
           initialValue:
             '{\n    "id": "",\n    "operatorId": "",\n    "resourceTemplateId": null,\n    "title": "",\n    "summary": "",\n    "description": null,\n    "thumbnailUrl": null,\n    "infoLink": null,\n    "status": "DRAFT",\n    "lastModified": "1970-01-01T00:00:00.000Z",\n    "targetAudiences": [],\n    "setupServices": [],\n    "recurringServices": [],\n    "facetTargets": [],\n    "services": [],\n    "tiers": [],\n    "optionGroups": []\n}',
           schema:
-            "type ServiceOfferingState {\n    id: PHID!\n    operatorId: PHID!\n    resourceTemplateId: PHID\n    title: String!\n    summary: String!\n    description: String\n    thumbnailUrl: URL\n    infoLink: URL\n    status: ServiceStatus!\n    lastModified: DateTime!\n    targetAudiences: [TargetAudience!]!\n    setupServices: [String!]!\n    recurringServices: [String!]!\n    facetTargets: [FacetTarget!]!\n    services: [Service!]!\n    tiers: [ServiceSubscriptionTier!]!\n    optionGroups: [OptionGroup!]!\n}\n\nenum ServiceStatus {\n    DRAFT\n    COMING_SOON\n    ACTIVE\n    DEPRECATED\n}\n\ntype TargetAudience {\n    id: OID!\n    label: String!\n    color: String\n}\n\ntype FacetTarget {\n    id: OID!\n    categoryKey: String!\n    categoryLabel: String!\n    selectedOptions: [String!]!\n}\n\ntype Service {\n    id: OID!\n    title: String!\n    description: String\n    displayOrder: Int\n    parentServiceId: OID\n    isSetupFormation: Boolean!\n    isPremiumExclusive: Boolean!\n    optionGroupId: OID\n    facetBindings: [ResourceFacetBinding!]!\n}\n\ntype ResourceFacetBinding {\n    id: OID!\n    facetName: String!\n    facetType: PHID!\n    supportedOptions: [OID!]!\n}\n\ntype ServiceSubscriptionTier {\n    id: OID!\n    name: String!\n    description: String\n    isCustomPricing: Boolean!\n    pricing: ServicePricing!\n    serviceLevels: [ServiceLevelBinding!]!\n    usageLimits: [ServiceUsageLimit!]!\n}\n\ntype ServicePricing {\n    amount: Amount_Money\n    currency: Currency!\n    billingCycle: BillingCycle!\n    setupFee: Amount_Money\n}\n\nenum BillingCycle {\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n    ONE_TIME\n}\n\ntype ServiceLevelBinding {\n    id: OID!\n    serviceId: OID!\n    level: ServiceLevel!\n    customValue: String\n    variations: String\n    annexes: String\n    setupFee: Amount_Money\n    optionGroupId: OID\n}\n\nenum ServiceLevel {\n    INCLUDED\n    NOT_INCLUDED\n    OPTIONAL\n    CUSTOM\n    VARIABLE\n    NOT_APPLICABLE\n}\n\ntype ServiceUsageLimit {\n    id: OID!\n    serviceId: OID!\n    metric: String!\n    limit: Int\n    resetPeriod: ResetPeriod\n    notes: String\n}\n\nenum ResetPeriod {\n    HOURLY\n    DAILY\n    WEEKLY\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n}\n\ntype OptionGroup {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n}",
+            "type ServiceOfferingState {\n    id: PHID!\n    operatorId: PHID!\n    resourceTemplateId: PHID\n    title: String!\n    summary: String!\n    description: String\n    thumbnailUrl: URL\n    infoLink: URL\n    status: ServiceStatus!\n    lastModified: DateTime!\n    targetAudiences: [TargetAudience!]!\n    setupServices: [String!]!\n    recurringServices: [String!]!\n    facetTargets: [FacetTarget!]!\n    services: [Service!]!\n    tiers: [ServiceSubscriptionTier!]!\n    optionGroups: [OptionGroup!]!\n}\n\nenum ServiceStatus {\n    DRAFT\n    COMING_SOON\n    ACTIVE\n    DEPRECATED\n}\n\ntype TargetAudience {\n    id: OID!\n    label: String!\n    color: String\n}\n\ntype FacetTarget {\n    id: OID!\n    categoryKey: String!\n    categoryLabel: String!\n    selectedOptions: [String!]!\n}\n\ntype Service {\n    id: OID!\n    title: String!\n    description: String\n    displayOrder: Int\n    parentServiceId: OID\n    isSetupFormation: Boolean!\n    isPremiumExclusive: Boolean!\n    optionGroupId: OID\n    facetBindings: [ResourceFacetBinding!]!\n}\n\ntype ResourceFacetBinding {\n    id: OID!\n    facetName: String!\n    facetType: PHID!\n    supportedOptions: [OID!]!\n}\n\ntype ServiceSubscriptionTier {\n    id: OID!\n    name: String!\n    description: String\n    isCustomPricing: Boolean!\n    pricing: ServicePricing!\n    pricingOptions: [TierPricingOption!]!\n    serviceLevels: [ServiceLevelBinding!]!\n    usageLimits: [ServiceUsageLimit!]!\n}\n\ntype ServicePricing {\n    amount: Amount_Money\n    currency: Currency!\n    billingCycle: BillingCycle!\n    setupFee: Amount_Money\n    perSeatAmount: Amount_Money\n    perSeatCurrency: Currency\n    perSeatBillingCycle: BillingCycle\n    perSeatLabel: String\n}\n\ntype TierPricingOption {\n    id: OID!\n    billingCycle: BillingCycle!\n    amount: Amount_Money!\n    currency: Currency!\n    setupFee: Amount_Money\n    isDefault: Boolean!\n    perSeatAmount: Amount_Money\n}\n\nenum BillingCycle {\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n    ONE_TIME\n}\n\ntype ServiceLevelBinding {\n    id: OID!\n    serviceId: OID!\n    level: ServiceLevel!\n    customValue: String\n    variations: String\n    annexes: String\n    setupFee: Amount_Money\n    optionGroupId: OID\n}\n\nenum ServiceLevel {\n    INCLUDED\n    NOT_INCLUDED\n    OPTIONAL\n    CUSTOM\n    VARIABLE\n    NOT_APPLICABLE\n}\n\ntype ServiceUsageLimit {\n    id: OID!\n    serviceId: OID!\n    metric: String!\n    unitName: String\n    limit: Int\n    resetPeriod: ResetPeriod\n    notes: String\n    unitPrice: Amount_Money\n    unitPriceCurrency: Currency\n    unitPriceBillingCycle: BillingCycle\n}\n\nenum ResetPeriod {\n    HOURLY\n    DAILY\n    WEEKLY\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n}\n\ntype OptionGroup {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n}",
         },
         local: {
           examples: [],

@@ -4,6 +4,9 @@ import type {
   UpdateTierInput,
   UpdateTierPricingInput,
   DeleteTierInput,
+  AddTierPricingOptionInput,
+  UpdateTierPricingOptionInput,
+  RemoveTierPricingOptionInput,
   AddServiceLevelInput,
   UpdateServiceLevelInput,
   RemoveServiceLevelInput,
@@ -24,6 +27,18 @@ export type UpdateTierPricingAction = Action & {
 export type DeleteTierAction = Action & {
   type: "DELETE_TIER";
   input: DeleteTierInput;
+};
+export type AddTierPricingOptionAction = Action & {
+  type: "ADD_TIER_PRICING_OPTION";
+  input: AddTierPricingOptionInput;
+};
+export type UpdateTierPricingOptionAction = Action & {
+  type: "UPDATE_TIER_PRICING_OPTION";
+  input: UpdateTierPricingOptionInput;
+};
+export type RemoveTierPricingOptionAction = Action & {
+  type: "REMOVE_TIER_PRICING_OPTION";
+  input: RemoveTierPricingOptionInput;
 };
 export type AddServiceLevelAction = Action & {
   type: "ADD_SERVICE_LEVEL";
@@ -55,6 +70,9 @@ export type ServiceOfferingTierManagementAction =
   | UpdateTierAction
   | UpdateTierPricingAction
   | DeleteTierAction
+  | AddTierPricingOptionAction
+  | UpdateTierPricingOptionAction
+  | RemoveTierPricingOptionAction
   | AddServiceLevelAction
   | UpdateServiceLevelAction
   | RemoveServiceLevelAction

@@ -5,7 +5,8 @@ import type {
   ResourceTemplateDocument,
   ResourceTemplateAction,
   TargetAudience,
-} from "@powerhousedao/contributor-billing/document-models/resource-template";
+  FaqField,
+} from "resourceServices/document-models/resource-template";
 import {
   updateTemplateInfo,
   updateTemplateStatus,
@@ -14,6 +15,9 @@ import {
   removeTargetAudience,
   setSetupServices,
   setRecurringServices,
+  addFaq,
+  updateFaq,
+  deleteFaq,
 } from "../../../document-models/resource-template/gen/creators.js";
 
 interface TemplateInfoProps {
@@ -29,12 +33,8 @@ const STATUS_OPTIONS = [
 ] as const;
 
 const AUDIENCE_PRESETS = [
-  { label: "Founders", color: "#8b5cf6" },
-  { label: "SNO Governors", color: "#f43f5e" },
   { label: "Builders", color: "#0ea5e9" },
-  { label: "Operators", color: "#f97316" },
-  { label: "Contributors", color: "#10b981" },
-  { label: "Investors", color: "#6366f1" },
+  { label: "Networks", color: "#10b981" },
 ];
 
 // Service templates for quick-add functionality
@@ -45,127 +45,70 @@ interface ServiceTemplate {
 }
 
 const SETUP_SERVICE_TEMPLATES: Record<string, ServiceTemplate[]> = {
-  "Entity Formation": [
+  "Legal Services": [
     {
-      title: "Entity Formation",
-      description: "Legal entity registration and setup",
+      title: "Swiss association entity",
+      description: "Legal entity formation as a Swiss association",
       icon: "🏛️",
     },
     {
-      title: "Registered Agent",
-      description: "Registered agent designation for one year",
+      title: "Registered address (Zug)",
+      description: "Official registered address in Zug, Switzerland",
+      icon: "📍",
+    },
+    {
+      title: "Legal document templates",
+      description: "Access to standardized legal document templates",
       icon: "📋",
-    },
-    {
-      title: "Operating Agreement",
-      description: "Custom operating agreement drafting",
-      icon: "📜",
-    },
-    {
-      title: "EIN Application",
-      description: "Federal tax ID number application",
-      icon: "🔢",
-    },
-    {
-      title: "Banking Resolution",
-      description: "Corporate banking resolution preparation",
-      icon: "🏦",
-    },
-  ],
-  "Initial Setup": [
-    {
-      title: "Corporate Seal & Kit",
-      description: "Official corporate seal and documentation kit",
-      icon: "🔏",
-    },
-    {
-      title: "Initial Minutes",
-      description: "Organizational meeting minutes preparation",
-      icon: "📝",
-    },
-    {
-      title: "Bylaws Drafting",
-      description: "Corporate bylaws and governance documents",
-      icon: "⚖️",
-    },
-    {
-      title: "Stock Certificates",
-      description: "Initial stock certificate issuance",
-      icon: "📃",
-    },
-    {
-      title: "Compliance Calendar",
-      description: "Annual compliance calendar setup",
-      icon: "📅",
     },
   ],
 };
 
 const RECURRING_SERVICE_TEMPLATES: Record<string, ServiceTemplate[]> = {
-  "Compliance & Governance": [
+  "Operations & Finance": [
     {
-      title: "Annual Compliance Review",
-      description: "Yearly compliance status check and filings",
-      icon: "✓",
+      title: "Invoice management",
+      description: "Professional invoice processing and management",
+      icon: "📄",
     },
     {
-      title: "Board Meeting Minutes",
-      description: "Quarterly board meeting documentation",
-      icon: "📋",
-    },
-    {
-      title: "Regulatory Filing Support",
-      description: "Ongoing regulatory submission assistance",
-      icon: "📊",
-    },
-    {
-      title: "Corporate Record Maintenance",
-      description: "Continuous corporate record keeping",
-      icon: "🗄️",
-    },
-  ],
-  "Accounting & Finance": [
-    {
-      title: "Bookkeeping",
-      description: "Monthly bookkeeping and reconciliation",
-      icon: "📚",
-    },
-    {
-      title: "Financial Reporting",
-      description: "Quarterly financial statement preparation",
-      icon: "📈",
-    },
-    {
-      title: "Tax Preparation",
-      description: "Annual tax return preparation and filing",
+      title: "Annual tax filing",
+      description: "Yearly tax preparation and filing services",
       icon: "💰",
     },
     {
-      title: "Payroll Processing",
-      description: "Bi-weekly payroll management",
-      icon: "💵",
+      title: "Monthly accounting & close",
+      description: "Monthly bookkeeping and financial close",
+      icon: "📊",
     },
   ],
-  "Advisory & Support": [
+  "Contributor & Payments": [
     {
-      title: "Dedicated Account Manager",
-      description: "Personal point of contact for all needs",
-      icon: "👤",
+      title: "Contributor operations",
+      description: "Management of contributor payments and operations",
+      icon: "👥",
     },
     {
-      title: "Priority Support",
-      description: "Fast-track support response times",
-      icon: "⚡",
+      title: "Multi-currency payouts",
+      description: "Support for payments in multiple currencies",
+      icon: "💱",
     },
     {
-      title: "Strategic Consulting",
-      description: "Quarterly business strategy sessions",
+      title: "Multiple entities",
+      description: "Support for managing multiple legal entities",
+      icon: "🏢",
+    },
+  ],
+  "Support & Advisory": [
+    {
+      title: "Dedicated ops support",
+      description: "Dedicated operations support team",
       icon: "🎯",
     },
     {
-      title: "Legal Document Review",
-      description: "Contract and document review services",
-      icon: "🔍",
+      title: "Dedicated account manager",
+      description: "Personal point of contact for all needs",
+      icon: "👤",
     },
   ],
 };
@@ -190,6 +133,11 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
   const [showAudienceInput, setShowAudienceInput] = useState(false);
   const [showSetupTemplates, setShowSetupTemplates] = useState(false);
   const [showRecurringTemplates, setShowRecurringTemplates] = useState(false);
+  const [newFaqQuestion, setNewFaqQuestion] = useState("");
+  const [newFaqAnswer, setNewFaqAnswer] = useState("");
+  const [editingFaqId, setEditingFaqId] = useState<string | null>(null);
+  const [editingFaqQuestion, setEditingFaqQuestion] = useState("");
+  const [editingFaqAnswer, setEditingFaqAnswer] = useState("");
   const setupServiceInputRef = useRef<HTMLInputElement>(null);
   const recurringServiceInputRef = useRef<HTMLInputElement>(null);
 
@@ -375,6 +323,58 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
     );
   };
 
+  // FAQ Handlers
+  const handleAddFaq = () => {
+    if (!newFaqQuestion.trim() || !newFaqAnswer.trim()) return;
+    dispatch(
+      addFaq({
+        id: generateId(),
+        question: newFaqQuestion.trim(),
+        answer: newFaqAnswer.trim(),
+        lastModified: new Date().toISOString(),
+      }),
+    );
+    setNewFaqQuestion("");
+    setNewFaqAnswer("");
+  };
+
+  const handleStartEditFaq = (faq: FaqField) => {
+    setEditingFaqId(faq.id);
+    setEditingFaqQuestion(faq.question || "");
+    setEditingFaqAnswer(faq.answer || "");
+  };
+
+  const handleSaveFaqEdit = () => {
+    if (!editingFaqId || !editingFaqQuestion.trim() || !editingFaqAnswer.trim())
+      return;
+    dispatch(
+      updateFaq({
+        id: editingFaqId,
+        question: editingFaqQuestion.trim(),
+        answer: editingFaqAnswer.trim(),
+        lastModified: new Date().toISOString(),
+      }),
+    );
+    setEditingFaqId(null);
+    setEditingFaqQuestion("");
+    setEditingFaqAnswer("");
+  };
+
+  const handleCancelFaqEdit = () => {
+    setEditingFaqId(null);
+    setEditingFaqQuestion("");
+    setEditingFaqAnswer("");
+  };
+
+  const handleDeleteFaq = (id: string) => {
+    dispatch(
+      deleteFaq({
+        id,
+        lastModified: new Date().toISOString(),
+      }),
+    );
+  };
+
   const currentStatus = STATUS_OPTIONS.find((s) => s.value === formData.status);
 
   const availablePresets = AUDIENCE_PRESETS.filter(
@@ -442,7 +442,7 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
                 onChange={(e) => handleFieldChange("title", e.target.value)}
                 onBlur={handleInfoBlur}
                 className="template-editor__title-input"
-                placeholder="Resource Template Title"
+                placeholder="Product Title"
               />
               <div className="template-editor__status-select">
                 <select
@@ -555,7 +555,7 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
               onChange={(e) => handleFieldChange("summary", e.target.value)}
               onBlur={handleInfoBlur}
               className="template-editor__summary"
-              placeholder="Brief summary of your resource template..."
+              placeholder="Brief summary of your product..."
               rows={2}
             />
           </div>
@@ -577,7 +577,7 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
             <div>
               <h3 className="template-editor__card-title">Description</h3>
               <p className="template-editor__card-subtitle">
-                Detailed description of your resource template
+                Detailed description of your product
               </p>
             </div>
           </div>
@@ -586,10 +586,177 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
             onChange={(e) => handleFieldChange("description", e.target.value)}
             onBlur={handleInfoBlur}
             className="template-editor__textarea"
-            placeholder="Provide a comprehensive description of your resource template, including what makes it unique and valuable..."
+            placeholder="Provide a comprehensive description of your product, including what makes it unique and valuable..."
             rows={4}
           />
         </section>
+
+        {/* FAQ Section */}
+        <section className="template-editor__card template-editor__card--full">
+          <div className="template-editor__card-header">
+            <div className="template-editor__card-icon template-editor__card-icon--sky">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+                <path d="M12 17h.01" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="template-editor__card-title">
+                Frequently Asked Questions
+              </h3>
+              <p className="template-editor__card-subtitle">
+                Common questions and answers about this product
+              </p>
+            </div>
+          </div>
+
+          <div className="template-editor__faq-list">
+            {globalState.faqFields.map((faq: FaqField, index: number) => (
+              <div
+                key={faq.id}
+                className={`template-editor__faq-item ${editingFaqId === faq.id ? "template-editor__faq-item--editing" : ""}`}
+              >
+                {editingFaqId === faq.id ? (
+                  <div className="template-editor__faq-edit-form">
+                    <input
+                      type="text"
+                      value={editingFaqQuestion}
+                      onChange={(e) => setEditingFaqQuestion(e.target.value)}
+                      className="template-editor__faq-edit-question"
+                      placeholder="Question"
+                      autoFocus
+                    />
+                    <textarea
+                      value={editingFaqAnswer}
+                      onChange={(e) => setEditingFaqAnswer(e.target.value)}
+                      className="template-editor__faq-edit-answer"
+                      placeholder="Answer"
+                      rows={3}
+                    />
+                    <div className="template-editor__faq-edit-actions">
+                      <button
+                        type="button"
+                        onClick={handleSaveFaqEdit}
+                        className="template-editor__faq-save-btn"
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCancelFaqEdit}
+                        className="template-editor__faq-cancel-btn"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="template-editor__faq-number">
+                      {index + 1}
+                    </div>
+                    <div className="template-editor__faq-content">
+                      <div className="template-editor__faq-question">
+                        {faq.question}
+                      </div>
+                      <div className="template-editor__faq-answer">
+                        {faq.answer}
+                      </div>
+                    </div>
+                    <div className="template-editor__faq-actions">
+                      <button
+                        type="button"
+                        onClick={() => handleStartEditFaq(faq)}
+                        className="template-editor__faq-action-btn"
+                        title="Edit FAQ"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteFaq(faq.id)}
+                        className="template-editor__faq-action-btn template-editor__faq-action-btn--delete"
+                        title="Delete FAQ"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                        </svg>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Add new FAQ form */}
+          <div className="template-editor__faq-add-form">
+            <input
+              type="text"
+              value={newFaqQuestion}
+              onChange={(e) => setNewFaqQuestion(e.target.value)}
+              placeholder="New question..."
+              className="template-editor__faq-new-question"
+            />
+            <textarea
+              value={newFaqAnswer}
+              onChange={(e) => setNewFaqAnswer(e.target.value)}
+              placeholder="Answer to the question..."
+              className="template-editor__faq-new-answer"
+              rows={2}
+            />
+            {(newFaqQuestion || newFaqAnswer) && (
+              <button
+                type="button"
+                onClick={handleAddFaq}
+                className="template-editor__faq-add-btn"
+                disabled={!newFaqQuestion.trim() || !newFaqAnswer.trim()}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M12 5v14M5 12h14" strokeWidth="2" />
+                </svg>
+                Add FAQ
+              </button>
+            )}
+          </div>
+        </section>
+
+        {/* Services Information Section Divider */}
+        <div className="template-editor__section-divider">
+          <div className="template-editor__section-badge">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
+            </svg>
+            Services Information
+          </div>
+          <div className="template-editor__section-divider-line" />
+        </div>
 
         {/* Services Grid */}
         <div className="template-editor__grid">
@@ -1265,6 +1432,39 @@ const styles = `
     color: var(--te-ink-muted);
   }
 
+  /* Section Divider */
+  .template-editor__section-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 8px 0;
+  }
+
+  .template-editor__section-divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--te-border), transparent);
+  }
+
+  .template-editor__section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--te-emerald-light) 0%, var(--te-teal-light) 100%);
+    color: var(--te-emerald);
+    border-radius: 100px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .template-editor__section-badge svg {
+    width: 16px;
+    height: 16px;
+  }
+
   /* Grid Cards */
   .template-editor__grid {
     display: grid;
@@ -1830,6 +2030,285 @@ const styles = `
     width: 14px;
     height: 14px;
     margin-left: 2px;
+  }
+
+  /* FAQ Section */
+  .template-editor__faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .template-editor__faq-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    background: var(--te-surface-raised);
+    border: 1.5px solid var(--te-border-light);
+    border-radius: 12px;
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__faq-item:hover {
+    border-color: var(--te-border);
+  }
+
+  .template-editor__faq-item--editing {
+    border-color: var(--te-sky);
+    background: var(--te-sky-light);
+  }
+
+  .template-editor__faq-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--te-sky-light);
+    color: var(--te-sky);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  .template-editor__faq-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .template-editor__faq-question {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--te-ink);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  .template-editor__faq-answer {
+    font-size: 0.875rem;
+    color: var(--te-ink-light);
+    line-height: 1.6;
+  }
+
+  .template-editor__faq-actions {
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .template-editor__faq-item:hover .template-editor__faq-actions {
+    opacity: 1;
+  }
+
+  .template-editor__faq-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: var(--te-surface);
+    border: 1.5px solid var(--te-border-light);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--te-ink-muted);
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__faq-action-btn:hover {
+    border-color: var(--te-sky);
+    color: var(--te-sky);
+    background: var(--te-sky-light);
+  }
+
+  .template-editor__faq-action-btn--delete:hover {
+    border-color: var(--te-rose);
+    color: var(--te-rose);
+    background: var(--te-rose-light);
+  }
+
+  .template-editor__faq-action-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .template-editor__faq-edit-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .template-editor__faq-edit-question {
+    font-family: var(--te-font);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    padding: 10px 14px;
+    background: var(--te-surface);
+    border: 1.5px solid var(--te-border);
+    border-radius: 8px;
+    color: var(--te-ink);
+  }
+
+  .template-editor__faq-edit-question:focus {
+    outline: none;
+    border-color: var(--te-sky);
+  }
+
+  .template-editor__faq-edit-answer {
+    font-family: var(--te-font);
+    font-size: 0.875rem;
+    padding: 10px 14px;
+    background: var(--te-surface);
+    border: 1.5px solid var(--te-border);
+    border-radius: 8px;
+    color: var(--te-ink);
+    resize: vertical;
+    min-height: 60px;
+  }
+
+  .template-editor__faq-edit-answer:focus {
+    outline: none;
+    border-color: var(--te-sky);
+  }
+
+  .template-editor__faq-edit-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .template-editor__faq-save-btn {
+    padding: 8px 16px;
+    font-family: var(--te-font);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: white;
+    background: var(--te-sky);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .template-editor__faq-save-btn:hover {
+    background: #0284c7;
+  }
+
+  .template-editor__faq-cancel-btn {
+    padding: 8px 16px;
+    font-family: var(--te-font);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--te-ink-light);
+    background: var(--te-surface);
+    border: 1.5px solid var(--te-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__faq-cancel-btn:hover {
+    background: var(--te-surface-raised);
+    border-color: var(--te-ink-muted);
+  }
+
+  .template-editor__faq-add-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    background: var(--te-surface-raised);
+    border: 1.5px dashed var(--te-border);
+    border-radius: 12px;
+  }
+
+  .template-editor__faq-new-question {
+    font-family: var(--te-font);
+    font-size: 0.9375rem;
+    padding: 10px 14px;
+    background: var(--te-surface);
+    border: 1.5px solid var(--te-border-light);
+    border-radius: 8px;
+    color: var(--te-ink);
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__faq-new-question:hover {
+    border-color: var(--te-border);
+  }
+
+  .template-editor__faq-new-question:focus {
+    outline: none;
+    border-color: var(--te-sky);
+    box-shadow: 0 0 0 3px var(--te-sky-light);
+  }
+
+  .template-editor__faq-new-question::placeholder {
+    color: var(--te-ink-muted);
+  }
+
+  .template-editor__faq-new-answer {
+    font-family: var(--te-font);
+    font-size: 0.875rem;
+    padding: 10px 14px;
+    background: var(--te-surface);
+    border: 1.5px solid var(--te-border-light);
+    border-radius: 8px;
+    color: var(--te-ink);
+    resize: vertical;
+    min-height: 60px;
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__faq-new-answer:hover {
+    border-color: var(--te-border);
+  }
+
+  .template-editor__faq-new-answer:focus {
+    outline: none;
+    border-color: var(--te-sky);
+    box-shadow: 0 0 0 3px var(--te-sky-light);
+  }
+
+  .template-editor__faq-new-answer::placeholder {
+    color: var(--te-ink-muted);
+  }
+
+  .template-editor__faq-add-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-family: var(--te-font);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+    background: var(--te-sky);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__faq-add-btn:hover:not(:disabled) {
+    background: #0284c7;
+  }
+
+  .template-editor__faq-add-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .template-editor__faq-add-btn svg {
+    width: 16px;
+    height: 16px;
   }
 
   /* Responsive */

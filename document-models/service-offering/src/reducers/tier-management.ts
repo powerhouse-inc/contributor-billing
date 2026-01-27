@@ -1,4 +1,12 @@
-import type { ServiceOfferingTierManagementOperations } from "@powerhousedao/contributor-billing/document-models/service-offering";
+import {
+  AddPricingOptionTierNotFoundError,
+  DuplicateBillingCycleError,
+  UpdatePricingOptionTierNotFoundError,
+  PricingOptionNotFoundError,
+  RemovePricingOptionTierNotFoundError,
+  RemovePricingOptionNotFoundError,
+} from "../../gen/tier-management/error.js";
+import type { ServiceOfferingTierManagementOperations } from "resourceServices/document-models/service-offering";
 
 export const serviceOfferingTierManagementOperations: ServiceOfferingTierManagementOperations =
   {
@@ -14,7 +22,12 @@ export const serviceOfferingTierManagementOperations: ServiceOfferingTierManagem
           currency: action.input.currency,
           billingCycle: action.input.billingCycle,
           setupFee: action.input.setupFee || null,
+          perSeatAmount: action.input.perSeatAmount || null,
+          perSeatCurrency: action.input.perSeatCurrency || null,
+          perSeatBillingCycle: action.input.perSeatBillingCycle || null,
+          perSeatLabel: action.input.perSeatLabel || null,
         },
+        pricingOptions: [],
         isCustomPricing: action.input.isCustomPricing || false,
       });
       state.lastModified = action.input.lastModified;
@@ -54,6 +67,19 @@ export const serviceOfferingTierManagementOperations: ServiceOfferingTierManagem
         }
         if (action.input.setupFee !== undefined) {
           tier.pricing.setupFee = action.input.setupFee;
+        }
+        if (action.input.perSeatAmount !== undefined) {
+          tier.pricing.perSeatAmount = action.input.perSeatAmount;
+        }
+        if (action.input.perSeatCurrency !== undefined) {
+          tier.pricing.perSeatCurrency = action.input.perSeatCurrency || null;
+        }
+        if (action.input.perSeatBillingCycle !== undefined) {
+          tier.pricing.perSeatBillingCycle =
+            action.input.perSeatBillingCycle || null;
+        }
+        if (action.input.perSeatLabel !== undefined) {
+          tier.pricing.perSeatLabel = action.input.perSeatLabel || null;
         }
       }
       state.lastModified = action.input.lastModified;
@@ -129,9 +155,13 @@ export const serviceOfferingTierManagementOperations: ServiceOfferingTierManagem
           id: action.input.limitId,
           serviceId: action.input.serviceId,
           metric: action.input.metric,
+          unitName: action.input.unitName || null,
           limit: action.input.limit || null,
           resetPeriod: action.input.resetPeriod || null,
           notes: action.input.notes || null,
+          unitPrice: action.input.unitPrice || null,
+          unitPriceCurrency: action.input.unitPriceCurrency || null,
+          unitPriceBillingCycle: action.input.unitPriceBillingCycle || null,
         });
       }
       state.lastModified = action.input.lastModified;
@@ -146,14 +176,28 @@ export const serviceOfferingTierManagementOperations: ServiceOfferingTierManagem
           if (action.input.metric) {
             usageLimit.metric = action.input.metric;
           }
+          if (action.input.unitName !== undefined) {
+            usageLimit.unitName = action.input.unitName || null;
+          }
           if (action.input.limit !== undefined && action.input.limit !== null) {
             usageLimit.limit = action.input.limit;
           }
           if (action.input.resetPeriod) {
             usageLimit.resetPeriod = action.input.resetPeriod;
           }
-          if (action.input.notes !== undefined && action.input.notes !== null) {
-            usageLimit.notes = action.input.notes;
+          if (action.input.notes !== undefined) {
+            usageLimit.notes = action.input.notes || null;
+          }
+          if (action.input.unitPrice !== undefined) {
+            usageLimit.unitPrice = action.input.unitPrice || null;
+          }
+          if (action.input.unitPriceCurrency !== undefined) {
+            usageLimit.unitPriceCurrency =
+              action.input.unitPriceCurrency || null;
+          }
+          if (action.input.unitPriceBillingCycle !== undefined) {
+            usageLimit.unitPriceBillingCycle =
+              action.input.unitPriceBillingCycle || null;
           }
         }
       }
@@ -168,6 +212,96 @@ export const serviceOfferingTierManagementOperations: ServiceOfferingTierManagem
         if (limitIndex !== -1) {
           tier.usageLimits.splice(limitIndex, 1);
         }
+      }
+      state.lastModified = action.input.lastModified;
+    },
+    addTierPricingOptionOperation(state, action) {
+      const tier = state.tiers.find((t) => t.id === action.input.tierId);
+      if (!tier) {
+        throw new AddPricingOptionTierNotFoundError(
+          "Tier with the specified ID does not exist",
+        );
+      }
+      const existingCycle = tier.pricingOptions.find(
+        (po) => po.billingCycle === action.input.billingCycle,
+      );
+      if (existingCycle) {
+        throw new DuplicateBillingCycleError(
+          "A pricing option with this billing cycle already exists for this tier",
+        );
+      }
+      const isDefault =
+        action.input.isDefault || tier.pricingOptions.length === 0;
+      if (isDefault) {
+        tier.pricingOptions.forEach((po) => {
+          po.isDefault = false;
+        });
+      }
+      tier.pricingOptions.push({
+        id: action.input.pricingOptionId,
+        billingCycle: action.input.billingCycle,
+        amount: action.input.amount,
+        currency: action.input.currency,
+        setupFee: action.input.setupFee || null,
+        perSeatAmount: action.input.perSeatAmount || null,
+        isDefault: isDefault,
+      });
+      state.lastModified = action.input.lastModified;
+    },
+    updateTierPricingOptionOperation(state, action) {
+      const tier = state.tiers.find((t) => t.id === action.input.tierId);
+      if (!tier) {
+        throw new UpdatePricingOptionTierNotFoundError(
+          "Tier with the specified ID does not exist",
+        );
+      }
+      const pricingOption = tier.pricingOptions.find(
+        (po) => po.id === action.input.pricingOptionId,
+      );
+      if (!pricingOption) {
+        throw new PricingOptionNotFoundError(
+          "Pricing option with the specified ID does not exist",
+        );
+      }
+      if (action.input.amount !== undefined && action.input.amount !== null) {
+        pricingOption.amount = action.input.amount;
+      }
+      if (action.input.currency) {
+        pricingOption.currency = action.input.currency;
+      }
+      if (action.input.setupFee !== undefined) {
+        pricingOption.setupFee = action.input.setupFee || null;
+      }
+      if (action.input.perSeatAmount !== undefined) {
+        pricingOption.perSeatAmount = action.input.perSeatAmount || null;
+      }
+      if (action.input.isDefault === true) {
+        tier.pricingOptions.forEach((po) => {
+          po.isDefault = false;
+        });
+        pricingOption.isDefault = true;
+      }
+      state.lastModified = action.input.lastModified;
+    },
+    removeTierPricingOptionOperation(state, action) {
+      const tier = state.tiers.find((t) => t.id === action.input.tierId);
+      if (!tier) {
+        throw new RemovePricingOptionTierNotFoundError(
+          "Tier with the specified ID does not exist",
+        );
+      }
+      const optionIndex = tier.pricingOptions.findIndex(
+        (po) => po.id === action.input.pricingOptionId,
+      );
+      if (optionIndex === -1) {
+        throw new RemovePricingOptionNotFoundError(
+          "Pricing option with the specified ID does not exist",
+        );
+      }
+      const wasDefault = tier.pricingOptions[optionIndex].isDefault;
+      tier.pricingOptions.splice(optionIndex, 1);
+      if (wasDefault && tier.pricingOptions.length > 0) {
+        tier.pricingOptions[0].isDefault = true;
       }
       state.lastModified = action.input.lastModified;
     },

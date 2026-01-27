@@ -84,6 +84,7 @@ type ServiceSubscriptionTier {
     description: String
     isCustomPricing: Boolean!
     pricing: ServicePricing!
+    pricingOptions: [TierPricingOption!]!
     serviceLevels: [ServiceLevelBinding!]!
     usageLimits: [ServiceUsageLimit!]!
 }
@@ -93,6 +94,20 @@ type ServicePricing {
     currency: Currency!
     billingCycle: BillingCycle!
     setupFee: Amount_Money
+    perSeatAmount: Amount_Money
+    perSeatCurrency: Currency
+    perSeatBillingCycle: BillingCycle
+    perSeatLabel: String
+}
+
+type TierPricingOption {
+    id: OID!
+    billingCycle: BillingCycle!
+    amount: Amount_Money!
+    currency: Currency!
+    setupFee: Amount_Money
+    isDefault: Boolean!
+    perSeatAmount: Amount_Money
 }
 
 enum BillingCycle {
@@ -127,9 +142,13 @@ type ServiceUsageLimit {
     id: OID!
     serviceId: OID!
     metric: String!
+    unitName: String
     limit: Int
     resetPeriod: ResetPeriod
     notes: String
+    unitPrice: Amount_Money
+    unitPriceCurrency: Currency
+    unitPriceBillingCycle: BillingCycle
 }
 
 enum ResetPeriod {
@@ -206,6 +225,10 @@ input AddTierInput {
     currency: Currency!
     billingCycle: BillingCycle!
     setupFee: Amount_Money
+    perSeatAmount: Amount_Money
+    perSeatCurrency: Currency
+    perSeatBillingCycle: BillingCycle
+    perSeatLabel: String
     isCustomPricing: Boolean
     lastModified: DateTime!
 }
@@ -224,11 +247,44 @@ input UpdateTierPricingInput {
     currency: Currency
     billingCycle: BillingCycle
     setupFee: Amount_Money
+    perSeatAmount: Amount_Money
+    perSeatCurrency: Currency
+    perSeatBillingCycle: BillingCycle
+    perSeatLabel: String
     lastModified: DateTime!
 }
 
 input DeleteTierInput {
     id: OID!
+    lastModified: DateTime!
+}
+
+input AddTierPricingOptionInput {
+    tierId: OID!
+    pricingOptionId: OID!
+    billingCycle: BillingCycle!
+    amount: Amount_Money!
+    currency: Currency!
+    setupFee: Amount_Money
+    perSeatAmount: Amount_Money
+    isDefault: Boolean
+    lastModified: DateTime!
+}
+
+input UpdateTierPricingOptionInput {
+    tierId: OID!
+    pricingOptionId: OID!
+    amount: Amount_Money
+    currency: Currency
+    setupFee: Amount_Money
+    perSeatAmount: Amount_Money
+    isDefault: Boolean
+    lastModified: DateTime!
+}
+
+input RemoveTierPricingOptionInput {
+    tierId: OID!
+    pricingOptionId: OID!
     lastModified: DateTime!
 }
 
@@ -268,9 +324,13 @@ input AddUsageLimitInput {
     limitId: OID!
     serviceId: OID!
     metric: String!
+    unitName: String
     limit: Int
     resetPeriod: ResetPeriod
     notes: String
+    unitPrice: Amount_Money
+    unitPriceCurrency: Currency
+    unitPriceBillingCycle: BillingCycle
     lastModified: DateTime!
 }
 
@@ -278,9 +338,13 @@ input UpdateUsageLimitInput {
     tierId: OID!
     limitId: OID!
     metric: String
+    unitName: String
     limit: Int
     resetPeriod: ResetPeriod
     notes: String
+    unitPrice: Amount_Money
+    unitPriceCurrency: Currency
+    unitPriceBillingCycle: BillingCycle
     lastModified: DateTime!
 }
 

@@ -1,4 +1,4 @@
-import type { ResourceTemplateTemplateManagementOperations } from "@powerhousedao/contributor-billing/document-models/resource-template";
+import type { ResourceTemplateTemplateManagementOperations } from "resourceServices/document-models/resource-template";
 
 export const resourceTemplateTemplateManagementOperations: ResourceTemplateTemplateManagementOperations =
   {

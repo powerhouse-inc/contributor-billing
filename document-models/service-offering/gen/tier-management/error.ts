@@ -3,6 +3,12 @@ export type ErrorCode =
   | "UpdateTierNotFoundError"
   | "UpdatePricingTierNotFoundError"
   | "DeleteTierNotFoundError"
+  | "AddPricingOptionTierNotFoundError"
+  | "DuplicateBillingCycleError"
+  | "UpdatePricingOptionTierNotFoundError"
+  | "PricingOptionNotFoundError"
+  | "RemovePricingOptionTierNotFoundError"
+  | "RemovePricingOptionNotFoundError"
   | "AddServiceLevelTierNotFoundError"
   | "DuplicateServiceLevelIdError"
   | "UpdateServiceLevelTierNotFoundError"
@@ -47,6 +53,60 @@ export class UpdatePricingTierNotFoundError
 export class DeleteTierNotFoundError extends Error implements ReducerError {
   errorCode = "DeleteTierNotFoundError" as ErrorCode;
   constructor(message = "DeleteTierNotFoundError") {
+    super(message);
+  }
+}
+
+export class AddPricingOptionTierNotFoundError
+  extends Error
+  implements ReducerError
+{
+  errorCode = "AddPricingOptionTierNotFoundError" as ErrorCode;
+  constructor(message = "AddPricingOptionTierNotFoundError") {
+    super(message);
+  }
+}
+
+export class DuplicateBillingCycleError extends Error implements ReducerError {
+  errorCode = "DuplicateBillingCycleError" as ErrorCode;
+  constructor(message = "DuplicateBillingCycleError") {
+    super(message);
+  }
+}
+
+export class UpdatePricingOptionTierNotFoundError
+  extends Error
+  implements ReducerError
+{
+  errorCode = "UpdatePricingOptionTierNotFoundError" as ErrorCode;
+  constructor(message = "UpdatePricingOptionTierNotFoundError") {
+    super(message);
+  }
+}
+
+export class PricingOptionNotFoundError extends Error implements ReducerError {
+  errorCode = "PricingOptionNotFoundError" as ErrorCode;
+  constructor(message = "PricingOptionNotFoundError") {
+    super(message);
+  }
+}
+
+export class RemovePricingOptionTierNotFoundError
+  extends Error
+  implements ReducerError
+{
+  errorCode = "RemovePricingOptionTierNotFoundError" as ErrorCode;
+  constructor(message = "RemovePricingOptionTierNotFoundError") {
+    super(message);
+  }
+}
+
+export class RemovePricingOptionNotFoundError
+  extends Error
+  implements ReducerError
+{
+  errorCode = "RemovePricingOptionNotFoundError" as ErrorCode;
+  constructor(message = "RemovePricingOptionNotFoundError") {
     super(message);
   }
 }
@@ -173,6 +233,18 @@ export const errors = {
   UpdateTier: { UpdateTierNotFoundError },
   UpdateTierPricing: { UpdatePricingTierNotFoundError },
   DeleteTier: { DeleteTierNotFoundError },
+  AddTierPricingOption: {
+    AddPricingOptionTierNotFoundError,
+    DuplicateBillingCycleError,
+  },
+  UpdateTierPricingOption: {
+    UpdatePricingOptionTierNotFoundError,
+    PricingOptionNotFoundError,
+  },
+  RemoveTierPricingOption: {
+    RemovePricingOptionTierNotFoundError,
+    RemovePricingOptionNotFoundError,
+  },
   AddServiceLevel: {
     AddServiceLevelTierNotFoundError,
     DuplicateServiceLevelIdError,

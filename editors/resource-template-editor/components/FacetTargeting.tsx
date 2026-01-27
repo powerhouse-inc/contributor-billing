@@ -4,7 +4,7 @@ import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import type {
   ResourceTemplateDocument,
   ResourceTemplateAction,
-} from "@powerhousedao/contributor-billing/document-models/resource-template";
+} from "resourceServices/document-models/resource-template";
 import {
   setFacetTarget,
   removeFacetTarget,
@@ -38,7 +38,7 @@ const DEFAULT_FACET_PRESETS: FacetPreset[] = [
     description: "Sky Node Operator function type",
     suggestedOptions: [
       "Operational Hub for Open Source Builders",
-      "Commercial Operational Hub",
+      "Operational Hub",
       "IP SPV",
       "Revenue Generating Hub",
       "SNO Embryonic Hub",
@@ -318,7 +318,7 @@ export function FacetTargeting({ document, dispatch }: FacetTargetingProps) {
             <div>
               <h3 className="facet-targeting__title">Facet Targeting</h3>
               <p className="facet-targeting__subtitle">
-                Define configuration dimensions for this resource template
+                Define configuration dimensions for this product
               </p>
             </div>
           </div>

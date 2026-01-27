@@ -35,6 +35,7 @@ type ResourceTemplateState {
     facetTargets: [FacetTarget!]!
     services: [Service!]!
     optionGroups: [OptionGroup!]!
+    faqFields: [FaqField!]!
 }
 
 enum TemplateStatus {
@@ -81,6 +82,12 @@ type OptionGroup {
     description: String
     isAddOn: Boolean!
     defaultSelected: Boolean!
+}
+
+type FaqField {
+  id:OID!
+  question: String
+  answer: String
 }
 
 # Template Management
@@ -229,4 +236,19 @@ input UpdateOptionGroupInput {
 input DeleteOptionGroupInput {
     id: OID!
     lastModified: DateTime!
+}
+
+input AddFaqInput {
+  question: String
+  answer: String
+}
+
+input UpdateFaqInput {
+  id: OID!
+  question: String
+  answer: String
+}
+
+input DeleteFaqInput {
+  id:OID!
 }

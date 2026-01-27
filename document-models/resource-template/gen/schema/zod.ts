@@ -2,12 +2,15 @@ import * as z from "zod";
 import type {
   AddFacetBindingInput,
   AddFacetOptionInput,
+  AddFaqInput,
   AddOptionGroupInput,
   AddServiceInput,
   AddTargetAudienceInput,
+  DeleteFaqInput,
   DeleteOptionGroupInput,
   DeleteServiceInput,
   FacetTarget,
+  FaqField,
   OptionGroup,
   RemoveFacetBindingInput,
   RemoveFacetOptionInput,
@@ -23,6 +26,7 @@ import type {
   SetTemplateIdInput,
   TargetAudience,
   TemplateStatus,
+  UpdateFaqInput,
   UpdateOptionGroupInput,
   UpdateServiceInput,
   UpdateTemplateInfoInput,
@@ -72,6 +76,13 @@ export function AddFacetOptionInputSchema(): z.ZodObject<
   });
 }
 
+export function AddFaqInputSchema(): z.ZodObject<Properties<AddFaqInput>> {
+  return z.object({
+    answer: z.string().nullish(),
+    question: z.string().nullish(),
+  });
+}
+
 export function AddOptionGroupInputSchema(): z.ZodObject<
   Properties<AddOptionGroupInput>
 > {
@@ -111,6 +122,14 @@ export function AddTargetAudienceInputSchema(): z.ZodObject<
   });
 }
 
+export function DeleteFaqInputSchema(): z.ZodObject<
+  Properties<DeleteFaqInput>
+> {
+  return z.object({
+    id: z.string(),
+  });
+}
+
 export function DeleteOptionGroupInputSchema(): z.ZodObject<
   Properties<DeleteOptionGroupInput>
 > {
@@ -136,6 +155,15 @@ export function FacetTargetSchema(): z.ZodObject<Properties<FacetTarget>> {
     categoryLabel: z.string(),
     id: z.string(),
     selectedOptions: z.array(z.string()),
+  });
+}
+
+export function FaqFieldSchema(): z.ZodObject<Properties<FaqField>> {
+  return z.object({
+    __typename: z.literal("FaqField").optional(),
+    answer: z.string().nullish(),
+    id: z.string(),
+    question: z.string().nullish(),
   });
 }
 
@@ -207,6 +235,7 @@ export function ResourceTemplateStateSchema(): z.ZodObject<
     __typename: z.literal("ResourceTemplateState").optional(),
     description: z.string().nullish(),
     facetTargets: z.array(z.lazy(() => FacetTargetSchema())),
+    faqFields: z.array(z.lazy(() => FaqFieldSchema())),
     id: z.string(),
     infoLink: z.string().url().nullish(),
     lastModified: z.string().datetime(),
@@ -293,6 +322,16 @@ export function TargetAudienceSchema(): z.ZodObject<
     color: z.string().nullish(),
     id: z.string(),
     label: z.string(),
+  });
+}
+
+export function UpdateFaqInputSchema(): z.ZodObject<
+  Properties<UpdateFaqInput>
+> {
+  return z.object({
+    answer: z.string().nullish(),
+    id: z.string(),
+    question: z.string().nullish(),
   });
 }
 

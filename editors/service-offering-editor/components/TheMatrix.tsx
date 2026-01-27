@@ -10,7 +10,14 @@ import type {
   ServiceLevelBinding,
   OptionGroup,
   ServiceUsageLimit,
-} from "@powerhousedao/contributor-billing/document-models/service-offering";
+  BillingCycle,
+} from "resourceServices/document-models/service-offering";
+import {
+  RECURRING_BILLING_CYCLES,
+  BILLING_CYCLE_SHORT_LABELS,
+  formatPrice,
+  getMonthlyEquivalent,
+} from "./pricing-utils.js";
 import {
   addServiceLevel,
   updateServiceLevel,
@@ -20,6 +27,7 @@ import {
   addService,
   updateService,
 } from "../../../document-models/service-offering/gen/creators.js";
+import { useResourceTemplateDocumentsInSelectedDrive } from "../../../document-models/resource-template/hooks.js";
 
 interface TheMatrixProps {
   document: ServiceOfferingDocument;
@@ -72,39 +80,6 @@ const SERVICE_LEVELS: {
 ];
 
 const UNGROUPED_ID = "__ungrouped__";
-
-const FACET_CATEGORIES = {
-  FUNCTION: {
-    label: "SNO Function",
-    options: [
-      { id: "operational-hub", label: "Operational Hub" },
-      { id: "embryonic-hub", label: "Embryonic Hub" },
-    ],
-  },
-  LEGAL_ENTITY: {
-    label: "Legal Entity",
-    options: [
-      { id: "swiss-association", label: "Swiss Association" },
-      { id: "bvi-ltd", label: "BVI Ltd" },
-      { id: "unaffiliated", label: "Unaffiliated" },
-    ],
-  },
-  TEAM_STRUCTURE: {
-    label: "Team",
-    options: [
-      { id: "remote-team", label: "Remote" },
-      { id: "on-premise", label: "On-Premise" },
-      { id: "hybrid", label: "Hybrid" },
-    ],
-  },
-  ANONYMITY: {
-    label: "Anonymity",
-    options: [
-      { id: "high-anonymity", label: "High" },
-      { id: "highest-anonymity", label: "Highest" },
-    ],
-  },
-};
 
 const matrixStyles = `
   .matrix {
@@ -299,6 +274,40 @@ const matrixStyles = `
 
   .matrix__tier-header--selected .matrix__tier-price {
     color: var(--so-violet-200);
+  }
+
+  /* Billing Cycle Selector in Tier Header */
+  .matrix__tier-cycle-select {
+    font-family: var(--so-font-sans);
+    font-size: 0.625rem;
+    color: var(--so-slate-600);
+    background: var(--so-white);
+    border: 1px solid var(--so-slate-200);
+    border-radius: var(--so-radius-sm);
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    outline: none;
+    transition: var(--so-transition-fast);
+    margin-top: 0.25rem;
+  }
+
+  .matrix__tier-cycle-select:hover {
+    border-color: var(--so-slate-300);
+  }
+
+  .matrix__tier-cycle-select:focus {
+    border-color: var(--so-violet-400);
+    box-shadow: 0 0 0 2px var(--so-violet-100);
+  }
+
+  .matrix__tier-header--selected .matrix__tier-cycle-select {
+    background: var(--so-violet-500);
+    border-color: var(--so-violet-400);
+    color: var(--so-white);
+  }
+
+  .matrix__tier-header--selected .matrix__tier-cycle-select:focus {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
   }
 
   /* Section Header */
@@ -923,9 +932,24 @@ const matrixStyles = `
     border-bottom: 1px solid var(--so-slate-100);
   }
 
+  .matrix__metric-value-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.125rem;
+  }
+
   .matrix__metric-value {
     font-size: 0.6875rem;
     color: var(--so-slate-500);
+  }
+
+  .matrix__metric-overage {
+    font-family: var(--so-font-mono);
+    font-size: 0.5625rem;
+    font-weight: 500;
+    color: #059669;
+    white-space: nowrap;
   }
 
   /* Add Metric Button on Service Row */
@@ -958,6 +982,54 @@ const matrixStyles = `
   .matrix__add-metric-btn:hover {
     background: var(--so-violet-100);
     color: var(--so-violet-700);
+  }
+
+  /* Service Reorder Buttons */
+  .matrix__reorder-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-right: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .matrix__service-row:hover .matrix__reorder-btns {
+    opacity: 1;
+  }
+
+  .matrix__reorder-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 14px;
+    padding: 0;
+    background: var(--so-slate-100);
+    border: 1px solid var(--so-slate-200);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+  }
+
+  .matrix__reorder-btn:hover:not(:disabled) {
+    background: var(--so-violet-100);
+    border-color: var(--so-violet-300);
+  }
+
+  .matrix__reorder-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .matrix__reorder-btn svg {
+    width: 10px;
+    height: 10px;
+    color: var(--so-slate-500);
+  }
+
+  .matrix__reorder-btn:hover:not(:disabled) svg {
+    color: var(--so-violet-600);
   }
 
   /* Add Service Row */
@@ -1297,6 +1369,89 @@ const matrixStyles = `
 
   .matrix__panel-limit-value {
     font-size: 0.8125rem;
+    color: #64748b;
+  }
+
+  .matrix__panel-limit-value-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .matrix__panel-limit-overage {
+    font-family: var(--so-font-mono);
+    font-size: 0.6875rem;
+    color: #059669;
+    font-weight: 500;
+  }
+
+  /* Overage Pricing Section */
+  .matrix__panel-overage-section {
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #cbd5e1;
+  }
+
+  .matrix__panel-overage-row {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+  }
+
+  .matrix__panel-overage-price {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .matrix__panel-overage-currency {
+    font-family: var(--so-font-mono);
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+
+  .matrix__panel-overage-input {
+    width: 4.5rem;
+    font-family: var(--so-font-mono);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #0f172a;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--so-radius-sm);
+    padding: 0.375rem 0.5rem;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .matrix__panel-overage-input:focus {
+    border-color: #7c3aed;
+  }
+
+  .matrix__panel-overage-separator {
+    font-size: 0.875rem;
+    color: #94a3b8;
+  }
+
+  .matrix__panel-overage-select {
+    font-family: var(--so-font-sans);
+    font-size: 0.8125rem;
+    color: #334155;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--so-radius-sm);
+    padding: 0.375rem 0.5rem;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .matrix__panel-overage-select:focus {
+    border-color: #7c3aed;
+  }
+
+  .matrix__panel-overage-label {
+    font-size: 0.75rem;
     color: #64748b;
   }
 
@@ -1726,6 +1881,34 @@ export function TheMatrix({
   const services = state.global.services ?? [];
   const tiers = state.global.tiers ?? [];
   const optionGroups = state.global.optionGroups ?? [];
+  const resourceTemplateId = state.global.resourceTemplateId;
+
+  // Get resource templates to find the selected one
+  const templates = useResourceTemplateDocumentsInSelectedDrive();
+
+  // Get selected facets from the offering document's facetTargets
+  const offeringFacetTargets = state.global.facetTargets ?? [];
+
+  // Build facet categories from the SERVICE OFFERING's selected facet targets
+  // This ensures only the options selected in the offering's facet targeting appear in the Matrix
+  const facetCategories = useMemo(() => {
+    const categories: Record<
+      string,
+      { label: string; options: { id: string; label: string }[] }
+    > = {};
+
+    offeringFacetTargets.forEach((facet) => {
+      categories[facet.categoryKey] = {
+        label: facet.categoryLabel,
+        options: facet.selectedOptions.map((option) => ({
+          id: option.toLowerCase().replace(/\s+/g, "-"),
+          label: option,
+        })),
+      };
+    });
+
+    return categories;
+  }, [offeringFacetTargets]);
 
   const [enabledOptionalGroups, setEnabledOptionalGroups] = useState<
     Set<string>
@@ -1748,12 +1931,25 @@ export function TheMatrix({
 
   const [selectedTierIdx, setSelectedTierIdx] = useState<number>(0);
 
-  const [selectedFacets, setSelectedFacets] = useState<Record<string, string>>({
-    FUNCTION: "operational-hub",
-    LEGAL_ENTITY: "swiss-association",
-    TEAM_STRUCTURE: "remote-team",
-    ANONYMITY: "high-anonymity",
-  });
+  // Selected billing cycle per tier (for tiers with multiple pricing options)
+  const [selectedBillingCycles, setSelectedBillingCycles] = useState<
+    Record<string, string>
+  >({});
+
+  // Initialize selected facets from offering's facet targets
+  const [selectedFacets, setSelectedFacets] = useState<Record<string, string>>(
+    () => {
+      const initial: Record<string, string> = {};
+      offeringFacetTargets.forEach((facet) => {
+        if (facet.selectedOptions.length > 0) {
+          initial[facet.categoryKey] = facet.selectedOptions[0]
+            .toLowerCase()
+            .replace(/\s+/g, "-");
+        }
+      });
+      return initial;
+    },
+  );
 
   // Metric editing modal state
   const [metricModal, setMetricModal] = useState<{
@@ -1765,6 +1961,15 @@ export function TheMatrix({
   const [metricEnabledTiers, setMetricEnabledTiers] = useState<Set<string>>(
     new Set(),
   );
+  // Per-tier overage pricing for metric modal
+  const [metricOveragePrices, setMetricOveragePrices] = useState<
+    Record<string, string>
+  >({});
+  const [metricOverageCycles, setMetricOverageCycles] = useState<
+    Record<string, BillingCycle | "">
+  >({});
+  // Unit name for the metric (e.g., "entity", "user", "API call")
+  const [metricUnitName, setMetricUnitName] = useState("");
 
   // Bulk actions state
   const [showBulkActions, setShowBulkActions] = useState(false);
@@ -2144,14 +2349,22 @@ export function TheMatrix({
     setMetricName("");
     // Initialize limits for all tiers to empty string
     const initialLimits: Record<string, string> = {};
+    const initialOveragePrices: Record<string, string> = {};
+    const initialOverageCycles: Record<string, BillingCycle | ""> = {};
     // For new metrics, enable all tiers by default
     const allTierIds = new Set<string>();
     tiers.forEach((tier) => {
       initialLimits[tier.id] = "";
+      initialOveragePrices[tier.id] = "";
+      initialOverageCycles[tier.id] = "";
       allTierIds.add(tier.id);
     });
     setMetricLimits(initialLimits);
     setMetricEnabledTiers(allTierIds);
+    // Reset per-tier overage pricing and unit name
+    setMetricOveragePrices(initialOveragePrices);
+    setMetricOverageCycles(initialOverageCycles);
+    setMetricUnitName("");
   };
 
   const handleEditMetric = (serviceId: string, metric: string) => {
@@ -2159,7 +2372,10 @@ export function TheMatrix({
     setMetricName(metric);
     // Initialize limits with existing values and track which tiers have this metric
     const existingLimits: Record<string, string> = {};
+    const existingOveragePrices: Record<string, string> = {};
+    const existingOverageCycles: Record<string, BillingCycle | ""> = {};
     const enabledTiers = new Set<string>();
+    let existingUnitName = "";
     tiers.forEach((tier) => {
       const usageLimit = tier.usageLimits.find(
         (ul) => ul.serviceId === serviceId && ul.metric === metric,
@@ -2167,12 +2383,22 @@ export function TheMatrix({
       // Load value from either limit (numeric) or notes (string)
       existingLimits[tier.id] =
         usageLimit?.limit?.toString() || usageLimit?.notes || "";
+      // Load per-tier overage pricing
+      existingOveragePrices[tier.id] = usageLimit?.unitPrice?.toString() || "";
+      existingOverageCycles[tier.id] = usageLimit?.unitPriceBillingCycle || "";
       if (usageLimit) {
         enabledTiers.add(tier.id);
+        // Get unit name from first tier that has it
+        if (!existingUnitName && usageLimit.unitName) {
+          existingUnitName = usageLimit.unitName;
+        }
       }
     });
     setMetricLimits(existingLimits);
     setMetricEnabledTiers(enabledTiers);
+    setMetricOveragePrices(existingOveragePrices);
+    setMetricOverageCycles(existingOverageCycles);
+    setMetricUnitName(existingUnitName);
   };
 
   const handleRemoveMetric = (serviceId: string, metric: string) => {
@@ -2205,6 +2431,47 @@ export function TheMatrix({
     );
   };
 
+  // Service reordering - swap display order with adjacent service
+  const handleReorderService = (
+    serviceId: string,
+    direction: "up" | "down",
+    groupServices: Service[],
+  ) => {
+    // Sort services by displayOrder for consistent ordering
+    const sortedServices = [...groupServices].sort((a, b) => {
+      const orderA = a.displayOrder ?? 999;
+      const orderB = b.displayOrder ?? 999;
+      return orderA - orderB;
+    });
+
+    const currentIndex = sortedServices.findIndex((s) => s.id === serviceId);
+    if (currentIndex === -1) return;
+
+    const targetIndex =
+      direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= sortedServices.length) return;
+
+    const currentService = sortedServices[currentIndex];
+    const targetService = sortedServices[targetIndex];
+    const now = new Date().toISOString();
+
+    // Swap display orders
+    dispatch(
+      updateService({
+        id: currentService.id,
+        displayOrder: targetIndex,
+        lastModified: now,
+      }),
+    );
+    dispatch(
+      updateService({
+        id: targetService.id,
+        displayOrder: currentIndex,
+        lastModified: now,
+      }),
+    );
+  };
+
   const handleSaveMetric = () => {
     if (!metricModal || !metricName.trim()) return;
 
@@ -2224,6 +2491,14 @@ export function TheMatrix({
       const parsedLimit = limitValue ? parseInt(limitValue, 10) : null;
       const isNumeric = parsedLimit !== null && !isNaN(parsedLimit);
 
+      // Get per-tier overage pricing
+      const tierOveragePrice = metricOveragePrices[tier.id];
+      const tierOverageCycle = metricOverageCycles[tier.id];
+      const parsedOveragePrice = tierOveragePrice
+        ? parseFloat(tierOveragePrice)
+        : null;
+      const hasOveragePricing = parsedOveragePrice && tierOverageCycle;
+
       if (existingLimit && !isEnabled) {
         // Remove limit - tier was disabled
         dispatch(
@@ -2240,8 +2515,14 @@ export function TheMatrix({
             tierId: tier.id,
             limitId: existingLimit.id,
             metric: metricName.trim(),
+            unitName: metricUnitName.trim() || undefined,
             limit: isNumeric ? parsedLimit : null,
             notes: !isNumeric && limitValue ? limitValue.trim() : null,
+            unitPrice: hasOveragePricing ? parsedOveragePrice : null,
+            unitPriceCurrency: hasOveragePricing ? "USD" : undefined,
+            unitPriceBillingCycle: hasOveragePricing
+              ? tierOverageCycle
+              : undefined,
             lastModified: now,
           }),
         );
@@ -2253,9 +2534,15 @@ export function TheMatrix({
             limitId: generateId(),
             serviceId,
             metric: metricName.trim(),
+            unitName: metricUnitName.trim() || undefined,
             limit: isNumeric ? parsedLimit : null,
             notes: !isNumeric && limitValue ? limitValue.trim() : null,
             resetPeriod: "MONTHLY",
+            unitPrice: hasOveragePricing ? parsedOveragePrice : undefined,
+            unitPriceCurrency: hasOveragePricing ? "USD" : undefined,
+            unitPriceBillingCycle: hasOveragePricing
+              ? tierOverageCycle
+              : undefined,
             lastModified: now,
           }),
         );
@@ -2266,6 +2553,9 @@ export function TheMatrix({
     setMetricName("");
     setMetricLimits({});
     setMetricEnabledTiers(new Set());
+    setMetricOveragePrices({});
+    setMetricOverageCycles({});
+    setMetricUnitName("");
   };
 
   const getLevelDisplay = (
@@ -2326,63 +2616,60 @@ export function TheMatrix({
     <>
       <style>{matrixStyles}</style>
       <div className="matrix">
-        {/* Facet Selector */}
-        <div className="matrix__facets">
-          <div className="matrix__facets-row">
-            {Object.entries(FACET_CATEGORIES).map(([key, category]) => (
-              <div key={key} className="matrix__facet-group">
-                <span className="matrix__facet-label">{category.label}</span>
-                {key === "ANONYMITY" ? (
-                  <div className="matrix__toggle-group">
-                    {category.options.map((option) => (
-                      <button
-                        key={option.id}
-                        onClick={() =>
-                          setSelectedFacets((prev) => ({
-                            ...prev,
-                            [key]: option.id,
-                          }))
-                        }
-                        className={`matrix__toggle-btn ${
-                          selectedFacets[key] === option.id
-                            ? "matrix__toggle-btn--active"
-                            : ""
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <select
-                    value={selectedFacets[key] || ""}
-                    onChange={(e) =>
-                      setSelectedFacets((prev) => ({
-                        ...prev,
-                        [key]: e.target.value,
-                      }))
-                    }
-                    className="matrix__facet-select"
-                  >
-                    {category.options.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
-            ))}
-          </div>
-          {selectedFacets.ANONYMITY === "highest-anonymity" && (
-            <div className="matrix__facet-notice">
-              <p className="matrix__facet-notice-text">
-                <strong>Highest Anonymity:</strong> Additional setup services
-                may be required for enhanced privacy configurations.
-              </p>
+        {/* Facet Selector - Dynamic from Resource Template */}
+        {Object.keys(facetCategories).length > 0 && (
+          <div className="matrix__facets">
+            <div className="matrix__facets-row">
+              {Object.entries(facetCategories).map(([key, category]) => (
+                <div key={key} className="matrix__facet-group">
+                  <span className="matrix__facet-label">{category.label}</span>
+                  {category.options.length <= 3 ? (
+                    <div className="matrix__toggle-group">
+                      {category.options.map((option) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          onClick={() =>
+                            setSelectedFacets((prev) => ({
+                              ...prev,
+                              [key]: option.id,
+                            }))
+                          }
+                          className={`matrix__toggle-btn ${
+                            selectedFacets[key] === option.id
+                              ? "matrix__toggle-btn--active"
+                              : ""
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <select
+                      value={
+                        selectedFacets[key] || category.options[0]?.id || ""
+                      }
+                      onChange={(e) =>
+                        setSelectedFacets((prev) => ({
+                          ...prev,
+                          [key]: e.target.value,
+                        }))
+                      }
+                      className="matrix__facet-select"
+                    >
+                      {category.options.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Bulk Actions Toolbar */}
         {services.length > 0 && tiers.length > 0 && (
@@ -2627,27 +2914,81 @@ export function TheMatrix({
             <thead>
               <tr>
                 <th className="matrix__corner-cell" />
-                {tiers.map((tier, idx) => (
-                  <th
-                    key={tier.id}
-                    onClick={() => setSelectedTierIdx(idx)}
-                    className={`matrix__tier-header ${
-                      idx === selectedTierIdx
-                        ? "matrix__tier-header--selected"
-                        : ""
-                    }`}
-                  >
-                    <div className="matrix__tier-header-inner">
-                      <div className="matrix__tier-radio" />
-                      <span className="matrix__tier-name">{tier.name}</span>
-                      <span className="matrix__tier-price">
-                        {tier.isCustomPricing
-                          ? "Custom"
-                          : `$${tier.pricing.amount}/mo`}
-                      </span>
-                    </div>
-                  </th>
-                ))}
+                {tiers.map((tier, idx) => {
+                  const hasPricingOptions =
+                    tier.pricingOptions && tier.pricingOptions.length > 0;
+                  const selectedCycleId = selectedBillingCycles[tier.id];
+                  const activePricingOption = hasPricingOptions
+                    ? tier.pricingOptions.find(
+                        (po) => po.id === selectedCycleId,
+                      ) ||
+                      tier.pricingOptions.find((po) => po.isDefault) ||
+                      tier.pricingOptions[0]
+                    : null;
+                  const displayAmount = activePricingOption
+                    ? activePricingOption.amount
+                    : tier.pricing.amount;
+                  const displayCycle = activePricingOption
+                    ? activePricingOption.billingCycle
+                    : tier.pricing.billingCycle;
+                  const monthlyEquivalent =
+                    displayAmount &&
+                    displayCycle !== "MONTHLY" &&
+                    displayCycle !== "ONE_TIME"
+                      ? getMonthlyEquivalent(displayAmount, displayCycle)
+                      : null;
+
+                  return (
+                    <th
+                      key={tier.id}
+                      onClick={() => setSelectedTierIdx(idx)}
+                      className={`matrix__tier-header ${
+                        idx === selectedTierIdx
+                          ? "matrix__tier-header--selected"
+                          : ""
+                      }`}
+                    >
+                      <div className="matrix__tier-header-inner">
+                        <div className="matrix__tier-radio" />
+                        <span className="matrix__tier-name">{tier.name}</span>
+                        <span className="matrix__tier-price">
+                          {tier.isCustomPricing
+                            ? "Custom"
+                            : monthlyEquivalent
+                              ? `$${monthlyEquivalent.toFixed(0)}/mo`
+                              : displayAmount !== null
+                                ? `$${displayAmount}/mo`
+                                : "$null/mo"}
+                        </span>
+                        {/* Billing Cycle Selector for tiers with multiple options */}
+                        {hasPricingOptions &&
+                          tier.pricingOptions.length > 1 && (
+                            <select
+                              value={
+                                selectedCycleId || activePricingOption?.id || ""
+                              }
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                setSelectedBillingCycles((prev) => ({
+                                  ...prev,
+                                  [tier.id]: e.target.value,
+                                }));
+                              }}
+                              className="matrix__tier-cycle-select"
+                            >
+                              {tier.pricingOptions.map((po) => (
+                                <option key={po.id} value={po.id}>
+                                  {BILLING_CYCLE_SHORT_LABELS[po.billingCycle]}{" "}
+                                  - ${po.amount}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                      </div>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
 
@@ -2711,6 +3052,7 @@ export function TheMatrix({
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
                   onTogglePremiumExclusive={handleTogglePremiumExclusive}
+                  onReorderService={handleReorderService}
                 />
               ))}
 
@@ -2744,6 +3086,7 @@ export function TheMatrix({
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
                   onTogglePremiumExclusive={handleTogglePremiumExclusive}
+                  onReorderService={handleReorderService}
                 />
               )}
 
@@ -2794,6 +3137,7 @@ export function TheMatrix({
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
                   onTogglePremiumExclusive={handleTogglePremiumExclusive}
+                  onReorderService={handleReorderService}
                 />
               ))}
 
@@ -2826,6 +3170,7 @@ export function TheMatrix({
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
                   onTogglePremiumExclusive={handleTogglePremiumExclusive}
+                  onReorderService={handleReorderService}
                 />
               )}
 
@@ -2864,6 +3209,7 @@ export function TheMatrix({
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
                   onTogglePremiumExclusive={handleTogglePremiumExclusive}
+                  onReorderService={handleReorderService}
                 />
               ))}
 
@@ -3040,10 +3386,30 @@ export function TheMatrix({
                   type="text"
                   value={metricName}
                   onChange={(e) => setMetricName(e.target.value)}
-                  placeholder="e.g., API Calls, Storage, Users"
+                  placeholder="e.g., Number of Entities, API Calls, Storage"
                   className="matrix__modal-input"
                   autoFocus
                 />
+              </div>
+
+              <div className="matrix__modal-field">
+                <label className="matrix__modal-label">
+                  Unit Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={metricUnitName}
+                  onChange={(e) => setMetricUnitName(e.target.value)}
+                  placeholder="e.g., entity, user, API call, GB"
+                  className="matrix__modal-input"
+                />
+                <p
+                  className="matrix__modal-hint"
+                  style={{ marginTop: "0.375rem" }}
+                >
+                  Used for overage pricing display (e.g., "$50 per entity per
+                  month")
+                </p>
               </div>
 
               <div className="matrix__modal-field">
@@ -3065,14 +3431,16 @@ export function TheMatrix({
                 >
                   {tiers.map((tier) => {
                     const isEnabled = metricEnabledTiers.has(tier.id);
+                    const tierOveragePrice = metricOveragePrices[tier.id] || "";
+                    const tierOverageCycle = metricOverageCycles[tier.id] || "";
                     return (
                       <div
                         key={tier.id}
                         style={{
                           display: "flex",
-                          alignItems: "center",
-                          gap: "0.75rem",
-                          padding: "0.5rem",
+                          flexDirection: "column",
+                          gap: "0.5rem",
+                          padding: "0.75rem",
                           borderRadius: "6px",
                           background: isEnabled
                             ? "rgba(124, 58, 237, 0.05)"
@@ -3083,64 +3451,170 @@ export function TheMatrix({
                           transition: "all 0.15s ease",
                         }}
                       >
-                        <label
+                        <div
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            gap: "0.5rem",
-                            cursor: "pointer",
-                            minWidth: "120px",
+                            gap: "0.75rem",
                           }}
                         >
-                          <input
-                            type="checkbox"
-                            checked={isEnabled}
-                            onChange={(e) => {
-                              setMetricEnabledTiers((prev) => {
-                                const next = new Set(prev);
-                                if (e.target.checked) {
-                                  next.add(tier.id);
-                                } else {
-                                  next.delete(tier.id);
-                                }
-                                return next;
-                              });
-                            }}
+                          <label
                             style={{
-                              width: "16px",
-                              height: "16px",
-                              accentColor: "#7c3aed",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.5rem",
                               cursor: "pointer",
-                            }}
-                          />
-                          <span
-                            style={{
-                              fontWeight: 600,
-                              color: isEnabled ? "#334155" : "#94a3b8",
-                              fontSize: "0.875rem",
+                              minWidth: "120px",
                             }}
                           >
-                            {tier.name}
-                          </span>
-                        </label>
-                        <input
-                          type="text"
-                          value={metricLimits[tier.id] || ""}
-                          onChange={(e) =>
-                            setMetricLimits((prev) => ({
-                              ...prev,
-                              [tier.id]: e.target.value,
-                            }))
-                          }
-                          placeholder={isEnabled ? "Enter value" : "—"}
-                          className="matrix__modal-input"
-                          disabled={!isEnabled}
-                          style={{
-                            flex: 1,
-                            opacity: isEnabled ? 1 : 0.5,
-                            cursor: isEnabled ? "text" : "not-allowed",
-                          }}
-                        />
+                            <input
+                              type="checkbox"
+                              checked={isEnabled}
+                              onChange={(e) => {
+                                setMetricEnabledTiers((prev) => {
+                                  const next = new Set(prev);
+                                  if (e.target.checked) {
+                                    next.add(tier.id);
+                                  } else {
+                                    next.delete(tier.id);
+                                  }
+                                  return next;
+                                });
+                              }}
+                              style={{
+                                width: "16px",
+                                height: "16px",
+                                accentColor: "#7c3aed",
+                                cursor: "pointer",
+                              }}
+                            />
+                            <span
+                              style={{
+                                fontWeight: 600,
+                                color: isEnabled ? "#334155" : "#94a3b8",
+                                fontSize: "0.875rem",
+                              }}
+                            >
+                              {tier.name}
+                            </span>
+                          </label>
+                          <input
+                            type="text"
+                            value={metricLimits[tier.id] || ""}
+                            onChange={(e) =>
+                              setMetricLimits((prev) => ({
+                                ...prev,
+                                [tier.id]: e.target.value,
+                              }))
+                            }
+                            placeholder={isEnabled ? "Limit value" : "—"}
+                            className="matrix__modal-input"
+                            disabled={!isEnabled}
+                            style={{
+                              flex: 1,
+                              opacity: isEnabled ? 1 : 0.5,
+                              cursor: isEnabled ? "text" : "not-allowed",
+                            }}
+                          />
+                        </div>
+                        {/* Per-tier overage pricing */}
+                        {isEnabled && (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.5rem",
+                              marginLeft: "1.75rem",
+                              padding: "0.5rem 0.75rem",
+                              background: "rgba(255,255,255,0.6)",
+                              borderRadius: "4px",
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: "0.75rem",
+                                color: "#64748b",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              Overage:
+                            </span>
+                            <span
+                              style={{
+                                fontFamily: "var(--so-font-mono)",
+                                fontSize: "0.8125rem",
+                                color: "#64748b",
+                              }}
+                            >
+                              $
+                            </span>
+                            <input
+                              type="number"
+                              value={tierOveragePrice}
+                              onChange={(e) =>
+                                setMetricOveragePrices((prev) => ({
+                                  ...prev,
+                                  [tier.id]: e.target.value,
+                                }))
+                              }
+                              placeholder="0.00"
+                              step="0.01"
+                              style={{
+                                width: "4rem",
+                                fontFamily: "var(--so-font-mono)",
+                                fontSize: "0.8125rem",
+                                fontWeight: 500,
+                                color: "#0f172a",
+                                background: "#ffffff",
+                                border: "1px solid #cbd5e1",
+                                borderRadius: "4px",
+                                padding: "0.25rem 0.375rem",
+                                outline: "none",
+                              }}
+                            />
+                            <span
+                              style={{ fontSize: "0.75rem", color: "#94a3b8" }}
+                            >
+                              /
+                            </span>
+                            <select
+                              value={tierOverageCycle}
+                              onChange={(e) =>
+                                setMetricOverageCycles((prev) => ({
+                                  ...prev,
+                                  [tier.id]:
+                                    (e.target.value as BillingCycle) || "",
+                                }))
+                              }
+                              style={{
+                                fontFamily: "var(--so-font-sans)",
+                                fontSize: "0.75rem",
+                                color: "#334155",
+                                background: "#ffffff",
+                                border: "1px solid #cbd5e1",
+                                borderRadius: "4px",
+                                padding: "0.25rem 0.375rem",
+                                cursor: "pointer",
+                                outline: "none",
+                              }}
+                            >
+                              <option value="">None</option>
+                              {RECURRING_BILLING_CYCLES.map((cycle) => (
+                                <option key={cycle} value={cycle}>
+                                  {BILLING_CYCLE_SHORT_LABELS[cycle]}
+                                </option>
+                              ))}
+                            </select>
+                            <span
+                              style={{
+                                fontSize: "0.6875rem",
+                                color: "#64748b",
+                              }}
+                            >
+                              per extra {metricUnitName || "unit"}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -3152,8 +3626,11 @@ export function TheMatrix({
                   onClick={() => {
                     setMetricModal(null);
                     setMetricName("");
+                    setMetricUnitName("");
                     setMetricLimits({});
                     setMetricEnabledTiers(new Set());
+                    setMetricOveragePrices({});
+                    setMetricOverageCycles({});
                   }}
                   className="matrix__modal-btn matrix__modal-btn--cancel"
                 >
@@ -3214,6 +3691,11 @@ interface ServiceGroupSectionProps {
   onEditMetric: (serviceId: string, metric: string) => void;
   onRemoveMetric: (serviceId: string, metric: string) => void;
   onTogglePremiumExclusive: (serviceId: string) => void;
+  onReorderService: (
+    serviceId: string,
+    direction: "up" | "down",
+    groupServices: Service[],
+  ) => void;
 }
 
 function ServiceGroupSection({
@@ -3237,6 +3719,7 @@ function ServiceGroupSection({
   onEditMetric,
   onRemoveMetric,
   onTogglePremiumExclusive,
+  onReorderService,
 }: ServiceGroupSectionProps) {
   const showGroup = services.length > 0 || onAddService;
   if (!showGroup) return null;
@@ -3290,7 +3773,7 @@ function ServiceGroupSection({
         </td>
       </tr>
 
-      {services.map((service) => {
+      {services.map((service, serviceIndex) => {
         const metrics = getUniqueMetricsForService(service.id);
 
         return (
@@ -3310,6 +3793,9 @@ function ServiceGroupSection({
             onEditMetric={onEditMetric}
             onRemoveMetric={onRemoveMetric}
             onTogglePremiumExclusive={onTogglePremiumExclusive}
+            onReorderService={onReorderService}
+            groupServices={services}
+            serviceIndex={serviceIndex}
           />
         );
       })}
@@ -3408,6 +3894,13 @@ interface ServiceRowWithMetricsProps {
   onEditMetric: (serviceId: string, metric: string) => void;
   onRemoveMetric: (serviceId: string, metric: string) => void;
   onTogglePremiumExclusive: (serviceId: string) => void;
+  onReorderService: (
+    serviceId: string,
+    direction: "up" | "down",
+    groupServices: Service[],
+  ) => void;
+  groupServices: Service[];
+  serviceIndex: number;
 }
 
 function ServiceRowWithMetrics({
@@ -3425,6 +3918,9 @@ function ServiceRowWithMetrics({
   onEditMetric,
   onRemoveMetric,
   onTogglePremiumExclusive,
+  onReorderService,
+  groupServices,
+  serviceIndex,
 }: ServiceRowWithMetricsProps) {
   // Use persisted isPremiumExclusive field from document state
   const isPremiumExclusive = service.isPremiumExclusive;
@@ -3434,6 +3930,45 @@ function ServiceRowWithMetrics({
       <tr className={`matrix__service-row ${rowClass}`}>
         <td className={`matrix__service-cell ${rowClass}`}>
           <div className="matrix__service-cell-wrapper">
+            {/* Reorder buttons */}
+            <div className="matrix__reorder-btns">
+              <button
+                className="matrix__reorder-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReorderService(service.id, "up", groupServices);
+                }}
+                disabled={serviceIndex === 0}
+                title="Move up"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M18 15l-6-6-6 6" />
+                </svg>
+              </button>
+              <button
+                className="matrix__reorder-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReorderService(service.id, "down", groupServices);
+                }}
+                disabled={serviceIndex === groupServices.length - 1}
+                title="Move down"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+            </div>
             <span className="matrix__service-title">{service.title}</span>
             <button
               onClick={(e) => {
@@ -3588,13 +4123,29 @@ function ServiceRowWithMetrics({
                     : ""
                 }`}
               >
-                <span className="matrix__metric-value">
-                  {usageLimit
-                    ? usageLimit.limit
-                      ? `Up to ${usageLimit.limit}`
-                      : usageLimit.notes || "Unlimited"
-                    : "—"}
-                </span>
+                <div className="matrix__metric-value-container">
+                  <span className="matrix__metric-value">
+                    {usageLimit
+                      ? usageLimit.limit
+                        ? `Up to ${usageLimit.limit}`
+                        : usageLimit.notes || "Unlimited"
+                      : "—"}
+                  </span>
+                  {usageLimit?.unitPrice &&
+                    usageLimit?.unitPriceBillingCycle && (
+                      <span className="matrix__metric-overage">
+                        +
+                        {formatPrice(
+                          usageLimit.unitPrice,
+                          usageLimit.unitPriceCurrency || "USD",
+                        )}
+                        /
+                        {BILLING_CYCLE_SHORT_LABELS[
+                          usageLimit.unitPriceBillingCycle
+                        ].toLowerCase()}
+                      </span>
+                    )}
+                </div>
               </td>
             );
           })}
@@ -3737,44 +4288,6 @@ function ServiceLevelDetailPanel({
         lastModified: new Date().toISOString(),
       }),
     );
-  };
-
-  const handleSetLevel = (level: ServiceLevel) => {
-    if (serviceLevel) {
-      dispatch(
-        updateServiceLevel({
-          tierId: tier.id,
-          serviceLevelId: serviceLevel.id,
-          level,
-          customValue: level === "CUSTOM" ? customValue : undefined,
-          lastModified: new Date().toISOString(),
-        }),
-      );
-    } else {
-      dispatch(
-        addServiceLevel({
-          tierId: tier.id,
-          serviceLevelId: generateId(),
-          serviceId: service.id,
-          level,
-          customValue: level === "CUSTOM" ? customValue : undefined,
-          lastModified: new Date().toISOString(),
-        }),
-      );
-    }
-  };
-
-  const handleUpdateCustomValue = () => {
-    if (serviceLevel && serviceLevel.level === "CUSTOM") {
-      dispatch(
-        updateServiceLevel({
-          tierId: tier.id,
-          serviceLevelId: serviceLevel.id,
-          customValue,
-          lastModified: new Date().toISOString(),
-        }),
-      );
-    }
   };
 
   return (
@@ -3922,20 +4435,40 @@ function MetricLimitItem({
 }: MetricLimitItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editMetric, setEditMetric] = useState(limit.metric);
+  const [editUnitName, setEditUnitName] = useState(limit.unitName || "");
   const [editLimit, setEditLimit] = useState(
     limit.limit?.toString() || limit.notes || "",
   );
+  // Overage pricing state
+  const [editUnitPrice, setEditUnitPrice] = useState(
+    limit.unitPrice?.toString() || "",
+  );
+  const [editUnitPriceCurrency] = useState(limit.unitPriceCurrency || "USD");
+  const [editUnitPriceBillingCycle, setEditUnitPriceBillingCycle] = useState<
+    BillingCycle | ""
+  >(limit.unitPriceBillingCycle || "");
 
   const handleSave = () => {
     const parsedLimit = editLimit ? parseInt(editLimit, 10) : null;
     const isNumeric = parsedLimit !== null && !isNaN(parsedLimit);
+    const parsedUnitPrice = editUnitPrice ? parseFloat(editUnitPrice) : null;
     dispatch(
       updateUsageLimit({
         tierId,
         limitId: limit.id,
         metric: editMetric.trim() || limit.metric,
+        unitName: editUnitName.trim() || undefined,
         limit: isNumeric ? parsedLimit : undefined,
         notes: !isNumeric && editLimit ? editLimit.trim() : undefined,
+        unitPrice: parsedUnitPrice,
+        unitPriceCurrency:
+          parsedUnitPrice && editUnitPriceBillingCycle
+            ? editUnitPriceCurrency
+            : undefined,
+        unitPriceBillingCycle:
+          parsedUnitPrice && editUnitPriceBillingCycle
+            ? editUnitPriceBillingCycle
+            : undefined,
         lastModified: new Date().toISOString(),
       }),
     );
@@ -3944,9 +4477,23 @@ function MetricLimitItem({
 
   const handleCancel = () => {
     setEditMetric(limit.metric);
+    setEditUnitName(limit.unitName || "");
     setEditLimit(limit.limit?.toString() || limit.notes || "");
+    setEditUnitPrice(limit.unitPrice?.toString() || "");
+    setEditUnitPriceBillingCycle(limit.unitPriceBillingCycle || "");
     setIsEditing(false);
   };
+
+  // Format overage display string
+  const getOverageDisplay = () => {
+    if (!limit.unitPrice || !limit.unitPriceBillingCycle) return null;
+    const cycleLabel =
+      BILLING_CYCLE_SHORT_LABELS[limit.unitPriceBillingCycle].toLowerCase();
+    const unitLabel = limit.unitName || "unit";
+    return `+${formatPrice(limit.unitPrice, limit.unitPriceCurrency || "USD")} per ${unitLabel}/${cycleLabel}`;
+  };
+
+  const overageDisplay = getOverageDisplay();
 
   if (isEditing) {
     return (
@@ -3957,13 +4504,26 @@ function MetricLimitItem({
             type="text"
             value={editMetric}
             onChange={(e) => setEditMetric(e.target.value)}
-            placeholder="Metric name"
+            placeholder="e.g., Number of Entities"
             className="matrix__panel-input"
             autoFocus
           />
         </div>
         <div>
-          <label className="matrix__panel-edit-label">Value</label>
+          <label className="matrix__panel-edit-label">Unit Name</label>
+          <input
+            type="text"
+            value={editUnitName}
+            onChange={(e) => setEditUnitName(e.target.value)}
+            placeholder="e.g., entity, credit card, contractor"
+            className="matrix__panel-input"
+          />
+          <p className="matrix__panel-edit-hint">
+            Used for overage pricing display (e.g., "$50 per entity")
+          </p>
+        </div>
+        <div>
+          <label className="matrix__panel-edit-label">Included Value</label>
           <input
             type="text"
             value={editLimit}
@@ -3972,8 +4532,52 @@ function MetricLimitItem({
             className="matrix__panel-input"
           />
           <p className="matrix__panel-edit-hint">
-            Enter a value or leave empty
+            Enter limit included in tier or leave empty
           </p>
+        </div>
+        <div className="matrix__panel-overage-section">
+          <label className="matrix__panel-edit-label">
+            Overage Pricing (Optional)
+          </label>
+          <p
+            className="matrix__panel-edit-hint"
+            style={{ marginBottom: "0.5rem" }}
+          >
+            Set a price for usage beyond the included limit
+          </p>
+          <div className="matrix__panel-overage-row">
+            <div className="matrix__panel-overage-price">
+              <span className="matrix__panel-overage-currency">$</span>
+              <input
+                type="number"
+                value={editUnitPrice}
+                onChange={(e) => setEditUnitPrice(e.target.value)}
+                placeholder="0.00"
+                step="0.01"
+                className="matrix__panel-overage-input"
+              />
+            </div>
+            <span className="matrix__panel-overage-separator">/</span>
+            <select
+              value={editUnitPriceBillingCycle}
+              onChange={(e) =>
+                setEditUnitPriceBillingCycle(
+                  (e.target.value as BillingCycle) || "",
+                )
+              }
+              className="matrix__panel-overage-select"
+            >
+              <option value="">No overage</option>
+              {RECURRING_BILLING_CYCLES.map((cycle) => (
+                <option key={cycle} value={cycle}>
+                  {BILLING_CYCLE_SHORT_LABELS[cycle]}
+                </option>
+              ))}
+            </select>
+            <span className="matrix__panel-overage-label">
+              per {editUnitName || "unit"}
+            </span>
+          </div>
         </div>
         <div className="matrix__panel-edit-actions">
           <button
@@ -4000,8 +4604,13 @@ function MetricLimitItem({
         onClick={() => setIsEditing(true)}
       >
         <div className="matrix__panel-limit-metric">{limit.metric}</div>
-        <div className="matrix__panel-limit-value">
-          {limit.limit ?? limit.notes ?? "—"}
+        <div className="matrix__panel-limit-value-group">
+          <div className="matrix__panel-limit-value">
+            {limit.limit ?? limit.notes ?? "—"}
+          </div>
+          {overageDisplay && (
+            <div className="matrix__panel-limit-overage">{overageDisplay}</div>
+          )}
         </div>
       </div>
       <div className="matrix__panel-limit-actions">

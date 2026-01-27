@@ -4,6 +4,9 @@ import {
   UpdateTierInputSchema,
   UpdateTierPricingInputSchema,
   DeleteTierInputSchema,
+  AddTierPricingOptionInputSchema,
+  UpdateTierPricingOptionInputSchema,
+  RemoveTierPricingOptionInputSchema,
   AddServiceLevelInputSchema,
   UpdateServiceLevelInputSchema,
   RemoveServiceLevelInputSchema,
@@ -16,6 +19,9 @@ import type {
   UpdateTierInput,
   UpdateTierPricingInput,
   DeleteTierInput,
+  AddTierPricingOptionInput,
+  UpdateTierPricingOptionInput,
+  RemoveTierPricingOptionInput,
   AddServiceLevelInput,
   UpdateServiceLevelInput,
   RemoveServiceLevelInput,
@@ -28,6 +34,9 @@ import type {
   UpdateTierAction,
   UpdateTierPricingAction,
   DeleteTierAction,
+  AddTierPricingOptionAction,
+  UpdateTierPricingOptionAction,
+  RemoveTierPricingOptionAction,
   AddServiceLevelAction,
   UpdateServiceLevelAction,
   RemoveServiceLevelAction,
@@ -69,6 +78,33 @@ export const deleteTier = (input: DeleteTierInput) =>
     { ...input },
     undefined,
     DeleteTierInputSchema,
+    "global",
+  );
+
+export const addTierPricingOption = (input: AddTierPricingOptionInput) =>
+  createAction<AddTierPricingOptionAction>(
+    "ADD_TIER_PRICING_OPTION",
+    { ...input },
+    undefined,
+    AddTierPricingOptionInputSchema,
+    "global",
+  );
+
+export const updateTierPricingOption = (input: UpdateTierPricingOptionInput) =>
+  createAction<UpdateTierPricingOptionAction>(
+    "UPDATE_TIER_PRICING_OPTION",
+    { ...input },
+    undefined,
+    UpdateTierPricingOptionInputSchema,
+    "global",
+  );
+
+export const removeTierPricingOption = (input: RemoveTierPricingOptionInput) =>
+  createAction<RemoveTierPricingOptionAction>(
+    "REMOVE_TIER_PRICING_OPTION",
+    { ...input },
+    undefined,
+    RemoveTierPricingOptionInputSchema,
     "global",
   );
 

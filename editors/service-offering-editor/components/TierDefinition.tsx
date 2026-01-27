@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { generateId } from "document-model/core";
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import type {
@@ -6,12 +6,14 @@ import type {
   ServiceOfferingAction,
   ServiceSubscriptionTier,
   BillingCycle,
-} from "@powerhousedao/contributor-billing/document-models/service-offering";
+} from "resourceServices/document-models/service-offering";
 import {
   addTier,
   updateTier,
-  updateTierPricing,
   deleteTier,
+  addTierPricingOption,
+  updateTierPricingOption,
+  removeTierPricingOption,
 } from "../../../document-models/service-offering/gen/creators.js";
 
 interface TierDefinitionProps {
@@ -19,20 +21,14 @@ interface TierDefinitionProps {
   dispatch: DocumentDispatch<ServiceOfferingAction>;
 }
 
-// Calculate price per day for mental accounting display
-const BILLING_CYCLE_DAYS: Record<BillingCycle, number> = {
-  MONTHLY: 30,
-  QUARTERLY: 90,
-  SEMI_ANNUAL: 180,
-  ANNUAL: 365,
+// Calculate price per month for mental accounting display
+const BILLING_CYCLE_MONTHS: Record<BillingCycle, number> = {
+  MONTHLY: 1,
+  QUARTERLY: 3,
+  SEMI_ANNUAL: 6,
+  ANNUAL: 12,
   ONE_TIME: 1,
 };
-
-function getPricePerDay(amount: number, billingCycle: BillingCycle): string {
-  if (billingCycle === "ONE_TIME") return "";
-  const perDay = amount / BILLING_CYCLE_DAYS[billingCycle];
-  return perDay.toFixed(2);
-}
 
 // Determine which tier should show "Most Popular" badge
 // Uses middle-tier heuristic (Good-Better-Best psychology)
@@ -41,40 +37,6 @@ function getRecommendedTierIndex(tiers: ServiceSubscriptionTier[]): number {
   if (tiers.length === 2) return 1; // Second tier for 2-tier setup
   // For 3+ tiers, recommend the middle tier (or middle-right for even counts)
   return Math.floor(tiers.length / 2);
-}
-
-// Charm Pricing - Left-digit bias pricing suggestions
-// Convert any price to nearest charm prices (ending in .99 or .97)
-function getCharmPriceSuggestions(currentPrice: number): number[] {
-  if (currentPrice <= 0) return [9.99, 19.99, 29.99];
-
-  const suggestions: number[] = [];
-  const roundedDown = Math.floor(currentPrice);
-  const roundedUp = Math.ceil(currentPrice);
-
-  // Lower charm price (X9.99 below current)
-  const lowerCharm = Math.max(0, roundedDown - (roundedDown % 10) - 1) + 9.99;
-  if (lowerCharm > 0 && lowerCharm !== currentPrice) {
-    suggestions.push(lowerCharm);
-  }
-
-  // Nearest .99 at current level
-  const nearestCharm = roundedUp - 0.01;
-  if (
-    nearestCharm > 0 &&
-    nearestCharm !== currentPrice &&
-    !suggestions.includes(nearestCharm)
-  ) {
-    suggestions.push(nearestCharm);
-  }
-
-  // Higher charm price (X9.99 above current)
-  const higherCharm = roundedUp + (10 - (roundedUp % 10)) - 0.01;
-  if (higherCharm !== currentPrice && !suggestions.includes(higherCharm)) {
-    suggestions.push(higherCharm);
-  }
-
-  return suggestions.slice(0, 3).sort((a, b) => a - b);
 }
 
 const BILLING_CYCLES: { value: BillingCycle; label: string }[] = [
@@ -391,6 +353,8 @@ const tierStyles = `
     margin-bottom: 1rem;
   }
 
+
+  /* Pricing Box with Dropdown */
   .tier-card__pricing-box {
     display: flex;
     align-items: center;
@@ -428,8 +392,17 @@ const tierStyles = `
     font-size: 1rem;
   }
 
-  .tier-card__cycle-select {
+  /* Dropdown with checkboxes */
+  .tier-card__cycle-dropdown {
+    position: relative;
     flex: 1;
+  }
+
+  .tier-card__cycle-dropdown-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
     font-family: var(--so-font-sans);
     font-size: 0.875rem;
     color: var(--so-slate-600);
@@ -437,15 +410,129 @@ const tierStyles = `
     border: none;
     cursor: pointer;
     outline: none;
-    appearance: none;
-    padding-right: 1.25rem;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0 center;
-    background-size: 1rem;
+    padding: 0.25rem 0;
+    text-align: left;
   }
 
-  /* Price Per Day Breakdown - Mental Accounting */
+  .tier-card__cycle-dropdown-trigger svg {
+    width: 1rem;
+    height: 1rem;
+    color: var(--so-slate-400);
+    transition: transform 0.15s ease;
+  }
+
+  .tier-card__cycle-dropdown-trigger--open svg {
+    transform: rotate(180deg);
+  }
+
+  .tier-card__cycle-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: -1rem;
+    right: -1rem;
+    background: var(--so-white);
+    border: 1px solid var(--so-slate-200);
+    border-radius: var(--so-radius-md);
+    box-shadow: var(--so-shadow-lg);
+    z-index: 50;
+    padding: 0.5rem;
+    animation: dropdown-fade-in 0.15s ease-out;
+  }
+
+  @keyframes dropdown-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .tier-card__cycle-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.625rem;
+    border-radius: var(--so-radius-sm);
+    cursor: pointer;
+    transition: background 0.1s ease;
+  }
+
+  .tier-card__cycle-dropdown-item:hover {
+    background: var(--so-slate-50);
+  }
+
+  .tier-card__cycle-dropdown-item--active {
+    background: var(--so-violet-50);
+  }
+
+  .tier-card__cycle-checkbox {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--so-violet-600);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .tier-card__cycle-name {
+    font-family: var(--so-font-sans);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--so-slate-700);
+    flex: 1;
+  }
+
+  .tier-card__cycle-price-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .tier-card__cycle-currency-small {
+    font-family: var(--so-font-mono);
+    font-size: 0.75rem;
+    color: var(--so-slate-400);
+  }
+
+  .tier-card__cycle-price-input {
+    width: 4rem;
+    font-family: var(--so-font-mono);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--so-slate-800);
+    background: var(--so-white);
+    border: 1px solid var(--so-slate-200);
+    border-radius: var(--so-radius-sm);
+    padding: 0.25rem 0.5rem;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .tier-card__cycle-price-input:focus {
+    border-color: var(--so-violet-400);
+  }
+
+  .tier-card__cycle-price-input:disabled {
+    background: var(--so-slate-100);
+    color: var(--so-slate-400);
+    cursor: not-allowed;
+  }
+
+  .tier-card__cycle-default-badge {
+    font-family: var(--so-font-mono);
+    font-size: 0.5625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--so-violet-600);
+    background: var(--so-violet-100);
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--so-radius-sm);
+  }
+
+  /* Price Per Month - Mental Accounting */
   .tier-card__price-breakdown {
     margin-top: 0.625rem;
     padding-top: 0.625rem;
@@ -455,86 +542,54 @@ const tierStyles = `
     justify-content: space-between;
   }
 
-  .tier-card__per-day {
+  .tier-card__per-month {
     display: flex;
     align-items: baseline;
     gap: 0.25rem;
   }
 
-  .tier-card__per-day-amount {
+  .tier-card__per-month-amount {
     font-family: var(--so-font-mono);
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--so-emerald-600);
   }
 
-  .tier-card__per-day-label {
+  .tier-card__per-month-label {
     font-size: 0.6875rem;
     color: var(--so-slate-500);
   }
 
-  .tier-card__comparison {
-    font-size: 0.625rem;
-    color: var(--so-slate-400);
-    font-style: italic;
+  /* Active cycles summary */
+  .tier-card__cycles-summary {
+    margin-top: 0.5rem;
     display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .tier-card__cycle-tag {
+    display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-  }
-
-  /* Charm Pricing Suggestions */
-  .tier-card__charm-pricing {
-    margin-top: 0.625rem;
-    padding-top: 0.625rem;
-    border-top: 1px dashed var(--so-slate-200);
-  }
-
-  .tier-card__charm-label {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
+    font-family: var(--so-font-mono);
     font-size: 0.625rem;
     font-weight: 500;
-    color: var(--so-violet-600);
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .tier-card__charm-label svg {
-    width: 0.75rem;
-    height: 0.75rem;
-  }
-
-  .tier-card__charm-options {
-    display: flex;
-    gap: 0.375rem;
-  }
-
-  .tier-card__charm-btn {
-    padding: 0.25rem 0.625rem;
-    font-family: var(--so-font-mono);
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--so-slate-600);
+    padding: 0.25rem 0.5rem;
     background: var(--so-slate-100);
-    border: 1px solid var(--so-slate-200);
+    color: var(--so-slate-600);
     border-radius: var(--so-radius-sm);
-    cursor: pointer;
-    transition: all var(--so-transition-fast);
   }
 
-  .tier-card__charm-btn:hover {
-    background: var(--so-violet-50);
-    border-color: var(--so-violet-300);
-    color: var(--so-violet-700);
-  }
-
-  .tier-card__charm-btn--active {
+  .tier-card__cycle-tag--default {
     background: var(--so-violet-100);
-    border-color: var(--so-violet-400);
     color: var(--so-violet-700);
   }
+
+  .tier-card__cycle-tag-price {
+    color: var(--so-slate-500);
+  }
+
 
   /* Description */
   .tier-card__description {
@@ -1267,16 +1322,61 @@ function TierCard({
   isRecommended,
 }: TierCardProps) {
   const [localName, setLocalName] = useState(tier.name);
-  const [localAmount, setLocalAmount] = useState(
-    tier.pricing.amount?.toString() || "",
-  );
-  const [localBillingCycle, setLocalBillingCycle] = useState(
-    tier.pricing.billingCycle,
-  );
   const [localDescription, setLocalDescription] = useState(
     tier.description || "",
   );
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const isCustomPricing = tier.isCustomPricing ?? false;
+
+  // Track local prices for each billing cycle
+  const [cyclePrices, setCyclePrices] = useState<Record<BillingCycle, string>>(
+    () => {
+      const prices: Record<BillingCycle, string> = {
+        MONTHLY: "",
+        QUARTERLY: "",
+        SEMI_ANNUAL: "",
+        ANNUAL: "",
+        ONE_TIME: "",
+      };
+      // Initialize from existing pricing options
+      (tier.pricingOptions ?? []).forEach((opt) => {
+        prices[opt.billingCycle] = opt.amount?.toString() ?? "";
+      });
+      return prices;
+    },
+  );
+
+  // Update local state when tier.pricingOptions changes
+  useEffect(() => {
+    setCyclePrices((prev) => {
+      const prices = { ...prev };
+      (tier.pricingOptions ?? []).forEach((opt) => {
+        prices[opt.billingCycle] = opt.amount?.toString() ?? "";
+      });
+      // Clear prices for cycles that are no longer in pricingOptions
+      const activeCyclesSet = new Set(
+        (tier.pricingOptions ?? []).map((opt) => opt.billingCycle),
+      );
+      BILLING_CYCLES.forEach((cycle) => {
+        if (!activeCyclesSet.has(cycle.value)) {
+          prices[cycle.value] = "";
+        }
+      });
+      return prices;
+    });
+  }, [tier.pricingOptions]);
+
+  // Get the set of active billing cycles from pricingOptions
+  const activeCycles = new Set(
+    (tier.pricingOptions ?? []).map((opt) => opt.billingCycle),
+  );
+
+  // Get default option
+  const defaultOption = (tier.pricingOptions ?? []).find(
+    (opt) => opt.isDefault,
+  );
+  const defaultCycle = defaultOption?.billingCycle ?? "MONTHLY";
+  const defaultAmount = defaultOption?.amount ?? 0;
 
   const handleNameBlur = () => {
     if (localName !== tier.name && localName.trim()) {
@@ -1302,29 +1402,115 @@ function TierCard({
     }
   };
 
-  const handlePricingChange = (
-    amount?: string,
-    billingCycle?: BillingCycle,
-  ) => {
-    const newAmount =
-      amount !== undefined
-        ? amount
-          ? parseFloat(amount)
-          : null
-        : tier.pricing.amount;
-    const newCycle = billingCycle || tier.pricing.billingCycle;
+  // Toggle a billing cycle on/off
+  const handleCycleToggle = (cycle: BillingCycle, checked: boolean) => {
+    const now = new Date().toISOString();
+    if (checked) {
+      // Add this billing cycle
+      const isFirst = (tier.pricingOptions ?? []).length === 0;
+      dispatch(
+        addTierPricingOption({
+          tierId: tier.id,
+          pricingOptionId: generateId(),
+          billingCycle: cycle,
+          amount: 0,
+          currency: "USD",
+          isDefault: isFirst,
+          lastModified: now,
+        }),
+      );
+    } else {
+      // Remove this billing cycle
+      const option = (tier.pricingOptions ?? []).find(
+        (opt) => opt.billingCycle === cycle,
+      );
+      if (option) {
+        // Don't allow removing if it's the only one
+        if ((tier.pricingOptions ?? []).length <= 1) {
+          return;
+        }
+        dispatch(
+          removeTierPricingOption({
+            tierId: tier.id,
+            pricingOptionId: option.id,
+            lastModified: now,
+          }),
+        );
+      }
+    }
+  };
 
-    if (!isCustomPricing && (newAmount == null || isNaN(newAmount))) return;
+  // Update the price for a billing cycle
+  const handleCyclePriceChange = (cycle: BillingCycle, value: string) => {
+    setCyclePrices((prev) => ({ ...prev, [cycle]: value }));
+  };
+
+  const handleCyclePriceBlur = (cycle: BillingCycle) => {
+    const option = (tier.pricingOptions ?? []).find(
+      (opt) => opt.billingCycle === cycle,
+    );
+    if (!option) return;
+
+    const amount = parseFloat(cyclePrices[cycle]);
+    if (!isNaN(amount) && amount !== option.amount) {
+      dispatch(
+        updateTierPricingOption({
+          tierId: tier.id,
+          pricingOptionId: option.id,
+          amount,
+          lastModified: new Date().toISOString(),
+        }),
+      );
+    }
+  };
+
+  // Set a billing cycle as default (clicking it in the dropdown)
+  const handleSetDefault = (cycle: BillingCycle) => {
+    const option = (tier.pricingOptions ?? []).find(
+      (opt) => opt.billingCycle === cycle,
+    );
+    if (!option || option.isDefault) return;
 
     dispatch(
-      updateTierPricing({
+      updateTierPricingOption({
         tierId: tier.id,
-        amount: newAmount,
-        billingCycle: newCycle,
+        pricingOptionId: option.id,
+        isDefault: true,
         lastModified: new Date().toISOString(),
       }),
     );
   };
+
+  // Helper to get monthly equivalent
+  const getMonthlyEquivalent = (
+    amount: number,
+    cycle: BillingCycle,
+  ): string => {
+    if (cycle === "ONE_TIME" || cycle === "MONTHLY" || amount <= 0) return "";
+    const months = BILLING_CYCLE_MONTHS[cycle];
+    const monthly = amount / months;
+    return `$${monthly.toFixed(2)}`;
+  };
+
+  // Get the label for the currently selected default cycle
+  const getDefaultCycleLabel = () => {
+    const cycleInfo = BILLING_CYCLES.find((c) => c.value === defaultCycle);
+    return cycleInfo?.label ?? "Month";
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".tier-card__cycle-dropdown")) {
+        setDropdownOpen(false);
+      }
+    };
+    if (dropdownOpen) {
+      document.addEventListener("click", handleClickOutside);
+    }
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [dropdownOpen]);
 
   return (
     <div className={`tier-card ${isRecommended ? "tier-card--popular" : ""}`}>
@@ -1396,92 +1582,164 @@ function TierCard({
         {!isCustomPricing && (
           <div className="tier-card__pricing">
             <span className="tier-card__label">Recurring Price</span>
+
+            {/* Main pricing box with dropdown */}
             <div className="tier-card__pricing-box">
               <span className="tier-card__currency">$</span>
               <input
                 type="number"
-                value={localAmount}
-                onChange={(e) => setLocalAmount(e.target.value)}
-                onBlur={() => handlePricingChange(localAmount)}
+                value={cyclePrices[defaultCycle] || ""}
+                onChange={(e) =>
+                  handleCyclePriceChange(defaultCycle, e.target.value)
+                }
+                onBlur={() => handleCyclePriceBlur(defaultCycle)}
                 className="tier-card__amount-input"
+                placeholder="0"
                 step="0.01"
               />
               <span className="tier-card__divider">/</span>
-              <select
-                value={localBillingCycle}
-                onChange={(e) => {
-                  const newCycle = e.target.value as BillingCycle;
-                  setLocalBillingCycle(newCycle);
-                  handlePricingChange(undefined, newCycle);
-                }}
-                className="tier-card__cycle-select"
-              >
-                {BILLING_CYCLES.map((cycle) => (
-                  <option key={cycle.value} value={cycle.value}>
-                    {cycle.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {/* Price Per Day - Mental Accounting */}
-            {localAmount &&
-              parseFloat(localAmount) > 0 &&
-              localBillingCycle !== "ONE_TIME" && (
-                <div className="tier-card__price-breakdown">
-                  <div className="tier-card__per-day">
-                    <span className="tier-card__per-day-amount">
-                      $
-                      {getPricePerDay(
-                        parseFloat(localAmount),
-                        localBillingCycle,
-                      )}
-                    </span>
-                    <span className="tier-card__per-day-label">/day</span>
-                  </div>
-                  {parseFloat(localAmount) > 0 &&
-                    parseFloat(
-                      getPricePerDay(
-                        parseFloat(localAmount),
-                        localBillingCycle,
-                      ),
-                    ) < 10 && (
-                      <span className="tier-card__comparison">
-                        Less than a coffee
-                      </span>
+
+              {/* Dropdown trigger */}
+              <div className="tier-card__cycle-dropdown">
+                <button
+                  type="button"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className={`tier-card__cycle-dropdown-trigger ${dropdownOpen ? "tier-card__cycle-dropdown-trigger--open" : ""}`}
+                >
+                  <span>{getDefaultCycleLabel()}</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {/* Dropdown menu with checkboxes */}
+                {dropdownOpen && (
+                  <div className="tier-card__cycle-dropdown-menu">
+                    {BILLING_CYCLES.filter((c) => c.value !== "ONE_TIME").map(
+                      (cycle) => {
+                        const isActive = activeCycles.has(cycle.value);
+                        const option = (tier.pricingOptions ?? []).find(
+                          (opt) => opt.billingCycle === cycle.value,
+                        );
+                        const isDefault = option?.isDefault ?? false;
+                        const price = cyclePrices[cycle.value];
+
+                        return (
+                          <div
+                            key={cycle.value}
+                            className={`tier-card__cycle-dropdown-item ${isActive ? "tier-card__cycle-dropdown-item--active" : ""}`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isActive}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                handleCycleToggle(
+                                  cycle.value,
+                                  e.target.checked,
+                                );
+                              }}
+                              className="tier-card__cycle-checkbox"
+                              disabled={
+                                isActive &&
+                                (tier.pricingOptions ?? []).length <= 1
+                              }
+                            />
+                            <span
+                              className="tier-card__cycle-name"
+                              onClick={() => {
+                                if (isActive && !isDefault) {
+                                  handleSetDefault(cycle.value);
+                                }
+                              }}
+                              style={{
+                                cursor:
+                                  isActive && !isDefault
+                                    ? "pointer"
+                                    : "default",
+                              }}
+                            >
+                              {cycle.label}
+                            </span>
+                            {isActive && (
+                              <>
+                                <div className="tier-card__cycle-price-inline">
+                                  <span className="tier-card__cycle-currency-small">
+                                    $
+                                  </span>
+                                  <input
+                                    type="number"
+                                    value={price}
+                                    onChange={(e) => {
+                                      e.stopPropagation();
+                                      handleCyclePriceChange(
+                                        cycle.value,
+                                        e.target.value,
+                                      );
+                                    }}
+                                    onBlur={() =>
+                                      handleCyclePriceBlur(cycle.value)
+                                    }
+                                    placeholder="0"
+                                    step="0.01"
+                                    className="tier-card__cycle-price-input"
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                </div>
+                                {isDefault && (
+                                  <span className="tier-card__cycle-default-badge">
+                                    Default
+                                  </span>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        );
+                      },
                     )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Price Per Month - Mental Accounting */}
+            {defaultAmount > 0 &&
+              defaultCycle !== "ONE_TIME" &&
+              defaultCycle !== "MONTHLY" && (
+                <div className="tier-card__price-breakdown">
+                  <div className="tier-card__per-month">
+                    <span className="tier-card__per-month-amount">
+                      {getMonthlyEquivalent(defaultAmount, defaultCycle)}
+                    </span>
+                    <span className="tier-card__per-month-label">/month</span>
+                  </div>
                 </div>
               )}
-            {/* Charm Pricing Suggestions - Left-Digit Bias */}
-            {localAmount && parseFloat(localAmount) > 0 && (
-              <div className="tier-card__charm-pricing">
-                <span className="tier-card__charm-label">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Charm prices:
-                </span>
-                <div className="tier-card__charm-options">
-                  {getCharmPriceSuggestions(parseFloat(localAmount)).map(
-                    (price) => (
-                      <button
-                        key={price}
-                        type="button"
-                        onClick={() => {
-                          setLocalAmount(price.toFixed(2));
-                          handlePricingChange(price.toFixed(2));
-                        }}
-                        className={`tier-card__charm-btn ${parseFloat(localAmount) === price ? "tier-card__charm-btn--active" : ""}`}
-                      >
-                        ${price.toFixed(2).replace(/\.00$/, "")}
-                      </button>
-                    ),
-                  )}
-                </div>
+
+            {/* Show summary of active billing cycles */}
+            {activeCycles.size > 1 && (
+              <div className="tier-card__cycles-summary">
+                {(tier.pricingOptions ?? []).map((opt) => {
+                  const cycleInfo = BILLING_CYCLES.find(
+                    (c) => c.value === opt.billingCycle,
+                  );
+                  return (
+                    <span
+                      key={opt.id}
+                      className={`tier-card__cycle-tag ${opt.isDefault ? "tier-card__cycle-tag--default" : ""}`}
+                    >
+                      {cycleInfo?.label}
+                      <span className="tier-card__cycle-tag-price">
+                        ${opt.amount}
+                      </span>
+                    </span>
+                  );
+                })}
               </div>
             )}
           </div>

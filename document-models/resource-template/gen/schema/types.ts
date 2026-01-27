@@ -74,6 +74,11 @@ export type AddFacetOptionInput = {
   optionId: Scalars["String"]["input"];
 };
 
+export type AddFaqInput = {
+  answer?: InputMaybe<Scalars["String"]["input"]>;
+  question?: InputMaybe<Scalars["String"]["input"]>;
+};
+
 export type AddOptionGroupInput = {
   defaultSelected: Scalars["Boolean"]["input"];
   description?: InputMaybe<Scalars["String"]["input"]>;
@@ -101,6 +106,10 @@ export type AddTargetAudienceInput = {
   lastModified: Scalars["DateTime"]["input"];
 };
 
+export type DeleteFaqInput = {
+  id: Scalars["OID"]["input"];
+};
+
 export type DeleteOptionGroupInput = {
   id: Scalars["OID"]["input"];
   lastModified: Scalars["DateTime"]["input"];
@@ -116,6 +125,12 @@ export type FacetTarget = {
   categoryLabel: Scalars["String"]["output"];
   id: Scalars["OID"]["output"];
   selectedOptions: Array<Scalars["String"]["output"]>;
+};
+
+export type FaqField = {
+  answer: Maybe<Scalars["String"]["output"]>;
+  id: Scalars["OID"]["output"];
+  question: Maybe<Scalars["String"]["output"]>;
 };
 
 export type OptionGroup = {
@@ -158,6 +173,7 @@ export type ResourceFacetBinding = {
 export type ResourceTemplateState = {
   description: Maybe<Scalars["String"]["output"]>;
   facetTargets: Array<FacetTarget>;
+  faqFields: Array<FaqField>;
   id: Scalars["PHID"]["output"];
   infoLink: Maybe<Scalars["URL"]["output"]>;
   lastModified: Scalars["DateTime"]["output"];
@@ -219,6 +235,12 @@ export type TargetAudience = {
 };
 
 export type TemplateStatus = "ACTIVE" | "COMING_SOON" | "DEPRECATED" | "DRAFT";
+
+export type UpdateFaqInput = {
+  answer?: InputMaybe<Scalars["String"]["input"]>;
+  id: Scalars["OID"]["input"];
+  question?: InputMaybe<Scalars["String"]["input"]>;
+};
 
 export type UpdateOptionGroupInput = {
   defaultSelected?: InputMaybe<Scalars["Boolean"]["input"]>;

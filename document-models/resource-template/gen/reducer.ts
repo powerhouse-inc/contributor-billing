@@ -33,6 +33,9 @@ import {
   AddOptionGroupInputSchema,
   UpdateOptionGroupInputSchema,
   DeleteOptionGroupInputSchema,
+  AddFaqInputSchema,
+  UpdateFaqInputSchema,
+  DeleteFaqInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<ResourceTemplatePHState> = (
@@ -276,6 +279,42 @@ const stateReducer: StateReducer<ResourceTemplatePHState> = (
       DeleteOptionGroupInputSchema().parse(action.input);
 
       resourceTemplateOptionGroupManagementOperations.deleteOptionGroupOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "ADD_FAQ": {
+      AddFaqInputSchema().parse(action.input);
+
+      resourceTemplateOptionGroupManagementOperations.addFaqOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "UPDATE_FAQ": {
+      UpdateFaqInputSchema().parse(action.input);
+
+      resourceTemplateOptionGroupManagementOperations.updateFaqOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "DELETE_FAQ": {
+      DeleteFaqInputSchema().parse(action.input);
+
+      resourceTemplateOptionGroupManagementOperations.deleteFaqOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

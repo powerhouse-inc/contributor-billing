@@ -3,16 +3,25 @@ import {
   AddOptionGroupInputSchema,
   UpdateOptionGroupInputSchema,
   DeleteOptionGroupInputSchema,
+  AddFaqInputSchema,
+  UpdateFaqInputSchema,
+  DeleteFaqInputSchema,
 } from "../schema/zod.js";
 import type {
   AddOptionGroupInput,
   UpdateOptionGroupInput,
   DeleteOptionGroupInput,
+  AddFaqInput,
+  UpdateFaqInput,
+  DeleteFaqInput,
 } from "../types.js";
 import type {
   AddOptionGroupAction,
   UpdateOptionGroupAction,
   DeleteOptionGroupAction,
+  AddFaqAction,
+  UpdateFaqAction,
+  DeleteFaqAction,
 } from "./actions.js";
 
 export const addOptionGroup = (input: AddOptionGroupInput) =>
@@ -39,5 +48,32 @@ export const deleteOptionGroup = (input: DeleteOptionGroupInput) =>
     { ...input },
     undefined,
     DeleteOptionGroupInputSchema,
+    "global",
+  );
+
+export const addFaq = (input: AddFaqInput) =>
+  createAction<AddFaqAction>(
+    "ADD_FAQ",
+    { ...input },
+    undefined,
+    AddFaqInputSchema,
+    "global",
+  );
+
+export const updateFaq = (input: UpdateFaqInput) =>
+  createAction<UpdateFaqAction>(
+    "UPDATE_FAQ",
+    { ...input },
+    undefined,
+    UpdateFaqInputSchema,
+    "global",
+  );
+
+export const deleteFaq = (input: DeleteFaqInput) =>
+  createAction<DeleteFaqAction>(
+    "DELETE_FAQ",
+    { ...input },
+    undefined,
+    DeleteFaqInputSchema,
     "global",
   );

@@ -4,6 +4,9 @@ import type {
   UpdateTierAction,
   UpdateTierPricingAction,
   DeleteTierAction,
+  AddTierPricingOptionAction,
+  UpdateTierPricingOptionAction,
+  RemoveTierPricingOptionAction,
   AddServiceLevelAction,
   UpdateServiceLevelAction,
   RemoveServiceLevelAction,
@@ -32,6 +35,21 @@ export interface ServiceOfferingTierManagementOperations {
   deleteTierOperation: (
     state: ServiceOfferingState,
     action: DeleteTierAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  addTierPricingOptionOperation: (
+    state: ServiceOfferingState,
+    action: AddTierPricingOptionAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  updateTierPricingOptionOperation: (
+    state: ServiceOfferingState,
+    action: UpdateTierPricingOptionAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  removeTierPricingOptionOperation: (
+    state: ServiceOfferingState,
+    action: RemoveTierPricingOptionAction,
     dispatch?: SignalDispatch,
   ) => void;
   addServiceLevelOperation: (

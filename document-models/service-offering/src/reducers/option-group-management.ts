@@ -1,4 +1,4 @@
-import type { ServiceOfferingOptionGroupManagementOperations } from "@powerhousedao/contributor-billing/document-models/service-offering";
+import type { ServiceOfferingOptionGroupManagementOperations } from "resourceServices/document-models/service-offering";
 
 export const serviceOfferingOptionGroupManagementOperations: ServiceOfferingOptionGroupManagementOperations =
   {

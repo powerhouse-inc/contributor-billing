@@ -6,7 +6,7 @@ import type {
   ServiceOfferingAction,
   Service,
   OptionGroup,
-} from "@powerhousedao/contributor-billing/document-models/service-offering";
+} from "resourceServices/document-models/service-offering";
 import {
   addService,
   updateService,
@@ -29,119 +29,80 @@ interface ServiceTemplate {
 const SERVICE_TEMPLATES: Record<string, ServiceTemplate[]> = {
   "Setup & Formation": [
     {
-      title: "Entity Formation",
-      description: "Legal entity registration and setup",
+      title: "Swiss association entity",
+      description: "Legal entity formation as a Swiss association",
       category: "setup",
       icon: "🏛️",
     },
     {
-      title: "Registered Agent",
-      description: "Registered agent designation for one year",
+      title: "Registered address (Zug)",
+      description: "Official registered address in Zug, Switzerland",
+      category: "setup",
+      icon: "📍",
+    },
+    {
+      title: "Legal document templates",
+      description: "Access to standardized legal document templates",
       category: "setup",
       icon: "📋",
     },
+  ],
+  "Operations & Finance": [
     {
-      title: "Operating Agreement",
-      description: "Custom operating agreement drafting",
-      category: "setup",
+      title: "Invoice management",
+      description: "Professional invoice processing and management",
+      category: "recurring",
       icon: "📄",
     },
     {
-      title: "EIN Application",
-      description: "Federal tax ID number application",
-      category: "setup",
-      icon: "🔢",
-    },
-    {
-      title: "Banking Resolution",
-      description: "Corporate banking resolution documents",
-      category: "setup",
-      icon: "🏦",
-    },
-  ],
-  "Compliance & Governance": [
-    {
-      title: "Annual Compliance Review",
-      description: "Yearly compliance status check and filings",
-      category: "recurring",
-      icon: "✓",
-    },
-    {
-      title: "Board Meeting Minutes",
-      description: "Professional minute-taking for board meetings",
-      category: "recurring",
-      icon: "📝",
-    },
-    {
-      title: "Regulatory Filing Support",
-      description: "Assistance with regulatory submissions",
-      category: "recurring",
-      icon: "📊",
-    },
-    {
-      title: "Corporate Record Maintenance",
-      description: "Ongoing corporate record keeping",
-      category: "recurring",
-      icon: "🗂️",
-    },
-  ],
-  "Accounting & Finance": [
-    {
-      title: "Bookkeeping",
-      description: "Monthly transaction recording and reconciliation",
-      category: "recurring",
-      icon: "📚",
-    },
-    {
-      title: "Financial Reporting",
-      description: "Monthly/quarterly financial statements",
-      category: "recurring",
-      icon: "📈",
-    },
-    {
-      title: "Tax Preparation",
-      description: "Annual tax return preparation and filing",
+      title: "Annual tax filing",
+      description: "Yearly tax preparation and filing services",
       category: "recurring",
       icon: "💰",
     },
     {
-      title: "Payroll Processing",
-      description: "Employee payroll and tax withholding",
+      title: "Monthly accounting & close",
+      description: "Monthly bookkeeping and financial close",
       category: "recurring",
-      icon: "💳",
+      icon: "📊",
     },
   ],
-  "Advisory & Support": [
+  "Contributor & Payments": [
     {
-      title: "Dedicated Account Manager",
-      description: "Single point of contact for all services",
-      category: "addon",
-      icon: "👤",
+      title: "Contributor operations",
+      description: "Management of contributor payments and operations",
+      category: "recurring",
+      icon: "👥",
     },
     {
-      title: "Priority Support",
-      description: "24/7 priority support line access",
-      category: "addon",
-      icon: "⭐",
+      title: "Multi-currency payouts",
+      description: "Support for payments in multiple currencies",
+      category: "recurring",
+      icon: "💱",
     },
     {
-      title: "Strategic Consulting",
-      description: "Quarterly strategic review sessions",
+      title: "Multiple entities",
+      description: "Support for managing multiple legal entities",
+      category: "recurring",
+      icon: "🏢",
+    },
+  ],
+  "Support & Advisory": [
+    {
+      title: "Dedicated ops support",
+      description: "Dedicated operations support team",
       category: "addon",
       icon: "🎯",
     },
     {
-      title: "Legal Document Review",
-      description: "Contract and agreement review services",
+      title: "Dedicated account manager",
+      description: "Personal point of contact for all needs",
       category: "addon",
-      icon: "⚖️",
+      icon: "👤",
     },
   ],
 };
-import type {
-  ServiceSubscriptionTier,
-  ServiceLevelBinding,
-} from "../../../document-models/service-offering/gen/schema/types.js";
+import type { ServiceSubscriptionTier } from "../../../document-models/service-offering/gen/schema/types.js";
 
 // Extended group info for UI (tracks setup status and fee locally since schema doesn't support it yet)
 export interface GroupMetadata {
