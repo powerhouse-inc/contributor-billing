@@ -125,8 +125,8 @@ export function SetOwner({ ownerIds, dispatch }: SetOwnerProps) {
             onFocus={() => setIsPickerOpen(true)}
             placeholder={
               ownerIds.length === 0
-                ? "Search builder name to add owner"
-                : "Add another owner..."
+                ? "Search builder name to add team"
+                : "Add another team..."
             }
             className="flex-1 min-w-[280px] rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-gray-400 dark:focus:ring-gray-800"
           />
@@ -151,8 +151,8 @@ export function SetOwner({ ownerIds, dispatch }: SetOwnerProps) {
               <>
                 <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
                   {normalizedQuery
-                    ? "No matching builders"
-                    : "No more builders available"}
+                    ? "No matching teams"
+                    : "No more teams available"}
                 </div>
                 {normalizedQuery && !ownerIdSet.has(normalizedQuery) && (
                   <button
@@ -191,7 +191,7 @@ function OwnerCard({ ownerId, builderProfiles, onRemove }: OwnerCardProps) {
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            {profile?.name || "Unknown builder"}
+            {profile?.name || "Unknown team"}
           </div>
           <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400 truncate">
             {ownerId}
@@ -201,7 +201,7 @@ function OwnerCard({ ownerId, builderProfiles, onRemove }: OwnerCardProps) {
           type="button"
           onClick={onRemove}
           className="p-1 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
-          title="Remove owner"
+          title="Remove team"
         >
           <svg
             className="w-4 h-4"
@@ -221,13 +221,13 @@ function OwnerCard({ ownerId, builderProfiles, onRemove }: OwnerCardProps) {
       <div className="mt-2 flex flex-wrap items-center gap-3">
         {ownerDriveMissing ? (
           <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-            Owner Drive Not Found
+            Team Drive Not Found
           </span>
         ) : ownerDriveId ? (
           <OwnerDriveActions
             ownerDriveId={ownerDriveId}
             selectedDocument={selectedDocument}
-            ownerName={profile?.name || "owner"}
+            ownerName={profile?.name || "team"}
           />
         ) : null}
       </div>

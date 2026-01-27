@@ -98,16 +98,16 @@ export const documentModel: DocumentModelGlobalState = {
               template: "",
             },
             {
-              id: "remove-owner-id",
-              name: "REMOVE_OWNER_ID",
               description: "Remove an owner ID from the snapshot report",
-              schema: "input RemoveOwnerIdInput {\n  ownerId: PHID!\n}",
-              template: "",
-              reducer:
-                "const index = state.ownerIds.indexOf(action.input.ownerId);\nif (index !== -1) {\n  state.ownerIds.splice(index, 1);\n}",
               errors: [],
               examples: [],
+              id: "remove-owner-id",
+              name: "REMOVE_OWNER_ID",
+              reducer:
+                "const index = state.ownerIds.indexOf(action.input.ownerId);\nif (index !== -1) {\n  state.ownerIds.splice(index, 1);\n}",
+              schema: "input RemoveOwnerIdInput {\n  ownerId: PHID!\n}",
               scope: "global",
+              template: "",
             },
           ],
         },

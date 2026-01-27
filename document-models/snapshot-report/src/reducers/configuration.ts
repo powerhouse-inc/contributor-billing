@@ -49,4 +49,8 @@ export const snapshotReportConfigurationOperations: SnapshotReportConfigurationO
         state.ownerIds.splice(index, 1);
       }
     },
+    setOwnerIdOperation(state, action) {
+      // TODO: implement setOwnerIdOperation reducer
+      throw new Error("Reducer for 'setOwnerIdOperation' not implemented.");
+    },
   };
