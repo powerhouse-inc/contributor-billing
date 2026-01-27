@@ -3,6 +3,7 @@ export { Accounts } from "./accounts/module.js";
 export { BillingStatement } from "./billing-statement/module.js";
 export { ExpenseReport } from "./expense-report/module.js";
 export { Invoice } from "./invoice/module.js";
+export { OperationalHubProfile } from "./operational-hub-profile/module.js";
 export { ResourceTemplate } from "./resource-template/module.js";
 export { ServiceOffering } from "./service-offering/module.js";
 export { ServiceSubscriptions } from "./service-subscriptions/module.js";

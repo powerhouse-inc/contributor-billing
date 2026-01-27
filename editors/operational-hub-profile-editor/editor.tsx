@@ -1,0 +1,109 @@
+import { useState, useEffect } from "react";
+import { setName } from "document-model";
+import { useSelectedOperationalHubProfileDocument } from "../../document-models/operational-hub-profile/hooks.js";
+import { setOperationalHubName } from "../../document-models/operational-hub-profile/gen/configuration/creators.js";
+import { Input } from "@powerhousedao/document-engineering";
+import { DocumentToolbar } from "@powerhousedao/design-system/connect";
+import {
+  setSelectedNode,
+  useParentFolderForSelectedNode,
+} from "@powerhousedao/reactor-browser";
+import { SetOperatorTeam } from "./components/SetOperatorTeam.js";
+import { SubteamsPicker } from "./components/SubteamsPicker.js";
+
+export default function Editor() {
+  const [document, dispatch] = useSelectedOperationalHubProfileDocument();
+  const parentFolder = useParentFolderForSelectedNode();
+
+  // Local state for controlled input - only dispatch on blur
+  const [localName, setLocalName] = useState("");
+
+  // Sync local state with document state when document changes
+  useEffect(() => {
+    if (document) {
+      setLocalName(document.state.global.name || "");
+    }
+  }, [document?.state.global.name]);
+
+  if (!document || !dispatch) {
+    return <div>Loading...</div>;
+  }
+
+  const { operatorTeam, subteams } = document.state.global;
+
+  const handleNameBlur = () => {
+    const trimmedName = localName.trim();
+    if (trimmedName !== document.state.global.name) {
+      dispatch(setOperationalHubName({ name: trimmedName }));
+      dispatch(setName(trimmedName));
+    }
+  };
+
+  function handleClose() {
+    setSelectedNode(parentFolder?.id);
+  }
+
+  return (
+    <div className="flex flex-col h-full w-full overflow-hidden">
+      <DocumentToolbar document={document} onClose={handleClose} />
+      <div className="ph-default-styles flex flex-col flex-1 min-h-0 w-full bg-gray-50 dark:bg-gray-900">
+        <div className="flex-1 overflow-auto px-3 sm:px-4 lg:px-6 py-4">
+          <div className="w-full max-w-2xl mx-auto space-y-6">
+            {/* Header Section */}
+            <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="px-4 sm:px-6 py-4 sm:py-6">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-6">
+                  Operational Hub Profile
+                </h1>
+
+                {/* Name Field */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Name
+                  </label>
+                  <Input
+                    type="text"
+                    value={localName}
+                    onChange={(e) => setLocalName(e.target.value)}
+                    onBlur={handleNameBlur}
+                    placeholder="Enter hub name..."
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Operator Team Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Operator Team
+                  </label>
+                  <SetOperatorTeam
+                    operatorTeam={operatorTeam}
+                    dispatch={dispatch}
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    The builder team that operates this hub
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Subteams Section */}
+            <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                  Subteams
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Teams managed by this operational hub
+                </p>
+              </div>
+              <div className="p-4 sm:p-6">
+                <SubteamsPicker subteams={subteams} dispatch={dispatch} />
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
