@@ -18,8 +18,6 @@ import {
   removeOwnerId,
   AddOwnerIdInputSchema,
   RemoveOwnerIdInputSchema,
-  setOwnerId,
-  SetOwnerIdInputSchema,
 } from "@powerhousedao/contributor-billing/document-models/snapshot-report";
 
 describe("ConfigurationOperations", () => {
@@ -140,20 +138,5 @@ describe("ConfigurationOperations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
 
-  it("should handle setOwnerId operation", () => {
-    const document = utils.createDocument();
-    const input = generateMock(SetOwnerIdInputSchema());
 
-    const updatedDocument = reducer(document, setOwnerId(input));
-
-    expect(isSnapshotReportDocument(updatedDocument)).toBe(true);
-    expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].action.type).toBe(
-      "SET_OWNER_ID",
-    );
-    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
-      input,
-    );
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
-  });
 });
