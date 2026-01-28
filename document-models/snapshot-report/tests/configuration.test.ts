@@ -137,6 +137,4 @@ describe("ConfigurationOperations", () => {
     );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
-
-
 });

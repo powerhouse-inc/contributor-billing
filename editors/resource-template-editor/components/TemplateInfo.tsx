@@ -360,7 +360,8 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
     direction: "up" | "down",
   ) => {
     const newIndex = direction === "up" ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= globalState.recurringServices.length) return;
+    if (newIndex < 0 || newIndex >= globalState.recurringServices.length)
+      return;
 
     const reorderedServices = [...globalState.recurringServices];
     [reorderedServices[index], reorderedServices[newIndex]] = [
@@ -1283,7 +1284,9 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
                         type="button"
                         onClick={() => handleMoveSetupService(index, "down")}
                         className="template-editor__service-reorder-btn"
-                        disabled={index === globalState.setupServices.length - 1}
+                        disabled={
+                          index === globalState.setupServices.length - 1
+                        }
                         title="Move down"
                       >
                         <svg
@@ -1462,9 +1465,13 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleMoveRecurringService(index, "down")}
+                        onClick={() =>
+                          handleMoveRecurringService(index, "down")
+                        }
                         className="template-editor__service-reorder-btn"
-                        disabled={index === globalState.recurringServices.length - 1}
+                        disabled={
+                          index === globalState.recurringServices.length - 1
+                        }
                         title="Move down"
                       >
                         <svg

@@ -2055,7 +2055,6 @@ export function TheMatrix({
   // Unit name for the metric (e.g., "entity", "user", "API call")
   const [metricUnitName, setMetricUnitName] = useState("");
 
-
   // Service reordering state (not used - arrow buttons handle reorder directly)
 
   const getServiceGroup = (service: Service): string | null => {
@@ -2656,7 +2655,6 @@ export function TheMatrix({
           </div>
         )}
 
-
         {/* Incomplete Services Warning */}
         {incompleteServices.length > 0 && (
           <div className="matrix__incomplete-warning">
@@ -2832,7 +2830,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
-                                    onEditService={openEditServiceModal}
+                  onEditService={openEditServiceModal}
                   onReorderService={handleReorderService}
                 />
               ))}
@@ -2866,7 +2864,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
-                                    onEditService={openEditServiceModal}
+                  onEditService={openEditServiceModal}
                   onReorderService={handleReorderService}
                 />
               )}
@@ -2917,7 +2915,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
-                                    onEditService={openEditServiceModal}
+                  onEditService={openEditServiceModal}
                   onReorderService={handleReorderService}
                 />
               ))}
@@ -2950,7 +2948,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
-                                    onEditService={openEditServiceModal}
+                  onEditService={openEditServiceModal}
                   onReorderService={handleReorderService}
                 />
               )}
@@ -2989,7 +2987,7 @@ export function TheMatrix({
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
                   onRemoveMetric={handleRemoveMetric}
-                                    onEditService={openEditServiceModal}
+                  onEditService={openEditServiceModal}
                   onReorderService={handleReorderService}
                 />
               ))}
@@ -3187,7 +3185,9 @@ export function TheMatrix({
               {/* Tier Selection */}
               {tiers.length > 0 && (
                 <div className="matrix__modal-field">
-                  <label className="matrix__modal-label">Include in Tiers</label>
+                  <label className="matrix__modal-label">
+                    Include in Tiers
+                  </label>
                   <div className="matrix__modal-tier-grid">
                     {tiers.map((tier) => {
                       const isSelected = editServiceSelectedTiers.has(tier.id);
