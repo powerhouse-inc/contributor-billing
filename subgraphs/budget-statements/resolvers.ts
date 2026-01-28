@@ -338,10 +338,19 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                 wallets: [],
               };
 
+          // Get status from expense report state (default to empty string if not available)
+          const status = expenseReport?.state.global.status || "DRAFT";
+
+          // Get lastModifiedAtUtcIso from the expense report document header
+          const lastModifiedAtUtcIso =
+            expenseReport?.header.lastModifiedAtUtcIso || "";
+
           budgetStatements.push({
             id: key,
             owner,
             month,
+            status,
+            lastModifiedAtUtcIso,
             snapshotReport: snapshotReportData,
             expenseReport: expenseReportData,
           });

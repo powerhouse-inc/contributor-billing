@@ -18,6 +18,8 @@ export const schema: DocumentNode = gql`
     id: OID!
     owner: BudgetStatementOwner!
     month: String! ## JAN2026
+    status: String!
+    lastModifiedAtUtcIso: DateTime!
     snapshotReport: BudgetStatementSnapshotReport!
     expenseReport: BudgetStatementExpenseReport!
   }

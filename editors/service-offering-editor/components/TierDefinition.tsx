@@ -428,8 +428,9 @@ const tierStyles = `
   .tier-card__cycle-dropdown-menu {
     position: absolute;
     top: calc(100% + 0.5rem);
-    left: -1rem;
+    left: -6.5rem;
     right: -1rem;
+    min-width: 220px;
     background: var(--so-white);
     border: 1px solid var(--so-slate-200);
     border-radius: var(--so-radius-md);
@@ -453,11 +454,12 @@ const tierStyles = `
   .tier-card__cycle-dropdown-item {
     display: flex;
     align-items: center;
-    gap: 0.625rem;
-    padding: 0.5rem 0.625rem;
+    gap: 0.5rem;
+    padding: 0.5rem 0.5rem;
     border-radius: var(--so-radius-sm);
     cursor: pointer;
     transition: background 0.1s ease;
+    overflow: hidden;
   }
 
   .tier-card__cycle-dropdown-item:hover {
@@ -482,12 +484,17 @@ const tierStyles = `
     font-weight: 500;
     color: var(--so-slate-700);
     flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .tier-card__cycle-price-inline {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.125rem;
+    flex-shrink: 0;
   }
 
   .tier-card__cycle-currency-small {
@@ -497,7 +504,9 @@ const tierStyles = `
   }
 
   .tier-card__cycle-price-input {
-    width: 4rem;
+    width: 3.5rem;
+    min-width: 3.5rem;
+    max-width: 3.5rem;
     font-family: var(--so-font-mono);
     font-size: 0.8125rem;
     font-weight: 500;
@@ -505,9 +514,10 @@ const tierStyles = `
     background: var(--so-white);
     border: 1px solid var(--so-slate-200);
     border-radius: var(--so-radius-sm);
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0.375rem;
     outline: none;
     transition: border-color 0.15s ease;
+    box-sizing: border-box;
   }
 
   .tier-card__cycle-price-input:focus {

@@ -29,6 +29,7 @@ export function defaultGlobalState(): ResourceTemplateGlobalState {
     services: [],
     optionGroups: [],
     faqFields: [],
+    contentSections: [],
   };
 }
 

@@ -6,6 +6,7 @@ import type {
   AddFaqInput,
   UpdateFaqInput,
   DeleteFaqInput,
+  ReorderFaqsInput,
 } from "../types.js";
 
 export type AddOptionGroupAction = Action & {
@@ -29,6 +30,10 @@ export type DeleteFaqAction = Action & {
   type: "DELETE_FAQ";
   input: DeleteFaqInput;
 };
+export type ReorderFaqsAction = Action & {
+  type: "REORDER_FAQS";
+  input: ReorderFaqsInput;
+};
 
 export type ResourceTemplateOptionGroupManagementAction =
   | AddOptionGroupAction
@@ -36,4 +41,5 @@ export type ResourceTemplateOptionGroupManagementAction =
   | DeleteOptionGroupAction
   | AddFaqAction
   | UpdateFaqAction
-  | DeleteFaqAction;
+  | DeleteFaqAction
+  | ReorderFaqsAction;
