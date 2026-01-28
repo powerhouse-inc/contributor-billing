@@ -1,7 +1,6 @@
 import {
   Wallet,
   CheckCircle2,
-  Circle,
   ArrowRight,
   Building2,
   User,

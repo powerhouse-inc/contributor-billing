@@ -12,6 +12,10 @@ import type { FileNode } from "document-drive";
 import { actions as invoiceActions } from "../../../../document-models/invoice/index.js";
 import type { InvoiceTag } from "../../../../document-models/invoice/gen/types.js";
 import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
+import {
+  setPeriodStart,
+  setPeriodEnd,
+} from "../../../../document-models/expense-report/gen/creators.js";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
 import { exportExpenseReportCSV } from "../../../../scripts/contributor-billing/createExpenseReportCsv.js";
@@ -680,6 +684,28 @@ export const InvoiceTable = ({
       );
 
       if (createdNode?.id) {
+        // Set the Reporting Period to the month - parse "December 2025" format
+        const monthDate = new Date(monthName + " 1");
+        if (!isNaN(monthDate.getTime())) {
+          // Start date: first day of the month at midnight UTC
+          const periodStartDate = new Date(
+            Date.UTC(monthDate.getFullYear(), monthDate.getMonth(), 1),
+          );
+          // End date: last day of the month at 23:59:59.999 UTC
+          const periodEndDate = new Date(
+            Date.UTC(monthDate.getFullYear(), monthDate.getMonth() + 1, 0, 23, 59, 59, 999),
+          );
+
+          // Set Reporting Period only (Transaction Period is set by user)
+          await dispatchActions(
+            [
+              setPeriodStart({ periodStart: periodStartDate.toISOString() }),
+              setPeriodEnd({ periodEnd: periodEndDate.toISOString() }),
+            ],
+            createdNode.id,
+          );
+        }
+
         setSelectedNode(createdNode.id);
       }
     }

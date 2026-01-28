@@ -222,18 +222,6 @@ export function FolderTree({
     [validDocumentIds],
   );
 
-  // Generate a stable key based on the folder structure to force Sidebar remount when folders change
-  // Only tracks folder IDs - not document count, to prevent sidebar collapse when documents are added
-  const sidebarKey = useMemo(() => {
-    const nodeIds: string[] = [];
-    for (const [, info] of monthFolders.entries()) {
-      nodeIds.push(info.folder.id);
-      if (info.paymentsFolder) nodeIds.push(info.paymentsFolder.id);
-      if (info.reportingFolder) nodeIds.push(info.reportingFolder.id);
-    }
-    return nodeIds.join("-") || "empty";
-  }, [monthFolders]);
-
   // Build navigation sections
   const navigationSections = useMemo(() => {
     // Build account-transactions children nodes
@@ -437,6 +425,18 @@ export function FolderTree({
     onFolderSelect?.(null);
     safeSetSelectedNode("");
   };
+
+  // Generate a stable key based on the folder structure to force Sidebar remount when folders change
+  // Only tracks folder IDs - not document count, to prevent sidebar collapse when documents are added
+  const sidebarKey = useMemo(() => {
+    const nodeIds: string[] = [];
+    for (const [, info] of monthFolders.entries()) {
+      nodeIds.push(info.folder.id);
+      if (info.paymentsFolder) nodeIds.push(info.paymentsFolder.id);
+      if (info.reportingFolder) nodeIds.push(info.reportingFolder.id);
+    }
+    return nodeIds.join("-") || "empty";
+  }, [monthFolders]);
 
   return (
     <SidebarProvider nodes={navigationSections}>

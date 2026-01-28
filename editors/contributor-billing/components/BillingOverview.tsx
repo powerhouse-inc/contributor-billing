@@ -15,7 +15,7 @@ import {
   isFileNodeKind,
 } from "@powerhousedao/reactor-browser";
 import { useState, useMemo, useRef, useEffect } from "react";
-import { MonthlyReporting } from "./MonthlyReporting.js";
+import { MonthlyReportsOverview } from "./MonthlyReportsOverview.js";
 import type { SelectedFolderInfo } from "./FolderTree.js";
 
 interface BillingOverviewProps {
@@ -289,8 +289,8 @@ export function BillingOverview({ onFolderSelect }: BillingOverviewProps) {
         </div>
       </div>
 
-      {/* Monthly Reporting */}
-      <MonthlyReporting onFolderSelect={onFolderSelect} showAllMonths />
+      {/* Monthly Reports Overview */}
+      <MonthlyReportsOverview onFolderSelect={onFolderSelect} />
     </div>
   );
 }
