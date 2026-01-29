@@ -133,7 +133,7 @@ export function ResourcesServices() {
                 {isAllowedToCreateDocuments && (
                   <button
                     type="button"
-                    className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                    className="flex items-center gap-1 text-sm bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 shadow-sm transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleCreateDocument(
@@ -174,7 +174,7 @@ export function ResourcesServices() {
                 {isAllowedToCreateDocuments && (
                   <button
                     type="button"
-                    className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-800"
+                    className="flex items-center gap-1 text-sm bg-indigo-500 text-white px-3 py-1 rounded-md hover:bg-indigo-600 shadow-sm transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleCreateDocument(
