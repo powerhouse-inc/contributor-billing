@@ -27,7 +27,8 @@ import { useMemo, useState } from "react";
 const ICON_SIZE = 16;
 const EXPENSE_REPORTS_FOLDER_NAME = "Expense Reports";
 const SNAPSHOT_REPORTS_FOLDER_NAME = "Snapshot Reports";
-const RESOURCE_TEMPLATES_FOLDER_NAME = "Resource Templates";
+const SERVICES_AND_OFFERINGS_FOLDER_NAME = "Services And Offerings";
+const RESOURCE_TEMPLATES_FOLDER_NAME = "Products";
 const SERVICE_OFFERINGS_FOLDER_NAME = "Service Offerings";
 
 /** Custom view types that don't correspond to document models */
@@ -84,7 +85,7 @@ const BASE_NAVIGATION_SECTIONS: SidebarNode[] = [
   },
   {
     id: "resources-services",
-    title: "Resources & Services",
+    title: "Service Offerings",
     icon: <Layers size={ICON_SIZE} />,
   },
   {
@@ -180,25 +181,41 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
     );
   }, [driveDocument]);
 
-  // Find the "Resource Templates" folder in the drive
-  const resourceTemplatesFolder = useMemo(() => {
+  // Find the "Services And Offerings" parent folder in the drive (at root level)
+  const servicesAndOfferingsFolder = useMemo(() => {
     if (!driveDocument) return null;
     const nodes = driveDocument.state.global.nodes;
     return nodes.find(
       (node: Node): node is FolderNode =>
-        isFolderNodeKind(node) && node.name === RESOURCE_TEMPLATES_FOLDER_NAME,
+        isFolderNodeKind(node) &&
+        node.name === SERVICES_AND_OFFERINGS_FOLDER_NAME &&
+        !node.parentFolder,
     );
   }, [driveDocument]);
 
-  // Find the "Service Offerings" folder in the drive
-  const serviceOfferingsFolder = useMemo(() => {
-    if (!driveDocument) return null;
+  // Find the "Products" folder (inside Services And Offerings folder)
+  const resourceTemplatesFolder = useMemo(() => {
+    if (!driveDocument || !servicesAndOfferingsFolder) return null;
     const nodes = driveDocument.state.global.nodes;
     return nodes.find(
       (node: Node): node is FolderNode =>
-        isFolderNodeKind(node) && node.name === SERVICE_OFFERINGS_FOLDER_NAME,
+        isFolderNodeKind(node) &&
+        node.name === RESOURCE_TEMPLATES_FOLDER_NAME &&
+        node.parentFolder === servicesAndOfferingsFolder.id,
     );
-  }, [driveDocument]);
+  }, [driveDocument, servicesAndOfferingsFolder]);
+
+  // Find the "Service Offerings" folder (inside Services And Offerings folder)
+  const serviceOfferingsFolder = useMemo(() => {
+    if (!driveDocument || !servicesAndOfferingsFolder) return null;
+    const nodes = driveDocument.state.global.nodes;
+    return nodes.find(
+      (node: Node): node is FolderNode =>
+        isFolderNodeKind(node) &&
+        node.name === SERVICE_OFFERINGS_FOLDER_NAME &&
+        node.parentFolder === servicesAndOfferingsFolder.id,
+    );
+  }, [driveDocument, servicesAndOfferingsFolder]);
 
   // Build a set of all node IDs that are within the Expense Reports folder tree
   const expenseReportsNodeIds = useMemo(() => {
@@ -548,7 +565,7 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
         nodes={navigationSections}
         activeNodeId={activeNodeId}
         onActiveNodeChange={handleActiveNodeChange}
-        sidebarTitle="Builder Team Admin"
+        sidebarTitle={isOperator ? "Operator Team Admin" : "Builder Team Admin"}
         showSearchBar={false}
         resizable={true}
         allowPinning={false}
