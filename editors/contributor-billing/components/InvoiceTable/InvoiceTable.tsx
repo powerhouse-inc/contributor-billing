@@ -693,7 +693,15 @@ export const InvoiceTable = ({
           );
           // End date: last day of the month at 23:59:59.999 UTC
           const periodEndDate = new Date(
-            Date.UTC(monthDate.getFullYear(), monthDate.getMonth() + 1, 0, 23, 59, 59, 999),
+            Date.UTC(
+              monthDate.getFullYear(),
+              monthDate.getMonth() + 1,
+              0,
+              23,
+              59,
+              59,
+              999,
+            ),
           );
 
           // Set Reporting Period only (Transaction Period is set by user)

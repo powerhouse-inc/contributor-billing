@@ -5,15 +5,17 @@ import {
   Building2,
   User,
 } from "lucide-react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
+  addDocument,
   useDocumentsInSelectedDrive,
+  useSelectedDrive,
   setSelectedNode,
-  showCreateDocumentModal,
 } from "@powerhousedao/reactor-browser";
 import { useBillingFolderStructure } from "../hooks/useBillingFolderStructure.js";
 import type { SelectedFolderInfo } from "./FolderTree.js";
 import type { OperationalHubProfileDocument } from "../../../document-models/operational-hub-profile/gen/types.js";
+import { CreateHubProfileModal } from "./CreateHubProfileModal.js";
 
 interface DashboardHomeProps {
   onFolderSelect?: (folderInfo: SelectedFolderInfo | null) => void;
@@ -25,6 +27,7 @@ interface DashboardHomeProps {
  */
 export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
   const documentsInDrive = useDocumentsInSelectedDrive();
+  const [selectedDrive] = useSelectedDrive();
   const { billingFolder, monthFolders } = useBillingFolderStructure();
 
   // Check if accounts document exists
@@ -46,13 +49,28 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
   const hubName =
     operationalHubProfileDocument?.state?.global?.name || "Operational Hub";
 
-  const handleOpenAccounts = useCallback(() => {
+  // State for custom create hub profile modal
+  const [showCreateHubModal, setShowCreateHubModal] = useState(false);
+
+  const handleOpenAccounts = useCallback(async () => {
     if (accountsDocument) {
       setSelectedNode(accountsDocument.header.id);
     } else {
-      showCreateDocumentModal("powerhouse/accounts");
+      // Auto-create accounts document with name "Accounts"
+      const driveId = selectedDrive?.header.id;
+      if (!driveId) return;
+
+      const createdNode = await addDocument(
+        driveId,
+        "Accounts",
+        "powerhouse/accounts",
+      );
+
+      if (createdNode?.id) {
+        setSelectedNode(createdNode.id);
+      }
     }
-  }, [accountsDocument]);
+  }, [accountsDocument, selectedDrive?.header.id]);
 
   const handleOpenBilling = useCallback(() => {
     onFolderSelect?.({
@@ -65,7 +83,7 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
     if (operationalHubProfileDocument) {
       setSelectedNode(operationalHubProfileDocument.header.id);
     } else {
-      showCreateDocumentModal("powerhouse/operational-hub-profile");
+      setShowCreateHubModal(true);
     }
   }, [operationalHubProfileDocument]);
 
@@ -82,7 +100,7 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
         done: !!accountsDocument,
         label: "Add your accounts",
         description: "Add accounts and fetch transactions",
-        onClick: handleOpenAccounts,
+        onClick: () => void handleOpenAccounts(),
       },
       {
         done: monthFolders.size > 0,
@@ -210,7 +228,7 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
 
         {/* Accounts Card */}
         <button
-          onClick={handleOpenAccounts}
+          onClick={() => void handleOpenAccounts()}
           className="bg-white rounded-xl border border-gray-200 p-5 text-left hover:shadow-md hover:border-blue-200 transition-all group"
         >
           <div className="flex items-start justify-between">
@@ -265,6 +283,11 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
           </div>
         </button>
       </div>
+
+      <CreateHubProfileModal
+        isOpen={showCreateHubModal}
+        onClose={() => setShowCreateHubModal(false)}
+      />
     </div>
   );
 }

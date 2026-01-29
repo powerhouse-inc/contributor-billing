@@ -4,8 +4,8 @@ import {
   type SidebarNode,
 } from "@powerhousedao/document-engineering";
 import {
+  addDocument,
   setSelectedNode,
-  showCreateDocumentModal,
   useDocumentsInSelectedDrive,
   useSelectedDrive,
   isFileNodeKind,
@@ -23,6 +23,7 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { useBillingFolderStructure } from "../hooks/useBillingFolderStructure.js";
 import type { OperationalHubProfileDocument } from "../../../document-models/operational-hub-profile/gen/types.js";
+import { CreateHubProfileModal } from "./CreateHubProfileModal.js";
 
 const ICON_SIZE = 16;
 
@@ -72,6 +73,9 @@ export function FolderTree({
   const [localActiveNodeId, setLocalActiveNodeId] = useState<string>("");
   const activeNodeId = controlledActiveNodeId ?? localActiveNodeId;
   const setActiveNodeId = onActiveNodeIdChange ?? setLocalActiveNodeId;
+
+  // State for custom create hub profile modal
+  const [showCreateHubModal, setShowCreateHubModal] = useState(false);
 
   const documentsInDrive = useDocumentsInSelectedDrive();
   const [driveDocument] = useSelectedDrive();
@@ -222,6 +226,22 @@ export function FolderTree({
     [validDocumentIds],
   );
 
+  // Auto-create accounts document with name "Accounts"
+  const createAccountsDocument = useCallback(async () => {
+    const driveId = driveDocument?.header.id;
+    if (!driveId) return;
+
+    const createdNode = await addDocument(
+      driveId,
+      "Accounts",
+      "powerhouse/accounts",
+    );
+
+    if (createdNode?.id) {
+      setSelectedNode(createdNode.id);
+    }
+  }, [driveDocument?.header.id]);
+
   // Build navigation sections
   const navigationSections = useMemo(() => {
     // Build account-transactions children nodes
@@ -341,7 +361,7 @@ export function FolderTree({
         safeSetSelectedNode(operationalHubProfileDocument.header.id);
       } else {
         safeSetSelectedNode("");
-        showCreateDocumentModal("powerhouse/operational-hub-profile");
+        setShowCreateHubModal(true);
       }
       return;
     }
@@ -366,8 +386,8 @@ export function FolderTree({
         onFolderSelect?.(null);
         safeSetSelectedNode(accountsDocument.header.id);
       } else {
-        safeSetSelectedNode("");
-        showCreateDocumentModal("powerhouse/accounts");
+        // Auto-create accounts document with name "Accounts"
+        void createAccountsDocument();
       }
       return;
     }
@@ -439,36 +459,46 @@ export function FolderTree({
   }, [monthFolders]);
 
   return (
-    <SidebarProvider nodes={navigationSections}>
-      <style>
-        {`
-          .folder-tree-sidebar .sidebar__item-caret--no-children {
-            visibility: hidden;
+    <>
+      <SidebarProvider nodes={navigationSections}>
+        <style>
+          {`
+            .folder-tree-sidebar .sidebar__item-caret--no-children {
+              visibility: hidden;
+            }
+          `}
+        </style>
+        <Sidebar
+          key={sidebarKey}
+          className="pt-1 folder-tree-sidebar"
+          nodes={navigationSections}
+          activeNodeId={sanitizedActiveNodeId}
+          onActiveNodeChange={handleActiveNodeChange}
+          sidebarTitle={
+            operationalHubProfileDocument?.state?.global?.name ||
+            "Operational Hub"
           }
-        `}
-      </style>
-      <Sidebar
-        key={sidebarKey}
-        className="pt-1 folder-tree-sidebar"
-        nodes={navigationSections}
-        activeNodeId={sanitizedActiveNodeId}
-        onActiveNodeChange={handleActiveNodeChange}
-        sidebarTitle={
-          operationalHubProfileDocument?.state?.global?.name ||
-          "Operational Hub"
-        }
-        showSearchBar={false}
-        resizable={true}
-        allowPinning={false}
-        showStatusFilter={false}
-        initialWidth={256}
-        defaultLevel={2}
-        handleOnTitleClick={() => {
+          showSearchBar={false}
+          resizable={true}
+          allowPinning={false}
+          showStatusFilter={false}
+          initialWidth={256}
+          defaultLevel={2}
+          handleOnTitleClick={() => {
+            onFolderSelect?.(null);
+            safeSetSelectedNode("");
+            setActiveNodeId("");
+          }}
+        />
+      </SidebarProvider>
+
+      <CreateHubProfileModal
+        isOpen={showCreateHubModal}
+        onClose={() => setShowCreateHubModal(false)}
+        onCreated={() => {
           onFolderSelect?.(null);
-          safeSetSelectedNode("");
-          setActiveNodeId("");
         }}
       />
-    </SidebarProvider>
+    </>
   );
 }

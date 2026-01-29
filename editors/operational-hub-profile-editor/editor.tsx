@@ -58,7 +58,7 @@ export default function Editor() {
               {/* Name Field */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Name
+                  Hub Name
                 </label>
                 <Input
                   type="text"
@@ -73,14 +73,15 @@ export default function Editor() {
               {/* Operator Team Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Operator Team
+                  Operator Team{" "}
+                  <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
                 <SetOperatorTeam
                   operatorTeam={operatorTeam}
                   dispatch={dispatch}
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  The builder team that operates this hub
+                  Link to the builder team that operates this hub
                 </p>
               </div>
             </div>
@@ -90,10 +91,13 @@ export default function Editor() {
           <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
-                Subteams
+                Subteams{" "}
+                <span className="text-gray-400 font-normal text-base">
+                  (optional)
+                </span>
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Teams managed by this operational hub
+                Add builder teams that are managed by this operational hub
               </p>
             </div>
             <div className="p-4 sm:p-6">
