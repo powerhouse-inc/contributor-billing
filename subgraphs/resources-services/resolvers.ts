@@ -55,7 +55,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               if (operatorId && state.operatorId !== operatorId) {
                 return [];
               }
-              return [mapResourceTemplateState(state)];
+              return [mapResourceTemplateState(state, doc)];
             }
           } catch {
             // Document not found
@@ -103,7 +103,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                   continue;
                 }
 
-                resourceTemplates.push(mapResourceTemplateState(state));
+                resourceTemplates.push(mapResourceTemplateState(state,doc));
               }
             }
           } catch (error) {
@@ -149,7 +149,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               ) {
                 return [];
               }
-              return [mapServiceOfferingState(state)];
+              return [mapServiceOfferingState(state, doc)];
             }
           } catch {
             // Document not found
@@ -205,7 +205,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                   continue;
                 }
 
-                serviceOfferings.push(mapServiceOfferingState(state));
+                serviceOfferings.push(mapServiceOfferingState(state, doc));
               }
             }
           } catch (error) {
@@ -224,9 +224,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
  */
 function mapResourceTemplateState(
   state: ResourceTemplateDocument["state"]["global"],
+  doc: PHDocument,
 ) {
   return {
-    id: state.id,
+    id: doc.header.id,
     operatorId: state.operatorId,
     title: state.title,
     summary: state.summary,
@@ -290,9 +291,10 @@ function mapResourceTemplateState(
  */
 function mapServiceOfferingState(
   state: ServiceOfferingDocument["state"]["global"],
+  doc: PHDocument,
 ) {
   return {
-    id: state.id,
+    id: doc.header.id,
     operatorId: state.operatorId,
     resourceTemplateId: state.resourceTemplateId || null,
     title: state.title,
