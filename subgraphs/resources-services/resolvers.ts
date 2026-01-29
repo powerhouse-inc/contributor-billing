@@ -103,7 +103,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                   continue;
                 }
 
-                resourceTemplates.push(mapResourceTemplateState(state,doc));
+                resourceTemplates.push(mapResourceTemplateState(state, doc));
               }
             }
           } catch (error) {

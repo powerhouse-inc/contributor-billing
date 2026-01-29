@@ -9,18 +9,19 @@ import {
   useUserPermissions,
   showCreateDocumentModal,
 } from "@powerhousedao/reactor-browser";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { FolderNode } from "document-drive";
 import { Plus, FileText, Package } from "lucide-react";
 import { useResourcesServicesAutoPlacement } from "../hooks/useResourcesServicesAutoPlacement.js";
 
-const RESOURCE_TEMPLATES_FOLDER_NAME = "Resource Templates";
+const SERVICES_AND_OFFERINGS_FOLDER_NAME = "Services And Offerings";
+const RESOURCE_TEMPLATES_FOLDER_NAME = "Products";
 const SERVICE_OFFERINGS_FOLDER_NAME = "Service Offerings";
 
 /**
  * Component for the Resources & Services custom view.
- * Shows two auto-generated folders: Resource Templates and Service Offerings.
- * Users can create powerhouse/resource-template docs in Resource Templates
+ * Shows folder structure: Services And Offerings > Products / Service Offerings.
+ * Users can create powerhouse/resource-template docs in Products
  * and powerhouse/service-offering docs in Service Offerings.
  */
 export function ResourcesServices() {
@@ -30,9 +31,12 @@ export function ResourcesServices() {
   const { isAllowedToCreateDocuments } = useUserPermissions();
 
   // Use the shared auto-placement hook - this handles:
-  // 1. Creating the "Resource Templates" folder if it doesn't exist
-  // 2. Creating the "Service Offerings" folder if it doesn't exist
+  // 1. Creating the "Services And Offerings" parent folder if it doesn't exist
+  // 2. Creating the "Products" subfolder if it doesn't exist
+  // 3. Creating the "Service Offerings" subfolder if it doesn't exist
+  // 4. Migrating existing documents from old folder structure
   const {
+    servicesAndOfferingsFolder,
     resourceTemplatesFolder,
     serviceOfferingsFolder,
     resourceTemplateDocuments,
@@ -48,6 +52,7 @@ export function ResourcesServices() {
   // Navigate to root view initially (deselect any node)
   useEffect(() => {
     if (
+      servicesAndOfferingsFolder &&
       resourceTemplatesFolder &&
       serviceOfferingsFolder &&
       !hasNavigatedToFolder.current
@@ -56,14 +61,22 @@ export function ResourcesServices() {
       // Don't select any node so we show the root view with both folders
       setSelectedNode("");
     }
-  }, [resourceTemplatesFolder, serviceOfferingsFolder]);
+  }, [
+    servicesAndOfferingsFolder,
+    resourceTemplatesFolder,
+    serviceOfferingsFolder,
+  ]);
 
   // Show loading state while folders are being created
-  if (!resourceTemplatesFolder || !serviceOfferingsFolder) {
+  if (
+    !servicesAndOfferingsFolder ||
+    !resourceTemplatesFolder ||
+    !serviceOfferingsFolder
+  ) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-gray-500">
-          Setting up Resources & Services folders...
+          Setting up {SERVICES_AND_OFFERINGS_FOLDER_NAME} folders...
         </div>
       </div>
     );
@@ -87,12 +100,12 @@ export function ResourcesServices() {
     return (
       <div>
         <div className="text-2xl font-bold text-center mb-6">
-          Resources & Services
+          {SERVICES_AND_OFFERINGS_FOLDER_NAME}
         </div>
         <div className="space-y-6 px-6">
           <p className="text-gray-600 text-center mb-8">
-            Manage your resource templates and service offerings. Click on a
-            folder to view or create documents.
+            Manage your products and service offerings. Click on a folder to
+            view or create documents.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -110,12 +123,11 @@ export function ResourcesServices() {
                 </h3>
               </div>
               <p className="text-gray-600 text-sm mb-4">
-                Define resource templates that can be used across service
-                offerings.
+                Define products that can be used across service offerings.
               </p>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-500">
-                  {resourceTemplateDocuments.length} template
+                  {resourceTemplateDocuments.length} product
                   {resourceTemplateDocuments.length !== 1 ? "s" : ""}
                 </span>
                 {isAllowedToCreateDocuments && (
@@ -208,7 +220,7 @@ export function ResourcesServices() {
             onClick={() => setSelectedNode("")}
             role="button"
           >
-            Resources & Services
+            {SERVICES_AND_OFFERINGS_FOLDER_NAME}
           </div>
           <span>/</span>
           <div className="text-gray-800">{currentFolderName}</div>
@@ -267,10 +279,7 @@ export function ResourcesServices() {
                 <>
                   {" "}
                   Click "Add new" to create your first{" "}
-                  {isInResourceTemplates
-                    ? "resource template"
-                    : "service offering"}
-                  .
+                  {isInResourceTemplates ? "product" : "service offering"}.
                 </>
               )}
             </p>
