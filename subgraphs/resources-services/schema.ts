@@ -48,8 +48,6 @@ export const schema: DocumentNode = gql`
     setupServices: [String!]!
     recurringServices: [String!]!
     facetTargets: [RSFacetTarget!]!
-    services: [RSResourceService!]!
-    optionGroups: [RSOptionGroup!]!
     faqFields: [RSFaqField!]!
     contentSections: [RSContentSection!]!
   }

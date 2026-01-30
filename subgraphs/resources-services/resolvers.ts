@@ -249,28 +249,6 @@ function mapResourceTemplateState(
       categoryLabel: facet.categoryLabel,
       selectedOptions: facet.selectedOptions,
     })),
-    services: state.services.map((service) => ({
-      id: service.id,
-      title: service.title,
-      description: service.description || null,
-      displayOrder: service.displayOrder ?? null,
-      parentServiceId: service.parentServiceId || null,
-      isSetupFormation: service.isSetupFormation,
-      optionGroupId: service.optionGroupId || null,
-      facetBindings: service.facetBindings.map((binding) => ({
-        id: binding.id,
-        facetName: binding.facetName,
-        facetType: binding.facetType,
-        supportedOptions: binding.supportedOptions,
-      })),
-    })),
-    optionGroups: state.optionGroups.map((group) => ({
-      id: group.id,
-      name: group.name,
-      description: group.description || null,
-      isAddOn: group.isAddOn,
-      defaultSelected: group.defaultSelected,
-    })),
     faqFields: (state.faqFields || []).map((faq) => ({
       id: faq.id,
       question: faq.question || null,
