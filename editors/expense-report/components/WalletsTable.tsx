@@ -833,9 +833,9 @@ export function WalletsTable({
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Wallet
                   </th>
-                  {/* Monthly Budget column - hidden for now, may be needed in the future
+                  {/* Budget Allocation column - hidden for now, may be needed in the future
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
-                    Monthly Budget
+                    Budget Allocation
                   </th>
                   */}
                   {/* Forecast column - hidden for now, may be needed in the future
@@ -971,7 +971,7 @@ export function WalletsTable({
                           </div>
                         )}
                       </td>
-                      {/* Monthly Budget column - hidden for now, may be needed in the future
+                      {/* Budget Allocation column - hidden for now, may be needed in the future
                       <td className="px-3 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                         {formatCurrency(totals.budget)}
                       </td>

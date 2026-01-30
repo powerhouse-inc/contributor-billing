@@ -507,7 +507,7 @@ export function AggregatedExpensesTable({
                 </div>
               </th>
               <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Mthly Budget
+                Budget Allocation
               </th>
               <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Forecast

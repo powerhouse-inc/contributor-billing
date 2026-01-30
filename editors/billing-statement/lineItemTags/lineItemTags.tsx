@@ -2,7 +2,11 @@ import type { Dispatch } from "react";
 import { X, Tag } from "lucide-react";
 import { PowerhouseButton as Button } from "@powerhousedao/design-system/powerhouse/components/index";
 import { Select, DatePicker } from "@powerhousedao/document-engineering/ui";
-import { budgetOptions, expenseAccountOptions } from "./tagMapping.js";
+import type { SelectOption } from "@powerhousedao/document-engineering/ui";
+import {
+  budgetOptions as defaultBudgetOptions,
+  expenseAccountOptions,
+} from "./tagMapping.js";
 import {
   actions,
   type BillingStatementTag,
@@ -21,12 +25,15 @@ interface LineItemTagsTableProps {
   lineItems: TagAssignmentRow[];
   onClose: () => void;
   dispatch: Dispatch<BillingStatementAction>;
+  /** Dynamic budget options from Operational Hub Profile subteams */
+  budgetOptions?: SelectOption[];
 }
 
 export function LineItemTagsTable({
   lineItems,
   onClose,
   dispatch,
+  budgetOptions = defaultBudgetOptions,
 }: LineItemTagsTableProps) {
   const handleReset = () => {
     // Resetting all tags to empty values
@@ -48,7 +55,17 @@ export function LineItemTagsTable({
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white text-slate-800 shadow-[0_18px_50px_rgba(15,23,42,0.10)]">
           {/* Header */}
-          <div className="flex flex-col gap-4 border-b border-slate-200/60 bg-gradient-to-r from-slate-50 to-blue-50/50 px-6 py-5 text-slate-800 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative border-b border-slate-200/60 bg-gradient-to-r from-slate-50 to-blue-50/50 px-6 py-5 text-slate-800">
+            {/* Close button - absolute positioned top right */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute top-4 right-4 inline-flex items-center justify-center rounded-full border border-slate-300/60 bg-slate-100/50 p-2 text-slate-600 transition hover:bg-slate-200/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50"
+              aria-label="Close tag editor"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
             <div className="flex items-center gap-3">
               <div className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200/60 bg-white">
                 <Tag className="h-5 w-5 text-slate-600" />
@@ -63,18 +80,10 @@ export function LineItemTagsTable({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-4">
               <Button color="light" size="small" onClick={handleReset}>
                 Reset
               </Button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="inline-flex items-center justify-center rounded-full border border-slate-300/60 bg-slate-100/50 p-2 text-slate-600 transition hover:bg-slate-200/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50"
-                aria-label="Close tag editor"
-              >
-                <X className="h-5 w-5" />
-              </button>
             </div>
           </div>
 
@@ -95,7 +104,7 @@ export function LineItemTagsTable({
                         EXPENSE ACCOUNT
                       </th>
                       <th className="border-b border-slate-200/60 px-3 py-3 text-left text-[11px] font-medium tracking-[0.20em] text-slate-600">
-                        BUDGET
+                        BUDGET ALLOCATION
                       </th>
                     </tr>
                   </thead>
@@ -108,7 +117,7 @@ export function LineItemTagsTable({
                         <td className="border-b border-slate-200/60 p-2">
                           <InputField
                             value={item.description}
-                            handleInputChange={(e) => {}}
+                            handleInputChange={() => {}}
                             onBlur={(e) => {
                               dispatch(
                                 actions.editLineItem({
@@ -190,7 +199,8 @@ export function LineItemTagsTable({
                                 (tag) => tag.dimension === "budget",
                               )?.value || ""
                             }
-                            placeholder="Select Budget"
+                            placeholder="Select Budget Allocation"
+                            searchable={true}
                             onChange={(value) => {
                               dispatch(
                                 actions.editLineItemTag({

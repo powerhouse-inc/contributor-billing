@@ -337,7 +337,7 @@ export function ExpenseReportPDF({
                             Category
                           </Text>
                           <Text style={[styles.headerCell, styles.budgetCol]}>
-                            Budget
+                            Budget Allocation
                           </Text>
                           <Text style={[styles.headerCell, styles.forecastCol]}>
                             Forecast
