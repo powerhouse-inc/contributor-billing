@@ -127,7 +127,7 @@ export function SubteamsPicker({ subteams, dispatch }: SubteamsPickerProps) {
           />
         </div>
         {isPickerOpen && (
-          <div className="absolute z-10 mt-2 w-full rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+          <div className="absolute z-10 mt-2 w-full max-h-64 overflow-auto rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
             {filteredProfiles.length > 0 ? (
               filteredProfiles.map((profile) => (
                 <button

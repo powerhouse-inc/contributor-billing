@@ -12,6 +12,7 @@ import { useState, useRef, useEffect } from "react";
 import { formatNumber } from "../../invoice/lineItems.js";
 import { LineItemTagsTable } from "../lineItemTags/lineItemTags.js";
 import { generateId } from "document-model";
+import { useOperationalHubSubteams } from "../../hooks/useOperationalHubSubteams.js";
 
 const initialLineItem: LocalLineItemDraft = {
   description: "",
@@ -47,6 +48,7 @@ const LineItemsTable = (props: {
   dispatch: React.Dispatch<BillingStatementAction>;
 }) => {
   const { state, dispatch } = props;
+  const { budgetOptions } = useOperationalHubSubteams();
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [localLineItem, setLocalLineItem] =
     useState<LocalLineItemDraft>(initialLineItem);
@@ -236,6 +238,7 @@ const LineItemsTable = (props: {
         lineItems={state.lineItems as unknown as any}
         onClose={() => setShowTagTable(false)}
         dispatch={dispatch}
+        budgetOptions={budgetOptions.length > 0 ? budgetOptions : undefined}
       />
     );
   }

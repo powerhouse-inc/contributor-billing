@@ -1,0 +1,309 @@
+import { useCallback, useState, useMemo, useRef, useEffect } from "react";
+import { BarChart3, Plus, ChevronDown } from "lucide-react";
+import type { MonthFolderInfo } from "../hooks/useBillingFolderStructure.js";
+import {
+  useSelectedDrive,
+  addDocument,
+  dispatchActions,
+  setSelectedNode,
+} from "@powerhousedao/reactor-browser";
+import { setName } from "document-model";
+import { moveNode } from "document-drive";
+import { useMonthlyReports } from "../hooks/useMonthlyReports.js";
+import { MonthReportCard } from "./MonthReportCard.js";
+import { actions as expenseReportActions } from "../../../document-models/expense-report/index.js";
+import type { SelectedFolderInfo } from "./FolderTree.js";
+
+interface MonthlyReportsOverviewProps {
+  onFolderSelect?: (folderInfo: SelectedFolderInfo | null) => void;
+  monthFolders?: Map<string, MonthFolderInfo>;
+  onCreateMonth?: (monthName: string) => Promise<void>;
+}
+
+/**
+ * Format a date to month name like "January 2026"
+ */
+function formatMonthName(date: Date): string {
+  return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
+
+/**
+ * Format month name like "January 2026" to "01-2026"
+ */
+function formatMonthCode(monthName: string): string {
+  const date = new Date(monthName + " 1");
+  if (isNaN(date.getTime())) return monthName;
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month}-${year}`;
+}
+
+/**
+ * Parse a month name like "January 2026" into start and end dates (UTC)
+ */
+function parseMonthDates(monthName: string): {
+  start: Date;
+  end: Date;
+} | null {
+  const date = new Date(monthName + " 1");
+  if (isNaN(date.getTime())) return null;
+
+  // Use UTC to avoid timezone issues
+  const start = new Date(Date.UTC(date.getFullYear(), date.getMonth(), 1));
+  const end = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999),
+  );
+  return { start, end };
+}
+
+/**
+ * Monthly Reports Overview component for the billing page
+ * Shows collapsible month cards with reports and status
+ */
+export function MonthlyReportsOverview({
+  monthFolders,
+  onCreateMonth,
+}: MonthlyReportsOverviewProps) {
+  const { monthReportSets, isLoading } = useMonthlyReports();
+  const [selectedDrive] = useSelectedDrive();
+  const [isCreating, setIsCreating] = useState(false);
+  const [isAddingMonth, setIsAddingMonth] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const driveId = selectedDrive?.header.id;
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Get all months from January 2025 to next month, with exists flag
+  const allMonths = useMemo(() => {
+    const months: Array<{ name: string; exists: boolean }> = [];
+    const today = new Date();
+    const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const startDate = new Date(2025, 0, 1);
+
+    const currentDate = new Date(endDate);
+    while (currentDate >= startDate) {
+      const monthName = formatMonthName(currentDate);
+      months.push({
+        name: monthName,
+        exists: monthFolders?.has(monthName) ?? false,
+      });
+      currentDate.setMonth(currentDate.getMonth() - 1);
+    }
+    return months;
+  }, [monthFolders]);
+
+  const handleCreateMonth = useCallback(
+    async (monthName: string) => {
+      if (!onCreateMonth || isAddingMonth) return;
+      setIsAddingMonth(true);
+      try {
+        await onCreateMonth(monthName);
+        setIsDropdownOpen(false);
+      } finally {
+        setIsAddingMonth(false);
+      }
+    },
+    [onCreateMonth, isAddingMonth],
+  );
+
+  const handleCreateExpenseReport = useCallback(
+    async (monthName: string, folderId: string) => {
+      if (!driveId || isCreating) return;
+      setIsCreating(true);
+
+      try {
+        const monthCode = formatMonthCode(monthName);
+        // Find existing expense reports for this month to determine number
+        const monthSet = monthReportSets.find((s) => s.monthName === monthName);
+        const reportNumber = (monthSet?.expenseReports.length || 0) + 1;
+        const reportName = `${monthCode} Expense Report ${reportNumber}`;
+
+        const createdNode = await addDocument(
+          driveId,
+          reportName,
+          "powerhouse/expense-report",
+          undefined,
+          undefined,
+          undefined,
+          "powerhouse-expense-report-editor",
+        );
+
+        if (!createdNode?.id) return;
+
+        // Move to reporting folder
+        if (folderId) {
+          await dispatchActions(
+            moveNode({
+              srcFolder: createdNode.id,
+              targetParentFolder: folderId,
+            }),
+            driveId,
+          );
+        }
+
+        // Set the document name
+        await dispatchActions(setName(reportName), createdNode.id);
+
+        // Set Reporting Period based on month (Transaction Period is set by user)
+        const dates = parseMonthDates(monthName);
+        if (dates) {
+          await dispatchActions(
+            [
+              expenseReportActions.setPeriodStart({
+                periodStart: dates.start.toISOString(),
+              }),
+              expenseReportActions.setPeriodEnd({
+                periodEnd: dates.end.toISOString(),
+              }),
+            ],
+            createdNode.id,
+          );
+        }
+
+        // Open the created report
+        setSelectedNode(createdNode.id);
+      } finally {
+        setIsCreating(false);
+      }
+    },
+    [driveId, isCreating, monthReportSets],
+  );
+
+  // Add Month button component (reused across states)
+  const addMonthButton = onCreateMonth && (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        disabled={isAddingMonth}
+        className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <Plus className="w-4 h-4" />
+        {isAddingMonth ? "Adding..." : "Add Month"}
+        <ChevronDown className="w-3 h-3" />
+      </button>
+
+      {isDropdownOpen && (
+        <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+          <div className="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
+            Select a month to add
+          </div>
+          <div className="max-h-72 overflow-y-auto">
+            {allMonths.map(({ name, exists }) => (
+              <button
+                key={name}
+                onClick={() => void handleCreateMonth(name)}
+                disabled={isAddingMonth || exists}
+                className={`w-full px-3 py-2 text-left text-sm ${
+                  exists
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-gray-700 hover:bg-gray-50"
+                } disabled:cursor-not-allowed`}
+              >
+                {name}
+                {exists && (
+                  <span className="ml-2 text-xs text-gray-400">(exists)</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="animate-pulse">
+          <div className="flex items-center justify-between gap-3 mb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-gray-200 rounded-lg" />
+              <div>
+                <div className="h-5 bg-gray-200 rounded w-36 mb-2" />
+                <div className="h-4 bg-gray-100 rounded w-56" />
+              </div>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div className="h-16 bg-gray-100 rounded-xl" />
+            <div className="h-16 bg-gray-100 rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (monthReportSets.length === 0) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="flex items-center justify-between gap-3 mb-5">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <BarChart3 className="w-5 h-5 text-indigo-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Monthly Reports
+              </h2>
+              <p className="text-sm text-gray-600">
+                Quick access to expense and snapshot reports
+              </p>
+            </div>
+          </div>
+          {addMonthButton}
+        </div>
+        <p className="text-gray-500 text-sm text-center py-4">
+          No months configured yet. Click "Add Month" to get started.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-6">
+      {/* Header with Add Month button */}
+      <div className="flex items-center justify-between gap-3 mb-5">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-indigo-100 rounded-lg">
+            <BarChart3 className="w-5 h-5 text-indigo-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Monthly Reports
+            </h2>
+            <p className="text-sm text-gray-600">
+              Quick access to expense and snapshot reports
+            </p>
+          </div>
+        </div>
+        {addMonthButton}
+      </div>
+
+      {/* Month cards */}
+      <div className="space-y-3">
+        {monthReportSets.map((reportSet, index) => (
+          <MonthReportCard
+            key={reportSet.monthName}
+            reportSet={reportSet}
+            defaultExpanded={index === 0}
+            onCreateExpenseReport={handleCreateExpenseReport}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}

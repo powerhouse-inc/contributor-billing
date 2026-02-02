@@ -8,7 +8,6 @@ import {
   useSelectedDrive,
 } from "@powerhousedao/reactor-browser";
 import { generateId } from "document-model/core";
-import { setName } from "document-model";
 import { useSelectedAccountsDocument } from "../hooks/useAccountsDocument.js";
 import {
   addAccount,
@@ -22,7 +21,6 @@ import type {
   KycAmlStatusTypeInput,
 } from "../../document-models/accounts/gen/schema/types.js";
 import { AccountForm } from "./components/AccountForm.js";
-import { DocumentHeader } from "./components/DocumentHeader.js";
 import { AccountsList } from "./components/AccountsList.js";
 import { accountTransactionsService } from "./services/accountTransactionsService.js";
 
@@ -52,8 +50,9 @@ function InstructionSection({ onDismiss }: { onDismiss: () => void }) {
             onClick={onDismiss}
             className="p-1 hover:bg-blue-200 rounded text-blue-600"
             title="Don't show again"
+            aria-label="Dismiss help section"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -107,6 +106,18 @@ function InstructionSection({ onDismiss }: { onDismiss: () => void }) {
                 organization
               </li>
             </ul>
+          </div>
+          <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mt-2">
+            <strong className="text-amber-900">
+              📊 Why fetch transactions?
+            </strong>
+            <p className="mt-1 text-amber-800">
+              Transaction history is essential for generating accurate expense
+              reports. Without complete transaction data, your reports may have
+              gaps or inaccuracies. After adding an account, click "Fetch
+              Transaction History" and sync regularly to ensure your reporting
+              is complete.
+            </p>
           </div>
         </div>
       )}
@@ -360,12 +371,7 @@ export function Editor() {
 
       <div className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <DocumentHeader
-            document={document}
-            onNameChange={(name) => dispatch(setName(name))}
-          />
-
-          <div className="mt-8">
+          <div>
             {viewMode === "list" && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">

@@ -53,12 +53,14 @@ export function AccountCard({
               onClick={() => onEdit(account)}
               className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
               title="Edit account"
+              aria-label={`Edit account ${account.name}`}
             >
               <svg
                 className="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -72,12 +74,14 @@ export function AccountCard({
               onClick={() => onDelete(account.id)}
               className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
               title="Delete account"
+              aria-label={`Delete account ${account.name}`}
             >
               <svg
                 className="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -166,6 +170,9 @@ export function AccountCard({
                   onClick={() => setShowKycMenu(!showKycMenu)}
                   className="hover:opacity-80 transition-opacity"
                   title="Update KYC/AML status"
+                  aria-label={`Update KYC/AML status for ${account.name}, currently ${account.KycAmlStatus || "Not Set"}`}
+                  aria-expanded={showKycMenu}
+                  aria-haspopup="true"
                 >
                   <KYCStatusBadge status={account.KycAmlStatus} />
                 </button>
@@ -205,7 +212,7 @@ export function AccountCard({
               </div>
             </div>
 
-            {/* Create Transactions Button or Link */}
+            {/* Transaction History Section */}
             {onCreateTransactions && (
               <div className="flex flex-col gap-2">
                 {account.accountTransactionsId ? (
@@ -215,6 +222,7 @@ export function AccountCard({
                       setSelectedNode(account.accountTransactionsId!)
                     }
                     className="w-full bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg p-3 transition-colors text-left"
+                    aria-label={`View transaction history for ${account.name}`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
@@ -223,6 +231,7 @@ export function AccountCard({
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
+                          aria-hidden="true"
                         >
                           <path
                             strokeLinecap="round"
@@ -233,10 +242,10 @@ export function AccountCard({
                         </svg>
                         <div>
                           <span className="text-sm font-medium text-blue-900">
-                            View Transactions Document
+                            View Transaction History
                           </span>
-                          <p className="text-xs text-blue-600 font-mono mt-0.5">
-                            {account.accountTransactionsId}
+                          <p className="text-xs text-blue-600 mt-0.5">
+                            Transactions synced for reporting
                           </p>
                         </div>
                       </div>
@@ -245,6 +254,7 @@ export function AccountCard({
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
+                        aria-hidden="true"
                       >
                         <path
                           strokeLinecap="round"
@@ -256,54 +266,83 @@ export function AccountCard({
                     </div>
                   </button>
                 ) : (
-                  // Show create button if no transactions document exists
-                  <Button
-                    onClick={() => onCreateTransactions(account)}
-                    disabled={isCreatingTransactions}
-                    className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2.5 rounded-lg font-medium shadow-sm transition-colors flex items-center justify-center gap-2"
-                  >
-                    {isCreatingTransactions ? (
-                      <>
-                        <svg
-                          className="animate-spin h-4 w-4 text-white"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
+                  // Show warning and create button if no transactions document exists
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <svg
+                        className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
+                      </svg>
+                      <div>
+                        <p className="text-sm font-medium text-amber-900">
+                          No transaction history
+                        </p>
+                        <p className="text-xs text-amber-700 mt-0.5">
+                          Fetch transactions to enable accurate expense
+                          reporting
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => onCreateTransactions(account)}
+                      disabled={isCreatingTransactions}
+                      className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2.5 rounded-lg font-medium shadow-sm transition-colors"
+                    >
+                      {isCreatingTransactions ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <svg
+                            className="animate-spin h-4 w-4 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
+                          </svg>
+                          Fetching transactions…
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center gap-2">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
                             stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
-                        Creating...
-                      </>
-                    ) : (
-                      <>
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                          />
-                        </svg>
-                        Create Transactions
-                      </>
-                    )}
-                  </Button>
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                            />
+                          </svg>
+                          Fetch Transaction History
+                        </span>
+                      )}
+                    </Button>
+                  </div>
                 )}
               </div>
             )}

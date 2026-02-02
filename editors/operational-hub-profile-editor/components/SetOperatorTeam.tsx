@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useDrives } from "@powerhousedao/reactor-browser";
+import { PHIDInput } from "@powerhousedao/document-engineering";
 import { setOperatorTeam } from "../../../document-models/operational-hub-profile/gen/configuration/creators.js";
 
-type BuilderProfileOption = {
+type ProfileOption = {
   id: string;
-  name: string;
-  driveId: string;
+  label: string;
+  value: string;
+  title: string;
 };
 
 type SetOperatorTeamProps = {
@@ -18,11 +20,9 @@ export function SetOperatorTeam({
   dispatch,
 }: SetOperatorTeamProps) {
   const drives = useDrives();
-  const [query, setQuery] = useState("");
-  const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const pickerRef = useRef<HTMLDivElement | null>(null);
 
-  const builderProfiles = useMemo<BuilderProfileOption[]>(() => {
+  // Build options from builder profiles in connected drives
+  const builderProfileOptions = useMemo<ProfileOption[]>(() => {
     if (!drives) return [];
     return drives
       .filter(
@@ -40,124 +40,62 @@ export function SetOperatorTeam({
           )
           .map((node) => ({
             id: node.id,
-            name: node.name || "Untitled builder",
-            driveId: drive.header.id,
+            label: node.name || "Untitled builder",
+            value: node.id,
+            title: node.name || "Untitled builder",
           })),
       );
   }, [drives]);
 
-  const selectedProfile = useMemo(
-    () => builderProfiles.find((profile) => profile.id === operatorTeam),
-    [builderProfiles, operatorTeam],
+  // Check if a value is a known PHID from options
+  const isKnownPhid = useCallback(
+    (phid: string) => builderProfileOptions.some((opt) => opt.value === phid),
+    [builderProfileOptions],
   );
 
-  const showPicker = !operatorTeam || isPickerOpen;
-  const normalizedQuery = query.trim().toLowerCase();
-  const filteredProfiles = normalizedQuery
-    ? builderProfiles.filter((profile) =>
-        profile.name.toLowerCase().includes(normalizedQuery),
-      )
-    : builderProfiles.slice(0, 5);
-  const shouldShowOptions = isPickerOpen;
-
-  const handleSelect = (profile: BuilderProfileOption) => {
-    dispatch(setOperatorTeam({ operatorTeam: profile.id }));
-    setQuery("");
-    setIsPickerOpen(false);
-  };
-
-  const handleManualSelect = (value: string) => {
-    const trimmed = value.trim();
-    if (!trimmed) return;
-    dispatch(setOperatorTeam({ operatorTeam: trimmed }));
-    setQuery("");
-    setIsPickerOpen(false);
-  };
-
-  useEffect(() => {
-    if (!isPickerOpen) return;
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        pickerRef.current &&
-        event.target instanceof Node &&
-        !pickerRef.current.contains(event.target)
-      ) {
-        setIsPickerOpen(false);
+  const handleSave = useCallback(
+    (phid: string) => {
+      if (phid !== operatorTeam) {
+        dispatch(setOperatorTeam({ operatorTeam: phid || null }));
       }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isPickerOpen]);
+    },
+    [dispatch, operatorTeam],
+  );
+
+  // Fetch options callback for search
+  const fetchOptionsCallback = useCallback(
+    (input: string): Promise<ProfileOption[]> => {
+      const normalizedInput = input.toLowerCase().trim();
+      if (!normalizedInput)
+        return Promise.resolve(builderProfileOptions.slice(0, 10));
+      return Promise.resolve(
+        builderProfileOptions.filter(
+          (opt) =>
+            opt.label.toLowerCase().includes(normalizedInput) ||
+            opt.value.toLowerCase().includes(normalizedInput),
+        ),
+      );
+    },
+    [builderProfileOptions],
+  );
 
   return (
-    <div className="w-full">
-      {showPicker ? (
-        <div className="relative" ref={pickerRef}>
-          <input
-            type="text"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            onFocus={() => setIsPickerOpen(true)}
-            placeholder="Search builder name"
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-gray-400 dark:focus:ring-gray-800"
-          />
-          {shouldShowOptions ? (
-            filteredProfiles.length > 0 ? (
-              <div className="absolute z-10 mt-2 w-full rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
-                {filteredProfiles.map((profile) => (
-                  <button
-                    key={`${profile.driveId}-${profile.id}`}
-                    type="button"
-                    onClick={() => handleSelect(profile)}
-                    className="flex w-full flex-col px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800"
-                  >
-                    <span className="font-medium">{profile.name}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {profile.id}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="absolute z-10 mt-2 w-full rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
-                <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
-                  No matching builders
-                </div>
-                {normalizedQuery ? (
-                  <button
-                    type="button"
-                    onClick={() => handleManualSelect(query)}
-                    className="flex w-full flex-col px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800"
-                  >
-                    <span className="font-medium">Use this ID</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {query}
-                    </span>
-                  </button>
-                ) : null}
-              </div>
-            )
-          ) : null}
-        </div>
-      ) : (
-        <div className="rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            {selectedProfile?.name || "Unknown builder"}
-          </div>
-          <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400 truncate">
-            {operatorTeam}
-          </div>
-          <div className="mt-2">
-            <button
-              type="button"
-              onClick={() => setIsPickerOpen(true)}
-              className="text-xs font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-            >
-              Change operator team
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+    <PHIDInput
+      value={operatorTeam || ""}
+      onChange={(newValue) => {
+        // onChange is called when user selects from dropdown
+        if (isKnownPhid(newValue)) {
+          handleSave(newValue);
+        }
+      }}
+      onBlur={() => {
+        // Handle manual entry on blur - not directly available, handled via onChange
+      }}
+      placeholder="Search builder name or enter PHID"
+      className="w-full"
+      variant="withValueAndTitle"
+      initialOptions={builderProfileOptions}
+      fetchOptionsCallback={fetchOptionsCallback}
+    />
   );
 }

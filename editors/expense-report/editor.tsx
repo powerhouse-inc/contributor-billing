@@ -448,7 +448,11 @@ export default function Editor() {
                     />
                   </div>
                   {/* Owner */}
-                  <SetOwner ownerId={ownerId} dispatch={dispatch} />
+                  <SetOwner
+                    ownerId={ownerId}
+                    periodStart={periodStart}
+                    dispatch={dispatch}
+                  />
                 </div>
 
                 {/* Transaction Period - exact same structure as Snapshot Report editor */}

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDrives } from "@powerhousedao/reactor-browser";
+import { setName } from "document-model";
 import { setOwnerId } from "../../../document-models/expense-report/gen/wallet/creators.js";
 import type { ExpenseReportDocument } from "../../../document-models/expense-report/gen/types.js";
 import {
@@ -13,12 +14,26 @@ type BuilderProfileOption = {
   driveId: string;
 };
 
+/**
+ * Format month code from ISO date string like "2026-01-01T00:00:00.000Z" to "01-2026"
+ */
+function formatMonthCodeFromDate(isoDate: string): string {
+  const date = new Date(isoDate);
+  if (isNaN(date.getTime())) return "";
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const year = date.getUTCFullYear();
+  return `${month}-${year}`;
+}
+
 type SetOwnerProps = {
   ownerId?: string | null;
-  dispatch: (action: ReturnType<typeof setOwnerId>) => void;
+  periodStart?: string | null;
+  dispatch: (
+    action: ReturnType<typeof setOwnerId> | ReturnType<typeof setName>,
+  ) => void;
 };
 
-export function SetOwner({ ownerId, dispatch }: SetOwnerProps) {
+export function SetOwner({ ownerId, periodStart, dispatch }: SetOwnerProps) {
   const drives = useDrives();
   const [query, setQuery] = useState("");
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -69,6 +84,15 @@ export function SetOwner({ ownerId, dispatch }: SetOwnerProps) {
 
   const handleSelect = (profile: BuilderProfileOption) => {
     dispatch(setOwnerId({ ownerId: profile.id }));
+
+    // Auto-update document name with team name
+    if (periodStart) {
+      const monthCode = formatMonthCodeFromDate(periodStart);
+      if (monthCode) {
+        dispatch(setName(`${monthCode} ${profile.name}`));
+      }
+    }
+
     setQuery("");
     setIsPickerOpen(false);
   };
