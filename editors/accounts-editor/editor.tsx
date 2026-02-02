@@ -50,8 +50,9 @@ function InstructionSection({ onDismiss }: { onDismiss: () => void }) {
             onClick={onDismiss}
             className="p-1 hover:bg-blue-200 rounded text-blue-600"
             title="Don't show again"
+            aria-label="Dismiss help section"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -105,6 +106,18 @@ function InstructionSection({ onDismiss }: { onDismiss: () => void }) {
                 organization
               </li>
             </ul>
+          </div>
+          <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mt-2">
+            <strong className="text-amber-900">
+              📊 Why fetch transactions?
+            </strong>
+            <p className="mt-1 text-amber-800">
+              Transaction history is essential for generating accurate expense
+              reports. Without complete transaction data, your reports may have
+              gaps or inaccuracies. After adding an account, click "Fetch
+              Transaction History" and sync regularly to ensure your reporting
+              is complete.
+            </p>
           </div>
         </div>
       )}
