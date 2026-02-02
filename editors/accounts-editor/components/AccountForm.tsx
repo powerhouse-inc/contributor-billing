@@ -7,6 +7,7 @@ import {
 } from "@powerhousedao/document-engineering";
 import { Tooltip, TooltipProvider } from "@powerhousedao/design-system/ui";
 import { Info } from "lucide-react";
+import { isValidEthereumAddress } from "../../../scripts/alchemy/alchemyHelpers.js";
 import type {
   AccountEntry,
   AccountTypeInput,
@@ -40,9 +41,34 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
     owners: account?.owners?.join(", ") || "",
     KycAmlStatus: account?.KycAmlStatus || ("" as KycAmlStatusTypeInput | ""),
   });
+  const [accountError, setAccountError] = useState<string>("");
+
+  function validateAccount(address: string): boolean {
+    if (!address || address.trim() === "") {
+      setAccountError("Account address is required");
+      return false;
+    }
+    if (!isValidEthereumAddress(address.trim())) {
+      setAccountError("Invalid Ethereum address format. Must be 0x followed by 40 hexadecimal characters.");
+      return false;
+    }
+    setAccountError("");
+    return true;
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // Validate Ethereum address
+    if (!validateAccount(formData.account)) {
+      const accountInput = e.currentTarget.querySelector<HTMLInputElement>(
+        'input[name="account"]',
+      );
+      if (accountInput) {
+        accountInput.focus();
+      }
+      return;
+    }
 
     const chain = formData.chain
       .split(",")
@@ -71,7 +97,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
 
     onSubmit({
       ...(account?.id && { id: account.id }),
-      account: formData.account,
+      account: formData.account.trim(),
       name: formData.name,
       budgetPath: formData.budgetPath || undefined,
       accountTransactionsId: formData.accountTransactionsId || undefined,
@@ -83,10 +109,16 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white rounded-xl border border-gray-200 shadow-sm p-6"
-    >
+    <>
+      <style>{`
+        input[name="account"]::placeholder {
+          font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+      `}</style>
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-xl border border-gray-200 shadow-sm p-6"
+      >
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -95,14 +127,36 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
             </label>
             <input
               type="text"
+              name="account"
               value={formData.account}
-              onChange={(e) =>
-                setFormData({ ...formData, account: e.target.value })
-              }
+              onChange={(e) => {
+                const value = e.target.value;
+                setFormData({ ...formData, account: value });
+                // Clear error when user starts typing
+                if (accountError) {
+                  setAccountError("");
+                }
+              }}
+              onBlur={(e) => {
+                // Validate on blur
+                validateAccount(e.target.value);
+              }}
               placeholder="e.g., 0x1234...abcd"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono ${
+                accountError
+                  ? "border-red-300 focus:ring-red-500"
+                  : "border-gray-300"
+              }`}
               required
             />
+            {accountError && (
+              <p className="mt-1 text-sm text-red-600">{accountError}</p>
+            )}
+            {!accountError && formData.account && (
+              <p className="mt-1 text-xs text-gray-500">
+                Ethereum address format: 0x followed by 40 hexadecimal characters
+              </p>
+            )}
           </div>
 
           <div>
@@ -285,5 +339,6 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
         </Button>
       </div>
     </form>
+    </>
   );
 }
