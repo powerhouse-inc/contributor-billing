@@ -3,29 +3,7 @@
  * This is used as a fallback when local drives don't have the builder profile documents.
  */
 
-function getGraphQLUrl(): string {
-  if (typeof window === "undefined") {
-    return "http://localhost:4001/graphql";
-  }
-
-  const baseURI = window.document.baseURI;
-
-  if (baseURI.includes("localhost")) {
-    return "http://localhost:4001/graphql";
-  }
-
-  // Determine the appropriate Switchboard URL based on environment
-  if (baseURI.includes("-dev.")) {
-    return "https://switchboard-dev.powerhouse.xyz/graphql";
-  }
-
-  if (baseURI.includes("-staging.")) {
-    return "https://switchboard-staging.powerhouse.xyz/graphql";
-  }
-
-  // Production environment
-  return "https://switchboard.powerhouse.xyz/graphql";
-}
+import { getGraphQLUrl } from "../../shared/graphql.js";
 
 interface GraphQLResponse<T> {
   data?: T;
