@@ -277,11 +277,21 @@ export function FolderTree({
       }
 
       if (info.reportingFolder) {
-        // Filter reports that match this specific month by name (matches both old "January 2026" and new "01-2026" formats)
+        // Filter reports that are in this Reporting folder OR match this specific month by name
+        // This allows uploaded documents to show up even if their name doesn't match the month
         const monthLower = monthName.toLowerCase();
         const monthCode = formatMonthCode(monthName);
 
         const folderReports = reportDocuments.filter((doc) => {
+          // First check if document is actually in this Reporting folder
+          if (info.reportingFolder) {
+            const docParentFolder = documentParentMap.get(doc.header.id);
+            if (docParentFolder === info.reportingFolder.id) {
+              return true; // Document is in the folder, show it regardless of name
+            }
+          }
+          
+          // Otherwise, check if name matches the month (for backwards compatibility)
           const docName = doc.header.name || "";
           return (
             docName.toLowerCase().includes(monthLower) ||
@@ -446,17 +456,30 @@ export function FolderTree({
     safeSetSelectedNode("");
   };
 
-  // Generate a stable key based on the folder structure to force Sidebar remount when folders change
-  // Only tracks folder IDs - not document count, to prevent sidebar collapse when documents are added
+  // Generate a stable key based on the folder structure and document IDs
+  // This ensures the sidebar remounts when folders OR documents change, preventing state sync issues
   const sidebarKey = useMemo(() => {
     const nodeIds: string[] = [];
+    
+    // Include folder IDs
     for (const [, info] of monthFolders.entries()) {
       nodeIds.push(info.folder.id);
       if (info.paymentsFolder) nodeIds.push(info.paymentsFolder.id);
       if (info.reportingFolder) nodeIds.push(info.reportingFolder.id);
     }
+    
+    // Include document IDs to force remount when documents are added/removed
+    // This prevents the sidebar from trying to update toggle state for nodes that don't exist
+    if (documentsInDrive) {
+      const docIds = documentsInDrive
+        .map((doc) => doc.header.id)
+        .sort()
+        .slice(0, 20); // Limit to first 20 to keep key manageable
+      nodeIds.push(...docIds);
+    }
+    
     return nodeIds.join("-") || "empty";
-  }, [monthFolders]);
+  }, [monthFolders, documentsInDrive]);
 
   return (
     <>

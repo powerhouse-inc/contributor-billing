@@ -4,6 +4,7 @@ import { useState } from "react";
 import { DriveContents } from "./DriveContents.js";
 import { FolderTree, type SelectedFolderInfo } from "./FolderTree.js";
 import { FolderTreeErrorBoundary } from "./FolderTreeErrorBoundary.js";
+import { DocumentDropZone } from "./DocumentDropZone.js";
 
 /**
  * Main drive explorer component for Contributor Billing.
@@ -57,7 +58,7 @@ export function DriveExplorer({ children }: EditorProps) {
       />
 
       {/* Main content area - takes remaining space, scrollable */}
-      <div className="flex-1 min-w-0 h-full overflow-auto">
+      <DocumentDropZone className="flex-1 min-w-0 h-full overflow-auto">
         {/* Conditional rendering: Document editor or folder content */}
         {showDocumentEditor ? (
           /* Document editor view */
@@ -69,7 +70,7 @@ export function DriveExplorer({ children }: EditorProps) {
             onFolderSelect={handleFolderSelect}
           />
         )}
-      </div>
+      </DocumentDropZone>
     </div>
   );
 }

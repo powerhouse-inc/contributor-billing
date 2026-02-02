@@ -4,6 +4,7 @@ import {
   addDocument,
   dispatchActions,
   useSelectedDrive,
+  isFileNodeKind,
 } from "@powerhousedao/reactor-browser";
 import { useMemo, useState } from "react";
 import { FileText, Camera, Plus } from "lucide-react";
@@ -51,30 +52,62 @@ export function ReportingView({ folderId, monthName }: ReportingViewProps) {
   const [selectedDrive] = useSelectedDrive();
   const [isCreating, setIsCreating] = useState(false);
 
-  // Find expense reports and snapshot reports that match this month (matches both old "January 2026" and new "01-2026" formats)
+  // Find expense reports and snapshot reports in this Reporting folder
+  // Also includes documents that match the month by name (for backwards compatibility)
   const { expenseReports, snapshotReports } = useMemo(() => {
     if (!documentsInDrive || !monthName) {
       return { expenseReports: [], snapshotReports: [] };
     }
 
+    const allNodes = selectedDrive?.state.global.nodes || [];
+    
+    // Build a map of document ID to parent folder ID
+    const documentParentMap = new Map<string, string | null>();
+    for (const node of allNodes) {
+      if (isFileNodeKind(node)) {
+        documentParentMap.set(node.id, node.parentFolder);
+      }
+    }
+
     const monthLower = monthName.toLowerCase();
     const monthCode = formatMonthCode(monthName);
 
-    const expense = documentsInDrive.filter(
-      (doc) =>
-        doc.header.documentType === "powerhouse/expense-report" &&
-        (doc.header.name?.toLowerCase().includes(monthLower) ||
-          doc.header.name?.includes(monthCode)),
-    );
-    const snapshot = documentsInDrive.filter(
-      (doc) =>
-        doc.header.documentType === "powerhouse/snapshot-report" &&
-        (doc.header.name?.toLowerCase().includes(monthLower) ||
-          doc.header.name?.includes(monthCode)),
-    );
+    const expense = documentsInDrive.filter((doc) => {
+      if (doc.header.documentType !== "powerhouse/expense-report") return false;
+      
+      // Check if document is in this Reporting folder
+      const docParentFolder = documentParentMap.get(doc.header.id);
+      if (docParentFolder === folderId) {
+        return true; // Document is in the folder, show it
+      }
+      
+      // Otherwise, check if name matches the month (for backwards compatibility)
+      const docName = doc.header.name || "";
+      return (
+        docName.toLowerCase().includes(monthLower) ||
+        docName.includes(monthCode)
+      );
+    });
+    
+    const snapshot = documentsInDrive.filter((doc) => {
+      if (doc.header.documentType !== "powerhouse/snapshot-report") return false;
+      
+      // Check if document is in this Reporting folder
+      const docParentFolder = documentParentMap.get(doc.header.id);
+      if (docParentFolder === folderId) {
+        return true; // Document is in the folder, show it
+      }
+      
+      // Otherwise, check if name matches the month (for backwards compatibility)
+      const docName = doc.header.name || "";
+      return (
+        docName.toLowerCase().includes(monthLower) ||
+        docName.includes(monthCode)
+      );
+    });
 
     return { expenseReports: expense, snapshotReports: snapshot };
-  }, [documentsInDrive, monthName]);
+  }, [documentsInDrive, monthName, folderId, selectedDrive]);
 
   const handleOpenDocument = (docId: string) => {
     setSelectedNode(docId);

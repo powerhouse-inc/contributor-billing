@@ -142,7 +142,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
                 validateAccount(e.target.value);
               }}
               placeholder="e.g., 0x1234...abcd"
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono ${
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                 accountError
                   ? "border-red-300 focus:ring-red-500"
                   : "border-gray-300"
@@ -268,23 +268,25 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Account Transactions ID
-          </label>
-          <input
-            type="text"
-            value={formData.accountTransactionsId}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                accountTransactionsId: e.target.value,
-              })
-            }
-            placeholder="e.g., tx-12345"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
+        {account && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Account Transactions ID
+            </label>
+            <input
+              type="text"
+              value={formData.accountTransactionsId}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  accountTransactionsId: e.target.value,
+                })
+              }
+              placeholder="e.g., tx-12345"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
