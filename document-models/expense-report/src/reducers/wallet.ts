@@ -172,12 +172,10 @@ export const expenseReportWalletOperations: ExpenseReportWalletOperations = {
           lineItem.forecast = action.input.forecast;
           nextTotals.totalForecast = action.input.forecast;
         }
-        if (
-          action.input.payments !== undefined &&
-          action.input.payments !== null
-        ) {
-          lineItem.payments = action.input.payments;
-          nextTotals.totalPayments = action.input.payments;
+        if (action.input.payments !== undefined) {
+          // Explicitly handle null to reset payments to 0
+          lineItem.payments = action.input.payments ?? null;
+          nextTotals.totalPayments = action.input.payments ?? 0;
         }
         if (
           action.input.comments !== undefined &&

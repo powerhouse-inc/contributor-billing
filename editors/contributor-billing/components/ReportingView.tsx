@@ -60,7 +60,7 @@ export function ReportingView({ folderId, monthName }: ReportingViewProps) {
     }
 
     const allNodes = selectedDrive?.state.global.nodes || [];
-    
+
     // Build a map of document ID to parent folder ID
     const documentParentMap = new Map<string, string | null>();
     for (const node of allNodes) {
@@ -74,13 +74,13 @@ export function ReportingView({ folderId, monthName }: ReportingViewProps) {
 
     const expense = documentsInDrive.filter((doc) => {
       if (doc.header.documentType !== "powerhouse/expense-report") return false;
-      
+
       // Check if document is in this Reporting folder
       const docParentFolder = documentParentMap.get(doc.header.id);
       if (docParentFolder === folderId) {
         return true; // Document is in the folder, show it
       }
-      
+
       // Otherwise, check if name matches the month (for backwards compatibility)
       const docName = doc.header.name || "";
       return (
@@ -88,16 +88,17 @@ export function ReportingView({ folderId, monthName }: ReportingViewProps) {
         docName.includes(monthCode)
       );
     });
-    
+
     const snapshot = documentsInDrive.filter((doc) => {
-      if (doc.header.documentType !== "powerhouse/snapshot-report") return false;
-      
+      if (doc.header.documentType !== "powerhouse/snapshot-report")
+        return false;
+
       // Check if document is in this Reporting folder
       const docParentFolder = documentParentMap.get(doc.header.id);
       if (docParentFolder === folderId) {
         return true; // Document is in the folder, show it
       }
-      
+
       // Otherwise, check if name matches the month (for backwards compatibility)
       const docName = doc.header.name || "";
       return (

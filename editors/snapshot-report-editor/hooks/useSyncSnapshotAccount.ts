@@ -28,10 +28,12 @@ import { calculateTransactionFlowInfo } from "../utils/flowTypeCalculations.js";
 
 /**
  * Calculate starting balances for non-Internal accounts from Internal account transactions
+ * Only includes transactions where the counterparty is a non-Internal account type
  */
 function calculateNonInternalStartingBalances(
   allTransactions: any[],
   nonInternalAccounts: SnapshotAccount[],
+  internalAccountAddresses: Set<string>,
   startDate: string,
 ): Map<string, Map<string, { value: string; unit: string }>> {
   const start = new Date(startDate);
@@ -44,9 +46,16 @@ function calculateNonInternalStartingBalances(
     const addressLower = account.accountAddress.toLowerCase();
     const tokenBalances = new Map<string, number>();
 
-    // Find pre-period transactions where this account is counter-party
+    // Find pre-period transactions where:
+    // 1. This account is the counter-party
+    // 2. The counter-party is NOT an Internal account (i.e., is another account type)
     for (const tx of allTransactions) {
-      if (!tx.counterParty || tx.counterParty.toLowerCase() !== addressLower)
+      const counterPartyLower = tx.counterParty?.toLowerCase();
+      if (
+        !counterPartyLower ||
+        counterPartyLower !== addressLower ||
+        internalAccountAddresses.has(counterPartyLower)
+      )
         continue;
       const txDate = new Date(tx.datetime);
       if (txDate >= start) continue;
@@ -127,35 +136,60 @@ export function useSyncSnapshotAccount() {
 
       // For Internal accounts: sync from AccountTransactions document
       // Step 1: Ensure account transactions document exists
-      let accountTransactionsDocId = snapshotAccount.accountTransactionsId;
+      // Check both snapshot account and account entry for existing document ID
+      let accountTransactionsDocId =
+        snapshotAccount.accountTransactionsId ||
+        accountEntry?.accountTransactionsId;
 
       if (!accountTransactionsDocId && accountEntry) {
-        // Create account transactions document
-        const driveId = selectedDrive?.header?.id;
-        if (!driveId) {
-          return {
-            success: false,
-            message: "No drive selected",
-          };
-        }
-
-        const result =
-          await accountTransactionsService.createAccountTransactionsDocument(
-            accountEntry,
-            accountsDocumentId || "",
-            driveId,
+        // Check if a document already exists in the drive for this account
+        const existingDoc = documents?.find((doc) => {
+          if (doc.header.documentType !== "powerhouse/account-transactions") {
+            return false;
+          }
+          // Access state safely - account transactions documents have global state with account info
+          const state = (doc as any).state?.global;
+          return (
+            state?.account?.account?.toLowerCase() ===
+            accountEntry.account.toLowerCase()
           );
+        });
 
-        if (!result.success || !result.documentId) {
-          return {
-            success: false,
-            message:
-              result.message ||
-              "Failed to create account transactions document",
-          };
+        if (existingDoc) {
+          // Use existing document
+          accountTransactionsDocId = existingDoc.header.id;
+          console.log(
+            "[useSyncSnapshotAccount] Found existing account transactions document:",
+            accountTransactionsDocId,
+          );
+        } else {
+          // Create new account transactions document only if none exists
+          const driveId = selectedDrive?.header?.id;
+          if (!driveId) {
+            return {
+              success: false,
+              message: "No drive selected",
+            };
+          }
+
+          const result =
+            await accountTransactionsService.createAccountTransactionsDocument(
+              accountEntry,
+              accountsDocumentId || "",
+              driveId,
+            );
+
+          if (!result.success || !result.documentId) {
+            return {
+              success: false,
+              message:
+                result.message ||
+                "Failed to create account transactions document",
+            };
+          }
+
+          accountTransactionsDocId = result.documentId;
         }
-
-        accountTransactionsDocId = result.documentId;
       }
 
       // Step 2: Get account transactions document
@@ -249,6 +283,10 @@ export function useSyncSnapshotAccount() {
         startDate,
         endDate,
         snapshotAccount.type,
+        snapshotAccount.startingBalances.map((b) => ({
+          token: b.token,
+          amount: b.amount,
+        })),
       );
 
       // Build all actions into a single batch for efficiency
@@ -322,6 +360,7 @@ export function useSyncSnapshotAccount() {
       });
 
       // 6. Add new ending balances
+      // Always add ending balances for all tokens, even if closing equals opening (no period transactions)
       balances.forEach((balance) => {
         allActions.push(
           balancesActions.setEndingBalance({
@@ -338,9 +377,16 @@ export function useSyncSnapshotAccount() {
         (a) => a.type !== "Internal" && a.id !== snapshotAccount.id,
       );
       if (nonInternalAccounts.length > 0) {
+        // Create set of Internal account addresses for filtering
+        const internalAccountAddresses = new Set(
+          allSnapshotAccounts
+            .filter((a) => a.type === "Internal")
+            .map((a) => a.accountAddress.toLowerCase()),
+        );
         const nonInternalBalances = calculateNonInternalStartingBalances(
           allTransactions,
           nonInternalAccounts,
+          internalAccountAddresses,
           startDate,
         );
 
@@ -444,6 +490,12 @@ export function useSyncSnapshotAccount() {
         flowType: TransactionFlowType;
       }> = [];
 
+      // Create a set of Internal account addresses for filtering
+      // We only want transactions where the counterparty is a non-Internal account
+      const internalAccountAddresses = new Set(
+        internalAccounts.map((acc) => acc.accountAddress.toLowerCase()),
+      );
+
       // Scan ALL transactions from each Internal account's AccountTransactions document
       for (const internalAccount of internalAccounts) {
         const accountTxDocId = internalAccount.accountTransactionsId;
@@ -460,9 +512,19 @@ export function useSyncSnapshotAccount() {
 
         const allTxFromDoc = txDoc.state.global.transactions as any[];
 
-        // Find transactions where non-Internal account is counter-party
+        // Find transactions where the non-Internal account is the counter-party
+        // Note: Internal accounts themselves should have ALL transactions (including Internal-to-Internal)
+        // for accurate starting and ending balances. When deriving transactions for non-Internal accounts,
+        // we only include transactions where the counterparty is the non-Internal account being synced.
+        // The check against internalAccountAddresses ensures we don't include Internal-to-Internal transactions
+        // when calculating balances for non-Internal accounts.
         for (const tx of allTxFromDoc) {
-          if (tx.counterParty?.toLowerCase() === accountAddressLower) {
+          const counterPartyLower = tx.counterParty?.toLowerCase();
+          // Only include if counterparty is the non-Internal account AND it's not an Internal account
+          if (
+            counterPartyLower === accountAddressLower &&
+            !internalAccountAddresses.has(counterPartyLower)
+          ) {
             // Invert direction from Internal's perspective to non-Internal's perspective
             const invertedDirection: "INFLOW" | "OUTFLOW" =
               tx.direction === "INFLOW" ? "OUTFLOW" : "INFLOW";
@@ -533,10 +595,19 @@ export function useSyncSnapshotAccount() {
         periodTransactions.map((tx) => tx.transactionId),
       );
 
-      const hasChanges =
+      const hasTransactionChanges =
         existingTransactionIds.size !== newTransactionIds.size ||
         [...existingTransactionIds].some((id) => !newTransactionIds.has(id)) ||
         [...newTransactionIds].some((id) => !existingTransactionIds.has(id));
+
+      // Check if ending balances need to be updated
+      // If there are starting balances but no ending balances, we need to set ending = starting
+      const hasStartingBalances = snapshotAccount.startingBalances.length > 0;
+      const hasEndingBalances = snapshotAccount.endingBalances.length > 0;
+      const needsEndingBalanceUpdate =
+        hasStartingBalances && !hasEndingBalances;
+
+      const hasChanges = hasTransactionChanges || needsEndingBalanceUpdate;
 
       if (!hasChanges) {
         return {
@@ -567,6 +638,10 @@ export function useSyncSnapshotAccount() {
         startDate,
         endDate,
         snapshotAccount.type,
+        snapshotAccount.startingBalances.map((b) => ({
+          token: b.token,
+          amount: b.amount,
+        })),
       );
 
       // Build all actions into a single batch for efficiency
@@ -630,19 +705,63 @@ export function useSyncSnapshotAccount() {
       });
 
       // 6. Add new ending balances
+      // Always add ending balances for all tokens, even if closing equals opening (no period transactions)
+      // Ensure we add ending balances for ALL tokens that have starting balances
+      const balanceTokens = new Set(Array.from(balances.keys()));
+      const startingBalanceTokens = new Set(
+        snapshotAccount.startingBalances.map((b) => b.token),
+      );
+
+      console.log("[syncNonInternalAccount] Adding ending balances:", {
+        accountId: snapshotAccount.id,
+        accountName: snapshotAccount.accountName,
+        balancesInMap: Array.from(balances.values()).map((b) => ({
+          token: b.token,
+          opening: b.opening.value,
+          closing: b.closing.value,
+        })),
+        startingBalanceTokens: Array.from(startingBalanceTokens),
+        balanceTokens: Array.from(balanceTokens),
+      });
+
+      // Add ending balances for all tokens in the balances map
       balances.forEach((balance) => {
+        // Ensure we have a valid closing balance (should equal opening if no transactions)
+        const closingAmount = balance.closing;
+
+        console.log("[syncNonInternalAccount] Adding ending balance:", {
+          token: balance.token,
+          closingAmount,
+        });
+
         allActions.push(
           balancesActions.setEndingBalance({
             accountId: snapshotAccount.id,
             balanceId: generateId(),
             token: balance.token,
-            amount: balance.closing,
+            amount: closingAmount,
           }),
         );
       });
 
+      // Safety check: if any starting balance tokens are missing from balances map, log a warning
+      startingBalanceTokens.forEach((token) => {
+        if (!balanceTokens.has(token)) {
+          console.warn(
+            `[syncNonInternalAccount] Starting balance token ${token} not found in calculated balances map!`,
+          );
+        }
+      });
+
       // Dispatch all actions in a single batch if we have a document ID
       if (snapshotDocumentId && allActions.length > 0) {
+        console.log("[syncNonInternalAccount] Dispatching actions:", {
+          accountId: snapshotAccount.id,
+          totalActions: allActions.length,
+          endingBalanceActions: allActions.filter(
+            (a) => a.type === "SET_ENDING_BALANCE",
+          ).length,
+        });
         await dispatchActions(allActions, snapshotDocumentId);
       } else {
         // Fallback to individual dispatches if no document ID

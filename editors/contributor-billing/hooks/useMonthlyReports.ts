@@ -176,7 +176,7 @@ export function useMonthlyReports(): UseMonthlyReportsResult {
               return true; // Document is in the folder, include it
             }
           }
-          
+
           // Otherwise, check if name matches the month (for backwards compatibility)
           const docName = doc.header.name || "";
           return (
@@ -195,7 +195,7 @@ export function useMonthlyReports(): UseMonthlyReportsResult {
             return true; // Document is in the folder, include it
           }
         }
-        
+
         // Otherwise, check if name matches the month (for backwards compatibility)
         const docName = doc.header.name || "";
         return (

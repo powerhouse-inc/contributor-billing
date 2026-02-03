@@ -49,7 +49,9 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
       return false;
     }
     if (!isValidEthereumAddress(address.trim())) {
-      setAccountError("Invalid Ethereum address format. Must be 0x followed by 40 hexadecimal characters.");
+      setAccountError(
+        "Invalid Ethereum address format. Must be 0x followed by 40 hexadecimal characters.",
+      );
       return false;
     }
     setAccountError("");
@@ -119,228 +121,229 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
         onSubmit={handleSubmit}
         className="bg-white rounded-xl border border-gray-200 shadow-sm p-6"
       >
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Account <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="account"
-              value={formData.account}
-              onChange={(e) => {
-                const value = e.target.value;
-                setFormData({ ...formData, account: value });
-                // Clear error when user starts typing
-                if (accountError) {
-                  setAccountError("");
-                }
-              }}
-              onBlur={(e) => {
-                // Validate on blur
-                validateAccount(e.target.value);
-              }}
-              placeholder="e.g., 0x1234...abcd"
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                accountError
-                  ? "border-red-300 focus:ring-red-500"
-                  : "border-gray-300"
-              }`}
-              required
-            />
-            {accountError && (
-              <p className="mt-1 text-sm text-red-600">{accountError}</p>
-            )}
-            {!accountError && formData.account && (
-              <p className="mt-1 text-xs text-gray-500">
-                Ethereum address format: 0x followed by 40 hexadecimal characters
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              placeholder="e.g., Main Treasury"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <TooltipProvider delayDuration={0}>
-              <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-2">
-                Account Type <span className="text-red-500">*</span>
-                <Tooltip
-                  content={
-                    <div className="text-xs">
-                      <div className="font-semibold mb-1">Account Types:</div>
-                      <div>
-                        <strong>Source:</strong> Origin of funds (e.g., revenue
-                        streams)
-                      </div>
-                      <div>
-                        <strong>Internal:</strong> Accounts within your
-                        organization
-                      </div>
-                      <div>
-                        <strong>Destination:</strong> Where funds are sent
-                        (e.g., payments)
-                      </div>
-                      <div>
-                        <strong>External:</strong> Third-party accounts outside
-                        your org
-                      </div>
-                    </div>
-                  }
-                  side="right"
-                >
-                  <Info className="w-4 h-4 text-gray-400 cursor-help" />
-                </Tooltip>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Account <span className="text-red-500">*</span>
               </label>
-            </TooltipProvider>
-            <select
-              name="accountType"
-              value={formData.type}
-              onChange={(e) => {
-                setFormData({
-                  ...formData,
-                  type: e.target.value as AccountTypeInput,
-                });
-                // Clear custom validation message when user selects a value
-                e.target.setCustomValidity("");
-              }}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              required
-            >
-              <option value="">Select type...</option>
-              <option value="Source">Source</option>
-              <option value="Internal">Internal</option>
-              <option value="Destination">Destination</option>
-              <option value="External">External</option>
-            </select>
+              <input
+                type="text"
+                name="account"
+                value={formData.account}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData({ ...formData, account: value });
+                  // Clear error when user starts typing
+                  if (accountError) {
+                    setAccountError("");
+                  }
+                }}
+                onBlur={(e) => {
+                  // Validate on blur
+                  validateAccount(e.target.value);
+                }}
+                placeholder="e.g., 0x1234...abcd"
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  accountError
+                    ? "border-red-300 focus:ring-red-500"
+                    : "border-gray-300"
+                }`}
+                required
+              />
+              {accountError && (
+                <p className="mt-1 text-sm text-red-600">{accountError}</p>
+              )}
+              {!accountError && formData.account && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Ethereum address format: 0x followed by 40 hexadecimal
+                  characters
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                placeholder="e.g., Main Treasury"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <TooltipProvider delayDuration={0}>
+                <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-2">
+                  Account Type <span className="text-red-500">*</span>
+                  <Tooltip
+                    content={
+                      <div className="text-xs">
+                        <div className="font-semibold mb-1">Account Types:</div>
+                        <div>
+                          <strong>Source:</strong> Origin of funds (e.g.,
+                          revenue streams)
+                        </div>
+                        <div>
+                          <strong>Internal:</strong> Accounts within your
+                          organization
+                        </div>
+                        <div>
+                          <strong>Destination:</strong> Where funds are sent
+                          (e.g., payments)
+                        </div>
+                        <div>
+                          <strong>External:</strong> Third-party accounts
+                          outside your org
+                        </div>
+                      </div>
+                    }
+                    side="right"
+                  >
+                    <Info className="w-4 h-4 text-gray-400 cursor-help" />
+                  </Tooltip>
+                </label>
+              </TooltipProvider>
+              <select
+                name="accountType"
+                value={formData.type}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    type: e.target.value as AccountTypeInput,
+                  });
+                  // Clear custom validation message when user selects a value
+                  e.target.setCustomValidity("");
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                required
+              >
+                <option value="">Select type...</option>
+                <option value="Source">Source</option>
+                <option value="Internal">Internal</option>
+                <option value="Destination">Destination</option>
+                <option value="External">External</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                KYC/AML Status
+              </label>
+              <select
+                value={formData.KycAmlStatus}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    KycAmlStatus: e.target.value as KycAmlStatusTypeInput,
+                  })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              >
+                <option value="">Select status...</option>
+                <option value="PASSED">Passed</option>
+                <option value="PENDING">Pending</option>
+                <option value="FAILED">Failed</option>
+              </select>
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              KYC/AML Status
-            </label>
-            <select
-              value={formData.KycAmlStatus}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  KycAmlStatus: e.target.value as KycAmlStatusTypeInput,
-                })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-            >
-              <option value="">Select status...</option>
-              <option value="PASSED">Passed</option>
-              <option value="PENDING">Pending</option>
-              <option value="FAILED">Failed</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Budget Path
-          </label>
-          <input
-            type="text"
-            value={formData.budgetPath}
-            onChange={(e) =>
-              setFormData({ ...formData, budgetPath: e.target.value })
-            }
-            placeholder="e.g., /treasury/operations"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-
-        {account && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Account Transactions ID
+              Budget Path
             </label>
             <input
               type="text"
-              value={formData.accountTransactionsId}
+              value={formData.budgetPath}
               onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  accountTransactionsId: e.target.value,
-                })
+                setFormData({ ...formData, budgetPath: e.target.value })
               }
-              placeholder="e.g., tx-12345"
+              placeholder="e.g., /treasury/operations"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-        )}
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Chains
-            <span className="ml-2 text-xs text-gray-500 font-normal">
-              (comma-separated)
-            </span>
-          </label>
-          <input
-            type="text"
-            value={formData.chain}
-            onChange={(e) =>
-              setFormData({ ...formData, chain: e.target.value })
-            }
-            placeholder="e.g., Ethereum, Polygon, Arbitrum"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+          {account && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Account Transactions ID
+              </label>
+              <input
+                type="text"
+                value={formData.accountTransactionsId}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    accountTransactionsId: e.target.value,
+                  })
+                }
+                placeholder="e.g., tx-12345"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Chains
+              <span className="ml-2 text-xs text-gray-500 font-normal">
+                (comma-separated)
+              </span>
+            </label>
+            <input
+              type="text"
+              value={formData.chain}
+              onChange={(e) =>
+                setFormData({ ...formData, chain: e.target.value })
+              }
+              placeholder="e.g., Ethereum, Polygon, Arbitrum"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Owners
+              <span className="ml-2 text-xs text-gray-500 font-normal">
+                (comma-separated)
+              </span>
+            </label>
+            <input
+              type="text"
+              value={formData.owners}
+              onChange={(e) =>
+                setFormData({ ...formData, owners: e.target.value })
+              }
+              placeholder="e.g., Alice, Bob, Charlie"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Owners
-            <span className="ml-2 text-xs text-gray-500 font-normal">
-              (comma-separated)
-            </span>
-          </label>
-          <input
-            type="text"
-            value={formData.owners}
-            onChange={(e) =>
-              setFormData({ ...formData, owners: e.target.value })
-            }
-            placeholder="e.g., Alice, Bob, Charlie"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+        <div className="mt-8 flex items-center justify-end gap-3 pt-6 border-t border-gray-200">
+          <Button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-sm transition-colors"
+          >
+            {account ? "Update Account" : "Add Account"}
+          </Button>
         </div>
-      </div>
-
-      <div className="mt-8 flex items-center justify-end gap-3 pt-6 border-t border-gray-200">
-        <Button
-          type="button"
-          onClick={onCancel}
-          className="px-6 py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-sm transition-colors"
-        >
-          {account ? "Update Account" : "Add Account"}
-        </Button>
-      </div>
-    </form>
+      </form>
     </>
   );
 }

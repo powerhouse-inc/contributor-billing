@@ -44,21 +44,22 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
     globalProcessingState.processedDocs.set(driveId, new Set());
   }
 
-
   // Helper function to get month name from periodStart date
   // Uses UTC to avoid timezone issues - extracts year and month directly from ISO string
-  const getMonthNameFromPeriod = (periodStart: string | null | undefined): string | null => {
+  const getMonthNameFromPeriod = (
+    periodStart: string | null | undefined,
+  ): string | null => {
     if (!periodStart) return null;
     try {
       // Parse the ISO date string and extract UTC components
       // ISO format: "2025-07-01T00:00:00.000Z" or "2025-07-01"
       const date = new Date(periodStart);
       if (isNaN(date.getTime())) return null;
-      
+
       // Use UTC methods to get year and month, avoiding timezone conversion
       const year = date.getUTCFullYear();
       const month = date.getUTCMonth(); // 0-11
-      
+
       // Format as "Month Year" (e.g., "July 2025")
       const monthNames = [
         "January",
@@ -74,7 +75,7 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
         "November",
         "December",
       ];
-      
+
       return `${monthNames[month]} ${year}`;
     } catch {
       return null;
