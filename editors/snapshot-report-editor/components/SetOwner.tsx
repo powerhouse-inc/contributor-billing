@@ -101,7 +101,7 @@ export function SetOwner({ ownerIds, dispatch }: SetOwnerProps) {
 
   return (
     <div className="space-y-3">
-      {/* List of current owners */}
+      {/* List of current teams */}
       {ownerIds.length > 0 && (
         <div className="space-y-2">
           {ownerIds.map((ownerId) => (
@@ -115,7 +115,7 @@ export function SetOwner({ ownerIds, dispatch }: SetOwnerProps) {
         </div>
       )}
 
-      {/* Add owner picker */}
+      {/* Add team picker */}
       <div className="relative" ref={pickerRef}>
         <div className="flex items-center gap-2">
           <input

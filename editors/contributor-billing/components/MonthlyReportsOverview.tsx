@@ -12,6 +12,7 @@ import { moveNode } from "document-drive";
 import { useMonthlyReports } from "../hooks/useMonthlyReports.js";
 import { MonthReportCard } from "./MonthReportCard.js";
 import { actions as expenseReportActions } from "../../../document-models/expense-report/index.js";
+import { actions as snapshotReportActions } from "../../../document-models/snapshot-report/index.js";
 import type { SelectedFolderInfo } from "./FolderTree.js";
 
 interface MonthlyReportsOverviewProps {
@@ -183,6 +184,65 @@ export function MonthlyReportsOverview({
     [driveId, isCreating, monthReportSets],
   );
 
+  const handleCreateSnapshotReport = useCallback(
+    async (monthName: string, folderId: string) => {
+      if (!driveId || isCreating) return;
+      setIsCreating(true);
+
+      try {
+        const reportName = `${monthName} - Snapshot Report`;
+
+        const createdNode = await addDocument(
+          driveId,
+          reportName,
+          "powerhouse/snapshot-report",
+          undefined,
+          undefined,
+          undefined,
+          "powerhouse-snapshot-report-editor",
+        );
+
+        if (!createdNode?.id) return;
+
+        // Move to reporting folder
+        if (folderId) {
+          await dispatchActions(
+            moveNode({
+              srcFolder: createdNode.id,
+              targetParentFolder: folderId,
+            }),
+            driveId,
+          );
+        }
+
+        // Set the document name
+        await dispatchActions(setName(reportName), createdNode.id);
+
+        // Set period dates based on month
+        const dates = parseMonthDates(monthName);
+        if (dates) {
+          await dispatchActions(
+            [
+              snapshotReportActions.setPeriodStart({
+                periodStart: dates.start.toISOString(),
+              }),
+              snapshotReportActions.setPeriodEnd({
+                periodEnd: dates.end.toISOString(),
+              }),
+            ],
+            createdNode.id,
+          );
+        }
+
+        // Open the created report
+        setSelectedNode(createdNode.id);
+      } finally {
+        setIsCreating(false);
+      }
+    },
+    [driveId, isCreating],
+  );
+
   // Add Month button component (reused across states)
   const addMonthButton = onCreateMonth && (
     <div className="relative" ref={dropdownRef}>
@@ -301,6 +361,7 @@ export function MonthlyReportsOverview({
             reportSet={reportSet}
             defaultExpanded={index === 0}
             onCreateExpenseReport={handleCreateExpenseReport}
+            onCreateSnapshotReport={handleCreateSnapshotReport}
           />
         ))}
       </div>

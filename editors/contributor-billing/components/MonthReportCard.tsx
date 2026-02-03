@@ -19,6 +19,7 @@ interface MonthReportCardProps {
   reportSet: MonthReportSet;
   defaultExpanded?: boolean;
   onCreateExpenseReport?: (monthName: string, folderId: string) => void;
+  onCreateSnapshotReport?: (monthName: string, folderId: string) => void;
 }
 
 /**
@@ -103,6 +104,7 @@ export function MonthReportCard({
   reportSet,
   defaultExpanded = false,
   onCreateExpenseReport,
+  onCreateSnapshotReport,
 }: MonthReportCardProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const overallColors = getStatusColors(reportSet.overallStatus);
@@ -116,6 +118,12 @@ export function MonthReportCard({
       onCreateExpenseReport(reportSet.monthName, reportSet.reportingFolderId);
     }
   }, [onCreateExpenseReport, reportSet.monthName, reportSet.reportingFolderId]);
+
+  const handleCreateSnapshotReport = useCallback(() => {
+    if (onCreateSnapshotReport && reportSet.reportingFolderId) {
+      onCreateSnapshotReport(reportSet.monthName, reportSet.reportingFolderId);
+    }
+  }, [onCreateSnapshotReport, reportSet.monthName, reportSet.reportingFolderId]);
 
   const reportCountText =
     reportSet.reportCount === 1
@@ -172,18 +180,30 @@ export function MonthReportCard({
             </div>
           )}
 
-          {/* Add expense report button */}
-          {onCreateExpenseReport && reportSet.reportingFolderId && (
-            <div className="p-3 border-t border-gray-100 bg-gray-50">
-              <button
-                onClick={handleCreateExpenseReport}
-                className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Add Expense Report
-              </button>
-            </div>
-          )}
+          {/* Add report buttons */}
+          {(onCreateExpenseReport || onCreateSnapshotReport) &&
+            reportSet.reportingFolderId && (
+              <div className="p-3 border-t border-gray-100 bg-gray-50 flex items-center gap-3">
+                {onCreateSnapshotReport && !reportSet.snapshotReport && (
+                  <button
+                    onClick={handleCreateSnapshotReport}
+                    className="flex items-center gap-2 text-sm text-purple-600 hover:text-purple-700 font-medium transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Snapshot Report
+                  </button>
+                )}
+                {onCreateExpenseReport && (
+                  <button
+                    onClick={handleCreateExpenseReport}
+                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Expense Report
+                  </button>
+                )}
+              </div>
+            )}
         </div>
       )}
     </div>

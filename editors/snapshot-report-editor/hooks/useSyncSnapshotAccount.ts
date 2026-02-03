@@ -236,10 +236,20 @@ export function useSyncSnapshotAccount() {
       );
 
       // Check if the sets are identical (no changes needed)
-      const hasChanges =
+      const hasTransactionChanges =
         existingTransactionIds.size !== newTransactionIds.size ||
         [...existingTransactionIds].some((id) => !newTransactionIds.has(id)) ||
         [...newTransactionIds].some((id) => !existingTransactionIds.has(id));
+
+      // Check if balances need to be updated
+      // If there are transactions but no balances, we need to calculate and set balances
+      const hasTransactions = periodTransactions.length > 0;
+      const hasStartingBalances = snapshotAccount.startingBalances.length > 0;
+      const hasEndingBalances = snapshotAccount.endingBalances.length > 0;
+      const needsBalanceUpdate =
+        hasTransactions && (!hasStartingBalances || !hasEndingBalances);
+
+      const hasChanges = hasTransactionChanges || needsBalanceUpdate;
 
       if (!hasChanges) {
         return {

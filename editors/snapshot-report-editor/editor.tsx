@@ -383,6 +383,16 @@ export default function Editor() {
     setSelectedAccountIds(newSelection);
   };
 
+  const handleSelectAllAccounts = () => {
+    // Select all accounts that aren't already added to the snapshot
+    const allAvailableAccountIds = new Set(
+      availableAccounts
+        .filter((account: any) => !existingAccountIds.has(account.id))
+        .map((account: any) => account.id),
+    );
+    setSelectedAccountIds(allAvailableAccountIds);
+  };
+
   const handleImportAccounts = async () => {
     if (!documentsInDrive || !startDate || !endDate) {
       alert(
@@ -681,7 +691,7 @@ export default function Editor() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Owners
+                  Teams
                 </label>
                 <SetOwner ownerIds={ownerIds ?? []} dispatch={dispatch} />
               </div>
@@ -1207,15 +1217,29 @@ export default function Editor() {
 
         {/* Account Picker Modal */}
         {isAccountPickerOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col">
+          <div className="fixed inset-0 z-50 flex items-start justify-center pt-8 backdrop-blur-sm">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[85vh] flex flex-col border border-gray-200">
               <div className="p-6 border-b">
-                <h3 className="text-xl font-semibold">
-                  Select Accounts to Import
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Choose accounts from the selected Accounts document
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-semibold">
+                      Select Accounts to Import
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Choose accounts from the selected Accounts document
+                    </p>
+                  </div>
+                  {availableAccounts.some(
+                    (account: any) => !existingAccountIds.has(account.id),
+                  ) && (
+                    <button
+                      onClick={handleSelectAllAccounts}
+                      className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      Add All Accounts
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="p-6 overflow-y-auto flex-1">
