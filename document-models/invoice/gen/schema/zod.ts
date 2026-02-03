@@ -7,8 +7,6 @@ import type {
   Bank,
   CancelInput,
   ClosePaymentInput,
-  ClosureReason,
-  ClosureReasonInput,
   ConfirmPaymentInput,
   ContactInfo,
   DeleteLineItemInput,
@@ -24,8 +22,6 @@ import type {
   EditStatusInput,
   ExportedData,
   IntermediaryBank,
-  InvoiceAccountType,
-  InvoiceAccountTypeInput,
   InvoiceLineItem,
   InvoiceState,
   InvoiceTag,
@@ -47,7 +43,6 @@ import type {
   SetExportedDataInput,
   SetInvoiceTagInput,
   SetLineItemTagInput,
-  Status,
   Token,
 } from "./types.js";
 

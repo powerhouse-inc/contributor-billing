@@ -23,33 +23,6 @@ interface AddBillingStatementModalProps {
 }
 
 // Mapping of fusion labels to group IDs
-const fusionLabelToValue: Record<string, string> = {
-  Budget: "budget",
-  "Current Liability": "liabilities/current",
-  "Interest Income": "income/interest",
-  "Travel & Entertainment": "expenses/headcount/travel-and-entertainment",
-  "Cost of Goods Sold": "expenses/non-headcount/direct-costs",
-  "Marketing Expense": "expenses/headcount/marketing",
-  "Professional Services": "expenses/headcount/professional-services",
-  "Software Development Expense": "expenses/non-headcount/software-development",
-  "Compensation & Benefits": "expenses/headcount/compensation-and-benefits",
-  "Admin Expense": "expenses/headcount/admin",
-  "Other Income Expense (Non-operating)": "income/non-operating",
-  "Other Income": "income/other",
-  "Income Tax Expense": "expenses/non-headcount/income-tax",
-  "Current Asset": "assets/current",
-  "Software Expense": "expenses/non-headcount/software",
-  "Fixed Asset": "assets/fixed",
-  "Non-Current Asset": "assets/non-current",
-  "Gas Expense": "expenses/non-headcount/gas",
-  "Adjustment A/C": "accounts/adjustment",
-  "Temporary Holding Account": "accounts/temporary",
-  Other: "accounts/other",
-  "Internal Transfers": "accounts/internal-transfers",
-  "Owner Equity": "equity/owner",
-  "Non-current Liability": "liabilities/non-current",
-  Equity: "equity/retained",
-};
 
 export function AddBillingStatementModal({
   isOpen,

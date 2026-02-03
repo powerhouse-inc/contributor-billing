@@ -28,7 +28,6 @@ export function AggregatedExpensesTable({
   wallets,
   groups,
   periodStart,
-  periodEnd,
   dispatch,
 }: AggregatedExpensesTableProps) {
   // State for active tab (selected wallet)
@@ -198,15 +197,6 @@ export function AggregatedExpensesTable({
   };
 
   // Format period for title
-  const periodTitle = useMemo(() => {
-    if (!periodStart) return "Breakdown";
-
-    const date = new Date(periodStart);
-    const month = date.toLocaleDateString("en-US", { month: "short" });
-    const year = date.getFullYear();
-
-    return `${month} ${year} Breakdown`;
-  }, [periodStart]);
 
   // Create a map of groups with their parent info
   const groupsMap = useMemo(() => {

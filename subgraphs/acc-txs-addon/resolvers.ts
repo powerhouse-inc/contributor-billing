@@ -29,7 +29,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               maxCount: 1000,
             });
 
-          const { transactions, summary } = result;
+          const { transactions } = result;
           console.log(
             `[Resolver] Successfully fetched ${transactions.length} transactions`,
           );
@@ -93,7 +93,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               maxCount: 1000,
             });
 
-          const { transactions, summary } = result;
+          const { transactions } = result;
 
           if (!transactions || transactions.length === 0) {
             return {

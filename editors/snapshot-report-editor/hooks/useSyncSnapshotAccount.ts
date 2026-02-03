@@ -10,9 +10,7 @@ import {
 } from "@powerhousedao/reactor-browser";
 import { generateId } from "document-model/core";
 import { accountTransactionsService } from "../../accounts-editor/services/accountTransactionsService.js";
-import { actions as accountsActions } from "../../../document-models/accounts/index.js";
 import {
-  actions as snapshotActions,
   balancesActions,
   transactionsActions,
 } from "../../../document-models/snapshot-report/index.js";

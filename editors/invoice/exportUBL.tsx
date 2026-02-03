@@ -47,7 +47,6 @@ export class UBLExporter {
   async convertInvoiceToUBL(): Promise<string> {
     const issueDate = this.formatDate(this.invoice.dateIssued ?? null);
     const dueDate = this.formatDate(this.invoice.dateDue ?? null);
-    const deliveryDate = this.formatDate(this.invoice.dateDelivered ?? null);
 
     // Generate PDF attachment section first
     const pdfAttachmentSection = await this.generatePDFAttachment();

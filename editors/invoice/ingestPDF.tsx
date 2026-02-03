@@ -13,7 +13,6 @@ const GRAPHQL_URL = getGraphQLUrl();
 
 export async function loadPDFFile({
   file,
-  dispatch,
 }: {
   file: File;
   dispatch: (action: InvoiceAction) => void;

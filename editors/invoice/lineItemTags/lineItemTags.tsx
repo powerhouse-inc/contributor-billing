@@ -106,7 +106,7 @@ export function LineItemTagsTable({
                 <td className="border-b border-gray-200 p-3">
                   <InputField
                     value={item.item}
-                    handleInputChange={(e) => {}}
+                    handleInputChange={() => {}}
                     onBlur={(e) => {
                       dispatch(
                         actions.editLineItem({

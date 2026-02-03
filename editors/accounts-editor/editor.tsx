@@ -125,7 +125,7 @@ function InstructionSection({ onDismiss }: { onDismiss: () => void }) {
   );
 }
 
-export function Editor() {
+export default function Editor() {
   const [document, dispatch] = useSelectedAccountsDocument();
   const parentFolder = useParentFolderForSelectedNode();
   const [selectedDrive] = useSelectedDrive();
@@ -558,4 +558,3 @@ export function Editor() {
   );
 }
 
-export default Editor;
