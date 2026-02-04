@@ -31,7 +31,6 @@ export function LineItemCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
-
   return (
     <div className="bg-white border border-gray-200 rounded-lg mb-3 overflow-hidden">
       {/* Card Header */}

@@ -13,9 +13,7 @@ import {
   type ColumnAlignment,
   PHIDInput,
 } from "@powerhousedao/document-engineering";
-import type {
-  BuilderProfileDocument,
-} from "@powerhousedao/builder-profile/document-models/builder-profile";
+import type { BuilderProfileDocument } from "@powerhousedao/builder-profile/document-models/builder-profile";
 import { actions as builderProfileActions } from "@powerhousedao/builder-profile/document-models/builder-profile";
 import { useRemoteBuilderProfiles } from "../hooks/useRemoteBuilderProfiles.js";
 

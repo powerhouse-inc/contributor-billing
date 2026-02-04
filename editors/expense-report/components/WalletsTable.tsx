@@ -419,7 +419,6 @@ export function WalletsTable({
     // to prevent re-running when transactions are added
   }, [pendingTxDoc?.documentId, isProcessing]);
 
-
   // Validate Ethereum address
   const validateEthAddress = useCallback((address: string): boolean => {
     return ETH_ADDRESS_REGEX.test(address);

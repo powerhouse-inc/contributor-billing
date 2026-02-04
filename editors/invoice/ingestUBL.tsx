@@ -54,7 +54,6 @@ export class UBLConverter {
     return null;
   }
 
-
   private processGeneralData(invoice: Element) {
     // Process basic invoice data
     this.dispatch(
