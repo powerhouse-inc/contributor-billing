@@ -96,10 +96,6 @@ const LineItemsTable = (props: {
     { label: "Unit", value: "UNIT" },
   ];
 
-  const handleEdit = (rowIdx: number, item: BillingStatementLineItem) => {
-    setEditingRow(rowIdx);
-    setLocalLineItem({ ...item });
-  };
 
   const handleInputChange = (
     field: keyof LocalLineItemDraft,

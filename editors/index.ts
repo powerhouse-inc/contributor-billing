@@ -1,5 +1,5 @@
-export { AccountTransactionsEditor } from "./account-transactions-editor/module.js";
-export { AccountsEditor } from "./accounts-editor/module.js";
+export { AccountTransactions } from "./account-transactions-editor/module.js";
+export { Accounts } from "./accounts-editor/module.js";
 export { BillingStatement } from "./billing-statement/module.js";
 export { BuilderTeamAdmin } from "./builder-team-admin/module.js";
 export { ContributorBilling } from "./contributor-billing/module.js";
@@ -9,4 +9,4 @@ export { OperationalHubProfileEditor } from "./operational-hub-profile-editor/mo
 export { ResourceTemplateEditor } from "./resource-template-editor/module.js";
 export { ServiceOfferingEditor } from "./service-offering-editor/module.js";
 export { ServiceSubscriptionsEditor } from "./service-subscriptions-editor/module.js";
-export { SnapshotReportEditor } from "./snapshot-report-editor/module.js";
+export { SnapshotReport } from "./snapshot-report-editor/module.js";

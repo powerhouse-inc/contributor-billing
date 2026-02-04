@@ -126,7 +126,6 @@ const EditableLineItem = forwardRef(function EditableLineItem(
     const EPSILON = 0.00001;
 
     // Helper function to compare floating point numbers
-    const isClose = (a: number, b: number) => Math.abs(a - b) < EPSILON;
 
     // Check if user explicitly edited any fields
     const userEditedQuantity =
@@ -504,7 +503,6 @@ export function LineItemsTable({
   onAddItem,
   onUpdateItem,
   onDeleteItem,
-  onUpdateCurrency,
   onEditingItemChange,
   dispatch,
   paymentAccounts,

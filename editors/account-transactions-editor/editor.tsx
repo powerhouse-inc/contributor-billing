@@ -30,7 +30,7 @@ import { actions as expenseReportActions } from "../../document-models/expense-r
 
 type ViewMode = "list" | "add" | "edit";
 
-export function Editor() {
+export default function Editor() {
   const [document, dispatch] = useSelectedAccountTransactionsDocument();
   const parentFolder = useParentFolderForSelectedNode();
   const [selectedDrive] = useSelectedDrive();
@@ -50,13 +50,13 @@ export function Editor() {
       addTransaction({
         id: generateId(),
         ...values,
-      }),
+      })
     );
     setViewMode("list");
   }
 
   function handleUpdateTransaction(
-    values: AddTransactionInput | Omit<AddTransactionInput, "id">,
+    values: AddTransactionInput | Omit<AddTransactionInput, "id">
   ) {
     if ("id" in values) {
       dispatch(updateTransaction(values));
@@ -181,7 +181,7 @@ export function Editor() {
           typeof tx.blockNumber === "number" ? tx.blockNumber : -Infinity;
         return bn > max ? bn : max;
       },
-      -Infinity,
+      -Infinity
     );
     const fromBlock =
       Number.isFinite(lastBlockNumber) && lastBlockNumber >= 0
@@ -194,20 +194,41 @@ export function Editor() {
       try {
         const result = await alchemyIntegration.getTransactionsFromAlchemy(
           account.account,
-          fromBlock,
+          fromBlock
         );
 
         if (result.success) {
           // Check if there are any transactions returned
           if (!result.transactions || result.transactions.length === 0) {
             alert(
-              "No new transactions found. All transactions are up to date.",
+              "No new transactions found. All transactions are up to date."
             );
             return;
           }
 
-          // Deduplication is handled by the reducer based on uniqueId
-          // Add all transactions - the reducer will prevent duplicates
+          // Create a set of existing transaction keys for deduplication
+          // Use txHash + blockNumber + token + counterParty + amount as unique identifier
+          // Note: Multiple ERC20 transfers can share the same txHash and blockNumber, so we include amount
+          const existingTxKeys = new Set(
+            existingTransactions.map((tx: any) => {
+              const txHash = tx.details?.txHash || tx.txHash || "";
+              const blockNumber =
+                tx.details?.blockNumber || tx.blockNumber || "";
+              const token = tx.details?.token || tx.token || "";
+              const counterParty = tx.counterParty || "";
+              // Include amount to handle multiple transfers in same transaction
+              const amount = tx.amount;
+              const amountStr =
+                typeof amount === "object" && amount?.value && amount?.unit
+                  ? `${amount.value}-${amount.unit}`
+                  : typeof amount === "string"
+                    ? amount
+                    : "";
+              return `${txHash}-${blockNumber}-${token}-${counterParty}-${amountStr}`;
+            })
+          );
+
+          // Add only new transactions that don't already exist
           let addedCount = 0;
           let skippedCount = 0;
           for (const txData of result.transactions) {
@@ -240,7 +261,7 @@ export function Editor() {
             if (!txData.direction) {
               console.error(
                 `[Editor] Skipping transaction with undefined direction:`,
-                txData,
+                txData
               );
               skippedCount++;
               continue;
@@ -253,7 +274,7 @@ export function Editor() {
                   from: txData.from,
                   to: txData.to,
                   direction: txData.direction,
-                },
+                }
               );
               skippedCount++;
               continue;
@@ -274,7 +295,7 @@ export function Editor() {
                 direction:
                   (txData.direction as "INFLOW" | "OUTFLOW") || "OUTFLOW", // Use direction from Alchemy data or default to OUTFLOW
                 budget: null, // No budget assigned initially
-              }),
+              })
             );
             addedCount++;
           }
@@ -283,11 +304,11 @@ export function Editor() {
           if (addedCount === 0) {
             if (skippedCount > 0) {
               alert(
-                `No new transactions found. All ${skippedCount} transaction(s) already exist in the document.`,
+                `No new transactions found. All ${skippedCount} transaction(s) already exist in the document.`
               );
             } else {
               alert(
-                "No new transactions found. All transactions are up to date.",
+                "No new transactions found. All transactions are up to date."
               );
             }
           } else {
@@ -300,7 +321,7 @@ export function Editor() {
           return;
         } else {
           throw new Error(
-            result.message || "Failed to fetch transactions from Alchemy",
+            result.message || "Failed to fetch transactions from Alchemy"
           );
         }
       } catch (error) {
@@ -313,7 +334,7 @@ export function Editor() {
           errorMessage.includes("Cannot query field")
         ) {
           alert(
-            "The transaction fetching feature requires a reactor restart to work. Please restart the reactor (ph vetra) and try again.",
+            "The transaction fetching feature requires a reactor restart to work. Please restart the reactor (ph vetra) and try again."
           );
           return;
         }
@@ -324,7 +345,7 @@ export function Editor() {
     } catch (error) {
       console.error("Error fetching transactions:", error);
       alert(
-        `Error fetching transactions: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Error fetching transactions: ${error instanceof Error ? error.message : "Unknown error"}`
       );
     } finally {
       setIsLoadingTransactions(false);
@@ -360,7 +381,7 @@ export function Editor() {
                   id: generateId(),
                   account: address || "",
                   name: name || "",
-                }),
+                })
               );
             }}
           />
@@ -450,5 +471,3 @@ export function Editor() {
     </div>
   );
 }
-
-export default Editor;

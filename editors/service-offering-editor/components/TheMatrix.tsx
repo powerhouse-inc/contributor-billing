@@ -27,7 +27,6 @@ import {
   addService,
   updateService,
 } from "../../../document-models/service-offering/gen/creators.js";
-import { useResourceTemplateDocumentsInSelectedDrive } from "../../../document-models/resource-template/hooks.js";
 
 interface TheMatrixProps {
   document: ServiceOfferingDocument;
@@ -1955,10 +1954,8 @@ export function TheMatrix({
   const services = state.global.services ?? [];
   const tiers = state.global.tiers ?? [];
   const optionGroups = state.global.optionGroups ?? [];
-  const resourceTemplateId = state.global.resourceTemplateId;
 
   // Get resource templates to find the selected one
-  const templates = useResourceTemplateDocumentsInSelectedDrive();
 
   // Get selected facets from the offering document's facetTargets
   const offeringFacetTargets = state.global.facetTargets ?? [];

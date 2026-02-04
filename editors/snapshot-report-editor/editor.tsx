@@ -103,7 +103,6 @@ export default function Editor() {
     accountsDocumentId,
     ownerIds,
     reportPeriodStart,
-    reportPeriodEnd,
   } = document.state.global;
 
   // Filter for Accounts documents
@@ -583,26 +582,6 @@ export default function Editor() {
     }
   };
 
-  /**
-   * Derive transactions for all non-Internal accounts
-   */
-  const handleDeriveAllNonInternal = async () => {
-    const internalAccounts = snapshotAccounts.filter(
-      (a) => a.type === "Internal",
-    );
-    if (internalAccounts.length === 0) {
-      alert("No Internal accounts found. Import Internal accounts first.");
-      return;
-    }
-
-    const nonInternalAccounts = snapshotAccounts.filter(
-      (a) => a.type !== "Internal",
-    );
-
-    for (const account of nonInternalAccounts) {
-      await handleDeriveTransactions(account.id);
-    }
-  };
 
   // Handlers for the legacy startDate/endDate fields (DatePicker approach)
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -303,7 +303,7 @@ export const expenseReportWalletOperations: ExpenseReportWalletOperations = {
     // Set period end date
     state.periodEnd = action.input.periodEnd;
   },
-  updateWalletOperation(state, action, dispatch) {
+  updateWalletOperation(state, action) {
     // Update wallet name and document IDs
     const wallet = state.wallets.find((w) => w.wallet === action.input.address);
     if (wallet) {

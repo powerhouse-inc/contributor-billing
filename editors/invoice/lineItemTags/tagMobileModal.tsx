@@ -2,7 +2,7 @@ import { X } from "lucide-react";
 import { useState, useEffect, type Dispatch } from "react";
 import { InputField } from "../components/inputField.js";
 import { Select, DatePicker } from "@powerhousedao/document-engineering/ui";
-import { expenseAccountOptions, paymentAccountOptions } from "./tagMapping.js";
+import { expenseAccountOptions } from "./tagMapping.js";
 import {
   actions,
   type InvoiceTag,

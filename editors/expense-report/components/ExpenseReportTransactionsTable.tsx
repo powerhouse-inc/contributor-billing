@@ -15,7 +15,6 @@ interface ExpenseReportTransactionsTableProps {
 
 export function ExpenseReportTransactionsTable({
   transactions,
-  wallets,
 }: ExpenseReportTransactionsTableProps) {
   // Sort transactions by datetime, newest first
   const sortedTransactions = [...transactions].sort((a, b) => {

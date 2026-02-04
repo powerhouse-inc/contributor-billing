@@ -15,7 +15,6 @@ import {
 } from "@powerhousedao/document-engineering";
 import type {
   BuilderProfileDocument,
-  BuilderProfileState,
 } from "@powerhousedao/builder-profile/document-models/builder-profile";
 import { actions as builderProfileActions } from "@powerhousedao/builder-profile/document-models/builder-profile";
 import { useRemoteBuilderProfiles } from "../hooks/useRemoteBuilderProfiles.js";

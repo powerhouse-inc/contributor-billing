@@ -162,7 +162,7 @@ export const bankCountryRule: ValidationRule = {
 
 export const accountIbanRule: ValidationRule = {
   field: "accountNum",
-  validate: (value: string, document?: any) => {
+  validate: (value: string) => {
     if (!value || value.trim() === "") {
       return {
         isValid: false,

@@ -398,7 +398,6 @@ export const handleWebhook = async (req: any, res: any) => {
           const toAddress = activity.toAddress.toLowerCase();
           const tokenAddress = activity.rawContract.address.toLowerCase();
           const tokenValue = activity.value || 0;
-          const tokenDecimals = activity.rawContract.decimals || 18;
 
           console.log(
             `Token transfer details: ${tokenValue} of token ${tokenAddress} from ${fromAddress} to ${toAddress}`,

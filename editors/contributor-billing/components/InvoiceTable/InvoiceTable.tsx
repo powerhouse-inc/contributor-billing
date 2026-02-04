@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   addDocument,
   dispatchActions,
@@ -169,7 +169,6 @@ export const InvoiceTable = ({
   setSelected,
   filteredDocumentModels,
   onSelectDocumentModel,
-  getDocDispatcher,
   selectedStatuses,
   onStatusChange,
   onRowSelection,

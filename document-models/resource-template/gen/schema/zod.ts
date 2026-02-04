@@ -30,7 +30,6 @@ import type {
   SetSetupServicesInput,
   SetTemplateIdInput,
   TargetAudience,
-  TemplateStatus,
   UpdateContentSectionInput,
   UpdateFaqInput,
   UpdateOptionGroupInput,

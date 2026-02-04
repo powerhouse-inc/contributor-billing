@@ -419,63 +419,6 @@ export function WalletsTable({
     // to prevent re-running when transactions are added
   }, [pendingTxDoc?.documentId, isProcessing]);
 
-  const handleAddWallet = () => {
-    if (!selectedAccountId) {
-      setWalletError("Please select an account");
-      return;
-    }
-
-    // Find the selected account from accountEntries
-    const selectedAccount = accountEntries.find(
-      (acc: any) => acc.id === selectedAccountId,
-    );
-
-    if (!selectedAccount) {
-      setWalletError("Selected account not found");
-      return;
-    }
-
-    // Check if wallet already exists
-    const walletExists = wallets.some(
-      (w) => w.wallet === selectedAccount.account,
-    );
-
-    if (walletExists) {
-      setWalletError("This account is already added to the report");
-      return;
-    }
-
-    setAddingWallet(true);
-    setWalletError("");
-
-    try {
-      // Add the wallet to the expense report
-      dispatch(
-        actions.addWallet({
-          wallet: selectedAccount.account,
-          name: selectedAccount.name || undefined,
-        }),
-      );
-
-      // Immediately update with the linked document IDs
-      dispatch(
-        actions.updateWallet({
-          address: selectedAccount.account,
-          accountDocumentId: selectedAccount.accountsDocumentId || undefined,
-          accountTransactionsDocumentId:
-            selectedAccount.accountTransactionsId || undefined,
-        }),
-      );
-
-      // Clear selection
-      setSelectedAccountId("");
-    } catch (error) {
-      console.error("Error adding wallet:", error);
-      setWalletError("Failed to add wallet. Please try again.");
-    } finally {
-      setAddingWallet(false);
-    }
-  };
 
   // Validate Ethereum address
   const validateEthAddress = useCallback((address: string): boolean => {
