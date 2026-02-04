@@ -74,7 +74,7 @@ export function DriveContents({
   // Billing folder - show all months overview
   if (selectedFolder.folderType === "billing") {
     return (
-      <div className="container mx-auto flex-1 overflow-y-auto p-4">
+      <div className="container mx-auto flex-1 p-4">
         <Suspense>
           <BillingOverview onFolderSelect={onFolderSelect} />
         </Suspense>

@@ -1,4 +1,11 @@
-import { useCallback, useState, useMemo, useRef, useEffect } from "react";
+import {
+  useCallback,
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+} from "react";
+import { createPortal } from "react-dom";
 import { BarChart3, Plus, ChevronDown } from "lucide-react";
 import type { MonthFolderInfo } from "../hooks/useBillingFolderStructure.js";
 import {
@@ -73,13 +80,28 @@ export function MonthlyReportsOverview({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const driveId = selectedDrive?.header.id;
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+
+  // Update dropdown position when opening
+  useEffect(() => {
+    if (isDropdownOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + 4,
+        left: rect.right - 224, // 224px = w-56 (14rem)
+      });
+    }
+  }, [isDropdownOpen]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
       ) {
         setIsDropdownOpen(false);
       }
@@ -245,8 +267,9 @@ export function MonthlyReportsOverview({
 
   // Add Month button component (reused across states)
   const addMonthButton = onCreateMonth && (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative">
       <button
+        ref={buttonRef}
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         disabled={isAddingMonth}
         className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -256,32 +279,41 @@ export function MonthlyReportsOverview({
         <ChevronDown className="w-3 h-3" />
       </button>
 
-      {isDropdownOpen && (
-        <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-          <div className="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
-            Select a month to add
-          </div>
-          <div className="max-h-72 overflow-y-auto">
-            {allMonths.map(({ name, exists }) => (
-              <button
-                key={name}
-                onClick={() => void handleCreateMonth(name)}
-                disabled={isAddingMonth || exists}
-                className={`w-full px-3 py-2 text-left text-sm ${
-                  exists
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-gray-700 hover:bg-gray-50"
-                } disabled:cursor-not-allowed`}
-              >
-                {name}
-                {exists && (
-                  <span className="ml-2 text-xs text-gray-400">(exists)</span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      {isDropdownOpen &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            className="fixed w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-[9999]"
+            style={{
+              top: dropdownPosition.top,
+              left: dropdownPosition.left,
+            }}
+          >
+            <div className="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
+              Select a month to add
+            </div>
+            <div className="max-h-72 overflow-y-auto">
+              {allMonths.map(({ name, exists }) => (
+                <button
+                  key={name}
+                  onClick={() => void handleCreateMonth(name)}
+                  disabled={isAddingMonth || exists}
+                  className={`w-full px-3 py-2 text-left text-sm ${
+                    exists
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-gray-700 hover:bg-gray-50"
+                  } disabled:cursor-not-allowed`}
+                >
+                  {name}
+                  {exists && (
+                    <span className="ml-2 text-xs text-gray-400">(exists)</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 
@@ -309,7 +341,7 @@ export function MonthlyReportsOverview({
 
   if (monthReportSets.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-6 overflow-visible">
         <div className="flex items-center justify-between gap-3 mb-5">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-indigo-100 rounded-lg">
@@ -334,7 +366,7 @@ export function MonthlyReportsOverview({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6">
+    <div className="bg-white rounded-xl border border-gray-200 p-6 overflow-visible">
       {/* Header with Add Month button */}
       <div className="flex items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-3">

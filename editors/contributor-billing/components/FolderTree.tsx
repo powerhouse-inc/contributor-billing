@@ -456,30 +456,9 @@ export function FolderTree({
     safeSetSelectedNode("");
   };
 
-  // Generate a stable key based on the folder structure and document IDs
-  // This ensures the sidebar remounts when folders OR documents change, preventing state sync issues
-  const sidebarKey = useMemo(() => {
-    const nodeIds: string[] = [];
-
-    // Include folder IDs
-    for (const [, info] of monthFolders.entries()) {
-      nodeIds.push(info.folder.id);
-      if (info.paymentsFolder) nodeIds.push(info.paymentsFolder.id);
-      if (info.reportingFolder) nodeIds.push(info.reportingFolder.id);
-    }
-
-    // Include document IDs to force remount when documents are added/removed
-    // This prevents the sidebar from trying to update toggle state for nodes that don't exist
-    if (documentsInDrive) {
-      const docIds = documentsInDrive
-        .map((doc) => doc.header.id)
-        .sort()
-        .slice(0, 20); // Limit to first 20 to keep key manageable
-      nodeIds.push(...docIds);
-    }
-
-    return nodeIds.join("-") || "empty";
-  }, [monthFolders, documentsInDrive]);
+  // Use a stable key based on the drive ID only
+  // Previously this changed on every folder/document add, causing sidebar to remount and lose collapsed state
+  const sidebarKey = driveDocument?.header.id || "empty";
 
   return (
     <>

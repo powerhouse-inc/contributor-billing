@@ -58,7 +58,7 @@ export function DriveExplorer({ children }: EditorProps) {
       />
 
       {/* Main content area - takes remaining space, scrollable */}
-      <DocumentDropZone className="flex-1 min-w-0 h-full overflow-auto">
+      <DocumentDropZone className="flex-1 min-w-0 h-full overflow-x-hidden overflow-y-auto">
         {/* Conditional rendering: Document editor or folder content */}
         {showDocumentEditor ? (
           /* Document editor view */

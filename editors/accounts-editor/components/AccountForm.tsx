@@ -1,8 +1,7 @@
 import { useState } from "react";
-import {
-  Button,
-} from "@powerhousedao/document-engineering";
+import { Button } from "@powerhousedao/document-engineering";
 import { Tooltip, TooltipProvider } from "@powerhousedao/design-system/ui";
+import { toast } from "@powerhousedao/design-system/connect";
 import { Info } from "lucide-react";
 import { isValidEthereumAddress } from "../../../scripts/alchemy/alchemyHelpers.js";
 import type {
@@ -87,7 +86,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
         typeSelect.setCustomValidity("Please select an Account Type");
         typeSelect.reportValidity();
       } else {
-        alert("Account Type is required");
+        toast("Account Type is required", { type: "warning" });
       }
       return;
     } else if (typeSelect) {
@@ -121,11 +120,15 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="account-address"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Account <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
+                id="account-address"
                 name="account"
                 value={formData.account}
                 onChange={(e) => {
@@ -141,6 +144,8 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
                   validateAccount(e.target.value);
                 }}
                 placeholder="e.g., 0x1234...abcd"
+                spellCheck={false}
+                autoComplete="off"
                 className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   accountError
                     ? "border-red-300 focus:ring-red-500"
@@ -160,11 +165,16 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="account-name"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
+                id="account-name"
+                name="name"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
@@ -179,7 +189,10 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <TooltipProvider delayDuration={0}>
-                <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="account-type"
+                  className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-2"
+                >
                   Account Type <span className="text-red-500">*</span>
                   <Tooltip
                     content={
@@ -210,6 +223,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
                 </label>
               </TooltipProvider>
               <select
+                id="account-type"
                 name="accountType"
                 value={formData.type}
                 onChange={(e) => {
@@ -232,10 +246,15 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="kyc-status"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 KYC/AML Status
               </label>
               <select
+                id="kyc-status"
+                name="kycStatus"
                 value={formData.KycAmlStatus}
                 onChange={(e) =>
                   setFormData({
@@ -254,11 +273,16 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="budget-path"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Budget Path
             </label>
             <input
               type="text"
+              id="budget-path"
+              name="budgetPath"
               value={formData.budgetPath}
               onChange={(e) =>
                 setFormData({ ...formData, budgetPath: e.target.value })
@@ -270,11 +294,16 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
 
           {account && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="account-transactions-id"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Account Transactions ID
               </label>
               <input
                 type="text"
+                id="account-transactions-id"
+                name="accountTransactionsId"
                 value={formData.accountTransactionsId}
                 onChange={(e) =>
                   setFormData({
@@ -289,7 +318,10 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="chains"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Chains
               <span className="ml-2 text-xs text-gray-500 font-normal">
                 (comma-separated)
@@ -297,6 +329,8 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
             </label>
             <input
               type="text"
+              id="chains"
+              name="chain"
               value={formData.chain}
               onChange={(e) =>
                 setFormData({ ...formData, chain: e.target.value })
@@ -307,7 +341,10 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="owners"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Owners
               <span className="ml-2 text-xs text-gray-500 font-normal">
                 (comma-separated)
@@ -315,6 +352,8 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
             </label>
             <input
               type="text"
+              id="owners"
+              name="owners"
               value={formData.owners}
               onChange={(e) =>
                 setFormData({ ...formData, owners: e.target.value })

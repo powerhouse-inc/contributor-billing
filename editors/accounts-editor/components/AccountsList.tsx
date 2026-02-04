@@ -38,10 +38,10 @@ export function AccountsList({
           />
         </svg>
         <h3 className="mt-4 text-lg font-medium text-gray-900">
-          No accounts found
+          No accounts yet
         </h3>
         <p className="mt-2 text-sm text-gray-600">
-          Try adjusting your search or filter criteria
+          Get started by adding your first account
         </p>
       </div>
     );

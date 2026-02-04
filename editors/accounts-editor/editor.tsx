@@ -1,7 +1,18 @@
 import { useState } from "react";
 import { Button } from "@powerhousedao/document-engineering";
-import { ChevronDown, ChevronUp, HelpCircle, X } from "lucide-react";
-import { DocumentToolbar } from "@powerhousedao/design-system/connect";
+import {
+  ChevronDown,
+  ChevronUp,
+  HelpCircle,
+  Plus,
+  RefreshCw,
+  X,
+} from "lucide-react";
+import {
+  DocumentToolbar,
+  toast,
+  ToastContainer,
+} from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
   useParentFolderForSelectedNode,
@@ -142,6 +153,12 @@ export default function Editor() {
     total: number;
     account: string;
   } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    accountId: string | null;
+    accountName: string;
+  }>({ isOpen: false, accountId: null, accountName: "" });
+  const [syncConfirm, setSyncConfirm] = useState(false);
   const [showHelp, setShowHelp] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem(HELP_DISMISSED_KEY) !== "true";
@@ -214,9 +231,20 @@ export default function Editor() {
   }
 
   function handleDeleteAccount(id: string) {
-    if (window.confirm("Are you sure you want to delete this account?")) {
-      dispatch(deleteAccount({ id }));
+    const account = accounts.find((a) => a.id === id);
+    setDeleteConfirm({
+      isOpen: true,
+      accountId: id,
+      accountName: account?.name || "this account",
+    });
+  }
+
+  function confirmDelete() {
+    if (deleteConfirm.accountId) {
+      dispatch(deleteAccount({ id: deleteConfirm.accountId }));
+      toast("Account deleted successfully", { type: "success" });
     }
+    setDeleteConfirm({ isOpen: false, accountId: null, accountName: "" });
   }
 
   function handleUpdateKycStatus(
@@ -259,44 +287,33 @@ export default function Editor() {
             }),
           );
         }
-        alert(
-          `Success! Created document and fetched ${result.transactionsAdded} transactions`,
+        toast(
+          `Created document and fetched ${result.transactionsAdded} transactions`,
+          { type: "success" },
         );
       } else {
-        alert(`Error: ${result.message}`);
+        toast(`Error: ${result.message}`, { type: "error" });
       }
     } catch (error) {
-      alert(
+      toast(
         `Error: ${error instanceof Error ? error.message : "Unknown error occurred"}`,
+        { type: "error" },
       );
     } finally {
       setCreatingTransactionsFor(null);
     }
   }
 
+  function initiateSync() {
+    if (accounts.length === 0) {
+      toast("No accounts to sync transactions for", { type: "warning" });
+      return;
+    }
+    setSyncConfirm(true);
+  }
+
   async function handleSyncAllTransactions() {
-    // Filter accounts that have transaction documents
-    const accountsWithTransactions = accounts.filter(
-      (account) =>
-        account.accountTransactionsId &&
-        account.accountTransactionsId.trim() !== "",
-    );
-
-    if (accountsWithTransactions.length === 0) {
-      alert(
-        "No accounts have transaction documents to sync. Create transaction documents first.",
-      );
-      return;
-    }
-
-    if (
-      !window.confirm(
-        `This will sync transactions for ${accountsWithTransactions.length} account(s). Continue?`,
-      )
-    ) {
-      return;
-    }
-
+    setSyncConfirm(false);
     setIsSyncingAll(true);
     const results: Array<{
       account: string;
@@ -306,26 +323,67 @@ export default function Editor() {
     }> = [];
 
     try {
-      for (let i = 0; i < accountsWithTransactions.length; i++) {
-        const account = accountsWithTransactions[i];
+      const driveId = selectedDrive?.header?.id;
+      const accountsDocumentId = document.header.id;
+
+      for (let i = 0; i < accounts.length; i++) {
+        const account = accounts[i];
         setSyncProgress({
           current: i + 1,
-          total: accountsWithTransactions.length,
+          total: accounts.length,
           account: account.name,
         });
 
-        const result =
-          await accountTransactionsService.syncTransactionsForDocument(
-            account.accountTransactionsId!,
-            account.account,
-          );
+        try {
+          // If account already has a transaction document, sync it
+          if (account.accountTransactionsId) {
+            const result =
+              await accountTransactionsService.syncTransactionsForDocument(
+                account.accountTransactionsId,
+                account.account,
+              );
 
-        results.push({
-          account: account.name,
-          success: result.success,
-          transactionsAdded: result.transactionsAdded || 0,
-          message: result.message,
-        });
+            results.push({
+              account: account.name,
+              success: result.success,
+              transactionsAdded: result.transactionsAdded || 0,
+              message: result.message,
+            });
+          } else {
+            // Otherwise, create a new transaction document and fetch transactions
+            const result =
+              await accountTransactionsService.createAccountTransactionsDocument(
+                account,
+                accountsDocumentId,
+                driveId,
+              );
+
+            if (result.success && result.documentId) {
+              // Update the account with the new transaction document ID
+              dispatch(
+                updateAccount({
+                  id: account.id,
+                  accountTransactionsId: result.documentId,
+                }),
+              );
+            }
+
+            results.push({
+              account: account.name,
+              success: result.success,
+              transactionsAdded: result.transactionsAdded || 0,
+              message: result.message,
+            });
+          }
+        } catch (error) {
+          results.push({
+            account: account.name,
+            success: false,
+            transactionsAdded: 0,
+            message:
+              error instanceof Error ? error.message : "Unknown error occurred",
+          });
+        }
       }
 
       // Show summary
@@ -336,23 +394,21 @@ export default function Editor() {
       const successCount = results.filter((r) => r.success).length;
       const failedCount = results.length - successCount;
 
-      let message = `Sync complete!\n\n`;
-      message += `Successfully synced: ${successCount}/${results.length} accounts\n`;
-      message += `Total new transactions: ${totalAdded}\n`;
-
-      if (failedCount > 0) {
-        message += `\nFailed accounts:\n`;
-        results
-          .filter((r) => !r.success)
-          .forEach((r) => {
-            message += `- ${r.account}: ${r.message}\n`;
-          });
+      if (failedCount === 0) {
+        toast(
+          `Synced ${successCount} account${successCount !== 1 ? "s" : ""}, ${totalAdded} new transactions`,
+          { type: "success" },
+        );
+      } else {
+        toast(
+          `Synced ${successCount}/${results.length} accounts. ${failedCount} failed.`,
+          { type: "warning" },
+        );
       }
-
-      alert(message);
     } catch (error) {
-      alert(
-        `Error during bulk sync: ${error instanceof Error ? error.message : "Unknown error occurred"}`,
+      toast(
+        `Error during sync: ${error instanceof Error ? error.message : "Unknown error occurred"}`,
+        { type: "error" },
       );
     } finally {
       setIsSyncingAll(false);
@@ -374,67 +430,70 @@ export default function Editor() {
           <div>
             {viewMode === "list" && (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-2xl font-semibold text-gray-900">
-                      Accounts
-                    </h2>
-                    <p className="mt-1 text-sm text-gray-600">
-                      Manage your accounts and sync transactions
-                    </p>
-                  </div>
-                  <div className="flex gap-3">
-                    <Button
-                      onClick={handleSyncAllTransactions}
-                      disabled={
-                        isSyncingAll ||
-                        accounts.filter((a) => a.accountTransactionsId)
-                          .length === 0
-                      }
-                      className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors"
-                    >
-                      {isSyncingAll ? (
-                        <span className="flex items-center gap-2">
-                          <svg
-                            className="animate-spin h-4 w-4"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                          </svg>
-                          {syncProgress
-                            ? `${syncProgress.current}/${syncProgress.total}`
-                            : "Syncing..."}
-                        </span>
-                      ) : (
-                        "Sync All Transactions"
-                      )}
-                    </Button>
-                    <Button
-                      onClick={() => setViewMode("add")}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors"
-                    >
-                      Add Account
-                    </Button>
-                  </div>
+                {/* Header */}
+                <div>
+                  <h2 className="text-2xl font-semibold text-gray-900">
+                    Accounts
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Manage your accounts and sync transactions
+                  </p>
                 </div>
 
+                {/* Help Section */}
                 {showHelp && (
                   <InstructionSection onDismiss={handleDismissHelp} />
                 )}
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-end gap-3">
+                  <Button
+                    onClick={() => setViewMode("add")}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" aria-hidden="true" />
+                    Add Account
+                  </Button>
+                  <Button
+                    onClick={initiateSync}
+                    disabled={isSyncingAll || accounts.length === 0}
+                    className="border border-gray-300 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                  >
+                    {isSyncingAll ? (
+                      <>
+                        <svg
+                          className="animate-spin h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        {syncProgress
+                          ? `Syncing ${syncProgress.current}/${syncProgress.total}…`
+                          : "Syncing…"}
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="w-4 h-4" aria-hidden="true" />
+                        Sync Transactions
+                      </>
+                    )}
+                  </Button>
+                </div>
 
                 {syncProgress && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -554,7 +613,113 @@ export default function Editor() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm.isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() =>
+            setDeleteConfirm({
+              isOpen: false,
+              accountId: null,
+              accountName: "",
+            })
+          }
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-modal-title"
+          >
+            <h3
+              id="delete-modal-title"
+              className="text-lg font-semibold text-gray-900 mb-2"
+            >
+              Delete Account
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete "{deleteConfirm.accountName}"?
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button
+                onClick={() =>
+                  setDeleteConfirm({
+                    isOpen: false,
+                    accountId: null,
+                    accountName: "",
+                  })
+                }
+                className="px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+              >
+                Delete Account
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sync Confirmation Modal */}
+      {syncConfirm && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => setSyncConfirm(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sync-modal-title"
+          >
+            <h3
+              id="sync-modal-title"
+              className="text-lg font-semibold text-gray-900 mb-2"
+            >
+              Sync Transactions
+            </h3>
+            <p className="text-gray-600 mb-6">
+              This will sync transactions for all {accounts.length} account
+              {accounts.length !== 1 ? "s" : ""}. Accounts without transaction
+              documents will have them created automatically.
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button
+                onClick={() => setSyncConfirm(false)}
+                className="px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => void handleSyncAllTransactions()}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                Sync All
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ToastContainer
+        position="bottom-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }
-

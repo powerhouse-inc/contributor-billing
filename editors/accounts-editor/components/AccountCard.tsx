@@ -51,7 +51,7 @@ export function AccountCard({
           <div className="flex items-center gap-2">
             <button
               onClick={() => onEdit(account)}
-              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus:outline-none"
               title="Edit account"
               aria-label={`Edit account ${account.name}`}
             >
@@ -72,7 +72,7 @@ export function AccountCard({
             </button>
             <button
               onClick={() => onDelete(account.id)}
-              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus:outline-none"
               title="Delete account"
               aria-label={`Delete account ${account.name}`}
             >
@@ -167,12 +167,13 @@ export function AccountCard({
               </span>
               <div className="relative">
                 <button
+                  id={`kyc-status-button-${account.id}`}
                   onClick={() => setShowKycMenu(!showKycMenu)}
-                  className="hover:opacity-80 transition-opacity"
+                  className="hover:opacity-80 transition-opacity focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus:outline-none rounded"
                   title="Update KYC/AML status"
                   aria-label={`Update KYC/AML status for ${account.name}, currently ${account.KycAmlStatus || "Not Set"}`}
                   aria-expanded={showKycMenu}
-                  aria-haspopup="true"
+                  aria-haspopup="menu"
                 >
                   <KYCStatusBadge status={account.KycAmlStatus} />
                 </button>
@@ -181,28 +182,46 @@ export function AccountCard({
                     <div
                       className="fixed inset-0 z-10"
                       onClick={() => setShowKycMenu(false)}
+                      aria-hidden="true"
                     />
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+                    <div
+                      className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20"
+                      role="menu"
+                      aria-orientation="vertical"
+                      aria-labelledby={`kyc-status-button-${account.id}`}
+                    >
                       <div className="py-1">
                         <button
+                          role="menuitem"
                           onClick={() => handleKycStatusChange("PASSED")}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-900 flex items-center gap-2"
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-900 flex items-center gap-2 focus:bg-green-50 focus:text-green-900 focus:outline-none"
                         >
-                          <span className="w-2 h-2 rounded-full bg-green-500" />
+                          <span
+                            className="w-2 h-2 rounded-full bg-green-500"
+                            aria-hidden="true"
+                          />
                           Passed
                         </button>
                         <button
+                          role="menuitem"
                           onClick={() => handleKycStatusChange("PENDING")}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-900 flex items-center gap-2"
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-900 flex items-center gap-2 focus:bg-yellow-50 focus:text-yellow-900 focus:outline-none"
                         >
-                          <span className="w-2 h-2 rounded-full bg-yellow-500" />
+                          <span
+                            className="w-2 h-2 rounded-full bg-yellow-500"
+                            aria-hidden="true"
+                          />
                           Pending
                         </button>
                         <button
+                          role="menuitem"
                           onClick={() => handleKycStatusChange("FAILED")}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-900 flex items-center gap-2"
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-900 flex items-center gap-2 focus:bg-red-50 focus:text-red-900 focus:outline-none"
                         >
-                          <span className="w-2 h-2 rounded-full bg-red-500" />
+                          <span
+                            className="w-2 h-2 rounded-full bg-red-500"
+                            aria-hidden="true"
+                          />
                           Failed
                         </button>
                       </div>
