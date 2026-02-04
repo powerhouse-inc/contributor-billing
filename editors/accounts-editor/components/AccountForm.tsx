@@ -1,7 +1,5 @@
 import { useState } from "react";
-import {
-  Button,
-} from "@powerhousedao/document-engineering";
+import { Button } from "@powerhousedao/document-engineering";
 import { Tooltip, TooltipProvider } from "@powerhousedao/design-system/ui";
 import { Info } from "lucide-react";
 import type {

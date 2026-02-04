@@ -96,7 +96,6 @@ const LineItemsTable = (props: {
     { label: "Unit", value: "UNIT" },
   ];
 
-
   const handleInputChange = (
     field: keyof LocalLineItemDraft,
     value: string | number,

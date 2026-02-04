@@ -79,6 +79,8 @@ export default function Editor() {
                 <SetOperatorTeam
                   operatorTeam={operatorTeam}
                   dispatch={dispatch}
+                  opHubPhid={document.header.id}
+                  opHubName={document.state.global.name || ""}
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Link to the builder team that operates this hub
@@ -101,7 +103,13 @@ export default function Editor() {
               </p>
             </div>
             <div className="p-4 sm:p-6">
-              <SubteamsPicker subteams={subteams} dispatch={dispatch} />
+              <SubteamsPicker
+                subteams={subteams}
+                operatorTeam={operatorTeam}
+                dispatch={dispatch}
+                opHubPhid={document.header.id}
+                opHubName={document.state.global.name || ""}
+              />
             </div>
           </section>
         </div>

@@ -41,13 +41,13 @@ export default function Editor() {
       addTransaction({
         id: generateId(),
         ...values,
-      })
+      }),
     );
     setViewMode("list");
   }
 
   function handleUpdateTransaction(
-    values: AddTransactionInput | Omit<AddTransactionInput, "id">
+    values: AddTransactionInput | Omit<AddTransactionInput, "id">,
   ) {
     if ("id" in values) {
       dispatch(updateTransaction(values));
@@ -87,7 +87,7 @@ export default function Editor() {
           typeof tx.blockNumber === "number" ? tx.blockNumber : -Infinity;
         return bn > max ? bn : max;
       },
-      -Infinity
+      -Infinity,
     );
     const fromBlock =
       Number.isFinite(lastBlockNumber) && lastBlockNumber >= 0
@@ -100,14 +100,14 @@ export default function Editor() {
       try {
         const result = await alchemyIntegration.getTransactionsFromAlchemy(
           account.account,
-          fromBlock
+          fromBlock,
         );
 
         if (result.success) {
           // Check if there are any transactions returned
           if (!result.transactions || result.transactions.length === 0) {
             alert(
-              "No new transactions found. All transactions are up to date."
+              "No new transactions found. All transactions are up to date.",
             );
             return;
           }
@@ -131,7 +131,7 @@ export default function Editor() {
                     ? amount
                     : "";
               return `${txHash}-${blockNumber}-${token}-${counterParty}-${amountStr}`;
-            })
+            }),
           );
 
           // Add only new transactions that don't already exist
@@ -177,7 +177,7 @@ export default function Editor() {
             if (!txData.direction) {
               console.error(
                 `[Editor] Skipping transaction with undefined direction:`,
-                txData
+                txData,
               );
               skippedCount++;
               continue;
@@ -190,7 +190,7 @@ export default function Editor() {
                   from: txData.from,
                   to: txData.to,
                   direction: txData.direction,
-                }
+                },
               );
               skippedCount++;
               continue;
@@ -208,7 +208,7 @@ export default function Editor() {
                 direction:
                   (txData.direction as "INFLOW" | "OUTFLOW") || "OUTFLOW", // Use direction from Alchemy data or default to OUTFLOW
                 budget: null, // No budget assigned initially
-              })
+              }),
             );
             addedCount++;
           }
@@ -217,11 +217,11 @@ export default function Editor() {
           if (addedCount === 0) {
             if (skippedCount > 0) {
               alert(
-                `No new transactions found. All ${skippedCount} transaction(s) already exist in the document.`
+                `No new transactions found. All ${skippedCount} transaction(s) already exist in the document.`,
               );
             } else {
               alert(
-                "No new transactions found. All transactions are up to date."
+                "No new transactions found. All transactions are up to date.",
               );
             }
           } else {
@@ -234,7 +234,7 @@ export default function Editor() {
           return;
         } else {
           throw new Error(
-            result.message || "Failed to fetch transactions from Alchemy"
+            result.message || "Failed to fetch transactions from Alchemy",
           );
         }
       } catch (error) {
@@ -247,7 +247,7 @@ export default function Editor() {
           errorMessage.includes("Cannot query field")
         ) {
           alert(
-            "The transaction fetching feature requires a reactor restart to work. Please restart the reactor (ph vetra) and try again."
+            "The transaction fetching feature requires a reactor restart to work. Please restart the reactor (ph vetra) and try again.",
           );
           return;
         }
@@ -258,7 +258,7 @@ export default function Editor() {
     } catch (error) {
       console.error("Error fetching transactions:", error);
       alert(
-        `Error fetching transactions: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Error fetching transactions: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     } finally {
       setIsLoadingTransactions(false);
@@ -287,7 +287,7 @@ export default function Editor() {
                   id: generateId(),
                   account: address || "",
                   name: name || "",
-                })
+                }),
               );
             }}
           />

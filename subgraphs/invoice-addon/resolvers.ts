@@ -6,7 +6,6 @@ import {
 } from "./customResolvers.js";
 
 export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
-
   return {
     Mutation: {
       Invoice_processGnosisPayment: Invoice_processGnosisPayment,
