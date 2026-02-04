@@ -123,7 +123,11 @@ export function MonthReportCard({
     if (onCreateSnapshotReport && reportSet.reportingFolderId) {
       onCreateSnapshotReport(reportSet.monthName, reportSet.reportingFolderId);
     }
-  }, [onCreateSnapshotReport, reportSet.monthName, reportSet.reportingFolderId]);
+  }, [
+    onCreateSnapshotReport,
+    reportSet.monthName,
+    reportSet.reportingFolderId,
+  ]);
 
   const reportCountText =
     reportSet.reportCount === 1

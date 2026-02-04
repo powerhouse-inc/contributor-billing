@@ -468,6 +468,9 @@ export function FolderTree({
             .folder-tree-sidebar .sidebar__item-caret--no-children {
               visibility: hidden;
             }
+            .folder-tree-sidebar .sidebar__header-icon {
+              display: none;
+            }
           `}
         </style>
         <Sidebar
@@ -477,8 +480,24 @@ export function FolderTree({
           activeNodeId={sanitizedActiveNodeId}
           onActiveNodeChange={handleActiveNodeChange}
           sidebarTitle={
-            operationalHubProfileDocument?.state?.global?.name ||
-            "Operational Hub"
+            <span className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-purple-800 rounded flex items-center justify-center flex-shrink-0">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 2L4 6v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V6l-8-4z" />
+                </svg>
+              </div>
+              {operationalHubProfileDocument?.state?.global?.name ||
+                "Operational Hub"}
+            </span>
           }
           showSearchBar={false}
           resizable={true}

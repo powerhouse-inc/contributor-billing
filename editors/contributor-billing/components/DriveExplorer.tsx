@@ -1,6 +1,6 @@
 import type { EditorProps } from "document-model";
 import { ToastContainer } from "@powerhousedao/design-system/connect";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DriveContents } from "./DriveContents.js";
 import { FolderTree, type SelectedFolderInfo } from "./FolderTree.js";
 import { FolderTreeErrorBoundary } from "./FolderTreeErrorBoundary.js";
@@ -21,6 +21,31 @@ export function DriveExplorer({ children }: EditorProps) {
   // Track active node in sidebar for visual selection sync
   // Empty string means no selection (home page)
   const [activeNodeId, setActiveNodeId] = useState<string>("");
+
+  // Remember the last folder before opening a document so we can restore it when closing
+  const lastFolderRef = useRef<SelectedFolderInfo | null>(null);
+  const prevShowDocumentEditorRef = useRef(showDocumentEditor);
+
+  useEffect(() => {
+    const wasShowingDocument = prevShowDocumentEditorRef.current;
+    const isShowingDocument = showDocumentEditor;
+
+    if (isShowingDocument && !wasShowingDocument) {
+      // Transitioning TO document editor - save current folder
+      lastFolderRef.current = selectedFolder;
+    } else if (!isShowingDocument && wasShowingDocument) {
+      // Transitioning FROM document editor - restore last folder
+      if (lastFolderRef.current) {
+        setSelectedFolder(lastFolderRef.current);
+        if (lastFolderRef.current.folderId) {
+          setActiveNodeId(lastFolderRef.current.folderId);
+        }
+      }
+    }
+
+    prevShowDocumentEditorRef.current = isShowingDocument;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showDocumentEditor]);
 
   const handleFolderSelect = (folderInfo: SelectedFolderInfo | null) => {
     setSelectedFolder(folderInfo);
