@@ -1,39 +1,78 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useDrives } from "@powerhousedao/reactor-browser";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useDrives, useDocumentById } from "@powerhousedao/reactor-browser";
 import {
   addSubteam,
   removeSubteam,
 } from "../../../document-models/operational-hub-profile/gen/configuration/creators.js";
+import { setOpHubMember } from "@powerhousedao/builder-profile/document-models/builder-profile";
+import { useRemoteBuilderProfiles } from "../../shared/hooks/useRemoteBuilderProfiles.js";
+import { setOpHubMemberOnBuilderProfile } from "../../shared/graphql-client.js";
 
 type BuilderProfileOption = {
   id: string;
   name: string;
   driveId: string;
+  isRemote?: boolean;
 };
 
 type SubteamsPickerProps = {
   subteams: string[];
+  operatorTeam: string | null | undefined;
   dispatch: (
     action: ReturnType<typeof addSubteam> | ReturnType<typeof removeSubteam>,
   ) => void;
+  /** The PHID of the operational hub profile document */
+  opHubPhid: string;
+  /** The name of the operational hub */
+  opHubName: string;
 };
 
-export function SubteamsPicker({ subteams, dispatch }: SubteamsPickerProps) {
+export function SubteamsPicker({
+  subteams,
+  operatorTeam,
+  dispatch,
+  opHubPhid,
+  opHubName,
+}: SubteamsPickerProps) {
   const drives = useDrives();
   const [query, setQuery] = useState("");
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement | null>(null);
 
-  const builderProfiles = useMemo<BuilderProfileOption[]>(() => {
+  // Track pending op hub member updates for local dispatch
+  const [pendingOpHubUpdate, setPendingOpHubUpdate] = useState<{
+    phid: string;
+    name: string | null;
+    opHubPhid: string | null;
+  } | null>(null);
+
+  // Get dispatch function for the builder profile we want to update locally
+  const [pendingDoc, pendingDispatch] = useDocumentById(
+    pendingOpHubUpdate?.phid,
+  );
+
+  // Dispatch locally when the document becomes available
+  useEffect(() => {
+    if (pendingOpHubUpdate && pendingDoc && pendingDispatch) {
+      pendingDispatch(
+        setOpHubMember({
+          name: pendingOpHubUpdate.name,
+          phid: pendingOpHubUpdate.opHubPhid,
+        }),
+      );
+      setPendingOpHubUpdate(null);
+    }
+  }, [pendingOpHubUpdate, pendingDoc, pendingDispatch]);
+
+  // Build local profiles from ALL drives (not just builder-team-admin drives)
+  const localBuilderProfiles = useMemo<BuilderProfileOption[]>(() => {
     if (!drives) return [];
     return drives
       .filter(
-        (drive) =>
-          drive.header.documentType === "powerhouse/document-drive" &&
-          drive.header.meta?.preferredEditor === "builder-team-admin",
+        (drive) => drive.header.documentType === "powerhouse/document-drive",
       )
       .flatMap((drive) =>
-        (drive.state.global.nodes ?? [])
+        drive.state.global.nodes
           .filter(
             (node) =>
               node.kind === "file" &&
@@ -44,9 +83,41 @@ export function SubteamsPicker({ subteams, dispatch }: SubteamsPickerProps) {
             id: node.id,
             name: node.name || "Untitled builder",
             driveId: drive.header.id,
+            isRemote: false,
           })),
       );
   }, [drives]);
+
+  // Create a map of local profile IDs for filtering remote duplicates
+  const localProfileMap = useMemo(() => {
+    const map = new Map<string, BuilderProfileOption>();
+    localBuilderProfiles.forEach((profile) => {
+      map.set(profile.id, profile);
+    });
+    return map;
+  }, [localBuilderProfiles]);
+
+  // Fetch remote profiles as fallback
+  const { allProfiles: remoteProfiles, isLoading: isLoadingRemote } =
+    useRemoteBuilderProfiles(localProfileMap);
+
+  // Combine local and remote profiles
+  const builderProfiles = useMemo<BuilderProfileOption[]>(() => {
+    // Start with local profiles
+    const profiles = [...localBuilderProfiles];
+
+    // Add remote profiles that aren't already local
+    for (const remoteProfile of remoteProfiles) {
+      profiles.push({
+        id: remoteProfile.id,
+        name: remoteProfile.state.name || remoteProfile.id,
+        driveId: "remote",
+        isRemote: true,
+      });
+    }
+
+    return profiles;
+  }, [localBuilderProfiles, remoteProfiles]);
 
   // Filter out already selected subteams from the picker
   const subteamIdSet = new Set(subteams);
@@ -61,19 +132,69 @@ export function SubteamsPicker({ subteams, dispatch }: SubteamsPickerProps) {
       )
     : availableProfiles.slice(0, 5);
 
-  const handleSelect = (profile: BuilderProfileOption) => {
-    dispatch(addSubteam({ subteam: profile.id }));
-    setQuery("");
-    setIsPickerOpen(false);
-  };
+  // Get local profile IDs for checking if a profile is local
+  const localProfileIds = useMemo(
+    () => localBuilderProfiles.map((p) => p.id),
+    [localBuilderProfiles],
+  );
 
-  const handleManualSelect = (value: string) => {
-    const trimmed = value.trim();
-    if (!trimmed || subteamIdSet.has(trimmed)) return;
-    dispatch(addSubteam({ subteam: trimmed }));
-    setQuery("");
-    setIsPickerOpen(false);
-  };
+  // Check if a PHID is a local profile (in browser drives)
+  const isLocalProfile = useCallback(
+    (phid: string) => localProfileIds.includes(phid),
+    [localProfileIds],
+  );
+
+  // Helper to set op hub member on the builder profile (both local and remote)
+  const updateBuilderProfileOpHub = useCallback(
+    async (builderProfilePhid: string) => {
+      // Trigger local dispatch if the profile is local
+      if (isLocalProfile(builderProfilePhid)) {
+        setPendingOpHubUpdate({
+          phid: builderProfilePhid,
+          name: opHubName || null,
+          opHubPhid,
+        });
+      }
+
+      // Also call GraphQL for remote profiles or sync
+      try {
+        await setOpHubMemberOnBuilderProfile(builderProfilePhid, {
+          name: opHubName || null,
+          phid: opHubPhid,
+        });
+      } catch (error) {
+        console.error(
+          "Failed to set op hub member on builder profile (remote):",
+          error,
+        );
+      }
+    },
+    [opHubPhid, opHubName, isLocalProfile],
+  );
+
+  const handleSelect = useCallback(
+    (profile: BuilderProfileOption) => {
+      dispatch(addSubteam({ subteam: profile.id }));
+      // Also update the builder profile to link back to this operational hub
+      void updateBuilderProfileOpHub(profile.id);
+      setQuery("");
+      setIsPickerOpen(false);
+    },
+    [dispatch, updateBuilderProfileOpHub],
+  );
+
+  const handleManualSelect = useCallback(
+    (value: string) => {
+      const trimmed = value.trim();
+      if (!trimmed || subteamIdSet.has(trimmed)) return;
+      dispatch(addSubteam({ subteam: trimmed }));
+      // Also update the builder profile to link back to this operational hub
+      void updateBuilderProfileOpHub(trimmed);
+      setQuery("");
+      setIsPickerOpen(false);
+    },
+    [dispatch, subteamIdSet, updateBuilderProfileOpHub],
+  );
 
   const handleRemoveSubteam = (subteamId: string) => {
     dispatch(removeSubteam({ subteam: subteamId }));
@@ -119,9 +240,11 @@ export function SubteamsPicker({ subteams, dispatch }: SubteamsPickerProps) {
             onChange={(event) => setQuery(event.target.value)}
             onFocus={() => setIsPickerOpen(true)}
             placeholder={
-              subteams.length === 0
-                ? "Search builder name to add subteam..."
-                : "Add another subteam..."
+              isLoadingRemote
+                ? "Loading profiles..."
+                : subteams.length === 0
+                  ? "Search builder name to add subteam..."
+                  : "Add another subteam..."
             }
             className="flex-1 min-w-[280px] rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-gray-400 dark:focus:ring-gray-800"
           />
@@ -129,19 +252,39 @@ export function SubteamsPicker({ subteams, dispatch }: SubteamsPickerProps) {
         {isPickerOpen && (
           <div className="absolute z-10 mt-2 w-full max-h-64 overflow-auto rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
             {filteredProfiles.length > 0 ? (
-              filteredProfiles.map((profile) => (
-                <button
-                  key={`${profile.driveId}-${profile.id}`}
-                  type="button"
-                  onClick={() => handleSelect(profile)}
-                  className="flex w-full flex-col px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800"
-                >
-                  <span className="font-medium">{profile.name}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {profile.id}
-                  </span>
-                </button>
-              ))
+              filteredProfiles.map((profile) => {
+                const isOperatorTeam = operatorTeam === profile.id;
+                return (
+                  <button
+                    key={`${profile.driveId}-${profile.id}`}
+                    type="button"
+                    onClick={() => !isOperatorTeam && handleSelect(profile)}
+                    disabled={isOperatorTeam}
+                    className={`flex w-full flex-col px-3 py-2 text-left text-sm ${
+                      isOperatorTeam
+                        ? "cursor-not-allowed bg-gray-50 text-gray-400 dark:bg-gray-800 dark:text-gray-500"
+                        : "text-gray-900 hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800"
+                    }`}
+                  >
+                    <span className="font-medium">
+                      {profile.name}
+                      {profile.isRemote && (
+                        <span className="ml-2 text-xs text-blue-500 dark:text-blue-400">
+                          (remote)
+                        </span>
+                      )}
+                      {isOperatorTeam && (
+                        <span className="ml-2 text-xs text-amber-600 dark:text-amber-400">
+                          (already set as Operator Team)
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {profile.id}
+                    </span>
+                  </button>
+                );
+              })
             ) : (
               <>
                 <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
@@ -189,6 +332,11 @@ function SubteamCard({
         <div className="flex-1 min-w-0">
           <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
             {profile?.name || "Unknown team"}
+            {profile?.isRemote && (
+              <span className="ml-2 text-xs font-normal text-blue-500 dark:text-blue-400">
+                (remote)
+              </span>
+            )}
           </div>
           <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400 truncate">
             {subteamId}
