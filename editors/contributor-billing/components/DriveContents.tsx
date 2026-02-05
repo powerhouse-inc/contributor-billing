@@ -4,6 +4,7 @@ import { InvoiceTableContainer } from "./InvoiceTable/InvoiceTableContainer.js";
 import { ReportingView } from "./ReportingView.js";
 import { BillingOverview } from "./BillingOverview.js";
 import { DashboardHome } from "./DashboardHome.js";
+import { SubscriptionsOverview } from "./SubscriptionsOverview.js";
 import type { SelectedFolderInfo } from "./FolderTree.js";
 
 interface DriveContentsProps {
@@ -77,6 +78,17 @@ export function DriveContents({
       <div className="container mx-auto flex-1 overflow-y-auto p-4">
         <Suspense>
           <BillingOverview onFolderSelect={onFolderSelect} />
+        </Suspense>
+      </div>
+    );
+  }
+
+  // Subscriptions folder - show subscriptions overview
+  if (selectedFolder.folderType === "subscriptions") {
+    return (
+      <div className="container mx-auto flex-1 overflow-y-auto p-4">
+        <Suspense>
+          <SubscriptionsOverview />
         </Suspense>
       </div>
     );

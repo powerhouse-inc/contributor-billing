@@ -14,7 +14,7 @@ import {
 import { useEffect, useRef, useState, Fragment } from "react";
 import type { FolderNode } from "document-drive";
 import { Plus } from "lucide-react";
-import { useServiceSubscriptionAutoPlacement } from "../hooks/useServiceSubscriptionAutoPlacement.js";
+import { useSubscriptionsFolder } from "../hooks/useSubscriptionsFolder.js";
 
 /**
  * Simple inline input for creating new folders.
@@ -66,11 +66,11 @@ function FolderNameInput({
 }
 
 /**
- * Custom breadcrumbs component that treats "Service Subscriptions" folder as the root.
- * Only shows path from "Service Subscriptions" folder onwards.
+ * Custom breadcrumbs component that treats "Subscriptions" folder as the root.
+ * Only shows path from "Subscriptions" folder onwards.
  * Includes folder creation functionality.
  */
-function ServiceSubscriptionsBreadcrumbs({
+function SubscriptionsBreadcrumbs({
   rootFolderId,
 }: {
   rootFolderId: string;
@@ -146,47 +146,45 @@ function ServiceSubscriptionsBreadcrumbs({
   );
 }
 
-export function ServiceSubscriptions() {
+export function SubscriptionsOverview() {
   const hasNavigatedToFolder = useRef(false);
   const selectedNodePath = useSelectedNodePath();
   const nodesInCurrentFolder = useNodesInSelectedDriveOrFolder();
 
-  // Use the shared auto-placement hook - this handles:
-  // 1. Creating the "Service Subscriptions" folder if it doesn't exist
+  // Use the shared subscriptions hook - this handles:
+  // 1. Creating the "Subscriptions" folder if it doesn't exist
   // 2. Moving resource-instance and subscription-instance documents dropped anywhere into the proper folder
-  const { serviceSubscriptionsFolder } = useServiceSubscriptionAutoPlacement();
+  const { subscriptionsFolder } = useSubscriptionsFolder();
 
   // Navigate to the folder when it exists (only once on mount)
   useEffect(() => {
-    if (serviceSubscriptionsFolder && !hasNavigatedToFolder.current) {
+    if (subscriptionsFolder && !hasNavigatedToFolder.current) {
       hasNavigatedToFolder.current = true;
-      setSelectedNode(serviceSubscriptionsFolder.id);
+      setSelectedNode(subscriptionsFolder.id);
     }
-  }, [serviceSubscriptionsFolder]);
+  }, [subscriptionsFolder]);
 
-  // Check if we're currently within the Service Subscriptions folder tree
-  const isWithinServiceSubscriptions =
-    serviceSubscriptionsFolder &&
-    selectedNodePath.some((node) => node.id === serviceSubscriptionsFolder.id);
+  // Check if we're currently within the Subscriptions folder tree
+  const isWithinSubscriptions =
+    subscriptionsFolder &&
+    selectedNodePath.some((node) => node.id === subscriptionsFolder.id);
 
-  // If user navigated outside Service Subscriptions folder, bring them back
+  // If user navigated outside Subscriptions folder, bring them back
   useEffect(() => {
     if (
-      serviceSubscriptionsFolder &&
-      !isWithinServiceSubscriptions &&
+      subscriptionsFolder &&
+      !isWithinSubscriptions &&
       hasNavigatedToFolder.current
     ) {
-      setSelectedNode(serviceSubscriptionsFolder.id);
+      setSelectedNode(subscriptionsFolder.id);
     }
-  }, [serviceSubscriptionsFolder, isWithinServiceSubscriptions]);
+  }, [subscriptionsFolder, isWithinSubscriptions]);
 
   // Show loading state while folder is being created
-  if (!serviceSubscriptionsFolder) {
+  if (!subscriptionsFolder) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">
-          Setting up Service Subscriptions folder...
-        </div>
+        <div className="text-gray-500">Setting up Subscriptions folder...</div>
       </div>
     );
   }
@@ -200,9 +198,7 @@ export function ServiceSubscriptions() {
 
   return (
     <div>
-      <div className="text-2xl font-bold text-center mb-4">
-        Service Subscriptions
-      </div>
+      <div className="text-2xl font-bold text-center mb-4">Subscriptions</div>
       <div className="space-y-6 px-6">
         {/* Create Document Buttons */}
         <div className="flex gap-2 justify-center pb-4 border-b border-gray-200">
@@ -228,9 +224,7 @@ export function ServiceSubscriptions() {
           </button>
         </div>
 
-        <ServiceSubscriptionsBreadcrumbs
-          rootFolderId={serviceSubscriptionsFolder.id}
-        />
+        <SubscriptionsBreadcrumbs rootFolderId={subscriptionsFolder.id} />
 
         {hasFolders && (
           <div>
@@ -277,8 +271,7 @@ export function ServiceSubscriptions() {
               </svg>
             </div>
             <p className="text-gray-500 text-sm">
-              No service subscriptions yet. Add documents to this folder to get
-              started.
+              No subscriptions yet. Add documents to this folder to get started.
             </p>
           </div>
         )}
