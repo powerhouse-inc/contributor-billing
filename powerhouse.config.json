@@ -12,12 +12,12 @@
   "packages": [
     {
       "packageName": "@powerhousedao/vetra",
-      "version": "staging",
+      "version": "latest",
       "provider": "npm"
     },
     {
       "packageName": "@powerhousedao/builder-profile",
-      "version": "0.0.17",
+      "version": "0.0.18",
       "provider": "npm"
     }
   ]
