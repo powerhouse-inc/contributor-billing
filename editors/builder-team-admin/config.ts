@@ -7,8 +7,9 @@ export const editorConfig: PHDriveEditorConfig = {
     "powerhouse/builder-profile",
     "powerhouse/expense-report",
     "powerhouse/snapshot-report",
-    "powerhouse/service-subscriptions",
     "powerhouse/resource-template",
     "powerhouse/service-offering",
+    "powerhouse/resource-instance",
+    "powerhouse/subscription-instance",
   ],
 };

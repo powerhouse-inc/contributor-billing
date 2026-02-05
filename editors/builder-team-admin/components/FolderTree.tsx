@@ -27,6 +27,7 @@ import { useMemo, useState } from "react";
 const ICON_SIZE = 16;
 const EXPENSE_REPORTS_FOLDER_NAME = "Expense Reports";
 const SNAPSHOT_REPORTS_FOLDER_NAME = "Snapshot Reports";
+const SERVICE_SUBSCRIPTIONS_FOLDER_NAME = "Service Subscriptions";
 const SERVICES_AND_OFFERINGS_FOLDER_NAME = "Services And Offerings";
 const RESOURCE_TEMPLATES_FOLDER_NAME = "Products";
 const SERVICE_OFFERINGS_FOLDER_NAME = "Service Offerings";
@@ -37,6 +38,7 @@ export type CustomView =
   | "expense-reports"
   | "snapshot-reports"
   | "resources-services"
+  | "service-subscriptions"
   | null;
 
 /**
@@ -47,7 +49,7 @@ export type CustomView =
 const SECTION_TO_DOCUMENT_TYPE: Record<string, string | null> = {
   "builder-profile": "powerhouse/builder-profile",
   "team-members": null, // Uses custom TeamMembers component
-  "service-subscriptions": "powerhouse/service-subscriptions",
+  "service-subscriptions": null, // Uses custom ServiceSubscriptions component
   "resources-services": null, // Uses custom ResourcesServices component
   "expense-reports": null, // Uses custom ExpenseReports component
   "snapshot-reports": null, // Uses custom SnapshotReports component
@@ -58,6 +60,7 @@ const SECTION_TO_DOCUMENT_TYPE: Record<string, string | null> = {
  */
 const SECTION_TO_CUSTOM_VIEW: Record<string, CustomView> = {
   "team-members": "team-members",
+  "service-subscriptions": "service-subscriptions",
   "resources-services": "resources-services",
   "expense-reports": "expense-reports",
   "snapshot-reports": "snapshot-reports",
@@ -181,6 +184,17 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
     );
   }, [driveDocument]);
 
+  // Find the "Service Subscriptions" folder in the drive
+  const serviceSubscriptionsFolder = useMemo(() => {
+    if (!driveDocument) return null;
+    const nodes = driveDocument.state.global.nodes;
+    return nodes.find(
+      (node: Node): node is FolderNode =>
+        isFolderNodeKind(node) &&
+        node.name === SERVICE_SUBSCRIPTIONS_FOLDER_NAME,
+    );
+  }, [driveDocument]);
+
   // Find the "Services And Offerings" parent folder in the drive (at root level)
   const servicesAndOfferingsFolder = useMemo(() => {
     if (!driveDocument) return null;
@@ -262,6 +276,29 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
     collectNodeIds(snapshotReportsFolder.id);
     return nodeIds;
   }, [snapshotReportsFolder, driveDocument]);
+
+  // Build a set of all node IDs that are within the Service Subscriptions folder tree
+  const serviceSubscriptionsNodeIds = useMemo(() => {
+    const nodeIds = new Set<string>();
+    if (!serviceSubscriptionsFolder || !driveDocument) return nodeIds;
+
+    const allNodes = driveDocument.state.global.nodes;
+
+    // Recursively collect all node IDs within the Service Subscriptions folder
+    const collectNodeIds = (parentId: string) => {
+      nodeIds.add(parentId);
+      for (const node of allNodes) {
+        if (isFolderNodeKind(node) && node.parentFolder === parentId) {
+          collectNodeIds(node.id);
+        } else if (isFileNodeKind(node) && node.parentFolder === parentId) {
+          nodeIds.add(node.id);
+        }
+      }
+    };
+
+    collectNodeIds(serviceSubscriptionsFolder.id);
+    return nodeIds;
+  }, [serviceSubscriptionsFolder, driveDocument]);
 
   // Build a set of all node IDs that are within the Resource Templates folder tree
   const resourceTemplatesNodeIds = useMemo(() => {
@@ -488,6 +525,25 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
       if (driveNode && isFolderNodeKind(driveNode)) {
         // It's a folder - navigate to it within the snapshot reports view
         onCustomViewChange?.("snapshot-reports");
+        setSelectedNode(node.id);
+      } else if (driveNode && isFileNodeKind(driveNode)) {
+        // It's a document - open the document editor
+        onCustomViewChange?.(null);
+        setSelectedNode(node.id);
+      }
+      return;
+    }
+
+    // Check if this is a child node within the Service Subscriptions folder
+    if (serviceSubscriptionsNodeIds.has(node.id)) {
+      // Check if it's a folder or a document
+      const driveNode = driveDocument?.state.global.nodes.find(
+        (n: Node) => n.id === node.id,
+      );
+
+      if (driveNode && isFolderNodeKind(driveNode)) {
+        // It's a folder - navigate to it within the service subscriptions view
+        onCustomViewChange?.("service-subscriptions");
         setSelectedNode(node.id);
       } else if (driveNode && isFileNodeKind(driveNode)) {
         // It's a document - open the document editor

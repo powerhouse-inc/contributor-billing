@@ -522,7 +522,6 @@ export default function Editor() {
     setSelectedAccountIds(new Set());
   };
 
-
   // Handlers for the legacy startDate/endDate fields (DatePicker approach)
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const dateValue = e.target.value;
