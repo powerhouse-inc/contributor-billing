@@ -8,7 +8,7 @@ import type {
   ServiceOfferingDocument,
   ServiceStatus,
 } from "../../document-models/service-offering/index.js";
-import { addFile } from "document-drive";
+import { addFile, type DocumentDriveDocument } from "document-drive";
 import { BuilderProfile } from "@powerhousedao/builder-profile/document-models";
 import { ResourceInstance } from "../../document-models/resource-instance/module.js";
 
@@ -291,6 +291,19 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             name,
           );
 
+          // create copy of resource-instance doc inside the operator's drive
+          const operatorDrive = await getOperatorDrive(reactor, resourceTemplateId)
+          if (!operatorDrive) {
+            throw new Error(`Operator drive not found for resource template ${resourceTemplateId}`);
+          }
+          await reactor.addAction(operatorDrive.header.id, addFile({
+            documentType: "powerhouse/resource-instance",
+            id: resourceInstanceDoc.header.id,
+            name: `${parsedName} Resource Instance`,
+            parentFolder: operatorDrive.state.global.nodes?.find((node) => node.kind === 'folder')?.parentFolder,
+          }))
+
+
           return {
             success: true,
             data: {
@@ -529,4 +542,19 @@ function mapServiceOfferingState(
       defaultSelected: group.defaultSelected,
     })),
   };
+}
+
+async function getOperatorDrive(
+  reactor: ISubgraph["reactor"],
+  resourceTemplateId: string,
+) {
+  const drives = await reactor.getDrives();
+  const results = await Promise.all(
+    drives.map(async (drive) => {
+      const docIds = await reactor.getDocuments(drive);
+      return docIds.includes(resourceTemplateId) ? drive : null;
+    }),
+  );
+  const driveId = results.find((id) => id !== null);
+  return driveId ? reactor.getDrive(driveId) : undefined;
 }
