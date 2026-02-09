@@ -90,6 +90,7 @@ export const schema: DocumentNode = gql`
     Return
     Internal
     External
+    Swap
   }
 
   type BudgetStatementExpenseReport {
