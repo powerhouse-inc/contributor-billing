@@ -20,6 +20,7 @@ interface MonthlyReportsOverviewProps {
   onFolderSelect?: (folderInfo: SelectedFolderInfo | null) => void;
   monthFolders?: Map<string, MonthFolderInfo>;
   onCreateMonth?: (monthName: string) => Promise<void>;
+  onActiveNodeIdChange?: (nodeId: string) => void;
 }
 
 /**
@@ -65,6 +66,7 @@ function parseMonthDates(monthName: string): {
 export function MonthlyReportsOverview({
   monthFolders,
   onCreateMonth,
+  onActiveNodeIdChange,
 }: MonthlyReportsOverviewProps) {
   const { monthReportSets, isLoading } = useMonthlyReports();
   const [selectedDrive] = useSelectedDrive();
@@ -193,11 +195,13 @@ export function MonthlyReportsOverview({
 
         // Open the created report
         setSelectedNode(createdNode.id);
+        // Update sidebar active node to show the new document as selected
+        onActiveNodeIdChange?.(createdNode.id);
       } finally {
         setIsCreating(false);
       }
     },
-    [driveId, isCreating, monthReportSets],
+    [driveId, isCreating, monthReportSets, onActiveNodeIdChange],
   );
 
   const handleCreateSnapshotReport = useCallback(
@@ -250,14 +254,16 @@ export function MonthlyReportsOverview({
           );
         }
 
-        // Open the created report
-        setSelectedNode(createdNode.id);
-      } finally {
-        setIsCreating(false);
-      }
-    },
-    [driveId, isCreating],
-  );
+              // Open the created report
+              setSelectedNode(createdNode.id);
+              // Update sidebar active node to show the new document as selected
+              onActiveNodeIdChange?.(createdNode.id);
+            } finally {
+              setIsCreating(false);
+            }
+          },
+          [driveId, isCreating, onActiveNodeIdChange],
+        );
 
   // Add Month button component (reused across states)
   const addMonthButton = onCreateMonth && (

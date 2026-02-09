@@ -93,6 +93,7 @@ export function DriveExplorer({ children }: EditorProps) {
           <DriveContents
             selectedFolder={selectedFolder}
             onFolderSelect={handleFolderSelect}
+            onActiveNodeIdChange={setActiveNodeId}
           />
         )}
       </DocumentDropZone>

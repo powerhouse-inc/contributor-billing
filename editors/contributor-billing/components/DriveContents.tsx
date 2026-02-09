@@ -9,12 +9,14 @@ import type { SelectedFolderInfo } from "./FolderTree.js";
 interface DriveContentsProps {
   selectedFolder: SelectedFolderInfo | null;
   onFolderSelect?: (folderInfo: SelectedFolderInfo | null) => void;
+  onActiveNodeIdChange?: (nodeId: string) => void;
 }
 
 /** Shows the content based on the selected folder */
 export function DriveContents({
   selectedFolder,
   onFolderSelect,
+  onActiveNodeIdChange,
 }: DriveContentsProps) {
   // Default view (no folder selected or root) - show the dashboard home
   if (!selectedFolder) {
@@ -76,7 +78,10 @@ export function DriveContents({
     return (
       <div className="container mx-auto flex-1 p-4">
         <Suspense>
-          <BillingOverview onFolderSelect={onFolderSelect} />
+          <BillingOverview
+            onFolderSelect={onFolderSelect}
+            onActiveNodeIdChange={onActiveNodeIdChange}
+          />
         </Suspense>
       </div>
     );
