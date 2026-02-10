@@ -11,7 +11,9 @@ export const schema: DocumentNode = gql`
   }
 
   type Mutation {
-    createResourceInstances(input: CreateResourceInstancesInput!): CreateResourceInstancesOutput
+    createResourceInstances(
+      input: CreateResourceInstancesInput!
+    ): CreateResourceInstancesOutput
   }
 
   input CreateResourceInstancesInput {

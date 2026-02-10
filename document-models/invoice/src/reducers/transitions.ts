@@ -33,6 +33,12 @@ export const invoiceTransitionsOperations: InvoiceTransitionsOperations = {
     if (!action.input.invoiceNo || !action.input.dateIssued) {
       throw new Error("Invoice number and date issued are required");
     }
+    const wallet = state.issuer?.paymentRouting?.wallet;
+    if (!wallet?.address || (!wallet.chainName && !wallet.chainId)) {
+      throw new Error(
+        "Issuer wallet address and chain must be set before issuing an invoice",
+      );
+    }
     if (permittedTransitions[state.status].includes("ISSUED")) {
       state.status = "ISSUED";
       state.invoiceNo = action.input.invoiceNo;

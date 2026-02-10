@@ -4,14 +4,16 @@ import { BarChart3, Plus, ChevronDown } from "lucide-react";
 import type { MonthFolderInfo } from "../hooks/useBillingFolderStructure.js";
 import {
   useSelectedDrive,
+  useDocumentsInSelectedDrive,
   addDocument,
   dispatchActions,
   setSelectedNode,
+  isFileNodeKind,
 } from "@powerhousedao/reactor-browser";
 import { setName } from "document-model";
 import { moveNode } from "document-drive";
 import { useMonthlyReports } from "../hooks/useMonthlyReports.js";
-import { MonthReportCard } from "./MonthReportCard.js";
+import { MonthReportCard, type MonthPaymentStats } from "./MonthReportCard.js";
 import { actions as expenseReportActions } from "../../../document-models/expense-report/index.js";
 import { actions as snapshotReportActions } from "../../../document-models/snapshot-report/index.js";
 import type { SelectedFolderInfo } from "./FolderTree.js";
@@ -64,18 +66,92 @@ function parseMonthDates(monthName: string): {
  * Shows collapsible month cards with reports and status
  */
 export function MonthlyReportsOverview({
+  onFolderSelect,
   monthFolders,
   onCreateMonth,
   onActiveNodeIdChange,
 }: MonthlyReportsOverviewProps) {
   const { monthReportSets, isLoading } = useMonthlyReports();
   const [selectedDrive] = useSelectedDrive();
+  const documentsInDrive = useDocumentsInSelectedDrive();
   const [isCreating, setIsCreating] = useState(false);
   const [isAddingMonth, setIsAddingMonth] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const driveId = selectedDrive?.header.id;
+
+  // Per-month payment stats for the Payments row in each card
+  const monthPaymentStatsMap = useMemo(() => {
+    const map = new Map<string, MonthPaymentStats>();
+    if (!selectedDrive || !documentsInDrive || !monthFolders) return map;
+
+    const nodes = selectedDrive.state.global.nodes;
+
+    for (const [monthName, folderInfo] of monthFolders.entries()) {
+      const paymentsFolderId = folderInfo.paymentsFolder?.id;
+      if (!paymentsFolderId) continue;
+
+      const invoiceIds = new Set(
+        nodes
+          .filter(
+            (n) =>
+              isFileNodeKind(n) &&
+              n.parentFolder === paymentsFolderId &&
+              n.documentType === "powerhouse/invoice",
+          )
+          .map((n) => n.id),
+      );
+
+      const invoices = documentsInDrive.filter(
+        (doc) =>
+          doc.header.documentType === "powerhouse/invoice" &&
+          invoiceIds.has(doc.header.id),
+      );
+
+      let pendingCount = 0;
+      let paidCount = 0;
+      for (const invoice of invoices) {
+        const status = (
+          (invoice.state as { global?: { status?: string } }).global?.status ??
+          ""
+        ).toUpperCase();
+        if (
+          status === "PAYMENTSENT" ||
+          status === "PAYMENTRECEIVED" ||
+          status === "PAYMENTCLOSED"
+        ) {
+          paidCount++;
+        } else if (status !== "REJECTED" && status !== "CANCELLED") {
+          pendingCount++;
+        }
+      }
+
+      map.set(monthName, {
+        totalInvoices: invoices.length,
+        pendingCount,
+        paidCount,
+      });
+    }
+
+    return map;
+  }, [selectedDrive, documentsInDrive, monthFolders]);
+
+  const handleViewPayments = useCallback(
+    (monthName: string) => {
+      if (!onFolderSelect || !monthFolders) return;
+      const info = monthFolders.get(monthName);
+      if (!info?.paymentsFolder) return;
+      onFolderSelect({
+        folderId: info.paymentsFolder.id,
+        folderType: "payments",
+        monthName,
+        reportingFolderId: info.reportingFolder?.id,
+      });
+    },
+    [onFolderSelect, monthFolders],
+  );
+
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
 
@@ -394,6 +470,8 @@ export function MonthlyReportsOverview({
             defaultExpanded={index === 0}
             onCreateExpenseReport={handleCreateExpenseReport}
             onCreateSnapshotReport={handleCreateSnapshotReport}
+            onViewPayments={onFolderSelect ? handleViewPayments : undefined}
+            paymentStats={monthPaymentStatsMap.get(reportSet.monthName)}
           />
         ))}
       </div>

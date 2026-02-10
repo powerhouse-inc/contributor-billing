@@ -305,6 +305,7 @@ type LegalEntityFormProps = {
   readonly currency: string;
   readonly status: string;
   readonly walletvalidation?: ValidationResult | null;
+  readonly chainvalidation?: ValidationResult | null;
   readonly mainCountryValidation?: ValidationResult | null;
   readonly bankCountryValidation?: ValidationResult | null;
   readonly ibanvalidation?: ValidationResult | null;
@@ -358,6 +359,7 @@ export function LegalEntityForm({
   currency,
   status,
   walletvalidation,
+  chainvalidation,
   mainCountryValidation,
   bankCountryValidation,
   ibanvalidation,
@@ -396,6 +398,7 @@ export function LegalEntityForm({
           currency={currency}
           status={status}
           walletvalidation={walletvalidation}
+          chainvalidation={chainvalidation}
         />
       )}
       {!bankDisabled && !!onChangeBank && (

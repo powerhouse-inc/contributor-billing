@@ -85,6 +85,58 @@ export const ethereumAddressRule: ValidationRule = {
   },
 };
 
+// Wallet chain validation rule - chain must be set for all currencies
+export const walletChainRule: ValidationRule = {
+  field: "walletChain",
+  validate: (value: string) => {
+    if (!value || value.trim() === "") {
+      return {
+        isValid: false,
+        message: "Wallet chain is required before issuing",
+        severity: "warning",
+      };
+    }
+    return {
+      isValid: true,
+      message: "",
+      severity: "none",
+    };
+  },
+  appliesTo: {
+    currencies: ["ALL"],
+    statusTransitions: {
+      from: ["DRAFT"],
+      to: ["ISSUED"],
+    },
+  },
+};
+
+// Wallet address validation rule - address must be set for all currencies
+export const walletAddressRule: ValidationRule = {
+  field: "walletAddress",
+  validate: (value: string) => {
+    if (!value || value.trim() === "") {
+      return {
+        isValid: false,
+        message: "Wallet address is required before issuing",
+        severity: "warning",
+      };
+    }
+    return {
+      isValid: true,
+      message: "",
+      severity: "none",
+    };
+  },
+  appliesTo: {
+    currencies: ["ALL"],
+    statusTransitions: {
+      from: ["DRAFT"],
+      to: ["ISSUED"],
+    },
+  },
+};
+
 export const currencyRule: ValidationRule = {
   field: "currency",
   validate: (value: string) => {
