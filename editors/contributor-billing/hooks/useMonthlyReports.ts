@@ -1,5 +1,9 @@
 import { useMemo } from "react";
-import { useDocumentsInSelectedDrive } from "@powerhousedao/reactor-browser";
+import {
+  useDocumentsInSelectedDrive,
+  useSelectedDrive,
+  isFileNodeKind,
+} from "@powerhousedao/reactor-browser";
 import type { PHDocument } from "document-model";
 import {
   useBillingFolderStructure,
@@ -131,12 +135,22 @@ function toReportDocument(
  */
 export function useMonthlyReports(): UseMonthlyReportsResult {
   const documentsInDrive = useDocumentsInSelectedDrive();
+  const [selectedDrive] = useSelectedDrive();
   const { monthFolders } = useBillingFolderStructure();
 
   const monthReportSets = useMemo(() => {
     if (!documentsInDrive) return [];
 
     const sets: MonthReportSet[] = [];
+
+    // Build a map of document ID to parent folder ID
+    const documentParentMap = new Map<string, string | null>();
+    const allNodes = selectedDrive?.state.global.nodes || [];
+    for (const node of allNodes) {
+      if (isFileNodeKind(node)) {
+        documentParentMap.set(node.id, node.parentFolder);
+      }
+    }
 
     // Get all expense and snapshot reports
     const allExpenseReports = documentsInDrive.filter(
@@ -150,10 +164,20 @@ export function useMonthlyReports(): UseMonthlyReportsResult {
     for (const [monthName, folderInfo] of monthFolders.entries()) {
       const monthCode = formatMonthCode(monthName);
       const monthLower = monthName.toLowerCase();
+      const reportingFolderId = folderInfo.reportingFolder?.id;
 
-      // Find expense reports matching this month (by name containing month name or code)
+      // Find expense reports in this Reporting folder OR matching this month by name
       const expenseReports: ReportDocument[] = allExpenseReports
         .filter((doc) => {
+          // First check if document is in this Reporting folder
+          if (reportingFolderId) {
+            const docParentFolder = documentParentMap.get(doc.header.id);
+            if (docParentFolder === reportingFolderId) {
+              return true; // Document is in the folder, include it
+            }
+          }
+
+          // Otherwise, check if name matches the month (for backwards compatibility)
           const docName = doc.header.name || "";
           return (
             docName.toLowerCase().includes(monthLower) ||
@@ -162,8 +186,17 @@ export function useMonthlyReports(): UseMonthlyReportsResult {
         })
         .map((doc) => toReportDocument(doc, "powerhouse/expense-report"));
 
-      // Find snapshot report matching this month
+      // Find snapshot report in this Reporting folder OR matching this month by name
       const snapshotDoc = allSnapshotReports.find((doc) => {
+        // First check if document is in this Reporting folder
+        if (reportingFolderId) {
+          const docParentFolder = documentParentMap.get(doc.header.id);
+          if (docParentFolder === reportingFolderId) {
+            return true; // Document is in the folder, include it
+          }
+        }
+
+        // Otherwise, check if name matches the month (for backwards compatibility)
         const docName = doc.header.name || "";
         return (
           docName.toLowerCase().includes(monthLower) ||
@@ -198,7 +231,7 @@ export function useMonthlyReports(): UseMonthlyReportsResult {
     });
 
     return sets;
-  }, [documentsInDrive, monthFolders]);
+  }, [documentsInDrive, monthFolders, selectedDrive]);
 
   const isLoading = documentsInDrive === null;
 

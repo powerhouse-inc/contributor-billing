@@ -7,6 +7,7 @@ export const editorConfig: PHDriveEditorConfig = {
     "powerhouse/invoice",
     "powerhouse/billing-statement",
     "powerhouse/expense-report",
+    "powerhouse/accounts",
     "powerhouse/resource-instance",
     "powerhouse/subscription-instance",
   ],

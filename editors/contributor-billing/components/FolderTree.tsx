@@ -287,11 +287,21 @@ export function FolderTree({
       }
 
       if (info.reportingFolder) {
-        // Filter reports that match this specific month by name (matches both old "January 2026" and new "01-2026" formats)
+        // Filter reports that are in this Reporting folder OR match this specific month by name
+        // This allows uploaded documents to show up even if their name doesn't match the month
         const monthLower = monthName.toLowerCase();
         const monthCode = formatMonthCode(monthName);
 
         const folderReports = reportDocuments.filter((doc) => {
+          // First check if document is actually in this Reporting folder
+          if (info.reportingFolder) {
+            const docParentFolder = documentParentMap.get(doc.header.id);
+            if (docParentFolder === info.reportingFolder.id) {
+              return true; // Document is in the folder, show it regardless of name
+            }
+          }
+
+          // Otherwise, check if name matches the month (for backwards compatibility)
           const docName = doc.header.name || "";
           return (
             docName.toLowerCase().includes(monthLower) ||
@@ -475,17 +485,9 @@ export function FolderTree({
     safeSetSelectedNode("");
   };
 
-  // Generate a stable key based on the folder structure to force Sidebar remount when folders change
-  // Only tracks folder IDs - not document count, to prevent sidebar collapse when documents are added
-  const sidebarKey = useMemo(() => {
-    const nodeIds: string[] = [];
-    for (const [, info] of monthFolders.entries()) {
-      nodeIds.push(info.folder.id);
-      if (info.paymentsFolder) nodeIds.push(info.paymentsFolder.id);
-      if (info.reportingFolder) nodeIds.push(info.reportingFolder.id);
-    }
-    return nodeIds.join("-") || "empty";
-  }, [monthFolders]);
+  // Use a stable key based on the drive ID only
+  // Previously this changed on every folder/document add, causing sidebar to remount and lose collapsed state
+  const sidebarKey = driveDocument?.header.id || "empty";
 
   return (
     <>
@@ -494,6 +496,9 @@ export function FolderTree({
           {`
             .folder-tree-sidebar .sidebar__item-caret--no-children {
               visibility: hidden;
+            }
+            .folder-tree-sidebar .sidebar__header-icon {
+              display: none;
             }
           `}
         </style>

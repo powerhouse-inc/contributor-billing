@@ -101,6 +101,11 @@ export function useSyncWallet() {
         // Only count OUTFLOW transactions
         if (tx.direction !== "OUTFLOW") return sum;
 
+        // Exclude swap transactions first (transactions to known swap protocols)
+        // This must be checked early to ensure outbound swap transactions are never counted as payments
+        const counterParty = tx.counterParty;
+        if (isSwapAddress(counterParty)) return sum;
+
         // Check if transaction is within period
         const txDate = new Date(tx.datetime);
         if (txDate < startDate || txDate > endDate) return sum;
@@ -110,11 +115,9 @@ export function useSyncWallet() {
         if (!USD_STABLECOINS.includes(unit)) return sum;
 
         // Exclude intergroup transactions (transactions to other wallets in this report)
-        const counterParty = tx.counterParty?.toLowerCase();
-        if (counterParty && walletAddresses.has(counterParty)) return sum;
-
-        // Exclude swap transactions (transactions to known swap protocols)
-        if (isSwapAddress(counterParty)) return sum;
+        const counterPartyLower = counterParty?.toLowerCase();
+        if (counterPartyLower && walletAddresses.has(counterPartyLower))
+          return sum;
 
         // Add the transaction amount (convert to number if it's a string)
         const amount = parseFloat(tx.amount?.value || 0);
@@ -169,31 +172,50 @@ export function useSyncWallet() {
     });
 
     // Calculate payments from transactions for "Uncategorized" items
+    // The uncategorized payments should be: total USD transactions - sum of all other line items' payments
+    // This ensures the total matches transactions while persisting the value in the document
+    const UNCategorized_GROUP_ID = "121482a1-b69f-4511-g46f-267c24450238";
+
     if (accountTransactionsDocumentId && periodStart && periodEnd) {
-      const transactionPayments = calculatePaymentsFromTransactions(
+      const totalTransactionPayments = calculatePaymentsFromTransactions(
         accountTransactionsDocumentId,
         periodStart,
         periodEnd,
       );
 
-      if (transactionPayments > 0) {
-        // Add payments to "Uncategorized" category
-        const Uncategorized = categoryAggregation.get("Uncategorized");
+      // Calculate sum of payments from existing line items (excluding Uncategorized)
+      // This accounts for any payments that might already be set on other line items
+      // Note: categoryAggregation items from billing statements don't have payments, so we only need to check existing line items
+      const sumOfOtherPayments = existingLineItems
+        .filter((item) => {
+          // Exclude Uncategorized line items (they have the specific groupId)
+          return item.group !== UNCategorized_GROUP_ID && item.group !== null;
+        })
+        .reduce((sum, item) => sum + (item.payments || 0), 0);
 
-        if (Uncategorized) {
-          // Update existing Uncategorized category with payments
-          Uncategorized.payments = transactionPayments;
-        } else {
-          // Create new Uncategorized category entry with payments
-          categoryAggregation.set("Uncategorized", {
-            groupId: "121482a1-b69f-4511-g46f-267c24450238",
-            groupLabel: "Uncategorized",
-            budget: 0,
-            actuals: 0,
-            forecast: 0,
-            payments: transactionPayments,
-          });
-        }
+      // Uncategorized payments = total transactions - sum of other line items
+      // This ensures the total always matches the actual transactions
+      const uncategorizedPayments =
+        totalTransactionPayments - sumOfOtherPayments;
+
+      // Get or create "Uncategorized" category
+      const Uncategorized = categoryAggregation.get("Uncategorized");
+
+      if (Uncategorized) {
+        // Set uncategorized payments to the difference
+        Uncategorized.payments = uncategorizedPayments;
+        // Ensure it has the correct groupId
+        Uncategorized.groupId = UNCategorized_GROUP_ID;
+      } else {
+        // Create new Uncategorized category entry with calculated payments
+        categoryAggregation.set("Uncategorized", {
+          groupId: UNCategorized_GROUP_ID,
+          groupLabel: "Uncategorized",
+          budget: 0,
+          actuals: 0,
+          forecast: 0,
+          payments: uncategorizedPayments,
+        });
       }
     }
 

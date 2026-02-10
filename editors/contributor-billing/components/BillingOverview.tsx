@@ -11,12 +11,16 @@ import type { SelectedFolderInfo } from "./FolderTree.js";
 
 interface BillingOverviewProps {
   onFolderSelect?: (folderInfo: SelectedFolderInfo | null) => void;
+  onActiveNodeIdChange?: (nodeId: string) => void;
 }
 
 /**
  * Overview for the Billing folder showing payment stats and monthly reporting
  */
-export function BillingOverview({ onFolderSelect }: BillingOverviewProps) {
+export function BillingOverview({
+  onFolderSelect,
+  onActiveNodeIdChange,
+}: BillingOverviewProps) {
   const {
     billingFolder,
     monthFolders,
@@ -191,6 +195,7 @@ export function BillingOverview({ onFolderSelect }: BillingOverviewProps) {
         onFolderSelect={onFolderSelect}
         monthFolders={monthFolders}
         onCreateMonth={createMonthFolder}
+        onActiveNodeIdChange={onActiveNodeIdChange}
       />
     </div>
   );

@@ -1,4 +1,5 @@
 import { useCallback, useState, useMemo, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { BarChart3, Plus, ChevronDown } from "lucide-react";
 import type { MonthFolderInfo } from "../hooks/useBillingFolderStructure.js";
 import {
@@ -12,12 +13,14 @@ import { moveNode } from "document-drive";
 import { useMonthlyReports } from "../hooks/useMonthlyReports.js";
 import { MonthReportCard } from "./MonthReportCard.js";
 import { actions as expenseReportActions } from "../../../document-models/expense-report/index.js";
+import { actions as snapshotReportActions } from "../../../document-models/snapshot-report/index.js";
 import type { SelectedFolderInfo } from "./FolderTree.js";
 
 interface MonthlyReportsOverviewProps {
   onFolderSelect?: (folderInfo: SelectedFolderInfo | null) => void;
   monthFolders?: Map<string, MonthFolderInfo>;
   onCreateMonth?: (monthName: string) => Promise<void>;
+  onActiveNodeIdChange?: (nodeId: string) => void;
 }
 
 /**
@@ -63,6 +66,7 @@ function parseMonthDates(monthName: string): {
 export function MonthlyReportsOverview({
   monthFolders,
   onCreateMonth,
+  onActiveNodeIdChange,
 }: MonthlyReportsOverviewProps) {
   const { monthReportSets, isLoading } = useMonthlyReports();
   const [selectedDrive] = useSelectedDrive();
@@ -72,13 +76,28 @@ export function MonthlyReportsOverview({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const driveId = selectedDrive?.header.id;
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+
+  // Update dropdown position when opening
+  useEffect(() => {
+    if (isDropdownOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + 4,
+        left: rect.right - 224, // 224px = w-56 (14rem)
+      });
+    }
+  }, [isDropdownOpen]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
       ) {
         setIsDropdownOpen(false);
       }
@@ -176,17 +195,81 @@ export function MonthlyReportsOverview({
 
         // Open the created report
         setSelectedNode(createdNode.id);
+        // Update sidebar active node to show the new document as selected
+        onActiveNodeIdChange?.(createdNode.id);
       } finally {
         setIsCreating(false);
       }
     },
-    [driveId, isCreating, monthReportSets],
+    [driveId, isCreating, monthReportSets, onActiveNodeIdChange],
+  );
+
+  const handleCreateSnapshotReport = useCallback(
+    async (monthName: string, folderId: string) => {
+      if (!driveId || isCreating) return;
+      setIsCreating(true);
+
+      try {
+        const reportName = `${monthName} - Snapshot Report`;
+
+        const createdNode = await addDocument(
+          driveId,
+          reportName,
+          "powerhouse/snapshot-report",
+          undefined,
+          undefined,
+          undefined,
+          "powerhouse-snapshot-report-editor",
+        );
+
+        if (!createdNode?.id) return;
+
+        // Move to reporting folder
+        if (folderId) {
+          await dispatchActions(
+            moveNode({
+              srcFolder: createdNode.id,
+              targetParentFolder: folderId,
+            }),
+            driveId,
+          );
+        }
+
+        // Set the document name
+        await dispatchActions(setName(reportName), createdNode.id);
+
+        // Set period dates based on month
+        const dates = parseMonthDates(monthName);
+        if (dates) {
+          await dispatchActions(
+            [
+              snapshotReportActions.setPeriodStart({
+                periodStart: dates.start.toISOString(),
+              }),
+              snapshotReportActions.setPeriodEnd({
+                periodEnd: dates.end.toISOString(),
+              }),
+            ],
+            createdNode.id,
+          );
+        }
+
+        // Open the created report
+        setSelectedNode(createdNode.id);
+        // Update sidebar active node to show the new document as selected
+        onActiveNodeIdChange?.(createdNode.id);
+      } finally {
+        setIsCreating(false);
+      }
+    },
+    [driveId, isCreating, onActiveNodeIdChange],
   );
 
   // Add Month button component (reused across states)
   const addMonthButton = onCreateMonth && (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative">
       <button
+        ref={buttonRef}
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         disabled={isAddingMonth}
         className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -196,32 +279,41 @@ export function MonthlyReportsOverview({
         <ChevronDown className="w-3 h-3" />
       </button>
 
-      {isDropdownOpen && (
-        <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-          <div className="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
-            Select a month to add
-          </div>
-          <div className="max-h-72 overflow-y-auto">
-            {allMonths.map(({ name, exists }) => (
-              <button
-                key={name}
-                onClick={() => void handleCreateMonth(name)}
-                disabled={isAddingMonth || exists}
-                className={`w-full px-3 py-2 text-left text-sm ${
-                  exists
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-gray-700 hover:bg-gray-50"
-                } disabled:cursor-not-allowed`}
-              >
-                {name}
-                {exists && (
-                  <span className="ml-2 text-xs text-gray-400">(exists)</span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      {isDropdownOpen &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            className="fixed w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-[9999]"
+            style={{
+              top: dropdownPosition.top,
+              left: dropdownPosition.left,
+            }}
+          >
+            <div className="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
+              Select a month to add
+            </div>
+            <div className="max-h-72 overflow-y-auto">
+              {allMonths.map(({ name, exists }) => (
+                <button
+                  key={name}
+                  onClick={() => void handleCreateMonth(name)}
+                  disabled={isAddingMonth || exists}
+                  className={`w-full px-3 py-2 text-left text-sm ${
+                    exists
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-gray-700 hover:bg-gray-50"
+                  } disabled:cursor-not-allowed`}
+                >
+                  {name}
+                  {exists && (
+                    <span className="ml-2 text-xs text-gray-400">(exists)</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 
@@ -249,7 +341,7 @@ export function MonthlyReportsOverview({
 
   if (monthReportSets.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-6 overflow-visible">
         <div className="flex items-center justify-between gap-3 mb-5">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-indigo-100 rounded-lg">
@@ -274,7 +366,7 @@ export function MonthlyReportsOverview({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6">
+    <div className="bg-white rounded-xl border border-gray-200 p-6 overflow-visible">
       {/* Header with Add Month button */}
       <div className="flex items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-3">
@@ -301,6 +393,7 @@ export function MonthlyReportsOverview({
             reportSet={reportSet}
             defaultExpanded={index === 0}
             onCreateExpenseReport={handleCreateExpenseReport}
+            onCreateSnapshotReport={handleCreateSnapshotReport}
           />
         ))}
       </div>

@@ -5,12 +5,11 @@ import {
   actions,
   type ExpenseReportStatus,
 } from "../../document-models/expense-report/index.js";
+import { Icon, Button, Select } from "@powerhousedao/document-engineering";
 import {
-  Icon,
-  Button,
-  Select,
-  DatePicker,
-} from "@powerhousedao/document-engineering";
+  DatePickerField,
+  Form,
+} from "@powerhousedao/document-engineering/scalars";
 import { WalletsTable } from "./components/WalletsTable.js";
 import { AggregatedExpensesTable } from "./components/AggregatedExpensesTable.js";
 import { AddBillingStatementModal } from "./components/AddBillingStatementModal.js";
@@ -316,6 +315,20 @@ export default function Editor() {
     return `${month} ${year} Breakdown`;
   }, [periodStart]);
 
+  // Calculate the date to open the date picker to (last selected date or current date)
+  // This ensures the date picker opens on the last selected month instead of always current month
+  const openToDate = useMemo(() => {
+    // Prefer startDate, then endDate, then current date
+    const dateToUse = startDate || endDate;
+    if (dateToUse) {
+      const date = new Date(dateToUse);
+      // Return date in YYYY-MM-DD format for the date picker
+      return date.toISOString().split("T")[0];
+    }
+    // Default to current date
+    return new Date().toISOString().split("T")[0];
+  }, [startDate, endDate]);
+
   // Get the parent folder node for the currently selected node (this is the Reporting folder)
   const parentFolder = useParentFolderForSelectedNode();
   const [driveDocument] = useSelectedDrive();
@@ -461,21 +474,39 @@ export default function Editor() {
                     Transaction Period
                   </label>
                   <div className="flex gap-2 items-center">
-                    <DatePicker
-                      name="startDate"
-                      value={startDate ? startDate.split("T")[0] : ""}
-                      onChange={handleStartDateChange}
-                      dateFormat="YYYY-MM-DD"
-                      className="flex-1"
-                    />
+                    <Form
+                      key={`startDate-${openToDate}`}
+                      defaultValues={{
+                        input: startDate ? startDate.split("T")[0] : openToDate,
+                      }}
+                      onSubmit={() => {}}
+                      resetOnSuccessfulSubmit={false}
+                    >
+                      <DatePickerField
+                        name="startDate"
+                        value={startDate ? startDate.split("T")[0] : ""}
+                        onChange={handleStartDateChange}
+                        dateFormat="YYYY-MM-DD"
+                        className="flex-1"
+                      />
+                    </Form>
                     <span className="self-center">to</span>
-                    <DatePicker
-                      name="endDate"
-                      value={endDate ? endDate.split("T")[0] : ""}
-                      onChange={handleEndDateChange}
-                      dateFormat="YYYY-MM-DD"
-                      className="flex-1"
-                    />
+                    <Form
+                      key={`endDate-${openToDate}`}
+                      defaultValues={{
+                        input: endDate ? endDate.split("T")[0] : openToDate,
+                      }}
+                      onSubmit={() => {}}
+                      resetOnSuccessfulSubmit={false}
+                    >
+                      <DatePickerField
+                        name="endDate"
+                        value={endDate ? endDate.split("T")[0] : ""}
+                        onChange={handleEndDateChange}
+                        dateFormat="YYYY-MM-DD"
+                        className="flex-1"
+                      />
+                    </Form>
                   </div>
                 </div>
               </div>

@@ -39,6 +39,7 @@ import {
 } from "../../../document-models/account-transactions/index.js";
 import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
 import { alchemyIntegration } from "../../account-transactions-editor/alchemyIntegration.js";
+import { isSwapAddress } from "../../snapshot-report-editor/utils/flowTypeCalculations.js";
 
 interface WalletsTableProps {
   wallets: Wallet[];
@@ -57,6 +58,7 @@ export function WalletsTable({
   periodEnd,
   dispatch,
 }: WalletsTableProps) {
+  const documents = useDocumentsInSelectedDrive();
   const [selectedAccountId, setSelectedAccountId] = useState<string>("");
   const [walletError, setWalletError] = useState("");
   const [editingWallet, setEditingWallet] = useState<string | null>(null);
@@ -139,6 +141,20 @@ export function WalletsTable({
       return;
     }
 
+    // Check if transactions have already been added to prevent duplicates
+    const existingTransactions =
+      (pendingDocument?.state as any)?.global?.transactions || [];
+    if (existingTransactions.length > 0) {
+      console.log(
+        "[WalletsTable] Transactions already exist in document, skipping duplicate processing",
+        existingTransactions.length,
+      );
+      // Clear pending state since transactions are already there
+      setPendingTxDoc(null);
+      setIsProcessing(false);
+      return;
+    }
+
     // Mark as processing and save current pending doc
     setIsProcessing(true);
     const currentPendingDoc = pendingTxDoc;
@@ -218,6 +234,7 @@ export function WalletsTable({
 
         if (result.success && result.transactions.length > 0) {
           // Step 3: Add each transaction using the document's dispatch function
+          // Deduplication is handled by the reducer based on uniqueId
           setTxProgress({
             show: true,
             step: "Adding Transactions",
@@ -227,6 +244,7 @@ export function WalletsTable({
           });
 
           let addedCount = 0;
+          let skippedCount = 0;
 
           for (const txData of result.transactions) {
             // Validate required fields
@@ -235,6 +253,7 @@ export function WalletsTable({
                 "[WalletsTable] Skipping invalid transaction:",
                 txData,
               );
+              skippedCount++;
               continue;
             }
 
@@ -269,6 +288,7 @@ export function WalletsTable({
               txHash: txData.txHash,
               token: txData.token,
               blockNumber: txData.blockNumber,
+              uniqueId: txData.uniqueId || null,
               accountingPeriod: txData.accountingPeriod,
               direction:
                 (txData.direction as "INFLOW" | "OUTFLOW") || "OUTFLOW",
@@ -279,6 +299,8 @@ export function WalletsTable({
               console.log("[WalletsTable] First transaction action:", txAction);
             }
 
+            // Dispatch transaction - reducer will prevent duplicates based on uniqueId
+            // If uniqueId already exists, the reducer will throw an error which is stored in the operation
             pendingDocDispatch(txAction);
             addedCount++;
 
@@ -292,13 +314,13 @@ export function WalletsTable({
                 details: `Added ${addedCount} of ${result.transactions.length} transactions...`,
               });
               console.log(
-                `[WalletsTable] Added ${addedCount}/${result.transactions.length} transactions`,
+                `[WalletsTable] Added ${addedCount}/${result.transactions.length} transactions (${skippedCount} skipped)`,
               );
             }
           }
 
           console.log(
-            `[WalletsTable] Successfully added all ${addedCount} transactions`,
+            `[WalletsTable] Successfully added ${addedCount} transactions (${skippedCount} skipped as duplicates or invalid)`,
           );
 
           // Verify operations were added
@@ -393,7 +415,9 @@ export function WalletsTable({
     };
 
     fetchAndAddTransactions();
-  }, [pendingTxDoc, pendingDocument, pendingDocDispatch, isProcessing]);
+    // Only depend on pendingTxDoc and isProcessing - not on pendingDocument or pendingDocDispatch
+    // to prevent re-running when transactions are added
+  }, [pendingTxDoc?.documentId, isProcessing]);
 
   // Validate Ethereum address
   const validateEthAddress = useCallback((address: string): boolean => {

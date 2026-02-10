@@ -4,7 +4,11 @@ import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
   useParentFolderForSelectedNode,
+  useSelectedDrive,
+  useDocumentsInSelectedDrive,
+  dispatchActions,
 } from "@powerhousedao/reactor-browser";
+import { deleteNode } from "document-drive";
 import { generateId } from "document-model/core";
 import { useSelectedAccountTransactionsDocument } from "../hooks/useAccountTransactionsDocument.js";
 import {
@@ -21,16 +25,21 @@ import { TransactionsTable } from "./components/TransactionsTable.js";
 import { TransactionForm } from "./components/TransactionForm.js";
 import { AccountSection } from "./components/AccountSection.js";
 import { alchemyIntegration } from "./alchemyIntegration.js";
+import { actions as accountsActions } from "../../document-models/accounts/index.js";
+import { actions as expenseReportActions } from "../../document-models/expense-report/index.js";
 
 type ViewMode = "list" | "add" | "edit";
 
 export default function Editor() {
   const [document, dispatch] = useSelectedAccountTransactionsDocument();
   const parentFolder = useParentFolderForSelectedNode();
+  const [selectedDrive] = useSelectedDrive();
+  const allDocuments = useDocumentsInSelectedDrive();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [editingTransaction, setEditingTransaction] =
     useState<TransactionEntry | null>(null);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   function handleClose() {
     setSelectedNode(parentFolder?.id);
@@ -70,6 +79,91 @@ export default function Editor() {
   function handleCancelForm() {
     setViewMode("list");
     setEditingTransaction(null);
+  }
+
+  async function handleDeleteDocument() {
+    if (!document) return;
+
+    const confirmMessage =
+      "Are you sure you want to delete this account transactions document? This will also remove all references to it from Accounts, Expense Reports, and Snapshot Reports.";
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    setIsDeleting(true);
+    const documentId = document.header.id;
+
+    try {
+      // Step 1: Find and remove references from Accounts documents
+      const accountsDocs =
+        allDocuments?.filter(
+          (doc: any) => doc.header.documentType === "powerhouse/accounts",
+        ) || [];
+
+      for (const accountsDoc of accountsDocs) {
+        const state = accountsDoc.state as any;
+        const accounts = (state?.global?.accounts || []) as any[];
+        const accountsToUpdate = accounts.filter(
+          (acc: any) => acc.accountTransactionsId === documentId,
+        );
+
+        if (accountsToUpdate.length > 0) {
+          const updateActions = accountsToUpdate.map((acc: any) =>
+            accountsActions.updateAccount({
+              id: acc.id,
+              accountTransactionsId: null,
+            }),
+          );
+          await dispatchActions(updateActions, accountsDoc.header.id);
+        }
+      }
+
+      // Step 2: Find and remove references from Expense Report documents
+      const expenseReportDocs =
+        allDocuments?.filter(
+          (doc: any) => doc.header.documentType === "powerhouse/expense-report",
+        ) || [];
+
+      for (const expenseReportDoc of expenseReportDocs) {
+        const state = expenseReportDoc.state as any;
+        const wallets = (state?.global?.wallets || []) as any[];
+        const walletsToUpdate = wallets.filter(
+          (wallet: any) => wallet.accountTransactionsDocumentId === documentId,
+        );
+
+        if (walletsToUpdate.length > 0) {
+          const updateActions = walletsToUpdate.map((wallet: any) =>
+            expenseReportActions.updateWallet({
+              address: wallet.wallet,
+              accountTransactionsDocumentId: null,
+            }),
+          );
+          await dispatchActions(updateActions, expenseReportDoc.header.id);
+        }
+      }
+
+      // Step 3: Note about Snapshot Reports
+      // Snapshot Reports don't have an action to update accountTransactionsId,
+      // so those references will remain but won't cause errors since the document is deleted
+
+      // Step 4: Delete the document node from the drive
+      if (selectedDrive?.header.id) {
+        await dispatchActions(
+          [deleteNode({ id: documentId })],
+          selectedDrive.header.id,
+        );
+      }
+
+      // Step 5: Navigate back to parent folder
+      setSelectedNode(parentFolder?.id);
+    } catch (error) {
+      console.error("Error deleting account transactions document:", error);
+      alert(
+        `Failed to delete document: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   async function handleFetchTransactions() {
@@ -163,16 +257,6 @@ export default function Editor() {
               };
             }
 
-            // Create unique key for this transaction (include amount to handle multiple transfers in same tx)
-            const amountStr = `${amount.value}-${amount.unit}`;
-            const txKey = `${txData.txHash}-${txData.blockNumber}-${txData.token}-${txData.counterParty}-${amountStr}`;
-
-            // Skip if transaction already exists
-            if (existingTxKeys.has(txKey)) {
-              skippedCount++;
-              continue;
-            }
-
             // Validation - ensure we have required fields before adding
             if (!txData.direction) {
               console.error(
@@ -195,6 +279,8 @@ export default function Editor() {
               skippedCount++;
               continue;
             }
+            // Dispatch transaction - reducer will prevent duplicates based on uniqueId
+            // If uniqueId already exists, the reducer will throw an error which is stored in the operation
             dispatch(
               addTransaction({
                 id: generateId(),
@@ -204,6 +290,7 @@ export default function Editor() {
                 txHash: txData.txHash,
                 token: txData.token,
                 blockNumber: txData.blockNumber,
+                uniqueId: txData.uniqueId || null,
                 accountingPeriod: txData.accountingPeriod,
                 direction:
                   (txData.direction as "INFLOW" | "OUTFLOW") || "OUTFLOW", // Use direction from Alchemy data or default to OUTFLOW
@@ -272,6 +359,13 @@ export default function Editor() {
         <h1 className="text-lg font-semibold text-gray-900">
           Account Transactions
         </h1>
+        <Button
+          onClick={handleDeleteDocument}
+          disabled={isDeleting}
+          className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors"
+        >
+          {isDeleting ? "Deleting..." : "Delete Document"}
+        </Button>
       </div>
 
       <div className="flex-1 overflow-auto">

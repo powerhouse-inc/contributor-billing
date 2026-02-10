@@ -1,9 +1,10 @@
 import type { EditorProps } from "document-model";
 import { ToastContainer } from "@powerhousedao/design-system/connect";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DriveContents } from "./DriveContents.js";
 import { FolderTree, type SelectedFolderInfo } from "./FolderTree.js";
 import { FolderTreeErrorBoundary } from "./FolderTreeErrorBoundary.js";
+import { DocumentDropZone } from "./DocumentDropZone.js";
 
 /**
  * Main drive explorer component for Contributor Billing.
@@ -20,6 +21,30 @@ export function DriveExplorer({ children }: EditorProps) {
   // Track active node in sidebar for visual selection sync
   // Empty string means no selection (home page)
   const [activeNodeId, setActiveNodeId] = useState<string>("");
+
+  // Remember the last folder before opening a document so we can restore it when closing
+  const lastFolderRef = useRef<SelectedFolderInfo | null>(null);
+  const prevShowDocumentEditorRef = useRef(showDocumentEditor);
+
+  useEffect(() => {
+    const wasShowingDocument = prevShowDocumentEditorRef.current;
+    const isShowingDocument = showDocumentEditor;
+
+    if (isShowingDocument && !wasShowingDocument) {
+      // Transitioning TO document editor - save current folder
+      lastFolderRef.current = selectedFolder;
+    } else if (!isShowingDocument && wasShowingDocument) {
+      // Transitioning FROM document editor - restore last folder
+      if (lastFolderRef.current) {
+        setSelectedFolder(lastFolderRef.current);
+        if (lastFolderRef.current.folderId) {
+          setActiveNodeId(lastFolderRef.current.folderId);
+        }
+      }
+    }
+
+    prevShowDocumentEditorRef.current = isShowingDocument;
+  }, [showDocumentEditor]);
 
   const handleFolderSelect = (folderInfo: SelectedFolderInfo | null) => {
     setSelectedFolder(folderInfo);
@@ -57,7 +82,7 @@ export function DriveExplorer({ children }: EditorProps) {
       />
 
       {/* Main content area - takes remaining space, scrollable */}
-      <div className="flex-1 min-w-0 h-full overflow-auto">
+      <DocumentDropZone className="flex-1 min-w-0 h-full overflow-x-hidden overflow-y-auto">
         {/* Conditional rendering: Document editor or folder content */}
         {showDocumentEditor ? (
           /* Document editor view */
@@ -67,9 +92,10 @@ export function DriveExplorer({ children }: EditorProps) {
           <DriveContents
             selectedFolder={selectedFolder}
             onFolderSelect={handleFolderSelect}
+            onActiveNodeIdChange={setActiveNodeId}
           />
         )}
-      </div>
+      </DocumentDropZone>
     </div>
   );
 }

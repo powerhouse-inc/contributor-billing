@@ -20,7 +20,7 @@ export interface AlchemyTransactionData {
   txHash: string;
   token: string;
   blockNumber: number;
-  //uniqueId?: string; // Alchemy's unique identifier for deduplication
+  uniqueId?: string; // Alchemy's unique identifier for deduplication
   datetime: string;
   accountingPeriod: string;
   from: string; // From address for direction calculation
@@ -69,6 +69,7 @@ export class AlchemyIntegrationService {
                   txHash
                   token
                   blockNumber
+                  uniqueId
                   datetime
                   accountingPeriod
                   to

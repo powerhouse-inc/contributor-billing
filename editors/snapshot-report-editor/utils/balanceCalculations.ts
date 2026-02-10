@@ -51,6 +51,7 @@ function getTransactionEffect(
  * @param startDate - Period start date (ISO string)
  * @param endDate - Period end date (ISO string)
  * @param accountType - Optional account type for type-specific balance logic
+ * @param existingStartingBalances - Optional existing starting balances to preserve tokens with no transactions
  * @returns Map of token to balance information
  */
 export function calculateBalances(
@@ -58,10 +59,54 @@ export function calculateBalances(
   startDate: string,
   endDate: string,
   accountType?: AccountType,
+  existingStartingBalances?: Array<{ token: string; amount: Amount_Currency }>,
 ): Map<string, TokenBalance> {
   const balances = new Map<string, TokenBalance>();
   const start = new Date(startDate);
   const end = new Date(endDate);
+
+  // Initialize balances from existing starting balances
+  // This ensures tokens with opening balances but no transactions still get closing balances
+  if (existingStartingBalances && existingStartingBalances.length > 0) {
+    existingStartingBalances.forEach((startingBalance) => {
+      const token = startingBalance.token;
+      if (!token) return; // Skip if no token
+
+      if (!balances.has(token)) {
+        // Parse the starting balance amount
+        // Amount_Currency is always an object with { value: string, unit: string }
+        let openingValue = "0";
+        let unit = token;
+
+        if (
+          startingBalance.amount &&
+          typeof startingBalance.amount === "object"
+        ) {
+          if (
+            startingBalance.amount.value !== undefined &&
+            startingBalance.amount.value !== null
+          ) {
+            openingValue = String(startingBalance.amount.value);
+          }
+          if (startingBalance.amount.unit) {
+            unit = String(startingBalance.amount.unit);
+          }
+        }
+
+        balances.set(token, {
+          token,
+          opening: {
+            value: openingValue,
+            unit: unit,
+          },
+          closing: {
+            value: "0", // Initialize period change to 0 (will be updated if there are period transactions)
+            unit: unit,
+          },
+        });
+      }
+    });
+  }
 
   // Process all transactions
   transactions.forEach((tx) => {
@@ -120,6 +165,16 @@ export function calculateBalances(
 
     balance.opening.value = fixPrecision(openingValue).toString();
     balance.closing.value = fixPrecision(closingValue).toString();
+
+    // Debug logging for non-zero balances
+    if (Math.abs(openingValue) > 1e-10 || Math.abs(closingValue) > 1e-10) {
+      console.log("[calculateBalances] Finalized balance:", {
+        token: balance.token,
+        opening: balance.opening.value,
+        closing: balance.closing.value,
+        periodChange,
+      });
+    }
   });
 
   return balances;
