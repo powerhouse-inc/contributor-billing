@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { useDrives, useDocumentById } from "@powerhousedao/reactor-browser";
+import {
+  useDrives,
+  useDocumentById,
+  useGetDocuments,
+} from "@powerhousedao/reactor-browser";
+import type { PHDocument } from "document-model";
 import {
   addSubteam,
   removeSubteam,
@@ -64,8 +69,10 @@ export function SubteamsPicker({
     }
   }, [pendingOpHubUpdate, pendingDoc, pendingDispatch]);
 
-  // Build local profiles from ALL drives (not just builder-team-admin drives)
-  const localBuilderProfiles = useMemo<BuilderProfileOption[]>(() => {
+  const getDocuments = useGetDocuments();
+
+  // Collect builder profile node IDs from ALL drives
+  const localProfileNodes = useMemo(() => {
     if (!drives) return [];
     return drives
       .filter(
@@ -83,10 +90,62 @@ export function SubteamsPicker({
             id: node.id,
             name: node.name || "Untitled builder",
             driveId: drive.header.id,
-            isRemote: false,
           })),
       );
   }, [drives]);
+
+  const localProfilePhids = useMemo(
+    () => localProfileNodes.map((node) => node.id),
+    [localProfileNodes],
+  );
+
+  // Fetch actual builder profile documents to get state (name, etc.)
+  const [localProfileDocuments, setLocalProfileDocuments] = useState<
+    PHDocument[]
+  >([]);
+
+  useEffect(() => {
+    if (localProfilePhids.length === 0) {
+      setLocalProfileDocuments([]);
+      return;
+    }
+
+    getDocuments(localProfilePhids)
+      .then((docs) => {
+        setLocalProfileDocuments(docs);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch builder profile documents:", error);
+        setLocalProfileDocuments([]);
+      });
+  }, [localProfilePhids, getDocuments]);
+
+  // Create a map of PHID to document state for name lookup
+  const localProfileStateMap = useMemo(() => {
+    const map = new Map<string, { name?: string | null }>();
+    for (const doc of localProfileDocuments) {
+      const state = (
+        doc.state as { global?: { name?: string | null } } | undefined
+      )?.global;
+      if (state) {
+        map.set(doc.header.id, state);
+      }
+    }
+    return map;
+  }, [localProfileDocuments]);
+
+  // Build local profiles with actual document names
+  const localBuilderProfiles = useMemo<BuilderProfileOption[]>(() => {
+    return localProfileNodes.map((node) => {
+      const state = localProfileStateMap.get(node.id);
+      return {
+        id: node.id,
+        name: state?.name || node.name,
+        driveId: node.driveId,
+        isRemote: false,
+      };
+    });
+  }, [localProfileNodes, localProfileStateMap]);
 
   // Create a map of local profile IDs for filtering remote duplicates
   const localProfileMap = useMemo(() => {
