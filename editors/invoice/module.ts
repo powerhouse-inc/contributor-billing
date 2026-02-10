@@ -1,7 +1,7 @@
 import type { EditorModule } from "document-model";
 import { lazy } from "react";
 
-/** Document editor module for the Invoice document type */
+/** Document editor module for the "["powerhouse/invoice"]" document type */
 export const Invoice: EditorModule = {
   Component: lazy(() => import("./editor.js")),
   documentTypes: ["powerhouse/invoice"],

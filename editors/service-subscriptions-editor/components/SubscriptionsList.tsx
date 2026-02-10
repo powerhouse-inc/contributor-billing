@@ -188,7 +188,10 @@ function SubscriptionCard({
           <span
             className={`font-medium ${isDarkMode ? "text-gray-100" : "text-gray-900"}`}
           >
-            {formatCurrency(subscription.amount, subscription.currency)}
+            {formatCurrency(
+              subscription.amount ?? null,
+              subscription.currency ?? null,
+            )}
             {subscription.amount && (
               <span
                 className={`font-normal ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}

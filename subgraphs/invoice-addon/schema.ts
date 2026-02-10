@@ -8,11 +8,11 @@ export const schema: DocumentNode = gql`
   type Mutation {
     Invoice_processGnosisPayment(
       chainName: String!
-      paymentDetails: JSON!
+      paymentDetails: JSONObject!
       invoiceNo: String!
     ): ProcessGnosisPaymentOutput
     Invoice_createRequestFinancePayment(
-      paymentData: JSON!
+      paymentData: JSONObject!
     ): CreateRequestFinancePaymentOutput
     Invoice_uploadInvoicePdfChunk(
       chunk: String!
@@ -28,7 +28,7 @@ export const schema: DocumentNode = gql`
   """
   type UploadInvoicePdfChunkOutput {
     success: Boolean!
-    data: JSON
+    data: JSONObject
     error: String
   }
 
@@ -37,7 +37,7 @@ export const schema: DocumentNode = gql`
   """
   type CreateRequestFinancePaymentOutput {
     success: Boolean!
-    data: JSON
+    data: JSONObject
     error: String
   }
 
@@ -46,9 +46,7 @@ export const schema: DocumentNode = gql`
   """
   type ProcessGnosisPaymentOutput {
     success: Boolean!
-    data: JSON
+    data: JSONObject
     error: String
   }
-
-  scalar JSON
 `;

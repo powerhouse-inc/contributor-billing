@@ -1,4 +1,4 @@
-import { generateId } from "document-model/core";
+import { generateId, setName } from "document-model";
 import { useState, useMemo, useEffect } from "react";
 import {
   useDocumentsInSelectedDrive,
@@ -7,7 +7,11 @@ import {
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
-import { Button, Select, DatePicker } from "@powerhousedao/document-engineering";
+import {
+  Button,
+  Select,
+  DatePicker,
+} from "@powerhousedao/document-engineering";
 import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { useSelectedSnapshotReportDocument } from "../hooks/useSnapshotReportDocument.js";
 import {
@@ -21,9 +25,7 @@ import { SetOwner } from "./components/SetOwner.js";
 import { useSyncSnapshotAccount } from "./hooks/useSyncSnapshotAccount.js";
 import { formatBalance } from "./utils/balanceCalculations.js";
 import { calculateTransactionFlowInfo } from "./utils/flowTypeCalculations.js";
-import { deriveTransactionsForAccount } from "./utils/deriveTransactions.js";
 import { actions as accountsActions } from "../../document-models/accounts/index.js";
-import { transactionsActions } from "../../document-models/snapshot-report/index.js";
 
 // Helper function to generate month options from January 2025 to current month
 function generateMonthOptions() {
@@ -97,9 +99,8 @@ export default function Editor() {
     endDate,
     snapshotAccounts,
     accountsDocumentId,
-    ownerId,
+    ownerIds,
     reportPeriodStart,
-    reportPeriodEnd,
   } = document.state.global;
 
   // Filter for Accounts documents
@@ -132,8 +133,9 @@ export default function Editor() {
   // Local state for the selected period (before confirmation)
   const [selectedPeriod, setSelectedPeriod] = useState<string>(() => {
     if (reportPeriodStart) {
+      // Use UTC methods to avoid timezone issues
       const date = new Date(reportPeriodStart);
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
     }
     // Default to current month
     const now = new Date();
@@ -143,8 +145,9 @@ export default function Editor() {
   // Track if the selected period differs from the saved period
   const savedPeriod = useMemo(() => {
     if (reportPeriodStart) {
+      // Use UTC methods to avoid timezone issues
       const date = new Date(reportPeriodStart);
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
     }
     return "";
   }, [reportPeriodStart]);
@@ -170,9 +173,30 @@ export default function Editor() {
   const handleConfirmPeriod = () => {
     const { periodStart, periodEnd } = getMonthDateRange(selectedPeriod);
 
-    // Dispatch both start and end dates
+    // Get the formatted month label (e.g., "January 2025") - timezone agnostic
+    const [year, month] = selectedPeriod.split("-").map(Number);
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const monthLabel = `${monthNames[month - 1]} ${year}`;
+
+    // Dispatch period dates
     dispatch?.(setPeriodStart({ periodStart }));
     dispatch?.(setPeriodEnd({ periodEnd }));
+
+    // Auto-set document name based on reporting period
+    dispatch?.(setName(`${monthLabel} - Snapshot Report`));
 
     // Exit editing mode
     setIsEditingPeriod(false);
@@ -356,6 +380,16 @@ export default function Editor() {
     setSelectedAccountIds(newSelection);
   };
 
+  const handleSelectAllAccounts = () => {
+    // Select all accounts that aren't already added to the snapshot
+    const allAvailableAccountIds = new Set(
+      availableAccounts
+        .filter((account: any) => !existingAccountIds.has(account.id))
+        .map((account: any) => account.id),
+    );
+    setSelectedAccountIds(allAvailableAccountIds);
+  };
+
   const handleImportAccounts = async () => {
     if (!documentsInDrive || !startDate || !endDate) {
       alert(
@@ -498,75 +532,6 @@ export default function Editor() {
     setSelectedAccountIds(new Set());
   };
 
-  /**
-   * Derive transactions for a non-Internal account from Internal accounts
-   * This finds all transactions in Internal accounts where the counter-party
-   * matches the non-Internal account's address
-   */
-  const handleDeriveTransactions = async (accountId: string) => {
-    const account = snapshotAccounts.find((a) => a.id === accountId);
-    if (!account || account.type === "Internal") {
-      return;
-    }
-
-    const internalAccounts = snapshotAccounts.filter(
-      (a) => a.type === "Internal",
-    );
-    if (internalAccounts.length === 0) {
-      alert("No Internal accounts found. Import Internal accounts first.");
-      return;
-    }
-
-    // Get derived transactions
-    const derivedTxs = deriveTransactionsForAccount(account, internalAccounts);
-
-    // Remove existing transactions for this account
-    for (const tx of account.transactions) {
-      dispatch?.(transactionsActions.removeTransaction({ id: tx.id }));
-    }
-
-    // Add derived transactions
-    for (const tx of derivedTxs) {
-      dispatch?.(
-        addTransaction({
-          accountId: account.id,
-          id: tx.id,
-          transactionId: tx.transactionId,
-          counterParty: tx.counterParty,
-          amount: tx.amount,
-          datetime: tx.datetime,
-          txHash: tx.txHash,
-          token: tx.token,
-          blockNumber: tx.blockNumber ?? undefined,
-          direction: tx.direction,
-          flowType: tx.flowType,
-          counterPartyAccountId: tx.counterPartyAccountId,
-        }),
-      );
-    }
-  };
-
-  /**
-   * Derive transactions for all non-Internal accounts
-   */
-  const handleDeriveAllNonInternal = async () => {
-    const internalAccounts = snapshotAccounts.filter(
-      (a) => a.type === "Internal",
-    );
-    if (internalAccounts.length === 0) {
-      alert("No Internal accounts found. Import Internal accounts first.");
-      return;
-    }
-
-    const nonInternalAccounts = snapshotAccounts.filter(
-      (a) => a.type !== "Internal",
-    );
-
-    for (const account of nonInternalAccounts) {
-      await handleDeriveTransactions(account.id);
-    }
-  };
-
   // Handlers for the legacy startDate/endDate fields (DatePicker approach)
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const dateValue = e.target.value;
@@ -654,9 +619,9 @@ export default function Editor() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Owner
+                  Teams
                 </label>
-                <SetOwner ownerId={ownerId} dispatch={dispatch} />
+                <SetOwner ownerIds={ownerIds ?? []} dispatch={dispatch} />
               </div>
 
               <div>
@@ -995,11 +960,17 @@ export default function Editor() {
                                           {balance.token}
                                         </div>
                                         <div
-                                          className="text-xs text-gray-600"
+                                          className="text-xs text-gray-600 space-y-1"
                                           style={{
                                             fontVariantNumeric: "tabular-nums",
                                           }}
                                         >
+                                          <div>
+                                            Opening:{" "}
+                                            <span className="font-medium">
+                                              0.000000 {balance.token}
+                                            </span>
+                                          </div>
                                           <div>
                                             Closing:{" "}
                                             <span className="font-medium">
@@ -1046,108 +1017,118 @@ export default function Editor() {
                                     Transactions ({account.transactions.length})
                                   </h4>
                                   <div className="space-y-2">
-                                    {account.transactions.map((tx: any) => (
-                                      <div
-                                        key={tx.id}
-                                        className="bg-white border border-gray-200 rounded p-3 text-sm"
-                                      >
-                                        <div className="grid grid-cols-2 gap-2">
-                                          {/* Transaction Details Grid */}
-                                          <div>
-                                            <span className="text-gray-500">
-                                              Direction:
-                                            </span>
-                                            <span
-                                              className={`ml-2 font-medium ${
-                                                tx.direction === "INFLOW"
-                                                  ? "text-green-600"
-                                                  : "text-red-600"
-                                              }`}
-                                            >
-                                              {tx.direction}
-                                            </span>
-                                          </div>
-                                          <div>
-                                            <span className="text-gray-500">
-                                              Amount:
-                                            </span>
-                                            <span className="ml-2 font-medium">
-                                              {typeof tx.amount === "object" &&
-                                              tx.amount?.value !== undefined
-                                                ? `${tx.amount.value} ${tx.amount.unit || tx.token}`
-                                                : `${tx.amount} ${tx.token}`}
-                                            </span>
-                                          </div>
-                                          <div>
-                                            <span className="text-gray-500">
-                                              Date:
-                                            </span>
-                                            <span className="ml-2">
-                                              {new Date(
-                                                tx.datetime,
-                                              ).toLocaleDateString()}
-                                            </span>
-                                          </div>
-                                          <div>
-                                            <span className="text-gray-500">
-                                              Time:
-                                            </span>
-                                            <span className="ml-2">
-                                              {new Date(
-                                                tx.datetime,
-                                              ).toLocaleTimeString()}
-                                            </span>
-                                          </div>
-                                          {tx.counterParty && (
-                                            <div className="col-span-2">
-                                              <span className="text-gray-500">
-                                                Counter Party:
-                                              </span>
-                                              <span className="ml-2 font-mono text-xs">
-                                                {tx.counterParty}
-                                              </span>
-                                            </div>
-                                          )}
-                                          {tx.flowType && (
+                                    {[...account.transactions]
+                                      .sort(
+                                        (a: any, b: any) =>
+                                          new Date(b.datetime).getTime() -
+                                          new Date(a.datetime).getTime(),
+                                      )
+                                      .map((tx: any) => (
+                                        <div
+                                          key={tx.id}
+                                          className="bg-white border border-gray-200 rounded p-3 text-sm"
+                                        >
+                                          <div className="grid grid-cols-2 gap-2">
+                                            {/* Transaction Details Grid */}
                                             <div>
                                               <span className="text-gray-500">
-                                                Flow Type:
+                                                Direction:
                                               </span>
                                               <span
-                                                className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
-                                                  tx.flowType === "TopUp"
-                                                    ? "bg-green-100 text-green-800"
-                                                    : tx.flowType === "Return"
-                                                      ? "bg-orange-100 text-orange-800"
-                                                      : tx.flowType ===
-                                                          "Internal"
-                                                        ? "bg-purple-100 text-purple-800"
-                                                        : "bg-red-100 text-red-800"
+                                                className={`ml-2 font-medium ${
+                                                  tx.direction === "INFLOW"
+                                                    ? "text-green-600"
+                                                    : "text-red-600"
                                                 }`}
                                               >
-                                                {tx.flowType}
+                                                {tx.direction}
                                               </span>
                                             </div>
-                                          )}
-                                          <div className="col-span-2">
-                                            <span className="text-gray-500">
-                                              Tx Hash:
-                                            </span>
-                                            <a
-                                              href={`https://etherscan.io/tx/${tx.txHash}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="ml-2 text-blue-600 hover:underline font-mono text-xs"
-                                            >
-                                              {tx.txHash.substring(0, 10)}...
-                                              {tx.txHash.substring(
-                                                tx.txHash.length - 8,
-                                              )}
-                                            </a>
+                                            <div>
+                                              <span className="text-gray-500">
+                                                Amount:
+                                              </span>
+                                              <span className="ml-2 font-medium">
+                                                {typeof tx.amount ===
+                                                  "object" &&
+                                                tx.amount?.value !== undefined
+                                                  ? `${tx.amount.value} ${tx.amount.unit || tx.token}`
+                                                  : `${tx.amount} ${tx.token}`}
+                                              </span>
+                                            </div>
+                                            <div>
+                                              <span className="text-gray-500">
+                                                Date:
+                                              </span>
+                                              <span className="ml-2">
+                                                {new Date(
+                                                  tx.datetime,
+                                                ).toLocaleDateString()}
+                                              </span>
+                                            </div>
+                                            <div>
+                                              <span className="text-gray-500">
+                                                Time:
+                                              </span>
+                                              <span className="ml-2">
+                                                {new Date(
+                                                  tx.datetime,
+                                                ).toLocaleTimeString()}
+                                              </span>
+                                            </div>
+                                            {tx.counterParty && (
+                                              <div className="col-span-2">
+                                                <span className="text-gray-500">
+                                                  Counter Party:
+                                                </span>
+                                                <span className="ml-2 font-mono text-xs">
+                                                  {tx.counterParty}
+                                                </span>
+                                              </div>
+                                            )}
+                                            {tx.flowType && (
+                                              <div>
+                                                <span className="text-gray-500">
+                                                  Flow Type:
+                                                </span>
+                                                <span
+                                                  className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
+                                                    tx.flowType === "TopUp"
+                                                      ? "bg-green-100 text-green-800"
+                                                      : tx.flowType === "Return"
+                                                        ? "bg-orange-100 text-orange-800"
+                                                        : tx.flowType ===
+                                                            "Internal"
+                                                          ? "bg-purple-100 text-purple-800"
+                                                          : tx.flowType ===
+                                                              "Swap"
+                                                            ? "bg-blue-100 text-blue-800"
+                                                            : "bg-red-100 text-red-800"
+                                                  }`}
+                                                >
+                                                  {tx.flowType}
+                                                </span>
+                                              </div>
+                                            )}
+                                            <div className="col-span-2">
+                                              <span className="text-gray-500">
+                                                Tx Hash:
+                                              </span>
+                                              <a
+                                                href={`https://etherscan.io/tx/${tx.txHash}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="ml-2 text-blue-600 hover:underline font-mono text-xs"
+                                              >
+                                                {tx.txHash.substring(0, 10)}...
+                                                {tx.txHash.substring(
+                                                  tx.txHash.length - 8,
+                                                )}
+                                              </a>
+                                            </div>
                                           </div>
                                         </div>
-                                      </div>
-                                    ))}
+                                      ))}
                                   </div>
                                 </div>
                               </div>
@@ -1164,15 +1145,29 @@ export default function Editor() {
 
         {/* Account Picker Modal */}
         {isAccountPickerOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col">
+          <div className="fixed inset-0 z-50 flex items-start justify-center pt-8 backdrop-blur-sm">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[85vh] flex flex-col border border-gray-200">
               <div className="p-6 border-b">
-                <h3 className="text-xl font-semibold">
-                  Select Accounts to Import
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Choose accounts from the selected Accounts document
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-semibold">
+                      Select Accounts to Import
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Choose accounts from the selected Accounts document
+                    </p>
+                  </div>
+                  {availableAccounts.some(
+                    (account: any) => !existingAccountIds.has(account.id),
+                  ) && (
+                    <button
+                      onClick={handleSelectAllAccounts}
+                      className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      Add All Accounts
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="p-6 overflow-y-auto flex-1">

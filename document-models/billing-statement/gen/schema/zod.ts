@@ -1,13 +1,9 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   AddLineItemInput,
   BillingStatementLineItem,
   BillingStatementState,
-  BillingStatementStatus,
-  BillingStatementStatusInput,
   BillingStatementTag,
-  BillingStatementUnit,
-  BillingStatementUnitInput,
   DeleteLineItemInput,
   EditBillingStatementInput,
   EditContributorInput,
@@ -17,7 +13,7 @@ import type {
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -68,7 +64,7 @@ export function AddLineItemInputSchema(): z.ZodObject<
     quantity: z.number(),
     totalPriceCash: z.number(),
     totalPricePwt: z.number(),
-    unit: z.lazy(() => BillingStatementUnitInputSchema),
+    unit: BillingStatementUnitInputSchema,
     unitPriceCash: z.number(),
     unitPricePwt: z.number(),
   });
@@ -81,7 +77,7 @@ export function BillingStatementLineItemSchema(): z.ZodObject<
     __typename: z.literal("BillingStatementLineItem").optional(),
     description: z.string(),
     id: z.string(),
-    lineItemTag: z.array(BillingStatementTagSchema()),
+    lineItemTag: z.array(z.lazy(() => BillingStatementTagSchema())),
     quantity: z.number(),
     totalPriceCash: z.number(),
     totalPricePwt: z.number(),
@@ -96,12 +92,12 @@ export function BillingStatementStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("BillingStatementState").optional(),
-    contributor: z.string().nullable(),
+    contributor: z.string().nullish(),
     currency: z.string(),
-    dateDue: z.string().datetime().nullable(),
+    dateDue: z.string().datetime().nullish(),
     dateIssued: z.string().datetime(),
-    lineItems: z.array(BillingStatementLineItemSchema()),
-    notes: z.string().nullable(),
+    lineItems: z.array(z.lazy(() => BillingStatementLineItemSchema())),
+    notes: z.string().nullish(),
     status: BillingStatementStatusSchema,
     totalCash: z.number(),
     totalPowt: z.number(),
@@ -114,7 +110,7 @@ export function BillingStatementTagSchema(): z.ZodObject<
   return z.object({
     __typename: z.literal("BillingStatementTag").optional(),
     dimension: z.string(),
-    label: z.string().nullable(),
+    label: z.string().nullish(),
     value: z.string(),
   });
 }
@@ -155,7 +151,7 @@ export function EditLineItemInputSchema(): z.ZodObject<
     quantity: z.number().nullish(),
     totalPriceCash: z.number().nullish(),
     totalPricePwt: z.number().nullish(),
-    unit: z.lazy(() => BillingStatementUnitInputSchema.nullish()),
+    unit: BillingStatementUnitInputSchema.nullish(),
     unitPriceCash: z.number().nullish(),
     unitPricePwt: z.number().nullish(),
   });
@@ -176,6 +172,6 @@ export function EditStatusInputSchema(): z.ZodObject<
   Properties<EditStatusInput>
 > {
   return z.object({
-    status: z.lazy(() => BillingStatementStatusInputSchema),
+    status: BillingStatementStatusInputSchema,
   });
 }

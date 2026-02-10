@@ -6,11 +6,9 @@
  * @param onProgress Callback for upload progress
  */
 
-let GRAPHQL_URL = "http://localhost:4001/graphql";
+import { getGraphQLUrl } from "../shared/graphql.js";
 
-if (!window.document.baseURI.includes('localhost')) {
-  GRAPHQL_URL = 'https://switchboard-staging.powerhouse.xyz/graphql'
-}
+const GRAPHQL_URL = getGraphQLUrl();
 
 export async function uploadPdfChunked(
   pdfData: string,

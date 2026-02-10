@@ -1,4 +1,4 @@
-export type Maybe<T> = T | null;
+export type Maybe<T> = T | null | undefined;
 export type InputMaybe<T> = T | null | undefined;
 export type Exact<T extends { [key: string]: unknown }> = {
   [K in keyof T]: T[K];
@@ -25,6 +25,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
+  Address: { input: `${string}:0x${string}`; output: `${string}:0x${string}` };
   Amount: {
     input: { unit?: string; value?: number };
     output: { unit?: string; value?: number };
@@ -44,6 +45,7 @@ export type Scalars = {
   Amount_Money: { input: number; output: number };
   Amount_Percentage: { input: number; output: number };
   Amount_Tokens: { input: number; output: number };
+  Attachment: { input: string; output: string };
   Currency: { input: string; output: string };
   Date: { input: string; output: string };
   DateTime: { input: string; output: string };
@@ -53,11 +55,12 @@ export type Scalars = {
   OLabel: { input: string; output: string };
   PHID: { input: string; output: string };
   URL: { input: string; output: string };
+  Unknown: { input: unknown; output: unknown };
   Upload: { input: File; output: File };
 };
 
 export type AccountEntry = {
-  KycAmlStatus: Maybe<KycAmlStatusType | `${KycAmlStatusType}`>;
+  KycAmlStatus: Maybe<KycAmlStatusType>;
   account: Scalars["String"]["output"];
   accountTransactionsId: Maybe<Scalars["PHID"]["output"]>;
   budgetPath: Maybe<Scalars["String"]["output"]>;
@@ -65,7 +68,7 @@ export type AccountEntry = {
   id: Scalars["OID"]["output"];
   name: Scalars["String"]["output"];
   owners: Maybe<Array<Scalars["String"]["output"]>>;
-  type: AccountType | `${AccountType}`;
+  type: AccountType;
 };
 
 export type AccountType = "Destination" | "External" | "Internal" | "Source";
@@ -81,7 +84,7 @@ export type AccountsState = {
 };
 
 export type AddAccountInput = {
-  KycAmlStatus?: InputMaybe<KycAmlStatusTypeInput | `${KycAmlStatusTypeInput}`>;
+  KycAmlStatus?: InputMaybe<KycAmlStatusTypeInput>;
   account: Scalars["String"]["input"];
   accountTransactionsId?: InputMaybe<Scalars["PHID"]["input"]>;
   budgetPath?: InputMaybe<Scalars["String"]["input"]>;
@@ -89,7 +92,7 @@ export type AddAccountInput = {
   id: Scalars["OID"]["input"];
   name: Scalars["String"]["input"];
   owners?: InputMaybe<Array<Scalars["String"]["input"]>>;
-  type: AccountTypeInput | `${AccountTypeInput}`;
+  type: AccountTypeInput;
 };
 
 export type DeleteAccountInput = {
@@ -101,7 +104,7 @@ export type KycAmlStatusType = "FAILED" | "PASSED" | "PENDING";
 export type KycAmlStatusTypeInput = "FAILED" | "PASSED" | "PENDING";
 
 export type UpdateAccountInput = {
-  KycAmlStatus?: InputMaybe<KycAmlStatusTypeInput | `${KycAmlStatusTypeInput}`>;
+  KycAmlStatus?: InputMaybe<KycAmlStatusTypeInput>;
   account?: InputMaybe<Scalars["String"]["input"]>;
   accountTransactionsId?: InputMaybe<Scalars["PHID"]["input"]>;
   budgetPath?: InputMaybe<Scalars["String"]["input"]>;
@@ -109,10 +112,10 @@ export type UpdateAccountInput = {
   id: Scalars["OID"]["input"];
   name?: InputMaybe<Scalars["String"]["input"]>;
   owners?: InputMaybe<Array<Scalars["String"]["input"]>>;
-  type?: InputMaybe<AccountTypeInput | `${AccountTypeInput}`>;
+  type?: InputMaybe<AccountTypeInput>;
 };
 
 export type UpdateKycStatusInput = {
-  KycAmlStatus: KycAmlStatusTypeInput | `${KycAmlStatusTypeInput}`;
+  KycAmlStatus: KycAmlStatusTypeInput;
   id: Scalars["OID"]["input"];
 };

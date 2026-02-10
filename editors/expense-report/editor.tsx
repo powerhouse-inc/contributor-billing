@@ -1,10 +1,15 @@
 import { useState, useMemo, useEffect } from "react";
+import { setName } from "document-model";
 import { useSelectedExpenseReportDocument } from "../../document-models/expense-report/hooks.js";
 import {
   actions,
   type ExpenseReportStatus,
 } from "../../document-models/expense-report/index.js";
 import { Icon, Button, Select } from "@powerhousedao/document-engineering";
+import {
+  DatePickerField,
+  Form,
+} from "@powerhousedao/document-engineering/scalars";
 import { WalletsTable } from "./components/WalletsTable.js";
 import { AggregatedExpensesTable } from "./components/AggregatedExpensesTable.js";
 import { AddBillingStatementModal } from "./components/AddBillingStatementModal.js";
@@ -14,7 +19,10 @@ import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
   useParentFolderForSelectedNode,
+  useSelectedDrive,
+  isFolderNodeKind,
 } from "@powerhousedao/reactor-browser";
+import type { FolderNode } from "document-drive";
 import { useSyncWallet } from "./hooks/useSyncWallet.js";
 import { RefreshCw } from "lucide-react";
 import { SetOwner } from "./components/SetOwner.js";
@@ -83,11 +91,24 @@ export default function Editor() {
   const periodStart = document.state.global.periodStart || "";
   const periodEnd = document.state.global.periodEnd || "";
 
+  // Derive snapshot period from document state (for transaction filtering)
+  // Support both old field names (snapshotStart/snapshotEnd) and new ones (startDate/endDate)
+  const globalState = document.state.global as Record<string, unknown>;
+  const startDate =
+    (document.state.global.startDate as string) ||
+    (globalState.snapshotStart as string) ||
+    "";
+  const endDate =
+    (document.state.global.endDate as string) ||
+    (globalState.snapshotEnd as string) ||
+    "";
+
   // Local state for the selected period (before confirmation)
   const [selectedPeriod, setSelectedPeriod] = useState<string>(() => {
     if (periodStart) {
+      // Use UTC methods to avoid timezone issues
       const date = new Date(periodStart);
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
     }
     // Default to current month
     const now = new Date();
@@ -97,8 +118,9 @@ export default function Editor() {
   // Track if the selected period differs from the saved period
   const savedPeriod = useMemo(() => {
     if (periodStart) {
+      // Use UTC methods to avoid timezone issues
       const date = new Date(periodStart);
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
     }
     return "";
   }, [periodStart]);
@@ -124,17 +146,60 @@ export default function Editor() {
   const handleConfirmPeriod = () => {
     const { periodStart, periodEnd } = getMonthDateRange(selectedPeriod);
 
-    // Dispatch both start and end dates
+    // Get the formatted month label (e.g., "January 2025") - timezone agnostic
+    const [year, month] = selectedPeriod.split("-").map(Number);
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const monthLabel = `${monthNames[month - 1]} ${year}`;
+
+    // Dispatch period dates
     dispatch(actions.setPeriodStart({ periodStart }));
     dispatch(actions.setPeriodEnd({ periodEnd }));
+
+    // Auto-set document name based on reporting period
+    dispatch(setName(`${monthLabel} - Expense Report`));
 
     // Exit editing mode
     setIsEditingPeriod(false);
   };
 
-  // Handle starting to edit the period
-  const handleEditPeriod = () => {
-    setIsEditingPeriod(true);
+  // Handle snapshot period date changes
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const dateValue = e.target.value;
+    if (!dateValue) return;
+
+    const dateString = dateValue.split("T")[0];
+    if (!dateString) return;
+
+    const date = new Date(dateString + "T00:00:00.000Z");
+    if (isNaN(date.getTime())) return;
+
+    dispatch(actions.setPeriod({ startDate: date.toISOString() }));
+  };
+
+  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const dateValue = e.target.value;
+    if (!dateValue) return;
+
+    const dateString = dateValue.split("T")[0];
+    if (!dateString) return;
+
+    const endOfDay = new Date(dateString + "T23:59:59.999Z");
+    if (isNaN(endOfDay.getTime())) return;
+
+    dispatch(actions.setPeriod({ endDate: endOfDay.toISOString() }));
   };
 
   // Generate month options
@@ -142,9 +207,15 @@ export default function Editor() {
 
   // Get the formatted display label for the current period
   const periodDisplayLabel = useMemo(() => {
-    const option = monthOptions.find((opt) => opt.value === selectedPeriod);
-    return option ? option.label : selectedPeriod;
-  }, [selectedPeriod, monthOptions]);
+    if (!periodStart) return selectedPeriod;
+    const date = new Date(periodStart);
+    const monthName = date.toLocaleDateString("en-US", {
+      month: "long",
+      timeZone: "UTC",
+    });
+    const year = date.getUTCFullYear();
+    return `${monthName} ${year}`;
+  }, [periodStart, selectedPeriod]);
 
   // Handle wallet selection for adding billing statements
   const handleAddBillingStatement = (walletAddress: string) => {
@@ -160,9 +231,13 @@ export default function Editor() {
 
   // Handle sync all wallets
   const handleSyncAllWallets = () => {
-    if (!periodStart || !periodEnd) {
+    // Use snapshot period for transaction filtering if available, otherwise fall back to reporting period
+    const filterStart = startDate || periodStart;
+    const filterEnd = endDate || periodEnd;
+
+    if (!filterStart || !filterEnd) {
       alert(
-        "Please set the period start and end dates before syncing wallet transactions.",
+        "Please set the Snapshot Period dates (or Reporting Period) before syncing wallet transactions.",
       );
       return;
     }
@@ -178,13 +253,17 @@ export default function Editor() {
       ) {
         syncWallet(
           wallet.wallet,
-          (wallet.lineItems || []).filter((item) => item !== null),
-          (wallet.billingStatements || []).filter((id) => id !== null),
+          (wallet.lineItems || []).filter(
+            (item): item is NonNullable<typeof item> => item != null,
+          ),
+          (wallet.billingStatements || []).filter(
+            (id): id is NonNullable<typeof id> => id != null,
+          ),
           groups,
           wallets,
           wallet.accountTransactionsDocumentId,
-          periodStart,
-          periodEnd,
+          filterStart,
+          filterEnd,
           dispatch,
         );
       }
@@ -236,8 +315,67 @@ export default function Editor() {
     return `${month} ${year} Breakdown`;
   }, [periodStart]);
 
-  // Get the parent folder node for the currently selected node
+  // Calculate the date to open the date picker to (last selected date or current date)
+  // This ensures the date picker opens on the last selected month instead of always current month
+  const openToDate = useMemo(() => {
+    // Prefer startDate, then endDate, then current date
+    const dateToUse = startDate || endDate;
+    if (dateToUse) {
+      const date = new Date(dateToUse);
+      // Return date in YYYY-MM-DD format for the date picker
+      return date.toISOString().split("T")[0];
+    }
+    // Default to current date
+    return new Date().toISOString().split("T")[0];
+  }, [startDate, endDate]);
+
+  // Get the parent folder node for the currently selected node (this is the Reporting folder)
   const parentFolder = useParentFolderForSelectedNode();
+  const [driveDocument] = useSelectedDrive();
+
+  // Find the sibling "Payments" folder dynamically
+  // Structure: Month Folder -> Reporting (where expense report lives) | Payments (sibling)
+  // We find the expense report's file node, get its parent (Reporting), then find the sibling Payments folder
+  const paymentsFolderId = useMemo(() => {
+    if (!driveDocument || !document) return null;
+
+    const nodes = driveDocument.state.global.nodes;
+    const expenseReportId = document.header.id;
+
+    // Find the expense report's file node in the drive
+    const expenseReportFileNode = nodes.find(
+      (node) => node.id === expenseReportId,
+    );
+
+    if (!expenseReportFileNode) return null;
+
+    // Get the Reporting folder (parent of expense report)
+    const reportingFolderId = expenseReportFileNode.parentFolder;
+    if (!reportingFolderId) return null;
+
+    // Find the Reporting folder node to get its parent (month folder)
+    const reportingFolder = nodes.find(
+      (node): node is FolderNode =>
+        isFolderNodeKind(node) && node.id === reportingFolderId,
+    );
+
+    if (!reportingFolder) return null;
+
+    // Get the month folder (parent of Reporting)
+    const monthFolderId = reportingFolder.parentFolder;
+    if (!monthFolderId) return null;
+
+    // Find the "Payments" sibling folder under the same month folder
+    const paymentsFolder = nodes.find(
+      (node): node is FolderNode =>
+        isFolderNodeKind(node) &&
+        node.parentFolder === monthFolderId &&
+        node.name === "Payments",
+    );
+
+    return paymentsFolder?.id ?? null;
+  }, [driveDocument, document]);
+
   // Set the selected node to the parent folder node (close the editor)
   function handleClose() {
     setSelectedNode(parentFolder?.id);
@@ -267,12 +405,12 @@ export default function Editor() {
                     <span>Export to PDF</span>
                   </Button>
                 </div>
-                {/* Owner ID and Period - horizontal layout */}
-                <div className="flex flex-wrap justify-between gap-12">
-                  {/* Period */}
+                {/* Row 1: Reporting Period, Status, Owner */}
+                <div className="flex flex-wrap items-center gap-x-8 gap-y-3 mb-4">
+                  {/* Reporting Period */}
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Period:
+                      Reporting Period:
                     </span>
                     {isEditingPeriod ? (
                       <div className="flex items-center gap-2">
@@ -295,18 +433,9 @@ export default function Editor() {
                         )}
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-gray-900 dark:text-white">
-                          {periodDisplayLabel}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          onClick={handleEditPeriod}
-                          className="text-sm"
-                        >
-                          Change
-                        </Button>
-                      </div>
+                      <span className="text-lg font-bold text-gray-900 dark:text-white">
+                        {periodDisplayLabel}
+                      </span>
                     )}
                   </div>
                   {/* Status */}
@@ -328,11 +457,57 @@ export default function Editor() {
                           }),
                         )
                       }
-                      className="min-w-[180px]"
+                      className="min-w-[140px]"
                     />
                   </div>
                   {/* Owner */}
-                  <SetOwner ownerId={ownerId} dispatch={dispatch} />
+                  <SetOwner
+                    ownerId={ownerId}
+                    periodStart={periodStart}
+                    dispatch={dispatch}
+                  />
+                </div>
+
+                {/* Transaction Period - exact same structure as Snapshot Report editor */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Transaction Period
+                  </label>
+                  <div className="flex gap-2 items-center">
+                    <Form
+                      key={`startDate-${openToDate}`}
+                      defaultValues={{
+                        input: startDate ? startDate.split("T")[0] : openToDate,
+                      }}
+                      onSubmit={() => {}}
+                      resetOnSuccessfulSubmit={false}
+                    >
+                      <DatePickerField
+                        name="startDate"
+                        value={startDate ? startDate.split("T")[0] : ""}
+                        onChange={handleStartDateChange}
+                        dateFormat="YYYY-MM-DD"
+                        className="flex-1"
+                      />
+                    </Form>
+                    <span className="self-center">to</span>
+                    <Form
+                      key={`endDate-${openToDate}`}
+                      defaultValues={{
+                        input: endDate ? endDate.split("T")[0] : openToDate,
+                      }}
+                      onSubmit={() => {}}
+                      resetOnSuccessfulSubmit={false}
+                    >
+                      <DatePickerField
+                        name="endDate"
+                        value={endDate ? endDate.split("T")[0] : ""}
+                        onChange={handleEndDateChange}
+                        dateFormat="YYYY-MM-DD"
+                        className="flex-1"
+                      />
+                    </Form>
+                  </div>
                 </div>
               </div>
             </section>
@@ -400,6 +575,7 @@ export default function Editor() {
             walletAddress={selectedWallet}
             dispatch={dispatch}
             groups={groups}
+            paymentsFolderId={paymentsFolderId}
           />
         )}
       </div>

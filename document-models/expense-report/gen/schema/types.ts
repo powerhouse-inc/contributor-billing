@@ -1,4 +1,4 @@
-export type Maybe<T> = T | null;
+export type Maybe<T> = T | null | undefined;
 export type InputMaybe<T> = T | null | undefined;
 export type Exact<T extends { [key: string]: unknown }> = {
   [K in keyof T]: T[K];
@@ -25,6 +25,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
+  Address: { input: `${string}:0x${string}`; output: `${string}:0x${string}` };
   Amount: {
     input: { unit?: string; value?: number };
     output: { unit?: string; value?: number };
@@ -44,6 +45,7 @@ export type Scalars = {
   Amount_Money: { input: number; output: number };
   Amount_Percentage: { input: number; output: number };
   Amount_Tokens: { input: number; output: number };
+  Attachment: { input: string; output: string };
   Currency: { input: string; output: string };
   Date: { input: string; output: string };
   DateTime: { input: string; output: string };
@@ -53,6 +55,7 @@ export type Scalars = {
   OLabel: { input: string; output: string };
   PHID: { input: string; output: string };
   URL: { input: string; output: string };
+  Unknown: { input: unknown; output: unknown };
   Upload: { input: File; output: File };
 };
 
@@ -78,11 +81,13 @@ export type AddWalletInput = {
 };
 
 export type ExpenseReportState = {
+  endDate: Maybe<Scalars["DateTime"]["output"]>;
   groups: Array<LineItemGroup>;
   ownerId: Maybe<Scalars["PHID"]["output"]>;
   periodEnd: Maybe<Scalars["DateTime"]["output"]>;
   periodStart: Maybe<Scalars["DateTime"]["output"]>;
-  status: ExpenseReportStatus | `${ExpenseReportStatus}`;
+  startDate: Maybe<Scalars["DateTime"]["output"]>;
+  status: ExpenseReportStatus;
   wallets: Array<Wallet>;
 };
 
@@ -170,12 +175,17 @@ export type SetPeriodEndInput = {
   periodEnd: Scalars["DateTime"]["input"];
 };
 
+export type SetPeriodInput = {
+  endDate?: InputMaybe<Scalars["DateTime"]["input"]>;
+  startDate?: InputMaybe<Scalars["DateTime"]["input"]>;
+};
+
 export type SetPeriodStartInput = {
   periodStart: Scalars["DateTime"]["input"];
 };
 
 export type SetStatusInput = {
-  status: ExpenseReportStatusInput | `${ExpenseReportStatusInput}`;
+  status: ExpenseReportStatusInput;
 };
 
 export type UpdateLineItemGroupInput = {

@@ -3,25 +3,28 @@ import {
   SetReportConfigInputSchema,
   SetAccountsDocumentInputSchema,
   SetPeriodInputSchema,
-  SetOwnerIdInputSchema,
+  AddOwnerIdInputSchema,
   SetPeriodStartInputSchema,
   SetPeriodEndInputSchema,
+  RemoveOwnerIdInputSchema,
 } from "../schema/zod.js";
 import type {
   SetReportConfigInput,
   SetAccountsDocumentInput,
   SetPeriodInput,
-  SetOwnerIdInput,
+  AddOwnerIdInput,
   SetPeriodStartInput,
   SetPeriodEndInput,
+  RemoveOwnerIdInput,
 } from "../types.js";
 import type {
   SetReportConfigAction,
   SetAccountsDocumentAction,
   SetPeriodAction,
-  SetOwnerIdAction,
+  AddOwnerIdAction,
   SetPeriodStartAction,
   SetPeriodEndAction,
+  RemoveOwnerIdAction,
 } from "./actions.js";
 
 export const setReportConfig = (input: SetReportConfigInput) =>
@@ -51,12 +54,12 @@ export const setPeriod = (input: SetPeriodInput) =>
     "global",
   );
 
-export const setOwnerId = (input: SetOwnerIdInput) =>
-  createAction<SetOwnerIdAction>(
-    "SET_OWNER_ID",
+export const addOwnerId = (input: AddOwnerIdInput) =>
+  createAction<AddOwnerIdAction>(
+    "ADD_OWNER_ID",
     { ...input },
     undefined,
-    SetOwnerIdInputSchema,
+    AddOwnerIdInputSchema,
     "global",
   );
 
@@ -75,5 +78,14 @@ export const setPeriodEnd = (input: SetPeriodEndInput) =>
     { ...input },
     undefined,
     SetPeriodEndInputSchema,
+    "global",
+  );
+
+export const removeOwnerId = (input: RemoveOwnerIdInput) =>
+  createAction<RemoveOwnerIdAction>(
+    "REMOVE_OWNER_ID",
+    { ...input },
+    undefined,
+    RemoveOwnerIdInputSchema,
     "global",
   );

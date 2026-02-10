@@ -1,15 +1,18 @@
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import {
+  useDocumentById,
   useDocumentsInSelectedDrive,
   useDocumentsInSelectedFolder,
-  useDocumentById,
   useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import type {
-  SnapshotReportDocument,
   SnapshotReportAction,
+  SnapshotReportDocument,
 } from "@powerhousedao/contributor-billing/document-models/snapshot-report";
-import { isSnapshotReportDocument } from "./gen/document-schema.js";
+import {
+  assertIsSnapshotReportDocument,
+  isSnapshotReportDocument,
+} from "./gen/document-schema.js";
 
 /** Hook to get a SnapshotReport document by its id */
 export function useSnapshotReportDocumentById(
@@ -23,12 +26,14 @@ export function useSnapshotReportDocumentById(
 }
 
 /** Hook to get the selected SnapshotReport document */
-export function useSelectedSnapshotReportDocument():
-  | [SnapshotReportDocument, DocumentDispatch<SnapshotReportAction>]
-  | [undefined, undefined] {
+export function useSelectedSnapshotReportDocument(): [
+  SnapshotReportDocument,
+  DocumentDispatch<SnapshotReportAction>,
+] {
   const [document, dispatch] = useSelectedDocument();
-  if (!isSnapshotReportDocument(document)) return [undefined, undefined];
-  return [document, dispatch];
+
+  assertIsSnapshotReportDocument(document);
+  return [document, dispatch] as const;
 }
 
 /** Hook to get all SnapshotReport documents in the selected drive */

@@ -7,16 +7,12 @@ import { toast } from "@powerhousedao/design-system/connect";
 import { uploadPdfChunked } from "./uploadPdfChunked.js";
 import { getCountryCodeFromName, mapChainNameToConfig } from "./utils/utils.js";
 import { LoaderCircle } from "lucide-react";
+import { getGraphQLUrl } from "../shared/graphql.js";
 
-let GRAPHQL_URL = "http://localhost:4001/graphql";
-
-if (!window.document.baseURI.includes("localhost")) {
-  GRAPHQL_URL = "https://switchboard-staging.powerhouse.xyz/graphql";
-}
+const GRAPHQL_URL = getGraphQLUrl();
 
 export async function loadPDFFile({
   file,
-  dispatch,
 }: {
   file: File;
   dispatch: (action: InvoiceAction) => void;

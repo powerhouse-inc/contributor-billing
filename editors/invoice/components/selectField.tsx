@@ -97,7 +97,7 @@ const STATUS_OPTIONS_MAP = [
 ];
 
 export const SelectField = (props: SelectFieldProps) => {
-  const { options, value: status, onChange } = props;
+  const { value: status, onChange } = props;
   const [selectKey, setSelectKey] = useState(0);
 
   // Determine what options to show

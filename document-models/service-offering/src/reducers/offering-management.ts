@@ -1,3 +1,8 @@
+import {
+  TemplateAlreadySelectedError,
+  NoTemplateSelectedError,
+  TemplateMismatchError,
+} from "../../gen/offering-management/error.js";
 import type { ServiceOfferingOfferingManagementOperations } from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 export const serviceOfferingOfferingManagementOperations: ServiceOfferingOfferingManagementOperations =
@@ -47,6 +52,14 @@ export const serviceOfferingOfferingManagementOperations: ServiceOfferingOfferin
       if (audienceIndex !== -1) {
         state.targetAudiences.splice(audienceIndex, 1);
       }
+      state.lastModified = action.input.lastModified;
+    },
+    setSetupServicesOperation(state, action) {
+      state.setupServices = action.input.services;
+      state.lastModified = action.input.lastModified;
+    },
+    setRecurringServicesOperation(state, action) {
+      state.recurringServices = action.input.services;
       state.lastModified = action.input.lastModified;
     },
     setFacetTargetOperation(state, action) {
@@ -106,12 +119,27 @@ export const serviceOfferingOfferingManagementOperations: ServiceOfferingOfferin
       }
       state.lastModified = action.input.lastModified;
     },
-    setSetupServicesOperation(state, action) {
-      state.setupServices = action.input.services;
+    selectResourceTemplateOperation(state, action) {
+      if (state.resourceTemplateId) {
+        throw new TemplateAlreadySelectedError(
+          "A resource template has already been selected. Use CHANGE_RESOURCE_TEMPLATE to change it.",
+        );
+      }
+      state.resourceTemplateId = action.input.resourceTemplateId;
       state.lastModified = action.input.lastModified;
     },
-    setRecurringServicesOperation(state, action) {
-      state.recurringServices = action.input.services;
+    changeResourceTemplateOperation(state, action) {
+      if (!state.resourceTemplateId) {
+        throw new NoTemplateSelectedError(
+          "No resource template has been selected yet. Use SELECT_RESOURCE_TEMPLATE first.",
+        );
+      }
+      if (state.resourceTemplateId !== action.input.previousTemplateId) {
+        throw new TemplateMismatchError(
+          "The previous template ID does not match the currently selected template.",
+        );
+      }
+      state.resourceTemplateId = action.input.newTemplateId;
       state.lastModified = action.input.lastModified;
     },
   };

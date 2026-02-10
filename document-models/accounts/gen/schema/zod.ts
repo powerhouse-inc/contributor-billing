@@ -1,19 +1,15 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   AccountEntry,
-  AccountType,
-  AccountTypeInput,
   AccountsState,
   AddAccountInput,
   DeleteAccountInput,
-  KycAmlStatusType,
-  KycAmlStatusTypeInput,
   UpdateAccountInput,
   UpdateKycStatusInput,
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -50,30 +46,7 @@ export const KycAmlStatusTypeInputSchema = z.enum([
 export function AccountEntrySchema(): z.ZodObject<Properties<AccountEntry>> {
   return z.object({
     __typename: z.literal("AccountEntry").optional(),
-    KycAmlStatus: KycAmlStatusTypeSchema.nullable(),
-    account: z.string(),
-    accountTransactionsId: z.string().nullable(),
-    budgetPath: z.string().nullable(),
-    chain: z.array(z.string()).nullable(),
-    id: z.string(),
-    name: z.string(),
-    owners: z.array(z.string()).nullable(),
-    type: AccountTypeSchema,
-  });
-}
-
-export function AccountsStateSchema(): z.ZodObject<Properties<AccountsState>> {
-  return z.object({
-    __typename: z.literal("AccountsState").optional(),
-    accounts: z.array(AccountEntrySchema()),
-  });
-}
-
-export function AddAccountInputSchema(): z.ZodObject<
-  Properties<AddAccountInput>
-> {
-  return z.object({
-    KycAmlStatus: z.lazy(() => KycAmlStatusTypeInputSchema.nullish()),
+    KycAmlStatus: KycAmlStatusTypeSchema.nullish(),
     account: z.string(),
     accountTransactionsId: z.string().nullish(),
     budgetPath: z.string().nullish(),
@@ -81,7 +54,30 @@ export function AddAccountInputSchema(): z.ZodObject<
     id: z.string(),
     name: z.string(),
     owners: z.array(z.string()).nullish(),
-    type: z.lazy(() => AccountTypeInputSchema),
+    type: AccountTypeSchema,
+  });
+}
+
+export function AccountsStateSchema(): z.ZodObject<Properties<AccountsState>> {
+  return z.object({
+    __typename: z.literal("AccountsState").optional(),
+    accounts: z.array(z.lazy(() => AccountEntrySchema())),
+  });
+}
+
+export function AddAccountInputSchema(): z.ZodObject<
+  Properties<AddAccountInput>
+> {
+  return z.object({
+    KycAmlStatus: KycAmlStatusTypeInputSchema.nullish(),
+    account: z.string(),
+    accountTransactionsId: z.string().nullish(),
+    budgetPath: z.string().nullish(),
+    chain: z.array(z.string()).nullish(),
+    id: z.string(),
+    name: z.string(),
+    owners: z.array(z.string()).nullish(),
+    type: AccountTypeInputSchema,
   });
 }
 
@@ -97,7 +93,7 @@ export function UpdateAccountInputSchema(): z.ZodObject<
   Properties<UpdateAccountInput>
 > {
   return z.object({
-    KycAmlStatus: z.lazy(() => KycAmlStatusTypeInputSchema.nullish()),
+    KycAmlStatus: KycAmlStatusTypeInputSchema.nullish(),
     account: z.string().nullish(),
     accountTransactionsId: z.string().nullish(),
     budgetPath: z.string().nullish(),
@@ -105,7 +101,7 @@ export function UpdateAccountInputSchema(): z.ZodObject<
     id: z.string(),
     name: z.string().nullish(),
     owners: z.array(z.string()).nullish(),
-    type: z.lazy(() => AccountTypeInputSchema.nullish()),
+    type: AccountTypeInputSchema.nullish(),
   });
 }
 
@@ -113,7 +109,7 @@ export function UpdateKycStatusInputSchema(): z.ZodObject<
   Properties<UpdateKycStatusInput>
 > {
   return z.object({
-    KycAmlStatus: z.lazy(() => KycAmlStatusTypeInputSchema),
+    KycAmlStatus: KycAmlStatusTypeInputSchema,
     id: z.string(),
   });
 }

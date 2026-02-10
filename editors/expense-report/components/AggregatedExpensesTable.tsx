@@ -27,8 +27,6 @@ interface LineItemWithGroupInfo extends LineItem {
 export function AggregatedExpensesTable({
   wallets,
   groups,
-  periodStart,
-  periodEnd,
   dispatch,
 }: AggregatedExpensesTableProps) {
   // State for active tab (selected wallet)
@@ -198,15 +196,6 @@ export function AggregatedExpensesTable({
   };
 
   // Format period for title
-  const periodTitle = useMemo(() => {
-    if (!periodStart) return "Breakdown";
-
-    const date = new Date(periodStart);
-    const month = date.toLocaleDateString("en-US", { month: "short" });
-    const year = date.getFullYear();
-
-    return `${month} ${year} Breakdown`;
-  }, [periodStart]);
 
   // Create a map of groups with their parent info
   const groupsMap = useMemo(() => {
@@ -286,7 +275,7 @@ export function AggregatedExpensesTable({
       items.push({
         lineItemId: item.id || "",
         groupId: item.group || "uncategorized",
-        groupLabel: item.groupLabel || "Uncategorised",
+        groupLabel: item.groupLabel || "Uncategorized",
         parentGroupId: item.parentGroupId,
         parentGroupLabel: item.parentGroupLabel,
         budget: item.budget || 0,
@@ -507,7 +496,7 @@ export function AggregatedExpensesTable({
                 </div>
               </th>
               <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Mthly Budget
+                Budget Allocation
               </th>
               <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Forecast
@@ -537,7 +526,7 @@ export function AggregatedExpensesTable({
               const subtotals = calculateSubtotal(items);
               const parentLabel =
                 parentKey === "uncategorized"
-                  ? "Uncategorised"
+                  ? "Uncategorized"
                   : items[0]?.parentGroupLabel || "Other";
 
               return (

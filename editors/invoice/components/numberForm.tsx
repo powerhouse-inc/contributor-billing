@@ -15,9 +15,6 @@ interface NumberFormProps {
 export const NumberForm = ({
   number,
   precision,
-  min,
-  max,
-  pattern,
   handleInputChange,
   placeholder,
   className,

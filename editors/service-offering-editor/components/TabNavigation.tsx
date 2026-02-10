@@ -16,8 +16,8 @@ interface Tab {
 const tabs: Tab[] = [
   {
     id: "scope-facets",
-    label: "Scope & Facets",
-    accentColor: "violet",
+    label: "Resource Template",
+    accentColor: "teal",
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -25,10 +25,7 @@ const tabs: Tab[] = [
         stroke="currentColor"
         strokeWidth="1.75"
       >
-        <circle cx="12" cy="8" r="3" />
-        <circle cx="6" cy="16" r="3" />
-        <circle cx="18" cy="16" r="3" />
-        <path d="M12 11v2M9 14l-1.5 1M15 14l1.5 1" />
+        <path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
       </svg>
     ),
   },
@@ -312,6 +309,20 @@ const styles = `
 
   .so-tabs__item--active[data-accent="violet"] .so-tabs__label {
     color: var(--so-violet-700);
+    font-weight: 600;
+  }
+
+  .so-tabs__item--active[data-accent="teal"] .so-tabs__icon-ring {
+    background: #ccfbf1;
+    box-shadow: 0 0 0 4px #f0fdfa, 0 4px 12px rgba(20, 184, 166, 0.25);
+  }
+
+  .so-tabs__item--active[data-accent="teal"] .so-tabs__icon {
+    color: #0d9488;
+  }
+
+  .so-tabs__item--active[data-accent="teal"] .so-tabs__label {
+    color: #0f766e;
     font-weight: 600;
   }
 

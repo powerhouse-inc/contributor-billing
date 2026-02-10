@@ -160,9 +160,16 @@ export const initialGlobalState: ExpenseReportGlobalState = {
       label: "Internal Transfers",
       parentId: null,
     },
+    {
+      id: "121482a1-b69f-4511-g46f-267c24450238",
+      label: "Uncategorized",
+      parentId: null,
+    },
   ],
   periodStart: null,
   periodEnd: null,
+  startDate: null,
+  endDate: null,
 };
 export const initialLocalState: ExpenseReportLocalState = {};
 

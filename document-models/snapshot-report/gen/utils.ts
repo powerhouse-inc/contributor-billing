@@ -21,7 +21,7 @@ import {
 } from "./document-schema.js";
 
 export const initialGlobalState: SnapshotReportGlobalState = {
-  ownerId: null,
+  ownerIds: [],
   accountsDocumentId: null,
   startDate: null,
   endDate: null,

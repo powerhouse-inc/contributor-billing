@@ -1,13 +1,14 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type SetReportConfigAction,
-  type SetAccountsDocumentAction,
-  type SetPeriodAction,
-  type SetOwnerIdAction,
-  type SetPeriodStartAction,
-  type SetPeriodEndAction,
+import type {
+  SetReportConfigAction,
+  SetAccountsDocumentAction,
+  SetPeriodAction,
+  AddOwnerIdAction,
+  SetPeriodStartAction,
+  SetPeriodEndAction,
+  RemoveOwnerIdAction,
 } from "./actions.js";
-import { type SnapshotReportState } from "../types.js";
+import type { SnapshotReportState } from "../types.js";
 
 export interface SnapshotReportConfigurationOperations {
   setReportConfigOperation: (
@@ -25,9 +26,9 @@ export interface SnapshotReportConfigurationOperations {
     action: SetPeriodAction,
     dispatch?: SignalDispatch,
   ) => void;
-  setOwnerIdOperation: (
+  addOwnerIdOperation: (
     state: SnapshotReportState,
-    action: SetOwnerIdAction,
+    action: AddOwnerIdAction,
     dispatch?: SignalDispatch,
   ) => void;
   setPeriodStartOperation: (
@@ -38,6 +39,11 @@ export interface SnapshotReportConfigurationOperations {
   setPeriodEndOperation: (
     state: SnapshotReportState,
     action: SetPeriodEndAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  removeOwnerIdOperation: (
+    state: SnapshotReportState,
+    action: RemoveOwnerIdAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

@@ -39,6 +39,7 @@ import {
 } from "../../../document-models/account-transactions/index.js";
 import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
 import { alchemyIntegration } from "../../account-transactions-editor/alchemyIntegration.js";
+import { isSwapAddress } from "../../snapshot-report-editor/utils/flowTypeCalculations.js";
 
 interface WalletsTableProps {
   wallets: Wallet[];
@@ -57,6 +58,7 @@ export function WalletsTable({
   periodEnd,
   dispatch,
 }: WalletsTableProps) {
+  const documents = useDocumentsInSelectedDrive();
   const [selectedAccountId, setSelectedAccountId] = useState<string>("");
   const [walletError, setWalletError] = useState("");
   const [editingWallet, setEditingWallet] = useState<string | null>(null);
@@ -139,6 +141,20 @@ export function WalletsTable({
       return;
     }
 
+    // Check if transactions have already been added to prevent duplicates
+    const existingTransactions =
+      (pendingDocument?.state as any)?.global?.transactions || [];
+    if (existingTransactions.length > 0) {
+      console.log(
+        "[WalletsTable] Transactions already exist in document, skipping duplicate processing",
+        existingTransactions.length,
+      );
+      // Clear pending state since transactions are already there
+      setPendingTxDoc(null);
+      setIsProcessing(false);
+      return;
+    }
+
     // Mark as processing and save current pending doc
     setIsProcessing(true);
     const currentPendingDoc = pendingTxDoc;
@@ -218,6 +234,7 @@ export function WalletsTable({
 
         if (result.success && result.transactions.length > 0) {
           // Step 3: Add each transaction using the document's dispatch function
+          // Deduplication is handled by the reducer based on uniqueId
           setTxProgress({
             show: true,
             step: "Adding Transactions",
@@ -227,6 +244,7 @@ export function WalletsTable({
           });
 
           let addedCount = 0;
+          let skippedCount = 0;
 
           for (const txData of result.transactions) {
             // Validate required fields
@@ -235,6 +253,7 @@ export function WalletsTable({
                 "[WalletsTable] Skipping invalid transaction:",
                 txData,
               );
+              skippedCount++;
               continue;
             }
 
@@ -269,6 +288,7 @@ export function WalletsTable({
               txHash: txData.txHash,
               token: txData.token,
               blockNumber: txData.blockNumber,
+              uniqueId: txData.uniqueId || null,
               accountingPeriod: txData.accountingPeriod,
               direction:
                 (txData.direction as "INFLOW" | "OUTFLOW") || "OUTFLOW",
@@ -279,6 +299,8 @@ export function WalletsTable({
               console.log("[WalletsTable] First transaction action:", txAction);
             }
 
+            // Dispatch transaction - reducer will prevent duplicates based on uniqueId
+            // If uniqueId already exists, the reducer will throw an error which is stored in the operation
             pendingDocDispatch(txAction);
             addedCount++;
 
@@ -292,13 +314,13 @@ export function WalletsTable({
                 details: `Added ${addedCount} of ${result.transactions.length} transactions...`,
               });
               console.log(
-                `[WalletsTable] Added ${addedCount}/${result.transactions.length} transactions`,
+                `[WalletsTable] Added ${addedCount}/${result.transactions.length} transactions (${skippedCount} skipped)`,
               );
             }
           }
 
           console.log(
-            `[WalletsTable] Successfully added all ${addedCount} transactions`,
+            `[WalletsTable] Successfully added ${addedCount} transactions (${skippedCount} skipped as duplicates or invalid)`,
           );
 
           // Verify operations were added
@@ -393,65 +415,9 @@ export function WalletsTable({
     };
 
     fetchAndAddTransactions();
-  }, [pendingTxDoc, pendingDocument, pendingDocDispatch, isProcessing]);
-
-  const handleAddWallet = () => {
-    if (!selectedAccountId) {
-      setWalletError("Please select an account");
-      return;
-    }
-
-    // Find the selected account from accountEntries
-    const selectedAccount = accountEntries.find(
-      (acc: any) => acc.id === selectedAccountId,
-    );
-
-    if (!selectedAccount) {
-      setWalletError("Selected account not found");
-      return;
-    }
-
-    // Check if wallet already exists
-    const walletExists = wallets.some(
-      (w) => w.wallet === selectedAccount.account,
-    );
-
-    if (walletExists) {
-      setWalletError("This account is already added to the report");
-      return;
-    }
-
-    setAddingWallet(true);
-    setWalletError("");
-
-    try {
-      // Add the wallet to the expense report
-      dispatch(
-        actions.addWallet({
-          wallet: selectedAccount.account,
-          name: selectedAccount.name || undefined,
-        }),
-      );
-
-      // Immediately update with the linked document IDs
-      dispatch(
-        actions.updateWallet({
-          address: selectedAccount.account,
-          accountDocumentId: selectedAccount.accountsDocumentId || undefined,
-          accountTransactionsDocumentId:
-            selectedAccount.accountTransactionsId || undefined,
-        }),
-      );
-
-      // Clear selection
-      setSelectedAccountId("");
-    } catch (error) {
-      console.error("Error adding wallet:", error);
-      setWalletError("Failed to add wallet. Please try again.");
-    } finally {
-      setAddingWallet(false);
-    }
-  };
+    // Only depend on pendingTxDoc and isProcessing - not on pendingDocument or pendingDocDispatch
+    // to prevent re-running when transactions are added
+  }, [pendingTxDoc?.documentId, isProcessing]);
 
   // Validate Ethereum address
   const validateEthAddress = useCallback((address: string): boolean => {
@@ -833,9 +799,9 @@ export function WalletsTable({
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Wallet
                   </th>
-                  {/* Monthly Budget column - hidden for now, may be needed in the future
+                  {/* Budget Allocation column - hidden for now, may be needed in the future
                   <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
-                    Monthly Budget
+                    Budget Allocation
                   </th>
                   */}
                   {/* Forecast column - hidden for now, may be needed in the future
@@ -971,7 +937,7 @@ export function WalletsTable({
                           </div>
                         )}
                       </td>
-                      {/* Monthly Budget column - hidden for now, may be needed in the future
+                      {/* Budget Allocation column - hidden for now, may be needed in the future
                       <td className="px-3 py-3 whitespace-nowrap text-right text-sm text-gray-900 dark:text-white">
                         {formatCurrency(totals.budget)}
                       </td>
