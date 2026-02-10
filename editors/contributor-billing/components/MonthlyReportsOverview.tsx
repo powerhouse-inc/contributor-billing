@@ -254,16 +254,16 @@ export function MonthlyReportsOverview({
           );
         }
 
-              // Open the created report
-              setSelectedNode(createdNode.id);
-              // Update sidebar active node to show the new document as selected
-              onActiveNodeIdChange?.(createdNode.id);
-            } finally {
-              setIsCreating(false);
-            }
-          },
-          [driveId, isCreating, onActiveNodeIdChange],
-        );
+        // Open the created report
+        setSelectedNode(createdNode.id);
+        // Update sidebar active node to show the new document as selected
+        onActiveNodeIdChange?.(createdNode.id);
+      } finally {
+        setIsCreating(false);
+      }
+    },
+    [driveId, isCreating, onActiveNodeIdChange],
+  );
 
   // Add Month button component (reused across states)
   const addMonthButton = onCreateMonth && (

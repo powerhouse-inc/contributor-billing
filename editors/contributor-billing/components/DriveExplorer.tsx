@@ -44,7 +44,6 @@ export function DriveExplorer({ children }: EditorProps) {
     }
 
     prevShowDocumentEditorRef.current = isShowingDocument;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showDocumentEditor]);
 
   const handleFolderSelect = (folderInfo: SelectedFolderInfo | null) => {

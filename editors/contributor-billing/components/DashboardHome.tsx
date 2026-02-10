@@ -11,10 +11,12 @@ import {
   useDocumentsInSelectedDrive,
   useSelectedDrive,
   setSelectedNode,
+  isFileNodeKind,
 } from "@powerhousedao/reactor-browser";
 import { useBillingFolderStructure } from "../hooks/useBillingFolderStructure.js";
 import type { SelectedFolderInfo } from "./FolderTree.js";
 import type { OperationalHubProfileDocument } from "../../../document-models/operational-hub-profile/gen/types.js";
+import type { AccountsDocument } from "../../../document-models/accounts/gen/types.js";
 import { CreateHubProfileModal } from "./CreateHubProfileModal.js";
 
 interface DashboardHomeProps {
@@ -28,14 +30,15 @@ interface DashboardHomeProps {
 export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
   const documentsInDrive = useDocumentsInSelectedDrive();
   const [selectedDrive] = useSelectedDrive();
-  const { billingFolder, monthFolders } = useBillingFolderStructure();
+  const { billingFolder, monthFolders, paymentsFolderIds } =
+    useBillingFolderStructure();
 
   // Check if accounts document exists
   const accountsDocument = useMemo(() => {
     if (!documentsInDrive) return null;
     return documentsInDrive.find(
       (doc) => doc.header.documentType === "powerhouse/accounts",
-    );
+    ) as AccountsDocument | undefined;
   }, [documentsInDrive]);
 
   // Find operational hub profile document for name
@@ -48,6 +51,90 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
 
   const hubName =
     operationalHubProfileDocument?.state?.global?.name || "Operational Hub";
+
+  // Computed stats for action cards
+  const profileStats = useMemo(() => {
+    const profile = operationalHubProfileDocument?.state?.global;
+    if (!profile) return null;
+    const hasTeam = !!profile.operatorTeam;
+    const subteamCount = profile.subteams?.length ?? 0;
+    const parts: string[] = [];
+    parts.push(hasTeam ? "Operator team set" : "No operator team");
+    if (subteamCount > 0) {
+      parts.push(`${subteamCount} subteam${subteamCount > 1 ? "s" : ""}`);
+    }
+    return parts.join(" · ");
+  }, [operationalHubProfileDocument]);
+
+  const accountStats = useMemo(() => {
+    const accounts = accountsDocument?.state?.global?.accounts;
+    if (!accounts || accounts.length === 0) return null;
+    const counts: Record<string, number> = {};
+    for (const acct of accounts) {
+      const t = acct.type.toLowerCase();
+      counts[t] = (counts[t] ?? 0) + 1;
+    }
+    const entries = Object.entries(counts);
+    if (entries.length <= 3) {
+      return entries.map(([type, count]) => `${count} ${type}`).join(", ");
+    }
+    return `${accounts.length} accounts`;
+  }, [accountsDocument]);
+
+  const billingStats = useMemo(() => {
+    if (!selectedDrive || !documentsInDrive) return null;
+    const monthCount = monthFolders.size;
+    if (monthCount === 0) return null;
+
+    const nodes = selectedDrive.state.global.nodes;
+    const invoiceIds = new Set(
+      nodes
+        .filter(
+          (n) =>
+            isFileNodeKind(n) &&
+            paymentsFolderIds.has(n.parentFolder || "") &&
+            n.documentType === "powerhouse/invoice",
+        )
+        .map((n) => n.id),
+    );
+
+    const invoices = documentsInDrive.filter(
+      (doc) =>
+        doc.header.documentType === "powerhouse/invoice" &&
+        invoiceIds.has(doc.header.id),
+    );
+
+    if (invoices.length === 0) {
+      return `${monthCount} month${monthCount > 1 ? "s" : ""} configured`;
+    }
+
+    let pendingCount = 0;
+    let paidCount = 0;
+    for (const invoice of invoices) {
+      const status = (
+        (invoice.state as { global?: { status?: string } }).global?.status ?? ""
+      ).toUpperCase();
+      if (
+        status === "PAYMENTSENT" ||
+        status === "PAYMENTRECEIVED" ||
+        status === "PAYMENTCLOSED"
+      ) {
+        paidCount++;
+      } else if (status !== "REJECTED" && status !== "CANCELLED") {
+        pendingCount++;
+      }
+    }
+
+    const parts = [
+      `${monthCount} month${monthCount > 1 ? "s" : ""}`,
+      `${invoices.length} invoice${invoices.length > 1 ? "s" : ""}`,
+    ];
+    const statusParts: string[] = [];
+    if (pendingCount > 0) statusParts.push(`${pendingCount} pending`);
+    if (paidCount > 0) statusParts.push(`${paidCount} paid`);
+    if (statusParts.length > 0) parts.push(statusParts.join(", "));
+    return parts.join(" · ");
+  }, [selectedDrive, documentsInDrive, monthFolders.size, paymentsFolderIds]);
 
   // State for custom create hub profile modal
   const [showCreateHubModal, setShowCreateHubModal] = useState(false);
@@ -228,7 +315,7 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
                 <h3 className="font-semibold text-gray-900">Profile</h3>
                 <p className="text-sm text-gray-500">
                   {operationalHubProfileDocument
-                    ? "View and update your hub profile"
+                    ? profileStats || "View and update your hub profile"
                     : "Set up your hub profile"}
                 </p>
               </div>
@@ -262,7 +349,7 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
                 <h3 className="font-semibold text-gray-900">Accounts</h3>
                 <p className="text-sm text-gray-500">
                   {accountsDocument
-                    ? "View and manage accounts"
+                    ? accountStats || "View and manage accounts"
                     : "Set up your accounts first"}
                 </p>
               </div>
@@ -291,9 +378,7 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
               <div>
                 <h3 className="font-semibold text-gray-900">Billing</h3>
                 <p className="text-sm text-gray-500">
-                  {monthFolders.size > 0
-                    ? `${monthFolders.size} month${monthFolders.size > 1 ? "s" : ""} configured`
-                    : "Manage monthly billing cycles"}
+                  {billingStats || "Manage monthly billing cycles"}
                 </p>
               </div>
             </div>
