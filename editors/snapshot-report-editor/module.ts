@@ -1,7 +1,8 @@
 import type { EditorModule } from "document-model";
 import { lazy } from "react";
 
-export const SnapshotReportEditor: EditorModule = {
+/** Document editor module for the "["powerhouse/snapshot-report"]" document type */
+export const SnapshotReport: EditorModule = {
   Component: lazy(() => import("./editor.js")),
   documentTypes: ["powerhouse/snapshot-report"],
   config: {

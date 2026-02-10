@@ -1,7 +1,10 @@
 import type { EditorProps } from "document-model";
 import { ToastContainer } from "@powerhousedao/design-system/connect";
+import { useState, useEffect, useRef } from "react";
 import { DriveContents } from "./DriveContents.js";
-import { FolderTree } from "./FolderTree.js";
+import { FolderTree, type SelectedFolderInfo } from "./FolderTree.js";
+import { FolderTreeErrorBoundary } from "./FolderTreeErrorBoundary.js";
+import { DocumentDropZone } from "./DocumentDropZone.js";
 
 /**
  * Main drive explorer component for Contributor Billing.
@@ -11,10 +14,58 @@ export function DriveExplorer({ children }: EditorProps) {
   // if a document is selected then its editor will be passed as children
   const showDocumentEditor = !!children;
 
+  // Track which folder is selected for content routing
+  const [selectedFolder, setSelectedFolder] =
+    useState<SelectedFolderInfo | null>(null);
+
+  // Track active node in sidebar for visual selection sync
+  // Empty string means no selection (home page)
+  const [activeNodeId, setActiveNodeId] = useState<string>("");
+
+  // Remember the last folder before opening a document so we can restore it when closing
+  const lastFolderRef = useRef<SelectedFolderInfo | null>(null);
+  const prevShowDocumentEditorRef = useRef(showDocumentEditor);
+
+  useEffect(() => {
+    const wasShowingDocument = prevShowDocumentEditorRef.current;
+    const isShowingDocument = showDocumentEditor;
+
+    if (isShowingDocument && !wasShowingDocument) {
+      // Transitioning TO document editor - save current folder
+      lastFolderRef.current = selectedFolder;
+    } else if (!isShowingDocument && wasShowingDocument) {
+      // Transitioning FROM document editor - restore last folder
+      if (lastFolderRef.current) {
+        setSelectedFolder(lastFolderRef.current);
+        if (lastFolderRef.current.folderId) {
+          setActiveNodeId(lastFolderRef.current.folderId);
+        }
+      }
+    }
+
+    prevShowDocumentEditorRef.current = isShowingDocument;
+  }, [showDocumentEditor]);
+
+  const handleFolderSelect = (folderInfo: SelectedFolderInfo | null) => {
+    setSelectedFolder(folderInfo);
+    // Only update sidebar selection when explicitly selecting a folder with a valid ID
+    // When folderInfo is null (opening a document), let the sidebar keep its current selection
+    // When folderId is empty (e.g., billing folder doesn't exist yet), don't update sidebar
+    if (folderInfo && folderInfo.folderId) {
+      setActiveNodeId(folderInfo.folderId);
+    }
+  };
+
   return (
     <div className="flex h-full w-full overflow-hidden">
       {/* Sidebar - resizable, managed by Sidebar component */}
-      <FolderTree />
+      <FolderTreeErrorBoundary>
+        <FolderTree
+          onFolderSelect={handleFolderSelect}
+          activeNodeId={activeNodeId}
+          onActiveNodeIdChange={setActiveNodeId}
+        />
+      </FolderTreeErrorBoundary>
 
       {/* Toast notifications */}
       <ToastContainer
@@ -31,16 +82,20 @@ export function DriveExplorer({ children }: EditorProps) {
       />
 
       {/* Main content area - takes remaining space, scrollable */}
-      <div className="flex-1 min-w-0 h-full overflow-auto">
-        {/* Conditional rendering: Document editor or Operational Hub */}
+      <DocumentDropZone className="flex-1 min-w-0 h-full overflow-x-hidden overflow-y-auto">
+        {/* Conditional rendering: Document editor or folder content */}
         {showDocumentEditor ? (
           /* Document editor view */
           <div className="min-h-full">{children}</div>
         ) : (
-          /* Operational Hub view */
-          <DriveContents />
+          /* Folder content view */
+          <DriveContents
+            selectedFolder={selectedFolder}
+            onFolderSelect={handleFolderSelect}
+            onActiveNodeIdChange={setActiveNodeId}
+          />
         )}
-      </div>
+      </DocumentDropZone>
     </div>
   );
 }

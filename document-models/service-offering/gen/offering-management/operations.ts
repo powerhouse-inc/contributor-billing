@@ -1,19 +1,21 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type UpdateOfferingInfoAction,
-  type UpdateOfferingStatusAction,
-  type SetOperatorAction,
-  type SetOfferingIdAction,
-  type AddTargetAudienceAction,
-  type RemoveTargetAudienceAction,
-  type SetFacetTargetAction,
-  type RemoveFacetTargetAction,
-  type AddFacetOptionAction,
-  type RemoveFacetOptionAction,
-  type SetSetupServicesAction,
-  type SetRecurringServicesAction,
+import type {
+  UpdateOfferingInfoAction,
+  UpdateOfferingStatusAction,
+  SetOperatorAction,
+  SetOfferingIdAction,
+  AddTargetAudienceAction,
+  RemoveTargetAudienceAction,
+  SetFacetTargetAction,
+  RemoveFacetTargetAction,
+  AddFacetOptionAction,
+  RemoveFacetOptionAction,
+  SetSetupServicesAction,
+  SetRecurringServicesAction,
+  SelectResourceTemplateAction,
+  ChangeResourceTemplateAction,
 } from "./actions.js";
-import { type ServiceOfferingState } from "../types.js";
+import type { ServiceOfferingState } from "../types.js";
 
 export interface ServiceOfferingOfferingManagementOperations {
   updateOfferingInfoOperation: (
@@ -74,6 +76,16 @@ export interface ServiceOfferingOfferingManagementOperations {
   setRecurringServicesOperation: (
     state: ServiceOfferingState,
     action: SetRecurringServicesAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  selectResourceTemplateOperation: (
+    state: ServiceOfferingState,
+    action: SelectResourceTemplateAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  changeResourceTemplateOperation: (
+    state: ServiceOfferingState,
+    action: ChangeResourceTemplateAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

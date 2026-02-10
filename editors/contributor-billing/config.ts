@@ -1,11 +1,14 @@
 import type { PHDriveEditorConfig } from "@powerhousedao/reactor-browser";
 
-/** Editor config for the ContributorBilling */
+/** Editor config for the <%= pascalCaseDriveEditorName %> */
 export const editorConfig: PHDriveEditorConfig = {
-  isDragAndDropEnabled: true,
+  isDragAndDropEnabled: false,
   allowedDocumentTypes: [
     "powerhouse/invoice",
     "powerhouse/billing-statement",
     "powerhouse/expense-report",
+    "powerhouse/accounts",
+    "powerhouse/resource-instance",
+    "powerhouse/subscription-instance",
   ],
 };

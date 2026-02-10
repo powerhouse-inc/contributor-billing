@@ -20,19 +20,25 @@ import {
   Users,
   Folder,
   Camera,
-  Package,
+  Layers,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
 const ICON_SIZE = 16;
 const EXPENSE_REPORTS_FOLDER_NAME = "Expense Reports";
 const SNAPSHOT_REPORTS_FOLDER_NAME = "Snapshot Reports";
+const SERVICE_SUBSCRIPTIONS_FOLDER_NAME = "Service Subscriptions";
+const SERVICES_AND_OFFERINGS_FOLDER_NAME = "Services And Offerings";
+const RESOURCE_TEMPLATES_FOLDER_NAME = "Products";
+const SERVICE_OFFERINGS_FOLDER_NAME = "Service Offerings";
 
 /** Custom view types that don't correspond to document models */
 export type CustomView =
   | "team-members"
   | "expense-reports"
   | "snapshot-reports"
+  | "resources-services"
+  | "service-subscriptions"
   | null;
 
 /**
@@ -43,8 +49,8 @@ export type CustomView =
 const SECTION_TO_DOCUMENT_TYPE: Record<string, string | null> = {
   "builder-profile": "powerhouse/builder-profile",
   "team-members": null, // Uses custom TeamMembers component
-  "service-subscriptions": "powerhouse/service-subscriptions",
-  "service-offering": "powerhouse/service-offering",
+  "service-subscriptions": null, // Uses custom ServiceSubscriptions component
+  "resources-services": null, // Uses custom ResourcesServices component
   "expense-reports": null, // Uses custom ExpenseReports component
   "snapshot-reports": null, // Uses custom SnapshotReports component
 };
@@ -54,6 +60,8 @@ const SECTION_TO_DOCUMENT_TYPE: Record<string, string | null> = {
  */
 const SECTION_TO_CUSTOM_VIEW: Record<string, CustomView> = {
   "team-members": "team-members",
+  "service-subscriptions": "service-subscriptions",
+  "resources-services": "resources-services",
   "expense-reports": "expense-reports",
   "snapshot-reports": "snapshot-reports",
 };
@@ -79,9 +87,9 @@ const BASE_NAVIGATION_SECTIONS: SidebarNode[] = [
     icon: <CreditCard size={ICON_SIZE} />,
   },
   {
-    id: "service-offering",
-    title: "Service Offering",
-    icon: <Package size={ICON_SIZE} />,
+    id: "resources-services",
+    title: "Service Offerings",
+    icon: <Layers size={ICON_SIZE} />,
   },
   {
     id: "expense-reports",
@@ -176,6 +184,53 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
     );
   }, [driveDocument]);
 
+  // Find the "Service Subscriptions" folder in the drive
+  const serviceSubscriptionsFolder = useMemo(() => {
+    if (!driveDocument) return null;
+    const nodes = driveDocument.state.global.nodes;
+    return nodes.find(
+      (node: Node): node is FolderNode =>
+        isFolderNodeKind(node) &&
+        node.name === SERVICE_SUBSCRIPTIONS_FOLDER_NAME,
+    );
+  }, [driveDocument]);
+
+  // Find the "Services And Offerings" parent folder in the drive (at root level)
+  const servicesAndOfferingsFolder = useMemo(() => {
+    if (!driveDocument) return null;
+    const nodes = driveDocument.state.global.nodes;
+    return nodes.find(
+      (node: Node): node is FolderNode =>
+        isFolderNodeKind(node) &&
+        node.name === SERVICES_AND_OFFERINGS_FOLDER_NAME &&
+        !node.parentFolder,
+    );
+  }, [driveDocument]);
+
+  // Find the "Products" folder (inside Services And Offerings folder)
+  const resourceTemplatesFolder = useMemo(() => {
+    if (!driveDocument || !servicesAndOfferingsFolder) return null;
+    const nodes = driveDocument.state.global.nodes;
+    return nodes.find(
+      (node: Node): node is FolderNode =>
+        isFolderNodeKind(node) &&
+        node.name === RESOURCE_TEMPLATES_FOLDER_NAME &&
+        node.parentFolder === servicesAndOfferingsFolder.id,
+    );
+  }, [driveDocument, servicesAndOfferingsFolder]);
+
+  // Find the "Service Offerings" folder (inside Services And Offerings folder)
+  const serviceOfferingsFolder = useMemo(() => {
+    if (!driveDocument || !servicesAndOfferingsFolder) return null;
+    const nodes = driveDocument.state.global.nodes;
+    return nodes.find(
+      (node: Node): node is FolderNode =>
+        isFolderNodeKind(node) &&
+        node.name === SERVICE_OFFERINGS_FOLDER_NAME &&
+        node.parentFolder === servicesAndOfferingsFolder.id,
+    );
+  }, [driveDocument, servicesAndOfferingsFolder]);
+
   // Build a set of all node IDs that are within the Expense Reports folder tree
   const expenseReportsNodeIds = useMemo(() => {
     const nodeIds = new Set<string>();
@@ -222,6 +277,73 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
     return nodeIds;
   }, [snapshotReportsFolder, driveDocument]);
 
+  // Build a set of all node IDs that are within the Service Subscriptions folder tree
+  const serviceSubscriptionsNodeIds = useMemo(() => {
+    const nodeIds = new Set<string>();
+    if (!serviceSubscriptionsFolder || !driveDocument) return nodeIds;
+
+    const allNodes = driveDocument.state.global.nodes;
+
+    // Recursively collect all node IDs within the Service Subscriptions folder
+    const collectNodeIds = (parentId: string) => {
+      nodeIds.add(parentId);
+      for (const node of allNodes) {
+        if (isFolderNodeKind(node) && node.parentFolder === parentId) {
+          collectNodeIds(node.id);
+        } else if (isFileNodeKind(node) && node.parentFolder === parentId) {
+          nodeIds.add(node.id);
+        }
+      }
+    };
+
+    collectNodeIds(serviceSubscriptionsFolder.id);
+    return nodeIds;
+  }, [serviceSubscriptionsFolder, driveDocument]);
+
+  // Build a set of all node IDs that are within the Resource Templates folder tree
+  const resourceTemplatesNodeIds = useMemo(() => {
+    const nodeIds = new Set<string>();
+    if (!resourceTemplatesFolder || !driveDocument) return nodeIds;
+
+    const allNodes = driveDocument.state.global.nodes;
+
+    const collectNodeIds = (parentId: string) => {
+      nodeIds.add(parentId);
+      for (const node of allNodes) {
+        if (isFolderNodeKind(node) && node.parentFolder === parentId) {
+          collectNodeIds(node.id);
+        } else if (isFileNodeKind(node) && node.parentFolder === parentId) {
+          nodeIds.add(node.id);
+        }
+      }
+    };
+
+    collectNodeIds(resourceTemplatesFolder.id);
+    return nodeIds;
+  }, [resourceTemplatesFolder, driveDocument]);
+
+  // Build a set of all node IDs that are within the Service Offerings folder tree
+  const serviceOfferingsNodeIds = useMemo(() => {
+    const nodeIds = new Set<string>();
+    if (!serviceOfferingsFolder || !driveDocument) return nodeIds;
+
+    const allNodes = driveDocument.state.global.nodes;
+
+    const collectNodeIds = (parentId: string) => {
+      nodeIds.add(parentId);
+      for (const node of allNodes) {
+        if (isFolderNodeKind(node) && node.parentFolder === parentId) {
+          collectNodeIds(node.id);
+        } else if (isFileNodeKind(node) && node.parentFolder === parentId) {
+          nodeIds.add(node.id);
+        }
+      }
+    };
+
+    collectNodeIds(serviceOfferingsFolder.id);
+    return nodeIds;
+  }, [serviceOfferingsFolder, driveDocument]);
+
   // Find the builder profile document and get its state
   const builderProfileDocument = useMemo(() => {
     if (!documentsInDrive) return null;
@@ -236,11 +358,13 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
   // Get the isOperator flag from the builder profile state
   const isOperator = useMemo(() => {
     if (!builderProfileDocument) return false;
-    const state = (builderProfileDocument.state as unknown as { global: BuilderProfileState })?.global;
+    const state = (
+      builderProfileDocument.state as unknown as { global: BuilderProfileState }
+    )?.global;
     return state?.isOperator ?? false;
   }, [builderProfileDocument]);
 
-  // Build navigation sections with dynamic expense reports and snapshot reports children
+  // Build navigation sections with dynamic expense reports, snapshot reports, and resources & services children
   const navigationSections = useMemo(() => {
     if (!driveDocument) {
       return BASE_NAVIGATION_SECTIONS;
@@ -258,45 +382,96 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
       ? buildSidebarNodesFromFolder(snapshotReportsFolder.id, allNodes)
       : [];
 
-    // Filter and transform the sections based on isOperator flag
-    return BASE_NAVIGATION_SECTIONS
-      // Hide "Service Offering" when isOperator is false
-      .filter((section) => {
-        if (section.id === "service-offering" && !isOperator) {
-          return false;
-        }
-        return true;
-      })
-      // Transform sections with dynamic content
-      .map((section) => {
-        // Change "Builder Profile" to "Operator Profile" when isOperator is true
-        if (section.id === "builder-profile" && isOperator) {
-          return {
-            ...section,
-            title: "Operator Profile",
-          };
-        }
-        if (
-          section.id === "expense-reports" &&
-          expenseReportsChildren.length > 0
-        ) {
-          return {
-            ...section,
-            children: expenseReportsChildren,
-          };
-        }
-        if (
-          section.id === "snapshot-reports" &&
-          snapshotReportsChildren.length > 0
-        ) {
-          return {
-            ...section,
-            children: snapshotReportsChildren,
-          };
-        }
-        return section;
+    // Build resources & services children (Resource Templates and Service Offerings folders)
+    const resourcesServicesChildren: SidebarNode[] = [];
+    if (resourceTemplatesFolder) {
+      const resourceTemplatesChildren = buildSidebarNodesFromFolder(
+        resourceTemplatesFolder.id,
+        allNodes,
+      );
+      resourcesServicesChildren.push({
+        id: resourceTemplatesFolder.id,
+        title: RESOURCE_TEMPLATES_FOLDER_NAME,
+        icon: <Folder size={ICON_SIZE} />,
+        children:
+          resourceTemplatesChildren.length > 0
+            ? resourceTemplatesChildren
+            : undefined,
       });
-  }, [expenseReportsFolder, snapshotReportsFolder, driveDocument, isOperator]);
+    }
+    if (serviceOfferingsFolder) {
+      const serviceOfferingsChildren = buildSidebarNodesFromFolder(
+        serviceOfferingsFolder.id,
+        allNodes,
+      );
+      resourcesServicesChildren.push({
+        id: serviceOfferingsFolder.id,
+        title: SERVICE_OFFERINGS_FOLDER_NAME,
+        icon: <Folder size={ICON_SIZE} />,
+        children:
+          serviceOfferingsChildren.length > 0
+            ? serviceOfferingsChildren
+            : undefined,
+      });
+    }
+
+    // Filter and transform the sections based on isOperator flag
+    return (
+      BASE_NAVIGATION_SECTIONS
+        // Hide "Resources & Services" when isOperator is false
+        .filter((section) => {
+          if (section.id === "resources-services" && !isOperator) {
+            return false;
+          }
+          return true;
+        })
+        // Transform sections with dynamic content
+        .map((section) => {
+          // Change "Builder Profile" to "Operator Profile" when isOperator is true
+          if (section.id === "builder-profile" && isOperator) {
+            return {
+              ...section,
+              title: "Operator Profile",
+            };
+          }
+          if (
+            section.id === "resources-services" &&
+            resourcesServicesChildren.length > 0
+          ) {
+            return {
+              ...section,
+              children: resourcesServicesChildren,
+            };
+          }
+          if (
+            section.id === "expense-reports" &&
+            expenseReportsChildren.length > 0
+          ) {
+            return {
+              ...section,
+              children: expenseReportsChildren,
+            };
+          }
+          if (
+            section.id === "snapshot-reports" &&
+            snapshotReportsChildren.length > 0
+          ) {
+            return {
+              ...section,
+              children: snapshotReportsChildren,
+            };
+          }
+          return section;
+        })
+    );
+  }, [
+    expenseReportsFolder,
+    snapshotReportsFolder,
+    resourceTemplatesFolder,
+    serviceOfferingsFolder,
+    driveDocument,
+    isOperator,
+  ]);
 
   // Create a map of document type to existing document (first one found)
   const existingDocumentsByType = useMemo(() => {
@@ -359,6 +534,61 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
       return;
     }
 
+    // Check if this is a child node within the Service Subscriptions folder
+    if (serviceSubscriptionsNodeIds.has(node.id)) {
+      // Check if it's a folder or a document
+      const driveNode = driveDocument?.state.global.nodes.find(
+        (n: Node) => n.id === node.id,
+      );
+
+      if (driveNode && isFolderNodeKind(driveNode)) {
+        // It's a folder - navigate to it within the service subscriptions view
+        onCustomViewChange?.("service-subscriptions");
+        setSelectedNode(node.id);
+      } else if (driveNode && isFileNodeKind(driveNode)) {
+        // It's a document - open the document editor
+        onCustomViewChange?.(null);
+        setSelectedNode(node.id);
+      }
+      return;
+    }
+
+    // Check if this is a child node within the Resource Templates folder
+    if (resourceTemplatesNodeIds.has(node.id)) {
+      const driveNode = driveDocument?.state.global.nodes.find(
+        (n: Node) => n.id === node.id,
+      );
+
+      if (driveNode && isFolderNodeKind(driveNode)) {
+        // It's a folder - navigate to it within the resources & services view
+        onCustomViewChange?.("resources-services");
+        setSelectedNode(node.id);
+      } else if (driveNode && isFileNodeKind(driveNode)) {
+        // It's a document - open the document editor
+        onCustomViewChange?.(null);
+        setSelectedNode(node.id);
+      }
+      return;
+    }
+
+    // Check if this is a child node within the Service Offerings folder
+    if (serviceOfferingsNodeIds.has(node.id)) {
+      const driveNode = driveDocument?.state.global.nodes.find(
+        (n: Node) => n.id === node.id,
+      );
+
+      if (driveNode && isFolderNodeKind(driveNode)) {
+        // It's a folder - navigate to it within the resources & services view
+        onCustomViewChange?.("resources-services");
+        setSelectedNode(node.id);
+      } else if (driveNode && isFileNodeKind(driveNode)) {
+        // It's a document - open the document editor
+        onCustomViewChange?.(null);
+        setSelectedNode(node.id);
+      }
+      return;
+    }
+
     // Check if this section has a custom view
     const customView = SECTION_TO_CUSTOM_VIEW[node.id];
     if (customView) {
@@ -391,7 +621,7 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
         nodes={navigationSections}
         activeNodeId={activeNodeId}
         onActiveNodeChange={handleActiveNodeChange}
-        sidebarTitle="Builder Team Admin"
+        sidebarTitle={isOperator ? "Operator Team Admin" : "Builder Team Admin"}
         showSearchBar={false}
         resizable={true}
         allowPinning={false}

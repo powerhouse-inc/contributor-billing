@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { generateId, type EditorProps } from "document-model";
+import { generateId } from "document-model";
 import {
   type InvoiceDocument,
   type ClosureReason,
@@ -13,7 +13,7 @@ import PDFUploader from "./ingestPDF.js";
 import RequestFinance from "./requestFinance.js";
 import InvoiceToGnosis from "./invoiceToGnosis.js";
 import { toast, ToastContainer } from "@powerhousedao/design-system/connect";
-import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 import { InvoicePDF } from "./InvoicePDF.js";
 import { createRoot } from "react-dom/client";
 import { downloadUBL } from "./exportUBL.js";
@@ -473,7 +473,7 @@ export default function Editor() {
             fileName={`invoice-${state!.invoiceNo || "export"}.pdf`}
             className="hidden"
           >
-            {({ blob, url, loading, error }) => {
+            {({ blob, loading, error }) => {
               if (loading) {
                 return null;
               }

@@ -5,12 +5,9 @@ import type {
   InvoiceAction,
   InvoiceState,
 } from "../../document-models/invoice/index.js";
+import { getGraphQLUrl } from "../shared/graphql.js";
 
-let GRAPHQL_URL = "http://localhost:4001/graphql";
-
-if (!window.document.baseURI.includes('localhost')) {
-  GRAPHQL_URL = 'https://switchboard.powerhouse.xyz/graphql'
-}
+const GRAPHQL_URL = getGraphQLUrl();
 
 interface InvoiceToGnosisProps {
   docState: InvoiceState;

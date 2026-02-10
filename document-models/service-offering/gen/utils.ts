@@ -23,6 +23,7 @@ import {
 export const initialGlobalState: ServiceOfferingGlobalState = {
   id: "",
   operatorId: "",
+  resourceTemplateId: null,
   title: "",
   summary: "",
   description: null,

@@ -172,7 +172,12 @@ function truncateToLastCompleteElement(json: string): string {
     if (lastPropStart > 0) {
       // Find the comma or opening brace before this property
       let searchFrom = lastPropStart;
-      while (searchFrom > 0 && json[searchFrom] !== "," && json[searchFrom] !== "{") {
+
+      while (
+        searchFrom > 0 &&
+        json[searchFrom] !== "," &&
+        json[searchFrom] !== "{"
+      ) {
         searchFrom--;
       }
 
@@ -359,8 +364,10 @@ Extract only the data that is clearly visible in the PDF. If a field is not pres
 IMPORTANT: You MUST output valid, complete JSON. Do not truncate or abbreviate the output. Include all line items.
 `;
 
+    // Use Haiku for faster processing to avoid gateway timeouts
+    // Haiku is significantly faster than Sonnet while still being capable for invoice extraction
     const requestBody = {
-      model: "claude-sonnet-4-20250514",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 32000,
       messages: [
         {

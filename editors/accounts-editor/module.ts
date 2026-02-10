@@ -1,7 +1,8 @@
 import type { EditorModule } from "document-model";
 import { lazy } from "react";
 
-export const AccountsEditor: EditorModule = {
+/** Document editor module for the "["powerhouse/accounts"]" document type */
+export const Accounts: EditorModule = {
   Component: lazy(() => import("./editor.js")),
   documentTypes: ["powerhouse/accounts"],
   config: {

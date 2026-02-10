@@ -1,10 +1,9 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   AddCategoryInput,
   AddSubscriptionInput,
   AddVendorInput,
   AssignMemberInput,
-  BillingCycle,
   Category,
   DeleteCategoryInput,
   DeleteSubscriptionInput,
@@ -14,7 +13,6 @@ import type {
   ServiceSubscription,
   ServiceSubscriptionsState,
   SetTotalSeatsInput,
-  SubscriptionStatus,
   UnassignMemberInput,
   UpdateCategoryInput,
   UpdateSubscriptionInput,
@@ -24,7 +22,7 @@ import type {
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -114,7 +112,7 @@ export function AssignMemberInputSchema(): z.ZodObject<
 export function CategorySchema(): z.ZodObject<Properties<Category>> {
   return z.object({
     __typename: z.literal("Category").optional(),
-    description: z.string().nullable(),
+    description: z.string().nullish(),
     id: z.string(),
     name: z.string(),
   });
@@ -168,22 +166,22 @@ export function ServiceSubscriptionSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ServiceSubscription").optional(),
-    accountEmail: z.string().email().nullable(),
-    accountOwner: z.string().nullable(),
-    amount: z.number().nullable(),
-    autoRenew: z.boolean().nullable(),
+    accountEmail: z.string().email().nullish(),
+    accountOwner: z.string().nullish(),
+    amount: z.number().nullish(),
+    autoRenew: z.boolean().nullish(),
     billingCycle: BillingCycleSchema,
-    categoryId: z.string().nullable(),
-    currency: z.string().nullable(),
-    endDate: z.string().datetime().nullable(),
+    categoryId: z.string().nullish(),
+    currency: z.string().nullish(),
+    endDate: z.string().datetime().nullish(),
     id: z.string(),
-    loginUrl: z.string().url().nullable(),
+    loginUrl: z.string().url().nullish(),
     name: z.string(),
-    nextBillingDate: z.string().datetime().nullable(),
-    notes: z.string().nullable(),
-    planName: z.string().nullable(),
-    seats: SeatsAllocationSchema().nullable(),
-    startDate: z.string().datetime().nullable(),
+    nextBillingDate: z.string().datetime().nullish(),
+    notes: z.string().nullish(),
+    planName: z.string().nullish(),
+    seats: z.lazy(() => SeatsAllocationSchema().nullish()),
+    startDate: z.string().datetime().nullish(),
     status: SubscriptionStatusSchema,
     tags: z.array(z.string()),
     vendorId: z.string(),
@@ -195,9 +193,9 @@ export function ServiceSubscriptionsStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ServiceSubscriptionsState").optional(),
-    categories: z.array(CategorySchema()),
-    subscriptions: z.array(ServiceSubscriptionSchema()),
-    vendors: z.array(VendorSchema()),
+    categories: z.array(z.lazy(() => CategorySchema())),
+    subscriptions: z.array(z.lazy(() => ServiceSubscriptionSchema())),
+    vendors: z.array(z.lazy(() => VendorSchema())),
   });
 }
 
@@ -279,8 +277,8 @@ export function VendorSchema(): z.ZodObject<Properties<Vendor>> {
     __typename: z.literal("Vendor").optional(),
     id: z.string(),
     name: z.string(),
-    supportEmail: z.string().email().nullable(),
-    supportUrl: z.string().url().nullable(),
-    website: z.string().url().nullable(),
+    supportEmail: z.string().email().nullish(),
+    supportUrl: z.string().url().nullish(),
+    website: z.string().url().nullish(),
   });
 }

@@ -6,11 +6,9 @@
  * @param onProgress Callback for upload progress
  */
 
-let GRAPHQL_URL = "http://localhost:4001/graphql";
+import { getGraphQLUrl } from "../shared/graphql.js";
 
-if (!window.document.baseURI.includes('localhost')) {
-  GRAPHQL_URL = 'https://switchboard.powerhouse.xyz/graphql'
-}
+const GRAPHQL_URL = getGraphQLUrl();
 
 export async function uploadPdfChunked(
   pdfData: string,
@@ -35,11 +33,18 @@ export async function uploadPdfChunked(
     const end = Math.min(start + chunkSize, pdfData.length);
     const chunk = pdfData.substring(start, end);
 
+    // Create an AbortController with a longer timeout for the last chunk
+    // since that's when Claude processing happens
+    const controller = new AbortController();
+    const timeoutMs = i === totalChunks - 1 ? 120000 : 30000; // 2 minutes for last chunk, 30s for others
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      signal: controller.signal,
       body: JSON.stringify({
         query: `
           mutation Invoice_uploadInvoicePdfChunk(
@@ -71,6 +76,8 @@ export async function uploadPdfChunked(
         },
       }),
     });
+
+    clearTimeout(timeoutId);
 
     const result = await response.json();
     results.push(result);

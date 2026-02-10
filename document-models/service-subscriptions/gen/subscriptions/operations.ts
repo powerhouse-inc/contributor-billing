@@ -1,14 +1,14 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddSubscriptionAction,
-  type UpdateSubscriptionAction,
-  type UpdateSubscriptionStatusAction,
-  type DeleteSubscriptionAction,
-  type SetTotalSeatsAction,
-  type AssignMemberAction,
-  type UnassignMemberAction,
+import type {
+  AddSubscriptionAction,
+  UpdateSubscriptionAction,
+  UpdateSubscriptionStatusAction,
+  DeleteSubscriptionAction,
+  SetTotalSeatsAction,
+  AssignMemberAction,
+  UnassignMemberAction,
 } from "./actions.js";
-import { type ServiceSubscriptionsState } from "../types.js";
+import type { ServiceSubscriptionsState } from "../types.js";
 
 export interface ServiceSubscriptionsSubscriptionsOperations {
   addSubscriptionOperation: (

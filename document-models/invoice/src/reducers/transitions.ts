@@ -22,7 +22,7 @@ function ensureDatetimeFormat(
 }
 
 export const invoiceTransitionsOperations: InvoiceTransitionsOperations = {
-  cancelOperation(state, action) {
+  cancelOperation(state) {
     if (permittedTransitions[state.status].includes("CANCELLED")) {
       state.status = "CANCELLED";
     } else {
@@ -44,7 +44,7 @@ export const invoiceTransitionsOperations: InvoiceTransitionsOperations = {
       throw new Error(`Invalid transition from ${state.status} to ISSUED`);
     }
   },
-  resetOperation(state, action) {
+  resetOperation(state) {
     if (permittedTransitions[state.status].includes("DRAFT")) {
       state.status = "DRAFT";
     } else {
@@ -78,7 +78,7 @@ export const invoiceTransitionsOperations: InvoiceTransitionsOperations = {
       throw new Error(`Invalid transition from ${state.status} to ACCEPTED`);
     }
   },
-  reinstateOperation(state, action) {
+  reinstateOperation(state) {
     const finalRejection = state.rejections.find(
       (rejection) => rejection.final === true,
     );
@@ -112,7 +112,7 @@ export const invoiceTransitionsOperations: InvoiceTransitionsOperations = {
       );
     }
   },
-  reapprovePaymentOperation(state, action) {
+  reapprovePaymentOperation(state) {
     if (permittedTransitions[state.status].includes("ACCEPTED")) {
       state.status = "ACCEPTED";
     } else {

@@ -48,10 +48,7 @@ export const HeaderControls = ({
   onSearchChange,
   onExport,
   onExpenseReportExport,
-  createIntegrationsDocument,
-  integrationsDoc,
   hasBillingStatements = false,
-  expenseReportDoc,
   onCreateOrOpenExpenseReport,
   selected = {},
   handleCreateBillingStatement,
@@ -212,7 +209,7 @@ export const HeaderControls = ({
             onClick={onCreateOrOpenExpenseReport}
             disabled={!hasBillingStatements}
           >
-            {expenseReportDoc ? "Expense Report" : "Create Expense Report"}
+            + Expense Report
           </button>
           <button
             type="button"

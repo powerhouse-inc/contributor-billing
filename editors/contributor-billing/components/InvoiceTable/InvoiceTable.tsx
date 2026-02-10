@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import {
   addDocument,
   dispatchActions,
@@ -7,18 +7,22 @@ import {
   useDocumentsInSelectedDrive,
   type VetraDocumentModelModule,
 } from "@powerhousedao/reactor-browser";
-import { toast } from "@powerhousedao/design-system/connect";
 import type { PHDocument } from "document-model";
 import type { FileNode } from "document-drive";
 import { actions as invoiceActions } from "../../../../document-models/invoice/index.js";
 import type { InvoiceTag } from "../../../../document-models/invoice/gen/types.js";
 import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
+import {
+  setPeriodStart,
+  setPeriodEnd,
+} from "../../../../document-models/expense-report/gen/creators.js";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
 import { exportExpenseReportCSV } from "../../../../scripts/contributor-billing/createExpenseReportCsv.js";
 import { HeaderControls } from "./HeaderControls.js";
 import { InvoiceTableSection } from "./InvoiceTableSection.js";
 import { InvoiceTableRow, type InvoiceRowData } from "./InvoiceTableRow.js";
+import { NotificationDialog } from "./NotificationDialog.js";
 
 // Helper type for invoice line item tag (partial version for state access)
 interface LineItemTagPartial {
@@ -69,6 +73,17 @@ interface BillingStatementGlobalState {
   contributor?: string;
 }
 
+/**
+ * Format month name like "January 2026" to "01-2026"
+ */
+function formatMonthCode(monthName: string): string {
+  const date = new Date(monthName + " 1");
+  if (isNaN(date.getTime())) return monthName;
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month}-${year}`;
+}
+
 // Status options for filter
 export const statusOptions = [
   { label: "Draft", value: "DRAFT" },
@@ -104,7 +119,10 @@ interface InvoiceTableProps {
       | ((prev: Record<string, boolean>) => Record<string, boolean>),
   ) => void;
   filteredDocumentModels: VetraDocumentModelModule[];
-  onSelectDocumentModel: (model: VetraDocumentModelModule) => void;
+  onSelectDocumentModel: (
+    model: VetraDocumentModelModule,
+    name: string,
+  ) => void;
   getDocDispatcher: (
     id: string,
   ) => [PHDocument, (action: unknown) => Promise<void>] | null;
@@ -112,6 +130,10 @@ interface InvoiceTableProps {
   onStatusChange: (value: string | string[]) => void;
   onRowSelection: (rowId: string, checked: boolean, rowStatus: string) => void;
   canExportSelectedRows: () => boolean;
+  /** The month name (e.g., "January 2026") for checking existing reports */
+  monthName?: string;
+  /** The sibling Reporting folder ID where expense reports should be created */
+  reportingFolderId?: string;
 }
 
 // Table header component
@@ -147,26 +169,76 @@ export const InvoiceTable = ({
   setSelected,
   filteredDocumentModels,
   onSelectDocumentModel,
-  getDocDispatcher,
   selectedStatuses,
   onStatusChange,
   onRowSelection,
   canExportSelectedRows,
+  monthName,
+  reportingFolderId,
 }: InvoiceTableProps) => {
   const [selectedDrive] = useSelectedDrive();
 
-  // State to track when export actions complete, triggering page refresh
-  const [actionsCompleted, setActionsCompleted] = useState(0);
+  // Notification state
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    type: "success" | "error";
+    title: string;
+    message?: string;
+    details?: string[];
+  }>({
+    show: false,
+    type: "success",
+    title: "",
+  });
 
   // Get documents directly from the hook - this will automatically update when documents change
-  const allDocuments = useDocumentsInSelectedDrive() || [];
+  const documentsInDrive = useDocumentsInSelectedDrive() || [];
 
-  // Refresh page when actions complete to ensure state is updated
-  useEffect(() => {
-    if (actionsCompleted > 0) {
-      window.location.reload();
+  // Get all expense reports for the current month (matches both old "January 2026" and new "01-2026" formats)
+  const expenseReportsForMonth = useMemo(() => {
+    if (!monthName || !documentsInDrive) return [];
+    const monthCode = formatMonthCode(monthName);
+    const monthLower = monthName.toLowerCase();
+    return documentsInDrive.filter(
+      (doc) =>
+        doc.header.documentType === "powerhouse/expense-report" &&
+        (doc.header.name?.includes(monthCode) ||
+          doc.header.name?.toLowerCase().includes(monthLower)),
+    );
+  }, [documentsInDrive, monthName]);
+
+  // Build a set of file IDs from the files prop for quick lookup
+  const fileIds = useMemo(() => {
+    return new Set(files.map((f) => f.id));
+  }, [files]);
+
+  // Build a map of document IDs to documents for quick lookup
+  const documentsById = useMemo(() => {
+    const map = new Map<string, PHDocument>();
+    for (const doc of documentsInDrive) {
+      map.set(doc.header.id, doc);
     }
-  }, [actionsCompleted]);
+    return map;
+  }, [documentsInDrive]);
+
+  // Filter documents to only those in the current folder (matching the files prop)
+  const allDocuments = useMemo(() => {
+    const filtered = documentsInDrive.filter((doc) =>
+      fileIds.has(doc.header.id),
+    );
+    return filtered;
+  }, [documentsInDrive, fileIds]);
+
+  // Find files that are in the folder but don't have document content loaded yet
+  // These are "loading" files that need to show a placeholder
+  const loadingFileIds = useMemo(() => {
+    return files
+      .filter(
+        (f) =>
+          f.documentType === "powerhouse/invoice" && !documentsById.has(f.id),
+      )
+      .map((f) => f.id);
+  }, [files, documentsById]);
 
   // Helper function to map invoice document to InvoiceRowData
   const mapInvoiceToRowData = (doc: PHDocument): InvoiceRowData => {
@@ -325,7 +397,7 @@ export const InvoiceTable = ({
     const invoiceDoc = allDocuments.find((doc) => doc.header.id === id);
 
     if (!invoiceDoc) {
-      toast("Invoice not found", { type: "error" });
+      console.error("Invoice not found");
       return;
     }
 
@@ -333,19 +405,23 @@ export const InvoiceTable = ({
       invoiceDoc.state as unknown as { global: InvoiceGlobalState }
     ).global;
 
+    // Get the target folder (same as invoice's folder)
+    const targetFolder = invoiceFile?.parentFolder;
+
     try {
+      // Create billing statement directly in the target folder (avoids race condition with move)
       const createdNode = await addDocument(
         selectedDrive?.header.id || "",
         `bill-${invoiceFile?.name || id}`,
         "powerhouse/billing-statement",
-        undefined,
+        targetFolder ?? undefined, // Create directly in the payments folder
         undefined,
         undefined,
         "powerhouse-billing-statement-editor",
       );
 
       if (!createdNode?.id) {
-        toast("Failed to create billing statement", { type: "error" });
+        console.error("Failed to create billing statement");
         return;
       }
 
@@ -413,13 +489,22 @@ export const InvoiceTable = ({
 
       if (tagActions.length > 0) {
         await dispatchActions(tagActions, createdNode.id);
-        window.location.reload();
       }
 
-      toast("Billing statement created successfully", { type: "success" });
+      setNotification({
+        show: true,
+        type: "success",
+        title: "Billing Statement Created",
+        message: `Successfully created billing statement for ${invoiceFile?.name || id}`,
+      });
     } catch (error) {
       console.error("Error creating billing statement:", error);
-      toast("Failed to create billing statement", { type: "error" });
+      setNotification({
+        show: true,
+        type: "error",
+        title: "Creation Failed",
+        message: "Failed to create billing statement. Please try again.",
+      });
     }
   };
 
@@ -439,8 +524,6 @@ export const InvoiceTable = ({
         baseCurrency,
       );
 
-      toast("Invoices exported successfully", { type: "success" });
-
       // Update exported status on invoices
       for (const invoice of selectedInvoices) {
         const exportedInvoiceData =
@@ -457,9 +540,12 @@ export const InvoiceTable = ({
         );
       }
       setSelected({});
-
-      // Trigger page refresh after all actions complete
-      setActionsCompleted((prev) => prev + 1);
+      setNotification({
+        show: true,
+        type: "success",
+        title: "Export Successful",
+        message: `Successfully exported ${selectedInvoices.length} invoice${selectedInvoices.length !== 1 ? "s" : ""} to CSV`,
+      });
     } catch (error: unknown) {
       console.error("Error exporting invoices:", error);
       const err = error as { missingExpenseTagInvoices?: string[] };
@@ -469,34 +555,32 @@ export const InvoiceTable = ({
           files.find((file) => file.id === invoiceId)?.name || invoiceId,
       );
 
-      toast(
-        <>
-          Invoice Line Item Tags need to be set for:
-          <br />
-          {missingList.map((name: string) => (
-            <React.Fragment key={name}>
-              - {name}
-              <br />
-            </React.Fragment>
-          ))}
-        </>,
-        { type: "error" },
-      );
+      setNotification({
+        show: true,
+        type: "error",
+        title: "Export Failed",
+        message: "Invoice Line Item Tags need to be set before exporting.",
+        details: missingList,
+      });
     }
   };
 
   // Expense Report Export handler - simple async function
   const handleExpenseReportExport = async (baseCurrency: string) => {
-    console.log("selectedInvoices", selectedInvoices);
     try {
       await exportExpenseReportCSV(selectedInvoices, baseCurrency);
-      toast("Expense report exported successfully", { type: "success" });
       // Clear selection
       const updatedSelected = { ...selected };
       Object.keys(updatedSelected).forEach((id) => {
         updatedSelected[id] = false;
       });
       setSelected(updatedSelected);
+      setNotification({
+        show: true,
+        type: "success",
+        title: "Expense Report Exported",
+        message: `Successfully exported expense report with ${selectedInvoices.length} invoice${selectedInvoices.length !== 1 ? "s" : ""}`,
+      });
     } catch (error: unknown) {
       console.error("Error exporting expense report:", error);
       const err = error as { missingTagInvoices?: string[] };
@@ -506,19 +590,13 @@ export const InvoiceTable = ({
           files.find((file) => file.id === invoiceId)?.name || invoiceId,
       );
 
-      toast(
-        <>
-          Invoice Line Item Tags need to be set for:
-          <br />
-          {missingList.map((name: string) => (
-            <React.Fragment key={name}>
-              - {name}
-              <br />
-            </React.Fragment>
-          ))}
-        </>,
-        { type: "error" },
-      );
+      setNotification({
+        show: true,
+        type: "error",
+        title: "Export Failed",
+        message: "Invoice Line Item Tags need to be set before exporting.",
+        details: missingList,
+      });
     }
   };
 
@@ -550,10 +628,31 @@ export const InvoiceTable = ({
     }
   };
 
-  // Check for expense report document - simple computed value
-  const expenseReportDoc = files.find(
-    (file) => file.documentType === "powerhouse/expense-report",
-  );
+  // Check for expense report document in the Reporting folder (not Payments folder)
+  // We need to look at documentsInDrive and check if any expense report is in the reportingFolderId
+  const expenseReportDoc = useMemo(() => {
+    if (!reportingFolderId || !selectedDrive) return undefined;
+
+    // Get all nodes from the drive to check parent folders
+    const nodes = selectedDrive.state.global.nodes;
+
+    // Find expense report documents that are in the reporting folder
+    for (const doc of documentsInDrive) {
+      if (doc.header.documentType === "powerhouse/expense-report") {
+        // Find the file node to check its parent folder
+        const fileNode = nodes.find((n) => n.id === doc.header.id);
+        if (
+          fileNode &&
+          "parentFolder" in fileNode &&
+          fileNode.parentFolder === reportingFolderId
+        ) {
+          // Return the file node (for consistency with the rest of the code)
+          return fileNode as FileNode;
+        }
+      }
+    }
+    return undefined;
+  }, [documentsInDrive, reportingFolderId, selectedDrive]);
 
   // Check if billing statements exist - memoized to update when allDocuments changes
   const hasBillingStatements = useMemo(() => {
@@ -562,29 +661,59 @@ export const InvoiceTable = ({
     );
   }, [allDocuments]);
 
-  // Create or open expense report - simple async function
-  const handleCreateOrOpenExpenseReport = async () => {
-    if (expenseReportDoc) {
-      setSelectedNode(expenseReportDoc.id);
-    } else {
-      const expenseReportModel = filteredDocumentModels.find(
-        (model) => model.id === "powerhouse/expense-report",
+  // Create a new expense report
+  const handleCreateExpenseReport = async () => {
+    const expenseReportModel = filteredDocumentModels.find(
+      (model) => model.id === "powerhouse/expense-report",
+    );
+
+    if (expenseReportModel && monthName) {
+      const monthCode = formatMonthCode(monthName);
+      const reportNumber = expenseReportsForMonth.length + 1;
+      const reportName = `${monthCode} Expense Report ${reportNumber}`;
+
+      const createdNode = await addDocument(
+        selectedDrive?.header.id || "",
+        reportName,
+        "powerhouse/expense-report",
+        reportingFolderId, // Create in the Reporting folder (sibling of Payments)
+        undefined,
+        undefined,
+        "powerhouse-expense-report-editor",
       );
 
-      if (expenseReportModel) {
-        const createdNode = await addDocument(
-          selectedDrive?.header.id || "",
-          "expense-report",
-          "powerhouse/expense-report",
-          undefined,
-          undefined,
-          undefined,
-          "powerhouse-expense-report-editor",
-        );
+      if (createdNode?.id) {
+        // Set the Reporting Period to the month - parse "December 2025" format
+        const monthDate = new Date(monthName + " 1");
+        if (!isNaN(monthDate.getTime())) {
+          // Start date: first day of the month at midnight UTC
+          const periodStartDate = new Date(
+            Date.UTC(monthDate.getFullYear(), monthDate.getMonth(), 1),
+          );
+          // End date: last day of the month at 23:59:59.999 UTC
+          const periodEndDate = new Date(
+            Date.UTC(
+              monthDate.getFullYear(),
+              monthDate.getMonth() + 1,
+              0,
+              23,
+              59,
+              59,
+              999,
+            ),
+          );
 
-        if (createdNode?.id) {
-          setSelectedNode(createdNode.id);
+          // Set Reporting Period only (Transaction Period is set by user)
+          await dispatchActions(
+            [
+              setPeriodStart({ periodStart: periodStartDate.toISOString() }),
+              setPeriodEnd({ periodEnd: periodEndDate.toISOString() }),
+            ],
+            createdNode.id,
+          );
         }
+
+        setSelectedNode(createdNode.id);
       }
     }
   };
@@ -663,54 +792,126 @@ export const InvoiceTable = ({
   };
 
   return (
-    <div className="contributor-billing-table w-full h-full bg-white rounded-lg p-4 border border-gray-200 shadow-sm mt-4 overflow-x-auto">
-      <HeaderControls
-        statusOptions={statusOptions}
-        selectedStatuses={selectedStatuses}
-        onStatusChange={onStatusChange}
-        onExport={handleCSVExport}
-        onExpenseReportExport={handleExpenseReportExport}
-        createIntegrationsDocument={createIntegrationsDocument}
-        integrationsDoc={integrationsDoc}
-        hasBillingStatements={hasBillingStatements}
-        expenseReportDoc={expenseReportDoc}
-        onCreateOrOpenExpenseReport={handleCreateOrOpenExpenseReport}
-        selected={selected}
-        handleCreateBillingStatement={handleCreateBillingStatement}
-        setSelected={setSelected}
-        invoices={invoicesDocs}
-        billingStatements={billingStatementDocs}
-        canExportSelectedRows={canExportSelectedRows}
+    <>
+      <NotificationDialog
+        show={notification.show}
+        type={notification.type}
+        title={notification.title}
+        message={notification.message}
+        details={notification.details}
+        onClose={() => setNotification({ ...notification, show: false })}
       />
+      <div className="contributor-billing-table w-full h-full bg-white rounded-lg p-4 border border-gray-200 shadow-sm mt-4 overflow-x-auto">
+        <HeaderControls
+          statusOptions={statusOptions}
+          selectedStatuses={selectedStatuses}
+          onStatusChange={onStatusChange}
+          onExport={handleCSVExport}
+          onExpenseReportExport={handleExpenseReportExport}
+          createIntegrationsDocument={createIntegrationsDocument}
+          integrationsDoc={integrationsDoc}
+          hasBillingStatements={hasBillingStatements}
+          expenseReportDoc={expenseReportDoc}
+          onCreateOrOpenExpenseReport={handleCreateExpenseReport}
+          selected={selected}
+          handleCreateBillingStatement={handleCreateBillingStatement}
+          setSelected={setSelected}
+          invoices={invoicesDocs}
+          billingStatements={billingStatementDocs}
+          canExportSelectedRows={canExportSelectedRows}
+        />
 
-      {/* Status Sections */}
-      {renderSection("DRAFT", "Draft", draft, {
-        showIssuer: false,
-        showCreateButton: true,
-      })}
-      {renderSection("ISSUED", "Issued", issued, {
-        showBillingStatement: true,
-      })}
-      {renderSection("ACCEPTED", "Accepted", accepted, {
-        showBillingStatement: true,
-      })}
-      {renderSection(
-        "PAYMENTSCHEDULED",
-        "Payment Scheduled",
-        paymentScheduled,
-        {
+        {/* Status Sections */}
+        {renderSection("DRAFT", "Draft", draft, {
+          showIssuer: false,
+          showCreateButton: true,
+        })}
+        {renderSection("ISSUED", "Issued", issued, {
           showBillingStatement: true,
-        },
-      )}
-      {renderSection("PAYMENTSENT", "Payment Sent", paymentSent, {
-        showBillingStatement: true,
-      })}
-      {renderSection("PAYMENTISSUE", "Payment Issue", paymentIssue, {
-        showBillingStatement: true,
-      })}
-      {renderSection("PAYMENTCLOSED", "Payment Closed", paymentClosed)}
-      {renderSection("REJECTED", "Rejected", rejected)}
-      {renderSection("OTHER", "Other", otherInvoices)}
-    </div>
+        })}
+        {renderSection("ACCEPTED", "Accepted", accepted, {
+          showBillingStatement: true,
+        })}
+        {renderSection(
+          "PAYMENTSCHEDULED",
+          "Payment Scheduled",
+          paymentScheduled,
+          {
+            showBillingStatement: true,
+          },
+        )}
+        {renderSection("PAYMENTSENT", "Payment Sent", paymentSent, {
+          showBillingStatement: true,
+        })}
+        {renderSection("PAYMENTISSUE", "Payment Issue", paymentIssue, {
+          showBillingStatement: true,
+        })}
+        {renderSection("PAYMENTCLOSED", "Payment Closed", paymentClosed)}
+        {renderSection("REJECTED", "Rejected", rejected)}
+        {renderSection("OTHER", "Other", otherInvoices)}
+
+        {/* Loading section for files that haven't loaded yet */}
+        {loadingFileIds.length > 0 && (
+          <InvoiceTableSection
+            title="Loading"
+            count={loadingFileIds.length}
+            color="bg-gray-100 text-gray-600"
+          >
+            <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-300 overflow-hidden">
+              <thead>
+                <tr className="bg-gray-50 font-medium text-gray-500 text-xs">
+                  <th className="px-2 py-2 w-8 rounded-tl-sm" />
+                  <th className="px-2 py-2 text-center">Invoice</th>
+                  <th className="px-2 py-2 text-center">Invoice No.</th>
+                  <th className="px-2 py-2 text-center">Issue Date</th>
+                  <th className="px-2 py-2 text-center">Due Date</th>
+                  <th className="px-2 py-2 text-center">Currency</th>
+                  <th className="px-2 py-2 text-center">Amount</th>
+                  <th className="px-2 py-2 rounded-tr-sm text-center">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {loadingFileIds.map((id) => {
+                  const file = files.find((f) => f.id === id);
+                  return (
+                    <tr
+                      key={id}
+                      className="border-t border-gray-200 animate-pulse"
+                    >
+                      <td className="px-2 py-2" />
+                      <td className="px-2 py-2 text-center text-gray-400">
+                        {file?.name || "Loading..."}
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-16 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-12 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-16 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <span className="text-xs text-gray-400">
+                          Loading...
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </InvoiceTableSection>
+        )}
+      </div>
+    </>
   );
 };

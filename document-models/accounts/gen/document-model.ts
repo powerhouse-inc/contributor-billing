@@ -72,13 +72,13 @@ export const documentModel: DocumentModelGlobalState = {
       state: {
         global: {
           examples: [],
-          initialValue: '"{\\n  \\"accounts\\": []\\n}"',
+          initialValue: '{\n  "accounts": []\n}',
           schema:
             "type AccountsState {\n   accounts: [AccountEntry!]!\n}\n\ntype AccountEntry {\n    id: OID!\n    account: String!\n    name: String!\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: AccountType!\n    owners: [String!]\n    KycAmlStatus: KycAmlStatusType\n}\n\nenum AccountType {\n    Source\n    Internal\n    Destination\n    External\n}\n\nenum KycAmlStatusType {\n    PASSED\n    PENDING\n    FAILED\n}\n\nenum AccountTypeInput {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum KycAmlStatusTypeInput {\n  PASSED\n  PENDING\n  FAILED\n}",
         },
         local: {
           examples: [],
-          initialValue: '""',
+          initialValue: "",
           schema: "",
         },
       },

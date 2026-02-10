@@ -8,8 +8,9 @@ export const serviceOfferingServiceManagementOperations: ServiceOfferingServiceM
         title: action.input.title,
         description: action.input.description || null,
         parentServiceId: action.input.parentServiceId || null,
-        displayOrder: action.input.displayOrder || null,
+        displayOrder: action.input.displayOrder ?? null,
         isSetupFormation: action.input.isSetupFormation || false,
+        isPremiumExclusive: action.input.isPremiumExclusive || false,
         optionGroupId: action.input.optionGroupId || null,
         facetBindings: [],
       });
@@ -41,6 +42,12 @@ export const serviceOfferingServiceManagementOperations: ServiceOfferingServiceM
           action.input.isSetupFormation !== null
         ) {
           service.isSetupFormation = action.input.isSetupFormation;
+        }
+        if (
+          action.input.isPremiumExclusive !== undefined &&
+          action.input.isPremiumExclusive !== null
+        ) {
+          service.isPremiumExclusive = action.input.isPremiumExclusive;
         }
         if (action.input.optionGroupId !== undefined) {
           service.optionGroupId = action.input.optionGroupId || null;

@@ -1,12 +1,12 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddLineItemAction,
-  type EditLineItemAction,
-  type DeleteLineItemAction,
-  type SetLineItemTagAction,
-  type SetInvoiceTagAction,
+import type {
+  AddLineItemAction,
+  EditLineItemAction,
+  DeleteLineItemAction,
+  SetLineItemTagAction,
+  SetInvoiceTagAction,
 } from "./actions.js";
-import { type InvoiceState } from "../types.js";
+import type { InvoiceState } from "../types.js";
 
 export interface InvoiceItemsOperations {
   addLineItemOperation: (

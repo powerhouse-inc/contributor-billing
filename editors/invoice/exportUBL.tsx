@@ -45,9 +45,8 @@ export class UBLExporter {
    * @returns UBL XML string
    */
   async convertInvoiceToUBL(): Promise<string> {
-    const issueDate = this.formatDate(this.invoice.dateIssued);
-    const dueDate = this.formatDate(this.invoice.dateDue);
-    const deliveryDate = this.formatDate(this.invoice.dateDelivered);
+    const issueDate = this.formatDate(this.invoice.dateIssued ?? null);
+    const dueDate = this.formatDate(this.invoice.dateDue ?? null);
 
     // Generate PDF attachment section first
     const pdfAttachmentSection = await this.generatePDFAttachment();
@@ -237,7 +236,7 @@ export class UBLExporter {
    * Generate payment terms section
    */
   private generatePaymentTerms(): string {
-    const dueDate = this.formatDate(this.invoice.dateDue);
+    const dueDate = this.formatDate(this.invoice.dateDue ?? null);
     const amount = this.invoice.lineItems.reduce(
       (sum, item) => sum + item.totalPriceTaxIncl,
       0,
@@ -261,7 +260,7 @@ export class UBLExporter {
     const bank = this.invoice.issuer?.paymentRouting?.bank;
     if (!bank?.accountNum) return "";
 
-    const dueDate = this.formatDate(this.invoice.dateDue);
+    const dueDate = this.formatDate(this.invoice.dateDue ?? null);
     // Generate a payment reference based on invoice number
     const paymentRef = `RF47${this.invoice.invoiceNo?.replace(/[^a-zA-Z0-9]/g, "")}`;
 

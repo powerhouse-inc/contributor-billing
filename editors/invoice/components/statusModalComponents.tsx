@@ -6,12 +6,11 @@ import {
 } from "../../../document-models/invoice/index.js";
 import { InputField } from "../components/inputField.js";
 import { DatePicker } from "../components/datePicker.js";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   Textarea,
   Checkbox,
   Select,
-  NumberInput,
 } from "@powerhousedao/document-engineering";
 
 /**
@@ -116,9 +115,6 @@ interface RejectInvoiceModalContentProps {
   rejectReason: string;
 }
 export function RejectInvoiceModalContent({
-  state,
-  dispatch,
-  setWarning,
   setRejectReason,
   setFinalReason,
   finalReason,

@@ -1,11 +1,11 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type SetStartingBalanceAction,
-  type SetEndingBalanceAction,
-  type RemoveStartingBalanceAction,
-  type RemoveEndingBalanceAction,
+import type {
+  SetStartingBalanceAction,
+  SetEndingBalanceAction,
+  RemoveStartingBalanceAction,
+  RemoveEndingBalanceAction,
 } from "./actions.js";
-import { type SnapshotReportState } from "../types.js";
+import type { SnapshotReportState } from "../types.js";
 
 export interface SnapshotReportBalancesOperations {
   setStartingBalanceOperation: (

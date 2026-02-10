@@ -3,6 +3,7 @@ import type { ServiceOfferingAction } from "./actions.js";
 import type { ServiceOfferingState as ServiceOfferingGlobalState } from "./schema/types.js";
 
 type ServiceOfferingLocalState = Record<PropertyKey, never>;
+
 type ServiceOfferingPHState = PHBaseState & {
   global: ServiceOfferingGlobalState;
   local: ServiceOfferingLocalState;

@@ -2,7 +2,10 @@ export type ErrorCode =
   | "DuplicateTargetAudienceIdError"
   | "TargetAudienceNotFoundError"
   | "FacetTargetNotFoundError"
-  | "AddFacetOptionTargetNotFoundError";
+  | "AddFacetOptionTargetNotFoundError"
+  | "TemplateAlreadySelectedError"
+  | "NoTemplateSelectedError"
+  | "TemplateMismatchError";
 
 export interface ReducerError {
   errorCode: ErrorCode;
@@ -42,17 +45,35 @@ export class AddFacetOptionTargetNotFoundError
   }
 }
 
+export class TemplateAlreadySelectedError
+  extends Error
+  implements ReducerError
+{
+  errorCode = "TemplateAlreadySelectedError" as ErrorCode;
+  constructor(message = "TemplateAlreadySelectedError") {
+    super(message);
+  }
+}
+
+export class NoTemplateSelectedError extends Error implements ReducerError {
+  errorCode = "NoTemplateSelectedError" as ErrorCode;
+  constructor(message = "NoTemplateSelectedError") {
+    super(message);
+  }
+}
+
+export class TemplateMismatchError extends Error implements ReducerError {
+  errorCode = "TemplateMismatchError" as ErrorCode;
+  constructor(message = "TemplateMismatchError") {
+    super(message);
+  }
+}
+
 export const errors = {
-  AddTargetAudience: {
-    DuplicateTargetAudienceIdError,
-  },
-  RemoveTargetAudience: {
-    TargetAudienceNotFoundError,
-  },
-  RemoveFacetTarget: {
-    FacetTargetNotFoundError,
-  },
-  AddFacetOption: {
-    AddFacetOptionTargetNotFoundError,
-  },
+  AddTargetAudience: { DuplicateTargetAudienceIdError },
+  RemoveTargetAudience: { TargetAudienceNotFoundError },
+  RemoveFacetTarget: { FacetTargetNotFoundError },
+  AddFacetOption: { AddFacetOptionTargetNotFoundError },
+  SelectResourceTemplate: { TemplateAlreadySelectedError },
+  ChangeResourceTemplate: { NoTemplateSelectedError, TemplateMismatchError },
 };

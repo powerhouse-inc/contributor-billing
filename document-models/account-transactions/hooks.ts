@@ -1,15 +1,18 @@
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import {
+  useDocumentById,
   useDocumentsInSelectedDrive,
   useDocumentsInSelectedFolder,
-  useDocumentById,
   useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import type {
-  AccountTransactionsDocument,
   AccountTransactionsAction,
+  AccountTransactionsDocument,
 } from "@powerhousedao/contributor-billing/document-models/account-transactions";
-import { isAccountTransactionsDocument } from "./gen/document-schema.js";
+import {
+  assertIsAccountTransactionsDocument,
+  isAccountTransactionsDocument,
+} from "./gen/document-schema.js";
 
 /** Hook to get a AccountTransactions document by its id */
 export function useAccountTransactionsDocumentById(
@@ -23,12 +26,14 @@ export function useAccountTransactionsDocumentById(
 }
 
 /** Hook to get the selected AccountTransactions document */
-export function useSelectedAccountTransactionsDocument():
-  | [AccountTransactionsDocument, DocumentDispatch<AccountTransactionsAction>]
-  | [undefined, undefined] {
+export function useSelectedAccountTransactionsDocument(): [
+  AccountTransactionsDocument,
+  DocumentDispatch<AccountTransactionsAction>,
+] {
   const [document, dispatch] = useSelectedDocument();
-  if (!isAccountTransactionsDocument(document)) return [undefined, undefined];
-  return [document, dispatch];
+
+  assertIsAccountTransactionsDocument(document);
+  return [document, dispatch] as const;
 }
 
 /** Hook to get all AccountTransactions documents in the selected drive */

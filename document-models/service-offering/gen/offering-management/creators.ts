@@ -12,6 +12,8 @@ import {
   RemoveFacetOptionInputSchema,
   SetSetupServicesInputSchema,
   SetRecurringServicesInputSchema,
+  SelectResourceTemplateInputSchema,
+  ChangeResourceTemplateInputSchema,
 } from "../schema/zod.js";
 import type {
   UpdateOfferingInfoInput,
@@ -26,6 +28,8 @@ import type {
   RemoveFacetOptionInput,
   SetSetupServicesInput,
   SetRecurringServicesInput,
+  SelectResourceTemplateInput,
+  ChangeResourceTemplateInput,
 } from "../types.js";
 import type {
   UpdateOfferingInfoAction,
@@ -40,6 +44,8 @@ import type {
   RemoveFacetOptionAction,
   SetSetupServicesAction,
   SetRecurringServicesAction,
+  SelectResourceTemplateAction,
+  ChangeResourceTemplateAction,
 } from "./actions.js";
 
 export const updateOfferingInfo = (input: UpdateOfferingInfoInput) =>
@@ -147,5 +153,23 @@ export const setRecurringServices = (input: SetRecurringServicesInput) =>
     { ...input },
     undefined,
     SetRecurringServicesInputSchema,
+    "global",
+  );
+
+export const selectResourceTemplate = (input: SelectResourceTemplateInput) =>
+  createAction<SelectResourceTemplateAction>(
+    "SELECT_RESOURCE_TEMPLATE",
+    { ...input },
+    undefined,
+    SelectResourceTemplateInputSchema,
+    "global",
+  );
+
+export const changeResourceTemplate = (input: ChangeResourceTemplateInput) =>
+  createAction<ChangeResourceTemplateAction>(
+    "CHANGE_RESOURCE_TEMPLATE",
+    { ...input },
+    undefined,
+    ChangeResourceTemplateInputSchema,
     "global",
   );

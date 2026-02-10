@@ -1,12 +1,9 @@
 import React, { useState } from "react";
 import { actions } from "../../document-models/invoice/index.js";
 import { generateId } from "document-model";
+import { getGraphQLUrl } from "../shared/graphql.js";
 
-let GRAPHQL_URL = "http://localhost:4001/graphql";
-
-if (!window.document.baseURI.includes('localhost')) {
-  GRAPHQL_URL = 'https://switchboard.powerhouse.xyz/graphql'
-}
+const GRAPHQL_URL = getGraphQLUrl();
 
 interface RequestFinanceProps {
   docState: any; // Replace 'any' with the appropriate type if available

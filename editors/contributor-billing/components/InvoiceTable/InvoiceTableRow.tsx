@@ -66,6 +66,12 @@ const formatAmount = (amount: string | number | undefined): string => {
   });
 };
 
+/** Format a date string without timezone conversion */
+const formatDateUTC = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString(undefined, { timeZone: "UTC" });
+};
+
 export const InvoiceTableRow = ({
   files,
   row,
@@ -132,12 +138,12 @@ export const InvoiceTableRow = ({
 
       {/* Issue Date */}
       <td className="px-2 py-2 text-center text-sm text-gray-700">
-        {row.issueDate ? new Date(row.issueDate).toLocaleDateString() : "-"}
+        {row.issueDate ? formatDateUTC(row.issueDate) : "-"}
       </td>
 
       {/* Due Date */}
       <td className="px-2 py-2 text-center text-sm text-gray-700">
-        {row.dueDate ? new Date(row.dueDate).toLocaleDateString() : "-"}
+        {row.dueDate ? formatDateUTC(row.dueDate) : "-"}
       </td>
 
       {/* Currency */}

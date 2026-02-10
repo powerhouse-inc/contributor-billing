@@ -1,7 +1,7 @@
 import { setName } from "document-model";
 import type { FormEventHandler, MouseEventHandler } from "react";
 import { useState } from "react";
-import { useSelectedServiceOfferingDocument } from "../../../document-models/service-offering/hooks.js";
+import { useSelectedServiceOfferingDocument } from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 /** Displays the name of the selected ServiceOffering document and allows editing it */
 export function EditServiceOfferingName() {

@@ -22,43 +22,54 @@ const stateReducer: StateReducer<AccountsPHState> = (
   if (isDocumentAction(action)) {
     return state;
   }
-
   switch (action.type) {
-    case "ADD_ACCOUNT":
+    case "ADD_ACCOUNT": {
       AddAccountInputSchema().parse(action.input);
+
       accountsAccountsOperations.addAccountOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "UPDATE_ACCOUNT":
+      break;
+    }
+
+    case "UPDATE_ACCOUNT": {
       UpdateAccountInputSchema().parse(action.input);
+
       accountsAccountsOperations.updateAccountOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "DELETE_ACCOUNT":
+      break;
+    }
+
+    case "DELETE_ACCOUNT": {
       DeleteAccountInputSchema().parse(action.input);
+
       accountsAccountsOperations.deleteAccountOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "UPDATE_KYC_STATUS":
+      break;
+    }
+
+    case "UPDATE_KYC_STATUS": {
       UpdateKycStatusInputSchema().parse(action.input);
+
       accountsAccountsOperations.updateKycStatusOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
+
       break;
+    }
 
     default:
       return state;

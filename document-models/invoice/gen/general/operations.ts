@@ -1,12 +1,12 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type EditInvoiceAction,
-  type EditStatusAction,
-  type EditPaymentDataAction,
-  type SetExportedDataAction,
-  type AddPaymentAction,
+import type {
+  EditInvoiceAction,
+  EditStatusAction,
+  EditPaymentDataAction,
+  SetExportedDataAction,
+  AddPaymentAction,
 } from "./actions.js";
-import { type InvoiceState } from "../types.js";
+import type { InvoiceState } from "../types.js";
 
 export interface InvoiceGeneralOperations {
   editInvoiceOperation: (

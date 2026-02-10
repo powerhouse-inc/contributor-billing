@@ -5,7 +5,6 @@ import {
   type BillingStatementState,
   actions,
 } from "../../document-models/billing-statement/index.js";
-import { CurrencyForm } from "../invoice/components/currencyForm.js";
 import { Textarea, Select } from "@powerhousedao/document-engineering";
 import LineItemsTable from "./components/lineItemsTable.js";
 import { formatNumber } from "../invoice/lineItems.js";
@@ -57,29 +56,35 @@ export default function Editor(
   }
 
   return (
-    <div className="min-h-screen w-full bg-white text-[#14120f]">
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
       <DocumentToolbar document={doc} onClose={handleClose} />
 
-      <div className="w-full bg-white">
+      <div className="w-full">
         <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-          <div className="overflow-hidden rounded-2xl border border-black/10 bg-white text-[#14120f] shadow-[0_18px_50px_rgba(15,23,42,0.10)]">
+          <div className="overflow-hidden rounded-3xl border border-slate-200/60 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             {/* Header */}
-            <div className="border-b border-black/10 bg-[#efe8da] px-6 py-5 text-[#14120f]">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <div className="space-y-1">
-                  <h1 className="font-serif text-2xl tracking-tight sm:text-3xl">
+            <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-blue-50/50 px-8 py-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-light tracking-tight text-slate-800">
                     Billing Statement
                   </h1>
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:text-right">
-                  <div className="text-black/60">Submitter</div>
-                  <div className="font-semibold text-black/90">
-                    {state.contributor}
+                <div className="flex items-center gap-10">
+                  <div className="flex flex-col items-end gap-1.5">
+                    <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                      Submitter
+                    </div>
+                    <div className="text-sm font-medium text-slate-700">
+                      {state.contributor}
+                    </div>
                   </div>
-                  <div className="text-black/60">Status</div>
-                  <div className="flex justify-start sm:justify-end">
-                    <span className="inline-flex items-center rounded-full border border-black/15 bg-black/5 px-3 py-1 text-xs font-semibold tracking-wide text-black/80">
+                  <div className="flex flex-col items-end gap-1.5">
+                    <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                      Status
+                    </div>
+                    <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
                       {String(state.status || "—")}
                     </span>
                   </div>
@@ -88,17 +93,17 @@ export default function Editor(
             </div>
 
             {/* Body */}
-            <div className="px-6 py-6">
-              <div className="flex flex-col gap-3 rounded-xl border border-black/10 bg-[#efe8da] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-sm text-black/60">
+            <div className="px-8 py-8">
+              <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/50 px-5 py-4">
+                <div className="text-sm text-slate-500">
                   Keep edits lightweight: double‑click a row to edit, click
                   outside to auto‑save.
                 </div>
-                <div className="flex items-center justify-between gap-3 sm:justify-end">
-                  <span className="text-xs font-semibold tracking-wide text-black/60">
-                    CURRENCY
+                <div className="flex items-center gap-4">
+                  <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                    Currency
                   </span>
-                  <div className="rounded-lg border border-black/10 px-2 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
                     <Select
                       className="w-28"
                       options={currencyList.map((currency) => ({
@@ -125,7 +130,7 @@ export default function Editor(
 
               {/* Notes + Totals */}
               <div className="mt-8 grid gap-6 lg:grid-cols-2">
-                <div className="rounded-xl border border-black/10 bg-white p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+                <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
                   <Textarea
                     label="Notes"
                     placeholder="Add notes"
@@ -146,54 +151,49 @@ export default function Editor(
                     }}
                     className="p-2"
                   />
-                  <div className="mt-2 text-xs text-black/50">
+                  <div className="mt-3 text-xs text-slate-400">
                     Tip: notes are saved by clicking outside of the textarea or
                     pressing tab.
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-black/10 bg-white p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+                <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
                   <div className="flex items-baseline justify-between">
-                    <div className="text-xs font-semibold tracking-[0.24em] text-black/60">
-                      TOTALS
+                    <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                      Totals
                     </div>
-                    <div className="text-xs text-black/40">read‑only</div>
+                    <div className="text-xs text-slate-300">read‑only</div>
                   </div>
-                  <div className="mt-3 overflow-hidden rounded-lg border border-black/10">
+                  <div className="mt-4 overflow-hidden rounded-xl border border-slate-100">
                     <table className="w-full border-collapse">
-                      <thead className="bg-[#efe8da] text-[#14120f]">
+                      <thead className="bg-gradient-to-r from-slate-50 to-blue-50/30">
                         <tr>
-                          <th className="border-b border-black/10 px-4 py-3 text-left text-xs font-semibold tracking-wide text-black/70">
+                          <th className="border-b border-slate-100 px-5 py-3.5 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
                             Total Fiat
                           </th>
-                          <th className="border-b border-black/10 px-4 py-3 text-left text-xs font-semibold tracking-wide text-black/70">
+                          <th className="border-b border-slate-100 px-5 py-3.5 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
                             Total POWT
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="bg-[#fbf8f1]">
+                      <tbody className="bg-white">
                         <tr>
-                          <td className="border-t border-black/10 px-4 py-4 font-mono text-sm tabular-nums text-black/90">
+                          <td className="border-t border-slate-50 px-5 py-4 font-mono text-base tabular-nums text-slate-700">
                             {formatNumber(state.totalCash)}
                           </td>
-                          <td className="border-t border-black/10 px-4 py-4 font-mono text-sm tabular-nums text-black/90">
+                          <td className="border-t border-slate-50 px-5 py-4 font-mono text-base tabular-nums text-slate-700">
                             {formatNumber(state.totalPowt)}
                           </td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
-                  <div className="mt-3 text-xs text-black/50">
+                  <div className="mt-3 text-xs text-slate-400">
                     Totals update from line items.
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="mt-6 text-center text-xs text-black/40">
-            This view is a styled editor shell — your document operations remain
-            unchanged.
           </div>
         </div>
       </div>
