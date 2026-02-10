@@ -19,11 +19,11 @@ import {
   BarChart3,
   Camera,
   User,
-  Package,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useBillingFolderStructure } from "../hooks/useBillingFolderStructure.js";
-import { useSubscriptionsFolder } from "../hooks/useSubscriptionsFolder.js";
+// TODO: Uncomment when Subscriptions feature is ready
+// import { useSubscriptionsFolder } from "../hooks/useSubscriptionsFolder.js";
 import type { OperationalHubProfileDocument } from "../../../document-models/operational-hub-profile/gen/types.js";
 import { CreateHubProfileModal } from "./CreateHubProfileModal.js";
 
@@ -89,7 +89,8 @@ export function FolderTree({
   const [driveDocument] = useSelectedDrive();
   const { billingFolder, monthFolders, paymentsFolderIds, reportingFolderIds } =
     useBillingFolderStructure();
-  const { subscriptionsFolder } = useSubscriptionsFolder();
+  // TODO: Uncomment when Subscriptions feature is ready
+  // const { subscriptionsFolder } = useSubscriptionsFolder();
 
   // Build a map of document ID to parent folder ID
   const documentParentMap = useMemo(() => {
@@ -342,12 +343,12 @@ export function FolderTree({
             ? accountTransactionsChildren
             : undefined,
       },
-      // Subscriptions folder
-      {
-        id: subscriptionsFolder?.id || "subscriptions-placeholder",
-        title: "Subscriptions",
-        icon: <Package size={ICON_SIZE} />,
-      },
+      // TODO: Uncomment when Subscriptions feature is ready
+      // {
+      //   id: subscriptionsFolder?.id || "subscriptions-placeholder",
+      //   title: "Subscriptions",
+      //   icon: <Package size={ICON_SIZE} />,
+      // },
       // Billing folder structure
       {
         id: billingFolder?.id || "billing-placeholder",
@@ -361,7 +362,6 @@ export function FolderTree({
   }, [
     accountTransactionsDocuments,
     billingFolder,
-    subscriptionsFolder,
     monthFolders,
     reportDocuments,
     documentParentMap,
@@ -408,18 +408,18 @@ export function FolderTree({
       return;
     }
 
-    // Check if clicking Subscriptions folder
-    if (
-      node.id === subscriptionsFolder?.id ||
-      node.id === "subscriptions-placeholder"
-    ) {
-      onFolderSelect?.({
-        folderId: subscriptionsFolder?.id || "",
-        folderType: "subscriptions",
-      });
-      safeSetSelectedNode("");
-      return;
-    }
+    // TODO: Uncomment when Subscriptions feature is ready
+    // if (
+    //   node.id === subscriptionsFolder?.id ||
+    //   node.id === "subscriptions-placeholder"
+    // ) {
+    //   onFolderSelect?.({
+    //     folderId: subscriptionsFolder?.id || "",
+    //     folderType: "subscriptions",
+    //   });
+    //   safeSetSelectedNode("");
+    //   return;
+    // }
 
     // Check if clicking Billing folder
     if (node.id === billingFolder?.id || node.id === "billing-placeholder") {
