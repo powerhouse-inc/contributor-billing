@@ -70,11 +70,7 @@ function FolderNameInput({
  * Only shows path from "Subscriptions" folder onwards.
  * Includes folder creation functionality.
  */
-function SubscriptionsBreadcrumbs({
-  rootFolderId,
-}: {
-  rootFolderId: string;
-}) {
+function SubscriptionsBreadcrumbs({ rootFolderId }: { rootFolderId: string }) {
   const selectedNodePath = useSelectedNodePath();
   const selectedDriveId = useSelectedDriveId();
   const { isAllowedToCreateDocuments } = useUserPermissions();
