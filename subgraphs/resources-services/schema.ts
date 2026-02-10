@@ -10,6 +10,22 @@ export const schema: DocumentNode = gql`
     serviceOfferings(filter: RSServiceOfferingsFilter): [RSServiceOffering!]!
   }
 
+  type Mutation {
+    createResourceInstances(input: CreateResourceInstancesInput!): CreateResourceInstancesOutput
+  }
+
+  input CreateResourceInstancesInput {
+    resourceTemplateId: PHID!
+    name: String!
+    teamName: String!
+  }
+
+  type CreateResourceInstancesOutput {
+    success: Boolean!
+    data: JSONObject
+    errors: [String!]!
+  }
+
   # ============ Filters ============
 
   input RSResourceTemplatesFilter {

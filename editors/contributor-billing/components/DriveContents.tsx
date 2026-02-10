@@ -4,6 +4,7 @@ import { InvoiceTableContainer } from "./InvoiceTable/InvoiceTableContainer.js";
 import { ReportingView } from "./ReportingView.js";
 import { BillingOverview } from "./BillingOverview.js";
 import { DashboardHome } from "./DashboardHome.js";
+import { SubscriptionsOverview } from "./SubscriptionsOverview.js";
 import type { SelectedFolderInfo } from "./FolderTree.js";
 
 interface DriveContentsProps {
@@ -21,7 +22,7 @@ export function DriveContents({
   // Default view (no folder selected or root) - show the dashboard home
   if (!selectedFolder) {
     return (
-      <div className="container mx-auto flex-1 overflow-y-auto p-4">
+      <div className="container mx-auto flex-1 p-4">
         <Suspense>
           <DashboardHome onFolderSelect={onFolderSelect} />
         </Suspense>
@@ -34,7 +35,7 @@ export function DriveContents({
     return (
       <div
         key={selectedFolder.folderId}
-        className="container mx-auto flex-1 overflow-y-auto p-4"
+        className="container mx-auto flex-1 p-4"
       >
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-gray-900">
@@ -62,7 +63,7 @@ export function DriveContents({
   // Reporting folder - show expense and snapshot reports
   if (selectedFolder.folderType === "reporting") {
     return (
-      <div className="container mx-auto flex-1 overflow-y-auto p-4">
+      <div className="container mx-auto flex-1 p-4">
         <Suspense>
           <ReportingView
             folderId={selectedFolder.folderId}
@@ -87,9 +88,20 @@ export function DriveContents({
     );
   }
 
+  // Subscriptions folder - show subscriptions overview
+  if (selectedFolder.folderType === "subscriptions") {
+    return (
+      <div className="container mx-auto flex-1 p-4">
+        <Suspense>
+          <SubscriptionsOverview />
+        </Suspense>
+      </div>
+    );
+  }
+
   // Fallback - show dashboard home
   return (
-    <div className="container mx-auto flex-1 overflow-y-auto p-4">
+    <div className="container mx-auto flex-1 p-4">
       <Suspense>
         <DashboardHome onFolderSelect={onFolderSelect} />
       </Suspense>

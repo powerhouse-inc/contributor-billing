@@ -1955,8 +1955,6 @@ export function TheMatrix({
   const tiers = state.global.tiers ?? [];
   const optionGroups = state.global.optionGroups ?? [];
 
-  // Get resource templates to find the selected one
-
   // Get selected facets from the offering document's facetTargets
   const offeringFacetTargets = state.global.facetTargets ?? [];
 

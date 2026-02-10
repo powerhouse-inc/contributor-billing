@@ -8,6 +8,9 @@ import type {
   ServiceOfferingDocument,
   ServiceStatus,
 } from "../../document-models/service-offering/index.js";
+import { addFile, type DocumentDriveDocument } from "document-drive";
+import { BuilderProfile } from "@powerhousedao/builder-profile/document-models";
+import { ResourceInstance } from "../../document-models/resource-instance/module.js";
 
 // Filter types
 interface ResourceTemplatesFilter {
@@ -21,6 +24,12 @@ interface ServiceOfferingsFilter {
   status?: ServiceStatus[];
   operatorId?: string;
   resourceTemplateId?: string;
+}
+
+interface CreateResourceInstancesInput {
+  resourceTemplateId: string;
+  name: string;
+  teamName: string;
 }
 
 export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
@@ -216,8 +225,127 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         return serviceOfferings;
       },
     },
+    Mutation: {
+      createResourceInstances: async (
+        _: unknown,
+        args: { input: CreateResourceInstancesInput },
+      ) => {
+        const { input } = args;
+        const { resourceTemplateId, name, teamName } = input;
+
+        // Validate input
+        if (!resourceTemplateId) {
+          return { success: false, data: null, errors: ["Resource template ID is required"] };
+        }
+
+        if (!name) {
+          return { success: false, data: null, errors: ["Name is required"] };
+        }
+
+        if (!teamName) {
+          return { success: false, data: null, errors: ["Team name is required"] };
+        }
+
+        const parsedTeamName = teamName.toLowerCase().replace(/ /g, '-');
+        const parsedName = name.toLowerCase().replace(/ /g, '-');
+
+        try {
+          // create team-builder-admin drive
+          const teamBuilderAdminDrive = await reactor.addDrive(
+            {
+              global: { name: teamName, icon: "https://cdn-icons-png.flaticon.com/512/6020/6020347.png" },
+              id: parsedTeamName,
+              slug: parsedTeamName,
+              preferredEditor: "builder-team-admin"
+            }
+          );
+          teamBuilderAdminDrive.header.id
+          // create builder-profile doc inside the team-builder-admin drive
+          const builderProfileDoc = await reactor.addDocument('powerhouse/builder-profile')
+
+          await reactor.addAction(teamBuilderAdminDrive.header.id, addFile({
+            documentType: "powerhouse/builder-profile",
+            id: builderProfileDoc.header.id,
+            name: `${parsedName} Builder Profile`,
+            parentFolder: teamBuilderAdminDrive.state.global.nodes?.find((node) => node.kind === 'folder')?.parentFolder,
+          }))
+
+          await reactor.addAction(builderProfileDoc.header.id, BuilderProfile.actions.updateProfile({
+            name: name,
+          }))
+
+          // create resource-instance doc inside the team-builder-admin drive
+          const resourceInstanceDoc = await reactor.addDocument('powerhouse/resource-instance')
+          await reactor.addAction(teamBuilderAdminDrive.header.id, addFile({
+            documentType: "powerhouse/resource-instance",
+            id: resourceInstanceDoc.header.id,
+            name: `${parsedName} Resource Instance`,
+            parentFolder: teamBuilderAdminDrive.state.global.nodes?.find((node) => node.kind === 'folder')?.parentFolder,
+          }))
+
+          await populateResourceInstance(
+            reactor,
+            resourceInstanceDoc.header.id,
+            resourceTemplateId,
+            builderProfileDoc.header.id,
+            name,
+          );
+
+          // create copy of resource-instance doc inside the operator's drive
+          const operatorDrive = await getOperatorDrive(reactor, resourceTemplateId)
+          if (!operatorDrive) {
+            throw new Error(`Operator drive not found for resource template ${resourceTemplateId}`);
+          }
+          await reactor.addAction(operatorDrive.header.id, addFile({
+            documentType: "powerhouse/resource-instance",
+            id: resourceInstanceDoc.header.id,
+            name: `${parsedName} Resource Instance`,
+            parentFolder: operatorDrive.state.global.nodes?.find((node) => node.kind === 'folder')?.parentFolder,
+          }))
+
+
+          return {
+            success: true,
+            data: {
+              linkToDrive: getDriveLink(teamBuilderAdminDrive.header.id)
+            },
+            errors: [],
+          };
+        } catch (error) {
+          console.error("Failed to create resource instance:", error);
+          return {
+            success: false,
+            data: null,
+            errors: [error instanceof Error ? error.message : "An unexpected error occurred"],
+          };
+        }
+
+      },
+    },
   };
 };
+
+/**
+ * Build a link to a drive based on the current environment.
+ * Mirrors the logic from editors/shared/graphql.ts for server-side use.
+ */
+function getDriveLink(driveId: string): string {
+  const baseUri = process.env.BASE_URI || "";
+
+  if (baseUri.includes("-dev.")) {
+    return `https://connect-dev.powerhouse.xyz/?driveUrl=https://switchboard-dev.powerhouse.xyz/d/${driveId}`;
+  }
+
+  if (baseUri.includes("-staging.")) {
+    return `https://connect-staging.powerhouse.xyz/?driveUrl=https://switchboard-staging.powerhouse.xyz/d/${driveId}`;
+  }
+
+  if (baseUri && !baseUri.includes("localhost")) {
+    return `https://connect.powerhouse.xyz/?driveUrl=https://switchboard.powerhouse.xyz/d/${driveId}`;
+  }
+
+  return `http://localhost:3000/?driveUrl=http://localhost:4001/d/${driveId}`;
+}
 
 /**
  * Map ResourceTemplateState from document model to GraphQL response
@@ -262,6 +390,54 @@ function mapResourceTemplateState(
       displayOrder: section.displayOrder,
     })),
   };
+}
+
+/**
+ * Populate a resource-instance document with data from a resource-template.
+ * Initializes basic info and sets facet configuration from template facetTargets.
+ */
+async function populateResourceInstance(
+  reactor: ISubgraph["reactor"],
+  resourceInstanceDocId: string,
+  resourceTemplateId: string,
+  profileId: string,
+  name: string,
+) {
+  const resourceTemplateDoc =
+    await reactor.getDocument<ResourceTemplateDocument>(resourceTemplateId);
+  if (!resourceTemplateDoc) return;
+
+  const templateState = resourceTemplateDoc.state.global;
+
+  // Initialize instance with basic info from template
+  await reactor.addAction(
+    resourceInstanceDocId,
+    ResourceInstance.actions.initializeInstance({
+      profileId,
+      profileDocumentType: "powerhouse/builder-profile",
+      resourceTemplateId,
+      customerId: null,
+      name,
+      thumbnailUrl: templateState.thumbnailUrl,
+      infoLink: templateState.infoLink,
+      description: templateState.description,
+    }),
+  );
+
+  // Populate facet configuration from template's facetTargets
+  for (const facetTarget of templateState.facetTargets) {
+    if (facetTarget.selectedOptions.length > 0) {
+      await reactor.addAction(
+        resourceInstanceDocId,
+        ResourceInstance.actions.setInstanceFacet({
+          id: facetTarget.id,
+          categoryKey: facetTarget.categoryKey,
+          categoryLabel: facetTarget.categoryLabel,
+          selectedOption: facetTarget.selectedOptions[0],
+        }),
+      );
+    }
+  }
 }
 
 /**
@@ -366,4 +542,19 @@ function mapServiceOfferingState(
       defaultSelected: group.defaultSelected,
     })),
   };
+}
+
+async function getOperatorDrive(
+  reactor: ISubgraph["reactor"],
+  resourceTemplateId: string,
+) {
+  const drives = await reactor.getDrives();
+  const results = await Promise.all(
+    drives.map(async (drive) => {
+      const docIds = await reactor.getDocuments(drive);
+      return docIds.includes(resourceTemplateId) ? drive : null;
+    }),
+  );
+  const driveId = results.find((id) => id !== null);
+  return driveId ? reactor.getDrive(driveId) : undefined;
 }

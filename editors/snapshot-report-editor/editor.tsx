@@ -25,9 +25,7 @@ import { SetOwner } from "./components/SetOwner.js";
 import { useSyncSnapshotAccount } from "./hooks/useSyncSnapshotAccount.js";
 import { formatBalance } from "./utils/balanceCalculations.js";
 import { calculateTransactionFlowInfo } from "./utils/flowTypeCalculations.js";
-import { deriveTransactionsForAccount } from "./utils/deriveTransactions.js";
 import { actions as accountsActions } from "../../document-models/accounts/index.js";
-import { transactionsActions } from "../../document-models/snapshot-report/index.js";
 
 // Helper function to generate month options from January 2025 to current month
 function generateMonthOptions() {
@@ -532,54 +530,6 @@ export default function Editor() {
 
     setIsAccountPickerOpen(false);
     setSelectedAccountIds(new Set());
-  };
-
-  /**
-   * Derive transactions for a non-Internal account from Internal accounts
-   * This finds all transactions in Internal accounts where the counter-party
-   * matches the non-Internal account's address
-   */
-  const handleDeriveTransactions = async (accountId: string) => {
-    const account = snapshotAccounts.find((a) => a.id === accountId);
-    if (!account || account.type === "Internal") {
-      return;
-    }
-
-    const internalAccounts = snapshotAccounts.filter(
-      (a) => a.type === "Internal",
-    );
-    if (internalAccounts.length === 0) {
-      alert("No Internal accounts found. Import Internal accounts first.");
-      return;
-    }
-
-    // Get derived transactions
-    const derivedTxs = deriveTransactionsForAccount(account, internalAccounts);
-
-    // Remove existing transactions for this account
-    for (const tx of account.transactions) {
-      dispatch?.(transactionsActions.removeTransaction({ id: tx.id }));
-    }
-
-    // Add derived transactions
-    for (const tx of derivedTxs) {
-      dispatch?.(
-        addTransaction({
-          accountId: account.id,
-          id: tx.id,
-          transactionId: tx.transactionId,
-          counterParty: tx.counterParty,
-          amount: tx.amount,
-          datetime: tx.datetime,
-          txHash: tx.txHash,
-          token: tx.token,
-          blockNumber: tx.blockNumber ?? undefined,
-          direction: tx.direction,
-          flowType: tx.flowType,
-          counterPartyAccountId: tx.counterPartyAccountId,
-        }),
-      );
-    }
   };
 
   // Handlers for the legacy startDate/endDate fields (DatePicker approach)

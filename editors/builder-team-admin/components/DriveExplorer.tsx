@@ -10,6 +10,7 @@ import { useMemo, useState } from "react";
 import { ExpenseReports } from "./expense-reports.js";
 import { SnapshotReports } from "./snapshot-reports.js";
 import { ResourcesServices } from "./ResourcesServices.js";
+import { ServiceSubscriptions } from "./service-subscriptions.js";
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
@@ -105,6 +106,10 @@ export function DriveExplorer({ children }: EditorProps) {
     // Custom views
     if (customView === "team-members") {
       return <ContributorsSection />;
+    }
+
+    if (customView === "service-subscriptions") {
+      return <ServiceSubscriptions />;
     }
 
     if (customView === "expense-reports") {

@@ -27,7 +27,6 @@ interface LineItemWithGroupInfo extends LineItem {
 export function AggregatedExpensesTable({
   wallets,
   groups,
-  periodStart,
   dispatch,
 }: AggregatedExpensesTableProps) {
   // State for active tab (selected wallet)

@@ -123,7 +123,6 @@ const EditableLineItem = forwardRef(function EditableLineItem(
         : (editedItem.totalPriceTaxIncl ?? 0);
 
     const taxRate = taxPercent / 100;
-    const EPSILON = 0.00001;
 
     // Helper function to compare floating point numbers
 

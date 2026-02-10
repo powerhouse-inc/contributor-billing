@@ -17,6 +17,7 @@ import type {
   ResourceTemplateDocument,
   ResourceTemplateGlobalState,
 } from "@powerhousedao/contributor-billing/document-models/resource-template";
+import { MarkdownPreview } from "./MarkdownPreview.js";
 
 interface ResourceTemplateSelectorProps {
   document: ServiceOfferingDocument;
@@ -592,7 +593,10 @@ function TemplateDetailView({
               <h3 className="rtd-card__title">Description</h3>
             </div>
           </div>
-          <p className="rtd-card__text">{globalState.description}</p>
+          <MarkdownPreview
+            content={globalState.description}
+            className="rtd-card__text"
+          />
         </section>
       )}
 
