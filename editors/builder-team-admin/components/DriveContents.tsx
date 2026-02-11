@@ -1,13 +1,8 @@
 import { useMemo } from "react";
 import { useDocumentsInSelectedDrive } from "@powerhousedao/reactor-browser";
 import type { BuilderProfileDocument } from "@powerhousedao/builder-profile/document-models/builder-profile";
-import type { ServiceSubscriptionsDocument } from "../../../document-models/service-subscriptions/gen/types.js";
 import { ProfileHeader } from "./overview/ProfileHeader.js";
 import { TeamMembersOverview } from "./overview/TeamMembersOverview.js";
-import {
-  SubscriptionsStats,
-  SubscriptionsEmptyState,
-} from "./overview/SubscriptionsStats.js";
 import { ExpenseReportsStats } from "./ExpenseReportsStats.js";
 import { useExpenseReportAutoPlacement } from "../hooks/useExpenseReportAutoPlacement.js";
 
@@ -28,25 +23,12 @@ export function DriveContents() {
     );
   }, [documentsInDrive]);
 
-  // Extract service subscriptions document
-  const serviceSubscriptionsDoc = useMemo(() => {
-    if (!documentsInDrive) return null;
-    return (
-      (documentsInDrive.find(
-        (doc) => doc.header.documentType === "powerhouse/service-subscriptions",
-      ) as ServiceSubscriptionsDocument | undefined) ?? null
-    );
-  }, [documentsInDrive]);
-
   // Use the auto-placement hook - this handles moving expense reports
   // dropped anywhere in the drive into the proper "Expense Reports" folder
   const { expenseReportDocuments } = useExpenseReportAutoPlacement();
 
   // Get contributors from builder profile
   const contributors = builderProfileDoc?.state.global.contributors;
-
-  // Get subscriptions from service subscriptions doc
-  const subscriptions = serviceSubscriptionsDoc?.state.global.subscriptions;
 
   const hasExpenseReports = expenseReportDocuments.length > 0;
 
@@ -58,13 +40,6 @@ export function DriveContents() {
 
         {/* Team Members */}
         <TeamMembersOverview contributors={contributors} />
-
-        {/* Subscriptions Stats */}
-        {subscriptions ? (
-          <SubscriptionsStats subscriptions={subscriptions} />
-        ) : (
-          <SubscriptionsEmptyState />
-        )}
 
         {/* Expense Reports Stats */}
         {hasExpenseReports && (
