@@ -2,6 +2,7 @@
 @import "@powerhousedao/design-system/theme.css";
 @import './node_modules/@powerhousedao/vetra/dist/style.css';
 @import './node_modules/@powerhousedao/builder-profile/dist/style.css';
+@import './node_modules/@powerhousedao/service-offering/dist/style.css';
 
 @theme {
   /* You can customize the theme by overriding the theme variables here */

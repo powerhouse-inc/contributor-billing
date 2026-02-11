@@ -3,14 +3,14 @@ import type { PHDocument } from "document-model";
 import type {
   ResourceTemplateDocument,
   TemplateStatus,
-} from "../../document-models/resource-template/index.js";
+} from "@powerhousedao/service-offering/document-models/resource-template";
 import type {
   ServiceOfferingDocument,
   ServiceStatus,
-} from "../../document-models/service-offering/index.js";
+} from "@powerhousedao/service-offering/document-models/service-offering";
 import { addFile, type DocumentDriveDocument } from "document-drive";
 import { BuilderProfile } from "@powerhousedao/builder-profile/document-models";
-import { ResourceInstance } from "../../document-models/resource-instance/module.js";
+import { ResourceInstance } from "@powerhousedao/service-offering/document-models";
 
 // Filter types
 interface ResourceTemplatesFilter {
@@ -415,6 +415,28 @@ function mapResourceTemplateState(
       categoryLabel: facet.categoryLabel,
       selectedOptions: facet.selectedOptions,
     })),
+    services: (state.services || []).map((service) => ({
+      id: service.id,
+      title: service.title,
+      description: service.description || null,
+      displayOrder: service.displayOrder ?? null,
+      parentServiceId: service.parentServiceId || null,
+      isSetupFormation: service.isSetupFormation,
+      optionGroupId: service.optionGroupId || null,
+      facetBindings: (service.facetBindings || []).map((binding) => ({
+        id: binding.id,
+        facetName: binding.facetName,
+        facetType: binding.facetType,
+        supportedOptions: binding.supportedOptions,
+      })),
+    })),
+    optionGroups: (state.optionGroups || []).map((group) => ({
+      id: group.id,
+      name: group.name,
+      description: group.description || null,
+      isAddOn: group.isAddOn,
+      defaultSelected: group.defaultSelected,
+    })),
     faqFields: (state.faqFields || []).map((faq) => ({
       id: faq.id,
       question: faq.question || null,
@@ -501,24 +523,31 @@ function mapServiceOfferingState(
       label: audience.label,
       color: audience.color || null,
     })),
-    setupServices: state.setupServices,
-    recurringServices: state.recurringServices,
     facetTargets: state.facetTargets.map((facet) => ({
       id: facet.id,
       categoryKey: facet.categoryKey,
       categoryLabel: facet.categoryLabel,
       selectedOptions: facet.selectedOptions,
     })),
+    serviceGroups: (state.serviceGroups || []).map((group) => ({
+      id: group.id,
+      name: group.name,
+      description: group.description || null,
+      billingCycle: group.billingCycle,
+      displayOrder: group.displayOrder ?? null,
+    })),
     services: state.services.map((service) => ({
       id: service.id,
       title: service.title,
       description: service.description || null,
       displayOrder: service.displayOrder ?? null,
-      parentServiceId: service.parentServiceId || null,
+      serviceGroupId: service.serviceGroupId || null,
       isSetupFormation: service.isSetupFormation,
-      isPremiumExclusive: service.isPremiumExclusive,
       optionGroupId: service.optionGroupId || null,
-      facetBindings: service.facetBindings.map((binding) => ({
+      costType: service.costType || null,
+      price: service.price ?? null,
+      currency: service.currency || null,
+      facetBindings: (service.facetBindings || []).map((binding) => ({
         id: binding.id,
         facetName: binding.facetName,
         facetType: binding.facetType,
@@ -533,30 +562,18 @@ function mapServiceOfferingState(
       pricing: {
         amount: tier.pricing.amount ?? null,
         currency: tier.pricing.currency,
-        billingCycle: tier.pricing.billingCycle,
-        setupFee: tier.pricing.setupFee ?? null,
-        perSeatAmount: tier.pricing.perSeatAmount ?? null,
-        perSeatCurrency: tier.pricing.perSeatCurrency || null,
-        perSeatBillingCycle: tier.pricing.perSeatBillingCycle || null,
-        perSeatLabel: tier.pricing.perSeatLabel || null,
       },
       pricingOptions: tier.pricingOptions.map((option) => ({
         id: option.id,
-        billingCycle: option.billingCycle,
         amount: option.amount,
         currency: option.currency,
-        setupFee: option.setupFee ?? null,
         isDefault: option.isDefault,
-        perSeatAmount: option.perSeatAmount ?? null,
       })),
       serviceLevels: tier.serviceLevels.map((level) => ({
         id: level.id,
         serviceId: level.serviceId,
         level: level.level,
         customValue: level.customValue || null,
-        variations: level.variations || null,
-        annexes: level.annexes || null,
-        setupFee: level.setupFee ?? null,
         optionGroupId: level.optionGroupId || null,
       })),
       usageLimits: tier.usageLimits.map((limit) => ({
@@ -564,12 +581,12 @@ function mapServiceOfferingState(
         serviceId: limit.serviceId,
         metric: limit.metric,
         unitName: limit.unitName || null,
-        limit: limit.limit ?? null,
-        resetPeriod: limit.resetPeriod || null,
+        freeLimit: limit.freeLimit ?? null,
+        paidLimit: limit.paidLimit ?? null,
+        resetCycle: limit.resetCycle || null,
         notes: limit.notes || null,
         unitPrice: limit.unitPrice ?? null,
         unitPriceCurrency: limit.unitPriceCurrency || null,
-        unitPriceBillingCycle: limit.unitPriceBillingCycle || null,
       })),
     })),
     optionGroups: state.optionGroups.map((group) => ({
@@ -578,6 +595,10 @@ function mapServiceOfferingState(
       description: group.description || null,
       isAddOn: group.isAddOn,
       defaultSelected: group.defaultSelected,
+      costType: group.costType || null,
+      billingCycle: group.billingCycle || null,
+      price: group.price ?? null,
+      currency: group.currency || null,
     })),
   };
 }

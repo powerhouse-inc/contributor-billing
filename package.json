@@ -70,6 +70,7 @@
     "@powerhousedao/common": "5.3.0",
     "@powerhousedao/design-system": "5.3.0",
     "@powerhousedao/document-engineering": "^1.40.0",
+    "@powerhousedao/service-offering": "^0.0.1",
     "@powerhousedao/vetra": "^5.3.0",
     "@react-pdf/renderer": "^4.3.1",
     "@safe-global/api-kit": "^4.0.0",
@@ -137,15 +138,23 @@
   "release": {
     "branches": [
       "main",
-      { "name": "staging", "prerelease": "staging" },
-      { "name": "dev", "prerelease": "dev" }
+      {
+        "name": "staging",
+        "prerelease": "staging"
+      },
+      {
+        "name": "dev",
+        "prerelease": "dev"
+      }
     ],
     "plugins": [
       "@semantic-release/changelog",
       "@semantic-release/git",
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
-      ["@semantic-release/npm", { "npmPublish": false }],
+      ["@semantic-release/npm", {
+        "npmPublish": false
+      }],
       "@semantic-release/github"
     ]
   }

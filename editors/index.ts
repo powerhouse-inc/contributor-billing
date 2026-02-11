@@ -6,7 +6,4 @@ export { ContributorBilling } from "./contributor-billing/module.js";
 export { ExpenseReport } from "./expense-report/module.js";
 export { Invoice } from "./invoice/module.js";
 export { OperationalHubProfileEditor } from "./operational-hub-profile-editor/module.js";
-export { ResourceTemplateEditor } from "./resource-template-editor/module.js";
-export { ServiceOfferingEditor } from "./service-offering-editor/module.js";
-export { ServiceSubscriptionsEditor } from "./service-subscriptions-editor/module.js";
 export { SnapshotReport } from "./snapshot-report-editor/module.js";

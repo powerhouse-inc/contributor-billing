@@ -32,18 +32,6 @@
             "name": "Snapshot Report"
         },
         {
-            "id": "powerhouse/service-subscriptions",
-            "name": "ServiceSubscriptions"
-        },
-        {
-            "id": "powerhouse/service-offering",
-            "name": "ServiceOffering"
-        },
-        {
-            "id": "powerhouse/resource-template",
-            "name": "ResourceTemplate"
-        },
-        {
             "id": "powerhouse/operational-hub-profile",
             "name": "OperationalHubProfile"
         }
@@ -89,20 +77,6 @@
             "name": "Snapshot Report",
             "documentTypes": [
                 "powerhouse/snapshot-report"
-            ]
-        },
-        {
-            "id": "powerhouse-service-offering-editor",
-            "name": "Service Offering",
-            "documentTypes": [
-                "powerhouse/service-offering"
-            ]
-        },
-        {
-            "id": "powerhouse-resource-template-editor",
-            "name": "Resource Template",
-            "documentTypes": [
-                "powerhouse/resource-template"
             ]
         },
         {
