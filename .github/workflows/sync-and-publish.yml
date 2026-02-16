@@ -230,11 +230,13 @@ jobs:
             echo "No new release (version: $VERSION)"
           fi
 
+      - name: Upgrade npm for trusted publishing
+        if: inputs.dry-run != true && steps.get-version.outputs.released == 'true'
+        run: npm install -g npm@latest
+
       - name: Publish to npm
         if: inputs.dry-run != true && steps.get-version.outputs.released == 'true'
         run: npm publish --provenance --access public --tag ${{ inputs.channel }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Notify downstream
         if: inputs.dry-run != true && steps.get-version.outputs.released == 'true' && inputs.channel == 'dev'
