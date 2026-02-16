@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0...v1.0.1) (2026-02-16)
+
+
+### Bug Fixes
+
+* add repository url for npm trusted publishing ([96a0fcc](https://github.com/powerhouse-inc/contributor-billing/commit/96a0fccf472c3681f394fc301f5db5ac505b8fea))
+
 # 1.0.0 (2026-02-16)
 
 
