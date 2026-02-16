@@ -1,3 +1,11 @@
+## [1.0.2](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.1...v1.0.2) (2026-02-16)
+
+
+### Bug Fixes
+
+* **ci:** check npm before publishing to avoid duplicate version errors ([a662fda](https://github.com/powerhouse-inc/contributor-billing/commit/a662fdaaf070f45ff44a789fd82872da07944889))
+* release on all commit types via semantic-release releaseRules ([f0db13e](https://github.com/powerhouse-inc/contributor-billing/commit/f0db13e1e76daf6678572ce89e8c9fb521cad549))
+
 ## [1.0.1](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0...v1.0.1) (2026-02-16)
 
 
