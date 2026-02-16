@@ -222,13 +222,20 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-          git fetch --tags
-          if git tag --list "v$VERSION" | grep -q "v$VERSION"; then
-            echo "released=true" >> $GITHUB_OUTPUT
-            echo "Released version: $VERSION"
-          else
+          # Check if this version is already published on npm
+          if npm view "@powerhousedao/contributor-billing@${VERSION}" version 2>/dev/null; then
             echo "released=false" >> $GITHUB_OUTPUT
-            echo "No new release (version: $VERSION)"
+            echo "Version $VERSION already published, skipping"
+          else
+            # Check if semantic-release created a new tag
+            git fetch --tags
+            if git tag --list "v$VERSION" | grep -q "v$VERSION"; then
+              echo "released=true" >> $GITHUB_OUTPUT
+              echo "Released version: $VERSION"
+            else
+              echo "released=false" >> $GITHUB_OUTPUT
+              echo "No new release (version: $VERSION)"
+            fi
           fi
 
       - name: Upgrade npm for trusted publishing
