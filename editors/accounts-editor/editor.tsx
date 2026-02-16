@@ -8,11 +8,7 @@ import {
   RefreshCw,
   X,
 } from "lucide-react";
-import {
-  DocumentToolbar,
-  toast,
-  ToastContainer,
-} from "@powerhousedao/design-system/connect";
+import { DocumentToolbar, toast } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
   useParentFolderForSelectedNode,
@@ -708,18 +704,6 @@ export default function Editor() {
           </div>
         </div>
       )}
-
-      <ToastContainer
-        position="bottom-right"
-        autoClose={4000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
     </div>
   );
 }

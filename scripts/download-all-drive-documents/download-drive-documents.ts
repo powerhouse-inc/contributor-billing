@@ -423,9 +423,7 @@ async function fetchDocument(
 // ---------------------------------------------------------------------------
 
 function buildFolderPaths(nodes: DriveNode[]): Map<string, string> {
-  const folders = nodes.filter(
-    (n): n is FolderNode => n.kind === "folder",
-  );
+  const folders = nodes.filter((n): n is FolderNode => n.kind === "folder");
 
   const folderMap = new Map<string, FolderNode>();
   for (const f of folders) {
@@ -568,9 +566,7 @@ async function downloadDrive(
   console.log(`  Slug:  ${drive.slug}`);
   console.log(`  Icon:  ${drive.icon ?? "(none)"}`);
 
-  const folders = nodes.filter(
-    (n): n is FolderNode => n.kind === "folder",
-  );
+  const folders = nodes.filter((n): n is FolderNode => n.kind === "folder");
   const files = nodes.filter(
     (n): n is FileNode => "documentType" in n && n.kind === "file",
   );

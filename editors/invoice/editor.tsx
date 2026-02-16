@@ -15,7 +15,11 @@ import { loadUBLFile } from "./ingestUBL.js";
 import PDFUploader from "./ingestPDF.js";
 import RequestFinance from "./requestFinance.js";
 import InvoiceToGnosis from "./invoiceToGnosis.js";
-import { toast, ToastContainer } from "@powerhousedao/design-system/connect";
+import { ToastContainer } from "@powerhousedao/design-system/connect";
+import {
+  invoiceToast as toast,
+  INVOICE_TOAST_CONTAINER_ID,
+} from "./invoiceToast.js";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { InvoicePDF } from "./InvoicePDF.js";
 import { createRoot } from "react-dom/client";
@@ -681,6 +685,7 @@ export default function Editor() {
       <DocumentToolbar />
       <div className="flex-1 max-w-7xl mx-auto w-full mt-4 px-4 pb-8">
         <ToastContainer
+          containerId={INVOICE_TOAST_CONTAINER_ID}
           position="bottom-right"
           autoClose={5000}
           hideProgressBar={false}

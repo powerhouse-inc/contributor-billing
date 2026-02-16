@@ -54,11 +54,14 @@ export function DocumentDropZone({
       }
     };
 
-    document.addEventListener("drop", handleDocumentDrop);
+    // Use capture phase for drop so it fires BEFORE any React handler
+    // can call stopPropagation (e.g., InvoiceTableContainer stops the
+    // event from reaching DocumentDropZone's React handler)
+    document.addEventListener("drop", handleDocumentDrop, true);
     document.addEventListener("dragleave", handleDocumentDragLeave);
 
     return () => {
-      document.removeEventListener("drop", handleDocumentDrop);
+      document.removeEventListener("drop", handleDocumentDrop, true);
       document.removeEventListener("dragleave", handleDocumentDragLeave);
     };
   }, []);

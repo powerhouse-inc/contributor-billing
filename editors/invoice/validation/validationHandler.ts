@@ -3,7 +3,7 @@ import {
   type ValidationContext,
   validateField,
 } from "./validationManager.js";
-import { toast } from "@powerhousedao/design-system/connect";
+import { invoiceToast as toast } from "../invoiceToast.js";
 import { isValidIBAN } from "./validationRules.js";
 
 const validateStatusBeforeContinue = (

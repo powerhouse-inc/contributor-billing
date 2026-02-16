@@ -22,23 +22,16 @@ export const requestDirectPayment = async (
 ): Promise<RequestFinanceResponse> => {
   const data = invoiceData as InvoicePaymentData;
   data.buyerInfo.email = REQUEST_FINANCE_EMAIL ?? "";
-  console.log(
-    "Getting a request to create an invoice",
-    data.invoiceNumber,
-  );
+  console.log("Getting a request to create an invoice", data.invoiceNumber);
   try {
     // First API call to create the invoice
-    const response = await axios.post<{ id: string }>(
-      API_URL,
-      invoiceData,
-      {
-        headers: {
-          Authorization: `${API_KEY}`,
-          "Content-Type": "application/json",
-          "X-Network": "mainnet",
-        },
+    const response = await axios.post<{ id: string }>(API_URL, invoiceData, {
+      headers: {
+        Authorization: `${API_KEY}`,
+        "Content-Type": "application/json",
+        "X-Network": "mainnet",
       },
-    );
+    });
 
     console.log("Server: Invoice created successfully:", response.data.id);
 

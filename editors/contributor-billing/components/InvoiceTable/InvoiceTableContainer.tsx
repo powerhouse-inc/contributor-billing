@@ -24,6 +24,8 @@ interface InvoiceTableContainerProps {
   monthName?: string;
   /** The sibling Reporting folder ID where expense reports should be created */
   reportingFolderId?: string;
+  /** Content rendered above the InvoiceTable but inside the drop zone */
+  children?: React.ReactNode;
 }
 
 /**
@@ -34,6 +36,7 @@ export function InvoiceTableContainer({
   folderId,
   monthName,
   reportingFolderId,
+  children,
 }: InvoiceTableContainerProps) {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
@@ -208,10 +211,13 @@ export function InvoiceTableContainer({
     [onDropFile, driveId, folderId],
   );
 
+  // Don't stopPropagation on dragOver/dragEnter — these must bubble to
+  // DocumentDropZone so it can show the full-screen overlay.
+  // Only handleDrop uses stopPropagation to prevent DocumentDropZone
+  // from also processing the files.
   const handleDragOver = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
-      event.stopPropagation();
       event.dataTransfer.dropEffect = "copy";
     },
     [],
@@ -220,7 +226,6 @@ export function InvoiceTableContainer({
   const handleDragEnter = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
-      event.stopPropagation();
     },
     [],
   );
@@ -323,6 +328,7 @@ export function InvoiceTableContainer({
       onDragOver={handleDragOver}
       onDragEnter={handleDragEnter}
     >
+      {children}
       <InvoiceTable
         files={fileNodes}
         selected={selected}

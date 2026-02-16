@@ -39,6 +39,7 @@ interface HeaderControlsProps {
   invoices?: Array<{ header: { id: string; name: string } }>;
   billingStatements?: Array<{ header: { id: string; name: string } }>;
   canExportSelectedRows: () => boolean;
+  onDeleteSelected?: (ids: string[]) => Promise<void>;
 }
 
 export const HeaderControls = ({
@@ -56,6 +57,7 @@ export const HeaderControls = ({
   invoices = [],
   billingStatements = [],
   canExportSelectedRows,
+  onDeleteSelected,
 }: HeaderControlsProps) => {
   const batchOptions = [
     { label: "Generate Bill Statements", value: "generate-bills" },
@@ -63,6 +65,7 @@ export const HeaderControls = ({
       label: "Export CSV Expense Report",
       value: "export-csv-expense-report",
     },
+    { label: "Delete Selected", value: "delete-selected" },
   ];
 
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
@@ -74,12 +77,28 @@ export const HeaderControls = ({
   const [selectedBatchAction, setSelectedBatchAction] = useState<
     string | undefined
   >(undefined);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [deleteIds, setDeleteIds] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Simple batch action handler - matches working old code pattern
   const handleBatchAction = async (action: string) => {
     if (action === "export-csv-expense-report") {
       setShowExpenseReportCurrencyModal(true);
+      return;
+    }
+
+    if (action === "delete-selected") {
+      const selectedIds = Object.keys(selected).filter((id) => selected[id]);
+
+      if (selectedIds.length === 0) {
+        toast("No documents selected", { type: "warning" });
+        setTimeout(() => setSelectedBatchAction(undefined), 0);
+        return;
+      }
+
+      setDeleteIds(selectedIds);
+      setShowDeleteConfirmModal(true);
       return;
     }
 
