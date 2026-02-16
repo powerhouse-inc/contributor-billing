@@ -1,3 +1,11 @@
+# [1.0.0-dev.2](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.1...v1.0.0-dev.2) (2026-02-16)
+
+
+### Bug Fixes
+
+* **ci:** switch to npm trusted publishing (remove NPM_TOKEN) ([dfa3a05](https://github.com/powerhouse-inc/contributor-billing/commit/dfa3a05afb340676da64bb05578d4adee87400cf))
+* correct semantic-release plugin order ([8d9c226](https://github.com/powerhouse-inc/contributor-billing/commit/8d9c2260f2b8351db40e9d73884c79ffd527297d))
+
 # 1.0.0-dev.1 (2026-02-16)
 
 
