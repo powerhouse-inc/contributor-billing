@@ -1,25 +1,93 @@
-import { executeTransferProposal } from "../../scripts/invoice/gnosisTransactionBuilder.js";
+import {
+  executeTransferProposal,
+  type PaymentDetail,
+  type TransferResult,
+} from "../../scripts/invoice/gnosisTransactionBuilder.js";
 import { requestDirectPayment } from "../../scripts/invoice/requestFinance.js";
 import { actions } from "../../document-models/invoice/index.js";
 import { uploadPdfAndGetJsonClaude } from "../../scripts/invoice/pdfToClaudeAI.js";
 import * as crypto from "crypto";
 
+// --- Type definitions for resolver args and external interfaces ---
+
+interface GnosisPaymentArgs {
+  chainName: string;
+  paymentDetails: PaymentDetail;
+  invoiceNo: string;
+}
+
+interface RequestFinancePaymentArgs {
+  paymentData: Record<string, unknown>;
+}
+
+interface GnosisPaymentResult {
+  success: boolean;
+  data?: TransferResult;
+  error?: string;
+}
+
+interface PendingTransaction {
+  invoiceNo: string;
+  chainName: string;
+  paymentDetails: PaymentDetail | PaymentDetail[];
+  timestamp: number;
+}
+
+interface DriveNode {
+  id: string;
+  documentType: string;
+}
+
+interface ReactorInstance {
+  getDrive(driveId: string): Promise<{
+    state: { global: { nodes: DriveNode[] } };
+  }>;
+  getDocument(
+    driveId: string,
+    documentId: string,
+  ): Promise<{
+    state: { global: { invoiceNo: string } };
+  }>;
+  addAction(
+    driveId: string,
+    documentId: string,
+    action: unknown,
+  ): Promise<void>;
+}
+
+interface AlchemyActivity {
+  category: string;
+  fromAddress: string;
+  toAddress: string;
+  rawContract: { address: string };
+  hash?: string;
+  value?: number;
+}
+
+interface AlchemyWebhookPayload {
+  event?: {
+    activity?: AlchemyActivity | AlchemyActivity[];
+  };
+}
+
+interface WebhookRequest {
+  body: AlchemyWebhookPayload;
+  headers: Record<string, string | undefined>;
+}
+
+interface WebhookResponse {
+  status(code: number): WebhookResponse;
+  json(body: Record<string, unknown>): WebhookResponse;
+}
+
 // Store pending transactions for webhook matching
-const pendingTransactions: Record<
-  string,
-  {
-    invoiceNo: string;
-    chainName: string;
-    paymentDetails: any;
-    timestamp: number;
-  }
-> = {};
+const pendingTransactions: Record<string, PendingTransaction> = {};
 
 // Add a set to track processed transaction hashes to avoid duplicate processing
 let processedTransactions: Set<string> = new Set();
 
 // Track in-flight payment requests to prevent concurrent processing of the same invoice
-const inFlightPayments: Map<string, Promise<any>> = new Map();
+const inFlightPayments: Map<string, Promise<GnosisPaymentResult>> = new Map();
 
 interface UploadInvoicePdfChunkArgs {
   chunk: string;
@@ -38,9 +106,12 @@ interface FileChunksData {
 // Create a Map to store file chunks data
 const fileChunksMap = new Map<string, FileChunksData>();
 
-let reactor: any;
+let reactor: ReactorInstance;
 
-export const Invoice_processGnosisPayment = async (_: any, args: any) => {
+export const Invoice_processGnosisPayment = async (
+  _: unknown,
+  args: GnosisPaymentArgs,
+): Promise<GnosisPaymentResult> => {
   try {
     const { chainName, paymentDetails, invoiceNo } = args;
 
@@ -56,11 +127,11 @@ export const Invoice_processGnosisPayment = async (_: any, args: any) => {
       console.log(
         `Payment request already in progress for invoice ${invoiceNo}, returning existing promise`,
       );
-      return await inFlightPayments.get(paymentKey);
+      return await inFlightPayments.get(paymentKey)!;
     }
 
     // Create a promise for this payment request
-    const paymentPromise = (async () => {
+    const paymentPromise = (async (): Promise<GnosisPaymentResult> => {
       try {
         // Import and call the executeTransferProposal function
         const result = await executeTransferProposal(chainName, paymentDetails);
@@ -121,8 +192,8 @@ export const Invoice_processGnosisPayment = async (_: any, args: any) => {
 };
 
 export const Invoice_createRequestFinancePayment = async (
-  _: any,
-  args: any,
+  _: unknown,
+  args: RequestFinancePaymentArgs,
 ) => {
   try {
     const { paymentData } = args;
@@ -161,7 +232,7 @@ export const Invoice_createRequestFinancePayment = async (
 };
 
 export const Invoice_uploadInvoicePdfChunk = async (
-  _: any,
+  _: unknown,
   args: UploadInvoicePdfChunkArgs,
 ) => {
   try {
@@ -171,7 +242,7 @@ export const Invoice_uploadInvoicePdfChunk = async (
     // Initialize array for this file if it doesn't exist
     if (!fileChunksMap.has(fileKey)) {
       fileChunksMap.set(fileKey, {
-        chunks: new Array(totalChunks).fill(""),
+        chunks: new Array(totalChunks).fill("") as string[],
         receivedChunks: 0,
       });
     }
@@ -201,7 +272,7 @@ export const Invoice_uploadInvoicePdfChunk = async (
         console.log(`PDF processing completed in ${processingTime}ms`);
 
         const responseData = {
-          invoiceData: claudeResult.invoiceData,
+          invoiceData: claudeResult.invoiceData as Record<string, unknown>,
           processingMetadata: {
             provider: "claude-haiku-4-5-20251001",
             processingTimeMs: processingTime,
@@ -245,7 +316,7 @@ export const Invoice_uploadInvoicePdfChunk = async (
 };
 
 // Function to set the reactor instance
-export const setReactor = (reactorInstance: any) => {
+export const setReactor = (reactorInstance: ReactorInstance) => {
   reactor = reactorInstance;
 };
 
@@ -298,7 +369,7 @@ const updateDocumentStatus = async (invoiceNo: string): Promise<void> => {
   try {
     const drive = await reactor.getDrive("powerhouse");
     const documents = drive.state.global.nodes.filter(
-      (node: any) => node.documentType === "powerhouse/invoice",
+      (node: DriveNode) => node.documentType === "powerhouse/invoice",
     );
     if (documents.length === 0) {
       console.log(`No documents found for invoice ${invoiceNo}`);
@@ -326,17 +397,17 @@ const updateDocumentStatus = async (invoiceNo: string): Promise<void> => {
     }
   } catch (error) {
     console.error(`Error finding document for invoice ${invoiceNo}:`, error);
-    return Promise.reject(error);
+    return Promise.reject(new Error(error as string));
   }
 };
 
 // Webhook handler method
-export const handleWebhook = async (req: any, res: any) => {
+export const handleWebhook = async (
+  req: WebhookRequest,
+  res: WebhookResponse,
+) => {
   try {
     console.log("Webhook received");
-    // Log all headers to debug
-    // console.log('Webhook request headers:', req.headers);
-    // console.log('Webhook request body:', req.body);
 
     // Get the request body and signature
     const payload = req.body;
@@ -345,8 +416,6 @@ export const handleWebhook = async (req: any, res: any) => {
     const signature = req.headers["x-alchemy-signature"];
     if (!signature) {
       console.warn("Missing signature header");
-      // For testing, continue anyway
-      // return res.status(400).json({ error: 'Missing signature header' });
     } else {
       // Validate the signature
       const signingKey = process.env.ALCHEMY_SIGNING_KEY || "whsec_test";
@@ -358,14 +427,8 @@ export const handleWebhook = async (req: any, res: any) => {
 
       if (!isValid) {
         console.warn("Invalid signature");
-        // For testing, continue anyway
-        // return res.status(401).json({ error: 'Invalid signature' });
       }
     }
-
-    // Process the webhook
-    // console.log('Processing webhook test button:', payload.event);
-    // console.log('Processing webhook payload:', payload.event.activity);
 
     // Check if this is a transaction confirmation webhook
     if (payload.event && payload.event.activity) {
@@ -404,35 +467,28 @@ export const handleWebhook = async (req: any, res: any) => {
           );
 
           // Look for matching pending transactions based on transaction details
-          let matchedInvoiceNo = null;
-          let matchedTxHash = null;
+          let matchedInvoiceNo: string | null = null;
+          let matchedTxHash: string | null = null;
 
           for (const [txHash, txInfo] of Object.entries(pendingTransactions)) {
-            const paymentDetails = Array.isArray(txInfo.paymentDetails)
+            const paymentDetailsList = Array.isArray(txInfo.paymentDetails)
               ? txInfo.paymentDetails
               : [txInfo.paymentDetails];
 
-            // Safe transactions may be sent from a different address than the Safe itself
-            // So we'll focus on recipient, token, and amount
-
-            for (const payment of paymentDetails) {
-              // Cast payment to any to access its properties
-              const typedPayment = payment;
-
+            for (const payment of paymentDetailsList) {
               // Check if recipient address matches
               if (
-                typedPayment.payeeWallet &&
-                typedPayment.payeeWallet.address.toLowerCase() === toAddress
+                payment.payeeWallet &&
+                payment.payeeWallet.address.toLowerCase() === toAddress
               ) {
                 // Check if token address matches
                 if (
-                  typedPayment.token &&
-                  typedPayment.token.evmAddress.toLowerCase() === tokenAddress
+                  payment.token &&
+                  payment.token.evmAddress.toLowerCase() === tokenAddress
                 ) {
                   // Check if amount is similar (allowing for some precision loss)
-                  // Convert both to a common format for comparison
-                  const expectedAmount = parseFloat(typedPayment.amount);
-                  const actualAmount = parseFloat(tokenValue);
+                  const expectedAmount = parseFloat(String(payment.amount));
+                  const actualAmount = parseFloat(String(tokenValue));
 
                   // Allow for a small difference due to precision issues
                   const amountDifference = Math.abs(
@@ -460,12 +516,12 @@ export const handleWebhook = async (req: any, res: any) => {
                   }
                 } else {
                   console.log(
-                    `Token addresses don't match. Expected: ${typedPayment.token?.evmAddress}, Actual: ${tokenAddress}`,
+                    `Token addresses don't match. Expected: ${payment.token?.evmAddress}, Actual: ${tokenAddress}`,
                   );
                 }
               } else {
                 console.log(
-                  `Recipient addresses don't match. Expected: ${typedPayment.payeeWallet?.address}, Actual: ${toAddress}`,
+                  `Recipient addresses don't match. Expected: ${payment.payeeWallet?.address}, Actual: ${toAddress}`,
                 );
               }
             }

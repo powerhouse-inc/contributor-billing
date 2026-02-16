@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useDrives } from "@powerhousedao/reactor-browser";
+import { useDrives, useGetDocuments } from "@powerhousedao/reactor-browser";
+import type { PHDocument } from "document-model";
 import {
   addOwnerId,
   removeOwnerId,
@@ -29,7 +30,10 @@ export function SetOwner({ ownerIds, dispatch }: SetOwnerProps) {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement | null>(null);
 
-  const builderProfiles = useMemo<BuilderProfileOption[]>(() => {
+  const getDocuments = useGetDocuments();
+
+  // Collect builder profile node IDs from drives
+  const localProfileNodes = useMemo(() => {
     if (!drives) return [];
     return drives
       .filter(
@@ -52,6 +56,58 @@ export function SetOwner({ ownerIds, dispatch }: SetOwnerProps) {
           })),
       );
   }, [drives]);
+
+  const localProfilePhids = useMemo(
+    () => localProfileNodes.map((node) => node.id),
+    [localProfileNodes],
+  );
+
+  // Fetch actual builder profile documents to get state (name, etc.)
+  const [localProfileDocuments, setLocalProfileDocuments] = useState<
+    PHDocument[]
+  >([]);
+
+  useEffect(() => {
+    if (localProfilePhids.length === 0) {
+      setLocalProfileDocuments([]);
+      return;
+    }
+
+    getDocuments(localProfilePhids)
+      .then((docs) => {
+        setLocalProfileDocuments(docs);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch builder profile documents:", error);
+        setLocalProfileDocuments([]);
+      });
+  }, [localProfilePhids, getDocuments]);
+
+  // Create a map of PHID to document state for name lookup
+  const localProfileStateMap = useMemo(() => {
+    const map = new Map<string, { name?: string | null }>();
+    for (const doc of localProfileDocuments) {
+      const state = (
+        doc.state as { global?: { name?: string | null } } | undefined
+      )?.global;
+      if (state) {
+        map.set(doc.header.id, state);
+      }
+    }
+    return map;
+  }, [localProfileDocuments]);
+
+  // Build profiles with actual document names
+  const builderProfiles = useMemo<BuilderProfileOption[]>(() => {
+    return localProfileNodes.map((node) => {
+      const state = localProfileStateMap.get(node.id);
+      return {
+        id: node.id,
+        name: state?.name || node.name,
+        driveId: node.driveId,
+      };
+    });
+  }, [localProfileNodes, localProfileStateMap]);
 
   // Filter out already selected owners from the picker
   const ownerIdSet = new Set(ownerIds);

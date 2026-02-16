@@ -32,7 +32,7 @@ export const schema: DocumentNode = gql`
 
   input RSResourceTemplatesFilter {
     id: PHID
-    status: [RSTemplateStatus!]
+    status: [RSTemplateStatusInput!]
     operatorId: PHID
   }
 
@@ -45,7 +45,7 @@ export const schema: DocumentNode = gql`
 
   # ============ Resource Template Types ============
 
-  enum RSTemplateStatus {
+  enum RSTemplateStatusInput {
     DRAFT
     COMING_SOON
     ACTIVE
@@ -66,8 +66,17 @@ export const schema: DocumentNode = gql`
     setupServices: [String!]!
     recurringServices: [String!]!
     facetTargets: [RSFacetTarget!]!
-    faqFields: [RSFaqField!]!
+    services: [RSService!]!
+    optionGroups: [RSOptionGroup!]!
+    faqFields: [RSFaqField!]
     contentSections: [RSContentSection!]!
+  }
+
+  enum RSTemplateStatus {
+    DRAFT
+    COMING_SOON
+    ACTIVE
+    DEPRECATED
   }
 
   type RSTargetAudience {
@@ -76,14 +85,14 @@ export const schema: DocumentNode = gql`
     color: String
   }
 
-  type RSFacetTarget {
+  type RSOfferingFacetTarget {
     id: OID!
     categoryKey: String!
     categoryLabel: String!
     selectedOptions: [String!]!
   }
 
-  type RSResourceService {
+  type RSService {
     id: OID!
     title: String!
     description: String
@@ -92,13 +101,6 @@ export const schema: DocumentNode = gql`
     isSetupFormation: Boolean!
     optionGroupId: OID
     facetBindings: [RSResourceFacetBinding!]!
-  }
-
-  type RSResourceFacetBinding {
-    id: OID!
-    facetName: String!
-    facetType: PHID!
-    supportedOptions: [OID!]!
   }
 
   type RSOptionGroup {
@@ -125,13 +127,6 @@ export const schema: DocumentNode = gql`
 
   # ============ Service Offering Types ============
 
-  enum RSServiceStatus {
-    DRAFT
-    COMING_SOON
-    ACTIVE
-    DEPRECATED
-  }
-
   type RSServiceOffering {
     id: PHID!
     operatorId: PHID!
@@ -143,13 +138,40 @@ export const schema: DocumentNode = gql`
     infoLink: URL
     status: RSServiceStatus!
     lastModified: DateTime!
-    targetAudiences: [RSTargetAudience!]!
-    setupServices: [String!]!
-    recurringServices: [String!]!
-    facetTargets: [RSFacetTarget!]!
+    targetAudiences: [RSOfferingTargetAudience!]!
+    facetTargets: [RSOfferingFacetTarget!]!
+    serviceGroups: [RSServiceGroup!]!
     services: [RSOfferingService!]!
     tiers: [RSServiceSubscriptionTier!]!
-    optionGroups: [RSOptionGroup!]!
+    optionGroups: [RSOfferingOptionGroup!]!
+  }
+
+  enum RSServiceStatus {
+    DRAFT
+    COMING_SOON
+    ACTIVE
+    DEPRECATED
+  }
+
+  type RSOfferingTargetAudience {
+    id: OID!
+    label: String!
+    color: String
+  }
+
+  type RSFacetTarget {
+    id: OID!
+    categoryKey: String!
+    categoryLabel: String!
+    selectedOptions: [String!]!
+  }
+
+  type RSServiceGroup {
+    id: OID!
+    name: String!
+    description: String
+    billingCycle: RSBillingCycle!
+    displayOrder: Int
   }
 
   type RSOfferingService {
@@ -157,11 +179,25 @@ export const schema: DocumentNode = gql`
     title: String!
     description: String
     displayOrder: Int
-    parentServiceId: OID
+    serviceGroupId: OID
     isSetupFormation: Boolean!
-    isPremiumExclusive: Boolean!
     optionGroupId: OID
+    costType: RSServiceCostType
+    price: Amount_Money
+    currency: Currency
     facetBindings: [RSResourceFacetBinding!]!
+  }
+
+  enum RSServiceCostType {
+    RECURRING
+    SETUP
+  }
+
+  type RSResourceFacetBinding {
+    id: OID!
+    facetName: String!
+    facetType: PHID!
+    supportedOptions: [OID!]!
   }
 
   type RSServiceSubscriptionTier {
@@ -178,22 +214,13 @@ export const schema: DocumentNode = gql`
   type RSServicePricing {
     amount: Amount_Money
     currency: Currency!
-    billingCycle: RSBillingCycle!
-    setupFee: Amount_Money
-    perSeatAmount: Amount_Money
-    perSeatCurrency: Currency
-    perSeatBillingCycle: RSBillingCycle
-    perSeatLabel: String
   }
 
   type RSTierPricingOption {
     id: OID!
-    billingCycle: RSBillingCycle!
     amount: Amount_Money!
     currency: Currency!
-    setupFee: Amount_Money
     isDefault: Boolean!
-    perSeatAmount: Amount_Money
   }
 
   enum RSBillingCycle {
@@ -209,9 +236,6 @@ export const schema: DocumentNode = gql`
     serviceId: OID!
     level: RSServiceLevel!
     customValue: String
-    variations: String
-    annexes: String
-    setupFee: Amount_Money
     optionGroupId: OID
   }
 
@@ -229,21 +253,34 @@ export const schema: DocumentNode = gql`
     serviceId: OID!
     metric: String!
     unitName: String
-    limit: Int
-    resetPeriod: RSResetPeriod
+    freeLimit: Int
+    paidLimit: Int
+    resetCycle: RSUsageResetCycle
     notes: String
     unitPrice: Amount_Money
     unitPriceCurrency: Currency
-    unitPriceBillingCycle: RSBillingCycle
   }
 
-  enum RSResetPeriod {
-    HOURLY
+  enum RSUsageResetCycle {
     DAILY
     WEEKLY
     MONTHLY
-    QUARTERLY
-    SEMI_ANNUAL
-    ANNUAL
+  }
+
+  type RSOfferingOptionGroup {
+    id: OID!
+    name: String!
+    description: String
+    isAddOn: Boolean!
+    defaultSelected: Boolean!
+    costType: RSGroupCostType
+    billingCycle: RSBillingCycle
+    price: Amount_Money
+    currency: Currency
+  }
+
+  enum RSGroupCostType {
+    RECURRING
+    SETUP
   }
 `;

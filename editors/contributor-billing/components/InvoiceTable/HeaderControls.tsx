@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Select } from "@powerhousedao/document-engineering/ui";
-import { toast } from "@powerhousedao/design-system/connect";
 import type { FileNode } from "document-drive";
+import { cbToast } from "../cbToast.js";
 import { ConfirmationModal } from "./ConfirmationModal.js";
 
 const currencyOptions = [
@@ -39,6 +39,7 @@ interface HeaderControlsProps {
   invoices?: Array<{ header: { id: string; name: string } }>;
   billingStatements?: Array<{ header: { id: string; name: string } }>;
   canExportSelectedRows: () => boolean;
+  onDeleteSelected?: (ids: string[]) => Promise<void>;
 }
 
 export const HeaderControls = ({
@@ -56,6 +57,7 @@ export const HeaderControls = ({
   invoices = [],
   billingStatements = [],
   canExportSelectedRows,
+  onDeleteSelected,
 }: HeaderControlsProps) => {
   const batchOptions = [
     { label: "Generate Bill Statements", value: "generate-bills" },
@@ -63,6 +65,7 @@ export const HeaderControls = ({
       label: "Export CSV Expense Report",
       value: "export-csv-expense-report",
     },
+    { label: "Delete Selected", value: "delete-selected" },
   ];
 
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
@@ -74,6 +77,8 @@ export const HeaderControls = ({
   const [selectedBatchAction, setSelectedBatchAction] = useState<
     string | undefined
   >(undefined);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [deleteIds, setDeleteIds] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Simple batch action handler - matches working old code pattern
@@ -83,11 +88,25 @@ export const HeaderControls = ({
       return;
     }
 
+    if (action === "delete-selected") {
+      const selectedIds = Object.keys(selected).filter((id) => selected[id]);
+
+      if (selectedIds.length === 0) {
+        cbToast("No documents selected", { type: "warning" });
+        setTimeout(() => setSelectedBatchAction(undefined), 0);
+        return;
+      }
+
+      setDeleteIds(selectedIds);
+      setShowDeleteConfirmModal(true);
+      return;
+    }
+
     if (action === "generate-bills") {
       const selectedIds = Object.keys(selected).filter((id) => selected[id]);
 
       if (selectedIds.length === 0) {
-        toast("No invoices selected", { type: "warning" });
+        cbToast("No invoices selected", { type: "warning" });
         setTimeout(() => setSelectedBatchAction(undefined), 0);
         return;
       }
@@ -120,7 +139,7 @@ export const HeaderControls = ({
         });
         setSelected(updatedSelected);
         const billNames = existingBills.join(", ");
-        toast(`Billing statements already exist for: ${billNames}`, {
+        cbToast(`Billing statements already exist for: ${billNames}`, {
           type: "warning",
         });
         setTimeout(() => setSelectedBatchAction(undefined), 0);
@@ -136,7 +155,7 @@ export const HeaderControls = ({
           updatedSelected[id] = false;
         });
         setSelected(updatedSelected);
-        toast("Invoice not ready, change status to ISSUED", {
+        cbToast("Invoice not ready, change status to ISSUED", {
           type: "warning",
         });
         setTimeout(() => setSelectedBatchAction(undefined), 0);
@@ -300,6 +319,42 @@ export const HeaderControls = ({
             value={selectedExpenseReportCurrency}
           />
         </div>
+      </ConfirmationModal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        open={showDeleteConfirmModal}
+        onCancel={() => {
+          setShowDeleteConfirmModal(false);
+          setDeleteIds([]);
+          setTimeout(() => setSelectedBatchAction(undefined), 0);
+        }}
+        onContinue={async () => {
+          setShowDeleteConfirmModal(false);
+          setIsProcessing(true);
+          try {
+            await onDeleteSelected?.(deleteIds);
+            // Clear selection for deleted docs
+            const updatedSelected = { ...selected };
+            deleteIds.forEach((id) => {
+              delete updatedSelected[id];
+            });
+            setSelected(updatedSelected);
+          } finally {
+            setDeleteIds([]);
+            setIsProcessing(false);
+            setTimeout(() => setSelectedBatchAction(undefined), 100);
+          }
+        }}
+        header="Delete Selected Documents"
+        continueLabel="Delete"
+        cancelLabel="Cancel"
+      >
+        <p className="text-red-600 text-sm mb-3 font-medium">
+          This will permanently delete {deleteIds.length} selected document
+          {deleteIds.length !== 1 ? "s" : ""} from the drive. This action
+          cannot be undone.
+        </p>
       </ConfirmationModal>
     </div>
   );

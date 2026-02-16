@@ -25,11 +25,13 @@
       "mcp__reactor-mcp__getDocuments",
       "Bash(node --check:*)",
       "Bash(bun build:*)",
-      "Bash(npm run lint:fix:*)",
       "Bash(bun eslint:*)",
       "Bash(bun i:*)",
       "mcp__reactor-mcp__getDrive",
-      "Bash(npx tsc:*)"
+      "Bash(node -e:*)",
+      "Bash(npx tsc:*)",
+      "Bash(bun run build:*)",
+      "WebFetch(domain:www.conventionalcommits.org)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

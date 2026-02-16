@@ -32,8 +32,7 @@ import type {
   InvoiceWallet,
   IssueInput,
   LegalEntity,
-  LegalEntityCorporateRegistrationId,
-  LegalEntityTaxId,
+  LegalEntityId,
   Payment,
   PaymentRouting,
   ReapprovePaymentInput,
@@ -486,28 +485,11 @@ export function LegalEntitySchema(): z.ZodObject<Properties<LegalEntity>> {
   });
 }
 
-export function LegalEntityCorporateRegistrationIdSchema(): z.ZodObject<
-  Properties<LegalEntityCorporateRegistrationId>
-> {
+export function LegalEntityIdSchema(): z.ZodObject<Properties<LegalEntityId>> {
   return z.object({
-    __typename: z.literal("LegalEntityCorporateRegistrationId").optional(),
-    corpRegId: z.string(),
-  });
-}
-
-export function LegalEntityIdSchema() {
-  return z.union([
-    LegalEntityCorporateRegistrationIdSchema(),
-    LegalEntityTaxIdSchema(),
-  ]);
-}
-
-export function LegalEntityTaxIdSchema(): z.ZodObject<
-  Properties<LegalEntityTaxId>
-> {
-  return z.object({
-    __typename: z.literal("LegalEntityTaxId").optional(),
-    taxId: z.string(),
+    __typename: z.literal("LegalEntityId").optional(),
+    corpRegId: z.string().nullish(),
+    taxId: z.string().nullish(),
   });
 }
 

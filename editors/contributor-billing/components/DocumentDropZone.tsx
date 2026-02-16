@@ -1,12 +1,12 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   useOnDropFile,
   useSelectedDrive,
   useDocumentsInSelectedDrive,
 } from "@powerhousedao/reactor-browser";
-import { toast } from "@powerhousedao/design-system/connect";
 import type { FileUploadProgress } from "@powerhousedao/reactor-browser";
 import { useDocumentAutoPlacement } from "../hooks/useDocumentAutoPlacement.js";
+import { cbToast } from "./cbToast.js";
 
 interface DocumentDropZoneProps {
   children: React.ReactNode;
@@ -31,6 +31,40 @@ export function DocumentDropZone({
 
   // Activate auto-placement hook
   useDocumentAutoPlacement();
+
+  // Safety net: reset drag state when the drag operation ends globally.
+  // This catches cases the component-level handlers miss:
+  // - Drop intercepted by child elements (stopPropagation)
+  // - Drag cancelled by leaving the browser window
+  // - Counter getting out of sync from DOM changes during drag
+  useEffect(() => {
+    const resetDragState = () => {
+      setIsDragging(false);
+      dragCounterRef.current = 0;
+    };
+
+    const handleDocumentDrop = () => {
+      resetDragState();
+    };
+
+    const handleDocumentDragLeave = (e: DragEvent) => {
+      // relatedTarget is null when the cursor leaves the browser window
+      if (!e.relatedTarget) {
+        resetDragState();
+      }
+    };
+
+    // Use capture phase for drop so it fires BEFORE any React handler
+    // can call stopPropagation (e.g., InvoiceTableContainer stops the
+    // event from reaching DocumentDropZone's React handler)
+    document.addEventListener("drop", handleDocumentDrop, true);
+    document.addEventListener("dragleave", handleDocumentDragLeave);
+
+    return () => {
+      document.removeEventListener("drop", handleDocumentDrop, true);
+      document.removeEventListener("dragleave", handleDocumentDragLeave);
+    };
+  }, []);
 
   const driveId = selectedDrive?.header.id;
 
@@ -75,7 +109,7 @@ export function DocumentDropZone({
       // Show error for rejected files
       if (rejectedFiles.length > 0) {
         const rejectedNames = rejectedFiles.map((f) => f.name).join(", ");
-        toast(
+        cbToast(
           `Only .phd files (Powerhouse documents) can be dropped here. Rejected: ${rejectedNames}`,
           { type: "error" },
         );
@@ -90,11 +124,11 @@ export function DocumentDropZone({
             file,
             (progress: FileUploadProgress) => {
               if (progress.stage === "complete") {
-                toast(`Successfully uploaded ${file.name}`, {
+                cbToast(`Successfully uploaded ${file.name}`, {
                   type: "success",
                 });
               } else if (progress.stage === "failed") {
-                toast(`Failed to upload ${file.name}`, {
+                cbToast(`Failed to upload ${file.name}`, {
                   type: "error",
                 });
               }
@@ -113,12 +147,12 @@ export function DocumentDropZone({
               if (doc) {
                 const docType = doc.header.documentType;
                 if (docType === "powerhouse/expense-report") {
-                  toast(
+                  cbToast(
                     `Expense report uploaded. It will be placed in the appropriate Reporting folder based on its period.`,
                     { type: "info" },
                   );
                 } else if (docType === "powerhouse/accounts") {
-                  toast(
+                  cbToast(
                     `Accounts document uploaded. It will remain at the root level.`,
                     { type: "info" },
                   );
@@ -128,7 +162,7 @@ export function DocumentDropZone({
           }
         } catch (error) {
           console.error("Error dropping file:", error);
-          toast(`Error uploading ${file.name}`, { type: "error" });
+          cbToast(`Error uploading ${file.name}`, { type: "error" });
         }
       });
 

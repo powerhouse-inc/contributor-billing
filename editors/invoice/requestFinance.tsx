@@ -1,13 +1,38 @@
 import React, { useState } from "react";
 import { actions } from "../../document-models/invoice/index.js";
 import { generateId } from "document-model";
+import type {
+  InvoiceAction,
+  InvoiceState,
+  InvoiceLineItem,
+} from "../../document-models/invoice/index.js";
 import { getGraphQLUrl } from "../shared/graphql.js";
 
 const GRAPHQL_URL = getGraphQLUrl();
 
+interface DirectPaymentResult {
+  message?: string;
+  response?: {
+    invoiceLinks?: {
+      pay?: string;
+    };
+  };
+}
+
+interface CreateRequestFinancePaymentResponse {
+  data?: {
+    Invoice_createRequestFinancePayment?: {
+      success: boolean;
+      data?: DirectPaymentResult;
+      error?: string;
+    };
+  };
+  errors?: Array<{ message: string }>;
+}
+
 interface RequestFinanceProps {
-  docState: any; // Replace 'any' with the appropriate type if available
-  dispatch: any;
+  docState: InvoiceState;
+  dispatch: React.Dispatch<InvoiceAction>;
 }
 
 const RequestFinance: React.FC<RequestFinanceProps> = ({
@@ -16,7 +41,9 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [responseData, setResponseData] = useState<any>(null);
+  const [responseData, setResponseData] = useState<DirectPaymentResult | null>(
+    null,
+  );
   const [invoiceLink, setInvoiceLink] = useState<string | null>(null);
   const [directPaymentStatus, setDirectPaymentStatus] = useState<string | null>(
     null,
@@ -24,7 +51,9 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
   const invoiceStatus = docState.status;
 
   // Function to call the createDirectPayment mutation
-  const createDirectPayment = async (paymentData: any) => {
+  const createDirectPayment = async (
+    paymentData: Record<string, unknown>,
+  ): Promise<DirectPaymentResult | undefined> => {
     try {
       // GraphQL mutation request
       const response = await fetch(GRAPHQL_URL, {
@@ -34,7 +63,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
         },
         body: JSON.stringify({
           query: `
-            mutation Invoice_createRequestFinancePayment($paymentData: JSON!) {
+            mutation Invoice_createRequestFinancePayment($paymentData: JSONObject!) {
               Invoice_createRequestFinancePayment(paymentData: $paymentData) {
                 success
                 data
@@ -48,7 +77,8 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
         }),
       });
 
-      const result = await response.json();
+      const result =
+        (await response.json()) as CreateRequestFinancePaymentResponse;
 
       if (result.errors) {
         throw new Error(result.errors[0].message);
@@ -63,7 +93,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
             "Unknown error",
         );
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error creating direct payment:", err);
       setDirectPaymentStatus(
         `Error creating direct payment: ${err instanceof Error ? err.message : "Unknown error"}`,
@@ -79,27 +109,33 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
     setInvoiceLink(null);
     setDirectPaymentStatus(null);
 
-    const bankDetails: any = {
+    const bank = docState.issuer.paymentRouting?.bank;
+    if (!bank) {
+      setError("Missing bank payment routing details");
+      setIsLoading(false);
+      return;
+    }
+
+    const bankDetails: {
+      currency: string;
+      accountNumber: string;
+      country: string;
+      bankName: string;
+      firstName: string;
+      lastName: string;
+      bicSwift: string | null | undefined;
+      routingNumber?: string;
+    } = {
       currency: docState.currency,
-      accountNumber: docState.issuer.paymentRouting.bank.accountNum,
-      country:
-        docState.issuer.paymentRouting.bank.address.country.toUpperCase(),
-      bankName: docState.issuer.paymentRouting.bank.name,
-      firstName:
-        docState.issuer.paymentRouting.bank.beneficiary.split(" ")[0] ||
-        "Liberuum",
-      lastName:
-        docState.issuer.paymentRouting.bank.beneficiary.split(" ")[1] ||
-        "Liberty",
-      bicSwift:
-        docState.issuer.paymentRouting.bank.BIC ||
-        docState.issuer.paymentRouting.bank.SWIFT,
+      accountNumber: bank.accountNum,
+      country: bank.address.country?.toUpperCase() ?? "",
+      bankName: bank.name,
+      firstName: bank.beneficiary?.split(" ")[0] || "Liberuum",
+      lastName: bank.beneficiary?.split(" ")[1] || "Liberty",
+      bicSwift: bank.BIC || bank.SWIFT,
     };
-    if (
-      docState.issuer.paymentRouting.bank.ABA &&
-      docState.issuer.paymentRouting.bank.ABA.trim() !== ""
-    ) {
-      bankDetails.routingNumber = docState.issuer.paymentRouting.bank.ABA;
+    if (bank.ABA && bank.ABA.trim() !== "") {
+      bankDetails.routingNumber = bank.ABA;
     }
 
     const getDecimalPlaces = (currency: string): number => {
@@ -118,14 +154,14 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
           version: "0.0.3",
         },
         creationDate: docState.dateIssued,
-        invoiceItems: docState.lineItems.map((item: any) => {
-          const currency = bankDetails.currency;
-          const decimalPlaces = getDecimalPlaces(currency);
+        invoiceItems: docState.lineItems.map((item: InvoiceLineItem) => {
+          const itemCurrency = bankDetails.currency;
+          const decimalPlaces = getDecimalPlaces(itemCurrency);
           const multiplier = Math.pow(10, decimalPlaces);
           const unitPriceInt = Math.round(item.unitPriceTaxIncl * multiplier);
 
           return {
-            currency,
+            currency: itemCurrency,
             name: item.description,
             quantity: item.quantity,
             unitPrice: unitPriceInt,
@@ -133,31 +169,29 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
         }),
         invoiceNumber: docState.invoiceNo,
         buyerInfo: {
-          // email: docState.payer.contactInfo.email,
           email: "",
-          firstName: docState.payer.name,
-          // lastName: docState.payer.name.split(" ")[1] || "Liberty",
-          businessName: docState.payer.name,
+          firstName: docState.payer.name ?? "",
+          businessName: docState.payer.name ?? "",
           address: {
-            country: docState.payer.address.country,
-            city: docState.payer.address.city,
-            streetAddress: docState.payer.address.streetAddress,
-            extendedAddress: docState.payer.address.extendedAddress,
-            postalCode: docState.payer.address.postalCode,
-            region: docState.payer.address.stateProvince || "",
+            country: docState.payer.address?.country ?? "",
+            city: docState.payer.address?.city ?? "",
+            streetAddress: docState.payer.address?.streetAddress ?? "",
+            extendedAddress: docState.payer.address?.extendedAddress ?? "",
+            postalCode: docState.payer.address?.postalCode ?? "",
+            region: docState.payer.address?.stateProvince || "",
           },
         },
         sellerInfo: {
-          email: docState.issuer.contactInfo.email,
-          firstName: docState.issuer.name,
+          email: docState.issuer.contactInfo?.email ?? "",
+          firstName: docState.issuer.name ?? "",
           lastName: "",
           address: {
-            country: docState.issuer.address.country,
-            city: docState.issuer.address.city,
-            streetAddress: docState.issuer.address.streetAddress,
-            extendedAddress: docState.issuer.address.extendedAddress,
-            postalCode: docState.issuer.address.postalCode,
-            region: docState.issuer.address.stateProvince || "",
+            country: docState.issuer.address?.country ?? "",
+            city: docState.issuer.address?.city ?? "",
+            streetAddress: docState.issuer.address?.streetAddress ?? "",
+            extendedAddress: docState.issuer.address?.extendedAddress ?? "",
+            postalCode: docState.issuer.address?.postalCode ?? "",
+            region: docState.issuer.address?.stateProvince || "",
           },
         },
         paymentOptions: [
@@ -203,15 +237,11 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
         }
       }
 
-      setResponseData(directPaymentResult);
+      setResponseData(directPaymentResult ?? null);
       setDirectPaymentStatus("Direct payment created successfully");
-    } catch (err) {
-      // Handle error with proper typing
-      let errorMessage = "An error occurred";
-
-      if (err instanceof Error) {
-        errorMessage = err.message;
-      }
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred";
 
       setError(errorMessage);
       dispatch(
@@ -275,7 +305,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
                     className="view-invoice-button"
                     href={
                       docState.payments[docState.payments.length - 1]
-                        .processorRef
+                        .processorRef ?? ""
                     }
                     target="_blank"
                     rel="noopener noreferrer"

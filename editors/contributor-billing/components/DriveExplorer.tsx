@@ -1,6 +1,6 @@
 import type { EditorProps } from "document-model";
-import { ToastContainer } from "@powerhousedao/design-system/connect";
 import { useState, useEffect, useRef } from "react";
+import { ToastRenderer } from "./ToastRenderer.js";
 import { DriveContents } from "./DriveContents.js";
 import { FolderTree, type SelectedFolderInfo } from "./FolderTree.js";
 import { FolderTreeErrorBoundary } from "./FolderTreeErrorBoundary.js";
@@ -67,19 +67,7 @@ export function DriveExplorer({ children }: EditorProps) {
         />
       </FolderTreeErrorBoundary>
 
-      {/* Toast notifications */}
-      <ToastContainer
-        position="bottom-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
+      <ToastRenderer />
 
       {/* Main content area - takes remaining space, scrollable */}
       <DocumentDropZone className="flex-1 min-w-0 h-full overflow-x-hidden overflow-y-auto">
