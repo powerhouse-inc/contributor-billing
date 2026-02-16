@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { generateId } from "document-model";
 import {
+  type InvoiceAction,
   type InvoiceDocument,
+  type InvoiceLineItem,
   type ClosureReason,
+  type Rejection,
   type Status,
   actions,
 } from "../../document-models/invoice/index.js";
@@ -40,6 +43,7 @@ import validateStatusBeforeContinue from "./validation/validationHandler.js";
 import { useSelectedInvoiceDocument } from "../../document-models/invoice/hooks.js";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
+  type DocumentDispatch,
   setSelectedNode,
   useParentFolderForSelectedNode,
 } from "@powerhousedao/reactor-browser";
@@ -73,13 +77,11 @@ function datetimeToDate(datetimeStr: string | null | undefined): string {
 export default function Editor() {
   const [doc, dispatch] = useSelectedInvoiceDocument() as [
     InvoiceDocument | undefined,
-    any,
+    DocumentDispatch<InvoiceAction>,
   ];
   const state = doc?.state.global;
 
   // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
-  // Get the parent folder node for the currently selected node
-  const parentFolder = useParentFolderForSelectedNode();
 
   // Initialize hooks with safe defaults that don't depend on state being available
   const [fiatMode, setFiatMode] = useState(false);
@@ -201,14 +203,17 @@ export default function Editor() {
 
   const itemsTotalTaxExcl = useMemo(() => {
     if (!state?.lineItems) return 0;
-    let total = state.lineItems.reduce((sum: number, lineItem: any) => {
-      return sum + lineItem.quantity * lineItem.unitPriceTaxExcl;
-    }, 0.0);
+    let total = state.lineItems.reduce(
+      (sum: number, lineItem: InvoiceLineItem) => {
+        return sum + lineItem.quantity * lineItem.unitPriceTaxExcl;
+      },
+      0.0,
+    );
 
     // If there's an item being edited, replace its contribution with the edited values
     if (editingItemValues) {
       const originalItem = state.lineItems.find(
-        (item: any) => item.id === editingItemValues.id,
+        (item: InvoiceLineItem) => item.id === editingItemValues.id,
       );
       if (originalItem) {
         // Subtract the original contribution and add the edited contribution
@@ -224,14 +229,17 @@ export default function Editor() {
 
   const itemsTotalTaxIncl = useMemo(() => {
     if (!state?.lineItems) return 0;
-    let total = state.lineItems.reduce((sum: number, lineItem: any) => {
-      return sum + lineItem.quantity * lineItem.unitPriceTaxIncl;
-    }, 0.0);
+    let total = state.lineItems.reduce(
+      (sum: number, lineItem: InvoiceLineItem) => {
+        return sum + lineItem.quantity * lineItem.unitPriceTaxIncl;
+      },
+      0.0,
+    );
 
     // If there's an item being edited, replace its contribution with the edited values
     if (editingItemValues) {
       const originalItem = state.lineItems.find(
-        (item: any) => item.id === editingItemValues.id,
+        (item: InvoiceLineItem) => item.id === editingItemValues.id,
       );
       if (originalItem) {
         // Subtract the original contribution and add the edited contribution
@@ -497,7 +505,7 @@ export default function Editor() {
       } catch (error) {
         console.error("Error generating PDF blob:", error);
         cleanup();
-        reject(error);
+        reject(error as Error);
       }
     });
   }
@@ -529,7 +537,7 @@ export default function Editor() {
     }
     if (newStatus === "ISSUED") {
       const trueRejection = state.rejections.find(
-        (rejection: any) => rejection.final === true,
+        (rejection: Rejection) => rejection.final === true,
       );
       if (state.status === "REJECTED" && trueRejection) {
         setRejectReason(trueRejection.reason);
@@ -668,14 +676,9 @@ export default function Editor() {
     // Add more labels as needed
   };
 
-  // Set the selected node to the parent folder node (close the editor)
-  function handleClose() {
-    setSelectedNode(parentFolder);
-  }
-
   return (
     <div className="w-full min-h-full flex flex-col">
-      <DocumentToolbar document={doc} onClose={handleClose} />
+      <DocumentToolbar />
       <div className="flex-1 max-w-7xl mx-auto w-full mt-4 px-4 pb-8">
         <ToastContainer
           position="bottom-right"
@@ -947,7 +950,7 @@ export default function Editor() {
         <div className="mb-8">
           <LineItemsTable
             currency={state.currency}
-            lineItems={state.lineItems.map((item: any) => ({
+            lineItems={state.lineItems.map((item: InvoiceLineItem) => ({
               ...item,
               lineItemTag: item.lineItemTag ?? [],
             }))}

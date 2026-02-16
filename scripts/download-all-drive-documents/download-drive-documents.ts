@@ -424,7 +424,7 @@ async function fetchDocument(
 
 function buildFolderPaths(nodes: DriveNode[]): Map<string, string> {
   const folders = nodes.filter(
-    (n): n is FolderNode => !("documentType" in n) || n.kind === "folder",
+    (n): n is FolderNode => n.kind === "folder",
   );
 
   const folderMap = new Map<string, FolderNode>();
@@ -440,9 +440,7 @@ function buildFolderPaths(nodes: DriveNode[]): Map<string, string> {
     const folder = folderMap.get(folderId);
     if (!folder) return "";
 
-    const parentPath = folder.parentFolder
-      ? resolve(folder.parentFolder)
-      : "";
+    const parentPath = folder.parentFolder ? resolve(folder.parentFolder) : "";
     const fullPath = parentPath
       ? path.join(parentPath, sanitize(folder.name))
       : sanitize(folder.name);
@@ -571,20 +569,24 @@ async function downloadDrive(
   console.log(`  Icon:  ${drive.icon ?? "(none)"}`);
 
   const folders = nodes.filter(
-    (n): n is FolderNode => !("documentType" in n) || n.kind === "folder",
+    (n): n is FolderNode => n.kind === "folder",
   );
   const files = nodes.filter(
     (n): n is FileNode => "documentType" in n && n.kind === "file",
   );
 
-  console.log(`  Nodes: ${nodes.length} total (${files.length} files, ${folders.length} folders)`);
+  console.log(
+    `  Nodes: ${nodes.length} total (${files.length} files, ${folders.length} folders)`,
+  );
 
   if (folders.length > 0) {
     console.log(`  Folders:`);
     const folderPaths = buildFolderPaths(nodes);
     for (const folder of folders) {
       const resolvedPath = folderPaths.get(folder.id) ?? folder.name;
-      const parent = folder.parentFolder ? ` (parent: ${folder.parentFolder})` : " (root)";
+      const parent = folder.parentFolder
+        ? ` (parent: ${folder.parentFolder})`
+        : " (root)";
       console.log(`    /${resolvedPath}${parent}`);
     }
 
@@ -598,7 +600,7 @@ async function downloadDrive(
   const fileNodes = new Map<string, FileNode>();
   for (const node of nodes) {
     if ("documentType" in node && node.kind === "file") {
-      fileNodes.set(node.id, node as FileNode);
+      fileNodes.set(node.id, node);
     }
   }
 
@@ -623,7 +625,8 @@ async function downloadDrive(
   let emptyState = 0;
   const failures: { id: string; name: string; reason: string }[] = [];
   const verifyFailures: { id: string; name: string; reason: string }[] = [];
-  const emptyStateIds: { id: string; name: string; documentType: string }[] = [];
+  const emptyStateIds: { id: string; name: string; documentType: string }[] =
+    [];
 
   for (const docId of docIds) {
     const fileNode = fileNodes.get(docId);
@@ -631,14 +634,16 @@ async function downloadDrive(
 
     try {
       if (saved + failed > 0) await sleep(REQUEST_DELAY_MS);
-      console.log(`    [${saved + failed + 1}/${docIds.length}] Fetching "${nodeName}" (${docId})...`);
+      console.log(
+        `    [${saved + failed + 1}/${docIds.length}] Fetching "${nodeName}" (${docId})...`,
+      );
       const doc = await fetchDocument(baseUrl, driveId, docId);
 
       // Warn about empty stateJSON
       const stateIsEmpty =
         doc.stateJSON == null ||
         (typeof doc.stateJSON === "object" &&
-          Object.keys(doc.stateJSON as object).length === 0);
+          Object.keys(doc.stateJSON).length === 0);
       if (stateIsEmpty) {
         emptyState++;
         emptyStateIds.push({
@@ -667,7 +672,9 @@ async function downloadDrive(
       const relativePath = path.relative(outputBase, filePath);
       const sizeKb = (data.length / 1024).toFixed(1);
       const opsCount = doc.operations.length;
-      console.log(`           Saved ${relativePath} (${doc.documentType}, ${opsCount} ops, ${sizeKb} KB)`);
+      console.log(
+        `           Saved ${relativePath} (${doc.documentType}, ${opsCount} ops, ${sizeKb} KB)`,
+      );
 
       // Post-save verification: read back the .phd and compare state
       const vResult = verifyPhdFile(filePath, doc.stateJSON);
@@ -676,7 +683,11 @@ async function downloadDrive(
         console.log(`           Verified OK`);
       } else {
         verifyFailed++;
-        verifyFailures.push({ id: docId, name: nodeName, reason: vResult.reason! });
+        verifyFailures.push({
+          id: docId,
+          name: nodeName,
+          reason: vResult.reason!,
+        });
         console.warn(`           VERIFY FAILED: ${vResult.reason}`);
       }
 

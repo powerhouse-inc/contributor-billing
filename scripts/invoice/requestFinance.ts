@@ -4,27 +4,47 @@ const API_URL = "https://api.request.finance/invoices";
 const API_KEY = process.env.REQUEST_FINANCE_API_KEY; // Store in .env file
 const REQUEST_FINANCE_EMAIL = process.env.REQUEST_FINANCE_EMAIL;
 
-export const requestDirectPayment = async (invoiceData: any) => {
-  invoiceData.buyerInfo.email = REQUEST_FINANCE_EMAIL;
+interface InvoicePaymentData {
+  buyerInfo: { email: string; [key: string]: unknown };
+  invoiceNumber?: string;
+  [key: string]: unknown;
+}
+
+export interface RequestFinanceResponse {
+  errors?: string[];
+  invoiceLinks?: { pay: string };
+  id?: string;
+  [key: string]: unknown;
+}
+
+export const requestDirectPayment = async (
+  invoiceData: InvoicePaymentData | Record<string, unknown>,
+): Promise<RequestFinanceResponse> => {
+  const data = invoiceData as InvoicePaymentData;
+  data.buyerInfo.email = REQUEST_FINANCE_EMAIL ?? "";
   console.log(
     "Getting a request to create an invoice",
-    invoiceData.invoiceNumber,
+    data.invoiceNumber,
   );
   try {
     // First API call to create the invoice
-    const response = await axios.post(API_URL, invoiceData, {
-      headers: {
-        Authorization: `${API_KEY}`,
-        "Content-Type": "application/json",
-        "X-Network": "mainnet",
+    const response = await axios.post<{ id: string }>(
+      API_URL,
+      invoiceData,
+      {
+        headers: {
+          Authorization: `${API_KEY}`,
+          "Content-Type": "application/json",
+          "X-Network": "mainnet",
+        },
       },
-    });
+    );
 
     console.log("Server: Invoice created successfully:", response.data.id);
 
     try {
       // Second API call to make it on-chain
-      const onChainResponse = await axios.post(
+      const onChainResponse = await axios.post<RequestFinanceResponse>(
         `https://api.request.finance/invoices/${response.data.id}`,
         {},
         {
@@ -42,15 +62,26 @@ export const requestDirectPayment = async (invoiceData: any) => {
 
       // Send only one response
       return onChainResponse.data;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Server: Error making invoice on-chain:", error);
-      return error;
+      if (axios.isAxiosError(error) && error.response) {
+        return error.response.data as RequestFinanceResponse;
+      }
+      return {
+        errors: [error instanceof Error ? error.message : "Unknown error"],
+      };
     }
-  } catch (error: any) {
-    console.error(
-      "Error creating invoice: error.response",
-      error.response.data,
-    );
-    return error.response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      console.error(
+        "Error creating invoice: error.response",
+        error.response.data,
+      );
+      return error.response.data as RequestFinanceResponse;
+    }
+    console.error("Error creating invoice:", error);
+    return {
+      errors: [error instanceof Error ? error.message : "Unknown error"],
+    };
   }
 };

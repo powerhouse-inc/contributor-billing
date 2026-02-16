@@ -30,7 +30,8 @@ export const invoiceItemsOperations: InvoiceItemsOperations = {
 
     // Ensure lineItemTag is always an array if provided
     if ("lineItemTag" in action.input) {
-      sanitizedInput.lineItemTag = (action.input.lineItemTag ?? []) as any;
+      sanitizedInput.lineItemTag = (action.input.lineItemTag ??
+        []) as InvoiceTag[];
     }
 
     const nextItem: InvoiceLineItem = {

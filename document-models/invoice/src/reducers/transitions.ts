@@ -1,10 +1,3 @@
-/**
- * This is a scaffold file meant for customization:
- * - modify it by implementing the reducer functions
- * - delete the file and run the code generator again to have it reset
- */
-
-import { permittedTransitions } from "../../utils/statusTransitions.js";
 import type { InvoiceTransitionsOperations } from "@powerhousedao/contributor-billing/document-models/invoice";
 
 /**
@@ -20,6 +13,19 @@ function ensureDatetimeFormat(
   // Convert date-only to datetime at midnight UTC
   return `${dateStr}T00:00:00.000Z`;
 }
+
+const permittedTransitions = {
+  DRAFT: ["CANCELLED", "ISSUED"],
+  CANCELLED: ["DRAFT"],
+  ISSUED: ["REJECTED", "ACCEPTED"],
+  REJECTED: ["ISSUED"],
+  ACCEPTED: ["PAYMENTSCHEDULED", "PAYMENTCLOSED"],
+  PAYMENTSCHEDULED: ["PAYMENTSENT", "PAYMENTISSUE", "PAYMENTCLOSED"],
+  PAYMENTSENT: ["PAYMENTISSUE", "PAYMENTRECEIVED"],
+  PAYMENTISSUE: ["ACCEPTED", "PAYMENTCLOSED"],
+  PAYMENTRECEIVED: ["PAYMENTISSUE"],
+  PAYMENTCLOSED: ["ACCEPTED"],
+};
 
 export const invoiceTransitionsOperations: InvoiceTransitionsOperations = {
   cancelOperation(state) {

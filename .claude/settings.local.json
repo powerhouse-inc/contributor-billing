@@ -28,7 +28,9 @@
       "Bash(bun eslint:*)",
       "Bash(bun i:*)",
       "mcp__reactor-mcp__getDrive",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(npx tsc:*)",
+      "Bash(bun run build:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",
