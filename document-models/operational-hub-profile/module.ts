@@ -9,7 +9,7 @@ import {
   utils,
 } from "@powerhousedao/contributor-billing/document-models/operational-hub-profile";
 
-/** Document model module for the Todo List document type */
+/** Document model module for the OperationalHubProfile document type */
 export const OperationalHubProfile: DocumentModelModule<OperationalHubProfilePHState> =
   {
     version: 1,

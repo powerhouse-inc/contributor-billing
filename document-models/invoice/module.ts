@@ -9,7 +9,7 @@ import {
   utils,
 } from "@powerhousedao/contributor-billing/document-models/invoice";
 
-/** Document model module for the Todo List document type */
+/** Document model module for the Invoice document type */
 export const Invoice: DocumentModelModule<InvoicePHState> = {
   version: 1,
   reducer,

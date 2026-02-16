@@ -104,12 +104,12 @@ export function ExpenseReportStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ExpenseReportState").optional(),
-    endDate: z.string().datetime().nullish(),
+    endDate: z.iso.datetime().nullish(),
     groups: z.array(z.lazy(() => LineItemGroupSchema())),
     ownerId: z.string().nullish(),
-    periodEnd: z.string().datetime().nullish(),
-    periodStart: z.string().datetime().nullish(),
-    startDate: z.string().datetime().nullish(),
+    periodEnd: z.iso.datetime().nullish(),
+    periodStart: z.iso.datetime().nullish(),
+    startDate: z.iso.datetime().nullish(),
     status: ExpenseReportStatusSchema,
     wallets: z.array(z.lazy(() => WalletSchema())),
   });
@@ -258,7 +258,7 @@ export function SetPeriodEndInputSchema(): z.ZodObject<
   Properties<SetPeriodEndInput>
 > {
   return z.object({
-    periodEnd: z.string().datetime(),
+    periodEnd: z.iso.datetime(),
   });
 }
 
@@ -266,8 +266,8 @@ export function SetPeriodInputSchema(): z.ZodObject<
   Properties<SetPeriodInput>
 > {
   return z.object({
-    endDate: z.string().datetime().nullish(),
-    startDate: z.string().datetime().nullish(),
+    endDate: z.iso.datetime().nullish(),
+    startDate: z.iso.datetime().nullish(),
   });
 }
 
@@ -275,7 +275,7 @@ export function SetPeriodStartInputSchema(): z.ZodObject<
   Properties<SetPeriodStartInput>
 > {
   return z.object({
-    periodStart: z.string().datetime(),
+    periodStart: z.iso.datetime(),
   });
 }
 
