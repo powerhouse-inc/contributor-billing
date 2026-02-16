@@ -8,7 +8,7 @@ import {
   type VetraDocumentModelModule,
 } from "@powerhousedao/reactor-browser";
 import type { PHDocument } from "document-model";
-import type { FileNode } from "document-drive";
+import { deleteNode, type FileNode } from "document-drive";
 import { actions as invoiceActions } from "../../../../document-models/invoice/index.js";
 import type { InvoiceTag } from "../../../../document-models/invoice/gen/types.js";
 import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
@@ -600,6 +600,20 @@ export const InvoiceTable = ({
     }
   };
 
+  // Delete selected documents from the drive
+  const handleDeleteSelected = async (ids: string[]) => {
+    const driveId = selectedDrive?.header.id;
+    if (!driveId) return;
+
+    for (const id of ids) {
+      try {
+        await dispatchActions(deleteNode({ id }), driveId);
+      } catch (error) {
+        console.error(`Failed to delete document ${id}:`, error);
+      }
+    }
+  };
+
   // Check for integrations document - simple computed value
   const integrationsDoc = files.find(
     (file) => file.documentType === "powerhouse/integrations",
@@ -819,6 +833,7 @@ export const InvoiceTable = ({
           invoices={invoicesDocs}
           billingStatements={billingStatementDocs}
           canExportSelectedRows={canExportSelectedRows}
+          onDeleteSelected={handleDeleteSelected}
         />
 
         {/* Status Sections */}

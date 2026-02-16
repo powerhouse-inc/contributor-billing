@@ -320,6 +320,42 @@ export const HeaderControls = ({
           />
         </div>
       </ConfirmationModal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        open={showDeleteConfirmModal}
+        onCancel={() => {
+          setShowDeleteConfirmModal(false);
+          setDeleteIds([]);
+          setTimeout(() => setSelectedBatchAction(undefined), 0);
+        }}
+        onContinue={async () => {
+          setShowDeleteConfirmModal(false);
+          setIsProcessing(true);
+          try {
+            await onDeleteSelected?.(deleteIds);
+            // Clear selection for deleted docs
+            const updatedSelected = { ...selected };
+            deleteIds.forEach((id) => {
+              delete updatedSelected[id];
+            });
+            setSelected(updatedSelected);
+          } finally {
+            setDeleteIds([]);
+            setIsProcessing(false);
+            setTimeout(() => setSelectedBatchAction(undefined), 100);
+          }
+        }}
+        header="Delete Selected Documents"
+        continueLabel="Delete"
+        cancelLabel="Cancel"
+      >
+        <p className="text-red-600 text-sm mb-3 font-medium">
+          This will permanently delete {deleteIds.length} selected document
+          {deleteIds.length !== 1 ? "s" : ""} from the drive. This action
+          cannot be undone.
+        </p>
+      </ConfirmationModal>
     </div>
   );
 };
