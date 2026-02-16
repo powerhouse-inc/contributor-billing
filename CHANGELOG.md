@@ -1,3 +1,10 @@
+# [1.0.0-staging.2](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-staging.1...v1.0.0-staging.2) (2026-02-16)
+
+
+### Bug Fixes
+
+* add repository url for npm trusted publishing ([a34c46d](https://github.com/powerhouse-inc/contributor-billing/commit/a34c46d9e1f7f67bb1eaacc51bf4a15171c00520))
+
 # 1.0.0-staging.1 (2026-02-16)
 
 
