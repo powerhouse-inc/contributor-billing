@@ -135,6 +135,27 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
-  "readme": "ERROR: No README data found!",
-  "_id": "@powerhousedao/contributor-billing@0.1.49"
+  "release": {
+    "branches": [
+      "main",
+      {
+        "name": "staging",
+        "prerelease": "staging"
+      },
+      {
+        "name": "dev",
+        "prerelease": "dev"
+      }
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/changelog",
+      ["@semantic-release/npm", {
+        "npmPublish": false
+      }],
+      "@semantic-release/github",
+      "@semantic-release/git"
+    ]
+  }
 }
