@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   useOnDropFile,
   useSelectedDrive,
@@ -31,6 +31,37 @@ export function DocumentDropZone({
 
   // Activate auto-placement hook
   useDocumentAutoPlacement();
+
+  // Safety net: reset drag state when the drag operation ends globally.
+  // This catches cases the component-level handlers miss:
+  // - Drop intercepted by child elements (stopPropagation)
+  // - Drag cancelled by leaving the browser window
+  // - Counter getting out of sync from DOM changes during drag
+  useEffect(() => {
+    const resetDragState = () => {
+      setIsDragging(false);
+      dragCounterRef.current = 0;
+    };
+
+    const handleDocumentDrop = () => {
+      resetDragState();
+    };
+
+    const handleDocumentDragLeave = (e: DragEvent) => {
+      // relatedTarget is null when the cursor leaves the browser window
+      if (!e.relatedTarget) {
+        resetDragState();
+      }
+    };
+
+    document.addEventListener("drop", handleDocumentDrop);
+    document.addEventListener("dragleave", handleDocumentDragLeave);
+
+    return () => {
+      document.removeEventListener("drop", handleDocumentDrop);
+      document.removeEventListener("dragleave", handleDocumentDragLeave);
+    };
+  }, []);
 
   const driveId = selectedDrive?.header.id;
 
