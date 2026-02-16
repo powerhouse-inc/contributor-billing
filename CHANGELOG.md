@@ -1,3 +1,11 @@
+# [1.0.0-staging.3](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-staging.2...v1.0.0-staging.3) (2026-02-16)
+
+
+### Bug Fixes
+
+* **ci:** check npm before publishing to avoid duplicate version errors ([388b3c8](https://github.com/powerhouse-inc/contributor-billing/commit/388b3c8a1d06895c234e4e65d142b0f74abf9e69))
+* release on all commit types via semantic-release releaseRules ([a6e9e39](https://github.com/powerhouse-inc/contributor-billing/commit/a6e9e39aaac292ec908851895ea6e6a4a386fd17))
+
 # [1.0.0-staging.2](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-staging.1...v1.0.0-staging.2) (2026-02-16)
 
 
