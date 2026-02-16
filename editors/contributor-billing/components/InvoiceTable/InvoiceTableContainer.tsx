@@ -11,10 +11,10 @@ import {
   addDocument,
   setSelectedNode,
 } from "@powerhousedao/reactor-browser";
-import { toast } from "@powerhousedao/design-system/connect";
 import type { PHBaseState, PHDocument } from "document-model";
 import type { FileNode } from "document-drive";
 import { moveNode } from "document-drive";
+import { cbToast } from "../cbToast.js";
 import { InvoiceTable } from "./InvoiceTable.js";
 
 interface InvoiceTableContainerProps {
@@ -137,7 +137,7 @@ export function InvoiceTableContainer({
       // Show error for rejected files
       if (rejectedFiles.length > 0) {
         const rejectedNames = rejectedFiles.map((f) => f.name).join(", ");
-        toast(
+        cbToast(
           `Only .phd files (Powerhouse documents) can be dropped here. Rejected: ${rejectedNames}`,
           { type: "error" },
         );
@@ -258,7 +258,7 @@ export function InvoiceTableContainer({
   const onSelectDocumentModel = useCallback(
     async (documentModel: VetraDocumentModelModule, name: string) => {
       if (!driveId) {
-        toast("No drive selected", { type: "error" });
+        cbToast("No drive selected", { type: "error" });
         return;
       }
 
@@ -280,13 +280,13 @@ export function InvoiceTableContainer({
           setTimeout(() => {
             setSelectedNode(createdNode.id);
           }, 100);
-          toast("Invoice created successfully", { type: "success" });
+          cbToast("Invoice created successfully", { type: "success" });
         } else {
-          toast("Failed to create invoice", { type: "error" });
+          cbToast("Failed to create invoice", { type: "error" });
         }
       } catch (error) {
         console.error("Error creating invoice:", error);
-        toast("Failed to create invoice", { type: "error" });
+        cbToast("Failed to create invoice", { type: "error" });
       }
     },
     [driveId, folderId],

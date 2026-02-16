@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Select } from "@powerhousedao/document-engineering/ui";
-import { toast } from "@powerhousedao/design-system/connect";
 import type { FileNode } from "document-drive";
+import { cbToast } from "../cbToast.js";
 import { ConfirmationModal } from "./ConfirmationModal.js";
 
 const currencyOptions = [
@@ -92,7 +92,7 @@ export const HeaderControls = ({
       const selectedIds = Object.keys(selected).filter((id) => selected[id]);
 
       if (selectedIds.length === 0) {
-        toast("No documents selected", { type: "warning" });
+        cbToast("No documents selected", { type: "warning" });
         setTimeout(() => setSelectedBatchAction(undefined), 0);
         return;
       }
@@ -106,7 +106,7 @@ export const HeaderControls = ({
       const selectedIds = Object.keys(selected).filter((id) => selected[id]);
 
       if (selectedIds.length === 0) {
-        toast("No invoices selected", { type: "warning" });
+        cbToast("No invoices selected", { type: "warning" });
         setTimeout(() => setSelectedBatchAction(undefined), 0);
         return;
       }
@@ -139,7 +139,7 @@ export const HeaderControls = ({
         });
         setSelected(updatedSelected);
         const billNames = existingBills.join(", ");
-        toast(`Billing statements already exist for: ${billNames}`, {
+        cbToast(`Billing statements already exist for: ${billNames}`, {
           type: "warning",
         });
         setTimeout(() => setSelectedBatchAction(undefined), 0);
@@ -155,7 +155,7 @@ export const HeaderControls = ({
           updatedSelected[id] = false;
         });
         setSelected(updatedSelected);
-        toast("Invoice not ready, change status to ISSUED", {
+        cbToast("Invoice not ready, change status to ISSUED", {
           type: "warning",
         });
         setTimeout(() => setSelectedBatchAction(undefined), 0);
