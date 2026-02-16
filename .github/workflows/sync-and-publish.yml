@@ -35,7 +35,7 @@ on:
 
 env:
   NODE_VERSION: '22'
-  PNPM_VERSION: '10'
+  BUN_VERSION: 'latest'
 
 jobs:
   # ==========================================================================
@@ -83,38 +83,43 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
         with:
-          version: ${{ env.PNPM_VERSION }}
+          bun-version: ${{ env.BUN_VERSION }}
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
 
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Configure JSR registry
-        run: pnpm config set @jsr:registry https://npm.jsr.io
-
       - name: Update Powerhouse dependencies
-        run: pnpm update "@powerhousedao/*" "document-model" "document-drive"
+        run: |
+          bun update --latest $(node -e "
+            const pkg = require('./package.json');
+            const deps = {...pkg.dependencies, ...pkg.devDependencies};
+            const names = Object.keys(deps).filter(d => d.startsWith('@powerhousedao/') || ['document-model','document-drive'].includes(d));
+            console.log(names.join(' '));
+          ")
 
       - name: Install dependencies
-        run: pnpm install
+        run: bun install
+
+      - name: Generate
+        run: bun generate
 
       - name: Build package
-        run: pnpm build
+        run: bun run build
 
       - name: Check for changes
         id: changes
         run: |
-          if git diff --quiet package.json pnpm-lock.yaml; then
+          if git diff --quiet package.json bun.lock; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "No dependency changes detected"
           else
@@ -125,7 +130,7 @@ jobs:
       - name: Commit changes
         if: steps.changes.outputs.has_changes == 'true' && inputs.dry-run != true
         run: |
-          git add package.json pnpm-lock.yaml
+          git add package.json bun.lock
           PH_VERSION="${{ inputs.powerhouse-version }}"
           if [ -n "$PH_VERSION" ]; then
             git commit -m "chore: sync powerhouse dependencies to $PH_VERSION"
@@ -174,29 +179,28 @@ jobs:
             fi
           done
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
         with:
-          version: ${{ env.PNPM_VERSION }}
+          bun-version: ${{ env.BUN_VERSION }}
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Configure JSR registry
-        run: pnpm config set @jsr:registry https://npm.jsr.io
-
       - name: Install dependencies
-        run: pnpm install
+        run: bun install
+
+      - name: Generate
+        run: bun generate
 
       - name: Build package
-        run: pnpm build
+        run: bun run build
 
       - name: Run tests
-        run: pnpm test || true
+        run: bun run test || true
         continue-on-error: true
 
       - name: Run semantic-release
