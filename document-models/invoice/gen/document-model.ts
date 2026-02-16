@@ -16,14 +16,14 @@ export const documentModel: DocumentModelGlobalState = {
       modules: [
         {
           description: "",
-          id: "WDJ7NWCy8TEDk1TWvr0F+VXvIqc=",
+          id: "9c8263f0-02cd-47a8-ab51-324ddc34903e",
           name: "general",
           operations: [
             {
               description: "",
               errors: [],
               examples: [],
-              id: "8Ld7B60Upub1CNmVrx3TMzmyl54=",
+              id: "d955a93b-113a-4bce-a39c-a35fab0507dd",
               name: "EDIT_INVOICE",
               reducer: "",
               schema:
@@ -35,10 +35,9 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "cCXTmSu1J8VoyDQAk9l/ub3SjWw=",
+              id: "4fefc092-7c18-4c45-8dd3-1d793a4078f4",
               name: "EDIT_STATUS",
-              reducer:
-                'if (\n  state.status === "DRAFT" &&\n  action.input.status !== "DRAFT" &&\n  action.input.status !== "CANCELLED"\n) {\n  const wallet = state.issuer?.paymentRouting?.wallet;\n  if (!wallet?.address || (!wallet.chainName && !wallet.chainId)) {\n    throw new Error(\n      "Issuer wallet address and chain must be set before moving out of DRAFT",\n    );\n  }\n}\nstate.status = action.input.status;',
+              reducer: "",
               schema: "input EditStatusInput {\n  status: Status!\n}",
               scope: "global",
               template: "",
@@ -47,7 +46,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "a++9qKPt5DBpAB/T6dHeJLFLUnA=",
+              id: "2e59c939-146e-4b32-b099-fde474a5ddf0",
               name: "EDIT_PAYMENT_DATA",
               reducer: "",
               schema:
@@ -56,11 +55,10 @@ export const documentModel: DocumentModelGlobalState = {
               template: "",
             },
             {
-              description:
-                "Set exported line items in CSV format with timestamp to track exports",
+              description: "",
               errors: [],
               examples: [],
-              id: "GcKc8GFnD3w7M1fdwxBXrGBwCRM=",
+              id: "6e0f6dc6-d60d-4b44-9890-78d4a21dbb80",
               name: "SET_EXPORTED_DATA",
               reducer: "",
               schema:
@@ -72,7 +70,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "1bd3e06e-2be9-4655-88cb-81f02547f9bf",
+              id: "be51fbde-c3ae-4c9c-bb40-5108eeaad248",
               name: "ADD_PAYMENT",
               reducer: "",
               schema:
@@ -84,14 +82,14 @@ export const documentModel: DocumentModelGlobalState = {
         },
         {
           description: "",
-          id: "M8OqnRBEHn6EHQTyrx826u5xAJg=",
+          id: "d3f278cd-d2bc-4b93-8257-ce49d33a3871",
           name: "parties",
           operations: [
             {
               description: "",
               errors: [],
               examples: [],
-              id: "HSnSU0WWJ8ytXGtuYqKPy8mccB4=",
+              id: "787305ae-aa44-41ea-b35b-4f3cac559a93",
               name: "EDIT_ISSUER",
               reducer: "",
               schema:
@@ -103,7 +101,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "nq2GFV2bmGet6sNlA2XytS7cPA0=",
+              id: "189cf7f9-30cd-4200-9397-c1a97a439c00",
               name: "EDIT_ISSUER_BANK",
               reducer: "",
               schema:
@@ -115,7 +113,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "XtXz6W0lScsBwPkaWofR9LtWjm0=",
+              id: "ccdd1700-0064-4076-8685-5422e172f96c",
               name: "EDIT_ISSUER_WALLET",
               reducer: "",
               schema:
@@ -127,7 +125,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "Lt7r5VNsfyWZhAlm/g3VY0buEhM=",
+              id: "56dd2085-353c-4db0-886e-3e37dd744b4b",
               name: "EDIT_PAYER",
               reducer: "",
               schema:
@@ -139,7 +137,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "Ibn3ArEEpicKLmrfE37zsq78Qeg=",
+              id: "a07a88ac-d080-4644-ae35-82bbca61ebc5",
               name: "EDIT_PAYER_BANK",
               reducer: "",
               schema:
@@ -151,7 +149,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "uEdf8IAGEgC8tiZRKn9WI4O/7KY=",
+              id: "ef795dfb-4fd8-4f8d-87cb-f978e5f8e356",
               name: "EDIT_PAYER_WALLET",
               reducer: "",
               schema:
@@ -163,14 +161,14 @@ export const documentModel: DocumentModelGlobalState = {
         },
         {
           description: "",
-          id: "V6qGoeW+8RP3CHE0XQiBYOy4EKI=",
+          id: "c1b6c239-ac07-4e70-9c54-009c2340fd2c",
           name: "items",
           operations: [
             {
               description: "",
               errors: [],
               examples: [],
-              id: "+Y7o2f0Ht0lsDpoR9FlQwEwzaFU=",
+              id: "9017ff01-001c-418c-8f22-cbbddc8f584b",
               name: "ADD_LINE_ITEM",
               reducer: "",
               schema:
@@ -182,7 +180,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "PCi10xZY1UKyAAsV/etTfQSULa0=",
+              id: "0347ff31-bf1b-4b0e-942b-8bd73be27840",
               name: "EDIT_LINE_ITEM",
               reducer: "",
               schema:
@@ -194,7 +192,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "E9/QRfqZQuNXj/f2sO2HeEjojUI=",
+              id: "c174028c-1e74-4d48-963c-fd7197900445",
               name: "DELETE_LINE_ITEM",
               reducer: "",
               schema: "input DeleteLineItemInput {\n  id: OID!\n}",
@@ -205,7 +203,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "eb020c14-9c7c-4858-8469-fd25059d532f",
+              id: "bf4b2e6e-b95a-4e5c-959f-76cd6a2cfb1d",
               name: "SET_LINE_ITEM_TAG",
               reducer: "",
               schema:
@@ -217,7 +215,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "5ch1tXNyQn0zt2NCITjSqL6Kmso=",
+              id: "17eb26fb-00ed-4aff-8dbb-1b6b9558a71f",
               name: "SET_INVOICE_TAG",
               reducer: "",
               schema:
@@ -229,14 +227,14 @@ export const documentModel: DocumentModelGlobalState = {
         },
         {
           description: "",
-          id: "0af3e43f-8233-4d95-862f-70f1d54fe1dd",
+          id: "7328ec4e-18e3-4f9a-97c7-faca635a4cb6",
           name: "transitions",
           operations: [
             {
               description: "",
               errors: [],
               examples: [],
-              id: "f516b9e3-4b47-4b49-955c-6e907778e186",
+              id: "5cd41d30-affc-422d-aed1-f5cf8a4990e1",
               name: "CANCEL",
               reducer: "",
               schema:
@@ -248,10 +246,9 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "261d8f6d-6d70-4c99-99aa-7717d22d08c3",
+              id: "08f6a81b-37ba-4eba-907d-b363c9047bb8",
               name: "ISSUE",
-              reducer:
-                'if (!action.input.invoiceNo || !action.input.dateIssued) {\n  throw new Error("Invoice number and date issued are required");\n}\nconst wallet = state.issuer?.paymentRouting?.wallet;\nif (!wallet?.address || (!wallet.chainName && !wallet.chainId)) {\n  throw new Error(\n    "Issuer wallet address and chain must be set before issuing an invoice",\n  );\n}\nif (permittedTransitions[state.status].includes("ISSUED")) {\n  state.status = "ISSUED";\n  state.invoiceNo = action.input.invoiceNo;\n  state.dateIssued =\n    ensureDatetimeFormat(action.input.dateIssued) ||\n    action.input.dateIssued;\n} else {\n  throw new Error(`Invalid transition from ${state.status} to ISSUED`);\n}',
+              reducer: "",
               schema:
                 "input IssueInput {\n  invoiceNo: String!\n  dateIssued: String!\n}",
               scope: "global",
@@ -261,7 +258,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "05bf4cc9-7772-481a-8d0f-1471ffaa4287",
+              id: "986336a4-0b51-4c84-8f3b-3a9f5071d429",
               name: "RESET",
               reducer: "",
               schema:
@@ -273,7 +270,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "0ae43a1e-e4a8-4a2e-aedc-e5e10a426de5",
+              id: "80519119-50b4-45aa-b074-34e3046e4fe2",
               name: "REJECT",
               reducer: "",
               schema:
@@ -285,7 +282,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "54a3fd38-abac-48d7-9cd1-2def01a15f93",
+              id: "90ecb375-322a-4f19-aca6-35e9e4a7bdb5",
               name: "ACCEPT",
               reducer: "",
               schema: "input AcceptInput {\n  payAfter: DateTime\n}",
@@ -296,7 +293,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "14566620-08db-4f56-84e7-96c30049dd33",
+              id: "f7df69c9-40a3-42ba-926c-66b3bdd87481",
               name: "REINSTATE",
               reducer: "",
               schema:
@@ -308,7 +305,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "e5df6e79-1398-4e9b-baeb-11957882f47d",
+              id: "d0a0803c-eeb3-40e2-b548-79f957e1d00b",
               name: "SCHEDULE_PAYMENT",
               reducer: "",
               schema:
@@ -320,7 +317,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "96849e73-c8ed-4726-b523-29e03cd3fd29",
+              id: "2e0e9b10-9a70-4551-848f-624d1a3401a5",
               name: "REAPPROVE_PAYMENT",
               reducer: "",
               schema:
@@ -332,7 +329,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "f5dabccc-4055-4c0a-b650-c5b2e7f37ac5",
+              id: "5d3bc4a6-395d-4318-8f23-4e6437f63e0c",
               name: "REGISTER_PAYMENT_TX",
               reducer: "",
               schema:
@@ -344,7 +341,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "562df495-9d22-4293-be78-e5258713d620",
+              id: "cb11b7d4-60af-4351-9ee0-5e2897418adf",
               name: "REPORT_PAYMENT_ISSUE",
               reducer: "",
               schema:
@@ -356,7 +353,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "8f374198-3588-487d-8833-b29790caeab0",
+              id: "55ae1d4d-3e93-4d74-80e9-e47b66deadbd",
               name: "CONFIRM_PAYMENT",
               reducer: "",
               schema:
@@ -368,7 +365,7 @@ export const documentModel: DocumentModelGlobalState = {
               description: "",
               errors: [],
               examples: [],
-              id: "13d337eb-8a4f-44e4-b5f5-83c5287e7360",
+              id: "da2e6a51-138d-4e82-994c-427564eaf621",
               name: "CLOSE_PAYMENT",
               reducer: "",
               schema:
@@ -385,7 +382,7 @@ export const documentModel: DocumentModelGlobalState = {
           initialValue:
             '{\n  "status": "DRAFT",\n  "invoiceNo": "",\n  "dateIssued": null,\n  "dateDue": null,\n  "dateDelivered": null,\n  "issuer": {\n    "id": null,\n    "name": null,\n    "address": null,\n    "contactInfo": null,\n    "country": null,\n    "paymentRouting": null\n  },\n  "payer": {\n    "id": null,\n    "name": null,\n    "address": null,\n    "contactInfo": null,\n    "country": null,\n    "paymentRouting": null\n  },\n  "currency": "",\n  "lineItems": [],\n  "totalPriceTaxExcl": 0,\n  "totalPriceTaxIncl": 0,\n  "notes": null,\n  "rejections": [],\n  "payments": [],\n  "payAfter": null,\n  "invoiceTags": [],\n  "exported": {\n    "timestamp": null,\n    "exportedLineItems": []\n  },\n  "closureReason": null\n}',
           schema:
-            'type InvoiceState {\n  status: Status!\n  invoiceNo: String!\n  dateIssued: Date\n  dateDue: Date\n  dateDelivered: Date\n  issuer: LegalEntity!\n  payer: LegalEntity!\n  currency: String!\n  lineItems: [InvoiceLineItem!]!\n  totalPriceTaxExcl: Float!\n  totalPriceTaxIncl: Float!\n  notes: String\n  rejections: [Rejection!]!\n  payments: [Payment!]!\n  payAfter: DateTime\n  invoiceTags: [InvoiceTag!]!   # e.g. {\'xero-payment-account\', \'090\', \'PowerhouseUSD\'}\n  exported: ExportedData!\n  closureReason: ClosureReason\n}\n\nenum ClosureReason {\n  UNDERPAID\n  OVERPAID\n  CANCELLED\n}\n\ntype Rejection {\n  id: OID!\n  reason: String!\n  final: Boolean!\n}\n\ntype ExportedData {\n  timestamp: DateTime   # ISO 8601 timestamp of the export\n  exportedLineItems: [[String!]!]!   # CSV Format\n}\n\ntype Payment {\n  id: OID!\n  processorRef: String\n  paymentDate: DateTime\n  txnRef: String\n  confirmed: Boolean!\n  issue: String\n  amount: Float\n}\n\ntype Token {\n  evmAddress: String\n  symbol: String\n  chainName: String\n  chainId: String\n  rpc: String\n}\n\ntype LegalEntity {\n  id: LegalEntityId\n  name: String\n  address: Address\n  contactInfo: ContactInfo\n  country: String\n  paymentRouting: PaymentRouting\n}\n\ntype Address {\n  streetAddress: String\n  extendedAddress: String\n  city: String\n  postalCode: String\n  country: String\n  stateProvince: String\n}\n\ntype ContactInfo {\n  tel: String\n  email: String\n}\n\ntype PaymentRouting {\n  bank: Bank\n  wallet: InvoiceWallet\n}\n\ntype Bank {\n  name: String!\n  address: Address!\n  ABA: String\n  BIC: String\n  SWIFT: String\n  accountNum: String!\n  accountType: InvoiceAccountType\n  beneficiary: String\n  intermediaryBank: IntermediaryBank\n  memo: String\n}\n\ntype IntermediaryBank {\n  name: String!\n  address: Address!\n  ABA: String\n  BIC: String\n  SWIFT: String\n  accountNum: String!\n  accountType: InvoiceAccountType\n  beneficiary: String\n  memo: String\n}\n\ntype InvoiceWallet {\n  rpc: String\n  chainName: String\n  chainId: String\n  address: String\n}\n\ntype InvoiceLineItem {\n  id: OID!\n  description: String!\n  taxPercent: Float!\n  quantity: Float!\n  currency: String!\n  unitPriceTaxExcl: Float!\n  unitPriceTaxIncl: Float!\n  totalPriceTaxExcl: Float!\n  totalPriceTaxIncl: Float!\n  lineItemTag: [InvoiceTag!]\n}\n\ntype InvoiceTag {\n  dimension: String!  # "xero-expense-account", "xero-payment-account", "accounting-period", ...\n  value: String!      # "627", ..., "090", ..., "2025/05", "2025/Q1", ...\n  label: String       # "Marketing", ..., "Business Bank", ..., "May 2025"\n}\n\nunion LegalEntityId = LegalEntityTaxId | LegalEntityCorporateRegistrationId\n\ntype LegalEntityTaxId {\n  taxId: String!\n}\n\ntype LegalEntityCorporateRegistrationId {\n  corpRegId: String!\n}\n\nenum Status {\n  DRAFT\n  ISSUED\n  CANCELLED\n  ACCEPTED\n  REJECTED\n  PAYMENTSCHEDULED\n  PAYMENTSENT\n  PAYMENTISSUE\n  PAYMENTRECEIVED\n  PAYMENTCLOSED\n}\n\nenum InvoiceAccountType {\n  CHECKING\n  SAVINGS\n  TRUST\n  WALLET\n}\n\nenum InvoiceAccountTypeInput {\n  CHECKING\n  SAVINGS\n  TRUST\n  WALLET\n}',
+            'type InvoiceState {\n  status: Status!\n  invoiceNo: String!\n  dateIssued: Date\n  dateDue: Date\n  dateDelivered: Date\n  issuer: LegalEntity!\n  payer: LegalEntity!\n  currency: String!\n  lineItems: [InvoiceLineItem!]!\n  totalPriceTaxExcl: Float!\n  totalPriceTaxIncl: Float!\n  notes: String\n  rejections: [Rejection!]!\n  payments: [Payment!]!\n  payAfter: DateTime\n  invoiceTags: [InvoiceTag!]!   # e.g. {\'xero-payment-account\', \'090\', \'PowerhouseUSD\'}\n  exported: ExportedData!\n  closureReason: ClosureReason\n}\n\nenum ClosureReason {\n  UNDERPAID\n  OVERPAID\n  CANCELLED\n}\n\ntype Rejection {\n  id: OID!\n  reason: String!\n  final: Boolean!\n}\n\ntype ExportedData {\n  timestamp: DateTime   # ISO 8601 timestamp of the export\n  exportedLineItems: [[String!]!]!   # CSV Format\n}\n\ntype Payment {\n  id: OID!\n  processorRef: String\n  paymentDate: DateTime\n  txnRef: String\n  confirmed: Boolean!\n  issue: String\n  amount: Float\n}\n\ntype Token {\n  evmAddress: String\n  symbol: String\n  chainName: String\n  chainId: String\n  rpc: String\n}\n\ntype LegalEntity {\n  id: LegalEntityId\n  name: String\n  address: Address\n  contactInfo: ContactInfo\n  country: String\n  paymentRouting: PaymentRouting\n}\n\ntype Address {\n  streetAddress: String\n  extendedAddress: String\n  city: String\n  postalCode: String\n  country: String\n  stateProvince: String\n}\n\ntype ContactInfo {\n  tel: String\n  email: String\n}\n\ntype PaymentRouting {\n  bank: Bank\n  wallet: InvoiceWallet\n}\n\ntype Bank {\n  name: String!\n  address: Address!\n  ABA: String\n  BIC: String\n  SWIFT: String\n  accountNum: String!\n  accountType: InvoiceAccountType\n  beneficiary: String\n  intermediaryBank: IntermediaryBank\n  memo: String\n}\n\ntype IntermediaryBank {\n  name: String!\n  address: Address!\n  ABA: String\n  BIC: String\n  SWIFT: String\n  accountNum: String!\n  accountType: InvoiceAccountType\n  beneficiary: String\n  memo: String\n}\n\ntype InvoiceWallet {\n  rpc: String\n  chainName: String\n  chainId: String\n  address: String\n}\n\ntype InvoiceLineItem {\n  id: OID!\n  description: String!\n  taxPercent: Float!\n  quantity: Float!\n  currency: String!\n  unitPriceTaxExcl: Float!\n  unitPriceTaxIncl: Float!\n  totalPriceTaxExcl: Float!\n  totalPriceTaxIncl: Float!\n  lineItemTag: [InvoiceTag!]\n}\n\ntype InvoiceTag {\n  dimension: String!  # "xero-expense-account", "xero-payment-account", "accounting-period", ...\n  value: String!      # "627", ..., "090", ..., "2025/05", "2025/Q1", ...\n  label: String       # "Marketing", ..., "Business Bank", ..., "May 2025"\n}\n\ntype LegalEntityId {\n  taxId: String\n  corpRegId: String\n}\n\nenum Status {\n  DRAFT\n  ISSUED\n  CANCELLED\n  ACCEPTED\n  REJECTED\n  PAYMENTSCHEDULED\n  PAYMENTSENT\n  PAYMENTISSUE\n  PAYMENTRECEIVED\n  PAYMENTCLOSED\n}\n\nenum InvoiceAccountType {\n  CHECKING\n  SAVINGS\n  TRUST\n  WALLET\n}\n\nenum InvoiceAccountTypeInput {\n  CHECKING\n  SAVINGS\n  TRUST\n  WALLET\n}',
         },
         local: {
           examples: [],
