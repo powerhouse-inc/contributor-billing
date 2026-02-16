@@ -30,7 +30,8 @@
       "mcp__reactor-mcp__getDrive",
       "Bash(node -e:*)",
       "Bash(npx tsc:*)",
-      "Bash(bun run build:*)"
+      "Bash(bun run build:*)",
+      "WebFetch(domain:www.conventionalcommits.org)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

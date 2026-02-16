@@ -406,6 +406,55 @@ When working with drives (adding/removing documents, creating folders, etc.):
 
 ---
 
+## Commit Message Convention (Conventional Commits)
+
+**MANDATORY**: All commit messages must follow the [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) specification.
+
+### Format
+
+```
+<type>(<optional scope>): <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+### Types
+
+| Type       | When to use                                      |
+| ---------- | ------------------------------------------------ |
+| `feat`     | New feature or capability                        |
+| `fix`      | Bug fix                                          |
+| `refactor` | Code change that neither fixes a bug nor adds a feature |
+| `docs`     | Documentation only                               |
+| `style`    | Formatting, whitespace, semicolons (no logic change) |
+| `perf`     | Performance improvement                          |
+| `test`     | Adding or updating tests                         |
+| `build`    | Build system or dependencies                     |
+| `ci`       | CI/CD configuration                              |
+| `chore`    | Other maintenance tasks                          |
+
+### Rules
+
+- **Scope** (optional): Section of codebase in parentheses, e.g. `feat(invoice-table): ...`
+- **Description**: Imperative, lowercase, no period at end
+- **Body**: Separate from description by blank line; explain *what* and *why*, not *how*
+- **Breaking changes**: Add `!` before colon (`feat!: ...`) and/or a `BREAKING CHANGE:` footer
+- **Footer format**: `Token: value` (e.g. `Reviewed-by: Name`, `Refs: #123`)
+
+### Examples
+
+```
+feat(invoice-table): add delete batch action for selected documents
+
+fix(editor): prevent duplicate billing statements on rapid clicks
+
+refactor(header-controls): extract currency modal into separate component
+```
+
+---
+
 ## SENIOR SOFTWARE ENGINEER
 
 <system_prompt>
