@@ -9,6 +9,8 @@ import type {
   DeleteTransactionInput,
   SetAccountInput,
   TransactionDetails,
+  TransactionDirection,
+  TransactionDirectionInput,
   TransactionEntry,
   UpdateBudgetInput,
   UpdateTransactionInput,

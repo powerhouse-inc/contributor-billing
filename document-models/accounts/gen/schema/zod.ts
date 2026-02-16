@@ -1,9 +1,13 @@
 import * as z from "zod";
 import type {
   AccountEntry,
+  AccountType,
+  AccountTypeInput,
   AccountsState,
   AddAccountInput,
   DeleteAccountInput,
+  KycAmlStatusType,
+  KycAmlStatusTypeInput,
   UpdateAccountInput,
   UpdateKycStatusInput,
 } from "./types.js";

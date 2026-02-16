@@ -1,5 +1,7 @@
 import * as z from "zod";
 import type {
+  AccountType,
+  AccountTypeInput,
   AddOwnerIdInput,
   AddSnapshotAccountInput,
   AddTransactionInput,
@@ -20,6 +22,10 @@ import type {
   SnapshotReportState,
   SnapshotTransaction,
   TokenBalance,
+  TransactionDirection,
+  TransactionDirectionInput,
+  TransactionFlowType,
+  TransactionFlowTypeInput,
   UpdateSnapshotAccountTypeInput,
   UpdateTransactionFlowTypeInput,
 } from "./types.js";

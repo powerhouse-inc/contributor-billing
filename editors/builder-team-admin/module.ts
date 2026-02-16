@@ -7,6 +7,6 @@ export const BuilderTeamAdmin: EditorModule = {
   documentTypes: ["powerhouse/document-drive"],
   config: {
     id: "builder-team-admin",
-    name: "builder-team-admin",
+    name: "Builder Team Admin",
   },
 };
