@@ -31,7 +31,9 @@
       "Bash(node -e:*)",
       "Bash(npx tsc:*)",
       "Bash(bun run build:*)",
-      "WebFetch(domain:www.conventionalcommits.org)"
+      "WebFetch(domain:www.conventionalcommits.org)",
+      "Bash(git cherry-pick:*)",
+      "Bash(git push:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",
