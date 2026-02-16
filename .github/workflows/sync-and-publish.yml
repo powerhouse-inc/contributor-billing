@@ -5,7 +5,7 @@ on:
   repository_dispatch:
     types: [powerhouse-release]
 
-  # Manual trigger
+  # Manual trigger or dispatched per-branch
   workflow_dispatch:
     inputs:
       channel:
@@ -27,6 +27,11 @@ on:
         required: false
         type: boolean
         default: false
+      powerhouse-version:
+        description: 'Powerhouse monorepo version (set by dispatch)'
+        required: false
+        type: string
+        default: ''
 
 env:
   NODE_VERSION: '22'
@@ -34,60 +39,40 @@ env:
 
 jobs:
   # ==========================================================================
-  # Prepare parameters
+  # Fan out: dispatch per-branch runs (repository_dispatch only, latest only)
   # ==========================================================================
-  prepare:
-    name: Prepare
+  dispatch:
+    name: Dispatch (${{ matrix.channel }})
+    if: github.event_name == 'repository_dispatch' && github.event.client_payload.channel == 'latest'
     runs-on: ubuntu-latest
-    outputs:
-      channel: ${{ steps.params.outputs.channel }}
-      branch: ${{ steps.params.outputs.branch }}
-      sync: ${{ steps.params.outputs.sync }}
-      dry_run: ${{ steps.params.outputs.dry_run }}
-      powerhouse_version: ${{ steps.params.outputs.powerhouse_version }}
+    strategy:
+      matrix:
+        include:
+          - branch: main
+            channel: latest
+          - branch: staging
+            channel: staging
+          - branch: dev
+            channel: dev
     steps:
-      - name: Determine parameters
-        id: params
+      - name: Trigger workflow on ${{ matrix.branch }}
         run: |
-          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-            CHANNEL="${{ github.event.client_payload.channel }}"
-            SYNC="true"
-            DRY_RUN="false"
-            PH_VERSION="${{ github.event.client_payload.version }}"
-          else
-            CHANNEL="${{ inputs.channel }}"
-            SYNC="${{ inputs.sync }}"
-            DRY_RUN="${{ inputs.dry-run }}"
-            PH_VERSION=""
-          fi
-
-          CHANNEL="${CHANNEL:-dev}"
-
-          case "$CHANNEL" in
-            dev) BRANCH="dev" ;;
-            staging) BRANCH="staging" ;;
-            latest) BRANCH="main" ;;
-            *) BRANCH="dev" ;;
-          esac
-
-          echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
-          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
-          echo "sync=$SYNC" >> $GITHUB_OUTPUT
-          echo "dry_run=$DRY_RUN" >> $GITHUB_OUTPUT
-          echo "powerhouse_version=$PH_VERSION" >> $GITHUB_OUTPUT
-
-          echo "Channel: $CHANNEL"
-          echo "Branch: $BRANCH"
-          echo "Sync: $SYNC"
-          echo "Dry Run: $DRY_RUN"
+          gh workflow run "Sync and Publish" \
+            --repo "${{ github.repository }}" \
+            --ref "${{ matrix.branch }}" \
+            -f channel="${{ matrix.channel }}" \
+            -f sync=true \
+            -f dry-run=false \
+            -f powerhouse-version="${{ github.event.client_payload.version }}"
+        env:
+          GH_TOKEN: ${{ secrets.K8S_REPO_PAT }}
 
   # ==========================================================================
-  # Sync powerhouse dependencies (optional)
+  # Sync powerhouse dependencies (workflow_dispatch only)
   # ==========================================================================
   sync:
     name: Sync Dependencies
-    needs: prepare
-    if: needs.prepare.outputs.sync == 'true'
+    if: github.event_name == 'workflow_dispatch' && inputs.sync == true
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -95,7 +80,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.prepare.outputs.branch }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -139,10 +123,10 @@ jobs:
           fi
 
       - name: Commit changes
-        if: steps.changes.outputs.has_changes == 'true' && needs.prepare.outputs.dry_run != 'true'
+        if: steps.changes.outputs.has_changes == 'true' && inputs.dry-run != true
         run: |
           git add package.json pnpm-lock.yaml
-          PH_VERSION="${{ needs.prepare.outputs.powerhouse_version }}"
+          PH_VERSION="${{ inputs.powerhouse-version }}"
           if [ -n "$PH_VERSION" ]; then
             git commit -m "chore: sync powerhouse dependencies to $PH_VERSION"
           else
@@ -150,16 +134,16 @@ jobs:
           fi
 
       - name: Push changes
-        if: steps.changes.outputs.has_changes == 'true' && needs.prepare.outputs.dry_run != 'true'
+        if: steps.changes.outputs.has_changes == 'true' && inputs.dry-run != true
         run: git push
 
   # ==========================================================================
-  # Release via semantic-release
+  # Release via semantic-release (workflow_dispatch only)
   # ==========================================================================
   release:
     name: Release
-    needs: [prepare, sync]
-    if: always() && (needs.sync.result == 'success' || needs.sync.result == 'skipped')
+    needs: sync
+    if: always() && github.event_name == 'workflow_dispatch' && (needs.sync.result == 'success' || needs.sync.result == 'skipped')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -173,7 +157,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.prepare.outputs.branch }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -181,7 +164,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull origin ${{ needs.prepare.outputs.branch }}
+          git pull origin ${{ github.ref_name }}
 
       - name: Create local tracking branches for semantic-release
         run: |
@@ -217,14 +200,13 @@ jobs:
         continue-on-error: true
 
       - name: Run semantic-release
-        id: semantic-release
-        if: needs.prepare.outputs.dry_run != 'true'
+        if: inputs.dry-run != true
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run semantic-release (dry-run)
-        if: needs.prepare.outputs.dry_run == 'true'
+        if: inputs.dry-run == true
         run: npx semantic-release --dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -245,18 +227,33 @@ jobs:
           fi
 
       - name: Publish to npm
-        if: needs.prepare.outputs.dry_run != 'true' && steps.get-version.outputs.released == 'true'
-        run: npm publish --provenance --access public --tag ${{ needs.prepare.outputs.channel }}
+        if: inputs.dry-run != true && steps.get-version.outputs.released == 'true'
+        run: npm publish --provenance --access public --tag ${{ inputs.channel }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Notify downstream
+        if: inputs.dry-run != true && steps.get-version.outputs.released == 'true' && inputs.channel == 'dev'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.K8S_REPO_PAT }}
+          repository: powerhouse-inc/bai-powerhouse-env
+          event-type: dependency-release
+          client-payload: |
+            {
+              "package": "@powerhousedao/contributor-billing",
+              "version": "${{ steps.get-version.outputs.version }}",
+              "channel": "${{ inputs.channel }}",
+              "powerhouse_version": "${{ inputs.powerhouse-version }}"
+            }
 
   # ==========================================================================
   # Summary
   # ==========================================================================
   summary:
     name: Summary
-    needs: [prepare, sync, release]
-    if: always()
+    needs: [sync, release]
+    if: always() && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Summary
@@ -265,13 +262,13 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Channel | ${{ needs.prepare.outputs.channel }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Branch | ${{ needs.prepare.outputs.branch }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Sync | ${{ needs.prepare.outputs.sync }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Channel | ${{ inputs.channel }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Sync | ${{ inputs.sync }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Version | ${{ needs.release.outputs.new_version }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Released | ${{ needs.release.outputs.released }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Dry Run | ${{ needs.prepare.outputs.dry_run }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dry Run | ${{ inputs.dry-run }} |" >> $GITHUB_STEP_SUMMARY
 
-          if [ -n "${{ needs.prepare.outputs.powerhouse_version }}" ]; then
-            echo "| Powerhouse Version | ${{ needs.prepare.outputs.powerhouse_version }} |" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ inputs.powerhouse-version }}" ]; then
+            echo "| Powerhouse Version | ${{ inputs.powerhouse-version }} |" >> $GITHUB_STEP_SUMMARY
           fi
