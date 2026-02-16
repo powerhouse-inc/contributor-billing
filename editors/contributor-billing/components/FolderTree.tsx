@@ -25,7 +25,6 @@ import { useBillingFolderStructure } from "../hooks/useBillingFolderStructure.js
 // TODO: Uncomment when Subscriptions feature is ready
 // import { useSubscriptionsFolder } from "../hooks/useSubscriptionsFolder.js";
 import type { OperationalHubProfileDocument } from "../../../document-models/operational-hub-profile/gen/types.js";
-import { CreateHubProfileModal } from "./CreateHubProfileModal.js";
 
 const ICON_SIZE = 16;
 const SUBSCRIPTIONS_FOLDER_NAME = "Subscriptions";
@@ -81,9 +80,6 @@ export function FolderTree({
   const [localActiveNodeId, setLocalActiveNodeId] = useState<string>("");
   const activeNodeId = controlledActiveNodeId ?? localActiveNodeId;
   const setActiveNodeId = onActiveNodeIdChange ?? setLocalActiveNodeId;
-
-  // State for custom create hub profile modal
-  const [showCreateHubModal, setShowCreateHubModal] = useState(false);
 
   const documentsInDrive = useDocumentsInSelectedDrive();
   const [driveDocument] = useSelectedDrive();
@@ -385,9 +381,6 @@ export function FolderTree({
       if (operationalHubProfileDocument) {
         onFolderSelect?.(null);
         safeSetSelectedNode(operationalHubProfileDocument.header.id);
-      } else {
-        safeSetSelectedNode("");
-        setShowCreateHubModal(true);
       }
       return;
     }
@@ -525,14 +518,6 @@ export function FolderTree({
           }}
         />
       </SidebarProvider>
-
-      <CreateHubProfileModal
-        isOpen={showCreateHubModal}
-        onClose={() => setShowCreateHubModal(false)}
-        onCreated={() => {
-          onFolderSelect?.(null);
-        }}
-      />
     </>
   );
 }

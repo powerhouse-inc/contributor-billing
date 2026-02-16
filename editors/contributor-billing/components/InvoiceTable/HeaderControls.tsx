@@ -352,8 +352,8 @@ export const HeaderControls = ({
       >
         <p className="text-red-600 text-sm mb-3 font-medium">
           This will permanently delete {deleteIds.length} selected document
-          {deleteIds.length !== 1 ? "s" : ""} from the drive. This action
-          cannot be undone.
+          {deleteIds.length !== 1 ? "s" : ""} from the drive. This action cannot
+          be undone.
         </p>
       </ConfirmationModal>
     </div>
