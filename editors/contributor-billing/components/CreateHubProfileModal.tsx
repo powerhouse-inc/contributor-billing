@@ -8,6 +8,7 @@ import {
   setSelectedNode,
 } from "@powerhousedao/reactor-browser";
 import { setName } from "document-model";
+import { isValidName } from "document-drive";
 import { twMerge } from "tailwind-merge";
 import { setOperationalHubName } from "../../../document-models/operational-hub-profile/gen/configuration/creators.js";
 
@@ -32,27 +33,34 @@ export function CreateHubProfileModal({
   onCreated,
 }: CreateHubProfileModalProps) {
   const [hubName, setHubName] = useState("");
+  const [isValid, setIsValid] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [selectedDrive] = useSelectedDrive();
 
   // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
-      setTimeout(() => setHubName(""), CLOSE_ANIMATION_DURATION);
+      setTimeout(() => {
+        setHubName("");
+        setIsValid(false);
+      }, CLOSE_ANIMATION_DURATION);
       setIsCreating(false);
     }
   }, [isOpen]);
 
   const handleCancel = useCallback(() => {
     onClose();
-    setTimeout(() => setHubName(""), CLOSE_ANIMATION_DURATION);
+    setTimeout(() => {
+      setHubName("");
+      setIsValid(false);
+    }, CLOSE_ANIMATION_DURATION);
   }, [onClose]);
 
   const handleCreate = useCallback(async () => {
     const trimmedName = hubName.trim();
     const driveId = selectedDrive?.header.id;
 
-    if (!trimmedName || !driveId || isCreating) return;
+    if (!isValid || !driveId || isCreating) return;
 
     setIsCreating(true);
 
@@ -88,25 +96,33 @@ export function CreateHubProfileModal({
       // Notify parent and close
       onCreated?.(createdNode.id);
       onClose();
-      setTimeout(() => setHubName(""), CLOSE_ANIMATION_DURATION);
+      setTimeout(() => {
+        setHubName("");
+        setIsValid(false);
+      }, CLOSE_ANIMATION_DURATION);
     } catch (error) {
       console.error("Error creating operational hub profile:", error);
     } finally {
       setIsCreating(false);
     }
-  }, [hubName, selectedDrive?.header.id, isCreating, onCreated, onClose]);
+  }, [
+    hubName,
+    selectedDrive?.header.id,
+    isValid,
+    isCreating,
+    onCreated,
+    onClose,
+  ]);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      if (hubName.trim() && !isCreating) {
+      if (isValid && !isCreating) {
         void handleCreate();
       }
     },
-    [hubName, isCreating, handleCreate],
+    [isValid, isCreating, handleCreate],
   );
-
-  const isValid = hubName.trim().length > 0;
 
   return (
     <Modal
@@ -127,9 +143,18 @@ export function CreateHubProfileModal({
           Create your Operational Hub profile
         </div>
         <div className="my-6">
+          {!isValid && hubName && (
+            <div className="mb-2 text-red-500">
+              Document name must be valid URL characters.
+            </div>
+          )}
           <FormInput
             icon={<Icon name="BrickGlobe" />}
-            onChange={(e) => setHubName(e.target.value)}
+            onChange={(e) => {
+              const name = e.target.value;
+              setHubName(name);
+              setIsValid(isValidName(name));
+            }}
             placeholder="Operational Hub name"
             required
             value={hubName}
