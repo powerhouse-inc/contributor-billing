@@ -25,10 +25,7 @@ function removeToast(id: number) {
   emit();
 }
 
-export function cbToast(
-  message: string,
-  options?: { type?: ToastType },
-) {
+export function cbToast(message: string, options?: { type?: ToastType }) {
   const id = nextId++;
   toasts = [...toasts, { id, message, type: options?.type ?? "info" }];
   emit();

@@ -112,7 +112,7 @@ export function AddTransactionInputSchema(): z.ZodObject<
       })
       .nullish(),
     counterPartyAccountId: z.string().nullish(),
-    datetime: z.string().datetime(),
+    datetime: z.iso.datetime(),
     direction: TransactionDirectionInputSchema,
     flowType: TransactionFlowTypeInputSchema.nullish(),
     id: z.string(),
@@ -195,7 +195,7 @@ export function SetPeriodEndInputSchema(): z.ZodObject<
   Properties<SetPeriodEndInput>
 > {
   return z.object({
-    periodEnd: z.string().datetime(),
+    periodEnd: z.iso.datetime(),
   });
 }
 
@@ -203,8 +203,8 @@ export function SetPeriodInputSchema(): z.ZodObject<
   Properties<SetPeriodInput>
 > {
   return z.object({
-    endDate: z.string().datetime(),
-    startDate: z.string().datetime(),
+    endDate: z.iso.datetime(),
+    startDate: z.iso.datetime(),
   });
 }
 
@@ -212,7 +212,7 @@ export function SetPeriodStartInputSchema(): z.ZodObject<
   Properties<SetPeriodStartInput>
 > {
   return z.object({
-    periodStart: z.string().datetime(),
+    periodStart: z.iso.datetime(),
   });
 }
 
@@ -221,9 +221,9 @@ export function SetReportConfigInputSchema(): z.ZodObject<
 > {
   return z.object({
     accountsDocumentId: z.string().nullish(),
-    endDate: z.string().datetime().nullish(),
+    endDate: z.iso.datetime().nullish(),
     reportName: z.string().nullish(),
-    startDate: z.string().datetime().nullish(),
+    startDate: z.iso.datetime().nullish(),
   });
 }
 
@@ -261,13 +261,13 @@ export function SnapshotReportStateSchema(): z.ZodObject<
   return z.object({
     __typename: z.literal("SnapshotReportState").optional(),
     accountsDocumentId: z.string().nullish(),
-    endDate: z.string().datetime().nullish(),
+    endDate: z.iso.datetime().nullish(),
     ownerIds: z.array(z.string()),
     reportName: z.string().nullish(),
-    reportPeriodEnd: z.string().datetime().nullish(),
-    reportPeriodStart: z.string().datetime().nullish(),
+    reportPeriodEnd: z.iso.datetime().nullish(),
+    reportPeriodStart: z.iso.datetime().nullish(),
     snapshotAccounts: z.array(z.lazy(() => SnapshotAccountSchema())),
-    startDate: z.string().datetime().nullish(),
+    startDate: z.iso.datetime().nullish(),
   });
 }
 
@@ -285,7 +285,7 @@ export function SnapshotTransactionSchema(): z.ZodObject<
       })
       .nullish(),
     counterPartyAccountId: z.string().nullish(),
-    datetime: z.string().datetime(),
+    datetime: z.iso.datetime(),
     direction: TransactionDirectionSchema,
     flowType: TransactionFlowTypeSchema.nullish(),
     id: z.string(),

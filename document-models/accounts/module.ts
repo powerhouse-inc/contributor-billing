@@ -9,7 +9,7 @@ import {
   utils,
 } from "@powerhousedao/contributor-billing/document-models/accounts";
 
-/** Document model module for the Todo List document type */
+/** Document model module for the Accounts document type */
 export const Accounts: DocumentModelModule<AccountsPHState> = {
   version: 1,
   reducer,

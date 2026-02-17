@@ -9,7 +9,7 @@ import {
   utils,
 } from "@powerhousedao/contributor-billing/document-models/expense-report";
 
-/** Document model module for the Todo List document type */
+/** Document model module for the ExpenseReport document type */
 export const ExpenseReport: DocumentModelModule<ExpenseReportPHState> = {
   version: 1,
   reducer,

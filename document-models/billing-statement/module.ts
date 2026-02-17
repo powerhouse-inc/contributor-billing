@@ -9,7 +9,7 @@ import {
   utils,
 } from "@powerhousedao/contributor-billing/document-models/billing-statement";
 
-/** Document model module for the Todo List document type */
+/** Document model module for the BillingStatement document type */
 export const BillingStatement: DocumentModelModule<BillingStatementPHState> = {
   version: 1,
   reducer,
