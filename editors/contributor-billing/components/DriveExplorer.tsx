@@ -8,6 +8,7 @@ import {
   dispatchActions,
   setSelectedNode,
 } from "@powerhousedao/reactor-browser";
+import { isValidName } from "document-drive";
 import { setOperationalHubName } from "../../../document-models/operational-hub-profile/gen/configuration/creators.js";
 import { ToastRenderer } from "./ToastRenderer.js";
 import { DriveContents } from "./DriveContents.js";
@@ -80,7 +81,7 @@ export function DriveExplorer({ children }: EditorProps) {
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      if (hubName.trim() && !isCreating) {
+      if (isValidName(hubName) && !isCreating) {
         void handleCreateHubProfile();
       }
     },
@@ -131,7 +132,7 @@ export function DriveExplorer({ children }: EditorProps) {
 
   // If no hub profile exists, show the creation form
   if (!hasHubProfile) {
-    const isValid = hubName.trim().length > 0;
+    const isValid = isValidName(hubName);
 
     return (
       <div className="flex h-full items-center justify-center px-4 py-12">
@@ -169,6 +170,11 @@ export function DriveExplorer({ children }: EditorProps) {
             </p>
 
             <form onSubmit={handleSubmit} className="mx-auto max-w-md">
+              {!isValid && hubName && (
+                <div className="mb-2 text-sm text-red-500">
+                  Document name must be valid URL characters.
+                </div>
+              )}
               <input
                 type="text"
                 value={hubName}

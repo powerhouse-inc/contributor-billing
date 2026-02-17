@@ -11,6 +11,7 @@ import {
   setSelectedNode,
 } from "@powerhousedao/reactor-browser";
 import { useCallback, useMemo, useState } from "react";
+import { isValidName } from "document-drive";
 import { ExpenseReports } from "./expense-reports.js";
 import { SnapshotReports } from "./snapshot-reports.js";
 import { ResourcesServices } from "./ResourcesServices.js";
@@ -103,7 +104,7 @@ export function DriveExplorer({ children }: EditorProps) {
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      if (profileName.trim() && !isCreating) {
+      if (isValidName(profileName) && !isCreating) {
         void handleCreateProfile();
       }
     },
@@ -112,7 +113,7 @@ export function DriveExplorer({ children }: EditorProps) {
 
   // If no builder profile exists, show the creation form
   if (!hasBuilderProfile) {
-    const isValid = profileName.trim().length > 0;
+    const isValid = isValidName(profileName);
 
     return (
       <div className="flex h-full items-center justify-center px-4 py-12">
@@ -149,6 +150,11 @@ export function DriveExplorer({ children }: EditorProps) {
             </p>
 
             <form onSubmit={handleSubmit} className="mx-auto max-w-md">
+              {!isValid && profileName && (
+                <div className="mb-2 text-sm text-red-500">
+                  Document name must be valid URL characters.
+                </div>
+              )}
               <input
                 type="text"
                 value={profileName}
