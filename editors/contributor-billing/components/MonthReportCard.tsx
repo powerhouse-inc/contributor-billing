@@ -4,6 +4,7 @@ import {
   ChevronDown,
   ChevronRight,
   Camera,
+  CreditCard,
   FileText,
   ArrowRight,
   Plus,
@@ -15,11 +16,19 @@ import type {
   ReportStatus,
 } from "../hooks/useMonthlyReports.js";
 
+export interface MonthPaymentStats {
+  totalInvoices: number;
+  pendingCount: number;
+  paidCount: number;
+}
+
 interface MonthReportCardProps {
   reportSet: MonthReportSet;
   defaultExpanded?: boolean;
   onCreateExpenseReport?: (monthName: string, folderId: string) => void;
   onCreateSnapshotReport?: (monthName: string, folderId: string) => void;
+  onViewPayments?: (monthName: string) => void;
+  paymentStats?: MonthPaymentStats;
 }
 
 /**
@@ -105,6 +114,8 @@ export function MonthReportCard({
   defaultExpanded = false,
   onCreateExpenseReport,
   onCreateSnapshotReport,
+  onViewPayments,
+  paymentStats,
 }: MonthReportCardProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const overallColors = getStatusColors(reportSet.overallStatus);
@@ -128,6 +139,10 @@ export function MonthReportCard({
     reportSet.monthName,
     reportSet.reportingFolderId,
   ]);
+
+  const handleViewPayments = useCallback(() => {
+    onViewPayments?.(reportSet.monthName);
+  }, [onViewPayments, reportSet.monthName]);
 
   const reportCountText =
     reportSet.reportCount === 1
@@ -167,6 +182,40 @@ export function MonthReportCard({
       {/* Expanded content */}
       {isExpanded && (
         <div className="border-t border-gray-200">
+          {/* Payments row */}
+          {onViewPayments && (
+            <button
+              onClick={handleViewPayments}
+              className="w-full flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <CreditCard className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                <span className="text-sm font-medium text-gray-900">
+                  Payments
+                </span>
+                {paymentStats && paymentStats.totalInvoices > 0 && (
+                  <span className="text-xs text-gray-500">
+                    {paymentStats.totalInvoices} invoice
+                    {paymentStats.totalInvoices !== 1 ? "s" : ""}
+                    {paymentStats.pendingCount > 0 && (
+                      <span className="text-amber-600">
+                        {" "}
+                        · {paymentStats.pendingCount} pending
+                      </span>
+                    )}
+                    {paymentStats.paidCount > 0 && (
+                      <span className="text-green-600">
+                        {" "}
+                        · {paymentStats.paidCount} paid
+                      </span>
+                    )}
+                  </span>
+                )}
+              </div>
+              <ArrowRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            </button>
+          )}
+
           {/* Snapshot report */}
           {reportSet.snapshotReport && (
             <ReportRow report={reportSet.snapshotReport} isSnapshot />

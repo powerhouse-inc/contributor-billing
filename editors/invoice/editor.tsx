@@ -131,6 +131,8 @@ export default function Editor() {
     useState<ValidationResult | null>(null);
   const [accountNumberValidation, setAccountNumberValidation] =
     useState<ValidationResult | null>(null);
+  const [chainValidation, setChainValidation] =
+    useState<ValidationResult | null>(null);
 
   // Replace showConfirmationModal and pendingStatus with a single modal state
   const [activeModal, setActiveModal] = useState<
@@ -535,6 +537,7 @@ export default function Editor() {
       setLineItemValidation,
       setRoutingNumberValidation,
       isFiatCurrency,
+      setChainValidation,
     );
     if (validationResult) {
       return;
@@ -906,6 +909,7 @@ export default function Editor() {
               currency={state.currency}
               status={state.status}
               walletvalidation={walletValidation}
+              chainvalidation={chainValidation}
               mainCountryValidation={mainCountryValidation}
               bankCountryValidation={bankCountryValidation}
               ibanvalidation={ibanValidation}

@@ -17,11 +17,19 @@ export const schema: DocumentNode = gql`
   type BudgetStatement {
     id: OID!
     owner: BudgetStatementOwner!
+    operationalHubMember: OperationalHubMember
     month: String! ## JAN2026
     status: String!
     lastModifiedAtUtcIso: DateTime!
+    reportedActuals: Amount_Currency!
+    netExpenseTxns: Amount_Currency!
     snapshotReport: BudgetStatementSnapshotReport!
     expenseReport: BudgetStatementExpenseReport!
+  }
+
+  type OperationalHubMember {
+    phid: PHID
+    name: String
   }
 
   type BudgetStatementOwner {

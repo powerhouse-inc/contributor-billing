@@ -15,6 +15,8 @@ import {
   bankCountryRule,
   routingNumberRule,
   accountNumberRule,
+  walletAddressRule,
+  walletChainRule,
 } from "./validationRules.js";
 
 // Types for validation
@@ -63,6 +65,8 @@ validationRules.push(payerEmailRule);
 validationRules.push(lineItemRule);
 validationRules.push(routingNumberRule);
 validationRules.push(accountNumberRule);
+validationRules.push(walletAddressRule);
+validationRules.push(walletChainRule);
 
 // Helper to check if a rule applies to the current context
 function ruleAppliesToContext(
