@@ -1,3 +1,10 @@
+# [1.0.0-dev.5](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.4...v1.0.0-dev.5) (2026-02-17)
+
+
+### Bug Fixes
+
+* fix validation rule for the issueInvoiceOperation for crypto payments ([85e1ac4](https://github.com/powerhouse-inc/contributor-billing/commit/85e1ac4889389c663b39df01bd45bdb6671fbbb7))
+
 # [1.0.0-dev.4](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.3...v1.0.0-dev.4) (2026-02-17)
 
 
