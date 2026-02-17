@@ -1,3 +1,17 @@
+# [1.0.0-dev.4](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.3...v1.0.0-dev.4) (2026-02-17)
+
+
+### Bug Fixes
+
+* **ci:** check npm before publishing to avoid duplicate version errors ([21ceadf](https://github.com/powerhouse-inc/contributor-billing/commit/21ceadf589637ca31be2bdc77c9a2334b5f75fec))
+* **editors:** validate document names with isValidName before creation ([fae6bb7](https://github.com/powerhouse-inc/contributor-billing/commit/fae6bb78bc536abddfb44974f50d643234a95450))
+
+
+### Features
+
+* add input form in welcome drive view for user to add details for auto doc creation ([d1b8e90](https://github.com/powerhouse-inc/contributor-billing/commit/d1b8e900714598751bdc3baa2e4eb56f54139efb))
+* **contributor-billing:** add welcome window for operational hub creation ([18201b6](https://github.com/powerhouse-inc/contributor-billing/commit/18201b6d452e3c24b0cbafd29345ef34aaee0c4b))
+
 # [1.0.0-dev.3](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.2...v1.0.0-dev.3) (2026-02-16)
 
 
