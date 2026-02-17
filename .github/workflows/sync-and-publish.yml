@@ -245,12 +245,27 @@ jobs:
         if: inputs.dry-run != true && steps.get-version.outputs.released == 'true'
         run: npm publish --provenance --access public --tag ${{ inputs.channel }}
 
-      - name: Notify downstream
+      - name: Notify bai-powerhouse-env
         if: inputs.dry-run != true && steps.get-version.outputs.released == 'true' && inputs.channel == 'dev'
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.K8S_REPO_PAT }}
           repository: powerhouse-inc/bai-powerhouse-env
+          event-type: dependency-release
+          client-payload: |
+            {
+              "package": "@powerhousedao/contributor-billing",
+              "version": "${{ steps.get-version.outputs.version }}",
+              "channel": "${{ inputs.channel }}",
+              "powerhouse_version": "${{ inputs.powerhouse-version }}"
+            }
+
+      - name: Notify powerhouse-demo
+        if: inputs.dry-run != true && steps.get-version.outputs.released == 'true' && inputs.channel == 'latest'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.K8S_REPO_PAT }}
+          repository: powerhouse-inc/powerhouse-demo
           event-type: dependency-release
           client-payload: |
             {
