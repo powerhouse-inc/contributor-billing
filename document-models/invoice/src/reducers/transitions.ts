@@ -40,7 +40,12 @@ export const invoiceTransitionsOperations: InvoiceTransitionsOperations = {
       throw new Error("Invoice number and date issued are required");
     }
     const wallet = state.issuer?.paymentRouting?.wallet;
-    if (!wallet?.address || (!wallet.chainName && !wallet.chainId)) {
+    const stablecoins = ["USDS", "DAI", "USDC"];
+    const isStablecoin = stablecoins.includes(state.currency.toUpperCase());
+    if (
+      isStablecoin &&
+      (!wallet?.address || (!wallet.chainName && !wallet.chainId))
+    ) {
       throw new Error(
         "Issuer wallet address and chain must be set before issuing an invoice",
       );

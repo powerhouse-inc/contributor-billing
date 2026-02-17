@@ -77,7 +77,7 @@ export const ethereumAddressRule: ValidationRule = {
     };
   },
   appliesTo: {
-    currencies: ["USDS", "DAI"], // Only apply for crypto currencies
+    currencies: ["USDS", "DAI", "USDC"], // Only apply for crypto currencies
     statusTransitions: {
       from: ["DRAFT"],
       to: ["ISSUED"],
@@ -103,33 +103,7 @@ export const walletChainRule: ValidationRule = {
     };
   },
   appliesTo: {
-    currencies: ["ALL"],
-    statusTransitions: {
-      from: ["DRAFT"],
-      to: ["ISSUED"],
-    },
-  },
-};
-
-// Wallet address validation rule - address must be set for all currencies
-export const walletAddressRule: ValidationRule = {
-  field: "walletAddress",
-  validate: (value: string) => {
-    if (!value || value.trim() === "") {
-      return {
-        isValid: false,
-        message: "Wallet address is required before issuing",
-        severity: "warning",
-      };
-    }
-    return {
-      isValid: true,
-      message: "",
-      severity: "none",
-    };
-  },
-  appliesTo: {
-    currencies: ["ALL"],
+    currencies: ["USDS", "DAI", "USDC"],
     statusTransitions: {
       from: ["DRAFT"],
       to: ["ISSUED"],

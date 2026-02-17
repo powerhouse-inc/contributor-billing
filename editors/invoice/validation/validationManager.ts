@@ -15,7 +15,6 @@ import {
   bankCountryRule,
   routingNumberRule,
   accountNumberRule,
-  walletAddressRule,
   walletChainRule,
 } from "./validationRules.js";
 
@@ -32,7 +31,7 @@ export type ValidationRule = {
   field: string;
   validate: (value: any, context?: any) => ValidationResult;
   appliesTo: {
-    currencies: Array<string | "ALL">;
+    currencies: string[];
     statusTransitions: {
       from: Status[];
       to: Status[];
@@ -65,7 +64,6 @@ validationRules.push(payerEmailRule);
 validationRules.push(lineItemRule);
 validationRules.push(routingNumberRule);
 validationRules.push(accountNumberRule);
-validationRules.push(walletAddressRule);
 validationRules.push(walletChainRule);
 
 // Helper to check if a rule applies to the current context
