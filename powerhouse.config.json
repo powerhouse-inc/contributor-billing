@@ -22,7 +22,7 @@
     },
     {
       "packageName": "@powerhousedao/service-offering",
-      "version": "latest",
+      "version": "0.0.2",
       "provider": "npm"
     }
   ]
