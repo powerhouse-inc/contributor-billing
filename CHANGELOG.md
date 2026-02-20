@@ -1,3 +1,10 @@
+# [1.0.0-dev.6](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.5...v1.0.0-dev.6) (2026-02-20)
+
+
+### Features
+
+* add service-offering pkg and replace custom queries ([2c47cec](https://github.com/powerhouse-inc/contributor-billing/commit/2c47cec2cbc9bdfd323ee7911267db8ab984a0ce))
+
 # [1.0.0-dev.5](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.4...v1.0.0-dev.5) (2026-02-17)
 
 
