@@ -1,3 +1,10 @@
+# [1.0.0-dev.7](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.6...v1.0.0-dev.7) (2026-02-23)
+
+
+### Features
+
+* update service offering pkg ([457054b](https://github.com/powerhouse-inc/contributor-billing/commit/457054bcaf010f9f9a0fdb6c23a80a76deb932b3))
+
 # [1.0.0-dev.6](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.5...v1.0.0-dev.6) (2026-02-20)
 
 
