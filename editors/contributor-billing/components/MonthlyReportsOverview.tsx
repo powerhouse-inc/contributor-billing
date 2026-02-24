@@ -11,8 +11,11 @@ import {
   isFileNodeKind,
 } from "@powerhousedao/reactor-browser";
 import { setName } from "document-model";
-import { moveNode } from "document-drive";
-import { useMonthlyReports } from "../hooks/useMonthlyReports.js";
+import { moveNode, deleteNode } from "document-drive";
+import {
+  useMonthlyReports,
+  type MonthReportSet,
+} from "../hooks/useMonthlyReports.js";
 import { MonthReportCard, type MonthPaymentStats } from "./MonthReportCard.js";
 import { actions as expenseReportActions } from "../../../document-models/expense-report/index.js";
 import { actions as snapshotReportActions } from "../../../document-models/snapshot-report/index.js";
@@ -59,6 +62,39 @@ function parseMonthDates(monthName: string): {
     Date.UTC(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999),
   );
   return { start, end };
+}
+
+/**
+ * Get the suggested start date for a new snapshot report based on the previous
+ * month's snapshot period end date. Returns the day after the previous period
+ * ends, or the first day of the month if there's no previous snapshot.
+ */
+function getSuggestedSnapshotStartDate(
+  monthName: string,
+  monthReportSets: MonthReportSet[],
+): Date | null {
+  const monthDates = parseMonthDates(monthName);
+  if (!monthDates) return null;
+
+  // Find the current month's index in the sorted (descending) list
+  const currentIndex = monthReportSets.findIndex(
+    (s) => s.monthName === monthName,
+  );
+  if (currentIndex === -1) return null;
+
+  // The previous month is the next item in the descending-sorted array
+  const previousMonth = monthReportSets[currentIndex + 1];
+  if (!previousMonth?.snapshotEndDate) return null;
+
+  const previousEnd = new Date(previousMonth.snapshotEndDate);
+  if (isNaN(previousEnd.getTime())) return null;
+
+  // Suggested start = previous period end + 1 day
+  const suggestedStart = new Date(previousEnd);
+  suggestedStart.setUTCDate(suggestedStart.getUTCDate() + 1);
+  suggestedStart.setUTCHours(0, 0, 0, 0);
+
+  return suggestedStart;
 }
 
 /**
@@ -314,9 +350,16 @@ export function MonthlyReportsOverview({
         // Set the document name
         await dispatchActions(setName(reportName), createdNode.id);
 
-        // Set period dates based on month
+        // Set reporting period to calendar month boundaries
         const dates = parseMonthDates(monthName);
         if (dates) {
+          const suggestedStart = getSuggestedSnapshotStartDate(
+            monthName,
+            monthReportSets,
+          );
+          // Transaction filtering start: previous period end + 1 day, or month start
+          const txStartDate = suggestedStart || dates.start;
+
           await dispatchActions(
             [
               snapshotReportActions.setPeriodStart({
@@ -326,6 +369,15 @@ export function MonthlyReportsOverview({
                 periodEnd: dates.end.toISOString(),
               }),
             ],
+            createdNode.id,
+          );
+
+          // Set the transaction filtering range (snapshot period) separately
+          await dispatchActions(
+            snapshotReportActions.setReportConfig({
+              startDate: txStartDate.toISOString(),
+              endDate: dates.end.toISOString(),
+            }),
             createdNode.id,
           );
         }
@@ -338,7 +390,19 @@ export function MonthlyReportsOverview({
         setIsCreating(false);
       }
     },
-    [driveId, isCreating, onActiveNodeIdChange],
+    [driveId, isCreating, monthReportSets, onActiveNodeIdChange],
+  );
+
+  const handleDeleteReport = useCallback(
+    async (reportId: string) => {
+      if (!driveId) return;
+      try {
+        await dispatchActions(deleteNode({ id: reportId }), driveId);
+      } catch (error) {
+        console.error("Failed to delete report:", error);
+      }
+    },
+    [driveId],
   );
 
   // Add Month button component (reused across states)
@@ -470,8 +534,15 @@ export function MonthlyReportsOverview({
             defaultExpanded={index === 0}
             onCreateExpenseReport={handleCreateExpenseReport}
             onCreateSnapshotReport={handleCreateSnapshotReport}
+            onDeleteReport={handleDeleteReport}
             onViewPayments={onFolderSelect ? handleViewPayments : undefined}
             paymentStats={monthPaymentStatsMap.get(reportSet.monthName)}
+            suggestedStartDate={
+              getSuggestedSnapshotStartDate(
+                reportSet.monthName,
+                monthReportSets,
+              ) || undefined
+            }
           />
         ))}
       </div>

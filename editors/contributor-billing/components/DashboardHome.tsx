@@ -18,7 +18,6 @@ import type { SelectedFolderInfo } from "./FolderTree.js";
 import type { OperationalHubProfileDocument } from "../../../document-models/operational-hub-profile/gen/types.js";
 import type { AccountsDocument } from "../../../document-models/accounts/gen/types.js";
 
-
 interface DashboardHomeProps {
   onFolderSelect?: (folderInfo: SelectedFolderInfo | null) => void;
 }
@@ -381,7 +380,6 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
           </div>
         </button>
       </div>
-
     </div>
   );
 }

@@ -36,8 +36,18 @@ export const getPeriodKey = (
 };
 
 const MONTHS = [
-  "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-  "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+  "JAN",
+  "FEB",
+  "MAR",
+  "APR",
+  "MAY",
+  "JUN",
+  "JUL",
+  "AUG",
+  "SEP",
+  "OCT",
+  "NOV",
+  "DEC",
 ];
 
 // Helper to extract month key from an ISO date string (format: "SEP2025")
@@ -177,12 +187,17 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const docsIds = await reactor.getDocuments(driveId);
 
           const docs = await Promise.all(
-            docsIds.map(async (docId) =>
-              reactor.getDocument<PHDocument>(docId),
-            ),
+            docsIds.map(async (docId) => {
+              try {
+                return await reactor.getDocument<PHDocument>(docId);
+              } catch {
+                return null;
+              }
+            }),
           );
 
           for (const doc of docs) {
+            if (!doc) continue;
             const docType = doc.header.documentType;
 
             if (docType === "powerhouse/snapshot-report") {
@@ -370,7 +385,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
           // Build snapshot report data
           const snapshotReportData = snapshotReport
-            ? buildSnapshotReportData(snapshotReport, accountTransactionsDocs)
+            ? buildSnapshotReportData(snapshotReport)
             : {
                 startDate: "",
                 endDate: "",
@@ -398,7 +413,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const opHubMember = ownerState?.operationalHubMember ?? null;
           const operationalHubMember =
             opHubMember?.phid || opHubMember?.name
-              ? { phid: opHubMember.phid || null, name: opHubMember.name || null }
+              ? {
+                  phid: opHubMember.phid || null,
+                  name: opHubMember.name || null,
+                }
               : null;
 
           budgetStatements.push({
@@ -457,10 +475,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 /**
  * Build snapshot report data from a SnapshotReportDocument
  */
-function buildSnapshotReportData(
-  doc: SnapshotReportDocument,
-  accountTransactionsDocs: Map<string, AccountTransactionsDocument>,
-) {
+function buildSnapshotReportData(doc: SnapshotReportDocument) {
   const state = doc.state.global;
 
   return {
@@ -490,8 +505,8 @@ function buildSnapshotReportData(
         txHash: tx.txHash,
         counterParty: tx.counterParty || "",
         counterPartyName: getCounterPartyName(
-          tx.counterPartyAccountId,
-          accountTransactionsDocs,
+          tx.counterParty,
+          state.snapshotAccounts,
         ),
         amount: {
           value: tx.amount,
@@ -590,23 +605,20 @@ function buildExpenseReportData(doc: ExpenseReportDocument) {
 }
 
 /**
- * Get counter party name from account-transactions document
+ * Get counter party name by matching the counter party address
+ * against snapshot account addresses.
  */
 function getCounterPartyName(
-  counterPartyAccountId: string | null | undefined,
-  accountTransactionsDocs: Map<string, AccountTransactionsDocument>,
+  counterPartyAddress: string | null | undefined,
+  snapshotAccounts: SnapshotReportDocument["state"]["global"]["snapshotAccounts"],
 ): string {
-  if (!counterPartyAccountId) return "";
+  if (!counterPartyAddress) return "";
 
-  // Search through all account-transactions docs to find the account name
-  for (const txDoc of accountTransactionsDocs.values()) {
-    const account = txDoc.state.global.account;
-    if (account && account.id === counterPartyAccountId) {
-      return account.name || "";
-    }
-  }
-
-  return "";
+  const account = snapshotAccounts.find(
+    (acc) =>
+      acc.accountAddress.toLowerCase() === counterPartyAddress.toLowerCase(),
+  );
+  return account?.accountName || "";
 }
 
 type AmountCurrency = { unit: string; value: string };
