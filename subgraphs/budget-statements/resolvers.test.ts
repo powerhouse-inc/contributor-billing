@@ -143,8 +143,18 @@ describe("getMonthKey", () => {
 
   it("handles all months", () => {
     const expected = [
-      "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-      "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+      "JAN",
+      "FEB",
+      "MAR",
+      "APR",
+      "MAY",
+      "JUN",
+      "JUL",
+      "AUG",
+      "SEP",
+      "OCT",
+      "NOV",
+      "DEC",
     ];
     for (let i = 0; i < 12; i++) {
       const month = String(i + 1).padStart(2, "0");
@@ -329,14 +339,14 @@ describe("computeNetExpenseTxns", () => {
         {
           type: "Internal",
           transactions: [
-            makeTx("OUTFLOW", "External", 500, "USDS"),   // counted
-            makeTx("OUTFLOW", "External", 200, "USDC"),   // counted
-            makeTx("OUTFLOW", "External", 100, "DAI"),    // counted
-            makeTx("OUTFLOW", "External", 1.5, "ETH"),    // excluded: not stablecoin
+            makeTx("OUTFLOW", "External", 500, "USDS"), // counted
+            makeTx("OUTFLOW", "External", 200, "USDC"), // counted
+            makeTx("OUTFLOW", "External", 100, "DAI"), // counted
+            makeTx("OUTFLOW", "External", 1.5, "ETH"), // excluded: not stablecoin
             makeTx("OUTFLOW", "External", 9999, "sUSDS"), // excluded: not stablecoin
-            makeTx("OUTFLOW", "External", 5000, "SKY"),   // excluded: not stablecoin
-            makeTx("OUTFLOW", "External", 134, "MKR"),    // excluded: not stablecoin
-            makeTx("OUTFLOW", "External", 46, "EURe"),    // excluded: not stablecoin
+            makeTx("OUTFLOW", "External", 5000, "SKY"), // excluded: not stablecoin
+            makeTx("OUTFLOW", "External", 134, "MKR"), // excluded: not stablecoin
+            makeTx("OUTFLOW", "External", 46, "EURe"), // excluded: not stablecoin
           ],
         },
       ],

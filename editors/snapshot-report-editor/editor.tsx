@@ -1,5 +1,5 @@
 import { generateId, setName } from "document-model";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   useDocumentsInSelectedDrive,
   useParentFolderForSelectedNode,
@@ -7,12 +7,9 @@ import {
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
-import {
-  Button,
-  Select,
-  DatePicker,
-} from "@powerhousedao/document-engineering";
+import { Button, Select } from "@powerhousedao/document-engineering";
 import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { DateRangePicker } from "./components/DateRangePicker.js";
 import { useSelectedSnapshotReportDocument } from "../hooks/useSnapshotReportDocument.js";
 import {
   setReportConfig,
@@ -156,6 +153,84 @@ export default function Editor() {
   const [isEditingPeriod, setIsEditingPeriod] = useState(!savedPeriod);
 
   const isPeriodChanged = selectedPeriod !== savedPeriod;
+
+  // Compute suggested start date from previous month's snapshot endDate
+  const suggestedStartDate = useMemo(() => {
+    if (!documentsInDrive || !reportPeriodStart) return null;
+
+    const currentPeriodStart = new Date(reportPeriodStart);
+    if (isNaN(currentPeriodStart.getTime())) return null;
+
+    // Find all other snapshot reports in the drive
+    const otherSnapshots = documentsInDrive.filter(
+      (doc) =>
+        doc.header.documentType === "powerhouse/snapshot-report" &&
+        doc.header.id !== document.header.id,
+    );
+
+    // Find the snapshot whose reportPeriodStart is closest before this one
+    let previousSnapshot: {
+      endDate: string | null;
+      reportPeriodStart: string;
+    } | null = null;
+    let closestDistance = Infinity;
+
+    for (const snap of otherSnapshots) {
+      const state = snap.state as {
+        global?: {
+          reportPeriodStart?: string | null;
+          endDate?: string | null;
+        };
+      };
+      const rps = state?.global?.reportPeriodStart;
+      if (!rps) continue;
+
+      const rpDate = new Date(rps);
+      if (isNaN(rpDate.getTime())) continue;
+
+      // Must be before current period
+      const diff = currentPeriodStart.getTime() - rpDate.getTime();
+      if (diff > 0 && diff < closestDistance) {
+        closestDistance = diff;
+        previousSnapshot = {
+          endDate: state?.global?.endDate || null,
+          reportPeriodStart: rps,
+        };
+      }
+    }
+
+    if (!previousSnapshot?.endDate) return null;
+
+    const prevEnd = new Date(previousSnapshot.endDate);
+    if (isNaN(prevEnd.getTime())) return null;
+
+    // Suggested start = previous endDate + 1 day
+    const suggested = new Date(prevEnd);
+    suggested.setUTCDate(suggested.getUTCDate() + 1);
+    suggested.setUTCHours(0, 0, 0, 0);
+    return suggested;
+  }, [documentsInDrive, reportPeriodStart, document.header.id]);
+
+  const handleSnapshotPeriodChange = useCallback(
+    (newFromDate: string, newToDate: string) => {
+      dispatch?.(
+        setReportConfig({
+          startDate: newFromDate,
+          endDate: newToDate,
+          reportName: reportName || undefined,
+          accountsDocumentId: accountsDocumentId || undefined,
+        }),
+      );
+    },
+    [dispatch, reportName, accountsDocumentId],
+  );
+
+  const handleApplySuggestedStartDate = useCallback(() => {
+    if (!suggestedStartDate) return;
+    const fromISO = suggestedStartDate.toISOString();
+    const toISO = endDate || "";
+    handleSnapshotPeriodChange(fromISO, toISO);
+  }, [suggestedStartDate, endDate, handleSnapshotPeriodChange]);
 
   // Update selected period when document period changes externally
   useEffect(() => {
@@ -532,59 +607,6 @@ export default function Editor() {
     setSelectedAccountIds(new Set());
   };
 
-  // Handlers for the legacy startDate/endDate fields (DatePicker approach)
-  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const dateValue = e.target.value;
-    if (!dateValue) return;
-
-    // DatePicker may return ISO string or date string - extract just the date part
-    const dateString = dateValue.split("T")[0]; // Get YYYY-MM-DD part if ISO string
-    if (!dateString) return;
-
-    // Create date at start of day (00:00:00)
-    const date = new Date(dateString + "T00:00:00.000Z");
-    if (isNaN(date.getTime())) {
-      console.error("Invalid date value:", dateValue);
-      return;
-    }
-
-    const isoDateTime = date.toISOString();
-    dispatch?.(
-      setReportConfig({
-        startDate: isoDateTime,
-        endDate: endDate || undefined,
-        reportName: reportName || undefined,
-        accountsDocumentId: accountsDocumentId || undefined,
-      }),
-    );
-  };
-
-  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const dateValue = e.target.value;
-    if (!dateValue) return;
-
-    // DatePicker may return ISO string or date string - extract just the date part
-    const dateString = dateValue.split("T")[0]; // Get YYYY-MM-DD part if ISO string
-    if (!dateString) return;
-
-    // Create date at end of day (23:59:59.999)
-    const endOfDay = new Date(dateString + "T23:59:59.999Z");
-    if (isNaN(endOfDay.getTime())) {
-      console.error("Invalid date value:", dateValue);
-      return;
-    }
-
-    const isoDateTime = endOfDay.toISOString();
-    dispatch?.(
-      setReportConfig({
-        endDate: isoDateTime,
-        startDate: startDate || undefined,
-        reportName: reportName || undefined,
-        accountsDocumentId: accountsDocumentId || undefined,
-      }),
-    );
-  };
-
   // Get the parent folder node for the currently selected node
   const parentFolder = useParentFolderForSelectedNode();
   // Set the selected node to the parent folder node (close the editor)
@@ -699,26 +721,44 @@ export default function Editor() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Snapshot Period
-              </label>
-              <div className="flex gap-2 items-center">
-                <DatePicker
-                  name="startDate"
-                  value={startDate ? startDate.split("T")[0] : ""}
-                  onChange={handleStartDateChange}
-                  dateFormat="YYYY-MM-DD"
-                  className="flex-1"
-                />
-                <span className="self-center">to</span>
-                <DatePicker
-                  name="endDate"
-                  value={endDate ? endDate.split("T")[0] : ""}
-                  onChange={handleEndDateChange}
-                  dateFormat="YYYY-MM-DD"
-                  className="flex-1"
-                />
-              </div>
+              <DateRangePicker
+                label="Snapshot Period"
+                fromDate={startDate || ""}
+                toDate={endDate || ""}
+                onChange={handleSnapshotPeriodChange}
+              />
+              {suggestedStartDate &&
+                (!startDate ||
+                  startDate.split("T")[0] !==
+                    suggestedStartDate.toISOString().split("T")[0]) && (
+                  <div className="mt-2 flex items-center gap-2 p-2 bg-indigo-50 border border-indigo-200 rounded-md">
+                    <span className="text-xs text-indigo-700 flex-1">
+                      Previous snapshot period ends{" "}
+                      {new Date(
+                        suggestedStartDate.getTime() - 86400000,
+                      ).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        timeZone: "UTC",
+                      })}
+                      . Start from{" "}
+                      <strong>
+                        {suggestedStartDate.toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          timeZone: "UTC",
+                        })}
+                      </strong>{" "}
+                      to avoid gaps.
+                    </span>
+                    <button
+                      onClick={handleApplySuggestedStartDate}
+                      className="px-2 py-1 text-xs font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-200 rounded transition-colors whitespace-nowrap"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                )}
             </div>
           </div>
         </div>
