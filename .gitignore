@@ -10,3 +10,4 @@ node_modules
 projects-import.js
 .keypair.json
 downloads
+.auth.json

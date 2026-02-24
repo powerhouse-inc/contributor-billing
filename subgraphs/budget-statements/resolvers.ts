@@ -189,8 +189,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               const snapshotDoc = doc as SnapshotReportDocument;
               const ownerId = snapshotDoc.state.global.ownerIds?.[0] ?? null;
 
-              // Apply filters: teamId takes precedence, then networkSlug (via allowedBuilderPhids)
-              if (teamId && ownerId !== teamId) continue;
+              // Don't filter snapshot reports by teamId here — snapshots are often
+              // owned by the operational hub, not individual teams. The opHub sharing
+              // mechanism (Step 4) will associate them with the correct teams later.
               if (
                 allowedBuilderPhids &&
                 ownerId &&
@@ -437,10 +438,17 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           }
         }
 
-        // Sort by month (most recent first)
-        budgetStatements.sort(sortByMonth);
+        // When filtering by teamId, remove entries for other owners that were
+        // only collected because we don't filter snapshot reports by teamId
+        // (snapshots are often owned by the opHub, not individual teams).
+        const filteredStatements = teamId
+          ? budgetStatements.filter((stmt) => stmt.owner.id === teamId)
+          : budgetStatements;
 
-        return budgetStatements;
+        // Sort by month (most recent first)
+        filteredStatements.sort(sortByMonth);
+
+        return filteredStatements;
       },
     },
   };
