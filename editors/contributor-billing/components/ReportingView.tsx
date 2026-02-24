@@ -28,8 +28,11 @@ function parseMonthDates(monthName: string): {
   const date = new Date(monthName + " 1"); // e.g., "January 2026 1"
   if (isNaN(date.getTime())) return null;
 
-  const start = new Date(date.getFullYear(), date.getMonth(), 1);
-  const end = new Date(date.getFullYear(), date.getMonth() + 1, 0); // Last day of month
+  // Use UTC to avoid timezone offset being baked into .toISOString()
+  const start = new Date(Date.UTC(date.getFullYear(), date.getMonth(), 1));
+  const end = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999),
+  );
   return { start, end };
 }
 
@@ -39,8 +42,8 @@ function parseMonthDates(monthName: string): {
 function formatMonthCode(monthName: string): string {
   const date = new Date(monthName + " 1");
   if (isNaN(date.getTime())) return monthName;
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const year = date.getUTCFullYear();
   return `${month}-${year}`;
 }
 
