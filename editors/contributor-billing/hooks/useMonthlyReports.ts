@@ -37,6 +37,10 @@ export interface MonthReportSet {
   reportingFolderId: string | null;
   /** The month folder info */
   folderInfo: MonthFolderInfo;
+  /** The snapshot report's transaction period start date (startDate), if any */
+  snapshotStartDate: string | null;
+  /** The snapshot report's transaction period end date (endDate), if any */
+  snapshotEndDate: string | null;
 }
 
 export interface UseMonthlyReportsResult {
@@ -207,6 +211,16 @@ export function useMonthlyReports(): UseMonthlyReportsResult {
         ? toReportDocument(snapshotDoc, "powerhouse/snapshot-report")
         : null;
 
+      // Extract snapshot transaction period dates from document state
+      const snapshotState = snapshotDoc?.state as
+        | {
+            global?: {
+              startDate?: string | null;
+              endDate?: string | null;
+            };
+          }
+        | undefined;
+
       // Combine all reports for status calculation
       const allReports: ReportDocument[] = [...expenseReports];
       if (snapshotReport) allReports.push(snapshotReport);
@@ -220,6 +234,8 @@ export function useMonthlyReports(): UseMonthlyReportsResult {
         reportCount: allReports.length,
         reportingFolderId: folderInfo.reportingFolder?.id || null,
         folderInfo,
+        snapshotStartDate: snapshotState?.global?.startDate || null,
+        snapshotEndDate: snapshotState?.global?.endDate || null,
       });
     }
 
