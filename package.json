@@ -1,7 +1,7 @@
 {
   "name": "@powerhousedao/contributor-billing",
   "description": "Document models that help contributors of open organisations get paid anonymously for their work on a monthly basis.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
@@ -199,6 +199,5 @@
     "url": "https://github.com/powerhouse-inc/contributor-billing/issues"
   },
   "readme": "ERROR: No README data found!",
-  "homepage": "https://github.com/powerhouse-inc/contributor-billing#readme",
-  "_id": "@powerhousedao/contributor-billing@1.0.2"
+  "homepage": "https://github.com/powerhouse-inc/contributor-billing#readme"
 }
