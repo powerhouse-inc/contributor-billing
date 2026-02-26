@@ -1,9 +1,9 @@
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import type {
   InvoiceState,
-  LegalEntityTaxId,
-  LegalEntityCorporateRegistrationId,
+  InvoiceLineItem as InvoiceLineItemType,
   Maybe,
+  PaymentRouting,
 } from "../../document-models/invoice/index.js";
 import countries from "world-countries";
 
@@ -323,7 +323,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
 
   // Helper to chunk line items with different first page size
   function chunkLineItems(
-    lineItems: any[],
+    lineItems: InvoiceLineItemType[],
     firstPageSize: number,
     otherPageSize: number,
   ) {
@@ -456,12 +456,8 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     <View style={styles.row}>
                       <Text style={styles.companyInfoLabel}>Tax/Corp ID:</Text>
                       <Text style={styles.companyInfo}>
-                        {(invoice.issuer.id as Maybe<LegalEntityTaxId>)
-                          ?.taxId ||
-                          (
-                            invoice.issuer
-                              .id as Maybe<LegalEntityCorporateRegistrationId>
-                          )?.corpRegId ||
+                        {invoice.issuer.id?.taxId ||
+                          invoice.issuer.id?.corpRegId ||
                           ""}
                       </Text>
                     </View>
@@ -529,11 +525,8 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     <View style={styles.row}>
                       <Text style={styles.companyInfoLabel}>Tax/Corp ID:</Text>
                       <Text style={styles.companyInfo}>
-                        {(invoice.payer.id as Maybe<LegalEntityTaxId>)?.taxId ||
-                          (
-                            invoice.payer
-                              .id as Maybe<LegalEntityCorporateRegistrationId>
-                          )?.corpRegId ||
+                        {invoice.payer.id?.taxId ||
+                          invoice.payer.id?.corpRegId ||
                           ""}
                       </Text>
                     </View>
@@ -738,9 +731,10 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({
 {
   /* New component for fiat payment section */
 }
-const PaymentSectionFiat: React.FC<{ paymentRouting: any }> = ({
-  paymentRouting,
-}) => {
+const PaymentSectionFiat: React.FC<{
+  paymentRouting: Maybe<PaymentRouting>;
+}> = ({ paymentRouting }) => {
+  if (!paymentRouting) return null;
   console.log("paymentRouting", paymentRouting.bank);
   return (
     <View style={[styles.gridContainer, { marginTop: 0, marginLeft: 0 }]}>
@@ -928,47 +922,42 @@ const PaymentSectionFiat: React.FC<{ paymentRouting: any }> = ({
 {
   /* New component for crypto payment section */
 }
-const PaymentSectionCrypto: React.FC<{ paymentRouting: any }> = ({
-  paymentRouting,
-}) => (
-  <View style={styles.row}>
-    <View style={styles.gridColumn}>
-      <View style={styles.row}>
-        <Text style={styles.companyInfoLabel}>Chain:</Text>
-        <Text style={styles.companyInfo}>
-          {paymentRouting.wallet?.chainName || ""}
-        </Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.companyInfoLabel}>Address:</Text>
-        <Text style={styles.companyInfo}>
-          {paymentRouting.wallet?.address || ""}
-        </Text>
+const PaymentSectionCrypto: React.FC<{
+  paymentRouting: Maybe<PaymentRouting>;
+}> = ({ paymentRouting }) => {
+  if (!paymentRouting) return null;
+  return (
+    <View style={styles.row}>
+      <View style={styles.gridColumn}>
+        <View style={styles.row}>
+          <Text style={styles.companyInfoLabel}>Chain:</Text>
+          <Text style={styles.companyInfo}>
+            {paymentRouting.wallet?.chainName || ""}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.companyInfoLabel}>Address:</Text>
+          <Text style={styles.companyInfo}>
+            {paymentRouting.wallet?.address || ""}
+          </Text>
+        </View>
       </View>
     </View>
-  </View>
-);
+  );
+};
 
 {
   /* New component for line items */
 }
-const InvoiceLineItem: React.FC<{ item: any; currency: string }> = ({
-  item,
-  currency,
-}) => (
+const InvoiceLineItem: React.FC<{
+  item: InvoiceLineItemType;
+  currency: string;
+}> = ({ item, currency }) => (
   <View style={styles.tableRow}>
     <View style={styles.tableCol40}>
       <Text style={styles.itemName} hyphenationCallback={(word) => [word]}>
         {item.description}
       </Text>
-      {item.longDescription && (
-        <Text
-          style={styles.itemDescription}
-          hyphenationCallback={(word) => [word]}
-        >
-          {item.longDescription}
-        </Text>
-      )}
     </View>
     <Text style={styles.tableCol15}>{item.quantity.toFixed(2)}</Text>
     <Text style={styles.tableCol18}>

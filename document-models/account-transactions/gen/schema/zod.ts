@@ -9,6 +9,8 @@ import type {
   DeleteTransactionInput,
   SetAccountInput,
   TransactionDetails,
+  TransactionDirection,
+  TransactionDirectionInput,
   TransactionEntry,
   UpdateBudgetInput,
   UpdateTransactionInput,
@@ -81,7 +83,7 @@ export function AddTransactionInputSchema(): z.ZodObject<
         message: "Invalid Ethereum address format",
       })
       .nullish(),
-    datetime: z.string().datetime(),
+    datetime: z.iso.datetime(),
     direction: TransactionDirectionInputSchema,
     id: z.string(),
     token: z.string(),
@@ -156,7 +158,7 @@ export function TransactionEntrySchema(): z.ZodObject<
         message: "Invalid Ethereum address format",
       })
       .nullish(),
-    datetime: z.string().datetime(),
+    datetime: z.iso.datetime(),
     details: z.lazy(() => TransactionDetailsSchema()),
     direction: TransactionDirectionSchema,
     id: z.string(),
@@ -186,7 +188,7 @@ export function UpdateTransactionInputSchema(): z.ZodObject<
         message: "Invalid Ethereum address format",
       })
       .nullish(),
-    datetime: z.string().datetime().nullish(),
+    datetime: z.iso.datetime().nullish(),
     direction: TransactionDirectionInputSchema.nullish(),
     id: z.string(),
     token: z.string().nullish(),

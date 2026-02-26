@@ -11,10 +11,10 @@ import {
   addDocument,
   setSelectedNode,
 } from "@powerhousedao/reactor-browser";
-import { toast } from "@powerhousedao/design-system/connect";
 import type { PHBaseState, PHDocument } from "document-model";
 import type { FileNode } from "document-drive";
 import { moveNode } from "document-drive";
+import { cbToast } from "../cbToast.js";
 import { InvoiceTable } from "./InvoiceTable.js";
 
 interface InvoiceTableContainerProps {
@@ -24,6 +24,8 @@ interface InvoiceTableContainerProps {
   monthName?: string;
   /** The sibling Reporting folder ID where expense reports should be created */
   reportingFolderId?: string;
+  /** Content rendered above the InvoiceTable but inside the drop zone */
+  children?: React.ReactNode;
 }
 
 /**
@@ -34,6 +36,7 @@ export function InvoiceTableContainer({
   folderId,
   monthName,
   reportingFolderId,
+  children,
 }: InvoiceTableContainerProps) {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
@@ -134,7 +137,7 @@ export function InvoiceTableContainer({
       // Show error for rejected files
       if (rejectedFiles.length > 0) {
         const rejectedNames = rejectedFiles.map((f) => f.name).join(", ");
-        toast(
+        cbToast(
           `Only .phd files (Powerhouse documents) can be dropped here. Rejected: ${rejectedNames}`,
           { type: "error" },
         );
@@ -208,10 +211,13 @@ export function InvoiceTableContainer({
     [onDropFile, driveId, folderId],
   );
 
+  // Don't stopPropagation on dragOver/dragEnter — these must bubble to
+  // DocumentDropZone so it can show the full-screen overlay.
+  // Only handleDrop uses stopPropagation to prevent DocumentDropZone
+  // from also processing the files.
   const handleDragOver = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
-      event.stopPropagation();
       event.dataTransfer.dropEffect = "copy";
     },
     [],
@@ -220,7 +226,6 @@ export function InvoiceTableContainer({
   const handleDragEnter = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
-      event.stopPropagation();
     },
     [],
   );
@@ -253,7 +258,7 @@ export function InvoiceTableContainer({
   const onSelectDocumentModel = useCallback(
     async (documentModel: VetraDocumentModelModule, name: string) => {
       if (!driveId) {
-        toast("No drive selected", { type: "error" });
+        cbToast("No drive selected", { type: "error" });
         return;
       }
 
@@ -275,13 +280,13 @@ export function InvoiceTableContainer({
           setTimeout(() => {
             setSelectedNode(createdNode.id);
           }, 100);
-          toast("Invoice created successfully", { type: "success" });
+          cbToast("Invoice created successfully", { type: "success" });
         } else {
-          toast("Failed to create invoice", { type: "error" });
+          cbToast("Failed to create invoice", { type: "error" });
         }
       } catch (error) {
         console.error("Error creating invoice:", error);
-        toast("Failed to create invoice", { type: "error" });
+        cbToast("Failed to create invoice", { type: "error" });
       }
     },
     [driveId, folderId],
@@ -323,6 +328,7 @@ export function InvoiceTableContainer({
       onDragOver={handleDragOver}
       onDragEnter={handleDragEnter}
     >
+      {children}
       <InvoiceTable
         files={fileNodes}
         selected={selected}

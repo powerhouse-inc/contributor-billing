@@ -5,6 +5,8 @@ import type {
   AddLineItemInput,
   AddWalletInput,
   ExpenseReportState,
+  ExpenseReportStatus,
+  ExpenseReportStatusInput,
   GroupTotals,
   GroupTotalsInput,
   LineItem,
@@ -53,9 +55,11 @@ export function AddBillingStatementInputSchema(): z.ZodObject<
 > {
   return z.object({
     billingStatementId: z.string(),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -74,9 +78,11 @@ export function AddLineItemInputSchema(): z.ZodObject<
 > {
   return z.object({
     lineItem: z.lazy(() => LineItemInputSchema()),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -85,9 +91,11 @@ export function AddWalletInputSchema(): z.ZodObject<
 > {
   return z.object({
     name: z.string().nullish(),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -96,12 +104,12 @@ export function ExpenseReportStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ExpenseReportState").optional(),
-    endDate: z.string().datetime().nullish(),
+    endDate: z.iso.datetime().nullish(),
     groups: z.array(z.lazy(() => LineItemGroupSchema())),
     ownerId: z.string().nullish(),
-    periodEnd: z.string().datetime().nullish(),
-    periodStart: z.string().datetime().nullish(),
-    startDate: z.string().datetime().nullish(),
+    periodEnd: z.iso.datetime().nullish(),
+    periodStart: z.iso.datetime().nullish(),
+    startDate: z.iso.datetime().nullish(),
     status: ExpenseReportStatusSchema,
     wallets: z.array(z.lazy(() => WalletSchema())),
   });
@@ -171,9 +179,11 @@ export function RemoveBillingStatementInputSchema(): z.ZodObject<
 > {
   return z.object({
     billingStatementId: z.string(),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -182,9 +192,11 @@ export function RemoveGroupTotalsInputSchema(): z.ZodObject<
 > {
   return z.object({
     groupId: z.string(),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -201,9 +213,11 @@ export function RemoveLineItemInputSchema(): z.ZodObject<
 > {
   return z.object({
     lineItemId: z.string(),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -211,9 +225,11 @@ export function RemoveWalletInputSchema(): z.ZodObject<
   Properties<RemoveWalletInput>
 > {
   return z.object({
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -222,9 +238,11 @@ export function SetGroupTotalsInputSchema(): z.ZodObject<
 > {
   return z.object({
     groupTotals: z.lazy(() => GroupTotalsInputSchema()),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -240,7 +258,7 @@ export function SetPeriodEndInputSchema(): z.ZodObject<
   Properties<SetPeriodEndInput>
 > {
   return z.object({
-    periodEnd: z.string().datetime(),
+    periodEnd: z.iso.datetime(),
   });
 }
 
@@ -248,8 +266,8 @@ export function SetPeriodInputSchema(): z.ZodObject<
   Properties<SetPeriodInput>
 > {
   return z.object({
-    endDate: z.string().datetime().nullish(),
-    startDate: z.string().datetime().nullish(),
+    endDate: z.iso.datetime().nullish(),
+    startDate: z.iso.datetime().nullish(),
   });
 }
 
@@ -257,7 +275,7 @@ export function SetPeriodStartInputSchema(): z.ZodObject<
   Properties<SetPeriodStartInput>
 > {
   return z.object({
-    periodStart: z.string().datetime(),
+    periodStart: z.iso.datetime(),
   });
 }
 
@@ -291,9 +309,11 @@ export function UpdateLineItemInputSchema(): z.ZodObject<
     label: z.string().nullish(),
     lineItemId: z.string(),
     payments: z.number().nullish(),
-    wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    wallet: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
   });
 }
 
@@ -303,9 +323,11 @@ export function UpdateWalletInputSchema(): z.ZodObject<
   return z.object({
     accountDocumentId: z.string().nullish(),
     accountTransactionsDocumentId: z.string().nullish(),
-    address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-      message: "Invalid Ethereum address format",
-    }),
+    address: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]{40}$/, {
+        message: "Invalid Ethereum address format",
+      }),
     name: z.string().nullish(),
   });
 }

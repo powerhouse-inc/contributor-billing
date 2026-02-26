@@ -9,7 +9,7 @@ import {
   utils,
 } from "@powerhousedao/contributor-billing/document-models/snapshot-report";
 
-/** Document model module for the Todo List document type */
+/** Document model module for the SnapshotReport document type */
 export const SnapshotReport: DocumentModelModule<SnapshotReportPHState> = {
   version: 1,
   reducer,

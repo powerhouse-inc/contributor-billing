@@ -10,42 +10,56 @@ interface BuilderProfileState {
   name: string | null;
   code: string | null;
   icon: string | null;
+  operationalHubMember: {
+    phid: string | null;
+    name: string | null;
+  };
 }
 
+// Helper to extract YYYY-MM-DD from an ISO date string without Date object
+// to avoid timezone-dependent parsing
+export const extractIsoDate = (dateStr: string): string | null => {
+  const match = dateStr.match(/^(\d{4}-\d{2}-\d{2})/);
+  return match ? match[1] : null;
+};
+
 // Helper to create a period key from start and end dates
-const getPeriodKey = (
+export const getPeriodKey = (
   periodStart: string | null | undefined,
   periodEnd: string | null | undefined,
 ): string | null => {
   if (!periodStart || !periodEnd) return null;
-  // Normalize dates to YYYY-MM-DD format for consistent matching
-  const startDate = new Date(periodStart);
-  const endDate = new Date(periodEnd);
-  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return null;
-  const formatDate = (d: Date) => d.toISOString().split("T")[0];
-  return `${formatDate(startDate)}_${formatDate(endDate)}`;
+  const start = extractIsoDate(periodStart);
+  const end = extractIsoDate(periodEnd);
+  if (!start || !end) return null;
+  return `${start}_${end}`;
 };
 
-// Helper to extract month key from date (format: "JAN2026")
-const getMonthKey = (dateStr: string | null): string | null => {
+const MONTHS = [
+  "JAN",
+  "FEB",
+  "MAR",
+  "APR",
+  "MAY",
+  "JUN",
+  "JUL",
+  "AUG",
+  "SEP",
+  "OCT",
+  "NOV",
+  "DEC",
+];
+
+// Helper to extract month key from an ISO date string (format: "SEP2025")
+// Parses directly from the string to avoid timezone issues
+export const getMonthKey = (dateStr: string | null): string | null => {
   if (!dateStr) return null;
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return null;
-  const months = [
-    "JAN",
-    "FEB",
-    "MAR",
-    "APR",
-    "MAY",
-    "JUN",
-    "JUL",
-    "AUG",
-    "SEP",
-    "OCT",
-    "NOV",
-    "DEC",
-  ];
-  return `${months[date.getMonth()]}${date.getFullYear()}`;
+  const match = dateStr.match(/^(\d{4})-(\d{2})/);
+  if (!match) return null;
+  const year = match[1];
+  const monthIndex = parseInt(match[2], 10) - 1;
+  if (monthIndex < 0 || monthIndex > 11) return null;
+  return `${MONTHS[monthIndex]}${year}`;
 };
 
 // Helper to sort budget statements by month (most recent first)
@@ -173,20 +187,26 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const docsIds = await reactor.getDocuments(driveId);
 
           const docs = await Promise.all(
-            docsIds.map(async (docId) =>
-              reactor.getDocument<PHDocument>(docId),
-            ),
+            docsIds.map(async (docId) => {
+              try {
+                return await reactor.getDocument<PHDocument>(docId);
+              } catch {
+                return null;
+              }
+            }),
           );
 
           for (const doc of docs) {
+            if (!doc) continue;
             const docType = doc.header.documentType;
 
             if (docType === "powerhouse/snapshot-report") {
               const snapshotDoc = doc as SnapshotReportDocument;
               const ownerId = snapshotDoc.state.global.ownerIds?.[0] ?? null;
 
-              // Apply filters: teamId takes precedence, then networkSlug (via allowedBuilderPhids)
-              if (teamId && ownerId !== teamId) continue;
+              // Don't filter snapshot reports by teamId here — snapshots are often
+              // owned by the operational hub, not individual teams. The opHub sharing
+              // mechanism (Step 4) will associate them with the correct teams later.
               if (
                 allowedBuilderPhids &&
                 ownerId &&
@@ -218,7 +238,49 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           }
         }
 
-        // Step 2: Group reports by ownerId AND period
+        // Step 2: Resolve builder profiles and build opHub lookup
+        // We need this before grouping so snapshot reports can be shared across op hub members
+        const resolvedProfiles = new Map<string, BuilderProfileState | null>();
+        const builderToOpHub = new Map<string, string>();
+
+        const resolveProfile = async (
+          phid: string,
+        ): Promise<BuilderProfileState | null> => {
+          if (resolvedProfiles.has(phid)) return resolvedProfiles.get(phid)!;
+          let doc = builderProfileDocs.get(phid) || null;
+          if (!doc) {
+            try {
+              doc = await reactor.getDocument<PHDocument>(phid);
+            } catch {
+              // Profile may not exist
+            }
+          }
+          const state = doc
+            ? ((doc.state as unknown as { global: BuilderProfileState })
+                ?.global ?? null)
+            : null;
+          resolvedProfiles.set(phid, state);
+          if (state?.operationalHubMember?.phid) {
+            builderToOpHub.set(phid, state.operationalHubMember.phid);
+          }
+          return state;
+        };
+
+        // Pre-resolve all builder profiles we'll need
+        const allOwnerIds = new Set<string>();
+        for (const doc of snapshotReportDocs) {
+          const id = doc.state.global.ownerIds?.[0];
+          if (id) allOwnerIds.add(id);
+        }
+        for (const doc of expenseReportDocs) {
+          const id = doc.state.global.ownerId;
+          if (id) allOwnerIds.add(id);
+        }
+        await Promise.all(
+          Array.from(allOwnerIds).map((id) => resolveProfile(id)),
+        );
+
+        // Step 3: Group reports by ownerId AND period
         // Key format: "ownerId_periodStart_periodEnd"
         const budgetStatementsByOwnerAndPeriod = new Map<
           string,
@@ -229,6 +291,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             expenseReport: ExpenseReportDocument | null;
           }
         >();
+
+        // Index snapshot reports by opHub + period so they can be shared
+        const snapshotByOpHub = new Map<string, SnapshotReportDocument>();
 
         // Group snapshot reports
         for (const snapshotDoc of snapshotReportDocs) {
@@ -253,6 +318,12 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           }
           budgetStatementsByOwnerAndPeriod.get(key)!.snapshotReport =
             snapshotDoc;
+
+          // Also index by opHub + period for sharing across subteams
+          const opHubPhid = builderToOpHub.get(ownerId);
+          if (opHubPhid) {
+            snapshotByOpHub.set(`${opHubPhid}_${periodKey}`, snapshotDoc);
+          }
         }
 
         // Group expense reports and match with snapshot reports
@@ -276,34 +347,27 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           budgetStatementsByOwnerAndPeriod.get(key)!.expenseReport = expenseDoc;
         }
 
-        // Step 3: Build the budget statements
+        // Step 4: Fill in missing snapshot reports from op hub siblings
+        for (const entry of budgetStatementsByOwnerAndPeriod.values()) {
+          if (entry.snapshotReport) continue; // already has a direct match
+          const opHubPhid = builderToOpHub.get(entry.ownerId);
+          if (!opHubPhid) continue;
+          const opHubSnapshot = snapshotByOpHub.get(
+            `${opHubPhid}_${entry.periodKey}`,
+          );
+          if (opHubSnapshot) {
+            entry.snapshotReport = opHubSnapshot;
+          }
+        }
+
+        // Step 5: Build the budget statements
         const budgetStatements = [];
 
         for (const [
           key,
           { ownerId, periodKey, snapshotReport, expenseReport },
         ] of budgetStatementsByOwnerAndPeriod.entries()) {
-          // Get the builder profile for this owner
-          let builderProfileDoc = builderProfileDocs.get(ownerId) || null;
-
-          // Try to fetch directly if not found
-          if (!builderProfileDoc) {
-            try {
-              builderProfileDoc =
-                await reactor.getDocument<PHDocument>(ownerId);
-            } catch {
-              // Ignore errors - profile may not exist
-            }
-          }
-
-          // Build owner object
-          const ownerState = builderProfileDoc
-            ? ((
-                builderProfileDoc.state as unknown as {
-                  global: BuilderProfileState;
-                }
-              )?.global ?? null)
-            : null;
+          const ownerState = resolvedProfiles.get(ownerId) ?? null;
 
           const owner = {
             id: ownerId,
@@ -321,7 +385,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
           // Build snapshot report data
           const snapshotReportData = snapshotReport
-            ? buildSnapshotReportData(snapshotReport, accountTransactionsDocs)
+            ? buildSnapshotReportData(snapshotReport)
             : {
                 startDate: "",
                 endDate: "",
@@ -345,21 +409,64 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const lastModifiedAtUtcIso =
             expenseReport?.header.lastModifiedAtUtcIso || "";
 
+          // Get operational hub member from builder profile
+          const opHubMember = ownerState?.operationalHubMember ?? null;
+          const operationalHubMember =
+            opHubMember?.phid || opHubMember?.name
+              ? {
+                  phid: opHubMember.phid || null,
+                  name: opHubMember.name || null,
+                }
+              : null;
+
           budgetStatements.push({
             id: key,
             owner,
+            operationalHubMember,
             month,
             status,
             lastModifiedAtUtcIso,
+            reportedActuals: computeReportedActuals(expenseReportData),
+            netExpenseTxns: computeNetExpenseTxns(snapshotReportData),
             snapshotReport: snapshotReportData,
             expenseReport: expenseReportData,
           });
         }
 
-        // Sort by month (most recent first)
-        budgetStatements.sort(sortByMonth);
+        // Aggregate reportedActuals by operational hub + month
+        // All builders in the same op hub for the same month share the same total
+        const opHubActuals = new Map<string, number>();
+        for (const stmt of budgetStatements) {
+          const opHubPhid = stmt.operationalHubMember?.phid;
+          if (!opHubPhid) continue;
+          const groupKey = `${opHubPhid}_${stmt.month}`;
+          const current = opHubActuals.get(groupKey) || 0;
+          opHubActuals.set(
+            groupKey,
+            current + (parseFloat(stmt.reportedActuals.value) || 0),
+          );
+        }
+        for (const stmt of budgetStatements) {
+          const opHubPhid = stmt.operationalHubMember?.phid;
+          if (!opHubPhid) continue;
+          const groupKey = `${opHubPhid}_${stmt.month}`;
+          const total = opHubActuals.get(groupKey);
+          if (total !== undefined) {
+            stmt.reportedActuals = { unit: "USDS", value: String(total) };
+          }
+        }
 
-        return budgetStatements;
+        // When filtering by teamId, remove entries for other owners that were
+        // only collected because we don't filter snapshot reports by teamId
+        // (snapshots are often owned by the opHub, not individual teams).
+        const filteredStatements = teamId
+          ? budgetStatements.filter((stmt) => stmt.owner.id === teamId)
+          : budgetStatements;
+
+        // Sort by month (most recent first)
+        filteredStatements.sort(sortByMonth);
+
+        return filteredStatements;
       },
     },
   };
@@ -368,10 +475,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 /**
  * Build snapshot report data from a SnapshotReportDocument
  */
-function buildSnapshotReportData(
-  doc: SnapshotReportDocument,
-  accountTransactionsDocs: Map<string, AccountTransactionsDocument>,
-) {
+function buildSnapshotReportData(doc: SnapshotReportDocument) {
   const state = doc.state.global;
 
   return {
@@ -401,8 +505,8 @@ function buildSnapshotReportData(
         txHash: tx.txHash,
         counterParty: tx.counterParty || "",
         counterPartyName: getCounterPartyName(
-          tx.counterPartyAccountId,
-          accountTransactionsDocs,
+          tx.counterParty,
+          state.snapshotAccounts,
         ),
         amount: {
           value: tx.amount,
@@ -501,21 +605,76 @@ function buildExpenseReportData(doc: ExpenseReportDocument) {
 }
 
 /**
- * Get counter party name from account-transactions document
+ * Get counter party name by matching the counter party address
+ * against snapshot account addresses.
  */
 function getCounterPartyName(
-  counterPartyAccountId: string | null | undefined,
-  accountTransactionsDocs: Map<string, AccountTransactionsDocument>,
+  counterPartyAddress: string | null | undefined,
+  snapshotAccounts: SnapshotReportDocument["state"]["global"]["snapshotAccounts"],
 ): string {
-  if (!counterPartyAccountId) return "";
+  if (!counterPartyAddress) return "";
 
-  // Search through all account-transactions docs to find the account name
-  for (const txDoc of accountTransactionsDocs.values()) {
-    const account = txDoc.state.global.account;
-    if (account && account.id === counterPartyAccountId) {
-      return account.name || "";
+  const account = snapshotAccounts.find(
+    (acc) =>
+      acc.accountAddress.toLowerCase() === counterPartyAddress.toLowerCase(),
+  );
+  return account?.accountName || "";
+}
+
+type AmountCurrency = { unit: string; value: string };
+
+type ExpenseReportData = {
+  wallets: Array<{
+    lineItems: Array<{ actuals: AmountCurrency }>;
+  }>;
+};
+
+type SnapshotReportData = {
+  accounts: Array<{
+    type: string;
+    transactions: Array<{
+      direction: string;
+      flowType: string;
+      amount: { value: AmountCurrency; unit: string };
+    }>;
+  }>;
+};
+
+/**
+ * Sum of all line item actuals from expense report wallets
+ */
+export function computeReportedActuals(
+  expenseReportData: ExpenseReportData,
+): AmountCurrency {
+  let total = 0;
+  for (const wallet of expenseReportData.wallets) {
+    for (const item of wallet.lineItems) {
+      total += parseFloat(item.actuals.value) || 0;
     }
   }
+  return { unit: "USDS", value: String(total) };
+}
 
-  return "";
+// USD stablecoins to include in net expense calculation
+const USD_STABLECOINS = new Set(["USDS", "USDC", "DAI"]);
+
+/**
+ * Sum of outbound USD stablecoin transactions that leave the Internal wallet grouping.
+ * Excludes Swap (token conversion) and Internal (inter-wallet transfers) flowTypes.
+ * Only counts USDS, USDC, and DAI — excludes sUSDS, EURe, SKY, MKR, etc.
+ */
+export function computeNetExpenseTxns(
+  snapshotReportData: SnapshotReportData,
+): AmountCurrency {
+  let total = 0;
+  for (const account of snapshotReportData.accounts) {
+    if (account.type !== "Internal") continue;
+    for (const tx of account.transactions) {
+      if (tx.direction !== "OUTFLOW") continue;
+      if (tx.flowType === "Swap" || tx.flowType === "Internal") continue;
+      if (!USD_STABLECOINS.has(tx.amount.unit)) continue;
+      total += parseFloat(tx.amount.value.value) || 0;
+    }
+  }
+  return { unit: "USDS", value: String(total) };
 }

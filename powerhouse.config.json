@@ -16,8 +16,13 @@
       "provider": "npm"
     },
     {
+      "packageName": "@powerhousedao/service-offering",
+      "version": "0.0.9",
+      "provider": "npm"
+    },
+    {
       "packageName": "@powerhousedao/builder-profile",
-      "version": "0.0.18",
+      "version": "latest",
       "provider": "npm"
     }
   ]

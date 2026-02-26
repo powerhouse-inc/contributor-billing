@@ -1,4 +1,4 @@
-import { toast } from "@powerhousedao/design-system/connect";
+import { invoiceToast as toast } from "./invoiceToast.js";
 import { RWAButton } from "@powerhousedao/design-system/rwa";
 import {
   type DeleteLineItemInput,

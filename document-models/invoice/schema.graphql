@@ -154,14 +154,9 @@ type InvoiceTag {
   label: String       # "Marketing", ..., "Business Bank", ..., "May 2025"
 }
 
-union LegalEntityId = LegalEntityTaxId | LegalEntityCorporateRegistrationId
-
-type LegalEntityTaxId {
-  taxId: String!
-}
-
-type LegalEntityCorporateRegistrationId {
-  corpRegId: String!
+type LegalEntityId {
+  taxId: String
+  corpRegId: String
 }
 
 enum Status {

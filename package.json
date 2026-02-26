@@ -69,11 +69,12 @@
     "migrate": "ph-cli migrate"
   },
   "dependencies": {
-    "@powerhousedao/builder-profile": "1.0.4",
+    "@powerhousedao/builder-profile": "^1.0.6",
     "@powerhousedao/builder-tools": "5.3.4",
     "@powerhousedao/common": "5.3.4",
     "@powerhousedao/design-system": "5.3.4",
     "@powerhousedao/document-engineering": "^1.40.1",
+    "@powerhousedao/service-offering": "0.0.9",
     "@powerhousedao/vetra": "^5.3.4",
     "@react-pdf/renderer": "^4.3.1",
     "@safe-global/api-kit": "^4.0.0",
@@ -129,7 +130,6 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
     "vite": "^6.2.3",
-    "vite-plugin-node-polyfills": "^0.24.0",
     "vitest": "^3.0.9",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",

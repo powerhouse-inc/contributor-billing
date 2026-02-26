@@ -16,6 +16,7 @@ export type LegalEntityWalletSectionProps = Omit<
   readonly currency: string;
   readonly status: string;
   readonly walletvalidation?: ValidationResult | null;
+  readonly chainvalidation?: ValidationResult | null;
 };
 
 export const LegalEntityWalletSection = (
@@ -28,6 +29,7 @@ export const LegalEntityWalletSection = (
     currency,
     status,
     walletvalidation,
+    chainvalidation,
     ...divProps
   } = props;
   const [localState, setLocalState] = useState(value);
@@ -102,13 +104,20 @@ export const LegalEntityWalletSection = (
         <h3 className="mb-4 text-lg font-semibold text-black-200">
           Wallet Information
         </h3>
-        <Select
-          style={{ width: "100%" }}
-          options={chainOptions}
-          value={selectedChain || ""}
-          onChange={handleChainChange}
-          placeholder="Select Chain"
-        />
+        <div>
+          <Select
+            style={{ width: "100%" }}
+            options={chainOptions}
+            value={selectedChain || ""}
+            onChange={handleChainChange}
+            placeholder="Select Chain"
+          />
+          {chainvalidation && !chainvalidation.isValid && (
+            <p className="mt-1 text-xs text-yellow-600">
+              {chainvalidation.message}
+            </p>
+          )}
+        </div>
       </div>
       <div className="space-y-6">
         <div className="space-y-4">

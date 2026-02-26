@@ -38,6 +38,18 @@ export const invoiceGeneralOperations: InvoiceGeneralOperations = {
     state = Object.assign(state, newState);
   },
   editStatusOperation(state, action) {
+    if (
+      state.status === "DRAFT" &&
+      action.input.status !== "DRAFT" &&
+      action.input.status !== "CANCELLED"
+    ) {
+      const wallet = state.issuer?.paymentRouting?.wallet;
+      if (!wallet?.address || (!wallet.chainName && !wallet.chainId)) {
+        throw new Error(
+          "Issuer wallet address and chain must be set before moving out of DRAFT",
+        );
+      }
+    }
     state.status = action.input.status;
   },
   editPaymentDataOperation(state, action) {

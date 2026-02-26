@@ -71,7 +71,9 @@ export const invoicePartiesOperations: InvoicePartiesOperations = {
           : (state.issuer.country ?? null);
     }
     if ("id" in action.input) {
-      state.issuer.id = action.input.id ? { taxId: action.input.id } : null;
+      state.issuer.id = action.input.id
+        ? { corpRegId: action.input.id, taxId: null }
+        : null;
     }
     if ("name" in action.input) {
       state.issuer.name =
@@ -301,7 +303,9 @@ export const invoicePartiesOperations: InvoicePartiesOperations = {
           : (state.payer.country ?? null);
     }
     if ("id" in action.input) {
-      state.payer.id = action.input.id ? { taxId: action.input.id } : null;
+      state.payer.id = action.input.id
+        ? { taxId: action.input.id, corpRegId: null }
+        : null;
     }
     if ("name" in action.input) {
       state.payer.name =

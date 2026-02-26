@@ -1,8 +1,6 @@
 import type {
   InvoiceState,
   LegalEntity,
-  LegalEntityCorporateRegistrationId,
-  LegalEntityTaxId,
   Maybe,
 } from "../../document-models/invoice/index.js";
 
@@ -140,9 +138,8 @@ export class UBLExporter {
   private generateSupplierParty(issuer: LegalEntity | null): string {
     if (!issuer) return "";
 
-    const taxId = (issuer.id as Maybe<LegalEntityTaxId>)?.taxId;
-    const corpRegId = (issuer.id as Maybe<LegalEntityCorporateRegistrationId>)
-      ?.corpRegId;
+    const taxId = issuer.id?.taxId;
+    const corpRegId = issuer.id?.corpRegId;
     const companyId = taxId || corpRegId;
 
     return `<cac:AccountingSupplierParty>

@@ -5,26 +5,25 @@ import {
   utils,
   isInvoiceDocument,
   cancel,
+  CancelInputSchema,
   issue,
   reset,
+  ResetInputSchema,
   reject,
   accept,
   reinstate,
-  schedulePayment,
-  reapprovePayment,
-  registerPaymentTx,
-  reportPaymentIssue,
-  confirmPayment,
-  closePayment,
-  CancelInputSchema,
-  IssueInputSchema,
-  ResetInputSchema,
   RejectInputSchema,
   AcceptInputSchema,
   ReinstateInputSchema,
+  schedulePayment,
   SchedulePaymentInputSchema,
+  reapprovePayment,
   ReapprovePaymentInputSchema,
+  registerPaymentTx,
   RegisterPaymentTxInputSchema,
+  reportPaymentIssue,
+  confirmPayment,
+  closePayment,
   ReportPaymentIssueInputSchema,
   ConfirmPaymentInputSchema,
   ClosePaymentInputSchema,
@@ -48,7 +47,12 @@ describe("TransitionsOperations", () => {
 
   it("should handle issue operation", () => {
     const document = utils.createDocument();
-    const input = generateMock(IssueInputSchema());
+    // Use explicit valid input: generateMock can produce invalid date strings
+    // that fail InvoiceStateSchema's z.iso.datetime() validation
+    const input = {
+      invoiceNo: "INV-001",
+      dateIssued: "2024-01-15",
+    };
 
     const updatedDocument = reducer(document, issue(input));
 

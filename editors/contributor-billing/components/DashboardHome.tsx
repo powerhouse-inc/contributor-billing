@@ -5,7 +5,7 @@ import {
   Building2,
   User,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import {
   addDocument,
   useDocumentsInSelectedDrive,
@@ -17,7 +17,6 @@ import { useBillingFolderStructure } from "../hooks/useBillingFolderStructure.js
 import type { SelectedFolderInfo } from "./FolderTree.js";
 import type { OperationalHubProfileDocument } from "../../../document-models/operational-hub-profile/gen/types.js";
 import type { AccountsDocument } from "../../../document-models/accounts/gen/types.js";
-import { CreateHubProfileModal } from "./CreateHubProfileModal.js";
 
 interface DashboardHomeProps {
   onFolderSelect?: (folderInfo: SelectedFolderInfo | null) => void;
@@ -136,9 +135,6 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
     return parts.join(" · ");
   }, [selectedDrive, documentsInDrive, monthFolders.size, paymentsFolderIds]);
 
-  // State for custom create hub profile modal
-  const [showCreateHubModal, setShowCreateHubModal] = useState(false);
-
   const handleOpenAccounts = useCallback(async () => {
     if (accountsDocument) {
       setSelectedNode(accountsDocument.header.id);
@@ -169,8 +165,6 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
   const handleOpenProfile = useCallback(() => {
     if (operationalHubProfileDocument) {
       setSelectedNode(operationalHubProfileDocument.header.id);
-    } else {
-      setShowCreateHubModal(true);
     }
   }, [operationalHubProfileDocument]);
 
@@ -386,11 +380,6 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
           </div>
         </button>
       </div>
-
-      <CreateHubProfileModal
-        isOpen={showCreateHubModal}
-        onClose={() => setShowCreateHubModal(false)}
-      />
     </div>
   );
 }

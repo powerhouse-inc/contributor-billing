@@ -1,10 +1,3 @@
-/**
- * This is a scaffold file meant for customization:
- * - modify it by implementing the reducer functions
- * - delete the file and run the code generator again to have it reset
- */
-
-import { permittedTransitions } from "../../utils/statusTransitions.js";
 import type { InvoiceTransitionsOperations } from "@powerhousedao/contributor-billing/document-models/invoice";
 
 /**
@@ -21,6 +14,19 @@ function ensureDatetimeFormat(
   return `${dateStr}T00:00:00.000Z`;
 }
 
+const permittedTransitions = {
+  DRAFT: ["CANCELLED", "ISSUED"],
+  CANCELLED: ["DRAFT"],
+  ISSUED: ["REJECTED", "ACCEPTED"],
+  REJECTED: ["ISSUED"],
+  ACCEPTED: ["PAYMENTSCHEDULED", "PAYMENTCLOSED"],
+  PAYMENTSCHEDULED: ["PAYMENTSENT", "PAYMENTISSUE", "PAYMENTCLOSED"],
+  PAYMENTSENT: ["PAYMENTISSUE", "PAYMENTRECEIVED"],
+  PAYMENTISSUE: ["ACCEPTED", "PAYMENTCLOSED"],
+  PAYMENTRECEIVED: ["PAYMENTISSUE"],
+  PAYMENTCLOSED: ["ACCEPTED"],
+};
+
 export const invoiceTransitionsOperations: InvoiceTransitionsOperations = {
   cancelOperation(state) {
     if (permittedTransitions[state.status].includes("CANCELLED")) {
@@ -32,6 +38,17 @@ export const invoiceTransitionsOperations: InvoiceTransitionsOperations = {
   issueOperation(state, action) {
     if (!action.input.invoiceNo || !action.input.dateIssued) {
       throw new Error("Invoice number and date issued are required");
+    }
+    const wallet = state.issuer?.paymentRouting?.wallet;
+    const stablecoins = ["USDS", "DAI", "USDC"];
+    const isStablecoin = stablecoins.includes(state.currency.toUpperCase());
+    if (
+      isStablecoin &&
+      (!wallet?.address || (!wallet.chainName && !wallet.chainId))
+    ) {
+      throw new Error(
+        "Issuer wallet address and chain must be set before issuing an invoice",
+      );
     }
     if (permittedTransitions[state.status].includes("ISSUED")) {
       state.status = "ISSUED";

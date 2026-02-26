@@ -3,7 +3,7 @@ import {
   type ValidationContext,
   validateField,
 } from "./validationManager.js";
-import { toast } from "@powerhousedao/design-system/connect";
+import { invoiceToast as toast } from "../invoiceToast.js";
 import { isValidIBAN } from "./validationRules.js";
 
 const validateStatusBeforeContinue = (
@@ -25,6 +25,7 @@ const validateStatusBeforeContinue = (
   setLineItemValidation: (validation: ValidationResult) => void,
   setRoutingNumberValidation: (validation: ValidationResult) => void,
   isFiatCurrency: (currency: string) => boolean,
+  setChainValidation?: (validation: ValidationResult | null) => void,
 ) => {
   if (newStatus === "PAYMENTSCHEDULED" || newStatus === "ISSUED") {
     const context: ValidationContext = {
@@ -69,6 +70,29 @@ const validateStatusBeforeContinue = (
     setCurrencyValidation(currencyValidation as any);
     if (currencyValidation && !currencyValidation.isValid) {
       validationErrors.push(currencyValidation);
+    }
+
+    // Validate wallet address and chain (required for all currencies)
+    const walletAddressValidation = validateField(
+      "walletAddress",
+      state.issuer.paymentRouting?.wallet?.address ?? "",
+      context,
+    );
+    setWalletValidation(walletAddressValidation as any);
+    if (walletAddressValidation && !walletAddressValidation.isValid) {
+      validationErrors.push(walletAddressValidation);
+    }
+
+    const walletChainValidation = validateField(
+      "walletChain",
+      state.issuer.paymentRouting?.wallet?.chainName ||
+        state.issuer.paymentRouting?.wallet?.chainId ||
+        "",
+      context,
+    );
+    setChainValidation?.(walletChainValidation);
+    if (walletChainValidation && !walletChainValidation.isValid) {
+      validationErrors.push(walletChainValidation);
     }
 
     // Validate main country
