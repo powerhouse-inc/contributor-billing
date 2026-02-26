@@ -1,3 +1,10 @@
+# [1.0.0-dev.9](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.8...v1.0.0-dev.9) (2026-02-26)
+
+
+### Bug Fixes
+
+* regenerate and fix pkg ([32818d7](https://github.com/powerhouse-inc/contributor-billing/commit/32818d7f09bfd8704eca2b3ae0c72a08b2a270fe))
+
 # [1.0.0-dev.8](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.7...v1.0.0-dev.8) (2026-02-26)
 
 
