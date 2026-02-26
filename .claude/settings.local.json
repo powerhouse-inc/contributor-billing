@@ -39,7 +39,10 @@
       "Bash(git rebase --continue)",
       "Bash(GIT_EDITOR=true git rebase --continue)",
       "Bash(echo \"exit: $?\")",
-      "Bash(git rebase --continue --no-edit)"
+      "Bash(git rebase --continue --no-edit)",
+      "Bash(npm test -- document-models/invoice/src/tests/transitions.test.ts)",
+      "Bash(npm test -- document-models/invoice/tests/transitions.test.ts)",
+      "Bash(npm test -- document-models/invoice/tests/transitions.test.ts --reporter=verbose)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",
