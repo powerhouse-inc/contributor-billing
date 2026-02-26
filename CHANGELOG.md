@@ -1,3 +1,15 @@
+# [1.0.0-dev.8](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.7...v1.0.0-dev.8) (2026-02-26)
+
+
+### Bug Fixes
+
+* correct version ([cf2bfb9](https://github.com/powerhouse-inc/contributor-billing/commit/cf2bfb9c69b8231b5451ba2b72ff1eb9cc90f94e))
+
+
+### Features
+
+* update builder profile pkg ([02fd473](https://github.com/powerhouse-inc/contributor-billing/commit/02fd4731cd908403d8ab52df76bf1e318f216118))
+
 # [1.0.0-dev.7](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.6...v1.0.0-dev.7) (2026-02-23)
 
 
