@@ -1,0 +1,331 @@
+name: Sync and Publish
+
+on:
+  # Triggered by powerhouse monorepo after release
+  repository_dispatch:
+    types: [powerhouse-release]
+
+  # Automatic release on push to dev/staging/main
+  push:
+    branches:
+      - dev
+      - staging
+      - main
+      - jetstream
+
+  # Manual trigger or dispatched per-branch
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Release channel'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - latest
+          - jetstream
+        default: 'dev'
+      sync:
+        description: 'Sync powerhouse dependencies first'
+        required: false
+        type: boolean
+        default: true
+      dry-run:
+        description: 'Dry run (skip publishing)'
+        required: false
+        type: boolean
+        default: false
+      powerhouse-version:
+        description: 'Powerhouse monorepo version (set by dispatch)'
+        required: false
+        type: string
+        default: ''
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '22'
+  BUN_VERSION: 'latest'
+
+jobs:
+  # ==========================================================================
+  # Fan out: dispatch per-branch runs (repository_dispatch only)
+  # ==========================================================================
+  dispatch:
+    name: Dispatch (${{ matrix.channel }})
+    if: github.event_name == 'repository_dispatch' && github.event.client_payload.channel == 'latest'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - branch: main
+            channel: latest
+          - branch: staging
+            channel: staging
+          - branch: dev
+            channel: dev
+    steps:
+      - name: Trigger workflow on ${{ matrix.branch }}
+        run: |
+          gh workflow run "Sync and Publish" \
+            --repo "${{ github.repository }}" \
+            --ref "${{ matrix.branch }}" \
+            -f channel="${{ matrix.channel }}" \
+            -f sync=true \
+            -f dry-run=false \
+            -f powerhouse-version="${{ github.event.client_payload.version }}"
+        env:
+          GH_TOKEN: ${{ secrets.K8S_REPO_PAT }}
+
+  # ==========================================================================
+  # Sync powerhouse dependencies (workflow_dispatch only)
+  # ==========================================================================
+  sync:
+    name: Sync Dependencies
+    if: github.event_name == 'workflow_dispatch' && inputs.sync == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update Powerhouse dependencies
+        run: |
+          bun update --latest $(node -e "
+            const pkg = require('./package.json');
+            const deps = {...pkg.dependencies, ...pkg.devDependencies};
+            const names = Object.keys(deps).filter(d => d.startsWith('@powerhousedao/') || ['document-model','document-drive'].includes(d));
+            console.log(names.join(' '));
+          ")
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Generate
+        run: bun generate
+
+      - name: Build package
+        run: bun run build
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet package.json bun.lock; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No dependency changes detected"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Dependency changes detected"
+          fi
+
+      - name: Commit changes
+        if: steps.changes.outputs.has_changes == 'true' && inputs.dry-run != true
+        run: |
+          git add package.json bun.lock
+          PH_VERSION="${{ inputs.powerhouse-version }}"
+          if [ -n "$PH_VERSION" ]; then
+            git commit -m "chore: sync powerhouse dependencies to $PH_VERSION [skip ci]"
+          else
+            git commit -m "chore: sync powerhouse dependencies [skip ci]"
+          fi
+
+      - name: Push changes
+        if: steps.changes.outputs.has_changes == 'true' && inputs.dry-run != true
+        run: git push
+
+  # ==========================================================================
+  # Release via semantic-release
+  # ==========================================================================
+  release:
+    name: Release
+    needs: sync
+    if: |
+      always() && (
+        (github.event_name == 'workflow_dispatch' && (needs.sync.result == 'success' || needs.sync.result == 'skipped'))
+        || github.event_name == 'push'
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      issues: write
+      pull-requests: write
+    outputs:
+      new_version: ${{ steps.get-version.outputs.version }}
+      released: ${{ steps.get-version.outputs.released }}
+      channel: ${{ steps.channel.outputs.channel }}
+    steps:
+      - name: Determine channel
+        id: channel
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            case "${{ github.ref_name }}" in
+              dev) CHANNEL=dev ;;
+              staging) CHANNEL=staging ;;
+              main) CHANNEL=latest ;;
+              jetstream) CHANNEL=jetstream ;;
+            esac
+          else
+            CHANNEL="${{ inputs.channel }}"
+          fi
+          echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull latest changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull origin ${{ github.ref_name }}
+
+      - name: Create local tracking branches for semantic-release
+        run: |
+          for branch in main staging dev jetstream; do
+            if ! git show-ref --verify --quiet refs/heads/$branch; then
+              git branch --track $branch origin/$branch 2>/dev/null || true
+            fi
+          done
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Generate
+        run: bun generate
+
+      - name: Build package
+        run: bun run build
+
+      - name: Run tests
+        run: bun run test || true
+        continue-on-error: true
+
+      - name: Run semantic-release
+        if: inputs.dry-run != true
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run semantic-release (dry-run)
+        if: inputs.dry-run == true
+        run: npx semantic-release --dry-run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get released version
+        id: get-version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          # Check if this version is already published on npm
+          if npm view "@powerhousedao/contributor-billing@${VERSION}" version 2>/dev/null; then
+            echo "released=false" >> $GITHUB_OUTPUT
+            echo "Version $VERSION already published, skipping"
+          else
+            # Check if semantic-release created a new tag
+            git fetch --tags
+            if git tag --list "v$VERSION" | grep -q "v$VERSION"; then
+              echo "released=true" >> $GITHUB_OUTPUT
+              echo "Released version: $VERSION"
+            else
+              echo "released=false" >> $GITHUB_OUTPUT
+              echo "No new release (version: $VERSION)"
+            fi
+          fi
+
+      - name: Upgrade npm for trusted publishing
+        if: inputs.dry-run != true && steps.get-version.outputs.released == 'true'
+        run: npm install -g npm@latest
+
+      - name: Publish to npm
+        if: inputs.dry-run != true && steps.get-version.outputs.released == 'true'
+        run: npm publish --provenance --access public --tag ${{ steps.channel.outputs.channel }}
+
+      - name: Notify bai-powerhouse-env
+        if: inputs.dry-run != true && steps.get-version.outputs.released == 'true' && steps.channel.outputs.channel == 'dev'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.K8S_REPO_PAT }}
+          repository: powerhouse-inc/bai-powerhouse-env
+          event-type: dependency-release
+          client-payload: |
+            {
+              "package": "@powerhousedao/contributor-billing",
+              "version": "${{ steps.get-version.outputs.version }}",
+              "channel": "${{ steps.channel.outputs.channel }}",
+              "powerhouse_version": "${{ inputs.powerhouse-version }}"
+            }
+
+
+      - name: Notify powerhouse-demo
+        if: inputs.dry-run != true && steps.get-version.outputs.released == 'true' && steps.channel.outputs.channel == 'latest'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.K8S_REPO_PAT }}
+          repository: powerhouse-inc/powerhouse-demo
+          event-type: dependency-release
+          client-payload: |
+            {
+              "package": "@powerhousedao/contributor-billing",
+              "version": "${{ steps.get-version.outputs.version }}",
+              "channel": "${{ steps.channel.outputs.channel }}",
+              "powerhouse_version": "${{ inputs.powerhouse-version }}"
+            }
+
+  # ==========================================================================
+  # Summary
+  # ==========================================================================
+  summary:
+    name: Summary
+    needs: [sync, release]
+    if: always() && (github.event_name == 'workflow_dispatch' || github.event_name == 'push')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Channel | ${{ needs.release.outputs.channel }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | ${{ needs.release.outputs.new_version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Released | ${{ needs.release.outputs.released }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trigger | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY

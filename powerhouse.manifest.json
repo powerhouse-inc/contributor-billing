@@ -1,19 +1,23 @@
 {
     "name": "Contributor Billing",
-    "description": "The invoice package offers contributors of decentralized and open organisations a way to get paid via their legal entity or governmental identity. ",
+    "description": "The invoice package offers contributors of decentralized and open organisations a way to get paid via their legal entity or governmental identity.",
     "category": "Finance",
     "publisher": {
         "name": "Powerhouse",
-        "url": "https://powerhouse.inc/"
+        "url": "https://powerhouse.inc"
     },
     "documentModels": [
         {
-            "id": "powerhouse/invoice",
-            "name": "Invoice"
+            "id": "powerhouse/accounts",
+            "name": "Accounts"
         },
         {
-            "id": "powerhouse/integrations",
-            "name": "Integrations"
+            "id": "powerhouse/account-transactions",
+            "name": "AccountTransactions"
+        },
+        {
+            "id": "powerhouse/invoice",
+            "name": "Invoice"
         },
         {
             "id": "powerhouse/billing-statement",
@@ -21,10 +25,32 @@
         },
         {
             "id": "powerhouse/expense-report",
-            "name": "Expense Report"
+            "name": "ExpenseReport"
+        },
+        {
+            "id": "powerhouse/snapshot-report",
+            "name": "Snapshot Report"
+        },
+        {
+            "id": "powerhouse/operational-hub-profile",
+            "name": "OperationalHubProfile"
         }
     ],
     "editors": [
+        {
+            "id": "powerhouse-accounts-editor",
+            "name": "Accounts",
+            "documentTypes": [
+                "powerhouse/accounts"
+            ]
+        },
+        {
+            "id": "powerhouse-account-transactions-editor",
+            "name": "Account Transactions",
+            "documentTypes": [
+                "powerhouse/account-transactions"
+            ]
+        },
         {
             "id": "powerhouse-invoice-editor",
             "name": "Invoice",
@@ -40,17 +66,24 @@
             ]
         },
         {
-            "id": "integrations-editor",
-            "name": "Integrations",
-            "documentTypes": [
-                "powerhouse/integrations"
-            ]
-        },
-        {
             "id": "powerhouse-expense-report-editor",
             "name": "Expense Report",
             "documentTypes": [
                 "powerhouse/expense-report"
+            ]
+        },
+        {
+            "id": "powerhouse-snapshot-report-editor",
+            "name": "Snapshot Report",
+            "documentTypes": [
+                "powerhouse/snapshot-report"
+            ]
+        },
+        {
+            "id": "operational-hub-profile-editor",
+            "name": "OperationalHubProfileEditor",
+            "documentTypes": [
+                "powerhouse/operational-hub-profile"
             ]
         }
     ],
@@ -59,6 +92,13 @@
             "id": "contributor-billing",
             "name": "Contributor Billing",
             "driveEditor": "contributor-billing"
+        },
+        {
+            "id": "builder-team-admin",
+            "name": "Builder Team Admin",
+            "documentTypes": [
+                "powerhouse/document-drive"
+            ]
         }
     ],
     "subgraphs": [],

@@ -1,15 +1,12 @@
-/**
- * This is a scaffold file meant for customization:
- * - modify it by implementing the reducer functions
- * - delete the file and run the code generator again to have it reset
- */
+import type {
+  InvoiceLineItem,
+  InvoiceState,
+  InvoiceTag,
+} from "../../gen/types.js";
+import type { InvoiceItemsOperations } from "@powerhousedao/contributor-billing/document-models/invoice";
 
-import type { InvoiceItemsOperations } from "../../gen/items/operations.js";
-import type { InvoiceLineItem, InvoiceState, InvoiceTag } from "../../gen/types.js";
-
-export const reducer: InvoiceItemsOperations = {
-  addLineItemOperation(state, action, dispatch) {
-
+export const invoiceItemsOperations: InvoiceItemsOperations = {
+  addLineItemOperation(state, action) {
     const item: InvoiceLineItem = {
       ...action.input,
       lineItemTag: [],
@@ -18,13 +15,12 @@ export const reducer: InvoiceItemsOperations = {
     if (state.lineItems.find((x) => x.id === item.id))
       throw new Error("Duplicate input.id");
 
-    validatePrices(item as InvoiceLineItem);
-    state.lineItems.push(item as InvoiceLineItem);
+    validatePrices(item);
+    state.lineItems.push(item);
     updateTotals(state);
-
   },
 
-  editLineItemOperation(state, action, dispatch) {
+  editLineItemOperation(state, action) {
     const stateItem = state.lineItems.find((x) => x.id === action.input.id);
     if (!stateItem) throw new Error("Item matching input.id not found");
 
@@ -33,8 +29,9 @@ export const reducer: InvoiceItemsOperations = {
     ) as Partial<InvoiceLineItem>;
 
     // Ensure lineItemTag is always an array if provided
-    if ('lineItemTag' in action.input) {
-      sanitizedInput.lineItemTag = (action.input.lineItemTag ?? []) as any;
+    if ("lineItemTag" in action.input) {
+      sanitizedInput.lineItemTag = (action.input.lineItemTag ??
+        []) as InvoiceTag[];
     }
 
     const nextItem: InvoiceLineItem = {
@@ -45,21 +42,23 @@ export const reducer: InvoiceItemsOperations = {
     applyInvariants(state, nextItem);
     Object.assign(stateItem, nextItem);
     updateTotals(state);
-
   },
 
-  deleteLineItemOperation(state, action, dispatch) {
+  deleteLineItemOperation(state, action) {
     state.lineItems = state.lineItems.filter((x) => x.id !== action.input.id);
     updateTotals(state);
-
   },
 
-  setLineItemTagOperation(state, action, dispatch) {
-    const stateItem = state.lineItems.find((x) => x.id === action.input.lineItemId);
+  setLineItemTagOperation(state, action) {
+    const stateItem = state.lineItems.find(
+      (x) => x.id === action.input.lineItemId,
+    );
     if (!stateItem) throw new Error("Item matching input.id not found");
 
     // if tag already exists with the same dimension, update the value and label
-    const existingTag = stateItem.lineItemTag?.find((tag) => tag.dimension === action.input.dimension);
+    const existingTag = stateItem.lineItemTag?.find(
+      (tag) => tag.dimension === action.input.dimension,
+    );
     if (existingTag) {
       existingTag.value = action.input.value;
       existingTag.label = action.input.label || null;
@@ -76,13 +75,13 @@ export const reducer: InvoiceItemsOperations = {
 
       // Add the new tag
       stateItem.lineItemTag?.push(newTag);
-
     }
-
   },
-  setInvoiceTagOperation(state, action, dispatch) {
+  setInvoiceTagOperation(state, action) {
     // if tag already exists with the same dimension, update the value and label
-    const existingTag = state.invoiceTags?.find((tag) => tag.dimension === action.input.dimension);
+    const existingTag = state.invoiceTags?.find(
+      (tag) => tag.dimension === action.input.dimension,
+    );
     if (existingTag) {
       existingTag.value = action.input.value;
       existingTag.label = action.input.label || null;
@@ -98,12 +97,9 @@ export const reducer: InvoiceItemsOperations = {
       }
       // Add the new tag
       state.invoiceTags.push(newTag);
-
     }
-
   },
 };
-
 
 function updateTotals(state: InvoiceState) {
   state.totalPriceTaxExcl = state.lineItems.reduce((total, lineItem) => {
@@ -157,10 +153,11 @@ const applyInvariants = (state: InvoiceState, nextItem: InvoiceLineItem) => {
   const isClose = (a: number, b: number) => Math.abs(a - b) < EPSILON;
 
   // Helper function to check if a value has changed significantly
-  const hasChanged = (oldValue: number, newValue: number) => !isClose(oldValue, newValue);
+  const hasChanged = (oldValue: number, newValue: number) =>
+    !isClose(oldValue, newValue);
 
   // Find the current state of this line item
-  const currentItem = state.lineItems.find(item => item.id === nextItem.id);
+  const currentItem = state.lineItems.find((item) => item.id === nextItem.id);
   if (!currentItem) {
     // New item, no comparison needed
     return;
@@ -169,7 +166,8 @@ const applyInvariants = (state: InvoiceState, nextItem: InvoiceLineItem) => {
   const taxRate = nextItem.taxPercent / 100;
 
   // Check if totalPriceTaxExcl was changed and update unitPriceTaxExcl accordingly
-  const expectedTotalPriceTaxExcl = nextItem.quantity * nextItem.unitPriceTaxExcl;
+  const expectedTotalPriceTaxExcl =
+    nextItem.quantity * nextItem.unitPriceTaxExcl;
   if (hasChanged(expectedTotalPriceTaxExcl, nextItem.totalPriceTaxExcl)) {
     // Total was changed, update unit price
     nextItem.unitPriceTaxExcl = nextItem.totalPriceTaxExcl / nextItem.quantity;
@@ -180,7 +178,8 @@ const applyInvariants = (state: InvoiceState, nextItem: InvoiceLineItem) => {
   }
 
   // Check if totalPriceTaxIncl was changed and update unitPriceTaxIncl accordingly
-  const expectedTotalPriceTaxIncl = nextItem.quantity * nextItem.unitPriceTaxIncl;
+  const expectedTotalPriceTaxIncl =
+    nextItem.quantity * nextItem.unitPriceTaxIncl;
   if (hasChanged(expectedTotalPriceTaxIncl, nextItem.totalPriceTaxIncl)) {
     // Total was changed, update unit price
     nextItem.unitPriceTaxIncl = nextItem.totalPriceTaxIncl / nextItem.quantity;
@@ -207,4 +206,4 @@ const applyInvariants = (state: InvoiceState, nextItem: InvoiceLineItem) => {
     nextItem.totalPriceTaxExcl = nextItem.quantity * nextItem.unitPriceTaxExcl;
     nextItem.totalPriceTaxIncl = nextItem.quantity * nextItem.unitPriceTaxIncl;
   }
-}
+};

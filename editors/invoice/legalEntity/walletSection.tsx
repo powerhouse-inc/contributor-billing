@@ -1,9 +1,10 @@
-import { ComponentProps, useEffect, useState } from "react";
+import { type ComponentProps, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { EditLegalEntityWalletInput } from "./legalEntity.js";
+import type { EditLegalEntityWalletInput } from "./legalEntity.js";
 import { InputField } from "../components/inputField.js";
-import { ValidationResult } from "../validation/validationManager.js";
+import type { ValidationResult } from "../validation/validationManager.js";
 import { Select } from "@powerhousedao/document-engineering";
+import { getAllChainConfigs } from "../utils/utils.js";
 
 export type LegalEntityWalletSectionProps = Omit<
   ComponentProps<"div">,
@@ -15,10 +16,11 @@ export type LegalEntityWalletSectionProps = Omit<
   readonly currency: string;
   readonly status: string;
   readonly walletvalidation?: ValidationResult | null;
+  readonly chainvalidation?: ValidationResult | null;
 };
 
 export const LegalEntityWalletSection = (
-  props: LegalEntityWalletSectionProps
+  props: LegalEntityWalletSectionProps,
 ) => {
   const {
     value,
@@ -27,6 +29,7 @@ export const LegalEntityWalletSection = (
     currency,
     status,
     walletvalidation,
+    chainvalidation,
     ...divProps
   } = props;
   const [localState, setLocalState] = useState(value);
@@ -37,9 +40,9 @@ export const LegalEntityWalletSection = (
 
   const handleInputChange = (
     field: keyof EditLegalEntityWalletInput,
-    event: React.ChangeEvent<HTMLTextAreaElement>
+    event: React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
-    setLocalState(prev => ({
+    setLocalState((prev) => ({
       ...prev,
       [field]: event.target.value,
     }));
@@ -47,7 +50,7 @@ export const LegalEntityWalletSection = (
 
   const handleBlur = (
     field: keyof EditLegalEntityWalletInput,
-    event: React.FocusEvent<HTMLTextAreaElement>
+    event: React.FocusEvent<HTMLTextAreaElement>,
   ) => {
     const newValue = event.target.value;
     onChange({
@@ -56,12 +59,10 @@ export const LegalEntityWalletSection = (
     });
   };
 
-  const CHAIN_PRESETS = [
-    { chainName: "Base", chainId: "8453" },
-    { chainName: "Ethereum", chainId: "1" },
-    { chainName: "Arbitrum One", chainId: "42161" },
-    // { chainName: "Gnosis", chainId: "100" },
-  ];
+  const CHAIN_PRESETS = getAllChainConfigs().map((config) => ({
+    chainName: config.chainName,
+    chainId: config.chainId,
+  }));
 
   // Map CHAIN_PRESETS to Select options
   const chainOptions = CHAIN_PRESETS.map((preset) => ({
@@ -71,15 +72,14 @@ export const LegalEntityWalletSection = (
 
   // Find the selected option by chainId
   const selectedChain = chainOptions.find(
-    (opt) => opt.value === localState.chainId
+    (opt) => opt.value === localState.chainId,
   )?.value;
-
 
   const handleChainChange = (value: string | string[]) => {
     const chainId = Array.isArray(value) ? value[0] : value;
     const preset = CHAIN_PRESETS.find((p) => p.chainId === chainId);
     if (preset) {
-      setLocalState(prev => ({
+      setLocalState((prev) => ({
         ...prev,
         chainId: preset.chainId,
         chainName: preset.chainName,
@@ -97,20 +97,27 @@ export const LegalEntityWalletSection = (
       {...divProps}
       className={twMerge(
         "rounded-lg border border-gray-200 bg-white p-6",
-        props.className
+        props.className,
       )}
     >
       <div className="grid grid-cols-2 gap-4 items-center">
         <h3 className="mb-4 text-lg font-semibold text-black-200">
           Wallet Information
         </h3>
-        <Select
-          style={{ width: "100%" }}
-          options={chainOptions}
-          value={selectedChain || ""}
-          onChange={handleChainChange}
-          placeholder="Select Chain"
-        />
+        <div>
+          <Select
+            style={{ width: "100%" }}
+            options={chainOptions}
+            value={selectedChain || ""}
+            onChange={handleChainChange}
+            placeholder="Select Chain"
+          />
+          {chainvalidation && !chainvalidation.isValid && (
+            <p className="mt-1 text-xs text-yellow-600">
+              {chainvalidation.message}
+            </p>
+          )}
+        </div>
       </div>
       <div className="space-y-6">
         <div className="space-y-4">

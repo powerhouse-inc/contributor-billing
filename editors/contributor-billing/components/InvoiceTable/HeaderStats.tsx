@@ -1,8 +1,13 @@
 import { Select } from "@powerhousedao/document-engineering/ui";
-import { useState, useEffect } from "react";
-import { useSelectedDriveDocuments } from "@powerhousedao/reactor-browser";
-import { getExchangeRate } from "../../util.js";
-import { Tooltip, TooltipProvider } from "@powerhousedao/design-system";
+import { useState, useEffect, useMemo } from "react";
+import {
+  useDocumentsInSelectedDrive,
+  useSelectedDrive,
+  isFileNodeKind,
+} from "@powerhousedao/reactor-browser";
+import { getExchangeRate } from "../../utils/exchangeRate.js";
+import { Tooltip, TooltipProvider } from "@powerhousedao/design-system/ui";
+import type { InvoiceDocument } from "../../../../document-models/invoice/index.js";
 
 const currencyList = [
   { ticker: "USDS", crypto: true },
@@ -17,27 +22,53 @@ const currencyList = [
   { ticker: "CHF", crypto: false },
 ];
 
-export const HeaderStats = () => {
+interface HeaderStatsProps {
+  /** The ID of the payments folder to filter invoices by */
+  folderId: string;
+}
+
+export const HeaderStats = ({ folderId }: HeaderStatsProps) => {
   const [selectedCurrency, setSelectedCurrency] = useState("USD");
   const [totalExpenses, setTotalExpenses] = useState(0);
-  const documents = useSelectedDriveDocuments();
-  const invoices = documents?.filter(
-    (doc) => doc.header.documentType === "powerhouse/invoice"
-  );
+  const [driveDocument] = useSelectedDrive();
+
+  // Filter invoice files to only those in the specific payments folder
+  const invoiceFiles = useMemo(() => {
+    if (!driveDocument) return [];
+    const nodes = driveDocument.state.global.nodes;
+    return nodes
+      .filter(
+        (node) =>
+          isFileNodeKind(node) &&
+          node.parentFolder === folderId &&
+          node.documentType === "powerhouse/invoice",
+      )
+      .map((node) => node.id);
+  }, [driveDocument, folderId]);
+
+  const allDocuments = useDocumentsInSelectedDrive() || [];
+  const invoices = useMemo(() => {
+    if (invoiceFiles.length === 0) return [];
+    const invoiceSet = new Set(invoiceFiles);
+    return allDocuments.filter(
+      (doc): doc is InvoiceDocument =>
+        doc.header.documentType === "powerhouse/invoice" &&
+        invoiceSet.has(doc.header.id),
+    );
+  }, [allDocuments, invoiceFiles]);
 
   useEffect(() => {
     const calculateTotalExpenses = async () => {
-      if (!invoices || invoices.length === 0) {
+      if (!invoices || !Array.isArray(invoices) || invoices.length === 0) {
         setTotalExpenses(0);
         return;
       }
 
       let total = 0;
-      for (const doc of invoices) {
-        const invoice = doc as any;
+      for (const invoice of invoices) {
         const invoiceAmount = invoice.state.global.totalPriceTaxIncl;
-        let invoiceCurrency = invoice.state.global.currency || "USD"; // Fallback to USD if currency is empty
-        let selectCurrency = selectedCurrency;
+        const invoiceCurrency = invoice.state.global.currency || "USD"; // Fallback to USD if currency is empty
+
         if (invoiceCurrency === selectedCurrency) {
           total += invoiceAmount;
         } else {
@@ -57,7 +88,7 @@ export const HeaderStats = () => {
             const exchangeRate = await getExchangeRate(
               fromCurrency,
               toCurrency,
-              invoiceAmount
+              invoiceAmount,
             );
             total += invoiceAmount * exchangeRate;
           } catch (error) {
@@ -70,7 +101,7 @@ export const HeaderStats = () => {
       setTotalExpenses(total);
     };
 
-    calculateTotalExpenses();
+    calculateTotalExpenses().catch(console.error);
   }, [invoices, selectedCurrency]);
 
   const currencyOptions = currencyList.map((currency) => ({

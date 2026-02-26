@@ -1,38 +1,63 @@
-import { createAction } from "document-model";
+import { createAction } from "document-model/core";
 import {
-  z,
-  type AddWalletInput,
-  type RemoveWalletInput,
-  type AddBillingStatementInput,
-  type RemoveBillingStatementInput,
-  type AddLineItemInput,
-  type UpdateLineItemInput,
-  type RemoveLineItemInput,
-  type AddLineItemGroupInput,
-  type UpdateLineItemGroupInput,
-  type RemoveLineItemGroupInput,
-  type SetGroupTotalsInput,
-  type RemoveGroupTotalsInput,
-  type SetPeriodStartInput,
-  type SetPeriodEndInput,
-  type UpdateWalletInput,
+  AddWalletInputSchema,
+  RemoveWalletInputSchema,
+  AddBillingStatementInputSchema,
+  RemoveBillingStatementInputSchema,
+  AddLineItemInputSchema,
+  UpdateLineItemInputSchema,
+  RemoveLineItemInputSchema,
+  AddLineItemGroupInputSchema,
+  UpdateLineItemGroupInputSchema,
+  RemoveLineItemGroupInputSchema,
+  SetGroupTotalsInputSchema,
+  RemoveGroupTotalsInputSchema,
+  SetPeriodStartInputSchema,
+  SetPeriodEndInputSchema,
+  UpdateWalletInputSchema,
+  SetOwnerIdInputSchema,
+  SetStatusInputSchema,
+  SetPeriodInputSchema,
+} from "../schema/zod.js";
+import type {
+  AddWalletInput,
+  RemoveWalletInput,
+  AddBillingStatementInput,
+  RemoveBillingStatementInput,
+  AddLineItemInput,
+  UpdateLineItemInput,
+  RemoveLineItemInput,
+  AddLineItemGroupInput,
+  UpdateLineItemGroupInput,
+  RemoveLineItemGroupInput,
+  SetGroupTotalsInput,
+  RemoveGroupTotalsInput,
+  SetPeriodStartInput,
+  SetPeriodEndInput,
+  UpdateWalletInput,
+  SetOwnerIdInput,
+  SetStatusInput,
+  SetPeriodInput,
 } from "../types.js";
-import {
-  type AddWalletAction,
-  type RemoveWalletAction,
-  type AddBillingStatementAction,
-  type RemoveBillingStatementAction,
-  type AddLineItemAction,
-  type UpdateLineItemAction,
-  type RemoveLineItemAction,
-  type AddLineItemGroupAction,
-  type UpdateLineItemGroupAction,
-  type RemoveLineItemGroupAction,
-  type SetGroupTotalsAction,
-  type RemoveGroupTotalsAction,
-  type SetPeriodStartAction,
-  type SetPeriodEndAction,
-  type UpdateWalletAction,
+import type {
+  AddWalletAction,
+  RemoveWalletAction,
+  AddBillingStatementAction,
+  RemoveBillingStatementAction,
+  AddLineItemAction,
+  UpdateLineItemAction,
+  RemoveLineItemAction,
+  AddLineItemGroupAction,
+  UpdateLineItemGroupAction,
+  RemoveLineItemGroupAction,
+  SetGroupTotalsAction,
+  RemoveGroupTotalsAction,
+  SetPeriodStartAction,
+  SetPeriodEndAction,
+  UpdateWalletAction,
+  SetOwnerIdAction,
+  SetStatusAction,
+  SetPeriodAction,
 } from "./actions.js";
 
 export const addWallet = (input: AddWalletInput) =>
@@ -40,7 +65,7 @@ export const addWallet = (input: AddWalletInput) =>
     "ADD_WALLET",
     { ...input },
     undefined,
-    z.AddWalletInputSchema,
+    AddWalletInputSchema,
     "global",
   );
 
@@ -49,7 +74,7 @@ export const removeWallet = (input: RemoveWalletInput) =>
     "REMOVE_WALLET",
     { ...input },
     undefined,
-    z.RemoveWalletInputSchema,
+    RemoveWalletInputSchema,
     "global",
   );
 
@@ -58,7 +83,7 @@ export const addBillingStatement = (input: AddBillingStatementInput) =>
     "ADD_BILLING_STATEMENT",
     { ...input },
     undefined,
-    z.AddBillingStatementInputSchema,
+    AddBillingStatementInputSchema,
     "global",
   );
 
@@ -67,7 +92,7 @@ export const removeBillingStatement = (input: RemoveBillingStatementInput) =>
     "REMOVE_BILLING_STATEMENT",
     { ...input },
     undefined,
-    z.RemoveBillingStatementInputSchema,
+    RemoveBillingStatementInputSchema,
     "global",
   );
 
@@ -76,7 +101,7 @@ export const addLineItem = (input: AddLineItemInput) =>
     "ADD_LINE_ITEM",
     { ...input },
     undefined,
-    z.AddLineItemInputSchema,
+    AddLineItemInputSchema,
     "global",
   );
 
@@ -85,7 +110,7 @@ export const updateLineItem = (input: UpdateLineItemInput) =>
     "UPDATE_LINE_ITEM",
     { ...input },
     undefined,
-    z.UpdateLineItemInputSchema,
+    UpdateLineItemInputSchema,
     "global",
   );
 
@@ -94,7 +119,7 @@ export const removeLineItem = (input: RemoveLineItemInput) =>
     "REMOVE_LINE_ITEM",
     { ...input },
     undefined,
-    z.RemoveLineItemInputSchema,
+    RemoveLineItemInputSchema,
     "global",
   );
 
@@ -103,7 +128,7 @@ export const addLineItemGroup = (input: AddLineItemGroupInput) =>
     "ADD_LINE_ITEM_GROUP",
     { ...input },
     undefined,
-    z.AddLineItemGroupInputSchema,
+    AddLineItemGroupInputSchema,
     "global",
   );
 
@@ -112,7 +137,7 @@ export const updateLineItemGroup = (input: UpdateLineItemGroupInput) =>
     "UPDATE_LINE_ITEM_GROUP",
     { ...input },
     undefined,
-    z.UpdateLineItemGroupInputSchema,
+    UpdateLineItemGroupInputSchema,
     "global",
   );
 
@@ -121,7 +146,7 @@ export const removeLineItemGroup = (input: RemoveLineItemGroupInput) =>
     "REMOVE_LINE_ITEM_GROUP",
     { ...input },
     undefined,
-    z.RemoveLineItemGroupInputSchema,
+    RemoveLineItemGroupInputSchema,
     "global",
   );
 
@@ -130,7 +155,7 @@ export const setGroupTotals = (input: SetGroupTotalsInput) =>
     "SET_GROUP_TOTALS",
     { ...input },
     undefined,
-    z.SetGroupTotalsInputSchema,
+    SetGroupTotalsInputSchema,
     "global",
   );
 
@@ -139,7 +164,7 @@ export const removeGroupTotals = (input: RemoveGroupTotalsInput) =>
     "REMOVE_GROUP_TOTALS",
     { ...input },
     undefined,
-    z.RemoveGroupTotalsInputSchema,
+    RemoveGroupTotalsInputSchema,
     "global",
   );
 
@@ -148,7 +173,7 @@ export const setPeriodStart = (input: SetPeriodStartInput) =>
     "SET_PERIOD_START",
     { ...input },
     undefined,
-    z.SetPeriodStartInputSchema,
+    SetPeriodStartInputSchema,
     "global",
   );
 
@@ -157,7 +182,7 @@ export const setPeriodEnd = (input: SetPeriodEndInput) =>
     "SET_PERIOD_END",
     { ...input },
     undefined,
-    z.SetPeriodEndInputSchema,
+    SetPeriodEndInputSchema,
     "global",
   );
 
@@ -166,6 +191,33 @@ export const updateWallet = (input: UpdateWalletInput) =>
     "UPDATE_WALLET",
     { ...input },
     undefined,
-    z.UpdateWalletInputSchema,
+    UpdateWalletInputSchema,
+    "global",
+  );
+
+export const setOwnerId = (input: SetOwnerIdInput) =>
+  createAction<SetOwnerIdAction>(
+    "SET_OWNER_ID",
+    { ...input },
+    undefined,
+    SetOwnerIdInputSchema,
+    "global",
+  );
+
+export const setStatus = (input: SetStatusInput) =>
+  createAction<SetStatusAction>(
+    "SET_STATUS",
+    { ...input },
+    undefined,
+    SetStatusInputSchema,
+    "global",
+  );
+
+export const setPeriod = (input: SetPeriodInput) =>
+  createAction<SetPeriodAction>(
+    "SET_PERIOD",
+    { ...input },
+    undefined,
+    SetPeriodInputSchema,
     "global",
   );

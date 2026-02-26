@@ -1,46 +1,43 @@
-/**
- * This is a scaffold file meant for customization:
- * - modify it by implementing the reducer functions
- * - delete the file and run the code generator again to have it reset
- */
+import type { BillingStatementState } from "../../gen/types.js";
+import type { BillingStatementLineItemsOperations } from "@powerhousedao/contributor-billing/document-models/billing-statement";
 
-import type { BillingStatementLineItemsOperations } from "../../gen/line-items/operations.js";
-import { BillingStatementLineItem, BillingStatementState } from "document-models/billing-statement/gen/types.js";
+export const billingStatementLineItemsOperations: BillingStatementLineItemsOperations =
+  {
+    addLineItemOperation(state, action) {
+      const newLineItem = {
+        ...action.input,
+        lineItemTag: [],
+      };
 
-export const reducer: BillingStatementLineItemsOperations = {
-  addLineItemOperation(state, action, dispatch) {
-    const newLineItem: BillingStatementLineItem = {
-      ...action.input,
-      lineItemTag: [],
-    };
+      // Check for duplicate ID
+      if (state.lineItems.find((x) => x.id === newLineItem.id)) {
+        throw new Error("Duplicate line item ID");
+      }
 
-    // Check for duplicate ID
-    if (state.lineItems.find((x) => x.id === newLineItem.id)) {
-      throw new Error("Duplicate line item ID");
-    }
+      state.lineItems.push(newLineItem);
+      updateTotals(state);
+    },
+    editLineItemOperation(state, action) {
+      const stateItem = state.lineItems.find((x) => x.id === action.input.id);
+      if (!stateItem) throw new Error("Item matching input.id not found");
 
-    state.lineItems.push(newLineItem);
-    updateTotals(state);
+      const sanitizedInput = Object.fromEntries(
+        Object.entries(action.input).filter(([, value]) => value !== null),
+      );
 
-  },
-  editLineItemOperation(state, action, dispatch) {
-    const stateItem = state.lineItems.find((x) => x.id === action.input.id);
-    if (!stateItem) throw new Error("Item matching input.id not found");
+      const nextItem = {
+        ...stateItem,
+        ...sanitizedInput,
+      };
 
-    const sanitizedInput = Object.fromEntries(
-      Object.entries(action.input).filter(([, value]) => value !== null),
-    ) as Partial<BillingStatementLineItem>;
-
-    const nextItem: BillingStatementLineItem = {
-      ...stateItem,
-      ...sanitizedInput,
-    };
-
-    Object.assign(stateItem, nextItem);
-    updateTotals(state);
-
-  },
-};
+      Object.assign(stateItem, nextItem);
+      updateTotals(state);
+    },
+    deleteLineItemOperation(state, action) {
+      state.lineItems = state.lineItems.filter((x) => x.id !== action.input.id);
+      updateTotals(state);
+    },
+  };
 
 const updateTotals = (state: BillingStatementState) => {
   state.totalCash = state.lineItems.reduce((total, lineItem) => {
@@ -50,4 +47,4 @@ const updateTotals = (state: BillingStatementState) => {
   state.totalPowt = state.lineItems.reduce((total, lineItem) => {
     return total + lineItem.quantity * lineItem.unitPricePwt;
   }, 0.0);
-}
+};

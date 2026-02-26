@@ -1,5 +1,9 @@
-export { module as Invoice } from "./invoice/index.js";
-export { module as ContributorBilling } from "./contributor-billing/index.js";
-export { module as BillingStatement } from "./billing-statement/index.js";
-export { module as Integrations } from "./integrations/index.js";
-export { module as ExpenseReport } from "./expense-report/index.js";
+export { AccountTransactions } from "./account-transactions-editor/module.js";
+export { Accounts } from "./accounts-editor/module.js";
+export { BillingStatement } from "./billing-statement/module.js";
+export { BuilderTeamAdmin } from "./builder-team-admin/module.js";
+export { ContributorBilling } from "./contributor-billing/module.js";
+export { ExpenseReport } from "./expense-report/module.js";
+export { Invoice } from "./invoice/module.js";
+export { OperationalHubProfileEditor } from "./operational-hub-profile-editor/module.js";
+export { SnapshotReport } from "./snapshot-report-editor/module.js";

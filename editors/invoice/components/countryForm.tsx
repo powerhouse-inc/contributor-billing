@@ -1,7 +1,10 @@
-import { Form, CountryCodeField } from "@powerhousedao/document-engineering/scalars";
+import {
+  Form,
+  CountryCodeField,
+} from "@powerhousedao/document-engineering/scalars";
 import { getCountryCodeFromName } from "../utils/utils.js";
 import { twMerge } from "tailwind-merge";
-import { ValidationResult } from "../validation/validationManager.js";
+import { type ValidationResult } from "../validation/validationManager.js";
 interface CountryFormProps {
   country: string;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

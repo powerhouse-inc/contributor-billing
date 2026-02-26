@@ -1,10 +1,12 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   AddBillingStatementInput,
   AddLineItemGroupInput,
   AddLineItemInput,
   AddWalletInput,
   ExpenseReportState,
+  ExpenseReportStatus,
+  ExpenseReportStatusInput,
   GroupTotals,
   GroupTotalsInput,
   LineItem,
@@ -16,8 +18,11 @@ import type {
   RemoveLineItemInput,
   RemoveWalletInput,
   SetGroupTotalsInput,
+  SetOwnerIdInput,
   SetPeriodEndInput,
+  SetPeriodInput,
   SetPeriodStartInput,
+  SetStatusInput,
   UpdateLineItemGroupInput,
   UpdateLineItemInput,
   UpdateWalletInput,
@@ -25,7 +30,7 @@ import type {
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -36,6 +41,14 @@ export const isDefinedNonNullAny = (v: any): v is definedNonNullAny =>
 export const definedNonNullAnySchema = z
   .any()
   .refine((v) => isDefinedNonNullAny(v));
+
+export const ExpenseReportStatusSchema = z.enum(["DRAFT", "FINAL", "REVIEW"]);
+
+export const ExpenseReportStatusInputSchema = z.enum([
+  "DRAFT",
+  "FINAL",
+  "REVIEW",
+]);
 
 export function AddBillingStatementInputSchema(): z.ZodObject<
   Properties<AddBillingStatementInput>
@@ -91,21 +104,25 @@ export function ExpenseReportStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ExpenseReportState").optional(),
-    groups: z.array(LineItemGroupSchema()),
-    periodEnd: z.string().datetime().nullable(),
-    periodStart: z.string().datetime().nullable(),
-    wallets: z.array(WalletSchema()),
+    endDate: z.iso.datetime().nullish(),
+    groups: z.array(z.lazy(() => LineItemGroupSchema())),
+    ownerId: z.string().nullish(),
+    periodEnd: z.iso.datetime().nullish(),
+    periodStart: z.iso.datetime().nullish(),
+    startDate: z.iso.datetime().nullish(),
+    status: ExpenseReportStatusSchema,
+    wallets: z.array(z.lazy(() => WalletSchema())),
   });
 }
 
 export function GroupTotalsSchema(): z.ZodObject<Properties<GroupTotals>> {
   return z.object({
     __typename: z.literal("GroupTotals").optional(),
-    group: z.string().nullable(),
-    totalActuals: z.number().nullable(),
-    totalBudget: z.number().nullable(),
-    totalForecast: z.number().nullable(),
-    totalPayments: z.number().nullable(),
+    group: z.string().nullish(),
+    totalActuals: z.number().nullish(),
+    totalBudget: z.number().nullish(),
+    totalForecast: z.number().nullish(),
+    totalPayments: z.number().nullish(),
   });
 }
 
@@ -124,14 +141,14 @@ export function GroupTotalsInputSchema(): z.ZodObject<
 export function LineItemSchema(): z.ZodObject<Properties<LineItem>> {
   return z.object({
     __typename: z.literal("LineItem").optional(),
-    actuals: z.number().nullable(),
-    budget: z.number().nullable(),
-    comments: z.string().nullable(),
-    forecast: z.number().nullable(),
-    group: z.string().nullable(),
-    id: z.string().nullable(),
-    label: z.string().nullable(),
-    payments: z.number().nullable(),
+    actuals: z.number().nullish(),
+    budget: z.number().nullish(),
+    comments: z.string().nullish(),
+    forecast: z.number().nullish(),
+    group: z.string().nullish(),
+    id: z.string().nullish(),
+    label: z.string().nullish(),
+    payments: z.number().nullish(),
   });
 }
 
@@ -139,8 +156,8 @@ export function LineItemGroupSchema(): z.ZodObject<Properties<LineItemGroup>> {
   return z.object({
     __typename: z.literal("LineItemGroup").optional(),
     id: z.string(),
-    label: z.string().nullable(),
-    parentId: z.string().nullable(),
+    label: z.string().nullish(),
+    parentId: z.string().nullish(),
   });
 }
 
@@ -229,11 +246,28 @@ export function SetGroupTotalsInputSchema(): z.ZodObject<
   });
 }
 
+export function SetOwnerIdInputSchema(): z.ZodObject<
+  Properties<SetOwnerIdInput>
+> {
+  return z.object({
+    ownerId: z.string(),
+  });
+}
+
 export function SetPeriodEndInputSchema(): z.ZodObject<
   Properties<SetPeriodEndInput>
 > {
   return z.object({
-    periodEnd: z.string().datetime(),
+    periodEnd: z.iso.datetime(),
+  });
+}
+
+export function SetPeriodInputSchema(): z.ZodObject<
+  Properties<SetPeriodInput>
+> {
+  return z.object({
+    endDate: z.iso.datetime().nullish(),
+    startDate: z.iso.datetime().nullish(),
   });
 }
 
@@ -241,7 +275,15 @@ export function SetPeriodStartInputSchema(): z.ZodObject<
   Properties<SetPeriodStartInput>
 > {
   return z.object({
-    periodStart: z.string().datetime(),
+    periodStart: z.iso.datetime(),
+  });
+}
+
+export function SetStatusInputSchema(): z.ZodObject<
+  Properties<SetStatusInput>
+> {
+  return z.object({
+    status: ExpenseReportStatusInputSchema,
   });
 }
 
@@ -279,6 +321,8 @@ export function UpdateWalletInputSchema(): z.ZodObject<
   Properties<UpdateWalletInput>
 > {
   return z.object({
+    accountDocumentId: z.string().nullish(),
+    accountTransactionsDocumentId: z.string().nullish(),
     address: z
       .string()
       .regex(/^0x[a-fA-F0-9]{40}$/, {
@@ -291,15 +335,17 @@ export function UpdateWalletInputSchema(): z.ZodObject<
 export function WalletSchema(): z.ZodObject<Properties<Wallet>> {
   return z.object({
     __typename: z.literal("Wallet").optional(),
-    billingStatements: z.array(z.string().nullable()).nullable(),
-    lineItems: z.array(LineItemSchema().nullable()).nullable(),
-    name: z.string().nullable(),
-    totals: z.array(GroupTotalsSchema().nullable()).nullable(),
+    accountDocumentId: z.string().nullish(),
+    accountTransactionsDocumentId: z.string().nullish(),
+    billingStatements: z.array(z.string().nullable()).nullish(),
+    lineItems: z.array(z.lazy(() => LineItemSchema().nullable())).nullish(),
+    name: z.string().nullish(),
+    totals: z.array(z.lazy(() => GroupTotalsSchema().nullable())).nullish(),
     wallet: z
       .string()
       .regex(/^0x[a-fA-F0-9]{40}$/, {
         message: "Invalid Ethereum address format",
       })
-      .nullable(),
+      .nullish(),
   });
 }

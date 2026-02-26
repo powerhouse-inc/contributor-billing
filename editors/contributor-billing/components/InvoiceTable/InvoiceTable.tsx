@@ -1,25 +1,91 @@
-import React from "react";
-import { HeaderControls } from "./HeaderControls.js";
-import { InvoiceTableSection } from "./InvoiceTableSection.js";
-import { InvoiceTableRow } from "./InvoiceTableRow.js";
-import { type DocumentModelModule } from "document-model";
+import { useMemo, useState } from "react";
+import {
+  addDocument,
+  dispatchActions,
+  setSelectedNode,
+  useSelectedDrive,
+  useDocumentsInSelectedDrive,
+  type VetraDocumentModelModule,
+} from "@powerhousedao/reactor-browser";
+import type { PHDocument } from "document-model";
+import { deleteNode, type FileNode } from "document-drive";
+import { actions as invoiceActions } from "../../../../document-models/invoice/index.js";
+import type { InvoiceTag } from "../../../../document-models/invoice/gen/types.js";
+import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
+import {
+  setPeriodStart,
+  setPeriodEnd,
+} from "../../../../document-models/expense-report/gen/creators.js";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
 import { exportExpenseReportCSV } from "../../../../scripts/contributor-billing/createExpenseReportCsv.js";
-import { toast } from "@powerhousedao/design-system";
-import {
-  actions,
-  type InvoiceAction,
-} from "../../../../document-models/invoice/index.js";
-import {
-  addDocument,
-  useSelectedDrive,
-  dispatchActions,
-  setSelectedNode,
-} from "@powerhousedao/reactor-browser";
-import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
+import { HeaderControls } from "./HeaderControls.js";
+import { InvoiceTableSection } from "./InvoiceTableSection.js";
+import { InvoiceTableRow, type InvoiceRowData } from "./InvoiceTableRow.js";
+import { NotificationDialog } from "./NotificationDialog.js";
 
-const statusOptions = [
+// Helper type for invoice line item tag (partial version for state access)
+interface LineItemTagPartial {
+  dimension?: string;
+  value?: string;
+  label?: string | null;
+}
+
+// Helper type for invoice document state access
+interface InvoiceGlobalState {
+  status?: string;
+  issuer?: { name?: string };
+  invoiceNo?: string;
+  dateIssued?: string;
+  dateDue?: string;
+  currency?: string;
+  totalPriceTaxIncl?: number;
+  exported?: { timestamp?: string; exportedLineItems?: unknown[] };
+  notes?: string;
+  lineItems?: Array<{
+    id: string;
+    description?: string;
+    quantity?: number;
+    totalPriceTaxIncl?: number;
+    unitPriceTaxIncl?: number;
+    lineItemTag?: LineItemTagPartial[];
+  }>;
+}
+
+// Helper to convert partial tags to InvoiceTag array
+const toInvoiceTags = (
+  tags: LineItemTagPartial[] | undefined,
+): InvoiceTag[] => {
+  if (!tags) return [];
+  return tags
+    .filter(
+      (tag): tag is LineItemTagPartial & { dimension: string; value: string } =>
+        typeof tag.dimension === "string" && typeof tag.value === "string",
+    )
+    .map((tag) => ({
+      dimension: tag.dimension,
+      value: tag.value,
+      label: tag.label ?? null,
+    }));
+};
+
+interface BillingStatementGlobalState {
+  contributor?: string;
+}
+
+/**
+ * Format month name like "January 2026" to "01-2026"
+ */
+function formatMonthCode(monthName: string): string {
+  const date = new Date(monthName + " 1");
+  if (isNaN(date.getTime())) return monthName;
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month}-${year}`;
+}
+
+// Status options for filter
+export const statusOptions = [
   { label: "Draft", value: "DRAFT" },
   { label: "Issued", value: "ISSUED" },
   { label: "Accepted", value: "ACCEPTED" },
@@ -31,705 +97,836 @@ const statusOptions = [
   { label: "Other", value: "OTHER" },
 ];
 
-type FileNodeLite = { id: string; name: string; documentType?: string };
+// Status color mappings
+const statusColors: Record<string, string> = {
+  DRAFT: "bg-blue-100 text-blue-600",
+  ISSUED: "bg-blue-100 text-blue-600",
+  ACCEPTED: "bg-green-100 text-green-600",
+  PAYMENTSCHEDULED: "bg-green-100 text-green-600",
+  PAYMENTSENT: "bg-green-100 text-green-600",
+  PAYMENTISSUE: "bg-yellow-100 text-yellow-600",
+  PAYMENTCLOSED: "bg-red-100 text-red-600",
+  REJECTED: "bg-red-100 text-red-600",
+  OTHER: "bg-blue-100 text-blue-600",
+};
 
 interface InvoiceTableProps {
-  files: FileNodeLite[];
-  state: any[];
-  selected: { [id: string]: boolean };
+  files: FileNode[];
+  selected: Record<string, boolean>;
   setSelected: (
     selected:
-      | { [id: string]: boolean }
-      | ((prev: { [id: string]: boolean }) => { [id: string]: boolean })
+      | Record<string, boolean>
+      | ((prev: Record<string, boolean>) => Record<string, boolean>),
   ) => void;
-  filteredDocumentModels: DocumentModelModule[];
-  onSelectDocumentModel: (model: DocumentModelModule) => void;
-  getDocDispatcher: (id: string) => any;
+  filteredDocumentModels: VetraDocumentModelModule[];
+  onSelectDocumentModel: (
+    model: VetraDocumentModelModule,
+    name: string,
+  ) => void;
+  getDocDispatcher: (
+    id: string,
+  ) => [PHDocument, (action: unknown) => Promise<void>] | null;
   selectedStatuses: string[];
   onStatusChange: (value: string | string[]) => void;
   onRowSelection: (rowId: string, checked: boolean, rowStatus: string) => void;
   canExportSelectedRows: () => boolean;
+  /** The month name (e.g., "January 2026") for checking existing reports */
+  monthName?: string;
+  /** The sibling Reporting folder ID where expense reports should be created */
+  reportingFolderId?: string;
 }
+
+// Table header component
+const TableHeader = ({
+  showIssuer = true,
+  showBillingStatement = false,
+}: {
+  showIssuer?: boolean;
+  showBillingStatement?: boolean;
+}) => (
+  <thead>
+    <tr className="bg-gray-50 font-medium text-gray-500 text-xs">
+      <th className="px-2 py-2 w-8 rounded-tl-sm" />
+      <th className="px-2 py-2 text-center">
+        {showIssuer ? "Issuer" : "Invoice"}
+      </th>
+      <th className="px-2 py-2 text-center">Invoice No.</th>
+      <th className="px-2 py-2 text-center">Issue Date</th>
+      <th className="px-2 py-2 text-center">Due Date</th>
+      <th className="px-2 py-2 text-center">Currency</th>
+      <th className="px-2 py-2 text-center">Amount</th>
+      {showBillingStatement && (
+        <th className="px-2 py-2 text-center">Billing Statement</th>
+      )}
+      <th className="px-2 py-2 rounded-tr-sm text-center">Exported</th>
+    </tr>
+  </thead>
+);
 
 export const InvoiceTable = ({
   files,
-  state,
   selected,
+  setSelected,
   filteredDocumentModels,
   onSelectDocumentModel,
-  getDocDispatcher,
   selectedStatuses,
   onStatusChange,
   onRowSelection,
   canExportSelectedRows,
+  monthName,
+  reportingFolderId,
 }: InvoiceTableProps) => {
   const [selectedDrive] = useSelectedDrive();
 
-  const billingDocStates = state
-    .filter((doc) => doc.header.documentType === "powerhouse/billing-statement")
-    .map((doc) => ({
+  // Notification state
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    type: "success" | "error";
+    title: string;
+    message?: string;
+    details?: string[];
+  }>({
+    show: false,
+    type: "success",
+    title: "",
+  });
+
+  // Get documents directly from the hook - this will automatically update when documents change
+  const documentsInDrive = useDocumentsInSelectedDrive() || [];
+
+  // Get all expense reports for the current month (matches both old "January 2026" and new "01-2026" formats)
+  const expenseReportsForMonth = useMemo(() => {
+    if (!monthName || !documentsInDrive) return [];
+    const monthCode = formatMonthCode(monthName);
+    const monthLower = monthName.toLowerCase();
+    return documentsInDrive.filter(
+      (doc) =>
+        doc.header.documentType === "powerhouse/expense-report" &&
+        (doc.header.name?.includes(monthCode) ||
+          doc.header.name?.toLowerCase().includes(monthLower)),
+    );
+  }, [documentsInDrive, monthName]);
+
+  // Build a set of file IDs from the files prop for quick lookup
+  const fileIds = useMemo(() => {
+    return new Set(files.map((f) => f.id));
+  }, [files]);
+
+  // Build a map of document IDs to documents for quick lookup
+  const documentsById = useMemo(() => {
+    const map = new Map<string, PHDocument>();
+    for (const doc of documentsInDrive) {
+      map.set(doc.header.id, doc);
+    }
+    return map;
+  }, [documentsInDrive]);
+
+  // Filter documents to only those in the current folder (matching the files prop)
+  const allDocuments = useMemo(() => {
+    const filtered = documentsInDrive.filter((doc) =>
+      fileIds.has(doc.header.id),
+    );
+    return filtered;
+  }, [documentsInDrive, fileIds]);
+
+  // Find files that are in the folder but don't have document content loaded yet
+  // These are "loading" files that need to show a placeholder
+  const loadingFileIds = useMemo(() => {
+    return files
+      .filter(
+        (f) =>
+          f.documentType === "powerhouse/invoice" && !documentsById.has(f.id),
+      )
+      .map((f) => f.id);
+  }, [files, documentsById]);
+
+  // Helper function to map invoice document to InvoiceRowData
+  const mapInvoiceToRowData = (doc: PHDocument): InvoiceRowData => {
+    const state = doc.state as unknown as { global: InvoiceGlobalState };
+    return {
       id: doc.header.id,
-      contributor: doc.state.global.contributor,
-    }));
-
-  const shouldShowSection = (status: string) => {
-    return selectedStatuses.length === 0 || selectedStatuses.includes(status);
+      issuer: state.global?.issuer?.name || "Unknown",
+      status: state.global?.status || "",
+      invoiceNo: state.global?.invoiceNo || "",
+      issueDate: state.global?.dateIssued || "",
+      dueDate: state.global?.dateDue || "",
+      currency: state.global?.currency || "",
+      amount: state.global?.totalPriceTaxIncl?.toString() || "",
+      exported: state.global?.exported,
+    };
   };
 
-  const getInvoicesByStatus = (status: string) => {
-    return state
+  // Memoize billing doc states - updates automatically when allDocuments changes
+  const billingDocStates = useMemo(() => {
+    return allDocuments
       .filter(
-        (doc) =>
-          doc.header.documentType === "powerhouse/invoice" &&
-          doc.state.global.status === status
+        (doc) => doc.header.documentType === "powerhouse/billing-statement",
       )
-      .map((doc) => ({
-        id: doc.header.id,
-        issuer: doc.state.global.issuer?.name || "Unknown",
-        status: doc.state.global.status,
-        invoiceNo: doc.state.global.invoiceNo,
-        issueDate: doc.state.global.dateIssued,
-        dueDate: doc.state.global.dateDue,
-        currency: doc.state.global.currency,
-        amount: doc.state.global.totalPriceTaxIncl?.toString() ?? "",
-        exported: doc.state.global.exported,
-      }));
-  };
+      .map((doc) => {
+        const state = doc.state as unknown as {
+          global: BillingStatementGlobalState;
+        };
+        return {
+          id: doc.header.id,
+          contributor: state.global?.contributor || "",
+        };
+      });
+  }, [allDocuments]);
 
-  const getOtherInvoices = () => {
-    return state
-      .filter(
-        (doc) =>
-          doc.header.documentType === "powerhouse/invoice" &&
-          doc.state.global.status !== "DRAFT" &&
-          doc.state.global.status !== "ISSUED" &&
-          doc.state.global.status !== "ACCEPTED" &&
-          doc.state.global.status !== "PAYMENTSCHEDULED" &&
-          doc.state.global.status !== "PAYMENTSENT" &&
-          doc.state.global.status !== "PAYMENTISSUE" &&
-          doc.state.global.status !== "PAYMENTCLOSED" &&
-          doc.state.global.status !== "REJECTED"
-      )
-      .map((doc) => ({
-        id: doc.header.id,
-        issuer: doc.state.global.issuer?.name || "Unknown",
-        status: doc.state.global.status,
-        invoiceNo: doc.state.global.invoiceNo,
-        issueDate: doc.state.global.dateIssued,
-        dueDate: doc.state.global.dateDue,
-        currency: doc.state.global.currency,
-        amount: doc.state.global.totalPriceTaxIncl?.toString() ?? "",
-        documentType: doc.header.documentType,
-        exported: doc.state.global.exported,
-      }));
-  };
+  // Memoize filtered invoice lists - they'll automatically update when allDocuments changes
+  const draft = useMemo(() => {
+    return allDocuments
+      .filter((doc) => {
+        if (doc.header.documentType !== "powerhouse/invoice") return false;
+        const state = doc.state as unknown as { global: InvoiceGlobalState };
+        return state.global?.status === "DRAFT";
+      })
+      .map(mapInvoiceToRowData);
+  }, [allDocuments]);
 
-  const draft = getInvoicesByStatus("DRAFT");
-  const issued = getInvoicesByStatus("ISSUED");
-  const accepted = getInvoicesByStatus("ACCEPTED");
-  const paymentScheduled = getInvoicesByStatus("PAYMENTSCHEDULED");
-  const paymentSent = getInvoicesByStatus("PAYMENTSENT");
-  const paymentIssue = getInvoicesByStatus("PAYMENTISSUE");
-  const paymentClosed = getInvoicesByStatus("PAYMENTCLOSED");
-  const rejected = getInvoicesByStatus("REJECTED");
-  const otherInvoices = getOtherInvoices();
+  const issued = useMemo(() => {
+    return allDocuments
+      .filter((doc) => {
+        if (doc.header.documentType !== "powerhouse/invoice") return false;
+        const state = doc.state as unknown as { global: InvoiceGlobalState };
+        return state.global?.status === "ISSUED";
+      })
+      .map(mapInvoiceToRowData);
+  }, [allDocuments]);
 
+  const accepted = useMemo(() => {
+    return allDocuments
+      .filter((doc) => {
+        if (doc.header.documentType !== "powerhouse/invoice") return false;
+        const state = doc.state as unknown as { global: InvoiceGlobalState };
+        return state.global?.status === "ACCEPTED";
+      })
+      .map(mapInvoiceToRowData);
+  }, [allDocuments]);
+
+  const paymentScheduled = useMemo(() => {
+    return allDocuments
+      .filter((doc) => {
+        if (doc.header.documentType !== "powerhouse/invoice") return false;
+        const state = doc.state as unknown as { global: InvoiceGlobalState };
+        return state.global?.status === "PAYMENTSCHEDULED";
+      })
+      .map(mapInvoiceToRowData);
+  }, [allDocuments]);
+
+  const paymentSent = useMemo(() => {
+    return allDocuments
+      .filter((doc) => {
+        if (doc.header.documentType !== "powerhouse/invoice") return false;
+        const state = doc.state as unknown as { global: InvoiceGlobalState };
+        return state.global?.status === "PAYMENTSENT";
+      })
+      .map(mapInvoiceToRowData);
+  }, [allDocuments]);
+
+  const paymentIssue = useMemo(() => {
+    return allDocuments
+      .filter((doc) => {
+        if (doc.header.documentType !== "powerhouse/invoice") return false;
+        const state = doc.state as unknown as { global: InvoiceGlobalState };
+        return state.global?.status === "PAYMENTISSUE";
+      })
+      .map(mapInvoiceToRowData);
+  }, [allDocuments]);
+
+  const paymentClosed = useMemo(() => {
+    return allDocuments
+      .filter((doc) => {
+        if (doc.header.documentType !== "powerhouse/invoice") return false;
+        const state = doc.state as unknown as { global: InvoiceGlobalState };
+        return state.global?.status === "PAYMENTCLOSED";
+      })
+      .map(mapInvoiceToRowData);
+  }, [allDocuments]);
+
+  const rejected = useMemo(() => {
+    return allDocuments
+      .filter((doc) => {
+        if (doc.header.documentType !== "powerhouse/invoice") return false;
+        const state = doc.state as unknown as { global: InvoiceGlobalState };
+        return state.global?.status === "REJECTED";
+      })
+      .map(mapInvoiceToRowData);
+  }, [allDocuments]);
+
+  const otherInvoices = useMemo(() => {
+    const knownStatuses = [
+      "DRAFT",
+      "ISSUED",
+      "ACCEPTED",
+      "PAYMENTSCHEDULED",
+      "PAYMENTSENT",
+      "PAYMENTISSUE",
+      "PAYMENTCLOSED",
+      "REJECTED",
+    ];
+    return allDocuments
+      .filter((doc) => {
+        if (doc.header.documentType !== "powerhouse/invoice") return false;
+        const state = doc.state as unknown as { global: InvoiceGlobalState };
+        return !knownStatuses.includes(state.global?.status || "");
+      })
+      .map((doc) => {
+        const state = doc.state as unknown as { global: InvoiceGlobalState };
+        return {
+          id: doc.header.id,
+          issuer: state.global?.issuer?.name || "Unknown",
+          status: state.global?.status || "OTHER",
+          invoiceNo: state.global?.invoiceNo || "",
+          issueDate: state.global?.dateIssued || "",
+          dueDate: state.global?.dateDue || "",
+          currency: state.global?.currency || "",
+          amount: state.global?.totalPriceTaxIncl?.toString() || "",
+          exported: state.global?.exported,
+        };
+      });
+  }, [allDocuments]);
+
+  // Check if section should be shown based on filter
+  const shouldShowSection = (status: string) =>
+    selectedStatuses.length === 0 || selectedStatuses.includes(status);
+
+  // Create billing statement from invoice - simple async function like old code
   const handleCreateBillingStatement = async (id: string) => {
     const invoiceFile = files.find((file) => file.id === id);
-    const invoiceState = state.find((doc) => doc.header.id === id);
-    if (!invoiceState) {
+    const invoiceDoc = allDocuments.find((doc) => doc.header.id === id);
+
+    if (!invoiceDoc) {
+      console.error("Invoice not found");
       return;
     }
 
-    const createdNode = await addDocument(
-      selectedDrive?.header.id || "",
-      `bill-${invoiceFile?.name}`,
-      "powerhouse/billing-statement",
-      undefined,
-      undefined,
-      undefined,
-      "powerhouse-billing-statement-editor"
-    );
-    console.log("created billing statement doc", createdNode);
-    if (!createdNode?.id) {
-      console.error("Failed to create billing statement");
-      return null;
-    }
-    await dispatchActions(
-      billingStatementActions.editContributor({
-        contributor: id,
-      }),
-      createdNode.id
-    );
-    // Prepare billing statement data with empty input handlers
-    const billingStatementData: any = {
-      dateIssued:
-        invoiceState.state.global.dateIssued &&
-        invoiceState.state.global.dateIssued.trim() !== ""
-          ? new Date(invoiceState.state.global.dateIssued).toISOString()
-          : null,
-      dateDue:
-        invoiceState.state.global.dateDue &&
-        invoiceState.state.global.dateDue.trim() !== ""
-          ? new Date(invoiceState.state.global.dateDue).toISOString()
-          : null,
-      currency: invoiceState.state.global.currency || "",
-      notes: invoiceState.state.global.notes || "",
-    };
+    const invoiceState = (
+      invoiceDoc.state as unknown as { global: InvoiceGlobalState }
+    ).global;
 
-    await dispatchActions(
-      billingStatementActions.editBillingStatement(billingStatementData),
-      createdNode.id
-    );
+    // Get the target folder (same as invoice's folder)
+    const targetFolder = invoiceFile?.parentFolder;
 
-    // add line items from invoiceState to billing statement
-    invoiceState.state.global.lineItems.forEach(async (lineItem: any) => {
-      await dispatchActions(
-        billingStatementActions.addLineItem({
-          id: lineItem.id,
-          description: lineItem.description,
-          quantity: lineItem.quantity,
-          // Map invoice fields to billing statement fields
-          totalPriceCash: lineItem.totalPriceTaxIncl || 0,
-          totalPricePwt: 0, // Default to 0 since invoice doesn't have POWT pricing
-          unit: "UNIT", // Default to UNIT since invoice doesn't have unit field
-          unitPriceCash: lineItem.unitPriceTaxIncl || 0,
-          unitPricePwt: 0, // Default to 0 since invoice doesn't have POWT pricing
-        }),
-        createdNode.id
-      );
-    });
-
-    // add tags from each invoice line item to billing statement line item
-    invoiceState.state.global.lineItems.forEach(async (lineItem: any) => {
-      const lineItemTag: any = mapTags(lineItem.lineItemTag || []);
-      lineItemTag.forEach(async (tag: any) => {
-        await dispatchActions(
-          billingStatementActions.editLineItemTag({
-            lineItemId: lineItem.id,
-            dimension: tag.dimension,
-            value: tag.value,
-            label: tag.label,
-          }),
-          createdNode.id
-        );
-      });
-    });
-  };
-
-  const selectedInvoiceIds = Object.keys(selected).filter((id) => selected[id]);
-  const selectedInvoices = selectedInvoiceIds
-    .map((id) => {
-      const doc = state.find((doc) => doc.header.id === id);
-      return doc ? { ...doc, id } : null;
-    })
-    .filter((inv) => inv !== null); // Filter out null/undefined invoices
-
-  const handleCSVExport = async (baseCurrency: string) => {
-    console.log(
-      "Exporting selected invoices:",
-      selectedInvoices.map((inv) => ({
-        id: inv.id,
-        state: inv,
-      }))
-    );
     try {
-      const exportedData: Record<
-        string,
-        { timestamp: string; exportedLineItems: any }
-      > = await exportInvoicesToXeroCSV(selectedInvoices, baseCurrency);
-      toast("Invoices exported successfully", {
-        type: "success",
-      });
-      selectedInvoices.forEach((invoice) => {
-        const invoiceDoc = getDocDispatcher(invoice.id);
-        const exportedInvoiceData = exportedData[invoice.id];
-        if (!invoiceDoc || !exportedInvoiceData) {
-          return;
-        }
-        const invoiceDispatcher = invoiceDoc[1];
-        invoiceDispatcher(
-          actions.setExportedData({
-            timestamp: exportedInvoiceData.timestamp,
-            exportedLineItems: exportedInvoiceData.exportedLineItems,
-          })
-        );
-      });
-    } catch (error: any) {
-      console.error("Error exporting invoices:", error);
-      const missingExpenseTagInvoices = error.missingExpenseTagInvoices || [];
-      const missingExpenseTagInvoicesList = missingExpenseTagInvoices.map(
-        (invoiceId: string) => {
-          const invoice = files.find((file) => file.id === invoiceId);
-          return invoice?.name || invoiceId;
-        }
-      );
-      console.log(
-        "missingExpenseTagInvoicesList",
-        missingExpenseTagInvoicesList
-      );
-      toast(
-        <>
-          Invoice Line Item Tags need to be set for:
-          <br />
-          {missingExpenseTagInvoicesList.map((name: any, idx: any) => (
-            <React.Fragment key={name}>
-              - {name}
-              <br />
-            </React.Fragment>
-          ))}
-        </>,
-        { type: "error" }
-      );
-    }
-  };
-
-  const handleExportCSVExpenseReport = async (baseCurrency: string) => {
-    console.log(
-      "Exporting expense report for selected invoices:",
-      selectedInvoices.map((inv) => ({
-        id: inv.id,
-        state: inv,
-      }))
-    );
-    try {
-      await exportExpenseReportCSV(selectedInvoices, baseCurrency);
-      toast("Expense report exported successfully", {
-        type: "success",
-      });
-    } catch (error: any) {
-      console.error("Error exporting expense report:", error);
-      const missingTagInvoices = error.missingTagInvoices || [];
-      const missingTagInvoicesList = missingTagInvoices.map(
-        (invoiceId: string) => {
-          const invoice = files.find((file) => file.id === invoiceId);
-          return invoice?.name || invoiceId;
-        }
-      );
-      console.log("missingTagInvoicesList", missingTagInvoicesList);
-      toast(
-        <>
-          Invoice Line Item Tags need to be set for:
-          <br />
-          {missingTagInvoicesList.map((name: any, idx: any) => (
-            <React.Fragment key={name}>
-              - {name}
-              <br />
-            </React.Fragment>
-          ))}
-        </>,
-        { type: "error" }
-      );
-    }
-  };
-
-  // check if integrations document exists
-  const integrationsDoc = files.find(
-    (file) => file.documentType === "powerhouse/integrations"
-  );
-  const createIntegrationsDocument = async () => {
-    const integrationsDocument = filteredDocumentModels?.find(
-      (model) => model.documentModel.id === "powerhouse/integrations"
-    );
-    if (integrationsDocument) {
+      // Create billing statement directly in the target folder (avoids race condition with move)
       const createdNode = await addDocument(
         selectedDrive?.header.id || "",
-        `integration-settings`,
+        `bill-${invoiceFile?.name || id}`,
+        "powerhouse/billing-statement",
+        targetFolder ?? undefined, // Create directly in the payments folder
+        undefined,
+        undefined,
+        "powerhouse-billing-statement-editor",
+      );
+
+      if (!createdNode?.id) {
+        console.error("Failed to create billing statement");
+        return;
+      }
+
+      // Prepare billing statement data
+      const billingStatementData = {
+        dateIssued: invoiceState.dateIssued?.trim()
+          ? new Date(invoiceState.dateIssued).toISOString()
+          : null,
+        dateDue: invoiceState.dateDue?.trim()
+          ? new Date(invoiceState.dateDue).toISOString()
+          : null,
+        currency: invoiceState.currency || "",
+        notes: invoiceState.notes || "",
+      };
+
+      // Dispatch initial setup actions
+      await dispatchActions(
+        [
+          billingStatementActions.editContributor({ contributor: id }),
+          billingStatementActions.editBillingStatement(billingStatementData),
+        ],
+        createdNode.id,
+      );
+
+      // Add line items
+      const lineItems = invoiceState.lineItems || [];
+      const lineItemActions = lineItems.map((lineItem) =>
+        billingStatementActions.addLineItem({
+          id: lineItem.id,
+          description: lineItem.description || "",
+          quantity: lineItem.quantity ?? 1,
+          totalPriceCash: lineItem.totalPriceTaxIncl || 0,
+          totalPricePwt: 0,
+          unit: "UNIT",
+          unitPriceCash: lineItem.unitPriceTaxIncl || 0,
+          unitPricePwt: 0,
+        }),
+      );
+
+      if (lineItemActions.length > 0) {
+        await dispatchActions(lineItemActions, createdNode.id);
+      }
+
+      // Add tags
+      type TagAction = ReturnType<
+        typeof billingStatementActions.editLineItemTag
+      >;
+      const tagActions: TagAction[] = [];
+      for (const lineItem of lineItems) {
+        const invoiceTags = toInvoiceTags(lineItem.lineItemTag);
+        const lineItemTags = mapTags(invoiceTags);
+        for (const tag of lineItemTags) {
+          if (tag) {
+            tagActions.push(
+              billingStatementActions.editLineItemTag({
+                lineItemId: lineItem.id,
+                dimension: tag.dimension,
+                value: tag.value,
+                label: tag.label,
+              }),
+            );
+          }
+        }
+      }
+
+      if (tagActions.length > 0) {
+        await dispatchActions(tagActions, createdNode.id);
+      }
+
+      setNotification({
+        show: true,
+        type: "success",
+        title: "Billing Statement Created",
+        message: `Successfully created billing statement for ${invoiceFile?.name || id}`,
+      });
+    } catch (error) {
+      console.error("Error creating billing statement:", error);
+      setNotification({
+        show: true,
+        type: "error",
+        title: "Creation Failed",
+        message: "Failed to create billing statement. Please try again.",
+      });
+    }
+  };
+
+  // Get selected invoices for export - memoized to update when selected or allDocuments changes
+  const selectedInvoiceIds = Object.keys(selected).filter((id) => selected[id]);
+  const selectedInvoices = useMemo(() => {
+    return selectedInvoiceIds
+      .map((id) => allDocuments.find((doc) => doc.header.id === id))
+      .filter((inv): inv is PHDocument => inv !== undefined);
+  }, [selectedInvoiceIds, allDocuments]);
+
+  // CSV Export handler - simple async function
+  const handleCSVExport = async (baseCurrency: string) => {
+    try {
+      const exportedData = await exportInvoicesToXeroCSV(
+        selectedInvoices,
+        baseCurrency,
+      );
+
+      // Update exported status on invoices
+      for (const invoice of selectedInvoices) {
+        const exportedInvoiceData =
+          exportedData[invoice.header.id as keyof typeof exportedData];
+
+        await dispatchActions(
+          [
+            invoiceActions.setExportedData({
+              timestamp: exportedInvoiceData.timestamp,
+              exportedLineItems: exportedInvoiceData.exportedLineItems,
+            }),
+          ],
+          invoice.header.id,
+        );
+      }
+      setSelected({});
+      setNotification({
+        show: true,
+        type: "success",
+        title: "Export Successful",
+        message: `Successfully exported ${selectedInvoices.length} invoice${selectedInvoices.length !== 1 ? "s" : ""} to CSV`,
+      });
+    } catch (error: unknown) {
+      console.error("Error exporting invoices:", error);
+      const err = error as { missingExpenseTagInvoices?: string[] };
+      const missingExpenseTagInvoices = err.missingExpenseTagInvoices || [];
+      const missingList = missingExpenseTagInvoices.map(
+        (invoiceId: string) =>
+          files.find((file) => file.id === invoiceId)?.name || invoiceId,
+      );
+
+      setNotification({
+        show: true,
+        type: "error",
+        title: "Export Failed",
+        message: "Invoice Line Item Tags need to be set before exporting.",
+        details: missingList,
+      });
+    }
+  };
+
+  // Expense Report Export handler - simple async function
+  const handleExpenseReportExport = async (baseCurrency: string) => {
+    try {
+      await exportExpenseReportCSV(selectedInvoices, baseCurrency);
+      // Clear selection
+      const updatedSelected = { ...selected };
+      Object.keys(updatedSelected).forEach((id) => {
+        updatedSelected[id] = false;
+      });
+      setSelected(updatedSelected);
+      setNotification({
+        show: true,
+        type: "success",
+        title: "Expense Report Exported",
+        message: `Successfully exported expense report with ${selectedInvoices.length} invoice${selectedInvoices.length !== 1 ? "s" : ""}`,
+      });
+    } catch (error: unknown) {
+      console.error("Error exporting expense report:", error);
+      const err = error as { missingTagInvoices?: string[] };
+      const missingTagInvoices = err.missingTagInvoices || [];
+      const missingList = missingTagInvoices.map(
+        (invoiceId: string) =>
+          files.find((file) => file.id === invoiceId)?.name || invoiceId,
+      );
+
+      setNotification({
+        show: true,
+        type: "error",
+        title: "Export Failed",
+        message: "Invoice Line Item Tags need to be set before exporting.",
+        details: missingList,
+      });
+    }
+  };
+
+  // Delete selected documents from the drive
+  const handleDeleteSelected = async (ids: string[]) => {
+    const driveId = selectedDrive?.header.id;
+    if (!driveId) return;
+
+    for (const id of ids) {
+      try {
+        await dispatchActions(deleteNode({ id }), driveId);
+      } catch (error) {
+        console.error(`Failed to delete document ${id}:`, error);
+      }
+    }
+  };
+
+  // Check for integrations document - simple computed value
+  const integrationsDoc = files.find(
+    (file) => file.documentType === "powerhouse/integrations",
+  );
+
+  // Create integrations document - simple async function
+  const createIntegrationsDocument = async () => {
+    const integrationsModel = filteredDocumentModels.find(
+      (model) => model.id === "powerhouse/integrations",
+    );
+
+    if (integrationsModel) {
+      const createdNode = await addDocument(
+        selectedDrive?.header.id || "",
+        "integration-settings",
         "powerhouse/integrations",
         undefined,
         undefined,
         undefined,
-        "integrations-editor"
+        "integrations-editor",
       );
-      console.log("created integrations document", createdNode);
-      if (!createdNode?.id) {
-        console.error("Failed to create integrations document");
-        return null;
-      }
-      setSelectedNode(createdNode.id);
-    }
-  };
 
-  // check if expense report document exists
-  const expenseReportDoc = files.find(
-    (file) => file.documentType === "powerhouse/expense-report"
-  );
-
-  // check if at least one billing statement exists
-  const hasBillingStatements = state.some(
-    (doc) => doc.header.documentType === "powerhouse/billing-statement"
-  );
-
-  const handleCreateOrOpenExpenseReport = async () => {
-    if (expenseReportDoc) {
-      // Open existing expense report
-      setSelectedNode(expenseReportDoc.id);
-    } else {
-      // Create new expense report
-      const expenseReportModel = filteredDocumentModels?.find(
-        (model) => model.documentModel.id === "powerhouse/expense-report"
-      );
-      if (expenseReportModel) {
-        const createdNode = await addDocument(
-          selectedDrive?.header.id || "",
-          `expense-report`,
-          "powerhouse/expense-report",
-          undefined,
-          undefined,
-          undefined,
-          "powerhouse-expense-report-editor"
-        );
-        console.log("created expense report document", createdNode);
-        if (!createdNode?.id) {
-          console.error("Failed to create expense report document");
-          return null;
-        }
+      if (createdNode?.id) {
         setSelectedNode(createdNode.id);
       }
     }
   };
 
+  // Check for expense report document in the Reporting folder (not Payments folder)
+  // We need to look at documentsInDrive and check if any expense report is in the reportingFolderId
+  const expenseReportDoc = useMemo(() => {
+    if (!reportingFolderId || !selectedDrive) return undefined;
+
+    // Get all nodes from the drive to check parent folders
+    const nodes = selectedDrive.state.global.nodes;
+
+    // Find expense report documents that are in the reporting folder
+    for (const doc of documentsInDrive) {
+      if (doc.header.documentType === "powerhouse/expense-report") {
+        // Find the file node to check its parent folder
+        const fileNode = nodes.find((n) => n.id === doc.header.id);
+        if (
+          fileNode &&
+          "parentFolder" in fileNode &&
+          fileNode.parentFolder === reportingFolderId
+        ) {
+          // Return the file node (for consistency with the rest of the code)
+          return fileNode as FileNode;
+        }
+      }
+    }
+    return undefined;
+  }, [documentsInDrive, reportingFolderId, selectedDrive]);
+
+  // Check if billing statements exist - memoized to update when allDocuments changes
+  const hasBillingStatements = useMemo(() => {
+    return allDocuments.some(
+      (doc) => doc.header.documentType === "powerhouse/billing-statement",
+    );
+  }, [allDocuments]);
+
+  // Create a new expense report
+  const handleCreateExpenseReport = async () => {
+    const expenseReportModel = filteredDocumentModels.find(
+      (model) => model.id === "powerhouse/expense-report",
+    );
+
+    if (expenseReportModel && monthName) {
+      const monthCode = formatMonthCode(monthName);
+      const reportNumber = expenseReportsForMonth.length + 1;
+      const reportName = `${monthCode} Expense Report ${reportNumber}`;
+
+      const createdNode = await addDocument(
+        selectedDrive?.header.id || "",
+        reportName,
+        "powerhouse/expense-report",
+        reportingFolderId, // Create in the Reporting folder (sibling of Payments)
+        undefined,
+        undefined,
+        "powerhouse-expense-report-editor",
+      );
+
+      if (createdNode?.id) {
+        // Set the Reporting Period to the month - parse "December 2025" format
+        const monthDate = new Date(monthName + " 1");
+        if (!isNaN(monthDate.getTime())) {
+          // Start date: first day of the month at midnight UTC
+          const periodStartDate = new Date(
+            Date.UTC(monthDate.getFullYear(), monthDate.getMonth(), 1),
+          );
+          // End date: last day of the month at 23:59:59.999 UTC
+          const periodEndDate = new Date(
+            Date.UTC(
+              monthDate.getFullYear(),
+              monthDate.getMonth() + 1,
+              0,
+              23,
+              59,
+              59,
+              999,
+            ),
+          );
+
+          // Set Reporting Period only (Transaction Period is set by user)
+          await dispatchActions(
+            [
+              setPeriodStart({ periodStart: periodStartDate.toISOString() }),
+              setPeriodEnd({ periodEnd: periodEndDate.toISOString() }),
+            ],
+            createdNode.id,
+          );
+        }
+
+        setSelectedNode(createdNode.id);
+      }
+    }
+  };
+
+  // Get invoices and billing statements for batch actions - memoized to update when allDocuments changes
+  const invoicesDocs = useMemo(() => {
+    return allDocuments.filter((doc) => {
+      if (doc.header.documentType !== "powerhouse/invoice") return false;
+      const state = doc.state as unknown as { global: InvoiceGlobalState };
+      return state.global?.status !== "DRAFT";
+    });
+  }, [allDocuments]);
+
+  const billingStatementDocs = useMemo(() => {
+    return allDocuments.filter(
+      (doc) => doc.header.documentType === "powerhouse/billing-statement",
+    );
+  }, [allDocuments]);
+
+  // Render section with table
+  const renderSection = (
+    status: string,
+    title: string,
+    data: InvoiceRowData[],
+    options?: {
+      showIssuer?: boolean;
+      showBillingStatement?: boolean;
+      showCreateButton?: boolean;
+    },
+  ) => {
+    if (!shouldShowSection(status)) return null;
+
+    const {
+      showIssuer = true,
+      showBillingStatement = false,
+      showCreateButton = false,
+    } = options || {};
+
+    return (
+      <InvoiceTableSection
+        title={title}
+        count={data.length}
+        color={statusColors[status] || statusColors.OTHER}
+        onSelectDocumentModel={
+          showCreateButton ? onSelectDocumentModel : undefined
+        }
+        filteredDocumentModels={
+          showCreateButton ? filteredDocumentModels : undefined
+        }
+      >
+        <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-300 overflow-hidden">
+          <TableHeader
+            showIssuer={showIssuer}
+            showBillingStatement={showBillingStatement}
+          />
+          <tbody>
+            {data.map((row) => (
+              <InvoiceTableRow
+                key={row.id}
+                files={files}
+                row={row}
+                isSelected={!!selected[row.id]}
+                onSelect={(checked) =>
+                  onRowSelection(row.id, checked, row.status)
+                }
+                onCreateBillingStatement={handleCreateBillingStatement}
+                billingDocStates={billingDocStates}
+                showIssuerColumn={showIssuer}
+                showBillingStatementColumn={showBillingStatement}
+              />
+            ))}
+          </tbody>
+        </table>
+      </InvoiceTableSection>
+    );
+  };
+
   return (
-    <div
-      className="w-full h-full bg-white rounded-lg p-4 border border-gray-200 shadow-md mt-4 overflow-x-auto"
-      key={`${state.length}`}
-    >
-      <HeaderControls
-        statusOptions={statusOptions}
-        onStatusChange={onStatusChange}
-        onExport={handleCSVExport}
-        onExpenseReportExport={handleExportCSVExpenseReport}
-        selectedStatuses={selectedStatuses}
-        createIntegrationsDocument={createIntegrationsDocument}
-        integrationsDoc={integrationsDoc}
-        canExportSelectedRows={canExportSelectedRows}
-        hasBillingStatements={hasBillingStatements}
-        expenseReportDoc={expenseReportDoc}
-        onCreateOrOpenExpenseReport={handleCreateOrOpenExpenseReport}
+    <>
+      <NotificationDialog
+        show={notification.show}
+        type={notification.type}
+        title={notification.title}
+        message={notification.message}
+        details={notification.details}
+        onClose={() => setNotification({ ...notification, show: false })}
       />
-      {shouldShowSection("DRAFT") && (
-        <InvoiceTableSection
-          title="Draft"
-          count={draft.length}
-          onSelectDocumentModel={onSelectDocumentModel}
-          filteredDocumentModels={filteredDocumentModels}
-        >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-center">Invoice</th>
-                <th className="px-2 py-2 text-center">Invoice No.</th>
-                <th className="px-2 py-2 text-center">Issue Date</th>
-                <th className="px-2 py-2 text-center">Due Date</th>
-                <th className="px-2 py-2 text-center">Currency</th>
-                <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2">Exported</th>
-              </tr>
-            </thead>
-            <tbody>
-              {draft.map((row) => (
-                <InvoiceTableRow
-                  files={files}
-                  key={row.id}
-                  row={row}
-                  isSelected={!!selected[row.id]}
-                  onSelect={(checked) =>
-                    onRowSelection(row.id, checked, row.status)
-                  }
-                />
-              ))}
-            </tbody>
-          </table>
-        </InvoiceTableSection>
-      )}
-      {shouldShowSection("ISSUED") && (
-        <InvoiceTableSection title="Issued" count={issued.length}>
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-center">Invoice No.</th>
-                <th className="px-2 py-2 text-center">Issue Date</th>
-                <th className="px-2 py-2 text-center">Due Date</th>
-                <th className="px-2 py-2 text-center">Currency</th>
-                <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2 text-center">Billing Statement</th>
-                <th className="px-2 py-2">Exported</th>
-              </tr>
-            </thead>
-            <tbody>
-              {issued.map((row) => (
-                <InvoiceTableRow
-                  files={files}
-                  key={row.id}
-                  row={row}
-                  isSelected={!!selected[row.id]}
-                  onSelect={(checked) =>
-                    onRowSelection(row.id, checked, row.status)
-                  }
-                  onCreateBillingStatement={handleCreateBillingStatement}
-                  billingDocStates={billingDocStates}
-                />
-              ))}
-            </tbody>
-          </table>
-        </InvoiceTableSection>
-      )}
-      {shouldShowSection("ACCEPTED") && (
-        <InvoiceTableSection
-          title="Accepted"
-          count={accepted.length}
-          color="bg-green-100 text-green-600"
-        >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-center">Invoice No.</th>
-                <th className="px-2 py-2 text-center">Issue Date</th>
-                <th className="px-2 py-2 text-center">Due Date</th>
-                <th className="px-2 py-2 text-center">Currency</th>
-                <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2 text-center">Billing Statement</th>
-                <th className="px-2 py-2">Exported</th>
-              </tr>
-            </thead>
-            <tbody>
-              {accepted.map((row) => (
-                <InvoiceTableRow
-                  files={files}
-                  key={row.id}
-                  row={row}
-                  isSelected={!!selected[row.id]}
-                  onSelect={(checked) =>
-                    onRowSelection(row.id, checked, row.status)
-                  }
-                  onCreateBillingStatement={handleCreateBillingStatement}
-                  billingDocStates={billingDocStates}
-                />
-              ))}
-            </tbody>
-          </table>
-        </InvoiceTableSection>
-      )}
-      {shouldShowSection("PAYMENTSCHEDULED") && (
-        <InvoiceTableSection
-          title="Payment Scheduled"
-          count={paymentScheduled.length}
-          color="bg-green-100 text-green-600"
-        >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-center">Invoice No.</th>
-                <th className="px-2 py-2 text-center">Issue Date</th>
-                <th className="px-2 py-2 text-center">Due Date</th>
-                <th className="px-2 py-2 text-center">Currency</th>
-                <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2 text-center">Billing Statement</th>
-                <th className="px-2 py-2">Exported</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paymentScheduled.map((row) => (
-                <InvoiceTableRow
-                  files={files}
-                  key={row.id}
-                  row={row}
-                  isSelected={!!selected[row.id]}
-                  onSelect={(checked) =>
-                    onRowSelection(row.id, checked, row.status)
-                  }
-                  onCreateBillingStatement={handleCreateBillingStatement}
-                  billingDocStates={billingDocStates}
-                />
-              ))}
-            </tbody>
-          </table>
-        </InvoiceTableSection>
-      )}
-      {shouldShowSection("PAYMENTSENT") && (
-        <InvoiceTableSection
-          title="Payment Sent"
-          count={paymentSent.length}
-          color="bg-green-100 text-green-600"
-        >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-center">Invoice No.</th>
-                <th className="px-2 py-2 text-center">Issue Date</th>
-                <th className="px-2 py-2 text-center">Due Date</th>
-                <th className="px-2 py-2 text-center">Currency</th>
-                <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2 text-center">Billing Statement</th>
-                <th className="px-2 py-2">Exported</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paymentSent.map((row) => (
-                <InvoiceTableRow
-                  files={files}
-                  key={row.id}
-                  row={row}
-                  isSelected={!!selected[row.id]}
-                  onSelect={(checked) =>
-                    onRowSelection(row.id, checked, row.status)
-                  }
-                  onCreateBillingStatement={handleCreateBillingStatement}
-                  billingDocStates={billingDocStates}
-                />
-              ))}
-            </tbody>
-          </table>
-        </InvoiceTableSection>
-      )}
-      {shouldShowSection("PAYMENTISSUE") && (
-        <InvoiceTableSection
-          title="Payment Issue"
-          count={paymentIssue.length}
-          color="bg-yellow-100 text-yellow-600"
-        >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-center">Invoice No.</th>
-                <th className="px-2 py-2 text-center">Issue Date</th>
-                <th className="px-2 py-2 text-center">Due Date</th>
-                <th className="px-2 py-2 text-center">Currency</th>
-                <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2 text-center">Billing Statement</th>
-                <th className="px-2 py-2">Exported</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paymentIssue.map((row) => (
-                <InvoiceTableRow
-                  files={files}
-                  key={row.id}
-                  row={row}
-                  isSelected={!!selected[row.id]}
-                  onSelect={(checked) =>
-                    onRowSelection(row.id, checked, row.status)
-                  }
-                  onCreateBillingStatement={handleCreateBillingStatement}
-                  billingDocStates={billingDocStates}
-                />
-              ))}
-            </tbody>
-          </table>
-        </InvoiceTableSection>
-      )}
-      {shouldShowSection("PAYMENTCLOSED") && (
-        <InvoiceTableSection
-          title="Payment Closed"
-          count={paymentClosed.length}
-          color="bg-red-500 text-black-600"
-        >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-center">Invoice No.</th>
-                <th className="px-2 py-2 text-center">Issue Date</th>
-                <th className="px-2 py-2 text-center">Due Date</th>
-                <th className="px-2 py-2 text-center">Currency</th>
-                <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2">Exported</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paymentClosed.map((row) => (
-                <InvoiceTableRow
-                  files={files}
-                  key={row.id}
-                  row={row}
-                  isSelected={!!selected[row.id]}
-                  onSelect={(checked) =>
-                    onRowSelection(row.id, checked, row.status)
-                  }
-                />
-              ))}
-            </tbody>
-          </table>
-        </InvoiceTableSection>
-      )}
-      {shouldShowSection("REJECTED") && (
-        <InvoiceTableSection
-          title="Rejected"
-          count={rejected.length}
-          color="bg-red-500 text-black-600"
-        >
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-center">Invoice No.</th>
-                <th className="px-2 py-2 text-center">Issue Date</th>
-                <th className="px-2 py-2 text-center">Due Date</th>
-                <th className="px-2 py-2 text-center">Currency</th>
-                <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2">Exported</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rejected.map((row) => (
-                <InvoiceTableRow
-                  files={files}
-                  key={row.id}
-                  row={row}
-                  isSelected={!!selected[row.id]}
-                  onSelect={(checked) =>
-                    onRowSelection(row.id, checked, row.status)
-                  }
-                />
-              ))}
-            </tbody>
-          </table>
-        </InvoiceTableSection>
-      )}
-      {shouldShowSection("OTHER") && (
-        <InvoiceTableSection title="Other" count={otherInvoices.length}>
-          <table className="w-full text-sm border-separate border-spacing-0 border border-gray-400">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-2 py-2 w-8"></th>
-                <th className="px-2 py-2 text-center">Issuer</th>
-                <th className="px-2 py-2 text-center">Invoice No.</th>
-                <th className="px-2 py-2 text-center">Issue Date</th>
-                <th className="px-2 py-2 text-center">Due Date</th>
-                <th className="px-2 py-2 text-center">Currency</th>
-                <th className="px-2 py-2 text-center">Amount</th>
-                <th className="px-2 py-2 text-center">Exported</th>
-              </tr>
-            </thead>
-            <tbody>
-              {otherInvoices.map((row) => (
-                <InvoiceTableRow
-                  files={files}
-                  key={row.id}
-                  row={row}
-                  isSelected={!!selected[row.id]}
-                  onSelect={(checked) =>
-                    onRowSelection(row.id, checked, row.status)
-                  }
-                />
-              ))}
-            </tbody>
-          </table>
-        </InvoiceTableSection>
-      )}
-    </div>
+      <div className="contributor-billing-table w-full h-full bg-white rounded-lg p-4 border border-gray-200 shadow-sm mt-4 overflow-x-auto">
+        <HeaderControls
+          statusOptions={statusOptions}
+          selectedStatuses={selectedStatuses}
+          onStatusChange={onStatusChange}
+          onExport={handleCSVExport}
+          onExpenseReportExport={handleExpenseReportExport}
+          createIntegrationsDocument={createIntegrationsDocument}
+          integrationsDoc={integrationsDoc}
+          hasBillingStatements={hasBillingStatements}
+          expenseReportDoc={expenseReportDoc}
+          onCreateOrOpenExpenseReport={handleCreateExpenseReport}
+          selected={selected}
+          handleCreateBillingStatement={handleCreateBillingStatement}
+          setSelected={setSelected}
+          invoices={invoicesDocs}
+          billingStatements={billingStatementDocs}
+          canExportSelectedRows={canExportSelectedRows}
+          onDeleteSelected={handleDeleteSelected}
+        />
+
+        {/* Status Sections */}
+        {renderSection("DRAFT", "Draft", draft, {
+          showIssuer: false,
+          showCreateButton: true,
+        })}
+        {renderSection("ISSUED", "Issued", issued, {
+          showBillingStatement: true,
+        })}
+        {renderSection("ACCEPTED", "Accepted", accepted, {
+          showBillingStatement: true,
+        })}
+        {renderSection(
+          "PAYMENTSCHEDULED",
+          "Payment Scheduled",
+          paymentScheduled,
+          {
+            showBillingStatement: true,
+          },
+        )}
+        {renderSection("PAYMENTSENT", "Payment Sent", paymentSent, {
+          showBillingStatement: true,
+        })}
+        {renderSection("PAYMENTISSUE", "Payment Issue", paymentIssue, {
+          showBillingStatement: true,
+        })}
+        {renderSection("PAYMENTCLOSED", "Payment Closed", paymentClosed)}
+        {renderSection("REJECTED", "Rejected", rejected)}
+        {renderSection("OTHER", "Other", otherInvoices)}
+
+        {/* Loading section for files that haven't loaded yet */}
+        {loadingFileIds.length > 0 && (
+          <InvoiceTableSection
+            title="Loading"
+            count={loadingFileIds.length}
+            color="bg-gray-100 text-gray-600"
+          >
+            <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-300 overflow-hidden">
+              <thead>
+                <tr className="bg-gray-50 font-medium text-gray-500 text-xs">
+                  <th className="px-2 py-2 w-8 rounded-tl-sm" />
+                  <th className="px-2 py-2 text-center">Invoice</th>
+                  <th className="px-2 py-2 text-center">Invoice No.</th>
+                  <th className="px-2 py-2 text-center">Issue Date</th>
+                  <th className="px-2 py-2 text-center">Due Date</th>
+                  <th className="px-2 py-2 text-center">Currency</th>
+                  <th className="px-2 py-2 text-center">Amount</th>
+                  <th className="px-2 py-2 rounded-tr-sm text-center">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {loadingFileIds.map((id) => {
+                  const file = files.find((f) => f.id === id);
+                  return (
+                    <tr
+                      key={id}
+                      className="border-t border-gray-200 animate-pulse"
+                    >
+                      <td className="px-2 py-2" />
+                      <td className="px-2 py-2 text-center text-gray-400">
+                        {file?.name || "Loading..."}
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-16 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-12 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-16 mx-auto" />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <span className="text-xs text-gray-400">
+                          Loading...
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </InvoiceTableSection>
+        )}
+      </div>
+    </>
   );
 };

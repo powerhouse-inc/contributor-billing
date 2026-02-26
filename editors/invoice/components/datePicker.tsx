@@ -2,11 +2,10 @@ import {
   DatePickerField,
   Form,
 } from "@powerhousedao/document-engineering/scalars";
-import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 interface DatePickerProps {
   name: string;
-  value: string;
+  value: string | null | undefined;
   label?: string;
   placeholder?: string;
   className?: string;
@@ -25,7 +24,7 @@ export const DatePicker = (props: DatePickerProps) => {
     >
       <DatePickerField
         name={props.name}
-        value={props.value}
+        value={props.value || ""}
         label={props.label}
         placeholder={props.placeholder}
         onChange={props.onChange}

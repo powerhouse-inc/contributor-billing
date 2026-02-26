@@ -1,5 +1,9 @@
-import { type Action } from "document-model";
-import type { AddLineItemInput, EditLineItemInput } from "../types.js";
+import type { Action } from "document-model";
+import type {
+  AddLineItemInput,
+  EditLineItemInput,
+  DeleteLineItemInput,
+} from "../types.js";
 
 export type AddLineItemAction = Action & {
   type: "ADD_LINE_ITEM";
@@ -9,7 +13,12 @@ export type EditLineItemAction = Action & {
   type: "EDIT_LINE_ITEM";
   input: EditLineItemInput;
 };
+export type DeleteLineItemAction = Action & {
+  type: "DELETE_LINE_ITEM";
+  input: DeleteLineItemInput;
+};
 
 export type BillingStatementLineItemsAction =
   | AddLineItemAction
-  | EditLineItemAction;
+  | EditLineItemAction
+  | DeleteLineItemAction;

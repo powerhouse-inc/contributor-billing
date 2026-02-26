@@ -1,22 +1,25 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddWalletAction,
-  type RemoveWalletAction,
-  type AddBillingStatementAction,
-  type RemoveBillingStatementAction,
-  type AddLineItemAction,
-  type UpdateLineItemAction,
-  type RemoveLineItemAction,
-  type AddLineItemGroupAction,
-  type UpdateLineItemGroupAction,
-  type RemoveLineItemGroupAction,
-  type SetGroupTotalsAction,
-  type RemoveGroupTotalsAction,
-  type SetPeriodStartAction,
-  type SetPeriodEndAction,
-  type UpdateWalletAction,
+import type {
+  AddWalletAction,
+  RemoveWalletAction,
+  AddBillingStatementAction,
+  RemoveBillingStatementAction,
+  AddLineItemAction,
+  UpdateLineItemAction,
+  RemoveLineItemAction,
+  AddLineItemGroupAction,
+  UpdateLineItemGroupAction,
+  RemoveLineItemGroupAction,
+  SetGroupTotalsAction,
+  RemoveGroupTotalsAction,
+  SetPeriodStartAction,
+  SetPeriodEndAction,
+  UpdateWalletAction,
+  SetOwnerIdAction,
+  SetStatusAction,
+  SetPeriodAction,
 } from "./actions.js";
-import { type ExpenseReportState } from "../types.js";
+import type { ExpenseReportState } from "../types.js";
 
 export interface ExpenseReportWalletOperations {
   addWalletOperation: (
@@ -92,6 +95,21 @@ export interface ExpenseReportWalletOperations {
   updateWalletOperation: (
     state: ExpenseReportState,
     action: UpdateWalletAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  setOwnerIdOperation: (
+    state: ExpenseReportState,
+    action: SetOwnerIdAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  setStatusOperation: (
+    state: ExpenseReportState,
+    action: SetStatusAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  setPeriodOperation: (
+    state: ExpenseReportState,
+    action: SetPeriodAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

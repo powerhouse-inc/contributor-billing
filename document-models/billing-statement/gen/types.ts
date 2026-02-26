@@ -1,14 +1,21 @@
-import type { PHDocument } from "document-model";
+import type { PHDocument, PHBaseState } from "document-model";
 import type { BillingStatementAction } from "./actions.js";
-import type { BillingStatementPHState } from "./ph-factories.js";
-import type { BillingStatementState } from "./schema/types.js";
+import type { BillingStatementState as BillingStatementGlobalState } from "./schema/types.js";
 
-export { z } from "./schema/index.js";
-export type * from "./schema/types.js";
 type BillingStatementLocalState = Record<PropertyKey, never>;
-export type BillingStatementDocument = PHDocument<BillingStatementPHState>;
+
+type BillingStatementPHState = PHBaseState & {
+  global: BillingStatementGlobalState;
+  local: BillingStatementLocalState;
+};
+type BillingStatementDocument = PHDocument<BillingStatementPHState>;
+
+export * from "./schema/types.js";
+
 export type {
-  BillingStatementState,
+  BillingStatementGlobalState,
   BillingStatementLocalState,
+  BillingStatementPHState,
   BillingStatementAction,
+  BillingStatementDocument,
 };

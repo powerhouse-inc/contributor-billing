@@ -1,5 +1,5 @@
 import { Form, StringField } from "@powerhousedao/document-engineering/scalars";
-import { ValidationResult } from "../validation/validationManager.js";
+import { type ValidationResult } from "../validation/validationManager.js";
 import { twMerge } from "tailwind-merge";
 
 interface InputFieldProps {
@@ -46,15 +46,20 @@ export const InputField = (props: InputFieldProps) => {
           handleInputChange(e);
         }}
         onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-          if (e.key === 'Enter') {
+          if (e.key === "Enter") {
             e.preventDefault();
             e.currentTarget.blur();
             // Find and focus the next focusable element
             const focusableElements = document.querySelectorAll(
-              'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+              'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
             );
-            const currentIndex = Array.from(focusableElements).indexOf(e.currentTarget);
-            if (currentIndex > -1 && currentIndex < focusableElements.length - 1) {
+            const currentIndex = Array.from(focusableElements).indexOf(
+              e.currentTarget,
+            );
+            if (
+              currentIndex > -1 &&
+              currentIndex < focusableElements.length - 1
+            ) {
               (focusableElements[currentIndex + 1] as HTMLElement).focus();
             }
           }

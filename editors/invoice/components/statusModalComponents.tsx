@@ -6,13 +6,34 @@ import {
 } from "../../../document-models/invoice/index.js";
 import { InputField } from "../components/inputField.js";
 import { DatePicker } from "../components/datePicker.js";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   Textarea,
   Checkbox,
   Select,
-  NumberInput,
 } from "@powerhousedao/document-engineering";
+
+/**
+ * Converts a date-only string (YYYY-MM-DD) to ISO datetime string (YYYY-MM-DDTHH:mm:ss.sssZ)
+ * Used when dispatching date values to match the Zod schema requirements
+ */
+function dateToDatetime(dateStr: string | null | undefined): string | null {
+  if (!dateStr || dateStr.trim() === "") return null;
+  // If it's already a datetime string, return as is
+  if (dateStr.includes("T")) return dateStr;
+  // Convert date-only to datetime at midnight UTC
+  return `${dateStr}T00:00:00.000Z`;
+}
+
+/**
+ * Converts an ISO datetime string to date-only string (YYYY-MM-DD) for DatePicker
+ * Used when displaying date values from state
+ */
+function datetimeToDate(datetimeStr: string | null | undefined): string {
+  if (!datetimeStr || datetimeStr.trim() === "") return "";
+  // Extract date part from datetime string
+  return datetimeStr.split("T")[0];
+}
 
 // Modal content components
 interface IssueInvoiceModalContentProps {
@@ -67,16 +88,17 @@ export function IssueInvoiceModalContent({
         <label className="block mb-1 text-sm">Issue Date:</label>
         <DatePicker
           name="issueDate"
-          className={String.raw`w-full p-0`}
+          className={String.raw`w-full p-0 bg-white`}
           onChange={(e) => {
-            const newDate = e.target.value.split("T")[0];
+            const dateOnly = e.target.value.split("T")[0];
+            const datetime = dateToDatetime(dateOnly);
             dispatch(
               actions.editInvoice({
-                dateIssued: newDate,
-              })
+                dateIssued: datetime,
+              }),
             );
           }}
-          value={state.dateIssued}
+          value={datetimeToDate(state.dateIssued)}
         />
       </div>
     </div>
@@ -93,9 +115,6 @@ interface RejectInvoiceModalContentProps {
   rejectReason: string;
 }
 export function RejectInvoiceModalContent({
-  state,
-  dispatch,
-  setWarning,
   setRejectReason,
   setFinalReason,
   finalReason,
@@ -220,7 +239,7 @@ export function RegisterPaymentTxModalContent({
         <label className="block mb-1 text-sm">Payment Date:</label>
         <DatePicker
           name="paymentDate"
-          className={String.raw`w-full p-0`}
+          className={String.raw`w-full p-0 bg-white`}
           onChange={(e) => {
             setPaymentDate(e.target.value);
           }}

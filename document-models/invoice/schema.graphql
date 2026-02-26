@@ -1,9 +1,12 @@
+scalar Unknown
+scalar DateTime
+scalar Attachment
+scalar Address
 scalar Amount_Tokens
 scalar EthereumAddress
-scalar Amount_Percentage
 scalar EmailAddress
+scalar Amount_Percentage
 scalar Date
-scalar DateTime
 scalar URL
 scalar Amount_Money
 scalar OLabel
@@ -15,11 +18,12 @@ scalar Amount_Currency
 scalar Amount_Crypto
 scalar Amount
 scalar Upload
+
 type InvoiceState {
   status: Status!
   invoiceNo: String!
-  dateIssued: Date!
-  dateDue: Date!
+  dateIssued: Date
+  dateDue: Date
   dateDelivered: Date
   issuer: LegalEntity!
   payer: LegalEntity!
@@ -32,7 +36,7 @@ type InvoiceState {
   payments: [Payment!]!
   payAfter: DateTime
   invoiceTags: [InvoiceTag!]!   # e.g. {'xero-payment-account', '090', 'PowerhouseUSD'}
-  exported: ExportedData
+  exported: ExportedData!
   closureReason: ClosureReason
 }
 
@@ -49,7 +53,7 @@ type Rejection {
 }
 
 type ExportedData {
-  timestamp: DateTime!        # ISO 8601 timestamp of the export
+  timestamp: DateTime   # ISO 8601 timestamp of the export
   exportedLineItems: [[String!]!]!   # CSV Format
 }
 
@@ -150,14 +154,9 @@ type InvoiceTag {
   label: String       # "Marketing", ..., "Business Bank", ..., "May 2025"
 }
 
-union LegalEntityId = LegalEntityTaxId | LegalEntityCorporateRegistrationId
-
-type LegalEntityTaxId {
-  taxId: String!
-}
-
-type LegalEntityCorporateRegistrationId {
-  corpRegId: String!
+type LegalEntityId {
+  taxId: String
+  corpRegId: String
 }
 
 enum Status {
@@ -186,8 +185,6 @@ enum InvoiceAccountTypeInput {
   TRUST
   WALLET
 }
-
-
 
 # general
 

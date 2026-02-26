@@ -1,19 +1,20 @@
 import {
-  ComponentPropsWithRef,
+  type ComponentPropsWithRef,
   forwardRef,
-  Ref,
+  type Ref,
   useCallback,
   useState,
   useEffect,
   useMemo,
 } from "react";
 import { twMerge } from "tailwind-merge";
-import { EditLegalEntityBankInput } from "./legalEntity.js";
+import type { EditLegalEntityBankInput } from "./legalEntity.js";
 import { CountryForm } from "../components/countryForm.js";
 import { InputField } from "../components/inputField.js";
-import { ValidationResult } from "../validation/validationManager.js";
+import type { ValidationResult } from "../validation/validationManager.js";
 import { Select } from "@powerhousedao/document-engineering";
 import { isValidIBAN } from "../validation/validationRules.js";
+import { STATE_PROVINCE_OPTIONS } from "./legalEntity.js";
 
 const ACCOUNT_TYPES = ["CHECKING", "SAVINGS", "TRUST"] as const;
 
@@ -69,7 +70,7 @@ function flattenBankInput(value: any) {
 export const LegalEntityBankSection = forwardRef(
   function LegalEntityBankSection(
     props: LegalEntityBankSectionProps,
-    ref: Ref<HTMLDivElement>
+    ref: Ref<HTMLDivElement>,
   ) {
     const {
       value,
@@ -111,7 +112,7 @@ export const LegalEntityBankSection = forwardRef(
       field: keyof EditLegalEntityBankInput,
       event: React.ChangeEvent<
         HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-      >
+      >,
     ) {
       setLocalState((prevState: ReturnType<typeof flattenBankInput>) => ({
         ...prevState,
@@ -124,29 +125,29 @@ export const LegalEntityBankSection = forwardRef(
         field: keyof EditLegalEntityBankInput,
         event: React.FocusEvent<
           HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-        >
+        >,
       ) {
         onChange({
           [field]: event.target.value,
         } as Partial<EditLegalEntityBankInput>);
       },
-      [onChange]
+      [onChange],
     );
 
     const handleIntermediaryToggle = useCallback(
       function handleIntermediaryToggle(
-        event: React.ChangeEvent<HTMLInputElement>
+        event: React.ChangeEvent<HTMLInputElement>,
       ) {
         setShowIntermediary(event.target.checked);
       },
-      [showIntermediary]
+      [showIntermediary],
     );
 
     function createInputHandler(field: keyof EditLegalEntityBankInput) {
       return function handleFieldChange(
         event: React.ChangeEvent<
           HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-        >
+        >,
       ) {
         handleInputChange(field, event);
       };
@@ -156,7 +157,7 @@ export const LegalEntityBankSection = forwardRef(
       return function handleFieldBlur(
         event: React.FocusEvent<
           HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-        >
+        >,
       ) {
         handleBlur(field, event);
       };
@@ -166,7 +167,7 @@ export const LegalEntityBankSection = forwardRef(
 
     const usdIbanPayment = useMemo(
       () => isValidIBAN(localState.accountNum ?? "") && currency === "USD",
-      [localState.accountNum, currency]
+      [localState.accountNum, currency],
     );
 
     return (
@@ -174,7 +175,7 @@ export const LegalEntityBankSection = forwardRef(
         {...divProps}
         className={twMerge(
           "rounded-lg border border-gray-200 bg-white p-6",
-          props.className
+          props.className,
         )}
         ref={ref}
       >
@@ -188,7 +189,9 @@ export const LegalEntityBankSection = forwardRef(
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Account Number
                   {isValidIBAN(localState.accountNum ?? "") && (
-                    <span className="ml-2 text-green-600 font-medium">IBAN</span>
+                    <span className="ml-2 text-green-600 font-medium">
+                      IBAN
+                    </span>
                   )}
                 </label>
                 <InputField
@@ -237,7 +240,7 @@ export const LegalEntityBankSection = forwardRef(
                         (prevState: ReturnType<typeof flattenBankInput>) => ({
                           ...prevState,
                           accountType: value as string,
-                        })
+                        }),
                       );
                       // Dispatch to parent component
                       onChange({
@@ -340,15 +343,36 @@ export const LegalEntityBankSection = forwardRef(
                   handleInputChange={createInputHandler("city")}
                   className="h-10 w-full text-md mb-2"
                 />
-                <InputField
-                  // input={localState.stateProvince ?? ""}
-                  value={localState.stateProvince ?? ""}
-                  label="State/Province"
-                  placeholder="State/Province"
-                  onBlur={createBlurHandler("stateProvince")}
-                  handleInputChange={createInputHandler("stateProvince")}
-                  className="h-10 w-full text-md mb-2"
-                />
+                <div className="space-y-2">
+                  {localState.country === "US" ? (
+                    <>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        State/Province
+                      </label>
+                      <Select
+                        options={STATE_PROVINCE_OPTIONS}
+                        value={localState.stateProvince ?? ""}
+                        onChange={(value) => {
+                          createBlurHandler("stateProvince")({
+                            target: { value: value as string },
+                          } as React.FocusEvent<HTMLInputElement>);
+                        }}
+                        className="h-10 w-full text-md mb-2"
+                        searchable={true}
+                      />
+                    </>
+                  ) : (
+                    <InputField
+                      // input={localState.stateProvince ?? ""}
+                      value={localState.stateProvince ?? ""}
+                      label="State/Province"
+                      placeholder="State/Province"
+                      onBlur={createBlurHandler("stateProvince")}
+                      handleInputChange={createInputHandler("stateProvince")}
+                      className="h-10 w-full text-md mb-2"
+                    />
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <InputField
@@ -414,7 +438,7 @@ export const LegalEntityBankSection = forwardRef(
                       placeholder="Intermediary Account Number"
                       onBlur={createBlurHandler("accountNumIntermediary")}
                       handleInputChange={createInputHandler(
-                        "accountNumIntermediary"
+                        "accountNumIntermediary",
                       )}
                       className="h-10 w-full text-md mb-2"
                     />
@@ -435,11 +459,11 @@ export const LegalEntityBankSection = forwardRef(
                             // Update local state
                             setLocalState(
                               (
-                                prevState: ReturnType<typeof flattenBankInput>
+                                prevState: ReturnType<typeof flattenBankInput>,
                               ) => ({
                                 ...prevState,
                                 accountType: value as string,
-                              })
+                              }),
                             );
                             // Dispatch to parent component
                             onChange({
@@ -460,7 +484,7 @@ export const LegalEntityBankSection = forwardRef(
                             placeholder="SWIFT/BIC"
                             onBlur={createBlurHandler("BICIntermediary")}
                             handleInputChange={createInputHandler(
-                              "BICIntermediary"
+                              "BICIntermediary",
                             )}
                             className="h-10 w-full text-md mb-2"
                             validation={bicvalidation}
@@ -473,7 +497,7 @@ export const LegalEntityBankSection = forwardRef(
                               placeholder="Routing Number (ABA/ACH)"
                               onBlur={createBlurHandler("ABAIntermediary")}
                               handleInputChange={createInputHandler(
-                                "ABAIntermediary"
+                                "ABAIntermediary",
                               )}
                               className="h-10 w-full text-md mb-2"
                             />
@@ -487,7 +511,7 @@ export const LegalEntityBankSection = forwardRef(
                               placeholder="SWIFT/BIC"
                               onBlur={createBlurHandler("SWIFTIntermediary")}
                               handleInputChange={createInputHandler(
-                                "SWIFTIntermediary"
+                                "SWIFTIntermediary",
                               )}
                               className="h-10 w-full text-md mb-2"
                             />
@@ -506,7 +530,7 @@ export const LegalEntityBankSection = forwardRef(
                     placeholder="Intermediary Beneficiary Name"
                     onBlur={createBlurHandler("beneficiaryIntermediary")}
                     handleInputChange={createInputHandler(
-                      "beneficiaryIntermediary"
+                      "beneficiaryIntermediary",
                     )}
                     className="h-10 w-full text-md mb-2"
                   />
@@ -533,7 +557,7 @@ export const LegalEntityBankSection = forwardRef(
                       placeholder="Street Address"
                       onBlur={createBlurHandler("streetAddressIntermediary")}
                       handleInputChange={createInputHandler(
-                        "streetAddressIntermediary"
+                        "streetAddressIntermediary",
                       )}
                       className="h-10 w-full text-md mb-2"
                     />
@@ -543,7 +567,7 @@ export const LegalEntityBankSection = forwardRef(
                       placeholder="Extended Address"
                       onBlur={createBlurHandler("extendedAddressIntermediary")}
                       handleInputChange={createInputHandler(
-                        "extendedAddressIntermediary"
+                        "extendedAddressIntermediary",
                       )}
                       className="h-10 w-full text-md mb-2"
                     />
@@ -555,21 +579,44 @@ export const LegalEntityBankSection = forwardRef(
                         placeholder="City"
                         onBlur={createBlurHandler("cityIntermediary")}
                         handleInputChange={createInputHandler(
-                          "cityIntermediary"
+                          "cityIntermediary",
                         )}
                         className="h-10 w-full text-md mb-2"
                       />
-                      <InputField
-                        // input={localState.stateProvinceIntermediary ?? ""}
-                        value={localState.stateProvinceIntermediary ?? ""}
-                        label="State/Province"
-                        placeholder="State/Province"
-                        onBlur={createBlurHandler("stateProvinceIntermediary")}
-                        handleInputChange={createInputHandler(
-                          "stateProvinceIntermediary"
+                      <div className="space-y-2">
+                        {localState.countryIntermediary === "US" ? (
+                          <>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">
+                              State/Province
+                            </label>
+                            <Select
+                              options={STATE_PROVINCE_OPTIONS}
+                              value={localState.stateProvinceIntermediary ?? ""}
+                              onChange={(value) => {
+                                createBlurHandler("stateProvinceIntermediary")({
+                                  target: { value: value as string },
+                                } as React.FocusEvent<HTMLInputElement>);
+                              }}
+                              className="h-10 w-full text-md mb-2"
+                              searchable={true}
+                            />
+                          </>
+                        ) : (
+                          <InputField
+                            // input={localState.stateProvince ?? ""}
+                            value={localState.stateProvinceIntermediary ?? ""}
+                            label="State/Province"
+                            placeholder="State/Province"
+                            onBlur={createBlurHandler(
+                              "stateProvinceIntermediary",
+                            )}
+                            handleInputChange={createInputHandler(
+                              "stateProvince",
+                            )}
+                            className="h-10 w-full text-md mb-2"
+                          />
                         )}
-                        className="h-10 w-full text-md mb-2"
-                      />
+                      </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <InputField
@@ -579,7 +626,7 @@ export const LegalEntityBankSection = forwardRef(
                         placeholder="Postal Code"
                         onBlur={createBlurHandler("postalCodeIntermediary")}
                         handleInputChange={createInputHandler(
-                          "postalCodeIntermediary"
+                          "postalCodeIntermediary",
                         )}
                         className="h-10 w-full text-md mb-2"
                       />
@@ -587,7 +634,7 @@ export const LegalEntityBankSection = forwardRef(
                         label="Country"
                         country={localState.countryIntermediary ?? ""}
                         handleInputChange={createInputHandler(
-                          "countryIntermediary"
+                          "countryIntermediary",
                         )}
                         handleBlur={createBlurHandler("countryIntermediary")}
                         className="h-10 w-full text-md mb-2"
@@ -613,5 +660,5 @@ export const LegalEntityBankSection = forwardRef(
         </div>
       </div>
     );
-  }
+  },
 );

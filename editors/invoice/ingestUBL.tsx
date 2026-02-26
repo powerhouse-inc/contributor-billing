@@ -1,5 +1,5 @@
 import {
-  InvoiceAction,
+  type InvoiceAction,
   actions,
 } from "../../document-models/invoice/index.js";
 
@@ -52,11 +52,6 @@ export class UBLConverter {
       }
     }
     return null;
-  }
-
-  private getElementTextList(parent: Element, selector: string): string[] {
-    const elements = parent.querySelectorAll(selector);
-    return Array.from(elements).map((el) => el.textContent || "");
   }
 
   private processGeneralData(invoice: Element) {

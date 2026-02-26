@@ -1,18 +1,24 @@
-import { createAction } from "document-model";
+import { createAction } from "document-model/core";
 import {
-  z,
-  type EditInvoiceInput,
-  type EditStatusInput,
-  type EditPaymentDataInput,
-  type SetExportedDataInput,
-  type AddPaymentInput,
+  EditInvoiceInputSchema,
+  EditStatusInputSchema,
+  EditPaymentDataInputSchema,
+  SetExportedDataInputSchema,
+  AddPaymentInputSchema,
+} from "../schema/zod.js";
+import type {
+  EditInvoiceInput,
+  EditStatusInput,
+  EditPaymentDataInput,
+  SetExportedDataInput,
+  AddPaymentInput,
 } from "../types.js";
-import {
-  type EditInvoiceAction,
-  type EditStatusAction,
-  type EditPaymentDataAction,
-  type SetExportedDataAction,
-  type AddPaymentAction,
+import type {
+  EditInvoiceAction,
+  EditStatusAction,
+  EditPaymentDataAction,
+  SetExportedDataAction,
+  AddPaymentAction,
 } from "./actions.js";
 
 export const editInvoice = (input: EditInvoiceInput) =>
@@ -20,7 +26,7 @@ export const editInvoice = (input: EditInvoiceInput) =>
     "EDIT_INVOICE",
     { ...input },
     undefined,
-    z.EditInvoiceInputSchema,
+    EditInvoiceInputSchema,
     "global",
   );
 
@@ -29,7 +35,7 @@ export const editStatus = (input: EditStatusInput) =>
     "EDIT_STATUS",
     { ...input },
     undefined,
-    z.EditStatusInputSchema,
+    EditStatusInputSchema,
     "global",
   );
 
@@ -38,7 +44,7 @@ export const editPaymentData = (input: EditPaymentDataInput) =>
     "EDIT_PAYMENT_DATA",
     { ...input },
     undefined,
-    z.EditPaymentDataInputSchema,
+    EditPaymentDataInputSchema,
     "global",
   );
 
@@ -47,7 +53,7 @@ export const setExportedData = (input: SetExportedDataInput) =>
     "SET_EXPORTED_DATA",
     { ...input },
     undefined,
-    z.SetExportedDataInputSchema,
+    SetExportedDataInputSchema,
     "global",
   );
 
@@ -56,6 +62,6 @@ export const addPayment = (input: AddPaymentInput) =>
     "ADD_PAYMENT",
     { ...input },
     undefined,
-    z.AddPaymentInputSchema,
+    AddPaymentInputSchema,
     "global",
   );

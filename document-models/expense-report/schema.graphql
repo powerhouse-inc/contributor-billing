@@ -1,9 +1,12 @@
+scalar Unknown
+scalar DateTime
+scalar Attachment
+scalar Address
 scalar Amount_Tokens
 scalar EthereumAddress
-scalar Amount_Percentage
 scalar EmailAddress
+scalar Amount_Percentage
 scalar Date
-scalar DateTime
 scalar URL
 scalar Amount_Money
 scalar OLabel
@@ -15,11 +18,22 @@ scalar Amount_Currency
 scalar Amount_Crypto
 scalar Amount
 scalar Upload
+
 type ExpenseReportState {
+  ownerId: PHID
+  status: ExpenseReportStatus!
   wallets: [Wallet!]!
   groups: [LineItemGroup!]!
   periodStart: DateTime
   periodEnd: DateTime
+  startDate: DateTime
+  endDate: DateTime
+}
+
+enum ExpenseReportStatus {
+  DRAFT
+  REVIEW
+  FINAL
 }
 
 type Wallet {
@@ -28,6 +42,8 @@ type Wallet {
   totals: [GroupTotals]
   billingStatements: [OID]
   lineItems: [LineItem]
+  accountDocumentId: PHID
+  accountTransactionsDocumentId: PHID
 }
 
 type LineItemGroup {
@@ -37,7 +53,7 @@ type LineItemGroup {
 }
 
 type GroupTotals {
-  group: ID  ## LineItemGroupId
+  group: ID
   totalBudget: Float
   totalForecast: Float
   totalActuals: Float
@@ -47,16 +63,13 @@ type GroupTotals {
 type LineItem {
   id: ID
   label: String
-  group: ID  ## LineItemGroupId
+  group: ID
   budget: Float
   actuals: Float
   forecast: Float
   payments: Float
   comments: String
 }
-
-
-
 
 # wallet
 
@@ -157,4 +170,25 @@ input SetPeriodEndInput {
 input UpdateWalletInput {
   address: EthereumAddress!
   name: String
+  accountDocumentId: PHID
+  accountTransactionsDocumentId: PHID
+}
+
+input SetOwnerIdInput {
+  ownerId: PHID!
+}
+
+input SetStatusInput {
+  status: ExpenseReportStatusInput!
+}
+
+enum ExpenseReportStatusInput {
+  DRAFT
+  REVIEW
+  FINAL
+}
+
+input SetPeriodInput {
+  startDate: DateTime
+  endDate: DateTime
 }

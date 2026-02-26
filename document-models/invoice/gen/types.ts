@@ -1,10 +1,21 @@
-import type { PHDocument } from "document-model";
+import type { PHDocument, PHBaseState } from "document-model";
 import type { InvoiceAction } from "./actions.js";
-import type { InvoicePHState } from "./ph-factories.js";
-import type { InvoiceState } from "./schema/types.js";
+import type { InvoiceState as InvoiceGlobalState } from "./schema/types.js";
 
-export { z } from "./schema/index.js";
-export type * from "./schema/types.js";
 type InvoiceLocalState = Record<PropertyKey, never>;
-export type InvoiceDocument = PHDocument<InvoicePHState>;
-export type { InvoiceState, InvoiceLocalState, InvoiceAction };
+
+type InvoicePHState = PHBaseState & {
+  global: InvoiceGlobalState;
+  local: InvoiceLocalState;
+};
+type InvoiceDocument = PHDocument<InvoicePHState>;
+
+export * from "./schema/types.js";
+
+export type {
+  InvoiceGlobalState,
+  InvoiceLocalState,
+  InvoicePHState,
+  InvoiceAction,
+  InvoiceDocument,
+};

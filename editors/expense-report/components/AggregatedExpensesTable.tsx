@@ -1,6 +1,10 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import React from "react";
-import type { Wallet, LineItemGroup, LineItem } from "../../../document-models/expense-report/gen/types.js";
+import type {
+  Wallet,
+  LineItemGroup,
+  LineItem,
+} from "../../../document-models/expense-report/gen/types.js";
 import { actions } from "../../../document-models/expense-report/index.js";
 import { Textarea, Select, Button } from "@powerhousedao/document-engineering";
 import { Plus, Trash2 } from "lucide-react";
@@ -23,8 +27,6 @@ interface LineItemWithGroupInfo extends LineItem {
 export function AggregatedExpensesTable({
   wallets,
   groups,
-  periodStart,
-  periodEnd,
   dispatch,
 }: AggregatedExpensesTableProps) {
   // State for active tab (selected wallet)
@@ -46,11 +48,15 @@ export function AggregatedExpensesTable({
   // State for adding new line item
   const [isAddingLineItem, setIsAddingLineItem] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
-  const [duplicateCategoryError, setDuplicateCategoryError] = useState<string>("");
+  const [duplicateCategoryError, setDuplicateCategoryError] =
+    useState<string>("");
 
   // State for delete confirmation modal
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [lineItemToDelete, setLineItemToDelete] = useState<{ id: string; label: string } | null>(null);
+  const [lineItemToDelete, setLineItemToDelete] = useState<{
+    id: string;
+    label: string;
+  } | null>(null);
 
   // Ref for line item editor to scroll into view
   const lineItemEditorRef = useRef<HTMLTableRowElement>(null);
@@ -64,8 +70,11 @@ export function AggregatedExpensesTable({
         let element = lineItemEditorRef.current?.parentElement;
         while (element) {
           const style = window.getComputedStyle(element);
-          const isScrollable = style.overflow === 'auto' || style.overflow === 'scroll' ||
-                              style.overflowY === 'auto' || style.overflowY === 'scroll';
+          const isScrollable =
+            style.overflow === "auto" ||
+            style.overflow === "scroll" ||
+            style.overflowY === "auto" ||
+            style.overflowY === "scroll";
           if (isScrollable && element.scrollHeight > element.clientHeight) {
             // Found the scrollable container, scroll to bottom
             element.scrollTo({ top: element.scrollHeight, behavior: "smooth" });
@@ -84,9 +93,12 @@ export function AggregatedExpensesTable({
 
     return new Set(
       wallet.lineItems
-        .filter((item): item is NonNullable<typeof item> => item !== null && item !== undefined)
-        .map(item => item.group)
-        .filter((group): group is string => !!group)
+        .filter(
+          (item): item is NonNullable<typeof item> =>
+            item !== null && item !== undefined,
+        )
+        .map((item) => item.group)
+        .filter((group): group is string => !!group),
     );
   }, [wallets, activeWalletIndex]);
 
@@ -104,8 +116,10 @@ export function AggregatedExpensesTable({
 
     // Check if category already exists
     if (existingCategoryIds.has(value)) {
-      const categoryLabel = groups.find(g => g.id === value)?.label || value;
-      setDuplicateCategoryError(`"${categoryLabel}" already exists in this wallet. Please select a different category.`);
+      const categoryLabel = groups.find((g) => g.id === value)?.label || value;
+      setDuplicateCategoryError(
+        `"${categoryLabel}" already exists in this wallet. Please select a different category.`,
+      );
     } else {
       setDuplicateCategoryError("");
     }
@@ -123,7 +137,7 @@ export function AggregatedExpensesTable({
 
     const newLineItem = {
       id: generateId(),
-      label: groups.find(g => g.id === selectedGroupId)?.label || "",
+      label: groups.find((g) => g.id === selectedGroupId)?.label || "",
       group: selectedGroupId,
       budget: 0,
       actuals: 0,
@@ -136,7 +150,7 @@ export function AggregatedExpensesTable({
       actions.addLineItem({
         wallet: wallet.wallet,
         lineItem: newLineItem,
-      })
+      }),
     );
 
     // Reset state
@@ -167,7 +181,7 @@ export function AggregatedExpensesTable({
       actions.removeLineItem({
         wallet: wallet.wallet,
         lineItemId: lineItemToDelete.id,
-      })
+      }),
     );
 
     // Close modal and reset state
@@ -182,19 +196,13 @@ export function AggregatedExpensesTable({
   };
 
   // Format period for title
-  const periodTitle = useMemo(() => {
-    if (!periodStart) return "Breakdown";
-
-    const date = new Date(periodStart);
-    const month = date.toLocaleDateString("en-US", { month: "short" });
-    const year = date.getFullYear();
-
-    return `${month} ${year} Breakdown`;
-  }, [periodStart]);
 
   // Create a map of groups with their parent info
   const groupsMap = useMemo(() => {
-    const map = new Map<string, { group: LineItemGroup; parent?: LineItemGroup }>();
+    const map = new Map<
+      string,
+      { group: LineItemGroup; parent?: LineItemGroup }
+    >();
 
     groups.forEach((group) => {
       map.set(group.id, { group });
@@ -223,7 +231,10 @@ export function AggregatedExpensesTable({
     const lineItems = wallet.lineItems || [];
 
     return lineItems
-      .filter((item): item is NonNullable<typeof item> => item !== null && item !== undefined)
+      .filter(
+        (item): item is NonNullable<typeof item> =>
+          item !== null && item !== undefined,
+      )
       .map((item): LineItemWithGroupInfo => {
         const groupInfo = item.group ? groupsMap.get(item.group) : undefined;
 
@@ -239,18 +250,21 @@ export function AggregatedExpensesTable({
   // Group line items by parent category
   // Line items are already aggregated by category, so we just need to group them by parent
   const groupedAndAggregatedItems = useMemo(() => {
-    const grouped = new Map<string, Array<{
-      lineItemId: string;
-      groupId: string;
-      groupLabel: string;
-      parentGroupId: string | null | undefined;
-      parentGroupLabel: string | undefined;
-      budget: number;
-      forecast: number;
-      actuals: number;
-      payments: number;
-      comment: string;
-    }>>();
+    const grouped = new Map<
+      string,
+      Array<{
+        lineItemId: string;
+        groupId: string;
+        groupLabel: string;
+        parentGroupId: string | null | undefined;
+        parentGroupLabel: string | undefined;
+        budget: number;
+        forecast: number;
+        actuals: number;
+        payments: number;
+        comment: string;
+      }>
+    >();
 
     walletLineItems.forEach((item) => {
       if (!item) return;
@@ -261,7 +275,7 @@ export function AggregatedExpensesTable({
       items.push({
         lineItemId: item.id || "",
         groupId: item.group || "uncategorized",
-        groupLabel: item.groupLabel || "Uncategorised",
+        groupLabel: item.groupLabel || "Uncategorized",
         parentGroupId: item.parentGroupId,
         parentGroupLabel: item.parentGroupLabel,
         budget: item.budget || 0,
@@ -278,13 +292,15 @@ export function AggregatedExpensesTable({
   }, [walletLineItems]);
 
   // Calculate subtotals for each parent group
-  const calculateSubtotal = (items: Array<{
-    budget: number;
-    forecast: number;
-    actuals: number;
-    payments: number;
-    [key: string]: any;
-  }>) => {
+  const calculateSubtotal = (
+    items: Array<{
+      budget: number;
+      forecast: number;
+      actuals: number;
+      payments: number;
+      [key: string]: any;
+    }>,
+  ) => {
     return items.reduce(
       (acc, item) => ({
         budget: acc.budget + item.budget,
@@ -293,7 +309,7 @@ export function AggregatedExpensesTable({
         difference: acc.difference + (item.forecast - item.actuals),
         payments: acc.payments + item.payments,
       }),
-      { budget: 0, forecast: 0, actuals: 0, difference: 0, payments: 0 }
+      { budget: 0, forecast: 0, actuals: 0, difference: 0, payments: 0 },
     );
   };
 
@@ -304,10 +320,11 @@ export function AggregatedExpensesTable({
         budget: acc.budget + (item?.budget || 0),
         forecast: acc.forecast + (item?.forecast || 0),
         actuals: acc.actuals + (item?.actuals || 0),
-        difference: acc.difference + ((item?.forecast || 0) - (item?.actuals || 0)),
+        difference:
+          acc.difference + ((item?.forecast || 0) - (item?.actuals || 0)),
         payments: acc.payments + (item?.payments || 0),
       }),
-      { budget: 0, forecast: 0, actuals: 0, difference: 0, payments: 0 }
+      { budget: 0, forecast: 0, actuals: 0, difference: 0, payments: 0 },
     );
   }, [walletLineItems]);
 
@@ -342,7 +359,7 @@ export function AggregatedExpensesTable({
           wallet: wallet.wallet,
           lineItemId: editingGroupId,
           comments: editingComment,
-        })
+        }),
       );
     }
 
@@ -363,7 +380,7 @@ export function AggregatedExpensesTable({
   const handleStartFieldEdit = (
     lineItemId: string,
     field: "budget" | "forecast" | "actuals" | "payments",
-    currentValue: number
+    currentValue: number,
   ) => {
     setEditingField({ lineItemId, field, originalValue: currentValue });
     setEditingValue(currentValue.toString());
@@ -388,7 +405,7 @@ export function AggregatedExpensesTable({
           wallet: wallet.wallet,
           lineItemId: editingField.lineItemId,
           [editingField.field]: numericValue,
-        })
+        }),
       );
     }
 
@@ -408,8 +425,10 @@ export function AggregatedExpensesTable({
     const keys = Array.from(groupedAndAggregatedItems.keys());
 
     // Find Headcount and Non-Headcount group IDs
-    const headcountGroup = groups.find(g => g.label === "Headcount Expenses");
-    const nonHeadcountGroup = groups.find(g => g.label === "Non-Headcount Expenses");
+    const headcountGroup = groups.find((g) => g.label === "Headcount Expenses");
+    const nonHeadcountGroup = groups.find(
+      (g) => g.label === "Non-Headcount Expenses",
+    );
 
     return keys.sort((a, b) => {
       // Uncategorized always goes last
@@ -477,7 +496,7 @@ export function AggregatedExpensesTable({
                 </div>
               </th>
               <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Mthly Budget
+                Budget Allocation
               </th>
               <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Forecast
@@ -507,7 +526,7 @@ export function AggregatedExpensesTable({
               const subtotals = calculateSubtotal(items);
               const parentLabel =
                 parentKey === "uncategorized"
-                  ? "Uncategorised"
+                  ? "Uncategorized"
                   : items[0]?.parentGroupLabel || "Other";
 
               return (
@@ -532,7 +551,7 @@ export function AggregatedExpensesTable({
                     // Helper function to render editable numeric cell
                     const renderEditableCell = (
                       field: "budget" | "forecast" | "actuals" | "payments",
-                      value: number
+                      value: number,
                     ) => {
                       const isEditingThis =
                         editingField?.lineItemId === item.lineItemId &&
@@ -564,7 +583,9 @@ export function AggregatedExpensesTable({
                       return (
                         <div
                           className="group cursor-pointer text-right"
-                          onClick={() => handleStartFieldEdit(item.lineItemId, field, value)}
+                          onClick={() =>
+                            handleStartFieldEdit(item.lineItemId, field, value)
+                          }
                         >
                           <span className="group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 inline-block px-1 py-0.5 rounded transition-colors min-w-[4rem]">
                             {formatNumber(value)}
@@ -603,7 +624,9 @@ export function AggregatedExpensesTable({
                           {isEditingComment ? (
                             <Textarea
                               value={editingComment}
-                              onChange={(e) => setEditingComment(e.target.value)}
+                              onChange={(e) =>
+                                setEditingComment(e.target.value)
+                              }
                               placeholder="Add comment..."
                               autoExpand={true}
                               multiline={true}
@@ -625,7 +648,9 @@ export function AggregatedExpensesTable({
                           ) : (
                             <div
                               className="group cursor-pointer w-full max-h-20 overflow-hidden"
-                              onClick={() => handleStartEdit(item.lineItemId, item.comment)}
+                              onClick={() =>
+                                handleStartEdit(item.lineItemId, item.comment)
+                              }
                               title={item.comment || "No comments"}
                             >
                               <span className="group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 px-1 py-0.5 rounded transition-colors block text-gray-600 dark:text-gray-400 break-words">
@@ -639,7 +664,12 @@ export function AggregatedExpensesTable({
                         </td>
                         <td className="px-2 py-3 whitespace-nowrap text-center w-16">
                           <button
-                            onClick={() => handleDeleteLineItem(item.lineItemId, item.groupLabel)}
+                            onClick={() =>
+                              handleDeleteLineItem(
+                                item.lineItemId,
+                                item.groupLabel,
+                              )
+                            }
                             className="inline-flex items-center justify-center p-0.5 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                             title="Delete line item"
                           >
@@ -762,7 +792,9 @@ export function AggregatedExpensesTable({
                           name="category"
                           searchable={true}
                           value={selectedGroupId}
-                          onChange={(value: string | string[]) => handleCategoryChange(value as string)}
+                          onChange={(value: string | string[]) =>
+                            handleCategoryChange(value as string)
+                          }
                           options={groupOptions}
                           placeholder="Choose a category..."
                           className="w-full"
@@ -771,7 +803,9 @@ export function AggregatedExpensesTable({
                       <div className="flex gap-2">
                         <Button
                           onClick={handleSaveLineItem}
-                          disabled={!selectedGroupId || !!duplicateCategoryError}
+                          disabled={
+                            !selectedGroupId || !!duplicateCategoryError
+                          }
                           className="bg-green-600 hover:bg-green-700 text-white"
                         >
                           SAVE

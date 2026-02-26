@@ -1,13 +1,13 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type EditIssuerAction,
-  type EditIssuerBankAction,
-  type EditIssuerWalletAction,
-  type EditPayerAction,
-  type EditPayerBankAction,
-  type EditPayerWalletAction,
+import type {
+  EditIssuerAction,
+  EditIssuerBankAction,
+  EditIssuerWalletAction,
+  EditPayerAction,
+  EditPayerBankAction,
+  EditPayerWalletAction,
 } from "./actions.js";
-import { type InvoiceState } from "../types.js";
+import type { InvoiceState } from "../types.js";
 
 export interface InvoicePartiesOperations {
   editIssuerOperation: (

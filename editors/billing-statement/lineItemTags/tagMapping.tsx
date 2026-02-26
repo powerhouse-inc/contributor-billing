@@ -1,5 +1,5 @@
-import { SelectOption } from "@powerhousedao/document-engineering/ui";
-import { InvoiceTag } from "../../../document-models/invoice/gen/types.js";
+import { type SelectOption } from "@powerhousedao/document-engineering/ui";
+import { type InvoiceTag } from "../../../document-models/invoice/gen/types.js";
 
 const billingTagMapping = [
   { fusion: "Budget", xero: "200 - Grants from Maker DAO" },
@@ -10,15 +10,24 @@ const billingTagMapping = [
   { fusion: "Travel & Entertainment", xero: "3001 - Meals" },
   { fusion: "Travel & Entertainment", xero: "3002 - Airfare" },
   { fusion: "Travel & Entertainment", xero: "3003 - Hotels" },
-  { fusion: "Travel & Entertainment", xero: "3004 - Transportation (Uber, Taxi etc)" },
+  {
+    fusion: "Travel & Entertainment",
+    xero: "3004 - Transportation (Uber, Taxi etc)",
+  },
   { fusion: "Travel & Entertainment", xero: "3005 - Other travel cost" },
   { fusion: "Cost of Goods Sold", xero: "310 - Cost of Goods Sold" },
   { fusion: "Marketing Expense", xero: "400 - Advertising" },
   { fusion: "Professional Services", xero: "4001 - Legal Fees Abroad" },
   { fusion: "Professional Services", xero: "4002 - Legal Fees Switzerland" },
   { fusion: "Professional Services", xero: "4003 - Finance Team Fees Abroad" },
-  { fusion: "Professional Services", xero: "4004 - Finance and Accounting Fees Switzerland" },
-  { fusion: "Software Development Expense", xero: "4005 - Software Development Team Fees" },
+  {
+    fusion: "Professional Services",
+    xero: "4004 - Finance and Accounting Fees Switzerland",
+  },
+  {
+    fusion: "Software Development Expense",
+    xero: "4005 - Software Development Team Fees",
+  },
   { fusion: "Professional Services", xero: "4006 - Research Team Fees" },
   { fusion: "Marketing Expense", xero: "4007 - Marketing Team Fees" },
   { fusion: "Compensation & Benefits", xero: "4008 - Health Care Fees" },
@@ -33,7 +42,10 @@ const billingTagMapping = [
   { fusion: "Admin Expense", xero: "453 - Office Expenses" },
   { fusion: "Admin Expense", xero: "469 - Rent" },
   { fusion: "Admin Expense", xero: "485 - Subscriptions" },
-  { fusion: "Other Income Expense (Non-operating)", xero: "497 - Bank Revaluations" },
+  {
+    fusion: "Other Income Expense (Non-operating)",
+    xero: "497 - Bank Revaluations",
+  },
   { fusion: "Other Income", xero: "498 - Unrealised Currency Gains" },
   { fusion: "Other Income", xero: "499 - Realised Currency Gains" },
   { fusion: "Income Tax Expense", xero: "505 - Income Tax Expense" },
@@ -43,9 +55,15 @@ const billingTagMapping = [
   { fusion: "Software Expense", xero: "701 - Software/IT Subscriptions" },
   { fusion: "Software Expense", xero: "702 - Telephone and Internet Charges" },
   { fusion: "Fixed Asset", xero: "710 - Office Equipment" },
-  { fusion: "Fixed Asset", xero: "711 - Less Accumulated Depreciation on Office Equipment" },
+  {
+    fusion: "Fixed Asset",
+    xero: "711 - Less Accumulated Depreciation on Office Equipment",
+  },
   { fusion: "Non-Current Asset", xero: "720 - Computer Equipment" },
-  { fusion: "Non-Current Asset", xero: "721 - Less Accumulated Depreciation on Computer Equipment" },
+  {
+    fusion: "Non-Current Asset",
+    xero: "721 - Less Accumulated Depreciation on Computer Equipment",
+  },
   { fusion: "Current Liability", xero: "800 - Accounts Payable" },
   { fusion: "Other", xero: "8000 - Bank Fees" },
   { fusion: "Gas Expense", xero: "8001 - Gas Fees" },
@@ -65,12 +83,12 @@ const billingTagMapping = [
   { fusion: "Owner Equity", xero: "881 - Owner A Funds Introduced" },
   { fusion: "Non-current Liability", xero: "900 - Loan" },
   { fusion: "Equity", xero: "960 - Retained Earnings" },
-  { fusion: "Equity", xero: "970 - Owner A Share Capital" }
+  { fusion: "Equity", xero: "970 - Owner A Share Capital" },
 ];
 
 // Mapping of labels to values
 const fusionLabelToValue: Record<string, string> = {
-  "Budget": "budget",
+  Budget: "budget",
   "Current Liability": "liabilities/current",
   "Interest Income": "income/interest",
   "Travel & Entertainment": "expenses/headcount/travel-and-entertainment",
@@ -90,15 +108,15 @@ const fusionLabelToValue: Record<string, string> = {
   "Gas Expense": "expenses/non-headcount/gas",
   "Adjustment A/C": "accounts/adjustment",
   "Temporary Holding Account": "accounts/temporary",
-  "Other": "accounts/other",
+  Other: "accounts/other",
   "Internal Transfers": "accounts/internal-transfers",
   "Owner Equity": "equity/owner",
   "Non-current Liability": "liabilities/non-current",
-  "Equity": "equity/retained",
+  Equity: "equity/retained",
 };
 
 export const expenseAccountOptions: SelectOption[] = Array.from(
-  new Set(billingTagMapping.map((tag) => tag.fusion))
+  new Set(billingTagMapping.map((tag) => tag.fusion)),
 ).map((tag) => {
   return {
     label: tag,
@@ -115,7 +133,7 @@ export const mapTags = (lineItemTags: InvoiceTag[]) => {
   if (lineItemTags.length === 0) return [];
   const tags = lineItemTags.map((tag) => {
     const mapping = billingTagMapping.find(
-      (mapping) => mapping.xero === tag.label
+      (mapping) => mapping.xero === tag.label,
     );
     const fusionLabel = fusionLabelToValue[mapping?.fusion || ""];
     if (mapping && fusionLabel) {

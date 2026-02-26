@@ -1,165 +1,52 @@
 /**
  * Factory methods for creating InvoiceDocument instances
  */
-
-import {
-  createBaseState,
-  defaultBaseState,
-  type PHAuthState,
-  type PHDocumentState,
-  type PHBaseState,
-} from "document-model";
+import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
+import { createBaseState, defaultBaseState } from "document-model/core";
 import type {
   InvoiceDocument,
   InvoiceLocalState,
-  InvoiceState,
+  InvoiceGlobalState,
+  InvoicePHState,
 } from "./types.js";
 import { createDocument } from "./utils.js";
 
-export type InvoicePHState = PHBaseState & {
-  global: InvoiceState;
-  local: InvoiceLocalState;
-};
-
-export function defaultGlobalState(): InvoiceState {
+export function defaultGlobalState(): InvoiceGlobalState {
   return {
-    invoiceNo: "",
-    dateIssued: "",
-    dateDue: "",
-    dateDelivered: null,
-    payAfter: null,
     status: "DRAFT",
+    invoiceNo: "",
+    dateIssued: null,
+    dateDue: null,
+    dateDelivered: null,
     issuer: {
       id: null,
-      name: "",
-      address: {
-        streetAddress: "",
-        extendedAddress: "",
-        city: "",
-        postalCode: "",
-        country: "",
-        stateProvince: "",
-      },
-      contactInfo: {
-        tel: "",
-        email: "",
-      },
-      country: "",
-      paymentRouting: {
-        bank: {
-          name: "",
-          address: {
-            streetAddress: "",
-            extendedAddress: "",
-            city: "",
-            postalCode: "",
-            country: "",
-            stateProvince: "",
-          },
-          ABA: "",
-          BIC: "",
-          SWIFT: "",
-          accountNum: "",
-          accountType: "CHECKING",
-          beneficiary: "",
-          intermediaryBank: {
-            name: "",
-            address: {
-              streetAddress: "",
-              extendedAddress: "",
-              city: "",
-              postalCode: "",
-              country: "",
-              stateProvince: "",
-            },
-            ABA: "",
-            BIC: "",
-            SWIFT: "",
-            accountNum: "",
-            accountType: "CHECKING",
-            beneficiary: "",
-            memo: "",
-          },
-          memo: "",
-        },
-        wallet: {
-          rpc: "",
-          chainName: "",
-          chainId: "",
-          address: "",
-        },
-      },
+      name: null,
+      address: null,
+      contactInfo: null,
+      country: null,
+      paymentRouting: null,
     },
     payer: {
       id: null,
-      name: "",
-      address: {
-        streetAddress: "",
-        extendedAddress: "",
-        city: "",
-        postalCode: "",
-        country: "",
-        stateProvince: "",
-      },
-      contactInfo: {
-        tel: "",
-        email: "",
-      },
-      country: "",
-      paymentRouting: {
-        bank: {
-          name: "",
-          address: {
-            streetAddress: "",
-            extendedAddress: "",
-            city: "",
-            postalCode: "",
-            country: "",
-            stateProvince: "",
-          },
-          ABA: "",
-          BIC: "",
-          SWIFT: "",
-          accountNum: "",
-          accountType: "CHECKING",
-          beneficiary: "",
-          intermediaryBank: {
-            name: "",
-            address: {
-              streetAddress: "",
-              extendedAddress: "",
-              city: "",
-              postalCode: "",
-              country: "",
-              stateProvince: "",
-            },
-            ABA: "",
-            BIC: "",
-            SWIFT: "",
-            accountNum: "",
-            accountType: "CHECKING",
-            beneficiary: "",
-            memo: "",
-          },
-          memo: "",
-        },
-        wallet: {
-          rpc: "",
-          chainName: "",
-          chainId: "",
-          address: "",
-        },
-      },
+      name: null,
+      address: null,
+      contactInfo: null,
+      country: null,
+      paymentRouting: null,
     },
     currency: "",
     lineItems: [],
     totalPriceTaxExcl: 0,
     totalPriceTaxIncl: 0,
     notes: null,
-    invoiceTags: [],
     rejections: [],
     payments: [],
-    exported: null,
+    payAfter: null,
+    invoiceTags: [],
+    exported: {
+      timestamp: null,
+      exportedLineItems: [],
+    },
     closureReason: null,
   };
 }
@@ -176,11 +63,13 @@ export function defaultPHState(): InvoicePHState {
   };
 }
 
-export function createGlobalState(state?: Partial<InvoiceState>): InvoiceState {
+export function createGlobalState(
+  state?: Partial<InvoiceGlobalState>,
+): InvoiceGlobalState {
   return {
     ...defaultGlobalState(),
     ...(state || {}),
-  } as InvoiceState;
+  } as InvoiceGlobalState;
 }
 
 export function createLocalState(
@@ -194,7 +83,7 @@ export function createLocalState(
 
 export function createState(
   baseState?: Partial<PHBaseState>,
-  globalState?: Partial<InvoiceState>,
+  globalState?: Partial<InvoiceGlobalState>,
   localState?: Partial<InvoiceLocalState>,
 ): InvoicePHState {
   return {
@@ -213,7 +102,7 @@ export function createInvoiceDocument(
   state?: Partial<{
     auth?: Partial<PHAuthState>;
     document?: Partial<PHDocumentState>;
-    global?: Partial<InvoiceState>;
+    global?: Partial<InvoiceGlobalState>;
     local?: Partial<InvoiceLocalState>;
   }>,
 ): InvoiceDocument {

@@ -5,12 +5,9 @@ import type {
   InvoiceAction,
   InvoiceState,
 } from "../../document-models/invoice/index.js";
+import { getGraphQLUrl } from "../shared/graphql.js";
 
-let GRAPHQL_URL = "http://localhost:4001/graphql/invoice";
-
-if (!window.document.baseURI.includes("localhost")) {
-  GRAPHQL_URL = "https://jetstream.powerhouse.io/api/graphql/invoice";
-}
+const GRAPHQL_URL = getGraphQLUrl();
 
 interface InvoiceToGnosisProps {
   docState: InvoiceState;
@@ -23,7 +20,9 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [invoiceStatusResponse, setInvoiceStatusResponse] = useState<any>(null);
+  const [invoiceStatusResponse, setInvoiceStatusResponse] = useState<
+    string | null
+  >(null);
   const [safeTxHash, setsafeTxHash] = useState<string | null>(null);
   const [safeAddress, setSafeAddress] = useState<string | null>(null);
   // Use ref to prevent race conditions from rapid clicks
@@ -84,16 +83,21 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
     amount: docState.totalPriceTaxIncl || 0.000015, // Make the amount small for testing
   };
 
-  function getTokenAddress(chainName: string, symbol: string) {
+  function getTokenAddress(
+    chainName: string,
+    symbol: string,
+  ): string | undefined {
     const networkTokens =
       TOKEN_ADDRESSES[chainName.toUpperCase() as keyof typeof TOKEN_ADDRESSES];
     if (!networkTokens) {
       console.error(`Network ${chainName} not supported`);
+      return undefined;
     }
 
     const tokenAddress = networkTokens[symbol as keyof typeof networkTokens];
     if (!tokenAddress) {
       console.error(`Token ${symbol} not supported on ${chainName}`);
+      return undefined;
     }
 
     return tokenAddress;
@@ -103,7 +107,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
     // Prevent concurrent calls using ref (faster than state update)
     if (isProcessingRef.current) {
       console.log(
-        "Payment request already in progress, ignoring duplicate click"
+        "Payment request already in progress, ignoring duplicate click",
       );
       return;
     }
@@ -120,7 +124,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
         },
         body: JSON.stringify({
           query: `
-            mutation Invoice_processGnosisPayment($chainName: String!, $paymentDetails: JSON!, $invoiceNo: String!) {
+            mutation Invoice_processGnosisPayment($chainName: String!, $paymentDetails: JSONObject!, $invoiceNo: String!) {
               Invoice_processGnosisPayment(chainName: $chainName, paymentDetails: $paymentDetails, invoiceNo: $invoiceNo) {
                 success
                 data
@@ -136,66 +140,79 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
         }),
       });
 
-      const result = await response.json();
-      const data = result.data.Invoice_processGnosisPayment;
-      if (data.success) {
+      const result = (await response.json()) as {
+        data?: {
+          Invoice_processGnosisPayment?: {
+            success: boolean;
+            data?: Record<string, unknown> | string;
+            error?: string;
+          };
+        };
+      };
+
+      const data = result.data?.Invoice_processGnosisPayment;
+      if (data?.success) {
         const dataObj =
-          typeof data.data === "string" ? JSON.parse(data.data) : data.data;
-        setsafeTxHash(dataObj.txHash);
-        setSafeAddress(dataObj.safeAddress);
+          typeof data.data === "string"
+            ? (JSON.parse(data.data) as Record<string, unknown>)
+            : (data.data ?? {});
+        const txHash = typeof dataObj.txHash === "string" ? dataObj.txHash : "";
+        const responseSafeAddress =
+          typeof dataObj.safeAddress === "string" ? dataObj.safeAddress : "";
+        setsafeTxHash(txHash);
+        setSafeAddress(responseSafeAddress);
 
         if (invoiceStatus === "ACCEPTED") {
           dispatch(
             actions.schedulePayment({
               id: generateId(),
-              processorRef: `${dataObj.safeAddress}:${dataObj.txHash}`,
-            })
+              processorRef: `${responseSafeAddress}:${txHash}`,
+            }),
           );
         } else {
           dispatch(
             actions.addPayment({
               id: generateId(),
-              processorRef: `${dataObj.safeAddress}:${dataObj.txHash}`,
+              processorRef: `${responseSafeAddress}:${txHash}`,
               confirmed: false,
-            })
+            }),
           );
         }
 
-        if (dataObj.paymentDetails) {
-          // Format the payment details for better readability
-          const formattedDetails = {
-            amount: dataObj.paymentDetails[0].amount,
-            token: dataObj.paymentDetails[0].token.symbol,
-            chain: chainName,
-          };
+        const paymentDetailsList = dataObj.paymentDetails as
+          | Array<{ amount: number; token: { symbol: string } }>
+          | undefined;
+        if (paymentDetailsList?.[0]) {
           setInvoiceStatusResponse(
-            `Amount: ${formattedDetails.amount} ${formattedDetails.token} on ${formattedDetails.chain}`
+            `Amount: ${paymentDetailsList[0].amount} ${paymentDetailsList[0].token.symbol} on ${chainName}`,
           );
         }
       } else {
-        setError(data.error);
+        const errorMsg = data?.error ?? "Unknown payment error";
+        setError(errorMsg);
         dispatch(
           actions.addPayment({
             id: generateId(),
             processorRef: "",
             confirmed: false,
-            issue: data.error.message,
-          })
+            issue: errorMsg,
+          }),
         );
       }
       setIsLoading(false);
       isProcessingRef.current = false;
-    } catch (error: any) {
+    } catch (err: unknown) {
       setIsLoading(false);
       isProcessingRef.current = false;
-      console.error("Error during transfer:", error);
+      const errorMsg = err instanceof Error ? err.message : "Unknown error";
+      console.error("Error during transfer:", err);
       dispatch(
         actions.addPayment({
           id: generateId(),
           processorRef: "",
           confirmed: false,
-          issue: error.message,
-        })
+          issue: errorMsg,
+        }),
       );
     }
   };
@@ -240,12 +257,12 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
       )}
 
       {safeTxHash && (
-        <div className="bg-gray-50 mt-4 rounded-md space-y-2">
+        <div className="bg-gray-50 mt-4 rounded-md space-y-2 w-full">
           <a
             href={`https://app.safe.global/transactions/queue?safe=${urlChainName}:${safeAddress}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 hover:text-blue-600 underline block"
+            className="text-blue-500 hover:text-blue-600 underline block w-full"
           >
             {linkText}
           </a>
