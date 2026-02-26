@@ -10,7 +10,7 @@
         "@powerhousedao/common": "5.3.4",
         "@powerhousedao/design-system": "5.3.4",
         "@powerhousedao/document-engineering": "^1.40.1",
-        "@powerhousedao/service-offering": "0.0.7",
+        "@powerhousedao/service-offering": "0.0.9",
         "@powerhousedao/vetra": "^5.3.4",
         "@react-pdf/renderer": "^4.3.1",
         "@safe-global/api-kit": "^4.0.0",
@@ -1098,7 +1098,7 @@
 
     "@powerhousedao/scalars": ["@powerhousedao/scalars@2.0.1", "", { "peerDependencies": { "graphql": "^16.9.0", "zod": "^3.24.2" } }, "sha512-LKDGuKAg5NJiYO5/2AFwfBeJg2kIRCD4UTUEWqIK/YQeVdXLC5ps92TsW1ga+XcZ+8IYwh8/e3oq3XH4x6N6dg=="],
 
-    "@powerhousedao/service-offering": ["@powerhousedao/service-offering@0.0.7", "", { "dependencies": { "@powerhousedao/builder-tools": "latest", "@powerhousedao/common": "latest", "@powerhousedao/design-system": "latest", "@powerhousedao/document-engineering": "1.40.0", "@powerhousedao/vetra": "latest", "@uiw/react-md-editor": "^4.0.11", "document-model": "latest", "error": "^10.4.0", "graphql": "^16.10.0", "graphql-tag": "^2.12.6", "lucide-react": "^0.563.0", "rehype-slug": "^6.0.0", "zod": "^4.1.13" }, "peerDependencies": { "react": "^19.2.0", "react-dom": "^19.2.0" } }, "sha512-Ox0Nq9Nle1iTd7k/20reh8D/Aj/VMBGuFks1mNTHactNmklHyC5Sesg4HO0YNm02DkHvrVI4B8+2SxhFdoyhxA=="],
+    "@powerhousedao/service-offering": ["@powerhousedao/service-offering@0.0.9", "", { "dependencies": { "@powerhousedao/builder-tools": "latest", "@powerhousedao/common": "latest", "@powerhousedao/design-system": "latest", "@powerhousedao/document-engineering": "1.40.0", "@powerhousedao/vetra": "latest", "@uiw/react-md-editor": "^4.0.11", "document-model": "latest", "error": "^10.4.0", "graphql": "^16.10.0", "graphql-tag": "^2.12.6", "lucide-react": "^0.563.0", "rehype-slug": "^6.0.0", "zod": "^4.1.13" }, "peerDependencies": { "react": "^19.2.0", "react-dom": "^19.2.0" } }, "sha512-rPmymWRFY/OHgkqzfQKqWt9HmiqzNthwjhD+p3bQJeJdx4KlBgq46UU3f8WEvjq+1+N4Eyy/dPNLS9mMq5smOA=="],
 
     "@powerhousedao/switchboard": ["@powerhousedao/switchboard@5.3.4", "", { "dependencies": { "@electric-sql/pglite": "0.2.17", "@openfeature/core": "^1.9.1", "@openfeature/env-var-provider": "^0.3.1", "@openfeature/server-sdk": "^1.19.0", "@powerhousedao/analytics-engine-core": "^0.5.0", "@powerhousedao/analytics-engine-knex": "^0.6.0", "@powerhousedao/config": "5.3.4", "@powerhousedao/reactor": "5.3.4", "@powerhousedao/reactor-api": "5.3.4", "@pyroscope/nodejs": "^0.4.5", "@renown/sdk": "5.3.4", "@sentry/node": "^9.6.1", "body-parser": "^1.20.3", "cors": "^2.8.5", "document-drive": "5.3.4", "document-model": "5.3.4", "dotenv": "^16.4.7", "exponential-backoff": "^3.1.1", "express": "^4.21.2", "graphql": "^16.11.0", "kysely": "^0.28.2", "kysely-pglite-dialect": "^1.1.1", "pg": "^8.13.0", "redis": "^4.7.0" }, "bin": { "switchboard": "dist/src/index.js" } }, "sha512-zp024hx2q7IeK+BSb2I2m+RB34cTqoJLjNjDyb3+CfkZZc7IVVzKA9MPixLah86JgblRwQWlTSf5DSkrhFba6A=="],
 

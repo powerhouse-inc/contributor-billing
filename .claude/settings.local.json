@@ -33,7 +33,13 @@
       "Bash(bun run build:*)",
       "WebFetch(domain:www.conventionalcommits.org)",
       "Bash(git cherry-pick:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git checkout --theirs bun.lock)",
+      "Bash(bun install)",
+      "Bash(git rebase --continue)",
+      "Bash(GIT_EDITOR=true git rebase --continue)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(git rebase --continue --no-edit)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

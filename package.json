@@ -74,7 +74,7 @@
     "@powerhousedao/common": "5.3.4",
     "@powerhousedao/design-system": "5.3.4",
     "@powerhousedao/document-engineering": "^1.40.1",
-    "@powerhousedao/service-offering": "0.0.7",
+    "@powerhousedao/service-offering": "0.0.9",
     "@powerhousedao/vetra": "^5.3.4",
     "@react-pdf/renderer": "^4.3.1",
     "@safe-global/api-kit": "^4.0.0",
