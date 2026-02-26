@@ -31,30 +31,34 @@ export function DriveContents({
   }
 
   // Payments folder - show invoice table
+  // All content is inside InvoiceTableContainer so its drop zone covers the
+  // entire view — drops on the header or stats area are handled by the same
+  // folder-aware logic that moves invoices to the correct Payments folder.
   if (selectedFolder.folderType === "payments") {
     return (
       <div
         key={selectedFolder.folderId}
         className="container mx-auto flex-1 p-4"
       >
-        <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Payments - {selectedFolder.monthName}
-          </h1>
-          <p className="text-gray-600">
-            Manage invoices and billing statements for{" "}
-            {selectedFolder.monthName}
-          </p>
-        </div>
-        <Suspense>
-          <HeaderStats folderId={selectedFolder.folderId} />
-        </Suspense>
         <Suspense>
           <InvoiceTableContainer
             folderId={selectedFolder.folderId}
             monthName={selectedFolder.monthName}
             reportingFolderId={selectedFolder.reportingFolderId}
-          />
+          >
+            <div className="mb-4">
+              <h1 className="text-2xl font-bold text-gray-900">
+                Payments - {selectedFolder.monthName}
+              </h1>
+              <p className="text-gray-600">
+                Manage invoices and billing statements for{" "}
+                {selectedFolder.monthName}
+              </p>
+            </div>
+            <Suspense>
+              <HeaderStats folderId={selectedFolder.folderId} />
+            </Suspense>
+          </InvoiceTableContainer>
         </Suspense>
       </div>
     );

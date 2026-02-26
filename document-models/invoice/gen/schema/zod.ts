@@ -7,6 +7,8 @@ import type {
   Bank,
   CancelInput,
   ClosePaymentInput,
+  ClosureReason,
+  ClosureReasonInput,
   ConfirmPaymentInput,
   ContactInfo,
   DeleteLineItemInput,
@@ -22,14 +24,15 @@ import type {
   EditStatusInput,
   ExportedData,
   IntermediaryBank,
+  InvoiceAccountType,
+  InvoiceAccountTypeInput,
   InvoiceLineItem,
   InvoiceState,
   InvoiceTag,
   InvoiceWallet,
   IssueInput,
   LegalEntity,
-  LegalEntityCorporateRegistrationId,
-  LegalEntityTaxId,
+  LegalEntityId,
   Payment,
   PaymentRouting,
   ReapprovePaymentInput,
@@ -43,6 +46,7 @@ import type {
   SetExportedDataInput,
   SetInvoiceTagInput,
   SetLineItemTagInput,
+  Status,
   Token,
 } from "./types.js";
 
@@ -100,7 +104,7 @@ export const StatusSchema = z.enum([
 
 export function AcceptInputSchema(): z.ZodObject<Properties<AcceptInput>> {
   return z.object({
-    payAfter: z.string().datetime().nullish(),
+    payAfter: z.iso.datetime().nullish(),
   });
 }
 
@@ -127,7 +131,7 @@ export function AddPaymentInputSchema(): z.ZodObject<
     confirmed: z.boolean(),
     id: z.string(),
     issue: z.string().nullish(),
-    paymentDate: z.string().datetime().nullish(),
+    paymentDate: z.iso.datetime().nullish(),
     processorRef: z.string().nullish(),
     txnRef: z.string().nullish(),
   });
@@ -362,7 +366,7 @@ export function EditPaymentDataInputSchema(): z.ZodObject<
     confirmed: z.boolean(),
     id: z.string(),
     issue: z.string().nullish(),
-    paymentDate: z.string().datetime().nullish(),
+    paymentDate: z.iso.datetime().nullish(),
     processorRef: z.string().nullish(),
     txnRef: z.string().nullish(),
   });
@@ -380,7 +384,7 @@ export function ExportedDataSchema(): z.ZodObject<Properties<ExportedData>> {
   return z.object({
     __typename: z.literal("ExportedData").optional(),
     exportedLineItems: z.array(z.array(z.string())),
-    timestamp: z.string().datetime().nullish(),
+    timestamp: z.iso.datetime().nullish(),
   });
 }
 
@@ -424,16 +428,16 @@ export function InvoiceStateSchema(): z.ZodObject<Properties<InvoiceState>> {
     __typename: z.literal("InvoiceState").optional(),
     closureReason: ClosureReasonSchema.nullish(),
     currency: z.string(),
-    dateDelivered: z.string().datetime().nullish(),
-    dateDue: z.string().datetime().nullish(),
-    dateIssued: z.string().datetime().nullish(),
+    dateDelivered: z.iso.datetime().nullish(),
+    dateDue: z.iso.datetime().nullish(),
+    dateIssued: z.iso.datetime().nullish(),
     exported: z.lazy(() => ExportedDataSchema()),
     invoiceNo: z.string(),
     invoiceTags: z.array(z.lazy(() => InvoiceTagSchema())),
     issuer: z.lazy(() => LegalEntitySchema()),
     lineItems: z.array(z.lazy(() => InvoiceLineItemSchema())),
     notes: z.string().nullish(),
-    payAfter: z.string().datetime().nullish(),
+    payAfter: z.iso.datetime().nullish(),
     payer: z.lazy(() => LegalEntitySchema()),
     payments: z.array(z.lazy(() => PaymentSchema())),
     rejections: z.array(z.lazy(() => RejectionSchema())),
@@ -481,28 +485,11 @@ export function LegalEntitySchema(): z.ZodObject<Properties<LegalEntity>> {
   });
 }
 
-export function LegalEntityCorporateRegistrationIdSchema(): z.ZodObject<
-  Properties<LegalEntityCorporateRegistrationId>
-> {
+export function LegalEntityIdSchema(): z.ZodObject<Properties<LegalEntityId>> {
   return z.object({
-    __typename: z.literal("LegalEntityCorporateRegistrationId").optional(),
-    corpRegId: z.string(),
-  });
-}
-
-export function LegalEntityIdSchema() {
-  return z.union([
-    LegalEntityCorporateRegistrationIdSchema(),
-    LegalEntityTaxIdSchema(),
-  ]);
-}
-
-export function LegalEntityTaxIdSchema(): z.ZodObject<
-  Properties<LegalEntityTaxId>
-> {
-  return z.object({
-    __typename: z.literal("LegalEntityTaxId").optional(),
-    taxId: z.string(),
+    __typename: z.literal("LegalEntityId").optional(),
+    corpRegId: z.string().nullish(),
+    taxId: z.string().nullish(),
   });
 }
 
@@ -513,7 +500,7 @@ export function PaymentSchema(): z.ZodObject<Properties<Payment>> {
     confirmed: z.boolean(),
     id: z.string(),
     issue: z.string().nullish(),
-    paymentDate: z.string().datetime().nullish(),
+    paymentDate: z.iso.datetime().nullish(),
     processorRef: z.string().nullish(),
     txnRef: z.string().nullish(),
   });
@@ -542,7 +529,7 @@ export function RegisterPaymentTxInputSchema(): z.ZodObject<
 > {
   return z.object({
     id: z.string(),
-    timestamp: z.string().datetime(),
+    timestamp: z.iso.datetime(),
     txRef: z.string(),
   });
 }
@@ -601,7 +588,7 @@ export function SetExportedDataInputSchema(): z.ZodObject<
 > {
   return z.object({
     exportedLineItems: z.array(z.array(z.string())),
-    timestamp: z.string().datetime(),
+    timestamp: z.iso.datetime(),
   });
 }
 

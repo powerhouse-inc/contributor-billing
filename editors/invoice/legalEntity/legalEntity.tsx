@@ -305,6 +305,7 @@ type LegalEntityFormProps = {
   readonly currency: string;
   readonly status: string;
   readonly walletvalidation?: ValidationResult | null;
+  readonly chainvalidation?: ValidationResult | null;
   readonly mainCountryValidation?: ValidationResult | null;
   readonly bankCountryValidation?: ValidationResult | null;
   readonly ibanvalidation?: ValidationResult | null;
@@ -322,17 +323,7 @@ type LegalEntityFormProps = {
 function flattenLegalEntityToEditInput(
   legalEntity: LegalEntity,
 ): EditLegalEntityInput {
-  let id = "";
-  if (typeof legalEntity.id === "string") {
-    id = legalEntity.id;
-  } else if (legalEntity.id && typeof legalEntity.id === "object") {
-    if (legalEntity.id && typeof legalEntity.id === "object") {
-      id =
-        "taxId" in legalEntity.id
-          ? legalEntity.id.taxId
-          : legalEntity.id.corpRegId;
-    }
-  }
+  const id = legalEntity.id?.taxId ?? legalEntity.id?.corpRegId ?? "";
   return {
     id,
     name: legalEntity.name ?? "",
@@ -358,6 +349,7 @@ export function LegalEntityForm({
   currency,
   status,
   walletvalidation,
+  chainvalidation,
   mainCountryValidation,
   bankCountryValidation,
   ibanvalidation,
@@ -396,6 +388,7 @@ export function LegalEntityForm({
           currency={currency}
           status={status}
           walletvalidation={walletvalidation}
+          chainvalidation={chainvalidation}
         />
       )}
       {!bankDisabled && !!onChangeBank && (

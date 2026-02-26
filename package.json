@@ -69,12 +69,13 @@
     "migrate": "ph-cli migrate"
   },
   "dependencies": {
-    "@powerhousedao/builder-profile": "1.0.6",
+    "@powerhousedao/builder-profile": "^1.0.6",
     "@powerhousedao/builder-tools": "5.3.4",
     "@powerhousedao/common": "5.3.4",
     "@powerhousedao/design-system": "5.3.4",
     "@powerhousedao/document-engineering": "^1.40.1",
-    "@powerhousedao/vetra": "5.3.4",
+    "@powerhousedao/service-offering": "0.0.9",
+    "@powerhousedao/vetra": "^5.3.4",
     "@react-pdf/renderer": "^4.3.1",
     "@safe-global/api-kit": "^4.0.0",
     "@safe-global/protocol-kit": "^6.0.3",
@@ -108,8 +109,6 @@
     "@powerhousedao/reactor-local": "5.3.4",
     "@powerhousedao/scalars": "^2.0.1",
     "@powerhousedao/switchboard": "5.3.4",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
     "@tailwindcss/cli": "^4.1.4",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^24.9.2",
@@ -127,13 +126,14 @@
     "pm2": "^5.4.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "semantic-release": "^25.0.2",
     "tailwindcss": "^4.1.16",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
     "vite": "^6.2.3",
-    "vite-plugin-node-polyfills": "^0.24.0",
-    "vitest": "^3.0.9"
+    "vitest": "^3.0.9",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "semantic-release": "^25.0.2"
   },
   "peerDependencies": {
     "react": "^19.2.0",

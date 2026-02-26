@@ -7,11 +7,13 @@ import {
   isFileNodeKind,
 } from "@powerhousedao/reactor-browser";
 import { useMemo, useState } from "react";
-import { FileText, Camera, Plus } from "lucide-react";
+import { FileText, Camera, Plus, Trash2 } from "lucide-react";
 import { setName } from "document-model";
-import { moveNode } from "document-drive";
+import { moveNode, deleteNode } from "document-drive";
+import { ConfirmationModal } from "./InvoiceTable/ConfirmationModal.js";
 import { actions as expenseReportActions } from "../../../document-models/expense-report/index.js";
 import { actions as snapshotReportActions } from "../../../document-models/snapshot-report/index.js";
+import { useMonthlyReports } from "../hooks/useMonthlyReports.js";
 
 interface ReportingViewProps {
   folderId: string;
@@ -28,8 +30,11 @@ function parseMonthDates(monthName: string): {
   const date = new Date(monthName + " 1"); // e.g., "January 2026 1"
   if (isNaN(date.getTime())) return null;
 
-  const start = new Date(date.getFullYear(), date.getMonth(), 1);
-  const end = new Date(date.getFullYear(), date.getMonth() + 1, 0); // Last day of month
+  // Use UTC to avoid timezone offset being baked into .toISOString()
+  const start = new Date(Date.UTC(date.getFullYear(), date.getMonth(), 1));
+  const end = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999),
+  );
   return { start, end };
 }
 
@@ -39,18 +44,53 @@ function parseMonthDates(monthName: string): {
 function formatMonthCode(monthName: string): string {
   const date = new Date(monthName + " 1");
   if (isNaN(date.getTime())) return monthName;
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const year = date.getUTCFullYear();
   return `${month}-${year}`;
 }
 
 /**
  * View for the Reporting folder showing Expense Reports and Snapshot Reports
  */
+/**
+ * Get the suggested start date for a new snapshot report based on the previous
+ * month's snapshot period end date.
+ */
+function getSuggestedSnapshotStartDate(
+  monthName: string,
+  monthReportSets: { monthName: string; snapshotEndDate: string | null }[],
+): Date | null {
+  const monthDates = parseMonthDates(monthName);
+  if (!monthDates) return null;
+
+  const currentIndex = monthReportSets.findIndex(
+    (s) => s.monthName === monthName,
+  );
+  if (currentIndex === -1) return null;
+
+  const previousMonth = monthReportSets[currentIndex + 1];
+  if (!previousMonth?.snapshotEndDate) return null;
+
+  const previousEnd = new Date(previousMonth.snapshotEndDate);
+  if (isNaN(previousEnd.getTime())) return null;
+
+  const suggestedStart = new Date(previousEnd);
+  suggestedStart.setUTCDate(suggestedStart.getUTCDate() + 1);
+  suggestedStart.setUTCHours(0, 0, 0, 0);
+
+  return suggestedStart;
+}
+
 export function ReportingView({ folderId, monthName }: ReportingViewProps) {
   const documentsInDrive = useDocumentsInSelectedDrive();
   const [selectedDrive] = useSelectedDrive();
   const [isCreating, setIsCreating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const { monthReportSets } = useMonthlyReports();
 
   // Find expense reports and snapshot reports in this Reporting folder
   // Also includes documents that match the month by name (for backwards compatibility)
@@ -115,6 +155,19 @@ export function ReportingView({ folderId, monthName }: ReportingViewProps) {
   };
 
   const driveId = selectedDrive?.header.id;
+
+  const handleDeleteReport = async () => {
+    if (!driveId || !deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      await dispatchActions(deleteNode({ id: deleteTarget.id }), driveId);
+    } catch (error) {
+      console.error("Failed to delete report:", error);
+    } finally {
+      setIsDeleting(false);
+      setDeleteTarget(null);
+    }
+  };
 
   const handleCreateExpenseReport = async () => {
     if (!driveId || !monthName || isCreating) return;
@@ -199,9 +252,16 @@ export function ReportingView({ folderId, monthName }: ReportingViewProps) {
       // Set the document name
       await dispatchActions(setName(reportName), createdNode.id);
 
-      // Set period dates based on month
+      // Set reporting period to calendar month boundaries
       const dates = parseMonthDates(monthName);
       if (dates) {
+        const suggestedStart = getSuggestedSnapshotStartDate(
+          monthName,
+          monthReportSets,
+        );
+        // Transaction filtering start: previous period end + 1 day, or month start
+        const txStartDate = suggestedStart || dates.start;
+
         await dispatchActions(
           [
             snapshotReportActions.setPeriodStart({
@@ -211,6 +271,15 @@ export function ReportingView({ folderId, monthName }: ReportingViewProps) {
               periodEnd: dates.end.toISOString(),
             }),
           ],
+          createdNode.id,
+        );
+
+        // Set the transaction filtering range (snapshot period) separately
+        await dispatchActions(
+          snapshotReportActions.setReportConfig({
+            startDate: txStartDate.toISOString(),
+            endDate: dates.end.toISOString(),
+          }),
           createdNode.id,
         );
       }
@@ -264,24 +333,40 @@ export function ReportingView({ folderId, monthName }: ReportingViewProps) {
           ) : (
             <div className="space-y-2">
               {expenseReports.map((doc) => (
-                <button
+                <div
                   key={doc.header.id}
-                  onClick={() => handleOpenDocument(doc.header.id)}
-                  className="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-md transition-colors border border-gray-100"
+                  className="flex items-center rounded-md border border-gray-100"
                 >
-                  <FileText className="w-4 h-4 text-gray-400" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {doc.header.name || "Untitled"}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Modified:{" "}
-                      {new Date(
-                        doc.header.lastModifiedAtUtcIso || Date.now(),
-                      ).toLocaleDateString()}
-                    </p>
-                  </div>
-                </button>
+                  <button
+                    onClick={() => handleOpenDocument(doc.header.id)}
+                    className="flex-1 flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-l-md transition-colors min-w-0"
+                  >
+                    <FileText className="w-4 h-4 text-gray-400" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {doc.header.name || "Untitled"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Modified:{" "}
+                        {new Date(
+                          doc.header.lastModifiedAtUtcIso || Date.now(),
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() =>
+                      setDeleteTarget({
+                        id: doc.header.id,
+                        name: doc.header.name || "Untitled",
+                      })
+                    }
+                    className="p-3 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                    title="Delete report"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               ))}
             </div>
           )}
@@ -313,29 +398,66 @@ export function ReportingView({ folderId, monthName }: ReportingViewProps) {
           ) : (
             <div className="space-y-2">
               {snapshotReports.map((doc) => (
-                <button
+                <div
                   key={doc.header.id}
-                  onClick={() => handleOpenDocument(doc.header.id)}
-                  className="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-md transition-colors border border-gray-100"
+                  className="flex items-center rounded-md border border-gray-100"
                 >
-                  <Camera className="w-4 h-4 text-gray-400" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {doc.header.name || "Untitled"}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Modified:{" "}
-                      {new Date(
-                        doc.header.lastModifiedAtUtcIso || Date.now(),
-                      ).toLocaleDateString()}
-                    </p>
-                  </div>
-                </button>
+                  <button
+                    onClick={() => handleOpenDocument(doc.header.id)}
+                    className="flex-1 flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-l-md transition-colors min-w-0"
+                  >
+                    <Camera className="w-4 h-4 text-gray-400" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {doc.header.name || "Untitled"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Modified:{" "}
+                        {new Date(
+                          doc.header.lastModifiedAtUtcIso || Date.now(),
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() =>
+                      setDeleteTarget({
+                        id: doc.header.id,
+                        name: doc.header.name || "Untitled",
+                      })
+                    }
+                    className="p-3 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                    title="Delete report"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               ))}
             </div>
           )}
         </div>
       </div>
+
+      {/* Delete confirmation modal */}
+      <ConfirmationModal
+        open={!!deleteTarget}
+        header="Delete Report"
+        onCancel={() => setDeleteTarget(null)}
+        onContinue={() => void handleDeleteReport()}
+        cancelLabel="Cancel"
+        continueLabel={isDeleting ? "Deleting..." : "Delete"}
+        continueDisabled={isDeleting}
+      >
+        <p className="text-red-600 text-sm mb-2 font-medium">
+          This will permanently delete this report from the drive. This action
+          cannot be undone.
+        </p>
+        {deleteTarget && (
+          <p className="text-gray-700 text-sm font-medium">
+            {deleteTarget.name}
+          </p>
+        )}
+      </ConfirmationModal>
     </div>
   );
 }

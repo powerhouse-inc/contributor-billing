@@ -3,7 +3,11 @@ import type {
   AddLineItemInput,
   BillingStatementLineItem,
   BillingStatementState,
+  BillingStatementStatus,
+  BillingStatementStatusInput,
   BillingStatementTag,
+  BillingStatementUnit,
+  BillingStatementUnitInput,
   DeleteLineItemInput,
   EditBillingStatementInput,
   EditContributorInput,
@@ -94,8 +98,8 @@ export function BillingStatementStateSchema(): z.ZodObject<
     __typename: z.literal("BillingStatementState").optional(),
     contributor: z.string().nullish(),
     currency: z.string(),
-    dateDue: z.string().datetime().nullish(),
-    dateIssued: z.string().datetime(),
+    dateDue: z.iso.datetime().nullish(),
+    dateIssued: z.iso.datetime(),
     lineItems: z.array(z.lazy(() => BillingStatementLineItemSchema())),
     notes: z.string().nullish(),
     status: BillingStatementStatusSchema,
@@ -128,8 +132,8 @@ export function EditBillingStatementInputSchema(): z.ZodObject<
 > {
   return z.object({
     currency: z.string().nullish(),
-    dateDue: z.string().datetime().nullish(),
-    dateIssued: z.string().datetime().nullish(),
+    dateDue: z.iso.datetime().nullish(),
+    dateIssued: z.iso.datetime().nullish(),
     notes: z.string().nullish(),
   });
 }

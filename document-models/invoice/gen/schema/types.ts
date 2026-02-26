@@ -354,16 +354,9 @@ export type LegalEntity = {
   paymentRouting: Maybe<PaymentRouting>;
 };
 
-export type LegalEntityCorporateRegistrationId = {
-  corpRegId: Scalars["String"]["output"];
-};
-
-export type LegalEntityId =
-  | LegalEntityCorporateRegistrationId
-  | LegalEntityTaxId;
-
-export type LegalEntityTaxId = {
-  taxId: Scalars["String"]["output"];
+export type LegalEntityId = {
+  corpRegId: Maybe<Scalars["String"]["output"]>;
+  taxId: Maybe<Scalars["String"]["output"]>;
 };
 
 export type Payment = {

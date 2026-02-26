@@ -36,7 +36,7 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
   const documentsInDrive = useDocumentsInSelectedDrive();
   const { reportingFolderIds, monthFolders, billingFolder, createMonthFolder } =
     useBillingFolderStructure();
-  const { onMoveNode } = useNodeActions();
+  const { onMoveNode, onRenameNode } = useNodeActions();
   const driveId = driveDocument?.header.id;
 
   // Initialize module-level tracking for this drive
@@ -82,6 +82,18 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
     }
   };
 
+  // Convert "August 2025" → "08-2025"
+  const formatMonthCode = (monthName: string): string => {
+    const date = new Date(monthName + " 1");
+    if (isNaN(date.getTime())) return monthName;
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${month}-${year}`;
+  };
+
+  // Standard naming pattern: "MM-YYYY Expense Report N"
+  const STANDARD_NAME_PATTERN = /^\d{2}-\d{4} Expense Report \d+$/;
+
   // Auto-place expense reports into appropriate Reporting folders
   useEffect(() => {
     if (!driveId || !driveDocument || !documentsInDrive) return;
@@ -97,6 +109,20 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
         node.documentType === "powerhouse/expense-report" &&
         !reportingFolderIds.has(node.parentFolder || ""),
     );
+
+    // Count existing expense reports per reporting folder for numbering
+    const expenseCountByFolder = new Map<string, number>();
+    for (const node of allNodes) {
+      if (
+        isFileNodeKind(node) &&
+        node.documentType === "powerhouse/expense-report" &&
+        node.parentFolder &&
+        reportingFolderIds.has(node.parentFolder)
+      ) {
+        const count = expenseCountByFolder.get(node.parentFolder) || 0;
+        expenseCountByFolder.set(node.parentFolder, count + 1);
+      }
+    }
 
     // Process each expense report
     for (const fileNode of expenseReportNodesToProcess) {
@@ -128,11 +154,34 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
           console.log(
             `[DocumentAutoPlacement] Moving expense report ${fileNode.id} to Reporting folder for ${monthName}`,
           );
+          // Compute the new name before moving (increment folder count)
+          const folderId = reportingFolder.id;
+          const currentCount = expenseCountByFolder.get(folderId) || 0;
+          const reportNumber = currentCount + 1;
+          expenseCountByFolder.set(folderId, reportNumber);
+          const monthCode = formatMonthCode(monthName);
+          const standardName = `${monthCode} Expense Report ${reportNumber}`;
+
           onMoveNode(fileNode, reportingFolder)
-            .then(() => {
+            .then(async () => {
               console.log(
                 `[DocumentAutoPlacement] Successfully moved expense report to ${monthName} Reporting folder`,
               );
+
+              // Rename if the node name doesn't match the standard pattern
+              if (!STANDARD_NAME_PATTERN.test(fileNode.name)) {
+                try {
+                  await onRenameNode(standardName, fileNode);
+                  console.log(
+                    `[DocumentAutoPlacement] Renamed "${fileNode.name}" → "${standardName}"`,
+                  );
+                } catch (renameError: unknown) {
+                  console.error(
+                    `[DocumentAutoPlacement] Failed to rename expense report:`,
+                    renameError,
+                  );
+                }
+              }
             })
             .catch((error: unknown) => {
               console.error(
@@ -187,6 +236,7 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
     billingFolder,
     createMonthFolder,
     onMoveNode,
+    onRenameNode,
   ]);
 
   return {

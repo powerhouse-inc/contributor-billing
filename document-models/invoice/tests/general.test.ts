@@ -6,20 +6,28 @@ import {
   isInvoiceDocument,
   editInvoice,
   editStatus,
-  editPaymentData,
-  setExportedData,
-  addPayment,
-  EditInvoiceInputSchema,
   EditStatusInputSchema,
+  editPaymentData,
   EditPaymentDataInputSchema,
+  setExportedData,
   SetExportedDataInputSchema,
+  addPayment,
   AddPaymentInputSchema,
 } from "@powerhousedao/contributor-billing/document-models/invoice";
 
 describe("GeneralOperations", () => {
   it("should handle editInvoice operation", () => {
     const document = utils.createDocument();
-    const input = generateMock(EditInvoiceInputSchema());
+    // Use explicit valid input: generateMock can produce invalid date strings
+    // that fail InvoiceStateSchema's z.iso.datetime() validation
+    const input = {
+      invoiceNo: "INV-001",
+      dateIssued: "2024-01-15",
+      dateDue: "2024-02-15",
+      dateDelivered: "2024-01-20",
+      currency: "USD",
+      notes: "Test notes",
+    };
 
     const updatedDocument = reducer(document, editInvoice(input));
 

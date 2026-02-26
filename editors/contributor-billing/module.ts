@@ -7,6 +7,6 @@ export const ContributorBilling: EditorModule = {
   documentTypes: ["powerhouse/document-drive"],
   config: {
     id: "contributor-billing-editor",
-    name: "contributor-billing",
+    name: "Contributor Billing",
   },
 };
