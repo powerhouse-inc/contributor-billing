@@ -1,3 +1,10 @@
+# [1.2.0-jetstream.2](https://github.com/powerhouse-inc/contributor-billing/compare/v1.2.0-jetstream.1...v1.2.0-jetstream.2) (2026-02-27)
+
+
+### Bug Fixes
+
+* add downstream notification to jetstream repo ([830df5a](https://github.com/powerhouse-inc/contributor-billing/commit/830df5aab2cf9e380dea138b73dbae0e6a0fc876))
+
 # [1.2.0-jetstream.1](https://github.com/powerhouse-inc/contributor-billing/compare/v1.1.0...v1.2.0-jetstream.1) (2026-02-27)
 
 
