@@ -1,3 +1,10 @@
+# [1.2.0-jetstream.1](https://github.com/powerhouse-inc/contributor-billing/compare/v1.1.0...v1.2.0-jetstream.1) (2026-02-27)
+
+
+### Features
+
+* enable jetstream release pipeline ([1ccfe0c](https://github.com/powerhouse-inc/contributor-billing/commit/1ccfe0cdb227ae8099d6673178658c401caf6fbf))
+
 # [1.1.0](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.4...v1.1.0) (2026-02-26)
 
 
