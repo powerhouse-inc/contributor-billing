@@ -294,6 +294,21 @@ jobs:
             }
 
 
+      - name: Notify jetstream
+        if: inputs.dry-run != true && steps.get-version.outputs.released == 'true' && steps.channel.outputs.channel == 'jetstream'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.K8S_REPO_PAT }}
+          repository: powerhouse-inc/jetstream
+          event-type: dependency-release
+          client-payload: |
+            {
+              "package": "@powerhousedao/contributor-billing",
+              "version": "${{ steps.get-version.outputs.version }}",
+              "channel": "${{ steps.channel.outputs.channel }}",
+              "powerhouse_version": "${{ inputs.powerhouse-version }}"
+            }
+
       - name: Notify powerhouse-demo
         if: inputs.dry-run != true && steps.get-version.outputs.released == 'true' && steps.channel.outputs.channel == 'latest'
         uses: peter-evans/repository-dispatch@v3
