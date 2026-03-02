@@ -198,10 +198,12 @@ export async function fetchAllRemoteBuilderProfiles(): Promise<
       return [];
     }
 
-    // Fetch profiles from all drives in parallel (silent to avoid console spam)
-    // Keep track of which drive each profile came from
+    // Resolve drive slugs to IDs, then fetch profiles in parallel
+    // The `drives` query returns slugs, but `getDocuments` expects UUIDs
     const profilePromises = drives.map(async (driveSlug) => {
-      const profiles = await fetchBuilderProfilesFromDrive(driveSlug, {
+      const driveId = await fetchDriveIdBySlug(driveSlug).catch(() => null);
+      if (!driveId) return [] as RemoteBuilderProfile[];
+      const profiles = await fetchBuilderProfilesFromDrive(driveId, {
         silent: true,
       }).catch(() => [] as RemoteBuilderProfile[]);
       // Attach drive name to each profile

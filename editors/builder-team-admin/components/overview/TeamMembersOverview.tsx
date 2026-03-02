@@ -3,7 +3,7 @@ import type { FileNode } from "document-drive";
 import type { PHDocument } from "document-model";
 import { useDrives, useGetDocuments } from "@powerhousedao/reactor-browser";
 import type { BuilderProfileDocument } from "@powerhousedao/builder-profile/document-models/builder-profile";
-import { useRemoteBuilderProfiles } from "../../hooks/useRemoteBuilderProfiles.js";
+import { useRemoteBuilderProfiles } from "../../../shared/hooks/useRemoteBuilderProfiles.js";
 
 type TeamMember = {
   phid: string;

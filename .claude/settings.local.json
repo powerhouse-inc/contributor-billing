@@ -42,7 +42,9 @@
       "Bash(git rebase --continue --no-edit)",
       "Bash(npm test -- document-models/invoice/src/tests/transitions.test.ts)",
       "Bash(npm test -- document-models/invoice/tests/transitions.test.ts)",
-      "Bash(npm test -- document-models/invoice/tests/transitions.test.ts --reporter=verbose)"
+      "Bash(npm test -- document-models/invoice/tests/transitions.test.ts --reporter=verbose)",
+      "Bash(curl -s -X POST https://switchboard-staging.powerhouse.xyz/graphql -H \"Content-Type: application/json\" -d '{\"\"query\"\":\"\"query { drives }\"\"}')",
+      "Bash(curl -s -X POST https://switchboard-staging.powerhouse.xyz/graphql -H \"Content-Type: application/json\" -d '{\"\"query\"\":\"\"query GetBuilderProfiles\\($driveId: String!\\) { BuilderProfile { getDocuments\\(driveId: $driveId\\) { id state { name slug icon description } } } }\"\",\"\"variables\"\":{\"\"driveId\"\":\"\"builders\"\"}}')"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",
