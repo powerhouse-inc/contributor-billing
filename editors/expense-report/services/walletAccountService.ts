@@ -4,7 +4,7 @@
  */
 
 import { generateId } from "document-model/core";
-import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
+import type { AccountEntry } from "../../../document-models/accounts/v1/gen/schema/types.js";
 import { accountTransactionsService } from "../../accounts-editor/services/accountTransactionsService.js";
 
 export interface WalletAccountServiceResult {

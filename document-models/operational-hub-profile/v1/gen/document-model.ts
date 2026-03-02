@@ -1,0 +1,92 @@
+import type { DocumentModelGlobalState } from "document-model";
+
+export const documentModel: DocumentModelGlobalState = {
+  author: {
+    name: "Powerhouse",
+    website: "https://www.powerhouse.inc/",
+  },
+  description:
+    "Profile document for Operational Hubs that manages operator team assignment and subteam relationships",
+  extension: "ohp",
+  id: "powerhouse/operational-hub-profile",
+  name: "OperationalHubProfile",
+  specifications: [
+    {
+      changeLog: [],
+      modules: [
+        {
+          description: "Operations for configuring the operational hub profile",
+          id: "configuration",
+          name: "configuration",
+          operations: [
+            {
+              description: "Set the name of the operational hub",
+              errors: [],
+              examples: [],
+              id: "set-operational-hub-name",
+              name: "SET_OPERATIONAL_HUB_NAME",
+              reducer: "state.name = action.input.name;",
+              schema: "input SetOperationalHubNameInput {\n  name: String!\n}",
+              scope: "global",
+              template: "Set the name of the operational hub",
+            },
+            {
+              description:
+                "Set the operator team PHID for this operational hub",
+              errors: [],
+              examples: [],
+              id: "set-operator-team",
+              name: "SET_OPERATOR_TEAM",
+              reducer:
+                "state.operatorTeam = action.input.operatorTeam || null;",
+              schema: "input SetOperatorTeamInput {\n  operatorTeam: PHID\n}",
+              scope: "global",
+              template: "Set the operator team PHID for this operational hub",
+            },
+            {
+              description:
+                "Add a subteam (builder profile) to the operational hub",
+              errors: [],
+              examples: [],
+              id: "add-subteam",
+              name: "ADD_SUBTEAM",
+              reducer:
+                "if (!state.subteams.includes(action.input.subteam)) {\n  state.subteams.push(action.input.subteam);\n}",
+              schema: "input AddSubteamInput {\n  subteam: PHID!\n}",
+              scope: "global",
+              template:
+                "Add a subteam (builder profile) to the operational hub",
+            },
+            {
+              description: "Remove a subteam from the operational hub",
+              errors: [],
+              examples: [],
+              id: "remove-subteam",
+              name: "REMOVE_SUBTEAM",
+              reducer:
+                "const index = state.subteams.indexOf(action.input.subteam);\nif (index !== -1) {\n  state.subteams.splice(index, 1);\n}",
+              schema: "input RemoveSubteamInput {\n  subteam: PHID!\n}",
+              scope: "global",
+              template: "Remove a subteam from the operational hub",
+            },
+          ],
+        },
+      ],
+      state: {
+        global: {
+          examples: [],
+          initialValue:
+            '{\n  "name": "",\n  "operatorTeam": null,\n  "subteams": []\n}',
+          schema:
+            "type OperationalHubProfileState {\n  name: String!\n  operatorTeam: PHID\n  subteams: [PHID!]!\n}",
+        },
+        local: {
+          examples: [],
+          initialValue: "",
+          schema: "",
+        },
+      },
+      version: 1,
+    },
+  ],
+};

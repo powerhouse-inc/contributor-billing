@@ -43,7 +43,8 @@
       "Bash(npm test -- document-models/invoice/src/tests/transitions.test.ts)",
       "Bash(npm test -- document-models/invoice/tests/transitions.test.ts)",
       "Bash(npm test -- document-models/invoice/tests/transitions.test.ts --reporter=verbose)",
-      "Bash(git checkout --ours .github/workflows/sync-and-publish.yml)"
+      "Bash(git checkout --ours .github/workflows/sync-and-publish.yml)",
+      "Bash(pnpm tsc:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

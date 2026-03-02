@@ -8,7 +8,7 @@ import { useRemoteBuilderProfiles } from "../../shared/hooks/useRemoteBuilderPro
 import type {
   Maybe,
   Scalars,
-} from "../../../document-models/operational-hub-profile/gen/schema/types.js";
+} from "../../../document-models/operational-hub-profile/v1/gen/schema/types.js";
 
 type ResolvedProfile = {
   phid: string;

@@ -1,7 +1,6 @@
-export { AccountTransactions } from "./account-transactions/module.js";
-export { Accounts } from "./accounts/module.js";
-export { BillingStatement } from "./billing-statement/module.js";
-export { ExpenseReport } from "./expense-report/module.js";
-export { Invoice } from "./invoice/module.js";
-export { OperationalHubProfile } from "./operational-hub-profile/module.js";
-export { SnapshotReport } from "./snapshot-report/module.js";
+export { accountTransactionsUpgradeManifest } from "./account-transactions/upgrades/upgrade-manifest.js";
+export { accountsUpgradeManifest } from "./accounts/upgrades/upgrade-manifest.js";
+export { billingStatementUpgradeManifest } from "./billing-statement/upgrades/upgrade-manifest.js";
+export { expenseReportUpgradeManifest } from "./expense-report/upgrades/upgrade-manifest.js";
+export { invoiceUpgradeManifest } from "./invoice/upgrades/upgrade-manifest.js";
+export { operationalHubProfileUpgradeManifest } from "./operational-hub-profile/upgrades/upgrade-manifest.js";

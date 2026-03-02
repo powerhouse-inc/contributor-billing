@@ -8,7 +8,7 @@ import type {
   AccountEntry,
   AccountTypeInput,
   KycAmlStatusTypeInput,
-} from "../../../document-models/accounts/gen/schema/types.js";
+} from "../../../document-models/accounts/v1/gen/schema/types.js";
 
 interface AccountFormProps {
   account?: AccountEntry;

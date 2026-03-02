@@ -1,7 +1,7 @@
 import type {
   SnapshotAccount,
   TransactionFlowType,
-} from "../../../document-models/snapshot-report/gen/schema/types.js";
+} from "../../../document-models/snapshot-report/v1/gen/schema/types.js";
 
 // Known swap protocol addresses (lowercase)
 const SWAP_ADDRESSES = new Set([

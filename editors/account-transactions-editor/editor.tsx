@@ -16,11 +16,11 @@ import {
   updateTransaction,
   deleteTransaction,
   setAccount,
-} from "../../document-models/account-transactions/gen/creators.js";
+} from "../../document-models/account-transactions/v1/gen/creators.js";
 import type {
   TransactionEntry,
   AddTransactionInput,
-} from "../../document-models/account-transactions/gen/types.js";
+} from "../../document-models/account-transactions/v1/gen/types.js";
 import { TransactionsTable } from "./components/TransactionsTable.js";
 import { TransactionForm } from "./components/TransactionForm.js";
 import { AccountSection } from "./components/AccountSection.js";

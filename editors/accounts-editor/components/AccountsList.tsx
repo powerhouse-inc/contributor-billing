@@ -1,7 +1,7 @@
 import type {
   AccountEntry,
   KycAmlStatusTypeInput,
-} from "../../../document-models/accounts/gen/schema/types.js";
+} from "../../../document-models/accounts/v1/gen/schema/types.js";
 import { AccountCard } from "./AccountCard.js";
 
 interface AccountsListProps {

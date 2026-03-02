@@ -8,7 +8,7 @@ import {
   useNodeActions,
 } from "@powerhousedao/reactor-browser";
 import type { FolderNode, FileNode, Node } from "document-drive";
-import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/gen/types.js";
+import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/v1/gen/types.js";
 
 const SNAPSHOT_REPORTS_FOLDER_NAME = "Snapshot Reports";
 
