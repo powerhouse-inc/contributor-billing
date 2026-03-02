@@ -1,3 +1,10 @@
+# [1.0.0-dev.11](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.10...v1.0.0-dev.11) (2026-03-02)
+
+
+### Bug Fixes
+
+* **graphql-client:** resolve drive slugs to UUIDs before fetching builder profiles ([c899312](https://github.com/powerhouse-inc/contributor-billing/commit/c899312db4eb0d5c061bda669d8bcd9c0d71e2df))
+
 # [1.0.0-dev.10](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.9...v1.0.0-dev.10) (2026-03-02)
 
 
