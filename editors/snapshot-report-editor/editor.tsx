@@ -6,7 +6,7 @@ import {
   setSelectedNode,
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
-import { DocumentToolbar } from "@powerhousedao/design-system/connect";
+import { DocumentToolbar, toast } from "@powerhousedao/design-system/connect";
 import { Button, Select } from "@powerhousedao/document-engineering";
 import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { DateRangePicker } from "./components/DateRangePicker.js";
@@ -211,6 +211,63 @@ export default function Editor() {
     return suggested;
   }, [documentsInDrive, reportPeriodStart, document.header.id]);
 
+  // Compute suggested end date from next month's snapshot startDate
+  const suggestedEndDate = useMemo(() => {
+    if (!documentsInDrive || !reportPeriodStart) return null;
+
+    const currentPeriodStart = new Date(reportPeriodStart);
+    if (isNaN(currentPeriodStart.getTime())) return null;
+
+    // Find all other snapshot reports in the drive
+    const otherSnapshots = documentsInDrive.filter(
+      (doc) =>
+        doc.header.documentType === "powerhouse/snapshot-report" &&
+        doc.header.id !== document.header.id,
+    );
+
+    // Find the snapshot whose reportPeriodStart is closest after this one
+    let nextSnapshot: {
+      startDate: string | null;
+      reportPeriodStart: string;
+    } | null = null;
+    let closestDistance = Infinity;
+
+    for (const snap of otherSnapshots) {
+      const state = snap.state as {
+        global?: {
+          reportPeriodStart?: string | null;
+          startDate?: string | null;
+        };
+      };
+      const rps = state?.global?.reportPeriodStart;
+      if (!rps) continue;
+
+      const rpDate = new Date(rps);
+      if (isNaN(rpDate.getTime())) continue;
+
+      // Must be after current period
+      const diff = rpDate.getTime() - currentPeriodStart.getTime();
+      if (diff > 0 && diff < closestDistance) {
+        closestDistance = diff;
+        nextSnapshot = {
+          startDate: state?.global?.startDate || null,
+          reportPeriodStart: rps,
+        };
+      }
+    }
+
+    if (!nextSnapshot?.startDate) return null;
+
+    const nextStart = new Date(nextSnapshot.startDate);
+    if (isNaN(nextStart.getTime())) return null;
+
+    // Suggested end = next startDate - 1 day (end of previous day)
+    const suggested = new Date(nextStart);
+    suggested.setUTCDate(suggested.getUTCDate() - 1);
+    suggested.setUTCHours(23, 59, 59, 999);
+    return suggested;
+  }, [documentsInDrive, reportPeriodStart, document.header.id]);
+
   const handleSnapshotPeriodChange = useCallback(
     (newFromDate: string, newToDate: string) => {
       dispatch?.(
@@ -231,6 +288,13 @@ export default function Editor() {
     const toISO = endDate || "";
     handleSnapshotPeriodChange(fromISO, toISO);
   }, [suggestedStartDate, endDate, handleSnapshotPeriodChange]);
+
+  const handleApplySuggestedEndDate = useCallback(() => {
+    if (!suggestedEndDate) return;
+    const fromISO = startDate || "";
+    const toISO = suggestedEndDate.toISOString();
+    handleSnapshotPeriodChange(fromISO, toISO);
+  }, [suggestedEndDate, startDate, handleSnapshotPeriodChange]);
 
   // Update selected period when document period changes externally
   useEffect(() => {
@@ -348,7 +412,7 @@ export default function Editor() {
     }
   };
 
-  // Handle sync all accounts - parallel with concurrency limit
+  // Handle sync all accounts — Internal first (sequentially), then non-Internal
   const handleSyncAll = async () => {
     if (!startDate || !endDate) {
       alert(
@@ -360,45 +424,103 @@ export default function Editor() {
     setIsSyncingAll(true);
     const accountUpdates: Array<{ id: string; accountTransactionsId: string }> =
       [];
-    const CONCURRENCY_LIMIT = 5;
+    const totalAccounts = snapshotAccounts.length;
+    let syncedCount = 0;
+    let failedCount = 0;
+
+    toast(`Syncing ${totalAccounts} accounts...`, { type: "connect-loading" });
 
     try {
-      // Process accounts in batches of 5 for parallel execution
-      for (let i = 0; i < snapshotAccounts.length; i += CONCURRENCY_LIMIT) {
-        const batch = snapshotAccounts.slice(i, i + CONCURRENCY_LIMIT);
-        await Promise.all(
-          batch.map(async (account) => {
-            const accountEntry = accountEntryMap.get(account.accountId);
+      const internalAccounts = snapshotAccounts.filter(
+        (a: any) => a.type === "Internal",
+      );
 
-            setSyncingAccounts((prev) => new Set(prev).add(account.id));
+      // Phase 1: Sync Internal accounts sequentially to avoid race conditions
+      // on concurrent dispatchActions to the same document
+      const accountTransactionsIdMap = new Map<string, string>();
+      let latestSnapshotDoc: any;
 
-            try {
-              const result = await syncAccount(
-                account,
-                accountEntry,
-                accountsDocumentId || undefined,
-                startDate,
-                endDate,
-                dispatch,
-                snapshotAccounts,
-                document?.header?.id,
-              );
+      for (const account of internalAccounts) {
+        const accountEntry = accountEntryMap.get(account.accountId);
+        setSyncingAccounts((prev) => new Set(prev).add(account.id));
 
-              if (result.documentId && accountEntry) {
-                accountUpdates.push({
-                  id: accountEntry.id,
-                  accountTransactionsId: result.documentId,
-                });
-              }
-            } finally {
-              setSyncingAccounts((prev) => {
-                const newSet = new Set(prev);
-                newSet.delete(account.id);
-                return newSet;
+        try {
+          const result = await syncAccount(
+            account,
+            accountEntry,
+            accountsDocumentId || undefined,
+            startDate,
+            endDate,
+            dispatch,
+            snapshotAccounts,
+            document?.header?.id,
+          );
+
+          if (result.documentId) {
+            accountTransactionsIdMap.set(account.id, result.documentId);
+            if (accountEntry) {
+              accountUpdates.push({
+                id: accountEntry.id,
+                accountTransactionsId: result.documentId,
               });
             }
-          }),
-        );
+          }
+          if (result.updatedSnapshotDoc) {
+            latestSnapshotDoc = result.updatedSnapshotDoc;
+          }
+
+          if (result.success) {
+            syncedCount++;
+          } else {
+            failedCount++;
+          }
+        } finally {
+          setSyncingAccounts((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(account.id);
+            return newSet;
+          });
+        }
+      }
+
+      // Use fresh snapshot accounts from the latest dispatch result for Phase 2
+      const freshSnapshotAccounts: any[] =
+        latestSnapshotDoc?.state?.global?.snapshotAccounts ?? snapshotAccounts;
+      const freshNonInternalAccounts = freshSnapshotAccounts.filter(
+        (a: any) => a.type !== "Internal",
+      );
+
+      // Phase 2: Sync non-Internal accounts sequentially
+      // These derive transactions from Internal accounts' AccountTransactions docs
+      for (const account of freshNonInternalAccounts) {
+        const accountEntry = accountEntryMap.get(account.accountId);
+        setSyncingAccounts((prev) => new Set(prev).add(account.id));
+
+        try {
+          const result = await syncAccount(
+            account,
+            accountEntry,
+            accountsDocumentId || undefined,
+            startDate,
+            endDate,
+            dispatch,
+            freshSnapshotAccounts,
+            document?.header?.id,
+            accountTransactionsIdMap,
+          );
+
+          if (result.success) {
+            syncedCount++;
+          } else {
+            failedCount++;
+          }
+        } finally {
+          setSyncingAccounts((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(account.id);
+            return newSet;
+          });
+        }
       }
 
       // Single batch update to Accounts document
@@ -408,6 +530,23 @@ export default function Editor() {
           accountsDocumentId,
         );
       }
+
+      if (failedCount === 0) {
+        toast(
+          `Synced ${syncedCount} account${syncedCount !== 1 ? "s" : ""} successfully`,
+          { type: "success" },
+        );
+      } else {
+        toast(
+          `Synced ${syncedCount}/${totalAccounts} accounts. ${failedCount} failed.`,
+          { type: "warning" },
+        );
+      }
+    } catch (error) {
+      toast(
+        `Sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { type: "error" },
+      );
     } finally {
       setIsSyncingAll(false);
     }
@@ -754,6 +893,37 @@ export default function Editor() {
                     <button
                       onClick={handleApplySuggestedStartDate}
                       className="px-2 py-1 text-xs font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-200 rounded transition-colors whitespace-nowrap"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                )}
+              {suggestedEndDate &&
+                endDate &&
+                new Date(endDate) >= suggestedEndDate && (
+                  <div className="mt-2 flex items-center gap-2 p-2 bg-amber-50 border border-amber-200 rounded-md">
+                    <span className="text-xs text-amber-700 flex-1">
+                      Next snapshot period starts{" "}
+                      {new Date(
+                        suggestedEndDate.getTime() + 86400000,
+                      ).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        timeZone: "UTC",
+                      })}
+                      . End by{" "}
+                      <strong>
+                        {suggestedEndDate.toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          timeZone: "UTC",
+                        })}
+                      </strong>{" "}
+                      to avoid overlap.
+                    </span>
+                    <button
+                      onClick={handleApplySuggestedEndDate}
+                      className="px-2 py-1 text-xs font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 rounded transition-colors whitespace-nowrap"
                     >
                       Apply
                     </button>
