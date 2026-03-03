@@ -1,3 +1,10 @@
+# [1.0.0-dev.13](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.12...v1.0.0-dev.13) (2026-03-03)
+
+
+### Features
+
+* install latest service offering pkg ([4044ffa](https://github.com/powerhouse-inc/contributor-billing/commit/4044ffadc63cb8c1a678b2ed3b288b1fe44f5c32))
+
 # [1.0.0-dev.12](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.11...v1.0.0-dev.12) (2026-03-03)
 
 
