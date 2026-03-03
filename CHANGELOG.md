@@ -1,3 +1,10 @@
+# [1.0.0-dev.12](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.11...v1.0.0-dev.12) (2026-03-03)
+
+
+### Bug Fixes
+
+* bump service offering pkg ([6819dd0](https://github.com/powerhouse-inc/contributor-billing/commit/6819dd05028b0b85835c6ef382c2936660e1ffcd))
+
 # [1.0.0-dev.11](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.10...v1.0.0-dev.11) (2026-03-02)
 
 
