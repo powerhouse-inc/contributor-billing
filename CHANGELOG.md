@@ -1,3 +1,10 @@
+# [1.0.0-dev.14](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.13...v1.0.0-dev.14) (2026-03-04)
+
+
+### Bug Fixes
+
+* restore semantic-release packages and clean up package.json ([a9dc0d5](https://github.com/powerhouse-inc/contributor-billing/commit/a9dc0d57523bdaa1cfbf4ce833a046437147b1b9))
+
 # [1.0.0-dev.13](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.12...v1.0.0-dev.13) (2026-03-03)
 
 
