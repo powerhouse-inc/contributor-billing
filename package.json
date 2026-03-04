@@ -5,7 +5,7 @@
   "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/powerhouse-inc/contributor-billing.git"
+    "url": "https://github.com/powerhouse-inc/contributor-billing"
   },
   "type": "module",
   "files": [
@@ -126,12 +126,14 @@
     "pm2": "^5.4.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "semantic-release": "^25.0.2",
     "tailwindcss": "^4.1.16",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
     "vite": "^6.2.3",
-    "vitest": "^3.0.9"
+    "vitest": "^3.0.9",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "semantic-release": "^25.0.2"
   },
   "peerDependencies": {
     "react": "^19.2.0",
@@ -162,11 +164,5 @@
       "@semantic-release/github",
       "@semantic-release/git"
     ]
-  },
-  "bugs": {
-    "url": "https://github.com/powerhouse-inc/contributor-billing/issues"
-  },
-  "readme": "ERROR: No README data found!",
-  "homepage": "https://github.com/powerhouse-inc/contributor-billing#readme",
-  "_id": "@powerhousedao/contributor-billing@1.0.0-dev.7"
+  }
 }
