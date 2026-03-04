@@ -44,7 +44,10 @@
       "Bash(npm test -- document-models/invoice/tests/transitions.test.ts)",
       "Bash(npm test -- document-models/invoice/tests/transitions.test.ts --reporter=verbose)",
       "Bash(git checkout --ours .github/workflows/sync-and-publish.yml)",
-      "Bash(pnpm tsc:*)"
+      "Bash(pnpm tsc:*)",
+      "Bash(curl -s -X POST https://switchboard-staging.powerhouse.xyz/graphql -H \"Content-Type: application/json\" -d '{\"\"query\"\":\"\"query { drives }\"\"}')",
+      "Bash(curl -s -X POST https://switchboard-staging.powerhouse.xyz/graphql -H \"Content-Type: application/json\" -d '{\"\"query\"\":\"\"query GetBuilderProfiles\\($driveId: String!\\) { BuilderProfile { getDocuments\\(driveId: $driveId\\) { id state { name slug icon description } } } }\"\",\"\"variables\"\":{\"\"driveId\"\":\"\"builders\"\"}}')",
+      "Bash(git:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

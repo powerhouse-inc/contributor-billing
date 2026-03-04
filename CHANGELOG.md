@@ -1,4 +1,94 @@
-# [1.1.0](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.4...v1.1.0) (2026-02-26)
+# [1.0.0-dev.14](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.13...v1.0.0-dev.14) (2026-03-04)
+
+
+### Bug Fixes
+
+* restore semantic-release packages and clean up package.json ([a9dc0d5](https://github.com/powerhouse-inc/contributor-billing/commit/a9dc0d57523bdaa1cfbf4ce833a046437147b1b9))
+
+# [1.0.0-dev.13](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.12...v1.0.0-dev.13) (2026-03-03)
+
+
+### Features
+
+* install latest service offering pkg ([4044ffa](https://github.com/powerhouse-inc/contributor-billing/commit/4044ffadc63cb8c1a678b2ed3b288b1fe44f5c32))
+
+# [1.0.0-dev.12](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.11...v1.0.0-dev.12) (2026-03-03)
+
+
+### Bug Fixes
+
+* bump service offering pkg ([6819dd0](https://github.com/powerhouse-inc/contributor-billing/commit/6819dd05028b0b85835c6ef382c2936660e1ffcd))
+
+# [1.0.0-dev.11](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.10...v1.0.0-dev.11) (2026-03-02)
+
+
+### Bug Fixes
+
+* **graphql-client:** resolve drive slugs to UUIDs before fetching builder profiles ([c899312](https://github.com/powerhouse-inc/contributor-billing/commit/c899312db4eb0d5c061bda669d8bcd9c0d71e2df))
+
+# [1.0.0-dev.10](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.9...v1.0.0-dev.10) (2026-03-02)
+
+
+### Bug Fixes
+
+* bump service offering dependency ([1001626](https://github.com/powerhouse-inc/contributor-billing/commit/100162665cd8725603e1199b1d39768f283597f0))
+* bump service offering dependency ([9e27813](https://github.com/powerhouse-inc/contributor-billing/commit/9e27813fe0401eb5d3108a96b1891941180feb9f))
+
+# [1.0.0-dev.9](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.8...v1.0.0-dev.9) (2026-02-26)
+
+
+### Bug Fixes
+
+* regenerate and fix pkg ([32818d7](https://github.com/powerhouse-inc/contributor-billing/commit/32818d7f09bfd8704eca2b3ae0c72a08b2a270fe))
+
+# [1.0.0-dev.8](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.7...v1.0.0-dev.8) (2026-02-26)
+
+
+### Bug Fixes
+
+* correct version ([cf2bfb9](https://github.com/powerhouse-inc/contributor-billing/commit/cf2bfb9c69b8231b5451ba2b72ff1eb9cc90f94e))
+
+
+### Features
+
+* update builder profile pkg ([02fd473](https://github.com/powerhouse-inc/contributor-billing/commit/02fd4731cd908403d8ab52df76bf1e318f216118))
+
+# [1.0.0-dev.7](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.6...v1.0.0-dev.7) (2026-02-23)
+
+
+### Features
+
+* update service offering pkg ([457054b](https://github.com/powerhouse-inc/contributor-billing/commit/457054bcaf010f9f9a0fdb6c23a80a76deb932b3))
+
+# [1.0.0-dev.6](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.5...v1.0.0-dev.6) (2026-02-20)
+
+
+### Features
+
+* add service-offering pkg and replace custom queries ([2c47cec](https://github.com/powerhouse-inc/contributor-billing/commit/2c47cec2cbc9bdfd323ee7911267db8ab984a0ce))
+
+# [1.0.0-dev.5](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.4...v1.0.0-dev.5) (2026-02-17)
+
+
+### Bug Fixes
+
+* fix validation rule for the issueInvoiceOperation for crypto payments ([85e1ac4](https://github.com/powerhouse-inc/contributor-billing/commit/85e1ac4889389c663b39df01bd45bdb6671fbbb7))
+
+# [1.0.0-dev.4](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.3...v1.0.0-dev.4) (2026-02-17)
+
+
+### Bug Fixes
+
+* **ci:** check npm before publishing to avoid duplicate version errors ([21ceadf](https://github.com/powerhouse-inc/contributor-billing/commit/21ceadf589637ca31be2bdc77c9a2334b5f75fec))
+* **editors:** validate document names with isValidName before creation ([fae6bb7](https://github.com/powerhouse-inc/contributor-billing/commit/fae6bb78bc536abddfb44974f50d643234a95450))
+
+
+### Features
+
+* add input form in welcome drive view for user to add details for auto doc creation ([d1b8e90](https://github.com/powerhouse-inc/contributor-billing/commit/d1b8e900714598751bdc3baa2e4eb56f54139efb))
+* **contributor-billing:** add welcome window for operational hub creation ([18201b6](https://github.com/powerhouse-inc/contributor-billing/commit/18201b6d452e3c24b0cbafd29345ef34aaee0c4b))
+
+# [1.0.0-dev.3](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.2...v1.0.0-dev.3) (2026-02-16)
 
 
 ### Bug Fixes
