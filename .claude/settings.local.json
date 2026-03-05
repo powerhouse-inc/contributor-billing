@@ -44,7 +44,19 @@
       "Bash(npm test -- document-models/invoice/tests/transitions.test.ts)",
       "Bash(npm test -- document-models/invoice/tests/transitions.test.ts --reporter=verbose)",
       "Bash(curl -s -X POST https://switchboard-staging.powerhouse.xyz/graphql -H \"Content-Type: application/json\" -d '{\"\"query\"\":\"\"query { drives }\"\"}')",
-      "Bash(curl -s -X POST https://switchboard-staging.powerhouse.xyz/graphql -H \"Content-Type: application/json\" -d '{\"\"query\"\":\"\"query GetBuilderProfiles\\($driveId: String!\\) { BuilderProfile { getDocuments\\(driveId: $driveId\\) { id state { name slug icon description } } } }\"\",\"\"variables\"\":{\"\"driveId\"\":\"\"builders\"\"}}')"
+      "Bash(curl -s -X POST https://switchboard-staging.powerhouse.xyz/graphql -H \"Content-Type: application/json\" -d '{\"\"query\"\":\"\"query GetBuilderProfiles\\($driveId: String!\\) { BuilderProfile { getDocuments\\(driveId: $driveId\\) { id state { name slug icon description } } } }\"\",\"\"variables\"\":{\"\"driveId\"\":\"\"builders\"\"}}')",
+      "Bash(ss:*)",
+      "Read(//etc/**)",
+      "Read(//mnt/c/Users/**)",
+      "Bash(curl:*)",
+      "Bash(wsl.exe:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(kill:*)",
+      "Bash(sudo sed:*)",
+      "Bash(sudo:*)",
+      "Bash(lsattr:*)",
+      "Bash(chmod +x:*)",
+      "Bash(/home/p/wsl-port-forward.sh:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",
