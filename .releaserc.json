@@ -1,0 +1,13 @@
+{
+  "branches": [
+    "main",
+    {
+      "name": "staging",
+      "prerelease": "staging"
+    },
+    {
+      "name": "dev",
+      "prerelease": "dev"
+    }
+  ]
+}
