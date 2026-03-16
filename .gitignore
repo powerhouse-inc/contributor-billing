@@ -1,13 +1,9 @@
+.env
 dist
 coverage
 node_modules
 .eslintcache
 .env.local
-.env
-.playwright-mcp
-.ds_store
+
 .ph
 projects-import.js
-.keypair.json
-downloads
-.auth.json

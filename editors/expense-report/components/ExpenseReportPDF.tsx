@@ -3,7 +3,7 @@ import type {
   Wallet,
   LineItemGroup,
   LineItem,
-} from "../../../document-models/expense-report/gen/types.js";
+} from "../../../document-models/expense-report/v1/gen/types.js";
 
 interface ExpenseReportPDFProps {
   periodStart?: string | null;

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { ExpenseReportDocument } from "../../../document-models/expense-report/gen/types.js";
+import type { ExpenseReportDocument } from "../../../document-models/expense-report/v1/gen/types.js";
 
 type ExpenseReportDataPoint = {
   periodStart: Date | null;

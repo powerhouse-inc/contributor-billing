@@ -5,7 +5,9 @@ import {
 } from "../../scripts/invoice/gnosisTransactionBuilder.js";
 import { requestDirectPayment } from "../../scripts/invoice/requestFinance.js";
 import { actions } from "../../document-models/invoice/index.js";
+import type { InvoiceDocument } from "../../document-models/invoice/index.js";
 import { uploadPdfAndGetJsonClaude } from "../../scripts/invoice/pdfToClaudeAI.js";
+import type { IReactorClient } from "@powerhousedao/reactor";
 import * as crypto from "crypto";
 
 // --- Type definitions for resolver args and external interfaces ---
@@ -31,28 +33,6 @@ interface PendingTransaction {
   chainName: string;
   paymentDetails: PaymentDetail | PaymentDetail[];
   timestamp: number;
-}
-
-interface DriveNode {
-  id: string;
-  documentType: string;
-}
-
-interface ReactorInstance {
-  getDrive(driveId: string): Promise<{
-    state: { global: { nodes: DriveNode[] } };
-  }>;
-  getDocument(
-    driveId: string,
-    documentId: string,
-  ): Promise<{
-    state: { global: { invoiceNo: string } };
-  }>;
-  addAction(
-    driveId: string,
-    documentId: string,
-    action: unknown,
-  ): Promise<void>;
 }
 
 interface AlchemyActivity {
@@ -106,7 +86,7 @@ interface FileChunksData {
 // Create a Map to store file chunks data
 const fileChunksMap = new Map<string, FileChunksData>();
 
-let reactor: ReactorInstance;
+let reactorClient: IReactorClient;
 
 export const Invoice_processGnosisPayment = async (
   _: unknown,
@@ -315,9 +295,9 @@ export const Invoice_uploadInvoicePdfChunk = async (
   }
 };
 
-// Function to set the reactor instance
-export const setReactor = (reactorInstance: ReactorInstance) => {
-  reactor = reactorInstance;
+// Function to set the reactor client instance
+export const setReactorClient = (client: IReactorClient) => {
+  reactorClient = client;
 };
 
 // Export the pendingTransactions for use in webhook handling
@@ -367,37 +347,29 @@ function isValidSignatureForStringBody(
 
 const updateDocumentStatus = async (invoiceNo: string): Promise<void> => {
   try {
-    const drive = await reactor.getDrive("powerhouse");
-    const documents = drive.state.global.nodes.filter(
-      (node: DriveNode) => node.documentType === "powerhouse/invoice",
-    );
-    if (documents.length === 0) {
+    const invoiceResults = await reactorClient.find({
+      type: "powerhouse/invoice",
+    });
+    const invoiceDocs = invoiceResults.results as InvoiceDocument[];
+
+    if (invoiceDocs.length === 0) {
       console.log(`No documents found for invoice ${invoiceNo}`);
-      return Promise.reject(
-        new Error(`No documents found for invoice ${invoiceNo}`),
-      );
+      throw new Error(`No documents found for invoice ${invoiceNo}`);
     }
-    for (const document of documents) {
-      const invoiceDocument = await reactor.getDocument(
-        "powerhouse",
-        document.id,
-      );
-      const reactorInvoiceNo = invoiceDocument.state.global.invoiceNo;
-      if (reactorInvoiceNo === invoiceNo) {
-        console.log(`Changing status of Invoice No: ${invoiceNo} to PAID`);
-        await reactor.addAction(
-          "powerhouse",
-          document.id,
-          actions.editStatus({
-            status: "PAYMENTRECEIVED",
-          }),
-        );
-        return Promise.resolve();
-      }
+
+    const matchingDoc = invoiceDocs.find(
+      (doc) => doc.state.global.invoiceNo === invoiceNo,
+    );
+
+    if (matchingDoc) {
+      console.log(`Changing status of Invoice No: ${invoiceNo} to PAID`);
+      await reactorClient.execute(matchingDoc.header.id, "main", [
+        actions.editStatus({ status: "PAYMENTRECEIVED" }),
+      ]);
     }
   } catch (error) {
     console.error(`Error finding document for invoice ${invoiceNo}:`, error);
-    return Promise.reject(new Error(error as string));
+    throw error;
   }
 };
 

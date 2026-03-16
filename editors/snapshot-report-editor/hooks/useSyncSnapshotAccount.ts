@@ -21,8 +21,8 @@ import type {
   SnapshotAccount,
   SnapshotTransaction,
   TransactionFlowType,
-} from "../../../document-models/snapshot-report/gen/types.js";
-import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
+} from "../../../document-models/snapshot-report/v1/gen/types.js";
+import type { AccountEntry } from "../../../document-models/accounts/v1/gen/schema/types.js";
 import { calculateTransactionFlowInfo } from "../utils/flowTypeCalculations.js";
 
 /**

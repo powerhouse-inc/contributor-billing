@@ -4,7 +4,7 @@ import { setSelectedNode } from "@powerhousedao/reactor-browser";
 import type {
   AccountEntry,
   KycAmlStatusTypeInput,
-} from "../../../document-models/accounts/gen/schema/types.js";
+} from "../../../document-models/accounts/v1/gen/schema/types.js";
 import { KYCStatusBadge } from "./KYCStatusBadge.js";
 
 interface AccountCardProps {

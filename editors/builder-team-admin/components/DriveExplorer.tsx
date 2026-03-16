@@ -17,6 +17,8 @@ import { SnapshotReports } from "./snapshot-reports.js";
 import { ResourcesServices } from "./ResourcesServices.js";
 import { ServiceSubscriptions } from "./service-subscriptions.js";
 import { actions as builderProfileActions } from "@powerhousedao/builder-profile/document-models/builder-profile";
+import { useServiceSubscriptionAutoPlacement } from "../hooks/useServiceSubscriptionAutoPlacement.js";
+import { useSnapshotReportAutoPlacement } from "../hooks/useSnapshotReportAutoPlacement.js";
 
 function generateCode(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
@@ -49,6 +51,11 @@ export function DriveExplorer({ children }: EditorProps) {
   const [profileName, setProfileName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [selectedDrive] = useSelectedDrive();
+
+  // Auto-placement hooks — must run regardless of which view is active so
+  // documents synced from the server get placed into the right folders.
+  useServiceSubscriptionAutoPlacement();
+  useSnapshotReportAutoPlacement();
 
   // Check if builder profile document exists
   const hasBuilderProfile = useMemo(() => {

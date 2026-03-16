@@ -6,9 +6,9 @@ import type {
   InvoiceState,
   InvoiceLineItem,
 } from "../../document-models/invoice/index.js";
-import { getGraphQLUrl } from "../shared/graphql.js";
+import { getSubgraphUrl } from "../shared/graphql.js";
 
-const GRAPHQL_URL = getGraphQLUrl();
+const GRAPHQL_URL = getSubgraphUrl("invoice-addon");
 
 interface DirectPaymentResult {
   message?: string;
@@ -169,7 +169,7 @@ const RequestFinance: React.FC<RequestFinanceProps> = ({
         }),
         invoiceNumber: docState.invoiceNo,
         buyerInfo: {
-          email: "",
+          email: docState.payer.contactInfo?.email ?? "",
           firstName: docState.payer.name ?? "",
           businessName: docState.payer.name ?? "",
           address: {

@@ -15,8 +15,8 @@ import {
 } from "@powerhousedao/reactor-browser";
 import { useBillingFolderStructure } from "../hooks/useBillingFolderStructure.js";
 import type { SelectedFolderInfo } from "./FolderTree.js";
-import type { OperationalHubProfileDocument } from "../../../document-models/operational-hub-profile/gen/types.js";
-import type { AccountsDocument } from "../../../document-models/accounts/gen/types.js";
+import type { OperationalHubProfileDocument } from "../../../document-models/operational-hub-profile/v1/gen/types.js";
+import type { AccountsDocument } from "../../../document-models/accounts/v1/gen/types.js";
 
 interface DashboardHomeProps {
   onFolderSelect?: (folderInfo: SelectedFolderInfo | null) => void;
