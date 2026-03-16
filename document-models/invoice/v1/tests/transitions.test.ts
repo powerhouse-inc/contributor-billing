@@ -97,7 +97,10 @@ describe("TransitionsOperations", () => {
 
   it("should handle issue operation", () => {
     const document = utils.createDocument();
-    const input = generateMock(IssueInputSchema());
+    const input = {
+      ...generateMock(IssueInputSchema()),
+      dateIssued: "2024-01-01T00:00:00.000Z",
+    };
 
     const updatedDocument = reducer(document, issue(input));
 

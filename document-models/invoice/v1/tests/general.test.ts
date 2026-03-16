@@ -19,7 +19,12 @@ import {
 describe("GeneralOperations", () => {
   it("should handle editInvoice operation", () => {
     const document = utils.createDocument();
-    const input = generateMock(EditInvoiceInputSchema());
+    const input = {
+      ...generateMock(EditInvoiceInputSchema()),
+      dateIssued: "2024-01-01T00:00:00.000Z",
+      dateDue: "2024-02-01T00:00:00.000Z",
+      dateDelivered: "2024-01-15T00:00:00.000Z",
+    };
 
     const updatedDocument = reducer(document, editInvoice(input));
 

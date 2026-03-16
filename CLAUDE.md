@@ -112,6 +112,17 @@ The `useSelectedTodoDocument` gets generated automatically so you don't need to 
 
 **NEVER edit files in `gen/` folders** - they are auto-generated and will be overwritten.
 
+### ⚠️ controller.js barrel export fix (post-generate)
+
+After running `bun generate`, the codegen re-adds `export * from "./controller.js"` to every `document-models/*/v1/gen/index.ts`. This **must be commented out** because `controller.ts` imports from `../module.js`, which re-imports from the gen barrel, creating a **circular dependency** that crashes at runtime (`"Cannot access before initialization"`). This silently prevents the entire local package from registering in Connect — editors and drive apps won't appear.
+
+**After every `bun generate`, run:**
+```bash
+sed -i 's|^export \* from "./controller.js";|// export * from "./controller.js";|' document-models/*/v1/gen/index.ts
+```
+
+The `tsconfig.json` also excludes `**/gen/controller.ts` to prevent stale `controller.js` files in `dist/`.
+
 ### Document Model Modification Process
 
 For ANY document model changes, follow this **mandatory** two-step process:

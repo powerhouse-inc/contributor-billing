@@ -141,10 +141,8 @@
     "react": ">=19.0.0",
     "react-dom": ">=19.0.0"
   },
-  "pnpm": {
-    "overrides": {
-      "graphql": "16.12.0"
-    }
+  "overrides": {
+    "graphql": "16.12.0"
   },
   "bugs": {
     "url": "https://github.com/powerhouse-inc/contributor-billing/issues"
