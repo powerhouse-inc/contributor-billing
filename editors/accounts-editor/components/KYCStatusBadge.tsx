@@ -1,4 +1,4 @@
-import type { KycAmlStatusType } from "../../../document-models/accounts/gen/schema/types.js";
+import type { KycAmlStatusType } from "../../../document-models/accounts/v1/gen/schema/types.js";
 
 interface KYCStatusBadgeProps {
   status: KycAmlStatusType | null | undefined;

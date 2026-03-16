@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDrives, useGetDocuments } from "@powerhousedao/reactor-browser";
 import type { PHDocument } from "document-model";
 import { setName } from "document-model";
-import { setOwnerId } from "../../../document-models/expense-report/gen/wallet/creators.js";
-import type { ExpenseReportDocument } from "../../../document-models/expense-report/gen/types.js";
+import { setOwnerId } from "../../../document-models/expense-report/v1/gen/wallet/creators.js";
+import type { ExpenseReportDocument } from "../../../document-models/expense-report/v1/gen/types.js";
 import {
   useAddReportToRemoteDrive,
   useOwnerDriveActions,

@@ -4,8 +4,9 @@
  */
 
 import { generateId } from "document-model/core";
-import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
+import type { AccountEntry } from "../../../document-models/accounts/v1/gen/schema/types.js";
 import { accountTransactionsService } from "../../accounts-editor/services/accountTransactionsService.js";
+import { getGraphQLUrl } from "../../shared/graphql.js";
 
 export interface WalletAccountServiceResult {
   success: boolean;
@@ -23,13 +24,7 @@ export class WalletAccountService {
   }
 
   private getGraphQLEndpoint(): string {
-    if (
-      typeof window !== "undefined" &&
-      !window.document.baseURI.includes("localhost")
-    ) {
-      return "https://switchboard-dev.powerhouse.xyz/graphql";
-    }
-    return "http://localhost:4001/graphql";
+    return getGraphQLUrl();
   }
 
   /**

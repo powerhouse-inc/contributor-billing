@@ -17,7 +17,7 @@ import {
   addTransaction,
   setPeriodStart,
   setPeriodEnd,
-} from "../../document-models/snapshot-report/gen/creators.js";
+} from "../../document-models/snapshot-report/v1/gen/creators.js";
 import { SetOwner } from "./components/SetOwner.js";
 import { useSyncSnapshotAccount } from "./hooks/useSyncSnapshotAccount.js";
 import { formatBalance } from "./utils/balanceCalculations.js";

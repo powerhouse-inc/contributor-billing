@@ -1,15 +1,26 @@
 {
+  "id": "powerhouse/account-transactions",
+  "name": "AccountTransactions",
   "author": {
     "name": "Powerhouse",
     "website": "https://powerhouse.inc"
   },
-  "description": "The AccountTransactions doc model is designed to track and manage all transactions associated with various accounts. Each transaction entry records critical details such as the source and destination accounts, transaction amount, timestamp, and specific transaction details tailored to the type of transaction (e.g., cryptocurrency or bank-related)",
   "extension": "",
-  "id": "powerhouse/account-transactions",
-  "name": "AccountTransactions",
+  "description": "The AccountTransactions doc model is designed to track and manage all transactions associated with various accounts. Each transaction entry records critical details such as the source and destination accounts, transaction amount, timestamp, and specific transaction details tailored to the type of transaction (e.g., cryptocurrency or bank-related)",
   "specifications": [
     {
-      "changeLog": [],
+      "state": {
+        "local": {
+          "schema": "",
+          "examples": [],
+          "initialValue": ""
+        },
+        "global": {
+          "schema": "type AccountTransactionsState {\n  account: Account!\n  transactions: [TransactionEntry!]!\n  budgets: [Budget!]!\n}\n\ntype Account {\n    id: OID!\n    account: String!\n    name: String!\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: String\n    owners: [String!]\n    KycAmlStatus: String\n}\n\ntype TransactionDetails {\n    txHash: String!\n    token: Currency!\n    blockNumber: Int\n    uniqueId: String\n}\n\ntype TransactionEntry {\n    id: ID!\n    counterParty: EthereumAddress\n    amount: Amount_Currency!\n    datetime: DateTime!\n    details: TransactionDetails!\n    budget: OID\n    accountingPeriod: String!\n    direction: TransactionDirection!\n}\n\ntype Budget {\n    id: OID!\n    name: OLabel\n}\n\nenum TransactionDirection {\n    INFLOW\n    OUTFLOW\n}\n\nenum TransactionDirectionInput {\n    INFLOW\n    OUTFLOW\n}",
+          "examples": [],
+          "initialValue": "{\"account\":{\"id\":\"\",\"account\":\"\",\"name\":\"\",\"budgetPath\":null,\"accountTransactionsId\":null,\"chain\":null,\"type\":null,\"owners\":null,\"KycAmlStatus\":null},\"transactions\":[],\"budgets\":[]}"
+        }
+      },
       "modules": [
         {
           "id": "account-module-id",
@@ -121,19 +132,8 @@
           ]
         }
       ],
-      "state": {
-        "global": {
-          "examples": [],
-          "initialValue": "{\n  \"account\": {\n    \"id\": \"\",\n    \"account\": \"\",\n    \"name\": \"\",\n    \"budgetPath\": null,\n    \"accountTransactionsId\": null,\n    \"chain\": null,\n    \"type\": null,\n    \"owners\": null,\n    \"KycAmlStatus\": null\n  },\n  \"transactions\": [],\n  \"budgets\": []\n}",
-          "schema": "type AccountTransactionsState {\n  account: Account!\n  transactions: [TransactionEntry!]!\n  budgets: [Budget!]!\n}\n\ntype Account {\n    id: OID!\n    account: String!\n    name: String!\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: String\n    owners: [String!]\n    KycAmlStatus: String\n}\n\ntype TransactionDetails {\n    txHash: String!\n    token: Currency!\n    blockNumber: Int\n    uniqueId: String\n}\n\ntype TransactionEntry {\n    id: ID!\n    counterParty: EthereumAddress\n    amount: Amount_Currency!\n    datetime: DateTime!\n    details: TransactionDetails!\n    budget: OID\n    accountingPeriod: String!\n    direction: TransactionDirection!\n}\n\ntype Budget {\n    id: OID!\n    name: OLabel\n}\n\nenum TransactionDirection {\n    INFLOW\n    OUTFLOW\n}\n\nenum TransactionDirectionInput {\n    INFLOW\n    OUTFLOW\n}"
-        },
-        "local": {
-          "examples": [],
-          "initialValue": "",
-          "schema": ""
-        }
-      },
-      "version": 1
+      "version": 1,
+      "changeLog": []
     }
   ]
 }

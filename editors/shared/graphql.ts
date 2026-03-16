@@ -25,3 +25,11 @@ export function getGraphQLUrl(): string {
   // Production environment
   return "https://switchboard.powerhouse.xyz/graphql";
 }
+
+/**
+ * Returns the GraphQL endpoint for a custom subgraph.
+ * Custom subgraphs are served at `/graphql/<subgraph-name>`.
+ */
+export function getSubgraphUrl(subgraph: string): string {
+  return `${getGraphQLUrl()}/${subgraph}`;
+}

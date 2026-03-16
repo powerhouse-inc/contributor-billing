@@ -24,7 +24,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useBillingFolderStructure } from "../hooks/useBillingFolderStructure.js";
 // TODO: Uncomment when Subscriptions feature is ready
 // import { useSubscriptionsFolder } from "../hooks/useSubscriptionsFolder.js";
-import type { OperationalHubProfileDocument } from "../../../document-models/operational-hub-profile/gen/types.js";
+import type { OperationalHubProfileDocument } from "../../../document-models/operational-hub-profile/v1/gen/types.js";
 
 const ICON_SIZE = 16;
 const SUBSCRIPTIONS_FOLDER_NAME = "Subscriptions";

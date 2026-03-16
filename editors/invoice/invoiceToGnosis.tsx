@@ -5,9 +5,9 @@ import type {
   InvoiceAction,
   InvoiceState,
 } from "../../document-models/invoice/index.js";
-import { getGraphQLUrl } from "../shared/graphql.js";
+import { getSubgraphUrl } from "../shared/graphql.js";
 
-const GRAPHQL_URL = getGraphQLUrl();
+const GRAPHQL_URL = getSubgraphUrl("invoice-addon");
 
 interface InvoiceToGnosisProps {
   docState: InvoiceState;
@@ -167,6 +167,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
             actions.schedulePayment({
               id: generateId(),
               processorRef: `${responseSafeAddress}:${txHash}`,
+              paymentDate: new Date().toISOString(),
             }),
           );
         } else {
@@ -175,6 +176,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
               id: generateId(),
               processorRef: `${responseSafeAddress}:${txHash}`,
               confirmed: false,
+              paymentDate: new Date().toISOString(),
             }),
           );
         }

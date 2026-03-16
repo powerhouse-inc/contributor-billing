@@ -9,7 +9,7 @@ import {
   setSelectedNode,
 } from "@powerhousedao/reactor-browser";
 import { isValidName } from "document-drive";
-import { setOperationalHubName } from "../../../document-models/operational-hub-profile/gen/configuration/creators.js";
+import { setOperationalHubName } from "../../../document-models/operational-hub-profile/v1/gen/configuration/creators.js";
 import { ToastRenderer } from "./ToastRenderer.js";
 import { DriveContents } from "./DriveContents.js";
 import { FolderTree, type SelectedFolderInfo } from "./FolderTree.js";

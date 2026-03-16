@@ -4,8 +4,8 @@ import type { PHDocument } from "document-model";
 import {
   addOwnerId,
   removeOwnerId,
-} from "../../../document-models/snapshot-report/gen/configuration/creators.js";
-import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/gen/types.js";
+} from "../../../document-models/snapshot-report/v1/gen/configuration/creators.js";
+import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/v1/gen/types.js";
 import {
   useAddReportToRemoteDrive,
   useOwnerDriveActions,

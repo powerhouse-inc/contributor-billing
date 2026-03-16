@@ -8,7 +8,8 @@ import {
   useNodeActions,
 } from "@powerhousedao/reactor-browser";
 import type { FolderNode, FileNode, Node } from "document-drive";
-import type { ExpenseReportDocument } from "../../../document-models/expense-report/gen/types.js";
+import type { ExpenseReportDocument } from "../../../document-models/expense-report/v1/gen/types.js";
+import { isDocumentSynced } from "../../shared/document-sync.js";
 
 const EXPENSE_REPORTS_FOLDER_NAME = "Expense Reports";
 
@@ -192,7 +193,7 @@ export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementRe
           d.header.id === fileNode.id,
       );
 
-      if (!doc) continue;
+      if (!doc || !isDocumentSynced(doc)) continue;
 
       const periodStart = doc.state.global.periodStart;
       if (!periodStart) {

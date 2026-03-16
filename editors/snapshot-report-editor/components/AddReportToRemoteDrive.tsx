@@ -6,7 +6,7 @@ import {
 } from "@powerhousedao/reactor-browser";
 import { addFile } from "document-drive";
 import { useSelectedSnapshotReportDocument } from "../../hooks/useSnapshotReportDocument.js";
-import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/gen/types.js";
+import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/v1/gen/types.js";
 
 export function useAddReportToRemoteDrive(ownerIdOverride?: string | null) {
   const [selectedDocument] = useSelectedSnapshotReportDocument();

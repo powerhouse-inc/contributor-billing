@@ -19,7 +19,7 @@ import type {
   Wallet,
   LineItemGroup,
   LineItem,
-} from "../../../document-models/expense-report/gen/types.js";
+} from "../../../document-models/expense-report/v1/gen/types.js";
 import { actions } from "../../../document-models/expense-report/index.js";
 import { generateId } from "document-model/core";
 import { useWalletSync } from "../hooks/useWalletSync.js";
@@ -37,7 +37,7 @@ import {
   actions as accountTransactionsActions,
   addTransaction,
 } from "../../../document-models/account-transactions/index.js";
-import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
+import type { AccountEntry } from "../../../document-models/accounts/v1/gen/schema/types.js";
 import { alchemyIntegration } from "../../account-transactions-editor/alchemyIntegration.js";
 import { isSwapAddress } from "../../snapshot-report-editor/utils/flowTypeCalculations.js";
 

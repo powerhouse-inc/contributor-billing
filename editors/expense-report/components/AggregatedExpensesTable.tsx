@@ -4,7 +4,7 @@ import type {
   Wallet,
   LineItemGroup,
   LineItem,
-} from "../../../document-models/expense-report/gen/types.js";
+} from "../../../document-models/expense-report/v1/gen/types.js";
 import { actions } from "../../../document-models/expense-report/index.js";
 import { Textarea, Select, Button } from "@powerhousedao/document-engineering";
 import { Plus, Trash2 } from "lucide-react";

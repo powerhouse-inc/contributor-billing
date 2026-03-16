@@ -7,10 +7,11 @@ import {
   useNodeActions,
 } from "@powerhousedao/reactor-browser";
 import type { FileNode, Node } from "document-drive";
-import type { ExpenseReportDocument } from "../../../document-models/expense-report/gen/types.js";
-import type { InvoiceDocument } from "../../../document-models/invoice/gen/types.js";
-import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/gen/types.js";
-import type { BillingStatementDocument } from "../../../document-models/billing-statement/gen/types.js";
+import type { ExpenseReportDocument } from "../../../document-models/expense-report/v1/gen/types.js";
+import type { InvoiceDocument } from "../../../document-models/invoice/v1/gen/types.js";
+import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/v1/gen/types.js";
+import type { BillingStatementDocument } from "../../../document-models/billing-statement/v1/gen/types.js";
+import { isDocumentSynced } from "../../shared/document-sync.js";
 import { useBillingFolderStructure } from "./useBillingFolderStructure.js";
 import { cbToast } from "../components/cbToast.js";
 
@@ -145,7 +146,7 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
           d.header.id === fileNode.id,
       );
 
-      if (!doc) continue;
+      if (!doc || !isDocumentSynced(doc)) continue;
 
       const periodStart = doc.state.global.periodStart;
       const monthName = getMonthNameFromPeriod(periodStart);

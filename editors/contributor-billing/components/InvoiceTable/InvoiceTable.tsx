@@ -10,12 +10,12 @@ import {
 import type { PHDocument } from "document-model";
 import { deleteNode, type FileNode } from "document-drive";
 import { actions as invoiceActions } from "../../../../document-models/invoice/index.js";
-import type { InvoiceTag } from "../../../../document-models/invoice/gen/types.js";
+import type { InvoiceTag } from "../../../../document-models/invoice/v1/gen/types.js";
 import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
 import {
   setPeriodStart,
   setPeriodEnd,
-} from "../../../../document-models/expense-report/gen/creators.js";
+} from "../../../../document-models/expense-report/v1/gen/creators.js";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
 import { exportExpenseReportCSV } from "../../../../scripts/contributor-billing/createExpenseReportCsv.js";

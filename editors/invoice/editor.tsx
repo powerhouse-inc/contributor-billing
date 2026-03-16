@@ -42,9 +42,9 @@ import {
   ReportPaymentIssueModalContent,
   SchedulePaymentModalContent,
 } from "./components/statusModalComponents.js";
-import { InvoiceStateSchema } from "../../document-models/invoice/gen/schema/zod.js";
+import { InvoiceStateSchema } from "../../document-models/invoice/v1/gen/schema/zod.js";
 import validateStatusBeforeContinue from "./validation/validationHandler.js";
-import { useSelectedInvoiceDocument } from "../../document-models/invoice/hooks.js";
+import { useSelectedInvoiceDocument } from "../../document-models/invoice/v1/hooks.js";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   type DocumentDispatch,
