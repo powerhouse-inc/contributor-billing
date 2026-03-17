@@ -271,9 +271,9 @@ print(json.dumps(entries))
 "
 }
 
-# Pricing breakdown per tier:
+# Pricing breakdown per tier (option group recurring, not including tier base):
 #   Essentials (0):   Core=0, Financial=0, Team=0, Advanced=0
-#   Starter (750):    Core=0, Financial=450, Team=200, Advanced=100
+#   Starter (750):    Core=0, Financial=750, Team=0, Advanced=0
 #   Standard (1250):  Core=0, Financial=550, Team=350, Advanced=350
 
 # Core Tools & Documentation — 0 all tiers (free tools)
@@ -297,38 +297,38 @@ EOF
 done
 log "Tier pricing: Entity & Compliance Foundation (3 tiers, setup only)"
 
-# Financial Operations & Reporting — Essentials=0, Starter=450, Standard=550
+# Financial Operations & Reporting — Essentials=0, Starter=750, Standard=550
 OG_FINOPS="076744ed-c6a1-4ecd-b15e-e241c6fed82e"
-for pair in "$ESSENTIALS_TIER:0f7c52de-4ae7-49f5-93fa-61c3500a4640:0" "$STARTER_TIER:414d9867-8064-4fda-84aa-4fea80750f23:450" "$STANDARD_TIER:a2c42345-762c-4b97-a9f9-bf184d906a0c:550"; do
+for pair in "$ESSENTIALS_TIER:0f7c52de-4ae7-49f5-93fa-61c3500a4640:0" "$STARTER_TIER:414d9867-8064-4fda-84aa-4fea80750f23:750" "$STANDARD_TIER:a2c42345-762c-4b97-a9f9-bf184d906a0c:550"; do
   IFS=':' read -r tid tpid amt <<< "$pair"
   RP=$(mk_recurring "$amt")
   mutate "$SO_ID" addOptionGroupTierPricing <<EOF
 {"optionGroupId": "$OG_FINOPS", "tierPricingId": "$tpid", "tierId": "$tid", "recurringPricing": $RP, "lastModified": "$TIMESTAMP"}
 EOF
 done
-log "Tier pricing: Financial Ops & Reporting (Essentials=free, Starter=450, Standard=550)"
+log "Tier pricing: Financial Ops & Reporting (Essentials=free, Starter=750, Standard=550)"
 
-# Team & Contributor Operations — Essentials=0, Starter=200, Standard=350
+# Team & Contributor Operations — Essentials=0, Starter=0, Standard=350
 OG_TEAM="45cb921f-e2e7-4043-ae54-a4b9f44be415"
-for pair in "$ESSENTIALS_TIER:ed84bf98-225e-4c1f-9395-3557ed4f614a:0" "$STARTER_TIER:c59d491a-601c-4c67-a1b5-5c231664aa95:200" "$STANDARD_TIER:17fdecd5-221a-477e-882d-6352adb49188:350"; do
+for pair in "$ESSENTIALS_TIER:ed84bf98-225e-4c1f-9395-3557ed4f614a:0" "$STARTER_TIER:c59d491a-601c-4c67-a1b5-5c231664aa95:0" "$STANDARD_TIER:17fdecd5-221a-477e-882d-6352adb49188:350"; do
   IFS=':' read -r tid tpid amt <<< "$pair"
   RP=$(mk_recurring "$amt")
   mutate "$SO_ID" addOptionGroupTierPricing <<EOF
 {"optionGroupId": "$OG_TEAM", "tierPricingId": "$tpid", "tierId": "$tid", "recurringPricing": $RP, "lastModified": "$TIMESTAMP"}
 EOF
 done
-log "Tier pricing: Team & Contributor Ops (Essentials=free, Starter=200, Standard=350)"
+log "Tier pricing: Team & Contributor Ops (Essentials=free, Starter=free, Standard=350)"
 
-# Advanced & Scale Features — Essentials=0, Starter=100, Standard=350
+# Advanced & Scale Features — Essentials=0, Starter=0, Standard=350
 OG_ADV="0894f5e4-a03d-42f6-8e86-672fd6b7d46f"
-for pair in "$ESSENTIALS_TIER:227b20b9-4edd-40da-9856-c9a6a2d89e03:0" "$STARTER_TIER:b97846e2-bd1a-40bb-833c-392572c8fdc6:100" "$STANDARD_TIER:51721efc-d35c-42a4-a392-dffd6354393e:350"; do
+for pair in "$ESSENTIALS_TIER:227b20b9-4edd-40da-9856-c9a6a2d89e03:0" "$STARTER_TIER:b97846e2-bd1a-40bb-833c-392572c8fdc6:0" "$STANDARD_TIER:51721efc-d35c-42a4-a392-dffd6354393e:350"; do
   IFS=':' read -r tid tpid amt <<< "$pair"
   RP=$(mk_recurring "$amt")
   mutate "$SO_ID" addOptionGroupTierPricing <<EOF
 {"optionGroupId": "$OG_ADV", "tierPricingId": "$tpid", "tierId": "$tid", "recurringPricing": $RP, "lastModified": "$TIMESTAMP"}
 EOF
 done
-log "Tier pricing: Advanced & Scale (Essentials=free, Starter=100, Standard=350)"
+log "Tier pricing: Advanced & Scale (Essentials=free, Starter=free, Standard=350)"
 
 # ── Services ─────────────────────────────────────────────────────────────────
 
@@ -593,6 +593,10 @@ for pair in \
   "b45dade5-7c15-493e-b876-39cfb234d609:060de4c6-003f-4db0-b0b3-73bc1eee3667:45cb921f-e2e7-4043-ae54-a4b9f44be415" \
   "329ad638-494b-4877-ba3f-2116c6fa81f5:6527d83a-ac0b-4e01-9a43-448d444fd982:45cb921f-e2e7-4043-ae54-a4b9f44be415" \
   "42ab8332-bed1-4ced-bdc6-61181e7beca1:afe19ef7-ee82-492d-9814-e427bf19c72a:45cb921f-e2e7-4043-ae54-a4b9f44be415" \
+  "e1a3b5c7-9d2f-4e8a-b6c4-1f0d8e7a2b59:309cbb23-e978-452f-bca2-dc4995993a48:0894f5e4-a03d-42f6-8e86-672fd6b7d46f" \
+  "a4d8f2e6-3b7c-41a9-8e5d-6c9f0b2a1d73:2e7d934b-2324-4ab9-8e72-37bf64488841:0894f5e4-a03d-42f6-8e86-672fd6b7d46f" \
+  "c7f1a9b3-5e4d-42c8-96a7-2d8b0e3f5c16:ceaf4759-63f3-488e-bb1d-6ba6ce7919fa:0894f5e4-a03d-42f6-8e86-672fd6b7d46f" \
+  "b2e6d4a8-1c9f-43b7-a5e3-7f0c8d1b6a24:43a9473a-a217-4e67-9b26-31e1c6cbb2b5:0894f5e4-a03d-42f6-8e86-672fd6b7d46f" \
   "14784011-2ac9-4f02-a37e-568824b2bd49:7b892ca8-3781-43a5-8535-d19022dba5c2:d9a9ca46-a603-487c-ad00-a6b2fb25b81c" \
   "86dd1390-d1d0-43e6-ac0a-eac1b212d456:9df512e6-d003-40bf-ba7d-642b3297dbab:d9a9ca46-a603-487c-ad00-a6b2fb25b81c" \
   "9e51f5dc-08cc-4fae-9ccc-79594ee3abcc:df8a6ed0-f1d3-4b98-8916-0167d4f5a8f6:d9a9ca46-a603-487c-ad00-a6b2fb25b81c" \
@@ -617,7 +621,7 @@ do
 {"tierId": "$STANDARD_TIER", "serviceLevelId": "$sl_id", "serviceId": "$svc_id", "level": "INCLUDED", "optionGroupId": "$og_id", "lastModified": "$TIMESTAMP"}
 EOF
 done
-log "Standard tier: 34 service levels"
+log "Standard tier: 38 service levels"
 
 # Standard tier usage limits
 mutate "$SO_ID" addUsageLimit <<EOF
@@ -659,6 +663,10 @@ standard_pairs = [
     ('060de4c6-003f-4db0-b0b3-73bc1eee3667','45cb921f-e2e7-4043-ae54-a4b9f44be415'),
     ('6527d83a-ac0b-4e01-9a43-448d444fd982','45cb921f-e2e7-4043-ae54-a4b9f44be415'),
     ('afe19ef7-ee82-492d-9814-e427bf19c72a','45cb921f-e2e7-4043-ae54-a4b9f44be415'),
+    ('309cbb23-e978-452f-bca2-dc4995993a48','0894f5e4-a03d-42f6-8e86-672fd6b7d46f'),
+    ('2e7d934b-2324-4ab9-8e72-37bf64488841','0894f5e4-a03d-42f6-8e86-672fd6b7d46f'),
+    ('ceaf4759-63f3-488e-bb1d-6ba6ce7919fa','0894f5e4-a03d-42f6-8e86-672fd6b7d46f'),
+    ('43a9473a-a217-4e67-9b26-31e1c6cbb2b5','0894f5e4-a03d-42f6-8e86-672fd6b7d46f'),
     ('7b892ca8-3781-43a5-8535-d19022dba5c2','d9a9ca46-a603-487c-ad00-a6b2fb25b81c'),
     ('9df512e6-d003-40bf-ba7d-642b3297dbab','d9a9ca46-a603-487c-ad00-a6b2fb25b81c'),
     ('df8a6ed0-f1d3-4b98-8916-0167d4f5a8f6','d9a9ca46-a603-487c-ad00-a6b2fb25b81c'),
@@ -686,7 +694,7 @@ for svc_id, og_id in standard_pairs:
 {"tierId": "$CUSTOM_TIER", "serviceLevelId": "$sl_id", "serviceId": "$svc_id", "level": "INCLUDED", "optionGroupId": "$og_id", "lastModified": "$TIMESTAMP"}
 EOF
 done
-log "Custom tier: 34 service levels (mirrors Standard)"
+log "Custom tier: 38 service levels (mirrors Standard)"
 
 # ── Done ─────────────────────────────────────────────────────────────────────
 
