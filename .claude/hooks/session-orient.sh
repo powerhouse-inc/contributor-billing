@@ -2,7 +2,8 @@
 # Session orientation hook — runs at session start
 # Reads vault state and surfaces what needs attention
 
-VAULT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+VAULT_ROOT="$PROJECT_ROOT/knowledge"
 MARKER="$VAULT_ROOT/.arscontexta"
 
 # Only run if this is an Ars Contexta vault
@@ -54,7 +55,7 @@ fi
 # Check for reminders
 if [ -f "$VAULT_ROOT/ops/reminders.md" ]; then
   PENDING=$(grep -c '^\- \[ \]' "$VAULT_ROOT/ops/reminders.md" 2>/dev/null || echo 0)
-  [ "$PENDING" -gt 0 ] && echo "REMINDERS: $PENDING pending items in ops/reminders.md"
+  [ "$PENDING" -gt 0 ] && echo "REMINDERS: $PENDING pending items in knowledge/ops/reminders.md"
 fi
 
 echo "--- Orient Complete ---"
