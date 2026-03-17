@@ -56,7 +56,13 @@
       "Bash(sudo:*)",
       "Bash(lsattr:*)",
       "Bash(chmod +x:*)",
-      "Bash(/home/p/wsl-port-forward.sh:*)"
+      "Bash(/home/p/wsl-port-forward.sh:*)",
+      "Bash(find . -name *.md -type f \\\\\\(-path ./insights/* -o -path ./self/* -o -path ./ops/methodology/* -o -path ./templates/* \\\\\\) ! -path ./node_modules/* -exec grep -o [[[^]]*]] {} +)",
+      "Bash(find /home/p/Powerhouse/demos/contributor-billing -maxdepth 3 -name *.md -type f \\\\\\(-path */insights/* -o -path */self/* -o -path */ops/methodology/* \\\\\\) ! -path */node_modules/*)",
+      "Bash(for file:*)",
+      "Bash(do echo:*)",
+      "Bash(then echo:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",
