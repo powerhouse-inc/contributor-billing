@@ -83,13 +83,13 @@ step "Step 2: Create folder structure"
 # Generate folder IDs
 FOLDER_IDS=$(python3 -c "
 import uuid
-print(str(uuid.uuid4()))
-print(str(uuid.uuid4()))
-print(str(uuid.uuid4()))
+for _ in range(4):
+    print(str(uuid.uuid4()))
 ")
 SERVICES_FOLDER_ID=$(echo "$FOLDER_IDS" | sed -n '1p')
 PRODUCTS_FOLDER_ID=$(echo "$FOLDER_IDS" | sed -n '2p')
 OFFERINGS_FOLDER_ID=$(echo "$FOLDER_IDS" | sed -n '3p')
+SUBSCRIPTIONS_FOLDER_ID=$(echo "$FOLDER_IDS" | sed -n '4p')
 
 # Create "Services And Offerings" at root
 switchboard docs mutate "$DRIVE_ID" --op addFolder \
@@ -109,6 +109,12 @@ switchboard docs mutate "$DRIVE_ID" --op addFolder \
   --format json --quiet >/dev/null 2>&1
 log "Created: Service Offerings ($OFFERINGS_FOLDER_ID)"
 
+# Create "Service Subscriptions" subfolder (team subfolders created by the resolver)
+switchboard docs mutate "$DRIVE_ID" --op addFolder \
+  --input "{\"id\": \"$SUBSCRIPTIONS_FOLDER_ID\", \"name\": \"Service Subscriptions\", \"parentFolder\": \"$SERVICES_FOLDER_ID\"}" \
+  --format json --quiet >/dev/null 2>&1
+log "Created: Service Subscriptions ($SUBSCRIPTIONS_FOLDER_ID)"
+
 # Verify folder structure
 TREE_JSON=$(switchboard docs tree "$DRIVE_SLUG" --format json 2>&1)
 FOLDER_COUNT=$(echo "$TREE_JSON" | pyjq "
@@ -117,8 +123,8 @@ nodes = data['document']['state']['global']['nodes']
 folders = [n for n in nodes if n['kind'] == 'folder']
 print(len(folders))
 ")
-[ "$FOLDER_COUNT" = "3" ] || die "Expected 3 folders, got $FOLDER_COUNT"
-log "Folder structure verified (3 folders)"
+[ "$FOLDER_COUNT" = "4" ] || die "Expected 4 folders, got $FOLDER_COUNT"
+log "Folder structure verified (4 folders)"
 
 # ── Step 3: Create builder profile ──────────────────────────────────────────
 
