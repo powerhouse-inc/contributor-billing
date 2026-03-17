@@ -12,7 +12,7 @@
         "@powerhousedao/common": "6.0.0-dev.90",
         "@powerhousedao/design-system": "6.0.0-dev.90",
         "@powerhousedao/document-engineering": "1.40.1",
-        "@powerhousedao/service-offering": "1.0.0-dev.13",
+        "@powerhousedao/service-offering": "1.0.0-dev.14",
         "@powerhousedao/vetra": "^6.0.0-dev.90",
         "@react-pdf/renderer": "^4.3.1",
         "@safe-global/api-kit": "^4.0.0",
@@ -759,7 +759,7 @@
 
     "@powerhousedao/reactor-mcp": ["@powerhousedao/reactor-mcp@6.0.0-dev.90", "", { "dependencies": { "@ai-sdk/openai": "2.0.0", "@modelcontextprotocol/sdk": "^1.27.1", "@openfeature/core": "1.9.1", "@openfeature/env-var-provider": "0.3.1", "@openfeature/server-sdk": "1.19.0", "@powerhousedao/codegen": "6.0.0-dev.90", "@powerhousedao/config": "6.0.0-dev.90", "@powerhousedao/reactor": "6.0.0-dev.90", "ai": "5.0.0", "change-case": "5.4.4", "document-drive": "6.0.0-dev.90", "document-model": "6.0.0-dev.90", "express": "^4.21.1", "vite": "7.3.1", "zod": "4.3.6" }, "bin": { "reactor-mcp": "dist/src/cli.js" } }, "sha512-CkAEthvaYhhYXaICyj+0MTjyB5mxyYMMYhyBD/lowPhqOWw0b+MdgZjEJDOCeeevLo2fDd8P4h6HUKapQh6RQQ=="],
 
-    "@powerhousedao/service-offering": ["@powerhousedao/service-offering@1.0.0-dev.13", "", { "dependencies": { "@electric-sql/pglite": "0.3.15", "@powerhousedao/builder-tools": "6.0.0-dev.90", "@powerhousedao/common": "6.0.0-dev.90", "@powerhousedao/design-system": "6.0.0-dev.90", "@powerhousedao/document-engineering": "1.40.1", "@powerhousedao/vetra": "6.0.0-dev.90", "@tailwindcss/vite": "^4.2.1", "@uiw/react-md-editor": "^4.0.11", "cmd-ts": "^0.15.0", "document-model": "^6.0.0-dev.90", "graphql": "^16.10.0", "graphql-tag": "^2.12.6", "lucide-react": "^0.577.0", "rehype-slug": "^6.0.0", "vite-plugin-html": "^3.2.2", "vite-plugin-svgr": "^4.5.0", "zod": "^4.3.5" }, "peerDependencies": { "react": ">=19.0.0", "react-dom": ">=19.0.0" } }, "sha512-Ki2ymoZgXawRN1oXPQv7aI4idKIWFMEaai064ViugqzHJU+590fkgI+VDEVcw/27SfRpAdwmKgrAx6QbW9GpLA=="],
+    "@powerhousedao/service-offering": ["@powerhousedao/service-offering@1.0.0-dev.14", "", { "dependencies": { "@electric-sql/pglite": "0.3.15", "@powerhousedao/builder-tools": "6.0.0-dev.90", "@powerhousedao/common": "6.0.0-dev.90", "@powerhousedao/design-system": "6.0.0-dev.90", "@powerhousedao/document-engineering": "1.40.1", "@powerhousedao/vetra": "6.0.0-dev.90", "@tailwindcss/vite": "^4.2.1", "@uiw/react-md-editor": "^4.0.11", "cmd-ts": "^0.15.0", "document-model": "^6.0.0-dev.90", "graphql": "^16.10.0", "graphql-tag": "^2.12.6", "lucide-react": "^0.577.0", "rehype-slug": "^6.0.0", "vite-plugin-html": "^3.2.2", "vite-plugin-svgr": "^4.5.0", "zod": "^4.3.5" }, "peerDependencies": { "react": ">=19.0.0", "react-dom": ">=19.0.0" } }, "sha512-ozQgGXzl/TrFLbY8fCVhcSB7Jfoz/5bJULlF+S/20314TS5umUy/Ud2NxtfLEd2a3K32I1kUY22plfAoZlPk9g=="],
 
     "@powerhousedao/shared": ["@powerhousedao/shared@6.0.0-dev.90", "", { "dependencies": { "@sindresorhus/fnv1a": "3.1.0", "luxon": "3.7.2", "zod": "4.3.6" } }, "sha512-tDFTEmZ3R/qQ6Bvw32OKceVaED8XhS/EwQtBctNbi6WYRGO9Oea8twItu7iwIG0AoEesm1+nth/2cmAazwbCKA=="],
 
