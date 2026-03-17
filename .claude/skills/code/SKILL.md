@@ -143,13 +143,13 @@ that. Correct?"
 After implementation, ALWAYS run:
 
 ```bash
-npm run tsc        # Type safety
-npm run lint:fix   # Lint errors
+bun run tsc        # Type safety
+bun run lint:fix   # Lint errors
 ```
 
 If tests are relevant:
 ```bash
-npm run test       # Full test suite
+bun run test       # Full test suite
 ```
 
 Fix any errors before reporting back. Do not present code with known type or lint failures.

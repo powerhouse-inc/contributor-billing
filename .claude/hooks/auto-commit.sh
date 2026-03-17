@@ -22,6 +22,6 @@ if git diff --cached --quiet 2>/dev/null; then
   exit 0
 fi
 
-git commit -m "vault: auto-commit knowledge changes" --no-verify 2>/dev/null
+git commit -m "chore(vault): auto-commit knowledge changes [skip ci]" --no-verify 2>/dev/null
 
 exit 0
