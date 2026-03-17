@@ -9,10 +9,10 @@ generated_from: "arscontexta-0.8.0"
 
 | Command | Purpose | Example |
 |---------|---------|---------|
-| /arscontexta:distill | Extract insights from source material | `/arscontexta:distill inbox/pr-review-notes.md` |
+| /arscontexta:distill | Extract insights from source material | `/arscontexta:distill knowledge/inbox/pr-review-notes.md` |
 | /arscontexta:connect | Find connections between insights | `/arscontexta:connect "reducer patterns map"` |
 | /arscontexta:revisit | Refresh old insights with new context | `/arscontexta:revisit "oldest 5 insights"` |
-| /arscontexta:validate | Verify insight quality (summary, schema, links) | `/arscontexta:validate insights/` |
+| /arscontexta:validate | Verify insight quality (summary, schema, links) | `/arscontexta:validate knowledge/insights/` |
 | /arscontexta:check | Schema and link validation | `/arscontexta:check` |
 
 ## Orchestration Skills
@@ -21,7 +21,7 @@ generated_from: "arscontexta-0.8.0"
 |---------|---------|---------|
 | /arscontexta:seed | Initialize processing from a source | `/arscontexta:seed "article about document models"` |
 | /arscontexta:ralph | Orchestrated batch processing | `/arscontexta:ralph` |
-| /arscontexta:pipeline | Full pipeline execution | `/arscontexta:pipeline inbox/session-notes.md` |
+| /arscontexta:pipeline | Full pipeline execution | `/arscontexta:pipeline knowledge/inbox/session-notes.md` |
 | /arscontexta:tasks | Queue management | `/arscontexta:tasks status` |
 
 ## Navigation Skills

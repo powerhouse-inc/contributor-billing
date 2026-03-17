@@ -7,7 +7,7 @@ generated_from: "arscontexta-0.8.0"
 
 ## config.yaml
 
-The live configuration file at ops/config.yaml controls system behavior. Key fields:
+The live configuration file at knowledge/ops/config.yaml controls system behavior. Key fields:
 
 ```yaml
 dimensions:
@@ -24,7 +24,7 @@ Changes take effect next session.
 
 ## Using /architect
 
-For guided configuration changes, run /arscontexta:architect. It analyzes your vault state, compares against ops/derivation.md, and suggests research-backed adjustments.
+For guided configuration changes, run /arscontexta:architect. It analyzes your vault state, compares against knowledge/ops/derivation.md, and suggests research-backed adjustments.
 
 ## What Your Preset Includes
 
@@ -37,7 +37,7 @@ Your system was configured as a **product engineering** vault with:
 
 ## Feature Toggling
 
-In ops/config.yaml, set features to true/false:
+In knowledge/ops/config.yaml, set features to true/false:
 - `semantic-search: false` — Enable with qmd for large vaults
 - `processing-pipeline: true` — The core pipeline (keep on)
 

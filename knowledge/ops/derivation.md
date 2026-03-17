@@ -87,7 +87,7 @@ engine_version: "1.0.0"
 4. Orphan Drift -- insights created but never linked to maps (mitigated by condition-based maintenance)
 
 ## Generation Parameters
-- Folder names: insights, inbox, archive, self, ops, templates, manual
+- Folder names: knowledge/insights, knowledge/inbox, knowledge/archive, knowledge/self, knowledge/ops, knowledge/templates, knowledge/manual
 - Skills to generate: all 16 -- vocabulary-transformed
 - Hooks to generate: session-orient, session-capture, validate-note, auto-commit
 - Templates to create: insight-note, map, source-capture, observation

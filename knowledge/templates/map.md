@@ -1,7 +1,7 @@
 ---
 _schema:
   entity_type: "map"
-  applies_to: "insights/*.md"
+  applies_to: "knowledge/insights/*.md"
   required:
     - summary
   optional:

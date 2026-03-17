@@ -9,7 +9,7 @@ Meta-skills operate on the system itself, not on your content. They help the kno
 
 ## /arscontexta:ask
 
-Query the bundled research knowledge base (249 methodology notes) plus your local ops/methodology/.
+Query the bundled research knowledge base (249 methodology notes) plus your local knowledge/ops/methodology/.
 
 ```
 /arscontexta:ask "why does my system use condition-based maintenance?"
@@ -17,7 +17,7 @@ Query the bundled research knowledge base (249 methodology notes) plus your loca
 ```
 
 Two knowledge layers:
-- **Local** (ops/methodology/) — "How does MY system work?"
+- **Local** (knowledge/ops/methodology/) — "How does MY system work?"
 - **Research graph** — "Why is this a good idea in general?"
 
 ## /arscontexta:architect
@@ -31,8 +31,8 @@ When to use:
 
 ## /arscontexta:rethink
 
-Reviews accumulated observations (ops/observations/) and tensions (ops/tensions/). For each, decides:
-- **PROMOTE** to insights/ — crystallized into a genuine insight
+Reviews accumulated observations (knowledge/ops/observations/) and tensions (knowledge/ops/tensions/). For each, decides:
+- **PROMOTE** to knowledge/insights/ — crystallized into a genuine insight
 - **IMPLEMENT** — update the context file or methodology
 - **ARCHIVE** — no longer relevant
 - **KEEP PENDING** — not enough evidence yet
@@ -47,14 +47,14 @@ Capture friction and methodology learnings immediately during work.
 /arscontexta:remember "searching for editor patterns always fails because insights are titled as decisions"
 ```
 
-This creates an observation in ops/observations/ for future /rethink processing. Also detectable automatically from session transcripts.
+This creates an observation in knowledge/ops/observations/ for future /rethink processing. Also detectable automatically from session transcripts.
 
 ## How Meta-Skills Relate
 
 ```
 Work session → notice friction → /remember (or auto-detect)
                                       ↓
-                              ops/observations/
+                              knowledge/ops/observations/
                                       ↓ (10+ accumulated)
                                   /rethink
                                       ↓

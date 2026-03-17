@@ -54,8 +54,9 @@ fi
 
 # Check for reminders
 if [ -f "$VAULT_ROOT/ops/reminders.md" ]; then
-  PENDING=$(grep -c '^\- \[ \]' "$VAULT_ROOT/ops/reminders.md" 2>/dev/null || echo 0)
-  [ "$PENDING" -gt 0 ] && echo "REMINDERS: $PENDING pending items in knowledge/ops/reminders.md"
+  PENDING=$(grep -c '^\- \[ \]' "$VAULT_ROOT/ops/reminders.md" 2>/dev/null || true)
+  PENDING=${PENDING:-0}
+  [ "$PENDING" -gt 0 ] 2>/dev/null && echo "REMINDERS: $PENDING pending items in knowledge/ops/reminders.md"
 fi
 
 echo "--- Orient Complete ---"

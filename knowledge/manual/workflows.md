@@ -10,10 +10,10 @@ generated_from: "arscontexta-0.8.0"
 Content flows through four phases:
 
 ```
-inbox/ → /distill → insights/ → /connect → /revisit → /validate
+knowledge/inbox/ → /distill → knowledge/insights/ → /connect → /revisit → /validate
 ```
 
-1. **Capture** — Drop raw content into inbox/. Zero friction, no structuring.
+1. **Capture** — Drop raw content into knowledge/inbox/. Zero friction, no structuring.
 2. **Distill** — /arscontexta:distill reads the source, extracts insights with proper schema
 3. **Connect** — /arscontexta:connect finds relationships, updates maps
 4. **Validate** — /arscontexta:validate checks summary quality, schema, and links
@@ -30,8 +30,8 @@ inbox/ → /distill → insights/ → /connect → /revisit → /validate
 
 Every session: **Orient → Work → Persist**
 
-1. Orient: Read self/, check conditions, check reminders (~2 min)
-2. Work: Focus on one task. Discoveries go to inbox/, not tangents
+1. Orient: Read knowledge/self/, check conditions, check reminders (~2 min)
+2. Work: Focus on one task. Discoveries go to knowledge/inbox/, not tangents
 3. Persist: Update goals, commit changes, session capture runs automatically
 
 ## Maintenance Cycle

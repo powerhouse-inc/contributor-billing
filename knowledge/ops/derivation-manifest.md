@@ -32,10 +32,10 @@ active_blocks:
 coherence_result: passed
 
 vocabulary:
-  notes: "insights"
-  inbox: "inbox"
-  archive: "archive"
-  ops: "ops"
+  notes: "knowledge/insights"
+  inbox: "knowledge/inbox"
+  archive: "knowledge/archive"
+  ops: "knowledge/ops"
 
   note: "insight"
   note_plural: "insights"

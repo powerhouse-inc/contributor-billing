@@ -22,7 +22,7 @@ Welcome to the contributor-billing knowledge system. This graph tracks architect
 - type safety — TypeScript patterns and gotchas
 
 ## Getting Started
-1. Read self/identity.md to understand your purpose
-2. Capture your first insight in inbox/
-3. Process it through /distill to insights/
+1. Read knowledge/self/identity.md to understand your purpose
+2. Capture your first insight in knowledge/inbox/
+3. Process it through /distill to knowledge/insights/
 4. Connect it to this hub

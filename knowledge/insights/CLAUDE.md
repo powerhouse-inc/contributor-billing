@@ -14,7 +14,7 @@ Insights are your external memory. Wiki-links are your connections. Maps are you
 
 **Every insight you create must be findable by a future agent who doesn't know it exists.**
 
-This is the foundational retrieval constraint. Before writing anything to insights/, ask:
+This is the foundational retrieval constraint. Before writing anything to knowledge/insights/, ask:
 
 1. **Title as claim** — Does the title work as prose when linked? `since [[title]]` reads naturally?
 2. **Summary quality** — Does the summary add information beyond the title? Would an agent searching for this concept find it?
@@ -33,16 +33,16 @@ Every session follows three phases. This rhythm prevents context loss and keeps 
 
 Before doing anything, understand where you are:
 
-1. **Read identity and goals** — Check self/identity.md and self/goals.md. What was the last session working on?
+1. **Read identity and goals** — Check knowledge/self/identity.md and knowledge/self/goals.md. What was the last session working on?
 2. **Check condition-based triggers** — Workboard reconciliation runs at session start. It checks maintenance conditions (orphans, dangling links, inbox pressure, observation thresholds) and surfaces any that need attention.
-3. **Check reminders** — Read ops/reminders.md. Past sessions may have left explicit notes for future sessions.
-4. **Understand current state** — What insights exist? What's in inbox/? What does the graph look like?
+3. **Check reminders** — Read knowledge/ops/reminders.md. Past sessions may have left explicit notes for future sessions.
+4. **Understand current state** — What insights exist? What's in knowledge/inbox/? What does the graph look like?
 
 Orientation should take 1-2 minutes. Read what's needed, skip what isn't.
 
 ### Work
 
-Focus on one task per session. When discoveries emerge, capture them in inbox/ and return to the current task. Don't context-switch.
+Focus on one task per session. When discoveries emerge, capture them in knowledge/inbox/ and return to the current task. Don't context-switch.
 
 **Context budget:**
 - ~20% orientation (self/, recent ops)
@@ -54,18 +54,18 @@ Focus on one task per session. When discoveries emerge, capture them in inbox/ a
 Before ending a session:
 - Write any new insights
 - Update relevant maps
-- Update self/goals.md with current state
+- Update knowledge/self/goals.md with current state
 - Capture methodology learnings
-- Session capture: stop hooks save transcript to ops/sessions/
+- Session capture: stop hooks save transcript to knowledge/ops/sessions/
 
 ---
 
-## Your Mind Space (self/)
+## Your Mind Space (knowledge/self/)
 
 This is YOUR persistent memory. Read it at EVERY session start.
 
 ```
-self/
+knowledge/self/
 ├── identity.md      — who you are, your approach
 ├── methodology.md   — how you work, principles
 ├── goals.md         — current threads, what's active
@@ -83,21 +83,21 @@ self/
 
 | Content Type | Destination | Examples |
 |-------------|-------------|----------|
-| Architecture decisions, patterns, feature ideas | insights/ | Proven fixes, design rationale, technical debt signals |
-| Raw material to process | inbox/ | PR observations, brainstorm dumps, code review notes |
-| Agent identity, methodology, preferences | self/ | Working patterns, learned preferences, goals |
-| Time-bound commitments | ops/reminders.md | Follow-ups, deadlines, "remind me to..." |
-| Processing state, queue, config | ops/ | Queue state, task files, session logs |
-| Friction signals, patterns noticed | ops/observations/ | Search failures, methodology improvements |
+| Architecture decisions, patterns, feature ideas | knowledge/insights/ | Proven fixes, design rationale, technical debt signals |
+| Raw material to process | knowledge/inbox/ | PR observations, brainstorm dumps, code review notes |
+| Agent identity, methodology, preferences | knowledge/self/ | Working patterns, learned preferences, goals |
+| Time-bound commitments | knowledge/ops/reminders.md | Follow-ups, deadlines, "remind me to..." |
+| Processing state, queue, config | knowledge/ops/ | Queue state, task files, session logs |
+| Friction signals, patterns noticed | knowledge/ops/observations/ | Search failures, methodology improvements |
 
-When uncertain, ask: "Is this durable knowledge (insights/), agent identity (self/), or temporal coordination (ops/)?"
+When uncertain, ask: "Is this durable knowledge (knowledge/insights/), agent identity (knowledge/self/), or temporal coordination (knowledge/ops/)?"
 
 ---
 
-## Operational Space (ops/)
+## Operational Space (knowledge/ops/)
 
 ```
-ops/
+knowledge/ops/
 ├── derivation.md      — why this system was configured this way
 ├── config.yaml        — live configuration (edit to adjust dimensions)
 ├── reminders.md       — time-bound commitments
@@ -119,7 +119,7 @@ When users ask about system structure, schema, or methodology:
 |---------|----------|----------|
 | "How should I organize/structure..." | /arscontexta:architect | Apply methodology below |
 | "Research best practices for..." | /arscontexta:ask | Read bundled references |
-| "What does my system know about..." | Check ops/methodology/ directly | /arscontexta:ask for research backing |
+| "What does my system know about..." | Check knowledge/ops/methodology/ directly | /arscontexta:ask for research backing |
 | "I want to add a new area/domain..." | /arscontexta:add-domain | Manual folder + template creation |
 | "What should I work on..." | /arscontexta:next | Reconcile queue + recommend |
 | "Help / what can I do..." | /arscontexta:help | Show available commands |
@@ -232,7 +232,7 @@ Every piece of content follows: capture → distill → connect → validate. Ea
 
 #### Phase 1: Capture
 
-Zero friction. Everything enters through inbox/. Speed of capture beats precision of filing. Distilling happens later, in fresh context with full attention.
+Zero friction. Everything enters through knowledge/inbox/. Speed of capture beats precision of filing. Distilling happens later, in fresh context with full attention.
 
 #### Phase 2: Distill
 
@@ -268,7 +268,7 @@ Three checks:
 
 ### Inbox Processing
 
-Everything enters through inbox/. Don't think about structure at capture time.
+Everything enters through knowledge/inbox/. Don't think about structure at capture time.
 
 **What goes to inbox:**
 - Observations from coding sessions
@@ -285,11 +285,11 @@ Each session focuses on ONE task. Discoveries become future tasks, not tangents.
 
 ## Pipeline Compliance
 
-**NEVER write directly to insights/.** All content routes through the pipeline: inbox/ → /distill → insights/. If you find yourself creating a file in insights/ without having run /distill, STOP. Route through inbox/ first. The pipeline exists because direct writes skip quality gates.
+**NEVER write directly to knowledge/insights/.** All content routes through the pipeline: inbox/ → /distill → insights/. If you find yourself creating a file in knowledge/insights/ without having run /distill, STOP. Route through inbox/ first. The pipeline exists because direct writes skip quality gates.
 
 ### Processing Depth
 
-Configured in ops/config.yaml:
+Configured in knowledge/ops/config.yaml:
 - **deep** — Full pipeline, fresh context per phase, maximum quality gates
 - **standard** — Full pipeline, balanced attention (default)
 - **quick** — Compressed pipeline, combine phases, high volume catch-up
@@ -330,19 +330,19 @@ status: preliminary | open | active | archived
 
 ```bash
 # Find all insights of a specific type
-rg '^type: pattern' insights/
+rg '^type: pattern' knowledge/insights/
 
 # Scan summaries for a concept
-rg '^summary:.*reducer' insights/
+rg '^summary:.*reducer' knowledge/insights/
 
 # Find insights missing required fields
-rg -L '^summary:' insights/*.md
+rg -L '^summary:' knowledge/insights/*.md
 
 # Cross-field queries
-rg -l '^type: decision' insights/ | xargs rg '^status: active'
+rg -l '^type: decision' knowledge/insights/ | xargs rg '^status: active'
 
 # Count insights by type
-rg '^type:' insights/ --no-filename | sort | uniq -c | sort -rn
+rg '^type:' knowledge/insights/ --no-filename | sort | uniq -c | sort -rn
 
 # Find backlinks to a specific insight
 rg '\[\[insight title\]\]' --glob '*.md'
@@ -391,7 +391,7 @@ These are evaluated by /next. Priority derives from consequence speed:
 
 ## Task Management
 
-### Processing Queue (ops/queue/)
+### Processing Queue (knowledge/ops/queue/)
 
 Pipeline tasks are tracked in a JSON queue. Each insight gets one entry that progresses through phases (create → connect → revisit → validate).
 
@@ -408,34 +408,34 @@ Complexity arrives at pain points, not before. You don't add features because th
 ### Observation Capture
 
 When friction occurs (search fails, content placed wrong, workflow breaks):
-1. Use /remember to capture it in ops/observations/
+1. Use /remember to capture it in knowledge/ops/observations/
 2. Continue your current work
 3. If the same friction occurs 3+ times, propose updating this context file
 4. If user explicitly says "remember this," update immediately
 
 ### Operational Learning Loop
 
-**Observations** (ops/observations/) — friction, surprises, process gaps. Capture immediately as atomic notes.
+**Observations** (knowledge/ops/observations/) — friction, surprises, process gaps. Capture immediately as atomic notes.
 
-**Tensions** (ops/tensions/) — contradictions between insights, implementation vs theory mismatches.
+**Tensions** (knowledge/ops/tensions/) — contradictions between insights, implementation vs theory mismatches.
 
 **Accumulation triggers:**
 - 10+ pending observations → Run /rethink
 - 5+ pending tensions → Run /rethink
-- /rethink triages each: PROMOTE (to insights/), IMPLEMENT (update this file), ARCHIVE, or KEEP PENDING
+- /rethink triages each: PROMOTE (to knowledge/insights/), IMPLEMENT (update this file), ARCHIVE, or KEEP PENDING
 
 ---
 
-## Your System's Self-Knowledge (ops/methodology/)
+## Your System's Self-Knowledge (knowledge/ops/methodology/)
 
-Your vault knows why it was built the way it was. ops/methodology/ contains linked notes explaining configuration rationale and operational evolution.
+Your vault knows why it was built the way it was. knowledge/ops/methodology/ contains linked notes explaining configuration rationale and operational evolution.
 
 ### How to Query
 
 ```bash
-ls ops/methodology/*.md          # List all methodology notes
-rg '^category:' ops/methodology/ # Search by category
-rg '^status: active' ops/methodology/  # Find active directives
+ls knowledge/ops/methodology/*.md          # List all methodology notes
+rg '^category:' knowledge/ops/methodology/ # Search by category
+rg '^status: active' knowledge/ops/methodology/  # Find active directives
 ```
 
 ### The Research Foundation
@@ -450,7 +450,7 @@ Access the 249-note methodology knowledge base:
 
 ## Templates — Schema as Scaffolding
 
-Templates define the structure of each insight type. They live in templates/ and include _schema blocks that define validation rules.
+Templates define the structure of each insight type. They live in knowledge/templates/ and include _schema blocks that define validation rules.
 
 When creating a new insight, start from the appropriate template. The template ensures consistency while leaving room for content.
 
@@ -509,17 +509,17 @@ Use /analyze for interactive graph queries.
 
 Never rename an insight manually — it breaks wiki links. Use:
 ```bash
-./ops/scripts/rename-note.sh "old title" "new title"
+./knowledge/ops/scripts/rename-note.sh "old title" "new title"
 ```
 
 ### Maintenance Utilities
 
 ```bash
-./ops/scripts/orphan-notes.sh      # Find unlinked insights
-./ops/scripts/dangling-links.sh    # Find broken wiki links
-./ops/scripts/backlinks.sh "title" # Count incoming links
-./ops/scripts/link-density.sh      # Measure graph density
-./ops/scripts/validate-schema.sh   # Check schema compliance
+./knowledge/ops/scripts/orphan-notes.sh      # Find unlinked insights
+./knowledge/ops/scripts/dangling-links.sh    # Find broken wiki links
+./knowledge/ops/scripts/backlinks.sh "title" # Count incoming links
+./knowledge/ops/scripts/link-density.sh      # Measure graph density
+./knowledge/ops/scripts/validate-schema.sh   # Check schema compliance
 ```
 
 ---
@@ -530,7 +530,7 @@ Never rename an insight manually — it breaks wiki links. Use:
 - Always be honest about what is and isn't known
 - When surfacing patterns, explain the reasoning
 - Never present inferences as facts
-- ops/derivation.md is always readable
+- knowledge/ops/derivation.md is always readable
 
 ### Engineering Integrity
 - Source attribution: track where patterns and decisions originated

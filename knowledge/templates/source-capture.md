@@ -1,7 +1,7 @@
 ---
 _schema:
   entity_type: "source-capture"
-  applies_to: "inbox/*.md"
+  applies_to: "knowledge/inbox/*.md"
   required:
     - summary
   optional:
