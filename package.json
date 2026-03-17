@@ -81,7 +81,7 @@
     "@powerhousedao/common": "6.0.0-dev.90",
     "@powerhousedao/design-system": "6.0.0-dev.90",
     "@powerhousedao/document-engineering": "1.40.1",
-    "@powerhousedao/service-offering": "1.0.0-dev.12",
+    "@powerhousedao/service-offering": "1.0.0-dev.13",
     "@powerhousedao/vetra": "^6.0.0-dev.90",
     "@react-pdf/renderer": "^4.3.1",
     "@safe-global/api-kit": "^4.0.0",
@@ -142,7 +142,8 @@
     "react-dom": ">=19.0.0"
   },
   "overrides": {
-    "graphql": "16.12.0"
+    "graphql": "16.12.0",
+    "document-model": "6.0.0-dev.90"
   },
   "bugs": {
     "url": "https://github.com/powerhouse-inc/contributor-billing/issues"
