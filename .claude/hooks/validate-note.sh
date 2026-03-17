@@ -2,7 +2,8 @@
 # Validate note hook — runs after Write tool
 # Checks that insights have required YAML fields
 
-VAULT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+VAULT_ROOT="$PROJECT_ROOT/knowledge"
 MARKER="$VAULT_ROOT/.arscontexta"
 
 # Only run if this is an Ars Contexta vault
@@ -11,9 +12,9 @@ MARKER="$VAULT_ROOT/.arscontexta"
 # Get the file that was just written from the tool output
 FILE="$TOOL_INPUT_FILE_PATH"
 
-# Only validate files in insights/
+# Only validate files in knowledge/insights/
 case "$FILE" in
-  */insights/*.md)
+  */knowledge/insights/*.md)
     # Skip the CLAUDE.md and index
     case "$FILE" in
       */CLAUDE.md|*/index.md) exit 0 ;;

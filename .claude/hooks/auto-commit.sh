@@ -2,7 +2,8 @@
 # Auto-commit hook — runs after Write tool (async)
 # Commits vault changes to git automatically
 
-VAULT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+VAULT_ROOT="$PROJECT_ROOT/knowledge"
 MARKER="$VAULT_ROOT/.arscontexta"
 
 # Only run if this is an Ars Contexta vault
@@ -12,10 +13,10 @@ MARKER="$VAULT_ROOT/.arscontexta"
 GIT_ENABLED=$(grep -o 'git: *\(true\|false\)' "$MARKER" 2>/dev/null | awk '{print $2}')
 [ "$GIT_ENABLED" = "false" ] && exit 0
 
-cd "$VAULT_ROOT" || exit 0
+cd "$PROJECT_ROOT" || exit 0
 
 # Only commit vault-related files
-git add insights/ inbox/ archive/ self/ ops/ templates/ manual/ .arscontexta 2>/dev/null
+git add knowledge/ 2>/dev/null
 
 # Check if there are staged changes
 if git diff --cached --quiet 2>/dev/null; then
