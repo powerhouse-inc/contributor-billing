@@ -1,4 +1,10 @@
-import { CreditCard, FileText } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ChevronRight,
+  CreditCard,
+  FileText,
+} from "lucide-react";
 import { useBillingFolderStructure } from "../hooks/useBillingFolderStructure.js";
 import {
   useDocumentsInSelectedDrive,
@@ -7,6 +13,7 @@ import {
 } from "@powerhousedao/reactor-browser";
 import { useMemo, useEffect, useCallback } from "react";
 import { MonthlyReportsOverview } from "./MonthlyReportsOverview.js";
+import { useMonthlyReports } from "../hooks/useMonthlyReports.js";
 import type { SelectedFolderInfo } from "./FolderTree.js";
 
 interface BillingOverviewProps {
@@ -93,6 +100,76 @@ export function BillingOverview({
     };
   }, [documentsInDrive, driveDocument, paymentsFolderIds]);
 
+  const { monthReportSets } = useMonthlyReports();
+
+  // Reporting completeness: count months where both snapshot + expense exist
+  const reportingCompleteness = useMemo(() => {
+    const total = monthReportSets.length;
+    const complete = monthReportSets.filter(
+      (rs) => rs.snapshotReport !== null && rs.expenseReports.length > 0,
+    ).length;
+    return { complete, total };
+  }, [monthReportSets]);
+
+  // Action items: missing reports + pending invoices
+  const actionItems = useMemo(() => {
+    const items: Array<{
+      label: string;
+      type: "report" | "invoice";
+      folderInfo?: SelectedFolderInfo;
+    }> = [];
+
+    for (const rs of monthReportSets) {
+      if (!rs.snapshotReport) {
+        items.push({
+          label: `${rs.monthName} — missing snapshot report`,
+          type: "report",
+          folderInfo: rs.reportingFolderId
+            ? {
+                folderId: rs.reportingFolderId,
+                folderType: "reporting",
+                monthName: rs.monthName,
+                paymentsFolderId: rs.folderInfo.paymentsFolder?.id,
+              }
+            : undefined,
+        });
+      }
+      if (rs.expenseReports.length === 0) {
+        items.push({
+          label: `${rs.monthName} — missing expense report`,
+          type: "report",
+          folderInfo: rs.reportingFolderId
+            ? {
+                folderId: rs.reportingFolderId,
+                folderType: "reporting",
+                monthName: rs.monthName,
+                paymentsFolderId: rs.folderInfo.paymentsFolder?.id,
+              }
+            : undefined,
+        });
+      }
+    }
+
+    if (paymentStats.pendingCount > 0) {
+      // Navigate to the newest month's Payments folder
+      const newestMonth = monthReportSets[0];
+      items.push({
+        label: `${paymentStats.pendingCount} invoice${paymentStats.pendingCount === 1 ? "" : "s"} pending payment`,
+        type: "invoice",
+        folderInfo: newestMonth?.folderInfo.paymentsFolder
+          ? {
+              folderId: newestMonth.folderInfo.paymentsFolder.id,
+              folderType: "payments",
+              monthName: newestMonth.monthName,
+              reportingFolderId: newestMonth.folderInfo.reportingFolder?.id,
+            }
+          : undefined,
+      });
+    }
+
+    return items.slice(0, 4);
+  }, [monthReportSets, paymentStats.pendingCount]);
+
   // Auto-create billing folder if it doesn't exist
   const ensureBillingFolder = useCallback(async () => {
     if (!billingFolder) {
@@ -152,7 +229,7 @@ export function BillingOverview({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="flex items-center gap-2 mb-1">
               <FileText className="w-4 h-4 text-gray-500" />
@@ -187,8 +264,62 @@ export function BillingOverview({
               {paymentStats.paidCount}
             </p>
           </div>
+          <div
+            className={`${reportingCompleteness.total > 0 && reportingCompleteness.complete === reportingCompleteness.total ? "bg-green-50" : "bg-amber-50"} rounded-lg p-3`}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              {reportingCompleteness.total > 0 &&
+              reportingCompleteness.complete === reportingCompleteness.total ? (
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-amber-500" />
+              )}
+              <span
+                className={`text-sm ${reportingCompleteness.total > 0 && reportingCompleteness.complete === reportingCompleteness.total ? "text-green-600" : "text-amber-600"}`}
+              >
+                Reports Complete
+              </span>
+            </div>
+            <p
+              className={`text-xl font-bold ${reportingCompleteness.total > 0 && reportingCompleteness.complete === reportingCompleteness.total ? "text-green-700" : "text-amber-700"}`}
+            >
+              {reportingCompleteness.complete}/{reportingCompleteness.total}
+            </p>
+          </div>
         </div>
       </div>
+
+      {/* Action Items */}
+      {actionItems.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-4 h-4 text-amber-600" />
+            <span className="text-sm font-semibold text-amber-800">
+              Needs attention
+            </span>
+          </div>
+          <ul className="space-y-1">
+            {actionItems.map((item) => (
+              <li key={item.label}>
+                {item.folderInfo && onFolderSelect ? (
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between text-left text-sm text-amber-900 hover:bg-amber-100 rounded px-2 py-1.5 transition-colors"
+                    onClick={() => onFolderSelect(item.folderInfo!)}
+                  >
+                    <span>• {item.label}</span>
+                    <ChevronRight className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  </button>
+                ) : (
+                  <span className="text-sm text-amber-900 px-2 py-1.5 block">
+                    • {item.label}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Monthly Reports Overview */}
       <MonthlyReportsOverview

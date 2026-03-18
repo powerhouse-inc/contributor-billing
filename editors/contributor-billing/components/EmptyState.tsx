@@ -1,15 +1,17 @@
-import { useNodesInSelectedDriveOrFolder } from "@powerhousedao/reactor-browser";
+interface EmptyStateProps {
+  title?: string;
+  description?: string;
+}
 
-/** Shows a message when the selected drive or folder is empty */
-export function EmptyState() {
-  const nodes = useNodesInSelectedDriveOrFolder();
-  const hasNodes = nodes.length > 0;
-  if (hasNodes) return null;
-
+/** Shows a contextual message when a folder or view has no content */
+export function EmptyState({
+  title = "This folder is empty",
+  description = "Create your first document or drop one here",
+}: EmptyStateProps) {
   return (
     <div className="py-12 text-center text-gray-500">
-      <p className="text-lg">This folder is empty</p>
-      <p className="mt-2 text-sm">Create your first document or folder below</p>
+      <p className="text-lg">{title}</p>
+      <p className="mt-2 text-sm">{description}</p>
     </div>
   );
 }
