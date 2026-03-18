@@ -623,7 +623,10 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
         nodes={navigationSections}
         activeNodeId={activeNodeId}
         onActiveNodeChange={handleActiveNodeChange}
-        sidebarTitle={builderProfileName || (isOperator ? "Operator Team Admin" : "Builder Team Admin")}
+        sidebarTitle={
+          builderProfileName ||
+          (isOperator ? "Operator Team Admin" : "Builder Team Admin")
+        }
         showSearchBar={false}
         resizable={true}
         allowPinning={false}
