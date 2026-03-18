@@ -8,8 +8,12 @@ import {
 } from "@powerhousedao/reactor-browser";
 import type { FileNode, Node } from "document-drive";
 import type { ExpenseReportDocument } from "../../../document-models/expense-report/v1/gen/types.js";
+import type { InvoiceDocument } from "../../../document-models/invoice/v1/gen/types.js";
+import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/v1/gen/types.js";
+import type { BillingStatementDocument } from "../../../document-models/billing-statement/v1/gen/types.js";
 import { isDocumentSynced } from "../../shared/document-sync.js";
 import { useBillingFolderStructure } from "./useBillingFolderStructure.js";
+import { cbToast } from "../components/cbToast.js";
 
 // Module-level tracking to prevent duplicate processing
 const globalProcessingState = {
@@ -35,8 +39,13 @@ interface UseDocumentAutoPlacementResult {
 export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
   const [driveDocument] = useSelectedDrive();
   const documentsInDrive = useDocumentsInSelectedDrive();
-  const { reportingFolderIds, monthFolders, billingFolder, createMonthFolder } =
-    useBillingFolderStructure();
+  const {
+    reportingFolderIds,
+    paymentsFolderIds,
+    monthFolders,
+    billingFolder,
+    createMonthFolder,
+  } = useBillingFolderStructure();
   const { onMoveNode, onRenameNode } = useNodeActions();
   const driveId = driveDocument?.header.id;
 
@@ -238,6 +247,277 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
     createMonthFolder,
     onMoveNode,
     onRenameNode,
+  ]);
+
+  // Auto-place invoices into appropriate Payments folders based on dateIssued
+  useEffect(() => {
+    if (!driveId || !driveDocument || !documentsInDrive) return;
+
+    const allNodes = driveDocument.state.global.nodes;
+    const processedDocs = globalProcessingState.processedDocs.get(driveId);
+    if (!processedDocs) return;
+
+    // Find invoice file nodes that are NOT already in a Payments folder
+    const invoiceNodesToProcess = allNodes.filter(
+      (node): node is FileNode =>
+        isFileNodeKind(node) &&
+        node.documentType === "powerhouse/invoice" &&
+        !paymentsFolderIds.has(node.parentFolder || ""),
+    );
+
+    for (const fileNode of invoiceNodesToProcess) {
+      if (processedDocs.has(fileNode.id)) continue;
+
+      const doc = documentsInDrive.find(
+        (d): d is InvoiceDocument =>
+          d.header.documentType === "powerhouse/invoice" &&
+          d.header.id === fileNode.id,
+      );
+
+      if (!doc) continue;
+
+      const dateIssued = doc.state.global.dateIssued;
+      const monthName = getMonthNameFromPeriod(
+        dateIssued as string | null | undefined,
+      );
+
+      processedDocs.add(fileNode.id);
+
+      if (monthName) {
+        const monthInfo = monthFolders.get(monthName);
+        const paymentsFolder = monthInfo?.paymentsFolder;
+
+        if (paymentsFolder) {
+          console.log(
+            `[DocumentAutoPlacement] Moving invoice ${fileNode.id} ("${fileNode.name}") to Payments folder for ${monthName}`,
+          );
+
+          onMoveNode(fileNode, paymentsFolder)
+            .then(() => {
+              console.log(
+                `[DocumentAutoPlacement] Successfully moved invoice to ${monthName} > Payments`,
+              );
+              cbToast(
+                `Invoice "${fileNode.name}" placed in ${monthName} > Payments`,
+                { type: "success" },
+              );
+            })
+            .catch((error: unknown) => {
+              console.error(
+                `[DocumentAutoPlacement] Failed to move invoice to Payments folder:`,
+                error,
+              );
+              processedDocs.delete(fileNode.id);
+            });
+        } else {
+          // Month folder doesn't exist — create it, then retry on next effect run
+          console.log(
+            `[DocumentAutoPlacement] Month folder "${monthName}" doesn't exist for invoice, creating it`,
+          );
+          if (billingFolder && driveId) {
+            createMonthFolder(monthName)
+              .then(() => {
+                console.log(
+                  `[DocumentAutoPlacement] Created month folder "${monthName}" for invoice, will retry placement`,
+                );
+                processedDocs.delete(fileNode.id);
+              })
+              .catch((error: unknown) => {
+                console.error(
+                  `[DocumentAutoPlacement] Failed to create month folder "${monthName}" for invoice:`,
+                  error,
+                );
+                processedDocs.delete(fileNode.id);
+              });
+          } else {
+            processedDocs.delete(fileNode.id);
+          }
+        }
+      } else {
+        console.warn(
+          `[DocumentAutoPlacement] Invoice ${fileNode.id} ("${fileNode.name}") has no dateIssued, leaving at root`,
+        );
+        cbToast(
+          `Invoice "${fileNode.name}" has no issue date — could not auto-categorize. It remains at the drive root.`,
+          { type: "warning" },
+        );
+      }
+    }
+  }, [
+    driveId,
+    driveDocument,
+    documentsInDrive,
+    paymentsFolderIds,
+    monthFolders,
+    billingFolder,
+    createMonthFolder,
+    onMoveNode,
+  ]);
+
+  // Auto-place snapshot reports into appropriate Reporting folders based on reportPeriodStart
+  useEffect(() => {
+    if (!driveId || !driveDocument || !documentsInDrive) return;
+
+    const allNodes = driveDocument.state.global.nodes;
+    const processedDocs = globalProcessingState.processedDocs.get(driveId);
+    if (!processedDocs) return;
+
+    const snapshotNodesToProcess = allNodes.filter(
+      (node): node is FileNode =>
+        isFileNodeKind(node) &&
+        node.documentType === "powerhouse/snapshot-report" &&
+        !reportingFolderIds.has(node.parentFolder || ""),
+    );
+
+    for (const fileNode of snapshotNodesToProcess) {
+      if (processedDocs.has(fileNode.id)) continue;
+
+      const doc = documentsInDrive.find(
+        (d): d is SnapshotReportDocument =>
+          d.header.documentType === "powerhouse/snapshot-report" &&
+          d.header.id === fileNode.id,
+      );
+
+      if (!doc) continue;
+
+      const reportPeriodStart = doc.state.global.reportPeriodStart;
+      const monthName = getMonthNameFromPeriod(
+        reportPeriodStart as string | null | undefined,
+      );
+
+      processedDocs.add(fileNode.id);
+
+      if (monthName) {
+        const monthInfo = monthFolders.get(monthName);
+        const reportingFolder = monthInfo?.reportingFolder;
+
+        if (reportingFolder) {
+          onMoveNode(fileNode, reportingFolder)
+            .then(() => {
+              cbToast(
+                `Snapshot report "${fileNode.name}" placed in ${monthName} > Reporting`,
+                { type: "success" },
+              );
+            })
+            .catch((error: unknown) => {
+              console.error(
+                `[DocumentAutoPlacement] Failed to move snapshot report:`,
+                error,
+              );
+              processedDocs.delete(fileNode.id);
+            });
+        } else {
+          if (billingFolder && driveId) {
+            createMonthFolder(monthName)
+              .then(() => {
+                processedDocs.delete(fileNode.id);
+              })
+              .catch(() => {
+                processedDocs.delete(fileNode.id);
+              });
+          } else {
+            processedDocs.delete(fileNode.id);
+          }
+        }
+      } else {
+        cbToast(
+          `Snapshot report "${fileNode.name}" has no report period — could not auto-categorize.`,
+          { type: "warning" },
+        );
+      }
+    }
+  }, [
+    driveId,
+    driveDocument,
+    documentsInDrive,
+    reportingFolderIds,
+    monthFolders,
+    billingFolder,
+    createMonthFolder,
+    onMoveNode,
+  ]);
+
+  // Auto-place billing statements into appropriate Payments folders based on dateIssued
+  useEffect(() => {
+    if (!driveId || !driveDocument || !documentsInDrive) return;
+
+    const allNodes = driveDocument.state.global.nodes;
+    const processedDocs = globalProcessingState.processedDocs.get(driveId);
+    if (!processedDocs) return;
+
+    const billingStatementNodesToProcess = allNodes.filter(
+      (node): node is FileNode =>
+        isFileNodeKind(node) &&
+        node.documentType === "powerhouse/billing-statement" &&
+        !paymentsFolderIds.has(node.parentFolder || ""),
+    );
+
+    for (const fileNode of billingStatementNodesToProcess) {
+      if (processedDocs.has(fileNode.id)) continue;
+
+      const doc = documentsInDrive.find(
+        (d): d is BillingStatementDocument =>
+          d.header.documentType === "powerhouse/billing-statement" &&
+          d.header.id === fileNode.id,
+      );
+
+      if (!doc) continue;
+
+      const dateIssued = doc.state.global.dateIssued;
+      const monthName = getMonthNameFromPeriod(
+        dateIssued as string | null | undefined,
+      );
+
+      processedDocs.add(fileNode.id);
+
+      if (monthName) {
+        const monthInfo = monthFolders.get(monthName);
+        const paymentsFolder = monthInfo?.paymentsFolder;
+
+        if (paymentsFolder) {
+          onMoveNode(fileNode, paymentsFolder)
+            .then(() => {
+              cbToast(
+                `Billing statement "${fileNode.name}" placed in ${monthName} > Payments`,
+                { type: "success" },
+              );
+            })
+            .catch((error: unknown) => {
+              console.error(
+                `[DocumentAutoPlacement] Failed to move billing statement:`,
+                error,
+              );
+              processedDocs.delete(fileNode.id);
+            });
+        } else {
+          if (billingFolder && driveId) {
+            createMonthFolder(monthName)
+              .then(() => {
+                processedDocs.delete(fileNode.id);
+              })
+              .catch(() => {
+                processedDocs.delete(fileNode.id);
+              });
+          } else {
+            processedDocs.delete(fileNode.id);
+          }
+        }
+      } else {
+        cbToast(
+          `Billing statement "${fileNode.name}" has no issue date — could not auto-categorize.`,
+          { type: "warning" },
+        );
+      }
+    }
+  }, [
+    driveId,
+    driveDocument,
+    documentsInDrive,
+    paymentsFolderIds,
+    monthFolders,
+    billingFolder,
+    createMonthFolder,
+    onMoveNode,
   ]);
 
   return {

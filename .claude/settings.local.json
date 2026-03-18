@@ -62,7 +62,14 @@
       "Bash(for file:*)",
       "Bash(do echo:*)",
       "Bash(then echo:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(for f:*)",
+      "Bash(do)",
+      "Bash(sed -i -e 's|inbox/|knowledge/inbox/|g' -e 's|insights/|knowledge/insights/|g' -e 's|self/|knowledge/self/|g' -e 's|ops/observations/|knowledge/ops/observations/|g' -e 's|ops/tensions/|knowledge/ops/tensions/|g' -e 's|ops/methodology/|knowledge/ops/methodology/|g' -e 's|ops/queue/|knowledge/ops/queue/|g' -e 's|ops/config.yaml|knowledge/ops/config.yaml|g' -e 's|ops/derivation.md|knowledge/ops/derivation.md|g' -e \"s|ops/scripts/|knowledge/ops/scripts/|g\" \"$f\")",
+      "Bash(done)",
+      "Bash(bash .claude/hooks/session-orient.sh)",
+      "Bash(git status:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

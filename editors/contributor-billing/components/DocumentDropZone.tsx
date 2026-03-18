@@ -151,6 +151,21 @@ export function DocumentDropZone({
                     `Expense report uploaded. It will be placed in the appropriate Reporting folder based on its period.`,
                     { type: "info" },
                   );
+                } else if (docType === "powerhouse/invoice") {
+                  cbToast(
+                    `Invoice uploaded. It will be placed in the appropriate Payments folder based on its issue date.`,
+                    { type: "info" },
+                  );
+                } else if (docType === "powerhouse/billing-statement") {
+                  cbToast(
+                    `Billing statement uploaded. It will be placed in the appropriate Payments folder based on its issue date.`,
+                    { type: "info" },
+                  );
+                } else if (docType === "powerhouse/snapshot-report") {
+                  cbToast(
+                    `Snapshot report uploaded. It will be placed in the appropriate Reporting folder based on its period.`,
+                    { type: "info" },
+                  );
                 } else if (docType === "powerhouse/accounts") {
                   cbToast(
                     `Accounts document uploaded. It will remain at the root level.`,
@@ -189,8 +204,8 @@ export function DocumentDropZone({
                 Drop documents here
               </p>
               <p className="text-sm text-gray-600 mt-1">
-                Expense Reports and Accounts documents will be automatically
-                organized
+                Invoices, Expense Reports, and Accounts documents will be
+                automatically organized
               </p>
             </div>
           </div>

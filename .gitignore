@@ -4,8 +4,9 @@ coverage
 node_modules
 .eslintcache
 .env.local
-
 .ph
 projects-import.js
-
 knowledge/ops/sessions/
+.DS_Store
+.auth.json
+.keypair.json

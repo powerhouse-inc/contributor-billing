@@ -355,14 +355,16 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
   // Check if builder profile document exists - don't show sidebar if it doesn't
   const hasBuilderProfile = builderProfileDocument !== null;
 
-  // Get the isOperator flag from the builder profile state
-  const isOperator = useMemo(() => {
-    if (!builderProfileDocument) return false;
-    const state = (
+  // Get the isOperator flag and profile name from the builder profile state
+  const builderProfileState = useMemo(() => {
+    if (!builderProfileDocument) return null;
+    return (
       builderProfileDocument.state as unknown as { global: BuilderProfileState }
     )?.global;
-    return state?.isOperator ?? false;
   }, [builderProfileDocument]);
+
+  const isOperator = builderProfileState?.isOperator ?? false;
+  const builderProfileName = builderProfileState?.name || null;
 
   // Build navigation sections with dynamic expense reports, snapshot reports, and resources & services children
   const navigationSections = useMemo(() => {
@@ -621,7 +623,10 @@ export function FolderTree({ onCustomViewChange }: FolderTreeProps) {
         nodes={navigationSections}
         activeNodeId={activeNodeId}
         onActiveNodeChange={handleActiveNodeChange}
-        sidebarTitle={isOperator ? "Operator Team Admin" : "Builder Team Admin"}
+        sidebarTitle={
+          builderProfileName ||
+          (isOperator ? "Operator Team Admin" : "Builder Team Admin")
+        }
         showSearchBar={false}
         resizable={true}
         allowPinning={false}
