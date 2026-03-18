@@ -75,7 +75,7 @@
   },
   "dependencies": {
     "@electric-sql/pglite": "0.3.15",
-    "@powerhousedao/builder-profile": "1.1.0-dev.1",
+    "@powerhousedao/builder-profile": "1.1.0-dev.2",
     "@powerhousedao/builder-tools": "6.0.0-dev.98",
     "@powerhousedao/common": "6.0.0-dev.98",
     "@powerhousedao/design-system": "6.0.0-dev.98",

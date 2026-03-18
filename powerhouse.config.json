@@ -11,11 +11,6 @@
   },
   "packages": [
     {
-      "packageName": "@powerhousedao/builder-profile",
-      "version": "1.1.0-dev.1",
-      "provider": "npm"
-    },
-    {
       "packageName": "@powerhousedao/vetra",
       "version": "6.0.0-dev.90",
       "provider": "npm"
@@ -23,6 +18,11 @@
     {
       "packageName": "@powerhousedao/service-offering",
       "version": "1.0.0-dev.15",
+      "provider": "npm"
+    },
+    {
+      "packageName": "@powerhousedao/builder-profile",
+      "version": "1.1.0-dev.2",
       "provider": "npm"
     }
   ]
