@@ -1,13 +1,11 @@
 import type { DocumentModelModule } from "document-model";
 import { createState } from "document-model";
 import { defaultBaseState } from "document-model/core";
-import type { AccountTransactionsPHState } from "@powerhousedao/contributor-billing/document-models/account-transactions/v1";
-import {
-  actions,
-  documentModel,
-  reducer,
-  utils,
-} from "@powerhousedao/contributor-billing/document-models/account-transactions/v1";
+import type { AccountTransactionsPHState } from "./gen/types.js";
+import { documentModel } from "./gen/document-model.js";
+import { reducer } from "./gen/reducer.js";
+import { actions } from "./actions.js";
+import { utils } from "./utils.js";
 
 /** Document model module for the AccountTransactions document type */
 export const AccountTransactions: DocumentModelModule<AccountTransactionsPHState> =

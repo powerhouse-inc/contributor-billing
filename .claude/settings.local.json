@@ -69,7 +69,9 @@
       "Bash(done)",
       "Bash(bash .claude/hooks/session-orient.sh)",
       "Bash(git status:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Skill(arscontexta:health)",
+      "Skill(arscontexta:health:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

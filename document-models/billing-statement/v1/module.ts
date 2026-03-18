@@ -1,13 +1,11 @@
 import type { DocumentModelModule } from "document-model";
 import { createState } from "document-model";
 import { defaultBaseState } from "document-model/core";
-import type { BillingStatementPHState } from "@powerhousedao/contributor-billing/document-models/billing-statement/v1";
-import {
-  actions,
-  documentModel,
-  reducer,
-  utils,
-} from "@powerhousedao/contributor-billing/document-models/billing-statement/v1";
+import type { BillingStatementPHState } from "./gen/types.js";
+import { documentModel } from "./gen/document-model.js";
+import { reducer } from "./gen/reducer.js";
+import { actions } from "./actions.js";
+import { utils } from "./utils.js";
 
 /** Document model module for the BillingStatement document type */
 export const BillingStatement: DocumentModelModule<BillingStatementPHState> = {
