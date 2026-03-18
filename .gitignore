@@ -10,3 +10,4 @@ knowledge/ops/sessions/
 .DS_Store
 .auth.json
 .keypair.json
+.arscontexta
