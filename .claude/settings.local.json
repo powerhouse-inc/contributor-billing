@@ -71,7 +71,10 @@
       "Bash(git status:*)",
       "Bash(git rm:*)",
       "Skill(arscontexta:health)",
-      "Skill(arscontexta:health:*)"
+      "Skill(arscontexta:health:*)",
+      "Bash(echo \"root .arscontexta: $?\")",
+      "Bash(echo \"root ops/: $?\")",
+      "Bash(echo \"knowledge session: $?\")"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

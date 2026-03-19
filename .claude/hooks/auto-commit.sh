@@ -2,7 +2,7 @@
 # Auto-commit hook — runs after Write tool (async)
 # Commits vault changes to git automatically
 
-PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || cd "$(dirname "$0")/../.." && pwd)"
 VAULT_ROOT="$PROJECT_ROOT/knowledge"
 MARKER="$VAULT_ROOT/.arscontexta"
 ROOT_MARKER="$PROJECT_ROOT/.arscontexta"

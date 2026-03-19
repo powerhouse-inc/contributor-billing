@@ -2,7 +2,7 @@
 # Session orientation hook — runs at session start
 # Reads vault state and surfaces what needs attention
 
-PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || cd "$(dirname "$0")/../.." && pwd)"
 VAULT_ROOT="$PROJECT_ROOT/knowledge"
 MARKER="$VAULT_ROOT/.arscontexta"
 ROOT_MARKER="$PROJECT_ROOT/.arscontexta"
