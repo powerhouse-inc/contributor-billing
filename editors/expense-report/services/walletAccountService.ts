@@ -287,11 +287,17 @@ export class WalletAccountService {
 
       const requestBody = {
         query: `
-          mutation CreateAccountsDocument($name: String!, $driveId: String) {
-            Accounts_createDocument(name: $name, driveId: $driveId)
+          mutation CreateAccountsDocument($documentType: String!, $parentIdentifier: String) {
+            createEmptyDocument(documentType: $documentType, parentIdentifier: $parentIdentifier) {
+              id
+              name
+            }
           }
         `,
-        variables,
+        variables: {
+          documentType: "powerhouse/accounts",
+          ...(driveId && { parentIdentifier: driveId }),
+        },
       };
 
       console.log(
@@ -325,7 +331,7 @@ export class WalletAccountService {
       const result = (await response.json()) as {
         errors?: Array<{ message: string }>;
         data?: {
-          Accounts_createDocument?: string;
+          createEmptyDocument?: { id: string; name: string };
         };
       };
 
@@ -339,7 +345,7 @@ export class WalletAccountService {
         throw new Error(result.errors[0]?.message || "GraphQL error");
       }
 
-      const documentId = result.data?.Accounts_createDocument;
+      const documentId = result.data?.createEmptyDocument?.id;
       if (!documentId) {
         throw new Error(
           "Failed to create Accounts document - no document ID returned",
@@ -402,23 +408,18 @@ export class WalletAccountService {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               query: `
-                query GetAccountsDocument($docId: PHID!) {
-                  Accounts {
-                    getDocument(docId: $docId) {
-                      state {
-                        accounts {
-                          id
-                          account
-                          name
-                          accountTransactionsId
-                        }
-                      }
+                query GetAccountsDocument($identifier: String!) {
+                  document(identifier: $identifier) {
+                    document {
+                      id
+                      name
+                      state
                     }
                   }
                 }
               `,
               variables: {
-                docId: accountsDocumentId,
+                identifier: accountsDocumentId,
               },
             }),
           });
@@ -432,16 +433,11 @@ export class WalletAccountService {
           const getDocResult = (await getDocResponse.json()) as {
             errors?: Array<{ message: string }>;
             data?: {
-              Accounts?: {
-                getDocument?: {
-                  state?: {
-                    accounts?: Array<{
-                      id: string;
-                      account: string;
-                      name: string;
-                      accountTransactionsId?: string | null;
-                    }>;
-                  };
+              document?: {
+                document?: {
+                  id: string;
+                  name: string;
+                  state: Record<string, unknown>;
                 };
               };
             };
@@ -464,8 +460,32 @@ export class WalletAccountService {
             throw new Error(errorMsg);
           }
 
-          accounts =
-            getDocResult.data?.Accounts?.getDocument?.state?.accounts || [];
+          const docState = getDocResult.data?.document?.document?.state;
+          const globalState =
+            docState && typeof docState === "object" && "global" in docState
+              ? (
+                  docState as {
+                    global: {
+                      accounts?: Array<{
+                        id: string;
+                        account: string;
+                        name: string;
+                        accountTransactionsId?: string | null;
+                      }>;
+                    };
+                  }
+                ).global
+              : (docState as
+                  | {
+                      accounts?: Array<{
+                        id: string;
+                        account: string;
+                        name: string;
+                        accountTransactionsId?: string | null;
+                      }>;
+                    }
+                  | undefined);
+          accounts = (globalState?.accounts as typeof accounts) || [];
           break; // Success, exit retry loop
         } catch (error) {
           lastError = error instanceof Error ? error : new Error(String(error));
@@ -525,18 +545,27 @@ export class WalletAccountService {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           query: `
-            mutation AddAccount($docId: PHID!, $input: Accounts_AddAccountInput!) {
-              Accounts_addAccount(docId: $docId, input: $input)
+            mutation AddAccount($documentIdentifier: String!, $actions: [JSONObject!]!) {
+              mutateDocument(documentIdentifier: $documentIdentifier, actions: $actions) {
+                id
+                name
+              }
             }
           `,
           variables: {
-            docId: accountsDocumentId,
-            input: {
-              id: accountId,
-              account: walletAddress,
-              name: accountName,
-              chain: ["ethereum"],
-            },
+            documentIdentifier: accountsDocumentId,
+            actions: [
+              {
+                type: "ADD_ACCOUNT",
+                input: {
+                  id: accountId,
+                  account: walletAddress,
+                  name: accountName,
+                  chain: ["ethereum"],
+                },
+                scope: "global",
+              },
+            ],
           },
         }),
       });
@@ -551,7 +580,7 @@ export class WalletAccountService {
       const addAccountResult = (await addAccountResponse.json()) as {
         errors?: Array<{ message: string }>;
         data?: {
-          Accounts_addAccount?: number;
+          mutateDocument?: { id: string; name: string };
         };
       };
 
@@ -562,7 +591,7 @@ export class WalletAccountService {
       }
 
       // Ensure the mutation reports success
-      if (!addAccountResult.data?.Accounts_addAccount) {
+      if (!addAccountResult.data?.mutateDocument) {
         throw new Error(
           "Failed to add account - mutation returned falsy result",
         );
