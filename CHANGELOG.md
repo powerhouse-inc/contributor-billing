@@ -1,3 +1,10 @@
+# [1.0.0-dev.26](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.25...v1.0.0-dev.26) (2026-03-23)
+
+
+### Bug Fixes
+
+* service offering editor ([76b1fe3](https://github.com/powerhouse-inc/contributor-billing/commit/76b1fe30b1d8246385c81c7d0422e22bb8f536fc))
+
 # [1.0.0-dev.25](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.24...v1.0.0-dev.25) (2026-03-23)
 
 # [1.0.0-dev.24](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.23...v1.0.0-dev.24) (2026-03-23)
