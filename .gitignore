@@ -1,6 +1,5 @@
 .env
 dist
-scripts/drive-sync/data/
 coverage
 node_modules
 .eslintcache
