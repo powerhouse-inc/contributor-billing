@@ -1,3 +1,10 @@
+# [1.0.0-dev.24](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.23...v1.0.0-dev.24) (2026-03-23)
+
+
+### Features
+
+* add drive-sync scripts for cross-environment drive replication ([d0ea069](https://github.com/powerhouse-inc/contributor-billing/commit/d0ea069c5e9dc99c5f2118de6d7c7b2cc1ddfc54))
+
 # [1.0.0-dev.23](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.22...v1.0.0-dev.23) (2026-03-23)
 
 
