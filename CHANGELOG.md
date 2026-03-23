@@ -1,3 +1,5 @@
+## [1.1.2](https://github.com/powerhouse-inc/contributor-billing/compare/v1.1.1...v1.1.2) (2026-03-23)
+
 ## [1.1.1](https://github.com/powerhouse-inc/contributor-billing/compare/v1.1.0...v1.1.1) (2026-03-06)
 
 # [1.1.0](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.4...v1.1.0) (2026-02-26)
