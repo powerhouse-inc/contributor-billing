@@ -1,3 +1,5 @@
+# [1.0.0-staging.7](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-staging.6...v1.0.0-staging.7) (2026-03-23)
+
 # [1.0.0-staging.6](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-staging.5...v1.0.0-staging.6) (2026-03-06)
 
 # [1.0.0-staging.5](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-staging.4...v1.0.0-staging.5) (2026-02-26)
