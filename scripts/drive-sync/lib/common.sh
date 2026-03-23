@@ -92,6 +92,11 @@ confirm_target() {
   fi
 
   # Require explicit confirmation for remote targets
+  if [ "${CONFIRM_REMOTE:-}" = "yes" ]; then
+    log "Remote target auto-confirmed (CONFIRM_REMOTE=yes)"
+    return 0
+  fi
+
   echo -e "  ${RED}This is a REMOTE target. Changes cannot be easily undone.${NC}"
   read -r -p "  Type the profile name to confirm (${profile_name}): " confirmation
   if [ "$confirmation" != "$profile_name" ]; then

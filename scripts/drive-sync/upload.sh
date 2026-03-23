@@ -10,12 +10,14 @@ set -euo pipefail
 #   bash upload.sh <data-dir> [drive-name]
 #
 # Environment:
-#   SB_PROFILE    Switchboard profile to use (optional)
-#   ID_MAP_FILE   Path to write the ID mapping JSON (old→new). Default: <data-dir>/id-map.json
-#   PREFERRED_EDITOR  Drive editor override (default: builder-team-admin)
+#   SB_PROFILE        Switchboard profile to use (optional)
+#   ID_MAP_FILE       Path to write the ID mapping JSON (old→new). Default: <data-dir>/id-map.json
+#   PREFERRED_EDITOR  Drive editor override
+#   EXISTING_DRIVE    Drive ID to upload into (skips drive creation)
 #
 # Example:
 #   SB_PROFILE=local bash upload.sh data/powerhouse-operator-team-admin
+#   EXISTING_DRIVE=d8995a96-... SB_PROFILE=staging bash upload.sh data/powerhouse-operator-team-admin
 ###############################################################################
 
 DATA_DIR="${1:?Usage: $0 <data-dir> [drive-name]}"
@@ -23,6 +25,8 @@ DRIVE_NAME="${2:-}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ID_MAP_FILE="${ID_MAP_FILE:-$DATA_DIR/id-map.json}"
 PREFERRED_EDITOR="${PREFERRED_EDITOR:-}"
+EXISTING_DRIVE="${EXISTING_DRIVE:-}"
+EXTERNAL_ID_MAP="${EXTERNAL_ID_MAP:-}"  # Path to another drive's id-map.json for cross-drive remapping
 
 [ -f "$DATA_DIR/manifest.json" ] || { echo "Error: $DATA_DIR/manifest.json not found" >&2; exit 1; }
 
@@ -63,7 +67,7 @@ compat_check $REQUIRED_TYPES || true
 
 step "Creating drive from downloaded data"
 
-export DATA_DIR DRIVE_NAME ID_MAP_FILE PREFERRED_EDITOR
+export DATA_DIR DRIVE_NAME ID_MAP_FILE PREFERRED_EDITOR EXISTING_DRIVE EXTERNAL_ID_MAP
 
 python3 << 'PYEOF'
 import subprocess, json, sys, os, tempfile, uuid, datetime, time
@@ -72,6 +76,7 @@ data_dir = os.environ["DATA_DIR"]
 drive_name_override = os.environ.get("DRIVE_NAME", "").strip()
 id_map_file = os.environ["ID_MAP_FILE"]
 preferred_editor = os.environ.get("PREFERRED_EDITOR", "")
+existing_drive = os.environ.get("EXISTING_DRIVE", "").strip()
 
 G = "\033[0;32m"
 Y = "\033[1;33m"
@@ -145,12 +150,14 @@ def apply_actions(doc_id, actions, retries=3):
         return
     if isinstance(actions, dict):
         actions = [actions]
-    # Inject timestampUtcMs as ISO-8601 string — the reactor's operation store
-    # does new Date(timestampUtcMs) which works with ISO strings but NOT with
-    # numeric strings. GraphQL JSONObject serialization may coerce numbers to strings.
+    # Inject missing action fields required by the reactor:
+    # - id: required for pollSyncEnvelopes (Action.id is non-nullable)
+    # - timestampUtcMs: ISO-8601 string for the operation store
     now_iso = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.") + \
         f"{datetime.datetime.now(datetime.timezone.utc).microsecond // 1000:03d}Z"
     for action in actions:
+        if "id" not in action:
+            action["id"] = str(uuid.uuid4())
         if "timestampUtcMs" not in action:
             action["timestampUtcMs"] = now_iso
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
@@ -173,9 +180,24 @@ def apply_actions(doc_id, actions, retries=3):
     finally:
         os.unlink(tmppath)
 
+import re as _re
+
+def op_to_action_type(op_name):
+    """Convert camelCase operation name to SCREAMING_SNAKE_CASE action type.
+    e.g., 'updateTemplateInfo' → 'UPDATE_TEMPLATE_INFO', 'addFaq' → 'ADD_FAQ'"""
+    return _re.sub(r'([A-Z])', r'_\1', op_name).upper().lstrip('_')
+
 def mutate(doc_id, op, input_data, retries=3):
-    """Mutate a single document using docs mutate --op (handles operation name casing).
-    For batch operations on the same document, prefer apply_actions()."""
+    """Mutate a single document. When batch mode is active (begin_batch/flush_batch),
+    queues the action instead of sending it individually."""
+    global _batch_target
+    if _batch_target is not None and _batch_target[0] == doc_id:
+        _batch_target[1].append({
+            "type": op_to_action_type(op),
+            "input": input_data,
+            "scope": "global",
+        })
+        return
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(input_data, f)
         tmppath = f.name
@@ -195,6 +217,27 @@ def mutate(doc_id, op, input_data, retries=3):
         raise RuntimeError(f"mutate {doc_id} --op {op} failed after {retries} attempts: {result.stderr[:200]}")
     finally:
         os.unlink(tmppath)
+
+# Global batch mode: when _batch_target is set, mutate() queues actions
+# instead of sending them individually. Flushed via flush_batch().
+_batch_target = None  # (doc_id, actions_list) or None
+
+def begin_batch(doc_id):
+    """Start collecting mutations for batch submission."""
+    global _batch_target
+    _batch_target = (doc_id, [])
+
+def flush_batch():
+    """Send all queued mutations in one batch request. Returns action count."""
+    global _batch_target
+    if not _batch_target:
+        return 0
+    doc_id, actions = _batch_target
+    _batch_target = None
+    if not actions:
+        return 0
+    apply_actions(doc_id, actions)
+    return len(actions)
 
 def load_state(doc_id):
     """Load downloaded state for a document."""
@@ -302,22 +345,36 @@ def map_id(old_id):
 
 timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
-# ── Step 1: Create drive ─────────────────────────────────────────────────────
+# ── Step 1: Create or use existing drive ──────────────────────────────────────
 
 step("Step 1: Create drive")
 
-create_args = ["drives", "create", "--name", drive_name]
-if preferred_editor:
-    create_args += ["--preferred-editor", preferred_editor]
-result = json.loads(sb_run(*create_args))
-drive_id = result["id"]
-drive_slug = result["slug"]
-log(f"Drive: {drive_name} (ID: {drive_id}, Slug: {drive_slug})")
+if existing_drive:
+    # Use an existing drive — skip creation
+    drive_id = existing_drive
+    # Resolve slug from the drive info
+    try:
+        stdout = sb_run("drives", "get", drive_id)
+        drive_info_result = json.loads(stdout)
+        drive_slug = drive_info_result.get("slug", drive_id)
+        actual_name = drive_info_result.get("name", drive_name)
+        log(f"Using existing drive: {actual_name} (ID: {drive_id}, Slug: {drive_slug})")
+    except Exception as e:
+        errf(f"Cannot access existing drive {drive_id}: {e}")
+        sys.exit(1)
+else:
+    create_args = ["drives", "create", "--name", drive_name]
+    if preferred_editor:
+        create_args += ["--preferred-editor", preferred_editor]
+    result = json.loads(sb_run(*create_args))
+    drive_id = result["id"]
+    drive_slug = result["slug"]
+    log(f"Drive: {drive_name} (ID: {drive_id}, Slug: {drive_slug})")
 
-# Wait for drive to be fully committed before proceeding
+# Verify drive is accessible
 for attempt in range(5):
     time.sleep(1)
-    if verify_drive(drive_slug):
+    if verify_drive(drive_id):
         log("Drive verified")
         break
     if attempt < 4:
@@ -325,6 +382,11 @@ for attempt in range(5):
 else:
     errf("Drive verification failed after 5 attempts — aborting")
     sys.exit(1)
+
+# Ensure the drive state has the correct name (the /d/<slug> endpoint uses state.global.name)
+if existing_drive and drive_name:
+    mutate(drive_id, "setDriveName", {"name": drive_name})
+    log(f"Set drive state name: {drive_name}")
 
 # ── Step 2: Create folders ───────────────────────────────────────────────────
 
@@ -372,6 +434,12 @@ type_order = {
     "powerhouse/builder-profile": 0,
     "powerhouse/resource-template": 1,
     "powerhouse/service-offering": 2,
+    "powerhouse/network-profile": 3,
+    "powerhouse/builders": 4,
+    "powerhouse/payment-terms": 5,
+    "powerhouse/request-for-proposals": 6,
+    "powerhouse/scope-of-work": 7,
+    "powerhouse/workstream": 8,  # last — references network-profile, SOW, payment-terms
 }
 docs_sorted = sorted(manifest["documents"], key=lambda d: type_order.get(d["type"], 99))
 
@@ -990,12 +1058,310 @@ def apply_generic_state(old_id, new_id, state, doc_type):
     log(f"Generic state applied for {doc_type} ({ops_done} ops)")
 
 
+# ── Expense Report handler ──
+
+def apply_expense_report(old_id, new_id, state):
+    if not state:
+        return
+
+    # 1. Scalars
+    if state.get("ownerId"):
+        mutate(new_id, "setOwnerId", {"ownerId": state["ownerId"]})
+    if state.get("periodStart"):
+        mutate(new_id, "setPeriodStart", {"periodStart": state["periodStart"]})
+    if state.get("periodEnd"):
+        mutate(new_id, "setPeriodEnd", {"periodEnd": state["periodEnd"]})
+    if state.get("startDate") or state.get("endDate"):
+        inp = {}
+        if state.get("startDate"):
+            inp["startDate"] = state["startDate"]
+        if state.get("endDate"):
+            inp["endDate"] = state["endDate"]
+        if inp:
+            mutate(new_id, "setPeriod", inp)
+    if state.get("status"):
+        mutate(new_id, "setStatus", {"status": state["status"]})
+
+    # 2. Line item groups — root groups first (parentId=None), then children
+    groups = state.get("groups") or []
+    root_groups = [g for g in groups if not g.get("parentId")]
+    child_groups = [g for g in groups if g.get("parentId")]
+    for grp in root_groups + child_groups:
+        inp = {"id": grp["id"], "label": grp.get("label", "")}
+        if grp.get("parentId"):
+            inp["parentId"] = grp["parentId"]
+        mutate(new_id, "addLineItemGroup", inp)
+
+    # 3. Wallets, line items, group totals, billing statements
+    for wallet in state.get("wallets") or []:
+        wallet_addr = wallet.get("wallet")
+        if not wallet_addr:
+            continue
+
+        # Add wallet
+        mutate(new_id, "addWallet", {
+            "wallet": wallet_addr,
+            "name": wallet.get("name", ""),
+        })
+
+        # Add line items inside this wallet
+        for li in wallet.get("lineItems") or []:
+            li_input = {
+                "wallet": wallet_addr,
+                "lineItem": {
+                    "id": li["id"],
+                    "label": li.get("label", ""),
+                    "group": li.get("group"),
+                },
+            }
+            for key in ("budget", "actuals", "forecast", "payments", "comments"):
+                if li.get(key) is not None:
+                    li_input["lineItem"][key] = li[key]
+            mutate(new_id, "addLineItem", li_input)
+
+        # Set group totals for this wallet
+        for tot in wallet.get("totals") or []:
+            mutate(new_id, "setGroupTotals", {
+                "wallet": wallet_addr,
+                "groupTotals": {
+                    "group": tot["group"],
+                    "totalBudget": tot.get("totalBudget", 0),
+                    "totalForecast": tot.get("totalForecast", 0),
+                    "totalActuals": tot.get("totalActuals", 0),
+                    "totalPayments": tot.get("totalPayments", 0),
+                },
+            })
+
+        # Add billing statements for this wallet
+        for bs in wallet.get("billingStatements") or []:
+            bs_id = bs if isinstance(bs, str) else bs.get("id", bs.get("billingStatementId"))
+            if bs_id:
+                mutate(new_id, "addBillingStatement", {
+                    "wallet": wallet_addr,
+                    "billingStatementId": bs_id,
+                })
+
+# ── Workstream handler ──
+
+def apply_workstream(old_id, new_id, state):
+    if not state:
+        return
+
+    # 1. Client info (references network-profile doc)
+    client = state.get("client")
+    if client and client.get("id"):
+        mutate(new_id, "editClientInfo", {
+            "clientId": map_id(client["id"]),
+            "name": client.get("name", ""),
+            "icon": client.get("icon", ""),
+        })
+
+    # 2. Workstream basics
+    ws_input = {}
+    for key in ("code", "title"):
+        if state.get(key):
+            ws_input[key] = state[key]
+    if state.get("status"):
+        ws_input["status"] = state["status"]
+    if state.get("sow"):
+        ws_input["sowId"] = map_id(state["sow"])
+    if state.get("paymentTerms"):
+        ws_input["paymentTerms"] = map_id(state["paymentTerms"])
+    if ws_input:
+        mutate(new_id, "editWorkstream", ws_input)
+
+    # 3. RFP
+    rfp = state.get("rfp")
+    if rfp and (rfp.get("id") or rfp.get("title")):
+        mutate(new_id, "setRequestForProposal", {
+            "rfpId": map_id(rfp.get("id", "")),
+            "title": rfp.get("title", ""),
+        })
+
+    # 4. Initial proposal
+    ip = state.get("initialProposal")
+    if ip and ip.get("id"):
+        ip_input = {"id": ip["id"]}
+        if ip.get("sow"):
+            ip_input["sowId"] = map_id(ip["sow"])
+        if ip.get("paymentTerms"):
+            ip_input["paymentTermsId"] = map_id(ip["paymentTerms"])
+        if ip.get("status"):
+            ip_input["status"] = ip["status"]
+        author = ip.get("author")
+        if author:
+            ip_input["proposalAuthor"] = {
+                "id": map_id(author.get("id", "")),
+                "name": author.get("name", ""),
+            }
+            if author.get("icon"):
+                ip_input["proposalAuthor"]["icon"] = author["icon"]
+        mutate(new_id, "editInitialProposal", ip_input)
+
+    # 5. Alternative proposals
+    for ap in state.get("alternativeProposals") or []:
+        if ap.get("id"):
+            mutate(new_id, "addAlternativeProposal", ap)
+
+
+# ── Scope of Work handler ──
+
+def apply_scope_of_work(old_id, new_id, state):
+    if not state:
+        return
+
+    # 1. Basic info
+    sow_input = {}
+    for key in ("title", "description", "status"):
+        if state.get(key):
+            sow_input[key] = state[key]
+    if sow_input:
+        mutate(new_id, "editScopeOfWork", sow_input)
+
+    # 2. Agents (called 'contributors' in state)
+    for agent in state.get("contributors") or []:
+        mutate(new_id, "addAgent", {
+            "id": agent.get("id", ""),
+            "name": agent.get("name", ""),
+            "icon": agent.get("icon"),
+            "description": agent.get("description"),
+        })
+
+    # 3. Projects (before deliverables that reference them)
+    for proj in state.get("projects") or []:
+        proj_input = {"id": proj["id"]}
+        for key in ("code", "title", "slug", "abstract", "imageUrl"):
+            if proj.get(key) is not None:
+                proj_input[key] = proj[key]
+        if proj.get("budgetType"):
+            proj_input["budgetType"] = proj["budgetType"]
+        if proj.get("currency"):
+            proj_input["currency"] = proj["currency"]
+        if proj.get("budget") is not None:
+            proj_input["budget"] = proj["budget"]
+        if proj.get("projectOwner"):
+            proj_input["projectOwner"] = proj["projectOwner"]
+        mutate(new_id, "addProject", proj_input)
+
+    # 4. Roadmaps (before milestones)
+    for rm in state.get("roadmaps") or []:
+        rm_input = {"id": rm["id"]}
+        for key in ("title", "slug", "description"):
+            if rm.get(key) is not None:
+                rm_input[key] = rm[key]
+        mutate(new_id, "addRoadmap", rm_input)
+
+    # 5. Deliverables (basic creation)
+    for dl in state.get("deliverables") or []:
+        dl_input = {"id": dl["id"]}
+        for key in ("title", "code", "description", "status", "owner"):
+            if dl.get(key) is not None:
+                dl_input[key] = dl[key]
+        mutate(new_id, "addDeliverable", dl_input)
+
+    # 6. Deliverable progress
+    for dl in state.get("deliverables") or []:
+        wp = dl.get("workProgress")
+        if wp and (wp.get("completed") or wp.get("total")):
+            mutate(new_id, "setDeliverableProgress", {
+                "id": dl["id"],
+                "workProgress": {
+                    "storyPoints": {
+                        "total": wp.get("total", 0),
+                        "completed": wp.get("completed", 0),
+                    },
+                },
+            })
+
+    # 7. Key results per deliverable
+    for dl in state.get("deliverables") or []:
+        for kr in dl.get("keyResults") or []:
+            kr_input = {
+                "id": kr["id"],
+                "deliverableId": dl["id"],
+            }
+            for key in ("title", "link"):
+                if kr.get(key) is not None:
+                    kr_input[key] = kr[key]
+            mutate(new_id, "addKeyResult", kr_input)
+
+    # 8. Budget anchors per deliverable
+    for dl in state.get("deliverables") or []:
+        ba = dl.get("budgetAnchor")
+        if ba and ba.get("project"):
+            ba_input = {
+                "deliverableId": dl["id"],
+                "project": ba["project"],
+            }
+            for key in ("unit", "unitCost", "quantity", "margin"):
+                if ba.get(key) is not None:
+                    ba_input[key] = ba[key]
+            mutate(new_id, "setDeliverableBudgetAnchorProject", ba_input)
+
+    # 9. Milestones per roadmap
+    for rm in state.get("roadmaps") or []:
+        for ms in rm.get("milestones") or []:
+            ms_input = {
+                "id": ms["id"],
+                "roadmapId": rm["id"],
+            }
+            for key in ("sequenceCode", "title", "description", "deliveryTarget"):
+                if ms.get(key) is not None:
+                    ms_input[key] = ms[key]
+            mutate(new_id, "addMilestone", ms_input)
+
+            # Coordinators per milestone
+            for coord in ms.get("coordinators") or []:
+                coord_id = coord if isinstance(coord, str) else coord.get("id", "")
+                if coord_id:
+                    mutate(new_id, "addCoordinator", {
+                        "id": coord_id,
+                        "milestoneId": ms["id"],
+                    })
+
+            # Deliverable links per milestone
+            for msd in ms.get("deliverables") or []:
+                if isinstance(msd, str):
+                    mutate(new_id, "addMilestoneDeliverable", {
+                        "milestoneId": ms["id"],
+                        "deliverableId": msd,
+                    })
+                elif isinstance(msd, dict) and msd.get("id"):
+                    mutate(new_id, "addMilestoneDeliverable", {
+                        "milestoneId": ms["id"],
+                        "deliverableId": msd["id"],
+                        "title": msd.get("title", ""),
+                    })
+
+
+# ── Request for Proposals handler ──
+
+def apply_request_for_proposals(old_id, new_id, state):
+    if not state:
+        return
+
+    # editRfp with all available fields
+    rfp_input = {}
+    for key in ("title", "code", "summary", "briefing", "eligibilityCriteria",
+                "evaluationCriteria", "status", "deadline"):
+        if state.get(key) is not None:
+            rfp_input[key] = state[key]
+    if state.get("budgetRange"):
+        rfp_input["budgetRange"] = state["budgetRange"]
+    if rfp_input:
+        mutate(new_id, "editRfp", rfp_input)
+
+
 # ── Apply states to all documents ─────────────────────────────────────────────
 
 HANDLERS = {
     "powerhouse/builder-profile": apply_builder_profile,
     "powerhouse/resource-template": apply_resource_template,
     "powerhouse/service-offering": apply_service_offering,
+    "powerhouse/expense-report": apply_expense_report,
+    "powerhouse/workstream": apply_workstream,
+    "powerhouse/scope-of-work": apply_scope_of_work,
+    "powerhouse/request-for-proposals": apply_request_for_proposals,
 }
 
 for doc in docs_sorted:
@@ -1009,14 +1375,54 @@ for doc in docs_sorted:
     handler = HANDLERS.get(doc["type"])
     if handler:
         try:
+            begin_batch(new_id)
             handler(doc["id"], new_id, state)
+            ops = flush_batch()
+            log(f"Batch applied {doc['name']} ({ops} ops)")
         except Exception as e:
+            _batch_target = None  # reset on error
             errf(f"Error applying state for '{doc['name']}': {e}")
     else:
         try:
+            begin_batch(new_id)
             apply_generic_state(doc["id"], new_id, state, doc["type"])
+            ops = flush_batch()
+            log(f"Batch applied {doc['name']} ({ops} ops)")
         except Exception as e:
+            _batch_target = None  # reset on error
             errf(f"Error applying generic state for '{doc['name']}': {e}")
+
+# ── Step 5b: Cross-drive ID remapping ─────────────────────────────────────────
+
+external_id_map_path = os.environ.get("EXTERNAL_ID_MAP", "").strip()
+if external_id_map_path and os.path.exists(external_id_map_path):
+    step("Step 5b: Cross-drive ID remapping")
+    with open(external_id_map_path) as f:
+        external_map = json.load(f)
+    log(f"Loaded external ID map: {len(external_map)} entries from {external_id_map_path}")
+
+    # Find builder-profile docs and remap their contributors
+    for doc in docs_sorted:
+        if doc["type"] != "powerhouse/builder-profile":
+            continue
+        new_id = id_map.get(doc["id"])
+        if not new_id:
+            continue
+        state = load_state(doc["id"])
+        if not state:
+            continue
+
+        contributors = state.get("contributors") or []
+        to_remap = [c for c in contributors if c in external_map]
+        if not to_remap:
+            continue
+
+        log(f"Remapping {len(to_remap)} contributor(s) in {doc['name']}")
+        for old_contrib in to_remap:
+            new_contrib = external_map[old_contrib]
+            mutate(new_id, "removeContributor", {"contributorPHID": old_contrib})
+            mutate(new_id, "addContributor", {"contributorPHID": new_contrib})
+        log(f"Remapped {len(to_remap)} contributors")
 
 # ── Step 6: Verify applied states ─────────────────────────────────────────────
 
