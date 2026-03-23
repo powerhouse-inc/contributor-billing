@@ -113,7 +113,22 @@
       "Bash(1 rm:*)",
       "Bash(bash scripts/drive-sync/upload-to-staging.sh)",
       "Bash(git pull:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(SB_PROFILE=local bash scripts/drive-sync/upload.sh scripts/drive-sync/data/builders)",
+      "Bash(for dir:*)",
+      "Bash(echo \"=== $dir ===\")",
+      "Bash(EXISTING_DRIVE=6f2eb3f2-13e3-4177-b5f6-270ec01d5ce9 SB_PROFILE=local bash scripts/drive-sync/upload.sh scripts/drive-sync/data/powerhouse-operator-team-admin \"Powerhouse Operator Team Admin\")",
+      "Bash(SB_PROFILE=local bash scripts/drive-sync/upload.sh scripts/drive-sync/data/powerhouse-operator-team-admin)",
+      "Bash(mkdir -p /tmp/phd_extract)",
+      "Read(//tmp/**)",
+      "Bash(rm -rf *)",
+      "Bash(unzip \"/home/p/Powerhouse/demos/contributor-billing/scripts/drive-sync/Operational Hub.phd\")",
+      "Bash(DRIVE_ID=\"e0cb560c-5bb1-4ba6-9899-4891113e407c\")",
+      "Bash(FOLDER_ID=\"f53038d6-9f8a-4005-8cde-d04d0be01895\")",
+      "Bash(__NEW_LINE_7110d8b73ae4111d__ switchboard:*)",
+      "Bash(switchboard ops:*)",
+      "Bash(switchboard info:*)",
+      "Bash(SB_PROFILE=local bash scripts/drive-sync/upload.sh scripts/drive-sync/data/powerhouse-operator-team-admin \"Powerhouse Operator Team Admin\")"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",
