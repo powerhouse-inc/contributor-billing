@@ -1,14 +1,14 @@
 {
   "childIds": [
-    "03e167a8-0c92-4d72-8969-fb05a9ae1706",
-    "311231b5-0aba-43fd-8cd1-620fde308aae",
-    "7dbb174e-e197-4223-8e90-ec4e08167d8f",
-    "a70bcf36-350c-4989-9482-28093864bdda",
-    "c11847d4-19a4-451b-aa85-28c8cbed6ba3",
-    "b760fb82-979e-4a2c-813c-6f4e9ceec988"
+    "f8e243db-3d85-41e8-a27b-6a22103e2a87",
+    "59020cb2-681c-4108-8827-e475de073eec",
+    "922c6e79-25b2-414e-a494-25a3513692d9",
+    "9253cbbd-7577-4c3a-bca6-f54c81c74242",
+    "28712d94-0301-4822-98fa-77a65114ef86",
+    "078401d0-b861-4fba-a385-5e0dec199813"
   ],
   "document": {
-    "id": "cd45cc9c-fe5c-4a32-9898-664963cf790b",
+    "id": "5e9df222-ed39-4f44-a3eb-87f6098e43b4",
     "name": "Powerhouse Network Admin",
     "slug": "powerhouse-network-admin",
     "state": {
@@ -21,55 +21,59 @@
         "version": 0
       },
       "global": {
-        "documentTypes": [],
+        "icon": null,
         "name": "Powerhouse Network Admin",
         "nodes": [
           {
             "documentType": "powerhouse/network-profile",
-            "id": "03e167a8-0c92-4d72-8969-fb05a9ae1706",
+            "id": "078401d0-b861-4fba-a385-5e0dec199813",
             "kind": "file",
             "name": "Powerhouse",
             "parentFolder": null
           },
           {
-            "documentType": "powerhouse/builders",
-            "id": "311231b5-0aba-43fd-8cd1-620fde308aae",
+            "documentType": "powerhouse/workstream",
+            "id": "28712d94-0301-4822-98fa-77a65114ef86",
             "kind": "file",
-            "name": "Builders",
+            "name": "Powerhouse Workstream 2024",
             "parentFolder": null
           },
           {
             "documentType": "payment-terms",
-            "id": "7dbb174e-e197-4223-8e90-ec4e08167d8f",
+            "id": "59020cb2-681c-4108-8827-e475de073eec",
             "kind": "file",
             "name": "Payment Terms-Powerhouse Workstream 2024",
             "parentFolder": null
           },
           {
             "documentType": "powerhouse/rfp",
-            "id": "a70bcf36-350c-4989-9482-28093864bdda",
+            "id": "922c6e79-25b2-414e-a494-25a3513692d9",
             "kind": "file",
             "name": "RFP-Powerhouse Workstream 2024",
             "parentFolder": null
           },
           {
-            "documentType": "powerhouse/workstream",
-            "id": "b760fb82-979e-4a2c-813c-6f4e9ceec988",
-            "kind": "file",
-            "name": "Powerhouse Workstream 2024",
-            "parentFolder": null
-          },
-          {
             "documentType": "powerhouse/scopeofwork",
-            "id": "c11847d4-19a4-451b-aa85-28c8cbed6ba3",
+            "id": "9253cbbd-7577-4c3a-bca6-f54c81c74242",
             "kind": "file",
             "name": "SOW-Powerhouse Workstream 2024",
             "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builders",
+            "id": "f8e243db-3d85-41e8-a27b-6a22103e2a87",
+            "kind": "file",
+            "name": "Builders",
+            "parentFolder": null
           }
-        ],
-        "status": "ACTIVE"
+        ]
       },
-      "local": {}
+      "local": {
+        "availableOffline": false,
+        "listeners": [],
+        "sharingType": "private",
+        "triggers": []
+      }
     }
   }
 }

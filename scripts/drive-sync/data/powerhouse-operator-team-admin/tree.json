@@ -1,80 +1,36 @@
 {
   "childIds": [
-    "a3e9e3f5-72a3-459d-9712-dd929a1dac8a",
-    "a08dc883-357a-4c9b-9781-ad3ef5503cd8",
-    "6e030abf-0fde-4945-a981-ae359cfd8c2e",
-    "9edd37e9-f7b7-4336-add2-83449976c4f9",
-    "10da3ccd-dd53-44e1-822c-b1b4f2d87a4f",
-    "3207026a-1bf5-4184-9825-74c4a761880b",
-    "95a83f46-254b-4736-b92f-4aae01e6cc43",
-    "759d21c6-001b-475d-8aba-bb62b28a0ea5",
-    "ee4e28af-f994-4e1a-86c3-5f5b6e09d08d",
-    "797b6e77-30f0-48a6-ac76-2e04df4e15bf",
-    "14f832c0-010a-4335-94bb-fc412ff79f4b",
-    "9409329c-4aff-4a5f-b571-8fe9d7e86d73",
-    "58bc7e2b-cd4b-4c3a-b3d2-5ca75b600460",
-    "74fd8f4e-603b-4e8b-91d2-25b2878483fd",
-    "9e28c5fe-73a4-40fe-b809-fb9832ea2426",
-    "e7d767b2-8d1a-4ebf-ba17-43f37a14d557",
-    "8889428f-3161-4923-82da-ad8d91f71a8c",
-    "cfa471f0-6f53-426d-809f-ff225e81ac82",
-    "5618f8b3-440c-4f4a-9da3-924bb1866568",
-    "5c13c0b6-e733-4fc1-86c1-58c8c2e3fca2",
-    "e417e1f6-de83-4556-acd9-a2d2b1b46890",
-    "32a970bc-624a-4700-b588-0e4fad35c3ab",
-    "d23fa968-dff4-47d4-a1fc-c6f71d52d875",
-    "b99a2253-ec68-4795-9830-4e87b2a63ccb",
-    "712241c4-33ce-40de-94eb-f029b44f4a2d",
-    "88d43bf4-d9b3-4b29-bf44-b538a5170b48",
-    "7e44ecd0-bc31-4fd4-b4a6-e185224fc14b",
-    "7f01ef01-a7e4-4481-a171-168ed7c1b106",
-    "e0609406-600e-4b6b-8cb9-cc596af83c17",
-    "9d6dd42d-39d8-437c-9c98-41127ee09b1b",
-    "720600d2-6631-4ec2-b3e2-a1ca638d0b62",
-    "4029577b-3b25-4ada-a255-8b3d49b7c842",
-    "b6c53010-1329-40c1-9dcb-2de520b45f1a",
-    "adfbe05b-a260-4c28-849e-378085500794",
-    "3d361869-449b-4747-b1ee-393083060cbd",
-    "c1111ff6-2878-4700-9798-34518984eeef",
-    "dd65e10c-d837-4587-894c-beb0688f51c3",
-    "843f1717-87b8-488c-b6d3-af786fcd35cc",
-    "cdafdf21-106e-460a-8b7c-f0e7bef0e365",
-    "10713657-d4cc-4967-a0e8-f9bad6288871",
-    "495b2d62-8aac-43a6-acbd-19fb715675d8",
-    "ba2e960d-5721-4eb1-aadc-2eba4fab0747",
-    "7f078224-f321-4dc7-9def-bb7117d9fb84",
-    "5fa6830d-92e0-49c5-a205-1c24171b87f1",
-    "e0814765-2ac7-434e-b23e-c7169e891c7a",
-    "730ff9b5-d64f-44cf-afa8-2a37704b0a7a",
-    "f9e87646-de9e-41a2-9a4a-c7e95aa410d3",
-    "69fc167b-7174-41a2-814c-e625ac2e17f2",
-    "6c6d038a-d096-41c5-b01d-1413b2051e22",
-    "1f6a7942-eea2-40b0-bff6-c67ce790b525",
-    "d4755b36-b632-4168-9ba6-36e7c3c8b2ef",
-    "4f3ff269-d700-4bcf-9e68-17b42511179d",
-    "78d0142a-b545-4627-9ba0-217c90cd430a",
-    "8e816683-ab2b-40cd-a5f4-2ec2ec67541b",
-    "fe141991-3d53-4d59-9d9d-15c337611953",
-    "6785f408-b9b2-4ab2-b592-05416a966337",
-    "3a0273c8-52fb-4e7e-b35f-3129aabb5f60",
-    "212bd5fc-cd21-4c65-9d82-d150abbe2678",
-    "b5420acc-4e41-44e7-87b0-9c9fa4a46cd3",
-    "c577f757-4ccc-4784-b632-735b2df2d049",
-    "e9ba5640-e30f-4d42-9cac-243af83ce535",
-    "b85b7352-82f1-42fd-b9fc-a01d2f71be44",
-    "6748f68a-fe40-418e-94f7-2f5c2646b2ce",
-    "2e84b018-67d1-4837-b15b-752593238098",
-    "8ec3c98d-6738-436b-b7f9-ba3be2c64ef0",
-    "10112381-952c-44aa-822d-a6bc3bfd3d1d",
-    "05f1376b-0449-4063-b67a-597ad21fc1f1",
-    "7eec9d62-9f82-4542-bdb3-ebaa3877fbe3",
-    "c74a41a8-278f-4298-8df3-0e0a67149d5e",
-    "948f806f-b67e-45e0-9dca-90c07868f39a",
-    "23b2813d-036c-4717-b147-b8ab01a07cea",
-    "d59864fd-11b0-497b-9706-ff8547da8be0"
+    "831efda4-c052-42b1-8df3-dfae977b732b",
+    "ad1eabc5-9742-417a-9c25-de379440b48c",
+    "667336cb-dba8-4c2e-858e-0ddaa869ba33",
+    "9cefda9c-5b63-429a-8c47-fe686f92eb4d",
+    "72556f1d-dcee-4689-a152-6322a83bbe01",
+    "098a7cad-b66b-404a-b2c8-933d69b808cd",
+    "75932a19-3d38-4ac1-bd71-2b0c7bd4c27a",
+    "8d980ae6-3587-4762-8514-fb3be2811feb",
+    "3b20fc20-71b3-409b-a3c6-92856ce37216",
+    "cb49e571-6007-4240-ae0b-e7e9db214f98",
+    "d07ee3ea-f101-439d-8deb-4df88cdedf87",
+    "694ccfba-f8d3-405a-a19a-99c557dcd9f9",
+    "c4118d12-238b-4782-9703-99d5ac8f66af",
+    "0bfa8065-eb07-4040-ac1e-c35ead00f263",
+    "2400b5b3-66db-4c26-92a2-b8d57e64a9f1",
+    "055dc32e-c829-4521-b6e2-0efcb06b6233",
+    "5e699c21-5932-4761-9229-984c75dfec21",
+    "04bd6922-efd7-4b02-89d6-5c444e7b15f3",
+    "e44d2b6c-995b-4a65-b8c3-27c888fe2222",
+    "9686ffa4-bf84-415c-972e-80144def1f9c",
+    "dd055126-2e86-4e8b-82ad-a55c1eb18cd3",
+    "3b0eec67-40f0-46f1-bb6e-f5bd50f5c5bb",
+    "a0c6727d-50b1-489d-827a-eb650ab02556",
+    "29ec913e-a997-4811-93fb-f6561ebdb1b7",
+    "63143a4b-8294-4744-b83b-8c7370e06f7c",
+    "2e18fa5b-d986-472d-9e0e-d4d052cfda7f",
+    "7b312302-f408-4335-8fd9-2e35c067aa87",
+    "3544e082-b457-4efa-a750-ee86a5b3f25d"
   ],
   "document": {
-    "id": "b0ae6fb2-15b1-4596-8753-3a2fb2e78b95",
+    "id": "8b4d6840-532a-4407-ac1d-05176eef612c",
     "name": "Powerhouse Operator Team Admin",
     "slug": "powerhouse-operator-team-admin",
     "state": {
@@ -87,603 +43,267 @@
         "version": 0
       },
       "global": {
-        "documentTypes": [],
+        "icon": null,
         "name": "Powerhouse Operator Team Admin",
         "nodes": [
           {
+            "documentType": "powerhouse/snapshot-report",
+            "id": "04bd6922-efd7-4b02-89d6-5c444e7b15f3",
+            "kind": "file",
+            "name": "March 2025 - Snapshot Report",
+            "parentFolder": "70a9c0fc-302e-4acf-b17a-2f2db4da6860"
+          },
+          {
             "documentType": "powerhouse/expense-report",
-            "id": "05f1376b-0449-4063-b67a-597ad21fc1f1",
+            "id": "055dc32e-c829-4521-b6e2-0efcb06b6233",
             "kind": "file",
             "name": "07-2025 Powerhouse",
-            "parentFolder": "66b4cfa4-a21a-4712-b5eb-83fe62543f1b"
-          },
-          {
-            "id": "0d8a5ffb-7f75-4f62-8d0a-7ede3d73a412",
-            "kind": "folder",
-            "name": "test-team-1774008878447",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
-          },
-          {
-            "id": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb",
-            "kind": "folder",
-            "name": "Products",
-            "parentFolder": "cbdb3121-8be4-415a-a5dc-f1c6857ede63"
-          },
-          {
-            "documentType": "powerhouse/expense-report",
-            "id": "10112381-952c-44aa-822d-a6bc3bfd3d1d",
-            "kind": "file",
-            "name": "08-2025 Powerhouse",
-            "parentFolder": "66b4cfa4-a21a-4712-b5eb-83fe62543f1b"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "10713657-d4cc-4967-a0e8-f9bad6288871",
-            "kind": "file",
-            "name": "test-team Resource Instance",
-            "parentFolder": "93c69cb9-d7da-48eb-a1f6-7834be2f7ba4"
+            "parentFolder": "f68e94ac-52c6-4eaf-b61b-9f81e5b9e1ec"
           },
           {
             "documentType": "powerhouse/resource-template",
-            "id": "10da3ccd-dd53-44e1-822c-b1b4f2d87a4f",
+            "id": "098a7cad-b66b-404a-b2c8-933d69b808cd",
             "kind": "file",
-            "name": "Intellectual Property SPV (IP SPV)",
-            "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+            "name": "OperationalHub",
+            "parentFolder": "5a542e9b-3660-4e13-8418-eb75aca271b4"
           },
           {
-            "documentType": "powerhouse/resource-template",
-            "id": "14f832c0-010a-4335-94bb-fc412ff79f4b",
+            "documentType": "powerhouse/service-offering",
+            "id": "0bfa8065-eb07-4040-ac1e-c35ead00f263",
             "kind": "file",
-            "name": "NETWORK OPERATIONAL HUB",
-            "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+            "name": "Operational Hub",
+            "parentFolder": "1b142773-1c58-498d-ad1e-076d5f77bcb9"
           },
           {
-            "documentType": "powerhouse/resource-instance",
-            "id": "1f6a7942-eea2-40b0-bff6-c67ce790b525",
-            "kind": "file",
-            "name": "team-yasman Resource Instance",
-            "parentFolder": "dba09f7e-dd94-4153-ae37-08a18e6905db"
-          },
-          {
-            "id": "209c06fa-561f-4ab6-b983-df9f7d8cada9",
+            "id": "114f33f5-254f-4492-86ee-20543466c449",
             "kind": "folder",
             "name": "Expense Reports",
             "parentFolder": null
           },
           {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "212bd5fc-cd21-4c65-9d82-d150abbe2678",
-            "kind": "file",
-            "name": "team-yasman Subscription Instance",
-            "parentFolder": "50e957ee-f11e-4456-a45b-b7d787967154"
-          },
-          {
-            "documentType": "powerhouse/snapshot-report",
-            "id": "23b2813d-036c-4717-b147-b8ab01a07cea",
-            "kind": "file",
-            "name": "March 2025 - Snapshot Report",
-            "parentFolder": "e76d7ed8-20d2-4f28-b2e8-f724434de5db"
-          },
-          {
-            "id": "24db4f8a-1f43-4d74-b54f-c1fcb15459fa",
+            "id": "1b142773-1c58-498d-ad1e-076d5f77bcb9",
             "kind": "folder",
-            "name": "test-team-1774009832611",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
-          },
-          {
-            "id": "26c5770f-7d5c-4d6b-85cf-83680010caba",
-            "kind": "folder",
-            "name": "test-team-1774009834385",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
-          },
-          {
-            "documentType": "powerhouse/expense-report",
-            "id": "2e84b018-67d1-4837-b15b-752593238098",
-            "kind": "file",
-            "name": "11-2025 Powerhouse",
-            "parentFolder": "66b4cfa4-a21a-4712-b5eb-83fe62543f1b"
-          },
-          {
-            "id": "30f3c295-ddb0-48ef-98c5-93cb4c131e98",
-            "kind": "folder",
-            "name": "test-team-1774008537887",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
-          },
-          {
-            "documentType": "powerhouse/resource-template",
-            "id": "3207026a-1bf5-4184-9825-74c4a761880b",
-            "kind": "file",
-            "name": "COMMERCIAL OPERATIONAL HUB (OH)",
-            "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "3a0273c8-52fb-4e7e-b35f-3129aabb5f60",
-            "kind": "file",
-            "name": "team-yasman Resource Instance",
-            "parentFolder": "50e957ee-f11e-4456-a45b-b7d787967154"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "3d361869-449b-4747-b1ee-393083060cbd",
-            "kind": "file",
-            "name": "test-team-1774008546738 Subscription Instance",
-            "parentFolder": "5206fc9a-b25b-4098-badb-84ff38df2b4f"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "4029577b-3b25-4ada-a255-8b3d49b7c842",
-            "kind": "file",
-            "name": "test-team-1774008537887 Subscription Instance",
-            "parentFolder": "30f3c295-ddb0-48ef-98c5-93cb4c131e98"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "495b2d62-8aac-43a6-acbd-19fb715675d8",
-            "kind": "file",
-            "name": "test-team-1774008878447 Subscription Instance",
-            "parentFolder": "0d8a5ffb-7f75-4f62-8d0a-7ede3d73a412"
-          },
-          {
-            "id": "4b4a236c-41c6-48d3-b521-1e4325b54ae2",
-            "kind": "folder",
-            "name": "softDelete",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "4f3ff269-d700-4bcf-9e68-17b42511179d",
-            "kind": "file",
-            "name": "test-team-1774009832611 Resource Instance",
-            "parentFolder": "24db4f8a-1f43-4d74-b54f-c1fcb15459fa"
-          },
-          {
-            "id": "50e957ee-f11e-4456-a45b-b7d787967154",
-            "kind": "folder",
-            "name": "team yasman (copy) 2",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
-          },
-          {
-            "id": "5206fc9a-b25b-4098-badb-84ff38df2b4f",
-            "kind": "folder",
-            "name": "test-team-1774008546738",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
+            "name": "Service Offerings",
+            "parentFolder": "3fa15079-f48c-4783-92c5-d3710facf58a"
           },
           {
             "documentType": "powerhouse/service-offering",
-            "id": "58bc7e2b-cd4b-4c3a-b3d2-5ca75b600460",
-            "kind": "file",
-            "name": "Operational Hub",
-            "parentFolder": "de9cd20b-373c-4765-bc74-f495b3e70b05"
-          },
-          {
-            "id": "5b463c12-3d2b-46be-96cf-fc4dbbc7da8f",
-            "kind": "folder",
-            "name": "test-team-1774008879056",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "5fa6830d-92e0-49c5-a205-1c24171b87f1",
-            "kind": "file",
-            "name": "test-team-1774008879056 Resource Instance",
-            "parentFolder": "5b463c12-3d2b-46be-96cf-fc4dbbc7da8f"
-          },
-          {
-            "id": "66b4cfa4-a21a-4712-b5eb-83fe62543f1b",
-            "kind": "folder",
-            "name": "2025",
-            "parentFolder": "209c06fa-561f-4ab6-b983-df9f7d8cada9"
-          },
-          {
-            "documentType": "powerhouse/expense-report",
-            "id": "6748f68a-fe40-418e-94f7-2f5c2646b2ce",
-            "kind": "file",
-            "name": "12-2025 Powerhouse",
-            "parentFolder": "66b4cfa4-a21a-4712-b5eb-83fe62543f1b"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "6785f408-b9b2-4ab2-b592-05416a966337",
-            "kind": "file",
-            "name": "test-team-1774009841904 Subscription Instance",
-            "parentFolder": "f7d897fa-ab07-49fb-877f-6c2d5935c4cf"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "69fc167b-7174-41a2-814c-e625ac2e17f2",
-            "kind": "file",
-            "name": "team-yasman Resource Instance",
-            "parentFolder": "940d8182-6bef-454d-8bf3-cdee3e6b89b3"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "6c6d038a-d096-41c5-b01d-1413b2051e22",
-            "kind": "file",
-            "name": "team-yasman Subscription Instance",
-            "parentFolder": "dba09f7e-dd94-4153-ae37-08a18e6905db"
-          },
-          {
-            "documentType": "powerhouse/resource-template",
-            "id": "6e030abf-0fde-4945-a981-ae359cfd8c2e",
-            "kind": "file",
-            "name": "rupert",
-            "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
-          },
-          {
-            "documentType": "powerhouse/resource-template",
-            "id": "712241c4-33ce-40de-94eb-f029b44f4a2d",
-            "kind": "file",
-            "name": "OperationalHub",
-            "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "720600d2-6631-4ec2-b3e2-a1ca638d0b62",
-            "kind": "file",
-            "name": "test-team-1774008537887 Resource Instance",
-            "parentFolder": "30f3c295-ddb0-48ef-98c5-93cb4c131e98"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "730ff9b5-d64f-44cf-afa8-2a37704b0a7a",
-            "kind": "file",
-            "name": "test-team-1774008889054 Resource Instance",
-            "parentFolder": "d4b962a9-91f8-422e-b2d1-f694b9ca9ba5"
-          },
-          {
-            "documentType": "powerhouse/service-offering",
-            "id": "74fd8f4e-603b-4e8b-91d2-25b2878483fd",
+            "id": "2400b5b3-66db-4c26-92a2-b8d57e64a9f1",
             "kind": "file",
             "name": "AgenticOps",
-            "parentFolder": "de9cd20b-373c-4765-bc74-f495b3e70b05"
-          },
-          {
-            "documentType": "powerhouse/resource-template",
-            "id": "759d21c6-001b-475d-8aba-bb62b28a0ea5",
-            "kind": "file",
-            "name": "NETWORK IP SPV",
-            "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "78d0142a-b545-4627-9ba0-217c90cd430a",
-            "kind": "file",
-            "name": "test-team-1774009834385 Subscription Instance",
-            "parentFolder": "26c5770f-7d5c-4d6b-85cf-83680010caba"
-          },
-          {
-            "documentType": "powerhouse/resource-template",
-            "id": "797b6e77-30f0-48a6-ac76-2e04df4e15bf",
-            "kind": "file",
-            "name": "FUNDRAISING VEHICLE  (OCF)",
-            "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "7e44ecd0-bc31-4fd4-b4a6-e185224fc14b",
-            "kind": "file",
-            "name": "softdelete Subscription Instance",
-            "parentFolder": "4b4a236c-41c6-48d3-b521-1e4325b54ae2"
+            "parentFolder": "1b142773-1c58-498d-ad1e-076d5f77bcb9"
           },
           {
             "documentType": "powerhouse/snapshot-report",
-            "id": "7eec9d62-9f82-4542-bdb3-ebaa3877fbe3",
+            "id": "29ec913e-a997-4811-93fb-f6561ebdb1b7",
             "kind": "file",
-            "name": "June 2025 - Snapshot Report",
-            "parentFolder": "e76d7ed8-20d2-4f28-b2e8-f724434de5db"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "7f01ef01-a7e4-4481-a171-168ed7c1b106",
-            "kind": "file",
-            "name": "softdelete Resource Instance",
-            "parentFolder": "4b4a236c-41c6-48d3-b521-1e4325b54ae2"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "7f078224-f321-4dc7-9def-bb7117d9fb84",
-            "kind": "file",
-            "name": "test-team-1774008879056 Subscription Instance",
-            "parentFolder": "5b463c12-3d2b-46be-96cf-fc4dbbc7da8f"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "843f1717-87b8-488c-b6d3-af786fcd35cc",
-            "kind": "file",
-            "name": "test-team Subscription Instance",
-            "parentFolder": "8824933c-2eee-4ba2-b15b-6c7c21669d99"
-          },
-          {
-            "id": "8824933c-2eee-4ba2-b15b-6c7c21669d99",
-            "kind": "folder",
-            "name": "test team",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
+            "name": "February 2025 - Snapshot Report",
+            "parentFolder": "70a9c0fc-302e-4acf-b17a-2f2db4da6860"
           },
           {
             "documentType": "powerhouse/service-offering",
-            "id": "88d43bf4-d9b3-4b29-bf44-b538a5170b48",
+            "id": "2e18fa5b-d986-472d-9e0e-d4d052cfda7f",
             "kind": "file",
             "name": "OperationalHubOffering",
-            "parentFolder": "de9cd20b-373c-4765-bc74-f495b3e70b05"
+            "parentFolder": "1b142773-1c58-498d-ad1e-076d5f77bcb9"
           },
           {
             "documentType": "powerhouse/resource-instance",
-            "id": "8e816683-ab2b-40cd-a5f4-2ec2ec67541b",
+            "id": "3544e082-b457-4efa-a750-ee86a5b3f25d",
             "kind": "file",
-            "name": "test-team-1774009834385 Resource Instance",
-            "parentFolder": "26c5770f-7d5c-4d6b-85cf-83680010caba"
+            "name": "apw Resource Instance",
+            "parentFolder": "9950281e-be3a-42cd-a296-95bf88e3ed58"
           },
           {
             "documentType": "powerhouse/expense-report",
-            "id": "8ec3c98d-6738-436b-b7f9-ba3be2c64ef0",
+            "id": "3b0eec67-40f0-46f1-bb6e-f5bd50f5c5bb",
             "kind": "file",
             "name": "10-2025 Powerhouse",
-            "parentFolder": "66b4cfa4-a21a-4712-b5eb-83fe62543f1b"
-          },
-          {
-            "id": "93c69cb9-d7da-48eb-a1f6-7834be2f7ba4",
-            "kind": "folder",
-            "name": "test team (copy) 1",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
+            "parentFolder": "f68e94ac-52c6-4eaf-b61b-9f81e5b9e1ec"
           },
           {
             "documentType": "powerhouse/resource-template",
-            "id": "9409329c-4aff-4a5f-b571-8fe9d7e86d73",
+            "id": "3b20fc20-71b3-409b-a3c6-92856ce37216",
             "kind": "file",
             "name": "REVENUE GENERATING HUB (RGH)",
-            "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+            "parentFolder": "5a542e9b-3660-4e13-8418-eb75aca271b4"
           },
           {
-            "id": "940d8182-6bef-454d-8bf3-cdee3e6b89b3",
-            "kind": "folder",
-            "name": "team yasman",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
-          },
-          {
-            "documentType": "powerhouse/snapshot-report",
-            "id": "948f806f-b67e-45e0-9dca-90c07868f39a",
-            "kind": "file",
-            "name": "July 2025 - Snapshot Report",
-            "parentFolder": "e76d7ed8-20d2-4f28-b2e8-f724434de5db"
-          },
-          {
-            "documentType": "powerhouse/resource-template",
-            "id": "95a83f46-254b-4736-b92f-4aae01e6cc43",
-            "kind": "file",
-            "name": "NETWORK EMBRYONIC HUB",
-            "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "9d6dd42d-39d8-437c-9c98-41127ee09b1b",
-            "kind": "file",
-            "name": "soy Subscription Instance",
-            "parentFolder": "bada369e-5fb3-40c4-812c-1757961a87b2"
-          },
-          {
-            "documentType": "powerhouse/resource-template",
-            "id": "9edd37e9-f7b7-4336-add2-83449976c4f9",
-            "kind": "file",
-            "name": "NETWORK REVENUE GENERATING HUB",
-            "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
-          },
-          {
-            "documentType": "powerhouse/resource-template",
-            "id": "a08dc883-357a-4c9b-9781-ad3ef5503cd8",
-            "kind": "file",
-            "name": "ALTERNATIVE RISK TRANSFER (ART)",
-            "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
-          },
-          {
-            "documentType": "powerhouse/builder-profile",
-            "id": "a3e9e3f5-72a3-459d-9712-dd929a1dac8a",
-            "kind": "file",
-            "name": "Powerhouse Operator Profile",
-            "parentFolder": null
-          },
-          {
-            "id": "a94b42d2-04c3-4b1a-a12d-aa41bf30c150",
-            "kind": "folder",
-            "name": "test-team-1774008538143",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "adfbe05b-a260-4c28-849e-378085500794",
-            "kind": "file",
-            "name": "test-team-1774008538143 Subscription Instance",
-            "parentFolder": "a94b42d2-04c3-4b1a-a12d-aa41bf30c150"
-          },
-          {
-            "id": "b2e94c55-7c72-4220-bb1f-bc54e34e2539",
-            "kind": "folder",
-            "name": "team yasman (copy) 4",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "b5420acc-4e41-44e7-87b0-9c9fa4a46cd3",
-            "kind": "file",
-            "name": "team-yasman Subscription Instance",
-            "parentFolder": "eef01e69-a81f-44cf-b5c1-be79be2b49cc"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "b6c53010-1329-40c1-9dcb-2de520b45f1a",
-            "kind": "file",
-            "name": "test-team-1774008538143 Resource Instance",
-            "parentFolder": "a94b42d2-04c3-4b1a-a12d-aa41bf30c150"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "b85b7352-82f1-42fd-b9fc-a01d2f71be44",
-            "kind": "file",
-            "name": "team-yasman Resource Instance",
-            "parentFolder": "b2e94c55-7c72-4220-bb1f-bc54e34e2539"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "ba2e960d-5721-4eb1-aadc-2eba4fab0747",
-            "kind": "file",
-            "name": "test-team-1774008878447 Resource Instance",
-            "parentFolder": "0d8a5ffb-7f75-4f62-8d0a-7ede3d73a412"
-          },
-          {
-            "id": "bada369e-5fb3-40c4-812c-1757961a87b2",
-            "kind": "folder",
-            "name": "SOY",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "c1111ff6-2878-4700-9798-34518984eeef",
-            "kind": "file",
-            "name": "test-team-1774008546738 Resource Instance",
-            "parentFolder": "5206fc9a-b25b-4098-badb-84ff38df2b4f"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "c577f757-4ccc-4784-b632-735b2df2d049",
-            "kind": "file",
-            "name": "team-yasman Resource Instance",
-            "parentFolder": "eef01e69-a81f-44cf-b5c1-be79be2b49cc"
-          },
-          {
-            "documentType": "powerhouse/snapshot-report",
-            "id": "c74a41a8-278f-4298-8df3-0e0a67149d5e",
-            "kind": "file",
-            "name": "February 2025 - Snapshot Report",
-            "parentFolder": "e76d7ed8-20d2-4f28-b2e8-f724434de5db"
-          },
-          {
-            "id": "cbdb3121-8be4-415a-a5dc-f1c6857ede63",
+            "id": "3fa15079-f48c-4783-92c5-d3710facf58a",
             "kind": "folder",
             "name": "Services And Offerings",
             "parentFolder": null
           },
           {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "cdafdf21-106e-460a-8b7c-f0e7bef0e365",
-            "kind": "file",
-            "name": "test-team Subscription Instance",
-            "parentFolder": "93c69cb9-d7da-48eb-a1f6-7834be2f7ba4"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "d4755b36-b632-4168-9ba6-36e7c3c8b2ef",
-            "kind": "file",
-            "name": "test-team-1774009832611 Subscription Instance",
-            "parentFolder": "24db4f8a-1f43-4d74-b54f-c1fcb15459fa"
-          },
-          {
-            "id": "d4b962a9-91f8-422e-b2d1-f694b9ca9ba5",
+            "id": "5a542e9b-3660-4e13-8418-eb75aca271b4",
             "kind": "folder",
-            "name": "test-team-1774008889054",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
+            "name": "Products",
+            "parentFolder": "3fa15079-f48c-4783-92c5-d3710facf58a"
           },
           {
-            "documentType": "powerhouse/snapshot-report",
-            "id": "d59864fd-11b0-497b-9706-ff8547da8be0",
+            "documentType": "powerhouse/expense-report",
+            "id": "5e699c21-5932-4761-9229-984c75dfec21",
             "kind": "file",
-            "name": "April 2025 - Snapshot Report",
-            "parentFolder": "e76d7ed8-20d2-4f28-b2e8-f724434de5db"
+            "name": "08-2025 Powerhouse",
+            "parentFolder": "f68e94ac-52c6-4eaf-b61b-9f81e5b9e1ec"
           },
           {
-            "id": "dba09f7e-dd94-4153-ae37-08a18e6905db",
-            "kind": "folder",
-            "name": "team yasman (copy) 1",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "dd65e10c-d837-4587-894c-beb0688f51c3",
-            "kind": "file",
-            "name": "test-team Resource Instance",
-            "parentFolder": "8824933c-2eee-4ba2-b15b-6c7c21669d99"
-          },
-          {
-            "id": "de9cd20b-373c-4765-bc74-f495b3e70b05",
-            "kind": "folder",
-            "name": "Service Offerings",
-            "parentFolder": "cbdb3121-8be4-415a-a5dc-f1c6857ede63"
-          },
-          {
-            "documentType": "powerhouse/resource-instance",
-            "id": "e0609406-600e-4b6b-8cb9-cc596af83c17",
-            "kind": "file",
-            "name": "soy Resource Instance",
-            "parentFolder": "bada369e-5fb3-40c4-812c-1757961a87b2"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "e0814765-2ac7-434e-b23e-c7169e891c7a",
-            "kind": "file",
-            "name": "test-team-1774008889054 Subscription Instance",
-            "parentFolder": "d4b962a9-91f8-422e-b2d1-f694b9ca9ba5"
-          },
-          {
-            "id": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367",
-            "kind": "folder",
-            "name": "Service Subscriptions",
-            "parentFolder": null
-          },
-          {
-            "id": "e76d7ed8-20d2-4f28-b2e8-f724434de5db",
-            "kind": "folder",
-            "name": "2025",
-            "parentFolder": "fd90432f-eb64-4b7c-b28b-ce72f83240af"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "e9ba5640-e30f-4d42-9cac-243af83ce535",
-            "kind": "file",
-            "name": "team-yasman Subscription Instance",
-            "parentFolder": "b2e94c55-7c72-4220-bb1f-bc54e34e2539"
-          },
-          {
-            "documentType": "powerhouse/resource-template",
-            "id": "ee4e28af-f994-4e1a-86c3-5f5b6e09d08d",
-            "kind": "file",
-            "name": "AgentOps",
-            "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
-          },
-          {
-            "id": "eef01e69-a81f-44cf-b5c1-be79be2b49cc",
-            "kind": "folder",
-            "name": "team yasman (copy) 3",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
-          },
-          {
-            "id": "f7d897fa-ab07-49fb-877f-6c2d5935c4cf",
-            "kind": "folder",
-            "name": "test-team-1774009841904",
-            "parentFolder": "e23bdd75-b9b1-45bd-ab1c-38eb6699a367"
-          },
-          {
-            "documentType": "powerhouse/subscription-instance",
-            "id": "f9e87646-de9e-41a2-9a4a-c7e95aa410d3",
-            "kind": "file",
-            "name": "team-yasman Subscription Instance",
-            "parentFolder": "940d8182-6bef-454d-8bf3-cdee3e6b89b3"
-          },
-          {
-            "id": "fd90432f-eb64-4b7c-b28b-ce72f83240af",
+            "id": "6010dc18-df39-40b3-a6b7-c6bc5fbe0ea3",
             "kind": "folder",
             "name": "Snapshot Reports",
             "parentFolder": null
           },
           {
-            "documentType": "powerhouse/resource-instance",
-            "id": "fe141991-3d53-4d59-9d9d-15c337611953",
+            "documentType": "powerhouse/snapshot-report",
+            "id": "63143a4b-8294-4744-b83b-8c7370e06f7c",
             "kind": "file",
-            "name": "test-team-1774009841904 Resource Instance",
-            "parentFolder": "f7d897fa-ab07-49fb-877f-6c2d5935c4cf"
+            "name": "April 2025 - Snapshot Report",
+            "parentFolder": "70a9c0fc-302e-4acf-b17a-2f2db4da6860"
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "667336cb-dba8-4c2e-858e-0ddaa869ba33",
+            "kind": "file",
+            "name": "NETWORK OPERATIONAL HUB",
+            "parentFolder": "5a542e9b-3660-4e13-8418-eb75aca271b4"
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "694ccfba-f8d3-405a-a19a-99c557dcd9f9",
+            "kind": "file",
+            "name": "ALTERNATIVE RISK TRANSFER (ART)",
+            "parentFolder": "5a542e9b-3660-4e13-8418-eb75aca271b4"
+          },
+          {
+            "id": "70a9c0fc-302e-4acf-b17a-2f2db4da6860",
+            "kind": "folder",
+            "name": "2025",
+            "parentFolder": "6010dc18-df39-40b3-a6b7-c6bc5fbe0ea3"
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "72556f1d-dcee-4689-a152-6322a83bbe01",
+            "kind": "file",
+            "name": "rupert",
+            "parentFolder": "5a542e9b-3660-4e13-8418-eb75aca271b4"
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "75932a19-3d38-4ac1-bd71-2b0c7bd4c27a",
+            "kind": "file",
+            "name": "NETWORK IP SPV",
+            "parentFolder": "5a542e9b-3660-4e13-8418-eb75aca271b4"
+          },
+          {
+            "documentType": "powerhouse/subscription-instance",
+            "id": "7b312302-f408-4335-8fd9-2e35c067aa87",
+            "kind": "file",
+            "name": "apw Subscription Instance",
+            "parentFolder": "9950281e-be3a-42cd-a296-95bf88e3ed58"
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "831efda4-c052-42b1-8df3-dfae977b732b",
+            "kind": "file",
+            "name": "Powerhouse Operator Profile",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "8d980ae6-3587-4762-8514-fb3be2811feb",
+            "kind": "file",
+            "name": "FUNDRAISING VEHICLE  (OCF)",
+            "parentFolder": "5a542e9b-3660-4e13-8418-eb75aca271b4"
+          },
+          {
+            "documentType": "powerhouse/expense-report",
+            "id": "9686ffa4-bf84-415c-972e-80144def1f9c",
+            "kind": "file",
+            "name": "12-2025 Powerhouse",
+            "parentFolder": "f68e94ac-52c6-4eaf-b61b-9f81e5b9e1ec"
+          },
+          {
+            "id": "9950281e-be3a-42cd-a296-95bf88e3ed58",
+            "kind": "folder",
+            "name": "APW",
+            "parentFolder": "9b1744fb-6c60-4cbf-84d6-56fe43ef459e"
+          },
+          {
+            "id": "9b1744fb-6c60-4cbf-84d6-56fe43ef459e",
+            "kind": "folder",
+            "name": "Service Subscriptions",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "9cefda9c-5b63-429a-8c47-fe686f92eb4d",
+            "kind": "file",
+            "name": "COMMERCIAL OPERATIONAL HUB (OH)",
+            "parentFolder": "5a542e9b-3660-4e13-8418-eb75aca271b4"
+          },
+          {
+            "documentType": "powerhouse/snapshot-report",
+            "id": "a0c6727d-50b1-489d-827a-eb650ab02556",
+            "kind": "file",
+            "name": "July 2025 - Snapshot Report",
+            "parentFolder": "70a9c0fc-302e-4acf-b17a-2f2db4da6860"
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "ad1eabc5-9742-417a-9c25-de379440b48c",
+            "kind": "file",
+            "name": "Intellectual Property SPV (IP SPV)",
+            "parentFolder": "5a542e9b-3660-4e13-8418-eb75aca271b4"
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "c4118d12-238b-4782-9703-99d5ac8f66af",
+            "kind": "file",
+            "name": "AgentOps",
+            "parentFolder": "5a542e9b-3660-4e13-8418-eb75aca271b4"
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "cb49e571-6007-4240-ae0b-e7e9db214f98",
+            "kind": "file",
+            "name": "NETWORK EMBRYONIC HUB",
+            "parentFolder": "5a542e9b-3660-4e13-8418-eb75aca271b4"
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "d07ee3ea-f101-439d-8deb-4df88cdedf87",
+            "kind": "file",
+            "name": "NETWORK REVENUE GENERATING HUB",
+            "parentFolder": "5a542e9b-3660-4e13-8418-eb75aca271b4"
+          },
+          {
+            "documentType": "powerhouse/snapshot-report",
+            "id": "dd055126-2e86-4e8b-82ad-a55c1eb18cd3",
+            "kind": "file",
+            "name": "June 2025 - Snapshot Report",
+            "parentFolder": "70a9c0fc-302e-4acf-b17a-2f2db4da6860"
+          },
+          {
+            "documentType": "powerhouse/expense-report",
+            "id": "e44d2b6c-995b-4a65-b8c3-27c888fe2222",
+            "kind": "file",
+            "name": "11-2025 Powerhouse",
+            "parentFolder": "f68e94ac-52c6-4eaf-b61b-9f81e5b9e1ec"
+          },
+          {
+            "id": "f68e94ac-52c6-4eaf-b61b-9f81e5b9e1ec",
+            "kind": "folder",
+            "name": "2025",
+            "parentFolder": "114f33f5-254f-4492-86ee-20543466c449"
           }
-        ],
-        "status": "ACTIVE"
+        ]
       },
-      "local": {}
+      "local": {
+        "availableOffline": false,
+        "listeners": [],
+        "sharingType": "private",
+        "triggers": []
+      }
     }
   }
 }

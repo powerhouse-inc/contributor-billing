@@ -42,7 +42,7 @@ if [ -f "$OUTPUT_DIR/manifest.json" ]; then
   exit 0
 fi
 
-mkdir -p "$OUTPUT_DIR/states"
+mkdir -p "$OUTPUT_DIR/states" "$OUTPUT_DIR/ops"
 
 # ── Download drive tree ──────────────────────────────────────────────────────
 
@@ -119,8 +119,22 @@ for f in files:
         with open(state_path, "w") as fp:
             json.dump(state, fp, indent=2)
 
+        # Fetch operation history
+        ops_result = subprocess.run(
+            ["switchboard", "ops", doc_id, "--format", "json"],
+            capture_output=True, text=True, timeout=120,
+        )
+        if ops_result.returncode == 0:
+            ops_data = json.loads(ops_result.stdout)
+            ops_path = os.path.join(output_dir, "ops", f"{doc_id}.json")
+            with open(ops_path, "w") as fp:
+                json.dump(ops_data, fp, indent=2)
+            ops_count = len(ops_data) if isinstance(ops_data, list) else 0
+        else:
+            ops_count = 0
+
         downloaded += 1
-        print(f"  {G}✓{NC} {f['name']} ({doc_type})")
+        print(f"  {G}✓{NC} {f['name']} ({doc_type}) — state + {ops_count} ops")
 
     except Exception as e:
         # Save null state so manifest is consistent
