@@ -275,7 +275,8 @@ export function ExpenseReportPDF({
           <Text style={styles.title}>Expense Report</Text>
           {periodStart && (
             <Text style={styles.period}>
-              Period: {formatDate(periodStart)} to {formatDate(periodEnd)}
+              Transaction Period: {formatDate(periodStart)} to{" "}
+              {formatDate(periodEnd)}
             </Text>
           )}
         </View>
