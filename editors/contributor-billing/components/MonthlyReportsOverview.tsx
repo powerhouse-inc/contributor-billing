@@ -405,6 +405,55 @@ export function MonthlyReportsOverview({
     [driveId],
   );
 
+  const handleDeleteMonth = useCallback(
+    async (monthName: string) => {
+      if (!driveId || !monthFolders) return;
+      const info = monthFolders.get(monthName);
+      if (!info) return;
+
+      try {
+        // Delete child nodes first (files in Reporting/Payments, then subfolders, then month folder)
+        const allNodes = selectedDrive?.state.global.nodes || [];
+        const childNodeIds: string[] = [];
+
+        // Collect files inside Reporting and Payments subfolders
+        for (const node of allNodes) {
+          if (
+            node.parentFolder === info.reportingFolder?.id ||
+            node.parentFolder === info.paymentsFolder?.id
+          ) {
+            childNodeIds.push(node.id);
+          }
+        }
+
+        // Delete files first
+        for (const nodeId of childNodeIds) {
+          await dispatchActions(deleteNode({ id: nodeId }), driveId);
+        }
+
+        // Delete subfolders
+        if (info.reportingFolder) {
+          await dispatchActions(
+            deleteNode({ id: info.reportingFolder.id }),
+            driveId,
+          );
+        }
+        if (info.paymentsFolder) {
+          await dispatchActions(
+            deleteNode({ id: info.paymentsFolder.id }),
+            driveId,
+          );
+        }
+
+        // Delete the month folder itself
+        await dispatchActions(deleteNode({ id: info.folder.id }), driveId);
+      } catch (error) {
+        console.error(`Failed to delete month folder ${monthName}:`, error);
+      }
+    },
+    [driveId, monthFolders, selectedDrive],
+  );
+
   // Add Month button component (reused across states)
   const addMonthButton = onCreateMonth && (
     <div className="relative">
@@ -535,6 +584,7 @@ export function MonthlyReportsOverview({
             onCreateExpenseReport={handleCreateExpenseReport}
             onCreateSnapshotReport={handleCreateSnapshotReport}
             onDeleteReport={handleDeleteReport}
+            onDeleteMonth={handleDeleteMonth}
             onViewPayments={onFolderSelect ? handleViewPayments : undefined}
             paymentStats={monthPaymentStatsMap.get(reportSet.monthName)}
             suggestedStartDate={
