@@ -223,7 +223,7 @@ export function MonthlyReportsOverview({
     const months: Array<{ name: string; exists: boolean }> = [];
     const today = new Date();
     const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-    const startDate = new Date(2025, 0, 1);
+    const startDate = new Date(2024, 0, 1);
 
     const currentDate = new Date(endDate);
     while (currentDate >= startDate) {
