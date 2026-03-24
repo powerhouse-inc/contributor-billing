@@ -1,3 +1,10 @@
+# [1.0.0-dev.27](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.26...v1.0.0-dev.27) (2026-03-24)
+
+
+### Bug Fixes
+
+* update service offering with fix ([529d47c](https://github.com/powerhouse-inc/contributor-billing/commit/529d47c1a85fd3477be9ca5ffeadac97a79a6290))
+
 # [1.0.0-dev.26](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.25...v1.0.0-dev.26) (2026-03-23)
 
 
