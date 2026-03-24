@@ -1,0 +1,47 @@
+{
+  "source": {
+    "slug": "powerhouse-network-admin",
+    "name": "Powerhouse Network Admin",
+    "downloadedAt": "2026-03-23T11:43:29.000Z"
+  },
+  "excluded": [],
+  "folders": [],
+  "documents": [
+    {
+      "id": "03e167a8-0c92-4d72-8969-fb05a9ae1706",
+      "name": "Powerhouse",
+      "type": "powerhouse/network-profile",
+      "parentFolder": null
+    },
+    {
+      "id": "311231b5-0aba-43fd-8cd1-620fde308aae",
+      "name": "Builders",
+      "type": "powerhouse/builders",
+      "parentFolder": null
+    },
+    {
+      "id": "7dbb174e-e197-4223-8e90-ec4e08167d8f",
+      "name": "Payment Terms-Powerhouse Workstream 2024",
+      "type": "powerhouse/payment-terms",
+      "parentFolder": null
+    },
+    {
+      "id": "a70bcf36-350c-4989-9482-28093864bdda",
+      "name": "RFP-Powerhouse Workstream 2024",
+      "type": "powerhouse/request-for-proposals",
+      "parentFolder": null
+    },
+    {
+      "id": "b760fb82-979e-4a2c-813c-6f4e9ceec988",
+      "name": "Powerhouse Workstream 2024",
+      "type": "powerhouse/workstream",
+      "parentFolder": null
+    },
+    {
+      "id": "c11847d4-19a4-451b-aa85-28c8cbed6ba3",
+      "name": "SOW-Powerhouse Workstream 2024",
+      "type": "powerhouse/scope-of-work",
+      "parentFolder": null
+    }
+  ]
+}

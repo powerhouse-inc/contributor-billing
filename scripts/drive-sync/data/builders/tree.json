@@ -1,0 +1,156 @@
+{
+  "childIds": [
+    "95fcd197-2ede-425f-a174-7eda02968eee",
+    "b347d88a-05f7-4230-9288-43b4ff04a1be",
+    "3f96c745-ff83-4af8-a205-9cdf7401fe54",
+    "5e5732a8-3aeb-4625-8d0a-8ad24a7713c9",
+    "85f836c2-8882-4834-b8ff-205b01c706b0",
+    "9d6894e2-c6e5-4cee-a91f-ea65b45d6f57",
+    "70ac624c-1dee-47d9-bdc5-61b37a5b8f56",
+    "1e96714c-0687-4b46-91d8-eb175099dc25",
+    "5740f7f5-2a41-4a46-b248-8f757210064a",
+    "acb26da2-c6ff-4d78-9931-3688e4f1569d",
+    "2e465c19-8741-445f-8d06-e7b7ef6db27f",
+    "b766fa92-8c09-440b-a079-9b5d786e7005",
+    "bebde76e-eb0d-4e38-a608-d3e1b749b656",
+    "9448662f-6f22-43a2-9678-d071b6189719",
+    "f4be9841-28e1-4873-acd4-cbcfa943c8e5",
+    "8e0010d4-1077-483f-b303-aba945c4ccd5",
+    "5f52b83f-5b0d-41c4-852f-bf2473cbf91b"
+  ],
+  "document": {
+    "id": "7b960b47-7fe8-4f7f-b2c6-7a0374c29134",
+    "name": "builders",
+    "slug": "builders",
+    "state": {
+      "auth": {},
+      "document": {
+        "hash": {
+          "algorithm": "sha1",
+          "encoding": "base64"
+        },
+        "version": 0
+      },
+      "global": {
+        "documentTypes": [],
+        "name": "builders",
+        "nodes": [
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "1e96714c-0687-4b46-91d8-eb175099dc25",
+            "kind": "file",
+            "name": "teep",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "2e465c19-8741-445f-8d06-e7b7ef6db27f",
+            "kind": "file",
+            "name": "Frank",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "5740f7f5-2a41-4a46-b248-8f757210064a",
+            "kind": "file",
+            "name": "deadgoat",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "5e5732a8-3aeb-4625-8d0a-8ad24a7713c9",
+            "kind": "file",
+            "name": "Layer0",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "5f52b83f-5b0d-41c4-852f-bf2473cbf91b",
+            "kind": "file",
+            "name": "Dracaena",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "70ac624c-1dee-47d9-bdc5-61b37a5b8f56",
+            "kind": "file",
+            "name": "callMeT",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "85f836c2-8882-4834-b8ff-205b01c706b0",
+            "kind": "file",
+            "name": "willow",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "8e0010d4-1077-483f-b303-aba945c4ccd5",
+            "kind": "file",
+            "name": "oz",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "9448662f-6f22-43a2-9678-d071b6189719",
+            "kind": "file",
+            "name": "Prometheus",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "95fcd197-2ede-425f-a174-7eda02968eee",
+            "kind": "file",
+            "name": "Memo",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "9d6894e2-c6e5-4cee-a91f-ea65b45d6f57",
+            "kind": "file",
+            "name": "liberuum",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "acb26da2-c6ff-4d78-9931-3688e4f1569d",
+            "kind": "file",
+            "name": "Apeiron",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "b347d88a-05f7-4230-9288-43b4ff04a1be",
+            "kind": "file",
+            "name": "TheGoldenMule",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "b766fa92-8c09-440b-a079-9b5d786e7005",
+            "kind": "file",
+            "name": "Acaldas",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "bebde76e-eb0d-4e38-a608-d3e1b749b656",
+            "kind": "file",
+            "name": "Lumen",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "f4be9841-28e1-4873-acd4-cbcfa943c8e5",
+            "kind": "file",
+            "name": "Kilgore",
+            "parentFolder": null
+          }
+        ],
+        "status": "ACTIVE"
+      },
+      "local": {}
+    }
+  }
+}

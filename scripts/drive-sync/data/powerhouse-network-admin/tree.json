@@ -1,0 +1,75 @@
+{
+  "childIds": [
+    "03e167a8-0c92-4d72-8969-fb05a9ae1706",
+    "311231b5-0aba-43fd-8cd1-620fde308aae",
+    "7dbb174e-e197-4223-8e90-ec4e08167d8f",
+    "a70bcf36-350c-4989-9482-28093864bdda",
+    "c11847d4-19a4-451b-aa85-28c8cbed6ba3",
+    "b760fb82-979e-4a2c-813c-6f4e9ceec988"
+  ],
+  "document": {
+    "id": "cd45cc9c-fe5c-4a32-9898-664963cf790b",
+    "name": "Powerhouse Network Admin",
+    "slug": "powerhouse-network-admin",
+    "state": {
+      "auth": {},
+      "document": {
+        "hash": {
+          "algorithm": "sha1",
+          "encoding": "base64"
+        },
+        "version": 0
+      },
+      "global": {
+        "documentTypes": [],
+        "name": "Powerhouse Network Admin",
+        "nodes": [
+          {
+            "documentType": "powerhouse/network-profile",
+            "id": "03e167a8-0c92-4d72-8969-fb05a9ae1706",
+            "kind": "file",
+            "name": "Powerhouse",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/builders",
+            "id": "311231b5-0aba-43fd-8cd1-620fde308aae",
+            "kind": "file",
+            "name": "Builders",
+            "parentFolder": null
+          },
+          {
+            "documentType": "payment-terms",
+            "id": "7dbb174e-e197-4223-8e90-ec4e08167d8f",
+            "kind": "file",
+            "name": "Payment Terms-Powerhouse Workstream 2024",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/rfp",
+            "id": "a70bcf36-350c-4989-9482-28093864bdda",
+            "kind": "file",
+            "name": "RFP-Powerhouse Workstream 2024",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/workstream",
+            "id": "b760fb82-979e-4a2c-813c-6f4e9ceec988",
+            "kind": "file",
+            "name": "Powerhouse Workstream 2024",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/scopeofwork",
+            "id": "c11847d4-19a4-451b-aa85-28c8cbed6ba3",
+            "kind": "file",
+            "name": "SOW-Powerhouse Workstream 2024",
+            "parentFolder": null
+          }
+        ],
+        "status": "ACTIVE"
+      },
+      "local": {}
+    }
+  }
+}

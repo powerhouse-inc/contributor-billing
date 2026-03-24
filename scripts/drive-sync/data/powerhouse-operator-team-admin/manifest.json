@@ -1,0 +1,203 @@
+{
+  "source": {
+    "slug": "powerhouse-operator-team-admin",
+    "name": "Powerhouse Operator Team Admin",
+    "downloadedAt": "2026-03-22T22:55:34.000Z"
+  },
+  "excluded": [],
+  "folders": [
+    {
+      "id": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb",
+      "name": "Products",
+      "parentFolder": "cbdb3121-8be4-415a-a5dc-f1c6857ede63"
+    },
+    {
+      "id": "209c06fa-561f-4ab6-b983-df9f7d8cada9",
+      "name": "Expense Reports",
+      "parentFolder": null
+    },
+    {
+      "id": "66b4cfa4-a21a-4712-b5eb-83fe62543f1b",
+      "name": "2025",
+      "parentFolder": "209c06fa-561f-4ab6-b983-df9f7d8cada9"
+    },
+    {
+      "id": "cbdb3121-8be4-415a-a5dc-f1c6857ede63",
+      "name": "Services And Offerings",
+      "parentFolder": null
+    },
+    {
+      "id": "de9cd20b-373c-4765-bc74-f495b3e70b05",
+      "name": "Service Offerings",
+      "parentFolder": "cbdb3121-8be4-415a-a5dc-f1c6857ede63"
+    },
+    {
+      "id": "e76d7ed8-20d2-4f28-b2e8-f724434de5db",
+      "name": "2025",
+      "parentFolder": "fd90432f-eb64-4b7c-b28b-ce72f83240af"
+    },
+    {
+      "id": "fd90432f-eb64-4b7c-b28b-ce72f83240af",
+      "name": "Snapshot Reports",
+      "parentFolder": null
+    }
+  ],
+  "documents": [
+    {
+      "id": "05f1376b-0449-4063-b67a-597ad21fc1f1",
+      "name": "07-2025 Powerhouse",
+      "type": "powerhouse/expense-report",
+      "parentFolder": "66b4cfa4-a21a-4712-b5eb-83fe62543f1b"
+    },
+    {
+      "id": "10112381-952c-44aa-822d-a6bc3bfd3d1d",
+      "name": "08-2025 Powerhouse",
+      "type": "powerhouse/expense-report",
+      "parentFolder": "66b4cfa4-a21a-4712-b5eb-83fe62543f1b"
+    },
+    {
+      "id": "10da3ccd-dd53-44e1-822c-b1b4f2d87a4f",
+      "name": "Intellectual Property SPV (IP SPV)",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+    },
+    {
+      "id": "14f832c0-010a-4335-94bb-fc412ff79f4b",
+      "name": "NETWORK OPERATIONAL HUB",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+    },
+    {
+      "id": "23b2813d-036c-4717-b147-b8ab01a07cea",
+      "name": "March 2025 - Snapshot Report",
+      "type": "powerhouse/snapshot-report",
+      "parentFolder": "e76d7ed8-20d2-4f28-b2e8-f724434de5db"
+    },
+    {
+      "id": "2e84b018-67d1-4837-b15b-752593238098",
+      "name": "11-2025 Powerhouse",
+      "type": "powerhouse/expense-report",
+      "parentFolder": "66b4cfa4-a21a-4712-b5eb-83fe62543f1b"
+    },
+    {
+      "id": "3207026a-1bf5-4184-9825-74c4a761880b",
+      "name": "COMMERCIAL OPERATIONAL HUB (OH)",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+    },
+    {
+      "id": "58bc7e2b-cd4b-4c3a-b3d2-5ca75b600460",
+      "name": "Operational Hub",
+      "type": "powerhouse/service-offering",
+      "parentFolder": "de9cd20b-373c-4765-bc74-f495b3e70b05"
+    },
+    {
+      "id": "6748f68a-fe40-418e-94f7-2f5c2646b2ce",
+      "name": "12-2025 Powerhouse",
+      "type": "powerhouse/expense-report",
+      "parentFolder": "66b4cfa4-a21a-4712-b5eb-83fe62543f1b"
+    },
+    {
+      "id": "6e030abf-0fde-4945-a981-ae359cfd8c2e",
+      "name": "rupert",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+    },
+    {
+      "id": "712241c4-33ce-40de-94eb-f029b44f4a2d",
+      "name": "OperationalHub",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+    },
+    {
+      "id": "74fd8f4e-603b-4e8b-91d2-25b2878483fd",
+      "name": "AgenticOps",
+      "type": "powerhouse/service-offering",
+      "parentFolder": "de9cd20b-373c-4765-bc74-f495b3e70b05"
+    },
+    {
+      "id": "759d21c6-001b-475d-8aba-bb62b28a0ea5",
+      "name": "NETWORK IP SPV",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+    },
+    {
+      "id": "797b6e77-30f0-48a6-ac76-2e04df4e15bf",
+      "name": "FUNDRAISING VEHICLE  (OCF)",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+    },
+    {
+      "id": "7eec9d62-9f82-4542-bdb3-ebaa3877fbe3",
+      "name": "June 2025 - Snapshot Report",
+      "type": "powerhouse/snapshot-report",
+      "parentFolder": "e76d7ed8-20d2-4f28-b2e8-f724434de5db"
+    },
+    {
+      "id": "88d43bf4-d9b3-4b29-bf44-b538a5170b48",
+      "name": "OperationalHubOffering",
+      "type": "powerhouse/service-offering",
+      "parentFolder": "de9cd20b-373c-4765-bc74-f495b3e70b05"
+    },
+    {
+      "id": "8ec3c98d-6738-436b-b7f9-ba3be2c64ef0",
+      "name": "10-2025 Powerhouse",
+      "type": "powerhouse/expense-report",
+      "parentFolder": "66b4cfa4-a21a-4712-b5eb-83fe62543f1b"
+    },
+    {
+      "id": "9409329c-4aff-4a5f-b571-8fe9d7e86d73",
+      "name": "REVENUE GENERATING HUB (RGH)",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+    },
+    {
+      "id": "948f806f-b67e-45e0-9dca-90c07868f39a",
+      "name": "July 2025 - Snapshot Report",
+      "type": "powerhouse/snapshot-report",
+      "parentFolder": "e76d7ed8-20d2-4f28-b2e8-f724434de5db"
+    },
+    {
+      "id": "95a83f46-254b-4736-b92f-4aae01e6cc43",
+      "name": "NETWORK EMBRYONIC HUB",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+    },
+    {
+      "id": "9edd37e9-f7b7-4336-add2-83449976c4f9",
+      "name": "NETWORK REVENUE GENERATING HUB",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+    },
+    {
+      "id": "a08dc883-357a-4c9b-9781-ad3ef5503cd8",
+      "name": "ALTERNATIVE RISK TRANSFER (ART)",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+    },
+    {
+      "id": "a3e9e3f5-72a3-459d-9712-dd929a1dac8a",
+      "name": "Powerhouse Operator Profile",
+      "type": "powerhouse/builder-profile",
+      "parentFolder": null
+    },
+    {
+      "id": "c74a41a8-278f-4298-8df3-0e0a67149d5e",
+      "name": "February 2025 - Snapshot Report",
+      "type": "powerhouse/snapshot-report",
+      "parentFolder": "e76d7ed8-20d2-4f28-b2e8-f724434de5db"
+    },
+    {
+      "id": "d59864fd-11b0-497b-9706-ff8547da8be0",
+      "name": "April 2025 - Snapshot Report",
+      "type": "powerhouse/snapshot-report",
+      "parentFolder": "e76d7ed8-20d2-4f28-b2e8-f724434de5db"
+    },
+    {
+      "id": "ee4e28af-f994-4e1a-86c3-5f5b6e09d08d",
+      "name": "AgentOps",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "0fec9a71-dc99-48e8-9c1e-91b685ab52cb"
+    }
+  ]
+}

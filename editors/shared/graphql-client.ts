@@ -59,19 +59,11 @@ async function graphqlRequest<T>(
 // Query to find all builder profile documents
 const FIND_BUILDER_PROFILES_QUERY = `
   query FindBuilderProfiles {
-    BuilderProfile_findDocuments(search: {}) {
+    findDocuments(search: { type: "powerhouse/builder-profile" }) {
       items {
         id
         name
-        state {
-          global {
-            id
-            name
-            slug
-            icon
-            description
-          }
-        }
+        state
       }
       totalCount
     }
@@ -81,19 +73,11 @@ const FIND_BUILDER_PROFILES_QUERY = `
 // Query to get a single builder profile by identifier
 const GET_BUILDER_PROFILE_QUERY = `
   query GetBuilderProfile($identifier: String!) {
-    BuilderProfile_document(identifier: $identifier) {
+    document(identifier: $identifier) {
       document {
         id
         name
-        state {
-          global {
-            id
-            name
-            slug
-            icon
-            description
-          }
-        }
+        state
       }
     }
   }
@@ -109,41 +93,43 @@ export interface RemoteBuilderProfile {
   };
 }
 
+function getGlobalState(
+  state: Record<string, unknown>,
+): Record<string, unknown> {
+  if (state && typeof state === "object" && "global" in state) {
+    return (state as { global: Record<string, unknown> }).global;
+  }
+  return state;
+}
+
 interface FindBuilderProfilesItem {
   id: string;
   name: string;
-  state: {
-    global: {
-      id: string | null;
-      name: string | null;
-      slug: string | null;
-      icon: string | null;
-      description: string | null;
-    };
-  };
+  state: Record<string, unknown>;
 }
 
 interface FindBuilderProfilesResponse {
-  BuilderProfile_findDocuments: {
+  findDocuments: {
     items: FindBuilderProfilesItem[];
     totalCount: number;
   };
 }
 
 interface SingleBuilderProfileResponse {
-  BuilderProfile_document: {
+  document: {
     document: FindBuilderProfilesItem;
   } | null;
 }
 
 function toRemoteProfile(item: FindBuilderProfilesItem): RemoteBuilderProfile {
+  const global = getGlobalState(item.state);
   return {
     id: item.id,
     state: {
-      name: item.state.global.name,
-      slug: item.state.global.slug,
-      icon: item.state.global.icon,
-      description: item.state.global.description,
+      name: (global.name as string) ?? null,
+      slug: (global.slug as string) ?? null,
+      icon: (global.icon as string) ?? null,
+      description: (global.description as string) ?? null,
     },
   };
 }
@@ -158,7 +144,7 @@ export async function fetchBuilderProfileById(
     GET_BUILDER_PROFILE_QUERY,
     { identifier: docId },
   );
-  const item = data?.BuilderProfile_document?.document;
+  const item = data?.document?.document;
   return item ? toRemoteProfile(item) : null;
 }
 
@@ -172,7 +158,7 @@ export async function fetchAllRemoteBuilderProfiles(): Promise<
     const data = await graphqlRequest<FindBuilderProfilesResponse>(
       FIND_BUILDER_PROFILES_QUERY,
     );
-    const items = data?.BuilderProfile_findDocuments?.items ?? [];
+    const items = data?.findDocuments?.items ?? [];
     return items.map(toRemoteProfile);
   } catch {
     return [];
@@ -219,8 +205,11 @@ export async function fetchRemoteBuilderProfilesByIds(
 
 // Mutation to set operational hub member on a builder profile
 const SET_OP_HUB_MEMBER_MUTATION = `
-  mutation BuilderProfile_setOpHubMember($docId: PHID!, $input: BuilderProfile_SetOpHubMemberInput!) {
-    BuilderProfile_setOpHubMember(docId: $docId, input: $input)
+  mutation SetOpHubMember($documentIdentifier: String!, $actions: [JSONObject!]!) {
+    mutateDocument(documentIdentifier: $documentIdentifier, actions: $actions) {
+      id
+      name
+    }
   }
 `;
 
@@ -230,7 +219,7 @@ export interface SetOpHubMemberInput {
 }
 
 interface SetOpHubMemberResponse {
-  BuilderProfile_setOpHubMember: boolean;
+  mutateDocument: { id: string; name: string } | null;
 }
 
 /**
@@ -247,9 +236,12 @@ export async function setOpHubMemberOnBuilderProfile(
   try {
     const data = await graphqlRequest<SetOpHubMemberResponse>(
       SET_OP_HUB_MEMBER_MUTATION,
-      { docId, input },
+      {
+        documentIdentifier: docId,
+        actions: [{ type: "SET_OP_HUB_MEMBER", input, scope: "global" }],
+      },
     );
-    return data?.BuilderProfile_setOpHubMember ?? false;
+    return data?.mutateDocument != null;
   } catch (error) {
     console.warn("[graphql-client] Failed to set op hub member:", error);
     return false;

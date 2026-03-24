@@ -12,17 +12,17 @@
   "packages": [
     {
       "packageName": "@powerhousedao/vetra",
-      "version": "6.0.0-staging.0",
+      "version": "6.0.0-dev.105",
       "provider": "npm"
     },
     {
       "packageName": "@powerhousedao/builder-profile",
-      "version": "1.1.0-dev.3",
+      "version": "1.1.0-dev.6",
       "provider": "npm"
     },
     {
       "packageName": "@powerhousedao/service-offering",
-      "version": "1.0.0-dev.16",
+      "version": "1.0.0-dev.23",
       "provider": "npm"
     }
   ]
