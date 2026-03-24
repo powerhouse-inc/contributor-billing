@@ -22,7 +22,7 @@
     },
     {
       "packageName": "@powerhousedao/service-offering",
-      "version": "1.0.0-dev.22",
+      "version": "1.0.0-dev.23",
       "provider": "npm"
     }
   ]
