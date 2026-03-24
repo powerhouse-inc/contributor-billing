@@ -277,8 +277,8 @@ export default function Editor() {
     try {
       const blob = await pdf(
         <ExpenseReportPDF
-          periodStart={periodStart}
-          periodEnd={periodEnd}
+          periodStart={startDate || periodStart}
+          periodEnd={endDate || periodEnd}
           wallets={wallets}
           groups={groups}
         />,
