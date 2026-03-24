@@ -1,3 +1,11 @@
+# [1.0.0-dev.28](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.27...v1.0.0-dev.28) (2026-03-24)
+
+
+### Features
+
+* add snapshot report to editor configuration and update start date for monthly reports ([aa66527](https://github.com/powerhouse-inc/contributor-billing/commit/aa6652788739df2480a0d26434f6e4eb95073f9e))
+* implement month deletion functionality in MonthlyReportsOverview and MonthReportCard ([23fdc46](https://github.com/powerhouse-inc/contributor-billing/commit/23fdc4636e16f1109f736d76c0acbed2022e92f0))
+
 # [1.0.0-dev.27](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.26...v1.0.0-dev.27) (2026-03-24)
 
 
