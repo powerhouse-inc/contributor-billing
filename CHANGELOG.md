@@ -1,3 +1,11 @@
+# [1.0.0-dev.29](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.28...v1.0.0-dev.29) (2026-03-25)
+
+
+### Features
+
+* added service subscriptions dashboard view for operator and builder teams ([9e26526](https://github.com/powerhouse-inc/contributor-billing/commit/9e265262cb4d94b100e83e953887f6ec8a8b0726))
+* **knowledge:** add reactor recipes, drive app flow maps, and health report ([1ee5deb](https://github.com/powerhouse-inc/contributor-billing/commit/1ee5deba92801e377e87c574bf4b8d1711b0271b))
+
 # [1.0.0-dev.28](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.27...v1.0.0-dev.28) (2026-03-24)
 
 
