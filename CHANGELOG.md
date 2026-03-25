@@ -1,3 +1,10 @@
+# [1.0.0-dev.30](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.29...v1.0.0-dev.30) (2026-03-25)
+
+
+### Bug Fixes
+
+* **builder-team-admin:** add error boundary for unloadable documents ([f7992cb](https://github.com/powerhouse-inc/contributor-billing/commit/f7992cb1d79be2b29cd09c808e7c325c83ebf0b7))
+
 # [1.0.0-dev.29](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.28...v1.0.0-dev.29) (2026-03-25)
 
 
