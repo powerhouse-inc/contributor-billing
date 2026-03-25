@@ -1,0 +1,66 @@
+{
+  "contentSections": [
+    {
+      "content": "Content piece",
+      "displayOrder": 1,
+      "id": "d8e2c934-69d6-48b6-a9d2-1b1619d6fee3",
+      "title": "How this agent will save your time"
+    },
+    {
+      "content": "It's for anyone who's running operations as a side job",
+      "displayOrder": 0,
+      "id": "982039cd-d2d6-4e1a-bfb6-7e06223c9124",
+      "title": "Who this agent is for?"
+    }
+  ],
+  "description": null,
+  "facetTargets": [
+    {
+      "categoryKey": "product",
+      "categoryLabel": "Product",
+      "id": "21a4d21b-d3c6-46ef-9977-c5130f73f781",
+      "selectedOptions": [
+        "Operator-agent"
+      ]
+    }
+  ],
+  "faqFields": [
+    {
+      "answer": "It BYOK, or Bring your own key. Vetra allows to set up qwen, which is a open source AI model through vetra",
+      "displayOrder": 0,
+      "id": "40c26501-5c64-407b-beac-1be16346bfb1",
+      "question": "Do i need an API key?"
+    },
+    {
+      "answer": "No, your maintain control over your own payment transactions but the agent can propose payments",
+      "displayOrder": 1,
+      "id": "97e6ade3-94f5-4094-b375-8fc6d099a4ea",
+      "question": "Will this agent do my payments?"
+    }
+  ],
+  "id": null,
+  "infoLink": null,
+  "lastModified": "2026-03-18T17:19:22.856Z",
+  "operatorId": "a326c3a9-d29b-46d3-8ab0-14b361e11567",
+  "optionGroups": [],
+  "recurringServices": [
+    "Regular updates",
+    "Optimization review"
+  ],
+  "services": [],
+  "setupServices": [
+    "Onboarding call with agent orchestrator",
+    "Configuration tutorial for inbox integration"
+  ],
+  "status": "DRAFT",
+  "summary": "Agent that helps you run your operations. ",
+  "targetAudiences": [
+    {
+      "color": "#0ea5e9",
+      "id": "f7d8ea98-829c-4ca0-9422-844875388a86",
+      "label": "Builders"
+    }
+  ],
+  "thumbnailUrl": null,
+  "title": "Operator Agent"
+}

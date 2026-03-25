@@ -1,0 +1,131 @@
+{
+  "contentSections": [
+    {
+      "content": "CONTRIBUTOR AGREEMENT\n\nThis Contributor Agreement (\u201cAgreement\u201d) is made and entered into by and between:\n\nArtic (\u201cCompany\u201d), a [insert company type], located at [insert address], and\n\n[Contributor Name] (\u201cContributor\u201d), located at [insert address], collectively referred to as the \u201cParties.\u201d\n\nThis Agreement outlines the terms and conditions under which the Contributor agrees to contribute content, work, or other intellectual property (\u201cContribution\u201d) to Artic.\n\n1. Definitions\n\nContribution(s): All work, materials, and intellectual property provided by the Contributor to Artic, including but not limited to [list specific types of work, e.g., software code, design files, written content, artwork, etc.].\n\nPlatform: The platform, project, or entity known as Artic, which the Contributor is providing work for.\n\n2. Scope of Contribution\n\nThe Contributor agrees to provide the following Contributions:\n\nType of Contribution: [describe what the contribution involves, e.g., software development, documentation, visual artwork, etc.]\n\nSpecific Deliverables: [list any milestones, tasks, or deadlines if applicable]\n\nFormat: [e.g., code, images, text documents, etc.]\n\n3. Ownership and Intellectual Property\n\nOwnership of Contributions: The Contributor grants Artic a non-exclusive, worldwide, royalty-free, sublicensable, and transferable license to use, modify, distribute, display, and create derivative works based on the Contributions. This license is granted for the entire duration of the intellectual property rights.\n\nContributor's Rights: The Contributor retains ownership of the underlying intellectual property of the Contribution, but grants Artic the rights outlined above.\n\nMoral Rights: If applicable, the Contributor waives any moral rights (e.g., the right to attribution or integrity of the work) to the fullest extent permitted by law.\n\nThird-Party Materials: The Contributor represents that all Contributions are free from third-party claims and that they have obtained all necessary rights, licenses, and permissions for any third-party materials used in the Contributions.\n\n4. Compensation\n\nPayment Terms: [If applicable] The Contributor will be compensated as follows:\n\n[Specify payment amount, whether it's a one-time fee, hourly rate, or royalties, and payment schedule]\n\nPayment will be made via [payment method] upon completion and approval of deliverables.\n\nNo Payment (if applicable): [For volunteer or open-source contributions] The Contributor acknowledges that contributions to Artic may be voluntary, and no monetary compensation is provided unless otherwise specified.\n\n5. Confidentiality\n\nThe Contributor agrees not to disclose any confidential or proprietary information related to Artic\u2019s business, operations, or any materials provided to them during the term of this Agreement. This obligation will survive the termination of this Agreement.\n\n6. Warranties and Representations\n\nContributor Warranties: The Contributor represents and warrants that:\n\nThey are the sole creator of the Contributions, and they have the full right and authority to grant the rights set forth in this Agreement.\n\nThe Contributions do not infringe upon the intellectual property rights of any third party.\n\nThe Contributions are free from viruses, malware, or other harmful code.\n\nArtic Warranties: Artic represents and warrants that:\n\nArtic will credit the Contributor (where applicable) for the Contributions.\n\nArtic will use the Contributions in accordance with this Agreement and applicable laws.\n\n7. Indemnification\n\nThe Contributor agrees to indemnify and hold harmless Artic, its affiliates, officers, employees, and agents from any and all claims, damages, liabilities, and expenses (including reasonable attorney\u2019s fees) arising from or related to:\n\nAny breach of this Agreement by the Contributor.\n\nAny claim that the Contributions infringe upon the intellectual property rights of third parties.\n\n8. Term and Termination\n\nTerm: This Agreement will begin on the effective date and continue until terminated by either party.\n\nTermination for Convenience: Either party may terminate this Agreement at any time by providing written notice.\n\nTermination for Cause: Artic may terminate this Agreement immediately if the Contributor breaches any material terms of this Agreement.\n\nUpon termination, the Contributor will return any confidential information and any work-in-progress, if applicable.\n\n9. Governing Law\n\nThis Agreement will be governed by and construed in accordance with the laws of [insert jurisdiction], without regard to its conflict of law principles.\n\n10. Miscellaneous\n\nIndependent Contractor: The Contributor is an independent contractor and not an employee, partner, or agent of Artic.\n\nAmendments: Any amendments or modifications to this Agreement must be made in writing and signed by both parties.\n\nSeverability: If any provision of this Agreement is found to be invalid or unenforceable, the remainder of the Agreement will remain in full force and effect.\n\n11. Acceptance of Terms\n\nBy signing below, the Contributor acknowledges and agrees to the terms and conditions set forth in this Agreement.\n\nContributor:\nSignature: _______________________\nName: __________________________\nDate: ___________________________\n\nArtic:\nSignature: _______________________\nName: __________________________\nDate: ___________________________",
+      "displayOrder": 0,
+      "id": "c1cfac3f-0cb3-4c18-a474-7d0fd9f6e6dc",
+      "title": "CONTRIBUTOR AGREEMENT"
+    }
+  ],
+  "description": "Perform verification of standard contributor agreements for software developers.",
+  "facetTargets": [
+    {
+      "categoryKey": "sno-function",
+      "categoryLabel": "SNO Function",
+      "id": "1f3a58a7-8dce-4542-838a-ed4f71177549",
+      "selectedOptions": [
+        "Operational Hub for Open Source Builders",
+        "Operational Hub",
+        "IP SPV",
+        "Revenue Generating Hub",
+        "SNO Embryonic Hub",
+        "Self-Insurance Risk Management Hub",
+        "OH Artic"
+      ]
+    },
+    {
+      "categoryKey": "team",
+      "categoryLabel": "Team",
+      "id": "dfa50bad-1071-49d9-816e-6f1f329e185f",
+      "selectedOptions": [
+        "Remote",
+        "Local",
+        "Hybrid"
+      ]
+    },
+    {
+      "categoryKey": "legal-entity",
+      "categoryLabel": "Legal Entity",
+      "id": "e894977f-a72c-4fe3-801a-3de96d57f7b1",
+      "selectedOptions": [
+        "Swiss Association",
+        "BVI Entity",
+        "Cyber"
+      ]
+    },
+    {
+      "categoryKey": "anonymity",
+      "categoryLabel": "Anonymity",
+      "id": "ecb6d9b4-3ad4-4d3f-81e3-46ab2c825216",
+      "selectedOptions": [
+        "High",
+        "Highest",
+        "Low"
+      ]
+    },
+    {
+      "categoryKey": "consulants",
+      "categoryLabel": "Consulants",
+      "id": "a2f69f3c-57b1-43ed-864d-f628839a3a1c",
+      "selectedOptions": []
+    }
+  ],
+  "faqFields": [
+    {
+      "answer": "Yes",
+      "displayOrder": 0,
+      "id": "dc5eea89-5207-45f2-a4a6-f213a4cd67a8",
+      "question": "Should I sign IP documents"
+    },
+    {
+      "answer": "yes",
+      "displayOrder": 1,
+      "id": "6b718c3a-2c79-4f3f-a280-b53fb3140657",
+      "question": "Should I have currency"
+    },
+    {
+      "answer": "Yes",
+      "displayOrder": 2,
+      "id": "f6ceecfe-c8b0-4a94-b750-1f2c4d58daba",
+      "question": "Should I have a defined Scope of work?"
+    },
+    {
+      "answer": "yes",
+      "displayOrder": 3,
+      "id": "e4786c3d-5552-449e-b5a4-217fe993d17d",
+      "question": "Should I sign a non-compete clause"
+    },
+    {
+      "answer": "Yes",
+      "displayOrder": 4,
+      "id": "cd6d3dd3-6fc8-4291-ad72-8500c71dee9a",
+      "question": "Will I receive any royalties or ongoing compensation?"
+    },
+    {
+      "answer": "time frames",
+      "displayOrder": 5,
+      "id": "52c2b239-e8f7-429c-8f0b-2f51f5a5e08c",
+      "question": "What is the expected timeline for delivery?"
+    },
+    {
+      "answer": "Yes, check",
+      "displayOrder": 6,
+      "id": "fcbdfdc3-06e4-4fe0-98fc-85343406f481",
+      "question": "Can I work for other companies while contributing?"
+    }
+  ],
+  "id": null,
+  "infoLink": null,
+  "lastModified": "2026-03-18T17:19:26.375Z",
+  "operatorId": "Operator-007",
+  "optionGroups": [],
+  "recurringServices": [
+    "Ongoing Contributor Agreement Monitoring"
+  ],
+  "services": [],
+  "setupServices": [
+    "Contributor Agreement Review & Setup",
+    "A comprehensive review of contributor agreements to ensure compliance, clarity, and proper terms, including IP rights, payment terms, and scope of work."
+  ],
+  "status": "DRAFT",
+  "summary": "",
+  "targetAudiences": [
+    {
+      "color": "#0ea5e9",
+      "id": "c1c65c26-72da-44fa-ae6d-63c8c045b11c",
+      "label": "Builders"
+    }
+  ],
+  "thumbnailUrl": null,
+  "title": "OH - Artic "
+}

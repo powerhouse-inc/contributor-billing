@@ -1,0 +1,39 @@
+{
+  "contentSections": [
+    {
+      "content": "The BAI agent forgot to fill",
+      "displayOrder": 0,
+      "id": "6ae27117-1414-4a09-b149-1fef8bd97cb5",
+      "title": "NEW LONG FORM CONTENT BELOW"
+    }
+  ],
+  "description": " The BAI agent solves all your problems in the world of Business Analysis",
+  "facetTargets": [],
+  "faqFields": [
+    {
+      "answer": "You can find that in the Matrix",
+      "displayOrder": 0,
+      "id": "8d61fc3c-943b-43d3-b119-c264c4d3a3b4",
+      "question": "How much does it cost"
+    }
+  ],
+  "id": null,
+  "infoLink": null,
+  "lastModified": "2026-03-17T10:59:01.701Z",
+  "operatorId": "a326c3a9-d29b-46d3-8ab0-14b361e11567",
+  "optionGroups": [],
+  "recurringServices": [],
+  "services": [],
+  "setupServices": [],
+  "status": "DRAFT",
+  "summary": "",
+  "targetAudiences": [
+    {
+      "color": "#0ea5e9",
+      "id": "531d2db9-fcdf-45eb-8256-7affdb8b3645",
+      "label": "Builders"
+    }
+  ],
+  "thumbnailUrl": null,
+  "title": "BAI Agent Executor"
+}

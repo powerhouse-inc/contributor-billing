@@ -1,0 +1,159 @@
+{
+  "childIds": [
+    "8a65a724-7529-4300-92b1-c39732b6100f",
+    "e91c35bb-1f8e-467a-8b09-0d5dd466c97a",
+    "bf7c059a-9320-44ab-a5b3-bc4b27399daf",
+    "e4d77202-459f-4463-92d2-e020ad57184f",
+    "d30bc041-ba20-4af5-bc13-61e0476116ba",
+    "014a0405-3542-4a9e-94f6-9c192c6df5b4",
+    "4fb3a92b-057d-46d5-a9e5-5f849dba0c60",
+    "85f284d7-aeb7-4279-ae92-c174212d1d6c",
+    "4fd8b60c-131b-4318-8c42-e445fe17564a",
+    "eb3d754c-bff8-47a2-b54f-23df451ae9af",
+    "58faac4a-113c-4dde-87b6-05677e8ef9de",
+    "41a8d389-e4a3-4832-85f8-a8aa6f52cdd6",
+    "7b18db23-4cda-4dc8-b6f3-75f509e9935a"
+  ],
+  "document": {
+    "id": "73da91bc-41d0-48d3-b69b-b65764b58657",
+    "name": "Powerhouse RGH Operator Admin",
+    "slug": "powerhouse-rgh-operator-admin",
+    "state": {
+      "auth": {},
+      "document": {
+        "hash": {
+          "algorithm": "sha1",
+          "encoding": "base64"
+        },
+        "version": 0
+      },
+      "global": {
+        "icon": null,
+        "name": "Powerhouse RGH Operator Admin",
+        "nodes": [
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "014a0405-3542-4a9e-94f6-9c192c6df5b4",
+            "kind": "file",
+            "name": "OH - Artic",
+            "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+          },
+          {
+            "id": "0ccaa8c8-e04e-4ff3-9e62-8122dec3d424",
+            "kind": "folder",
+            "name": "Services And Offerings",
+            "parentFolder": null
+          },
+          {
+            "id": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e",
+            "kind": "folder",
+            "name": "Products",
+            "parentFolder": "0ccaa8c8-e04e-4ff3-9e62-8122dec3d424"
+          },
+          {
+            "documentType": "powerhouse/service-offering",
+            "id": "41a8d389-e4a3-4832-85f8-a8aa6f52cdd6",
+            "kind": "file",
+            "name": "Teeps Offering 2",
+            "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "4fb3a92b-057d-46d5-a9e5-5f849dba0c60",
+            "kind": "file",
+            "name": "Operator Agent",
+            "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "4fd8b60c-131b-4318-8c42-e445fe17564a",
+            "kind": "file",
+            "name": "apeiron_operator",
+            "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+          },
+          {
+            "documentType": "powerhouse/service-offering",
+            "id": "58faac4a-113c-4dde-87b6-05677e8ef9de",
+            "kind": "file",
+            "name": "Operator Agent subscription",
+            "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
+          },
+          {
+            "documentType": "powerhouse/service-offering",
+            "id": "7b18db23-4cda-4dc8-b6f3-75f509e9935a",
+            "kind": "file",
+            "name": "apeiron_operator_HA",
+            "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "85f284d7-aeb7-4279-ae92-c174212d1d6c",
+            "kind": "file",
+            "name": "Teeps Product",
+            "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+          },
+          {
+            "documentType": "powerhouse/builder-profile",
+            "id": "8a65a724-7529-4300-92b1-c39732b6100f",
+            "kind": "file",
+            "name": "Powerhouse RGH",
+            "parentFolder": null
+          },
+          {
+            "id": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5",
+            "kind": "folder",
+            "name": "Service Offerings",
+            "parentFolder": "0ccaa8c8-e04e-4ff3-9e62-8122dec3d424"
+          },
+          {
+            "documentType": "powerhouse/subscription-instance",
+            "id": "bf7c059a-9320-44ab-a5b3-bc4b27399daf",
+            "kind": "file",
+            "name": "t-team Subscription Instance",
+            "parentFolder": "c07a2edb-b9db-4a99-b7b5-9dd736215cd8"
+          },
+          {
+            "id": "c07a2edb-b9db-4a99-b7b5-9dd736215cd8",
+            "kind": "folder",
+            "name": "Service Subscriptions",
+            "parentFolder": null
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "d30bc041-ba20-4af5-bc13-61e0476116ba",
+            "kind": "file",
+            "name": "BAI Agent Executor",
+            "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+          },
+          {
+            "documentType": "powerhouse/resource-template",
+            "id": "e4d77202-459f-4463-92d2-e020ad57184f",
+            "kind": "file",
+            "name": "App builder Agent",
+            "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+          },
+          {
+            "documentType": "powerhouse/resource-instance",
+            "id": "e91c35bb-1f8e-467a-8b09-0d5dd466c97a",
+            "kind": "file",
+            "name": "t-team Resource Instance",
+            "parentFolder": "c07a2edb-b9db-4a99-b7b5-9dd736215cd8"
+          },
+          {
+            "documentType": "powerhouse/service-offering",
+            "id": "eb3d754c-bff8-47a2-b54f-23df451ae9af",
+            "kind": "file",
+            "name": "OH-Artic",
+            "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
+          }
+        ]
+      },
+      "local": {
+        "availableOffline": false,
+        "listeners": [],
+        "sharingType": "private",
+        "triggers": []
+      }
+    }
+  }
+}

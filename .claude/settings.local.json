@@ -131,7 +131,9 @@
       "Bash(SB_PROFILE=local bash scripts/drive-sync/upload.sh scripts/drive-sync/data/powerhouse-operator-team-admin \"Powerhouse Operator Team Admin\")",
       "Bash(SB_PROFILE=staging-remote bash scripts/drive-sync/download.sh powerhouse-network-admin)",
       "Bash(SB_PROFILE=staging-remote bash scripts/drive-sync/download.sh powerhouse-operator-team-admin)",
-      "Bash(SB_PROFILE=staging-remote bash scripts/drive-sync/download.sh 4a9efc55-84ac-4125-90ba-c4ee4e7611d1 scripts/drive-sync/data/builders)"
+      "Bash(SB_PROFILE=staging-remote bash scripts/drive-sync/download.sh 4a9efc55-84ac-4125-90ba-c4ee4e7611d1 scripts/drive-sync/data/builders)",
+      "Bash(SB_PROFILE=staging-remote switchboard ping)",
+      "Bash(SB_PROFILE=local bash scripts/drive-sync/upload-all.sh --target local)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

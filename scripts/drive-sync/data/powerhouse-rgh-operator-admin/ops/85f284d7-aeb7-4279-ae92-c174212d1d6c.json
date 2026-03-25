@@ -1,0 +1,451 @@
+[
+  {
+    "action": {
+      "input": {
+        "branch": "main",
+        "documentId": "85f284d7-aeb7-4279-ae92-c174212d1d6c",
+        "meta": {},
+        "model": "powerhouse/resource-template",
+        "name": "Teeps Product",
+        "protocolVersions": {
+          "base-reducer": 2
+        },
+        "signing": {
+          "createdAtUtcIso": "2026-03-24T17:19:35.441Z",
+          "documentType": "powerhouse/resource-template",
+          "nonce": "",
+          "publicKey": {},
+          "signature": "85f284d7-aeb7-4279-ae92-c174212d1d6c"
+        },
+        "slug": "",
+        "version": 0
+      },
+      "scope": "document",
+      "type": "CREATE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "3d86ddc6852a03b17ae360e39ecbb78d",
+    "index": 0,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:35.441Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-02T13:21:44.882Z",
+        "title": "Teeps Product $$"
+      },
+      "scope": "global",
+      "type": "UPDATE_TEMPLATE_INFO"
+    },
+    "error": null,
+    "hash": "+k75jtFQp4QBtv0Dx24I7/3Q43g=",
+    "id": "25b4a189b31d6ab96ca42d8a563ff084",
+    "index": 0,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:35.736Z"
+  },
+  {
+    "action": {
+      "input": {
+        "documentId": "85f284d7-aeb7-4279-ae92-c174212d1d6c",
+        "fromVersion": 0,
+        "initialState": {
+          "auth": {},
+          "document": {
+            "hash": {
+              "algorithm": "sha1",
+              "encoding": "base64"
+            },
+            "version": 0
+          },
+          "global": {
+            "contentSections": [],
+            "description": null,
+            "facetTargets": [],
+            "faqFields": [],
+            "id": null,
+            "infoLink": null,
+            "lastModified": null,
+            "operatorId": null,
+            "optionGroups": [],
+            "recurringServices": [],
+            "services": [],
+            "setupServices": [],
+            "status": "DRAFT",
+            "summary": "",
+            "targetAudiences": [],
+            "thumbnailUrl": null,
+            "title": ""
+          },
+          "local": {}
+        },
+        "model": "powerhouse/resource-template",
+        "toVersion": 1
+      },
+      "scope": "document",
+      "type": "UPGRADE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "063d1d49fe954af9f668313da60de2e8",
+    "index": 1,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:35.441Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-02T13:21:52.546Z",
+        "status": "ACTIVE"
+      },
+      "scope": "global",
+      "type": "UPDATE_TEMPLATE_STATUS"
+    },
+    "error": null,
+    "hash": "V3aouXo8FJh5UbxoqWweZyz/2HM=",
+    "id": "4f5f801e7447ecd1a60d7859294b85d7",
+    "index": 1,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:36.098Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "vetra-account",
+        "categoryLabel": "Vetra Account",
+        "id": "107cc282-76f2-4954-bfbc-c344397f2639",
+        "lastModified": "2026-03-02T13:24:02.563Z",
+        "selectedOptions": []
+      },
+      "scope": "global",
+      "type": "SET_FACET_TARGET"
+    },
+    "error": null,
+    "hash": "f07wgDjYlZYFYzRZ2n5dY7iBzBo=",
+    "id": "9166176ee46b996229f4b3370c377f45",
+    "index": 2,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:36.436Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "vetra-account",
+        "lastModified": "2026-03-02T13:24:11.358Z"
+      },
+      "scope": "global",
+      "type": "REMOVE_FACET_TARGET"
+    },
+    "error": null,
+    "hash": "8QMPjvCnWXB6Z5k+z0SPwreCBUo=",
+    "id": "1538d5fb3de78cf8a47a1ee574589c99",
+    "index": 3,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:36.813Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "cloud-service",
+        "categoryLabel": "Cloud Service",
+        "id": "1cfe7f26-790c-4c5e-b90e-1282fd31c7b3",
+        "lastModified": "2026-03-02T13:24:27.546Z",
+        "selectedOptions": []
+      },
+      "scope": "global",
+      "type": "SET_FACET_TARGET"
+    },
+    "error": null,
+    "hash": "T8AxE+x5IwLRkHmROE/bP5d/Tag=",
+    "id": "dd85153234fc51f07340bcd39864a1bf",
+    "index": 4,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:37.153Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "cloud-service",
+        "lastModified": "2026-03-02T13:24:35.227Z",
+        "optionId": "Vetra"
+      },
+      "scope": "global",
+      "type": "ADD_FACET_OPTION"
+    },
+    "error": null,
+    "hash": "wO+buZ0a7nSF7asXbjt3rVZHexs=",
+    "id": "8eaed2b9b3c8e378ffefb324d55e605a",
+    "index": 5,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:37.486Z"
+  },
+  {
+    "action": {
+      "input": {
+        "color": "#0ea5e9",
+        "id": "94199779-9fa6-4d8c-94a3-5a479353c87a",
+        "label": "Builders",
+        "lastModified": "2026-03-02T13:26:03.428Z"
+      },
+      "scope": "global",
+      "type": "ADD_TARGET_AUDIENCE"
+    },
+    "error": null,
+    "hash": "KlnbD9F9lqWoFruoTnk6MlubAGk=",
+    "id": "74d9ac43eb67c2a25ce37e5e82e07aa6",
+    "index": 6,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:37.842Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-02T13:26:47.239Z",
+        "operatorId": "a326c3a9-d29b-46d3-8ab0-14b361e11567"
+      },
+      "scope": "global",
+      "type": "SET_OPERATOR"
+    },
+    "error": null,
+    "hash": "8X/zn87LfxkBfbbjddi8jVW02io=",
+    "id": "22b1f9921a9d68b05bd54a3f56a48023",
+    "index": 7,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:38.185Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-02T15:43:50.166Z",
+        "title": "Teeps Cloud Service "
+      },
+      "scope": "global",
+      "type": "UPDATE_TEMPLATE_INFO"
+    },
+    "error": null,
+    "hash": "VqF8nJSSjUiAy2ikaLw4HBRknTc=",
+    "id": "f2eb9afedb6007a92d954aebc7e45dd4",
+    "index": 8,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:38.522Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": " Teep offers to host, taking the weight off your hands",
+        "lastModified": "2026-03-02T15:44:07.633Z"
+      },
+      "scope": "global",
+      "type": "UPDATE_TEMPLATE_INFO"
+    },
+    "error": null,
+    "hash": "GDgsFSprhe80hexpZp02hLpaO84=",
+    "id": "cfa4af53f52b0ec4ca8637bc0eb90b13",
+    "index": 9,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:38.862Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-02T15:44:22.716Z",
+        "services": [
+          "VPS setup"
+        ]
+      },
+      "scope": "global",
+      "type": "SET_SETUP_SERVICES"
+    },
+    "error": null,
+    "hash": "4WiGPxJOSOpqy3LadRWauCKb+P4=",
+    "id": "35e9b6981b3db5596be97a5492f557b3",
+    "index": 10,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:39.721Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-02T15:44:23.829Z",
+        "services": [
+          "Hosting billing"
+        ]
+      },
+      "scope": "global",
+      "type": "SET_RECURRING_SERVICES"
+    },
+    "error": null,
+    "hash": "cEdBqEKqOzf9iZjV6ajZYQVANlk=",
+    "id": "2507e5db1179a99b71bbecb43f4cbb7f",
+    "index": 11,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:40.062Z"
+  },
+  {
+    "action": {
+      "input": {
+        "answer": "101%",
+        "displayOrder": 0,
+        "id": "eaa786d3-d6f9-4d83-8a47-94d12ff839ed",
+        "question": "What is the uptime"
+      },
+      "scope": "global",
+      "type": "ADD_FAQ"
+    },
+    "error": null,
+    "hash": "bh59ojbR6fBURInjoTUKohClLuk=",
+    "id": "73d15d68d3ee9571aa3a807cb6746888",
+    "index": 12,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:40.402Z"
+  },
+  {
+    "action": {
+      "input": {
+        "content": "Teep doesnt charge for any addons",
+        "displayOrder": 0,
+        "id": "ae9afc22-4b99-434a-90be-f3eb5262fa81",
+        "lastModified": "2026-03-02T15:46:04.520Z",
+        "title": "Information on addons"
+      },
+      "scope": "global",
+      "type": "ADD_CONTENT_SECTION"
+    },
+    "error": null,
+    "hash": "OsB42FK97KbPOFSpgf8+Urgy0pI=",
+    "id": "5632f2cb863cf1fdf426d5b1a8eadb1e",
+    "index": 13,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:40.751Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-02T17:37:32.620Z",
+        "operatorId": ""
+      },
+      "scope": "global",
+      "type": "SET_OPERATOR"
+    },
+    "error": null,
+    "hash": "f6lHRlzWjKeADoIxNPByi3PmrJA=",
+    "id": "a6950cea107cc362b15d212d06d90a74",
+    "index": 14,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:41.105Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-02T17:37:51.893Z",
+        "operatorId": "a326c3a9-d29b-46d3-8ab0-14b361e11567"
+      },
+      "scope": "global",
+      "type": "SET_OPERATOR"
+    },
+    "error": null,
+    "hash": "hCBRd5k2rs4mv4282BWdxBvlS1g=",
+    "id": "c2aa44fbee55d15e00bd5c70445fea13",
+    "index": 15,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:41.447Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-02T17:53:45.862Z",
+        "operatorId": ""
+      },
+      "scope": "global",
+      "type": "SET_OPERATOR"
+    },
+    "error": null,
+    "hash": "/RANXLp6BRvhkMj9MIOYjVrtyfE=",
+    "id": "a49eaf1e8b0b8dcf2bcce9a3adfa34d0",
+    "index": 16,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:41.793Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-02T17:54:30.977Z",
+        "operatorId": "a326c3a9-d29b-46d3-8ab0-14b361e11567"
+      },
+      "scope": "global",
+      "type": "SET_OPERATOR"
+    },
+    "error": null,
+    "hash": "4kAbCuwTdZxdkTBogkAZUTik52Y=",
+    "id": "8367ee078a93b548e1d9d99722d30394",
+    "index": 17,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:42.141Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-02T17:59:59.613Z",
+        "operatorId": ""
+      },
+      "scope": "global",
+      "type": "SET_OPERATOR"
+    },
+    "error": null,
+    "hash": "EqenaRenViLfpT8E8KswTGV6rek=",
+    "id": "baf55fc7df783e9b676d7eadd4b5bc1e",
+    "index": 18,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:42.480Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-04T10:31:29.329Z",
+        "summary": " Teep handles hosting, do you can concentrate on shipping"
+      },
+      "scope": "global",
+      "type": "UPDATE_TEMPLATE_INFO"
+    },
+    "error": null,
+    "hash": "xUlRc/hx0IJpC5CTbaKQJ273+NY=",
+    "id": "6e058d797c9eb321fd105935881425a7",
+    "index": 19,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:42.821Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-04T10:34:49.736Z",
+        "thumbnailUrl": "https://pbs.twimg.com/profile_images/1543149307435618304/5K_7BdwO_400x400.jpg"
+      },
+      "scope": "global",
+      "type": "UPDATE_TEMPLATE_INFO"
+    },
+    "error": null,
+    "hash": "s4n74ioDBHEjgfuawWP4K8/SgCM=",
+    "id": "d4f9ab9050e5c1338eeea032c1558502",
+    "index": 20,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:43.160Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-18T17:19:17.478Z",
+        "status": "DRAFT"
+      },
+      "scope": "global",
+      "type": "UPDATE_TEMPLATE_STATUS"
+    },
+    "error": null,
+    "hash": "P0PZmxtw6J0iu/GR7Xq3+jv2G9A=",
+    "id": "f8dac71cae85bcb007fdf5696114e512",
+    "index": 21,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:43.535Z"
+  }
+]
