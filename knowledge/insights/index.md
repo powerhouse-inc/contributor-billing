@@ -13,7 +13,9 @@ Welcome to the contributor-billing knowledge system. This graph tracks architect
 - [[goals]] — current active threads
 
 ## Product Maps
-(Create these as insights accumulate in each area)
+- [[reactor-patterns]] — Reactor integration patterns from the official recipes: processors, read models, subscriptions, sagas, consistency
+- [[contributor-billing-drive-app-user-flow]] — complete user flow map: setup, invoices, billing statements, expense reports, reporting
+- [[builder-team-admin-drive-app-user-flow]] — complete user flow map: profile, team members, service offerings, subscriptions, reports
 - reducer patterns — proven patterns for document model reducers
 - editor architecture — approaches to building document editors
 - billing workflow — how the billing pipeline connects end-to-end
