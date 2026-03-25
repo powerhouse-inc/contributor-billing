@@ -65,8 +65,14 @@ async function main() {
   }
 
   const unsubscribes: Unsubscribe[] = [
-    eventBus.subscribe(ReactorEventTypes.JOB_PENDING, record(JobStatus.PENDING)),
-    eventBus.subscribe(ReactorEventTypes.JOB_RUNNING, record(JobStatus.RUNNING)),
+    eventBus.subscribe(
+      ReactorEventTypes.JOB_PENDING,
+      record(JobStatus.PENDING),
+    ),
+    eventBus.subscribe(
+      ReactorEventTypes.JOB_RUNNING,
+      record(JobStatus.RUNNING),
+    ),
     eventBus.subscribe(
       ReactorEventTypes.JOB_WRITE_READY,
       record(JobStatus.WRITE_READY),

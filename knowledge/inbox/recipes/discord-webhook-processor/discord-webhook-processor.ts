@@ -41,7 +41,11 @@ function operationToEmbed(op: OperationWithContext): DiscordEmbed {
       { name: "Hash", value: operation.hash || "—", inline: true },
       { name: "Input", value: truncatedInput },
     ],
-    timestamp: new Date(isNaN(Number(operation.timestampUtcMs)) ? operation.timestampUtcMs : Number(operation.timestampUtcMs)).toISOString(),
+    timestamp: new Date(
+      isNaN(Number(operation.timestampUtcMs))
+        ? operation.timestampUtcMs
+        : Number(operation.timestampUtcMs),
+    ).toISOString(),
   };
 }
 

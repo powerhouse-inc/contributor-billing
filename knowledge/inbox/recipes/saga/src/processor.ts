@@ -97,11 +97,9 @@ export class SagaProcessor implements IProcessor {
         try {
           for (const action of actions) {
             if (action.type === "SET_NAME") {
-              await this.reactor.execute(
-                targetDocId,
-                "main",
-                [setName(action.input.name)],
-              );
+              await this.reactor.execute(targetDocId, "main", [
+                setName(action.input.name),
+              ]);
             }
           }
         } finally {

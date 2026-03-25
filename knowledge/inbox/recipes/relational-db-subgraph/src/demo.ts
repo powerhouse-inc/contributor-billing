@@ -79,11 +79,15 @@ async function main() {
   const docs = await query.allDocuments();
   console.log(`\nCatalog entries: ${docs.length}`);
   for (const doc of docs) {
-    console.log(`  ${doc.document_id} (${doc.document_type}) — "${doc.name || "(unnamed)"}" rev=${doc.revision} tags=[${doc.tags.join(", ")}]`);
+    console.log(
+      `  ${doc.document_id} (${doc.document_type}) — "${doc.name || "(unnamed)"}" rev=${doc.revision} tags=[${doc.tags.join(", ")}]`,
+    );
   }
 
   if (docs.length === 0) {
-    console.log("  (no entries — processor may not have received operations with resultingState)");
+    console.log(
+      "  (no entries — processor may not have received operations with resultingState)",
+    );
   }
 
   console.log("\n✓ Demo complete");

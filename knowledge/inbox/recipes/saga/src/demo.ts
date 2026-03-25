@@ -1,9 +1,6 @@
 import { Kysely } from "kysely";
 import { KyselyPGlite } from "kysely-pglite";
-import {
-  ReactorBuilder,
-  ReactorClientBuilder,
-} from "@powerhousedao/reactor";
+import { ReactorBuilder, ReactorClientBuilder } from "@powerhousedao/reactor";
 import {
   documentModelDocumentModelModule,
   documentModelCreateDocument,
@@ -110,7 +107,8 @@ async function main() {
       stepName: "order-created",
       triggerActionType: "SET_NAME",
       triggerMatch: (op) => {
-        const name = (op.operation.action.input as Record<string, string>)?.name ?? "";
+        const name =
+          (op.operation.action.input as Record<string, string>)?.name ?? "";
         return (
           op.context.documentId === orderId &&
           name.includes("[CREATED]") &&
@@ -127,7 +125,8 @@ async function main() {
       stepName: "payment-requested",
       triggerActionType: "SET_NAME",
       triggerMatch: (op) => {
-        const name = (op.operation.action.input as Record<string, string>)?.name ?? "";
+        const name =
+          (op.operation.action.input as Record<string, string>)?.name ?? "";
         return (
           op.context.documentId === paymentId && name.includes("[REQUESTED]")
         );
@@ -142,7 +141,8 @@ async function main() {
       stepName: "fulfillment-started",
       triggerActionType: "SET_NAME",
       triggerMatch: (op) => {
-        const name = (op.operation.action.input as Record<string, string>)?.name ?? "";
+        const name =
+          (op.operation.action.input as Record<string, string>)?.name ?? "";
         return (
           op.context.documentId === fulfillmentId && name.includes("[STARTED]")
         );
@@ -199,15 +199,11 @@ async function main() {
     const sagaId = entries[0].saga_id;
     console.log(`  Saga ID: ${sagaId}\n`);
     for (const entry of entries) {
-      console.log(
-        `  Step: ${entry.step_name}`,
-      );
+      console.log(`  Step: ${entry.step_name}`);
       console.log(
         `    ${entry.source_document_id} -> ${entry.target_document_id}`,
       );
-      console.log(
-        `    action: ${entry.action_type}  status: ${entry.status}`,
-      );
+      console.log(`    action: ${entry.action_type}  status: ${entry.status}`);
     }
   }
 

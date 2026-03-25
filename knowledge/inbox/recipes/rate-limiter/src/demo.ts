@@ -87,12 +87,16 @@ async function main() {
     await new Promise<void>((r) => setTimeout(r, 500));
 
     check = authService.isAllowed(USER_ADDRESS);
-    console.log(`    → allowed=${check.allowed}${check.retryAfterMs ? ` retryAfterMs=${check.retryAfterMs}` : ""}`);
+    console.log(
+      `    → allowed=${check.allowed}${check.retryAfterMs ? ` retryAfterMs=${check.retryAfterMs}` : ""}`,
+    );
   }
 
   // 7. Summary
   check = authService.isAllowed(USER_ADDRESS);
-  console.log(`\n${check.allowed ? "✗ User was NOT rate-limited (unexpected)" : "✓ User rate-limited"} — retryAfterMs=${check.retryAfterMs}`);
+  console.log(
+    `\n${check.allowed ? "✗ User was NOT rate-limited (unexpected)" : "✓ User rate-limited"} — retryAfterMs=${check.retryAfterMs}`,
+  );
 
   // 8. Cleanup
   clientModule.reactor.kill();

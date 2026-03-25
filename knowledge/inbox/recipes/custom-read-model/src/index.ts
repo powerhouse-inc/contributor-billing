@@ -5,10 +5,7 @@ import {
   type JobReadReadyEvent,
 } from "@powerhousedao/reactor";
 import { documentModelDocumentModelModule } from "document-model";
-import {
-  driveDocumentModelModule,
-  driveCreateDocument,
-} from "document-drive";
+import { driveDocumentModelModule, driveCreateDocument } from "document-drive";
 import { DocumentCountReadModel } from "./document-count-read-model.js";
 
 /**

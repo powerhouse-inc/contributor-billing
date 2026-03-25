@@ -25,7 +25,11 @@ const typeDefs = /* GraphQL */ `
   type Query {
     documents(limit: Int, offset: Int): [Document!]!
     document(id: String!): Document
-    documentsByType(documentType: String!, limit: Int, offset: Int): [Document!]!
+    documentsByType(
+      documentType: String!
+      limit: Int
+      offset: Int
+    ): [Document!]!
     documentsByTag(tag: String!, limit: Int, offset: Int): [Document!]!
   }
 `;
@@ -101,7 +105,10 @@ export function createCatalogSchema(db: Kysely<CatalogDB>) {
  * Start an HTTP server exposing the catalog GraphQL endpoint.
  * Returns the server instance so the caller can shut it down.
  */
-export function startCatalogServer(db: Kysely<CatalogDB>, port: number): Server {
+export function startCatalogServer(
+  db: Kysely<CatalogDB>,
+  port: number,
+): Server {
   const yoga = createYoga({ schema: createCatalogSchema(db) });
   const server = createServer(yoga);
   server.listen(port, () => {

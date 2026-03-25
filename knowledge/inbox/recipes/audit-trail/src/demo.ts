@@ -1,9 +1,6 @@
 import { Kysely } from "kysely";
 import { KyselyPGlite } from "kysely-pglite";
-import {
-  ReactorBuilder,
-  ReactorClientBuilder,
-} from "@powerhousedao/reactor";
+import { ReactorBuilder, ReactorClientBuilder } from "@powerhousedao/reactor";
 import {
   documentModelDocumentModelModule,
   documentModelCreateDocument,
@@ -92,12 +89,16 @@ async function main() {
   const entries = await query.byUser(USER_ADDRESS);
   console.log(`\nAudit log entries for ${USER_ADDRESS}: ${entries.length}`);
   for (const entry of entries) {
-    console.log(`  [${entry.timestamp.toISOString()}] ${entry.action_type} on ${entry.document_id} (${entry.document_type})`);
+    console.log(
+      `  [${entry.timestamp.toISOString()}] ${entry.action_type} on ${entry.document_id} (${entry.document_type})`,
+    );
     console.log(`    app: ${entry.app_name}  signer: ${entry.signer_address}`);
   }
 
   if (entries.length === 0) {
-    console.log("  (no entries — processor may not have received signed operations)");
+    console.log(
+      "  (no entries — processor may not have received signed operations)",
+    );
   }
 
   console.log("\n✓ Demo complete");

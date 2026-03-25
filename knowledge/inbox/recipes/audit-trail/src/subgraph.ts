@@ -20,8 +20,17 @@ const typeDefs = /* GraphQL */ `
 
   type Query {
     auditByUser(address: String!, limit: Int, offset: Int): [AuditEntry!]!
-    auditByDocument(documentId: String!, limit: Int, offset: Int): [AuditEntry!]!
-    auditByTimeRange(from: String!, to: String!, limit: Int, offset: Int): [AuditEntry!]!
+    auditByDocument(
+      documentId: String!
+      limit: Int
+      offset: Int
+    ): [AuditEntry!]!
+    auditByTimeRange(
+      from: String!
+      to: String!
+      limit: Int
+      offset: Int
+    ): [AuditEntry!]!
   }
 `;
 

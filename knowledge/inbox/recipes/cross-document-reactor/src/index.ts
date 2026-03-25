@@ -77,66 +77,61 @@ async function main() {
   //    "When an invoice is marked [PAID], close the corresponding task."
   let reacting = false;
 
-  const unsubscribe = client.subscribe(
-    {},
-    (event: DocumentChangeEvent) => {
-      // Log every event
-      const names = event.documents
-        .map((d) => d.header.name || d.header.id)
-        .join(", ");
-      log(`${event.type} → ${names}`);
+  const unsubscribe = client.subscribe({}, (event: DocumentChangeEvent) => {
+    // Log every event
+    const names = event.documents
+      .map((d) => d.header.name || d.header.id)
+      .join(", ");
+    log(`${event.type} → ${names}`);
 
-      // Only react to updates (not creates, deletes, etc.)
-      if (event.type !== DocumentChangeType.Updated) return;
+    // Only react to updates (not creates, deletes, etc.)
+    if (event.type !== DocumentChangeType.Updated) return;
 
-      // Guard against re-entrant reactions
-      if (reacting) return;
+    // Guard against re-entrant reactions
+    if (reacting) return;
 
-      for (const doc of event.documents) {
-        const name = doc.header.name ?? "";
+    for (const doc of event.documents) {
+      const name = doc.header.name ?? "";
 
-        // Rule: invoice marked [PAID] → close the related task
-        if (name.includes("[PAID]") && !name.includes("[CLOSED]")) {
-          // Extract invoice identifier from name (e.g. "Invoice-001")
-          const invoiceKey = name.replace(" [PAID]", "");
-          const expectedTaskName = `Task-001-${invoiceKey}`;
+      // Rule: invoice marked [PAID] → close the related task
+      if (name.includes("[PAID]") && !name.includes("[CLOSED]")) {
+        // Extract invoice identifier from name (e.g. "Invoice-001")
+        const invoiceKey = name.replace(" [PAID]", "");
+        const expectedTaskName = `Task-001-${invoiceKey}`;
 
-          log(`⚡ Rule triggered: "${name}" is paid`);
-          log(`   Looking for task: "${expectedTaskName}"...`);
+        log(`⚡ Rule triggered: "${name}" is paid`);
+        log(`   Looking for task: "${expectedTaskName}"...`);
 
-          reacting = true;
-          // Find and close the related task from within the subscription handler
-          client
-            .find({ parentId: driveId })
-            .then((result) => {
-              const relatedTask = result.results.find(
-                (d) =>
-                  d.header.name === expectedTaskName &&
-                  !d.header.name.includes("[CLOSED]"),
+        reacting = true;
+        // Find and close the related task from within the subscription handler
+        client
+          .find({ parentId: driveId })
+          .then((result) => {
+            const relatedTask = result.results.find(
+              (d) =>
+                d.header.name === expectedTaskName &&
+                !d.header.name.includes("[CLOSED]"),
+            );
+            if (relatedTask) {
+              log(`   Found task ${relatedTask.header.id}, closing it...`);
+              return client.rename(
+                relatedTask.header.id,
+                `${relatedTask.header.name} [CLOSED]`,
               );
-              if (relatedTask) {
-                log(
-                  `   Found task ${relatedTask.header.id}, closing it...`,
-                );
-                return client.rename(
-                  relatedTask.header.id,
-                  `${relatedTask.header.name} [CLOSED]`,
-                );
-              } else {
-                log(`   No open task found for "${invoiceKey}"`);
-              }
-            })
-            .then(() => {
-              reacting = false;
-            })
-            .catch((err) => {
-              log(`   Error in reaction: ${err}`);
-              reacting = false;
-            });
-        }
+            } else {
+              log(`   No open task found for "${invoiceKey}"`);
+            }
+          })
+          .then(() => {
+            reacting = false;
+          })
+          .catch((err) => {
+            log(`   Error in reaction: ${err}`);
+            reacting = false;
+          });
       }
-    },
-  );
+    }
+  });
 
   // 5. Trigger the workflow: mark the invoice as paid
   console.log("─── Triggering workflow: marking Invoice-001 as [PAID] ───\n");

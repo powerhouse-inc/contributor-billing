@@ -18,10 +18,7 @@ import { documentModelCreateDocument } from "document-model";
  * inspect consistency tokens, or fine-tune when to wait for read
  * readiness vs write readiness.
  */
-export async function exportWithClient(
-  client: IReactorClient,
-  outDir: string,
-) {
+export async function exportWithClient(client: IReactorClient, outDir: string) {
   mkdirSync(outDir, { recursive: true });
 
   // --- 1. Create drive ---

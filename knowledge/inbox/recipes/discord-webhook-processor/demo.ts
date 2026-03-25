@@ -1,8 +1,9 @@
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import {
-  ReactorBuilder,
-  JobAwaiter,
-} from "@powerhousedao/reactor";
+  createServer,
+  type IncomingMessage,
+  type ServerResponse,
+} from "node:http";
+import { ReactorBuilder, JobAwaiter } from "@powerhousedao/reactor";
 import { documentModelDocumentModelModule } from "document-model";
 import { driveDocumentModelModule, driveCreateDocument } from "document-drive";
 import { createDiscordWebhookFactory } from "./discord-webhook-processor.js";
@@ -19,10 +20,17 @@ function startMockWebhook(): Promise<ReturnType<typeof createServer>> {
       req.on("end", () => {
         const payload = JSON.parse(body);
         const signature = req.headers["x-reactor-signature"];
-        console.log(`\n  Webhook received (signature: ${String(signature).slice(0, 16)}...):`);
+        console.log(
+          `\n  Webhook received (signature: ${String(signature).slice(0, 16)}...):`,
+        );
         for (const embed of payload.embeds) {
-          const docId = embed.fields.find((f: { name: string }) => f.name === "Document ID")?.value ?? "?";
-          const docType = embed.fields.find((f: { name: string }) => f.name === "Document Type")?.value ?? "?";
+          const docId =
+            embed.fields.find((f: { name: string }) => f.name === "Document ID")
+              ?.value ?? "?";
+          const docType =
+            embed.fields.find(
+              (f: { name: string }) => f.name === "Document Type",
+            )?.value ?? "?";
           console.log(`    ${embed.title} — doc=${docId} type=${docType}`);
         }
         res.writeHead(200, { "Content-Type": "application/json" });

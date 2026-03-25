@@ -40,7 +40,11 @@ export class AuditTrailProcessor implements IProcessor {
         action_type: op.operation.action.type,
         document_id: op.context.documentId,
         document_type: op.context.documentType,
-        timestamp: new Date(isNaN(Number(op.operation.action.timestampUtcMs)) ? op.operation.action.timestampUtcMs : Number(op.operation.action.timestampUtcMs)),
+        timestamp: new Date(
+          isNaN(Number(op.operation.action.timestampUtcMs))
+            ? op.operation.action.timestampUtcMs
+            : Number(op.operation.action.timestampUtcMs),
+        ),
       });
     }
 

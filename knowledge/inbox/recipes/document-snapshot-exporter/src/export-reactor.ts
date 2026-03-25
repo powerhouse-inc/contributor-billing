@@ -101,9 +101,8 @@ export async function exportWithReactor(
     );
 
     // Flatten the scoped operations map into a single array
-    const operations = Object.entries(opsResult).flatMap(
-      ([scope, paged]) =>
-        paged.results.map((op) => ({ ...op, scope })),
+    const operations = Object.entries(opsResult).flatMap(([scope, paged]) =>
+      paged.results.map((op) => ({ ...op, scope })),
     );
 
     const snapshot = {
@@ -129,9 +128,8 @@ export async function exportWithReactor(
     undefined,
     latestDriveToken,
   );
-  const driveOperations = Object.entries(driveOps).flatMap(
-    ([scope, paged]) =>
-      paged.results.map((op) => ({ ...op, scope })),
+  const driveOperations = Object.entries(driveOps).flatMap(([scope, paged]) =>
+    paged.results.map((op) => ({ ...op, scope })),
   );
 
   const driveSnapshot = {

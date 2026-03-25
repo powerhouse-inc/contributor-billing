@@ -39,10 +39,7 @@ async function attachTags(
 
 export function createCatalogQuery(db: Kysely<CatalogDB>) {
   return {
-    async allDocuments(
-      limit = 50,
-      offset = 0,
-    ): Promise<DocumentResult[]> {
+    async allDocuments(limit = 50, offset = 0): Promise<DocumentResult[]> {
       const rows = await db
         .selectFrom("documents")
         .selectAll()

@@ -87,7 +87,11 @@ export async function buildDemoOperations() {
 
   // 3. Construct the ActionSigner identity (user + app + signatures[])
   const signerIdentity: ActionSigner = actionSigner(
-    { address: "eip155:1:0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", chainId: 1, networkId: "eip155" },
+    {
+      address: "eip155:1:0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+      chainId: 1,
+      networkId: "eip155",
+    },
     { name: "demo-verifier-app", key: publicKeyHex },
   );
 
@@ -118,7 +122,14 @@ export async function buildDemoOperations() {
     document = documentModelReducer(document, action);
   }
 
-  return { signedOperations, document, publicKeyHex, signerIdentity, signer, renownCrypto };
+  return {
+    signedOperations,
+    document,
+    publicKeyHex,
+    signerIdentity,
+    signer,
+    renownCrypto,
+  };
 }
 
 // ── Core: inject bad data for testing ───────────────────────────────────
@@ -257,7 +268,9 @@ function printReport(results: VerificationResult[]) {
           ? "[FAIL]"
           : "[NONE]";
 
-    console.log(`  ${statusIcon} Operation #${result.index} (${result.actionType})`);
+    console.log(
+      `  ${statusIcon} Operation #${result.index} (${result.actionType})`,
+    );
 
     if (result.signer) {
       console.log(`         User:  ${result.signer.user.address}`);
@@ -275,10 +288,10 @@ function printReport(results: VerificationResult[]) {
       console.log(`           [0] timestamp:     ${timestamp}`);
       console.log(`           [1] publicKey:     ${pubKey.slice(0, 20)}...`);
       console.log(`           [2] actionHash:    ${actionHash}`);
-      console.log(`           [3] prevStateHash: ${prevStateHash || "(empty)"}`);
       console.log(
-        `           [4] signature:     ${sig.slice(0, 20)}...`,
+        `           [3] prevStateHash: ${prevStateHash || "(empty)"}`,
       );
+      console.log(`           [4] signature:     ${sig.slice(0, 20)}...`);
     }
 
     console.log();

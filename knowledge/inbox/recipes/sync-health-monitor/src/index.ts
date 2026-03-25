@@ -90,15 +90,25 @@ async function main() {
   const collectionId = driveCollectionId("main", driveId);
   const filter = { documentId: [], scope: [], branch: "main" };
 
-  await moduleA.syncModule!.syncManager.add("remoteB", collectionId, {
-    type: "internal",
-    parameters: {},
-  }, filter);
+  await moduleA.syncModule!.syncManager.add(
+    "remoteB",
+    collectionId,
+    {
+      type: "internal",
+      parameters: {},
+    },
+    filter,
+  );
 
-  await moduleB.syncModule!.syncManager.add("remoteA", collectionId, {
-    type: "internal",
-    parameters: {},
-  }, filter);
+  await moduleB.syncModule!.syncManager.add(
+    "remoteA",
+    collectionId,
+    {
+      type: "internal",
+      parameters: {},
+    },
+    filter,
+  );
 
   // ------------------------------------------------------------------
   // 6. Start the live dashboard
@@ -159,9 +169,7 @@ async function runDemo(
 
   // Phase 3 — Simulate sync failure by making the channel throw
   await sleep(3000);
-  const originalSend = channelToB
-    ? channelToB.getSendFn()
-    : () => {};
+  const originalSend = channelToB ? channelToB.getSendFn() : () => {};
   if (channelToB) {
     channelToB.setSendFn(() => {
       throw new Error("simulated network failure");

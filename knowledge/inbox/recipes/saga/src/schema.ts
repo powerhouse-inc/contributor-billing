@@ -1,6 +1,10 @@
 import type { ColumnType, Generated } from "kysely";
 
-export type Timestamp = ColumnType<Date, Date | string | undefined, Date | string | undefined>;
+export type Timestamp = ColumnType<
+  Date,
+  Date | string | undefined,
+  Date | string | undefined
+>;
 
 export interface SagaLogEntry {
   id: Generated<number>;

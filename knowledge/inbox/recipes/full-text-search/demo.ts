@@ -1,9 +1,6 @@
 import { Kysely } from "kysely";
 import { KyselyPGlite } from "kysely-pglite";
-import {
-  ReactorBuilder,
-  JobAwaiter,
-} from "@powerhousedao/reactor";
+import { ReactorBuilder, JobAwaiter } from "@powerhousedao/reactor";
 import {
   documentModelDocumentModelModule,
   documentModelCreateDocument,
@@ -84,7 +81,9 @@ async function main() {
   const rows = await db.selectFrom("search_index").selectAll().execute();
   console.log(`\nIndexed documents: ${rows.length}`);
   for (const row of rows) {
-    console.log(`  ${row.document_id} (${row.document_type}) — "${row.title || "(untitled)"}"`);
+    console.log(
+      `  ${row.document_id} (${row.document_type}) — "${row.title || "(untitled)"}"`,
+    );
   }
 
   // 8. Search demos — show selective matching
@@ -94,7 +93,9 @@ async function main() {
     const results = await query.search(searchTerm);
     console.log(`\nSearch for "${searchTerm}": ${results.length} result(s)`);
     for (const r of results) {
-      console.log(`  ${r.document_id} — "${r.title}" (rank=${r.rank.toFixed(4)})`);
+      console.log(
+        `  ${r.document_id} — "${r.title}" (rank=${r.rank.toFixed(4)})`,
+      );
     }
   }
 

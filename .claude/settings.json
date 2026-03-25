@@ -1,7 +1,4 @@
 {
-  "enabledPlugins": {
-    "arscontexta@agenticnotetaking": true
-  },
   "hooks": {
     "SessionStart": [
       {
@@ -39,5 +36,9 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "arscontexta@agenticnotetaking": true,
+    "chrome-devtools-mcp@claude-plugins-official": true
   }
 }

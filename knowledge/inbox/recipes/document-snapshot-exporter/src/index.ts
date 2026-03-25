@@ -1,9 +1,6 @@
 import { parseArgs } from "node:util";
 import { resolve } from "node:path";
-import {
-  ReactorBuilder,
-  ReactorClientBuilder,
-} from "@powerhousedao/reactor";
+import { ReactorBuilder, ReactorClientBuilder } from "@powerhousedao/reactor";
 import { documentModelDocumentModelModule } from "document-model";
 import { driveDocumentModelModule } from "document-drive";
 import { exportWithReactor } from "./export-reactor.js";
@@ -16,7 +13,7 @@ const { values } = parseArgs({
   },
 });
 
-const outDir = resolve(values.out!);
+const outDir = resolve(values.out);
 const mode = values.mode as "reactor" | "client";
 
 if (mode !== "reactor" && mode !== "client") {
