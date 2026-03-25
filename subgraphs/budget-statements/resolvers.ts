@@ -165,8 +165,12 @@ export const getResolvers = (
         // Apply filters to snapshot and expense reports
         if (allowedBuilderPhids) {
           snapshotReportDocs = snapshotReportDocs.filter((doc) => {
-            const ownerId = doc.state.global.ownerIds?.[0] ?? null;
-            return !ownerId || allowedBuilderPhids.has(ownerId);
+            const ownerIds = doc.state.global.ownerIds ?? [];
+            // Include if no owners set, or if any owner is in the allowed list
+            return (
+              ownerIds.length === 0 ||
+              ownerIds.some((id) => allowedBuilderPhids!.has(id))
+            );
           });
         }
 
@@ -213,8 +217,9 @@ export const getResolvers = (
         // Pre-resolve all builder profiles we'll need
         const allOwnerIds = new Set<string>();
         for (const doc of snapshotReportDocs) {
-          const id = doc.state.global.ownerIds?.[0];
-          if (id) allOwnerIds.add(id);
+          for (const id of doc.state.global.ownerIds ?? []) {
+            allOwnerIds.add(id);
+          }
         }
         for (const doc of expenseReportDocs) {
           const id = doc.state.global.ownerId;
@@ -239,11 +244,11 @@ export const getResolvers = (
         // Index snapshot reports by opHub + period so they can be shared
         const snapshotByOpHub = new Map<string, SnapshotReportDocument>();
 
-        // Group snapshot reports
+        // Group snapshot reports — create an entry for EACH owner
         for (const snapshotDoc of snapshotReportDocs) {
           const state = snapshotDoc.state.global;
-          const ownerId = state.ownerIds?.[0] ?? null;
-          if (!ownerId) continue;
+          const ownerIds = state.ownerIds ?? [];
+          if (ownerIds.length === 0) continue;
 
           const periodKey = getPeriodKey(
             state.reportPeriodStart,
@@ -251,22 +256,29 @@ export const getResolvers = (
           );
           if (!periodKey) continue;
 
-          const key = `${ownerId}_${periodKey}`;
-          if (!budgetStatementsByOwnerAndPeriod.has(key)) {
-            budgetStatementsByOwnerAndPeriod.set(key, {
-              ownerId,
-              periodKey,
-              snapshotReport: null,
-              expenseReport: null,
-            });
-          }
-          budgetStatementsByOwnerAndPeriod.get(key)!.snapshotReport =
-            snapshotDoc;
+          // Filter to allowed builders if network filter is active
+          const effectiveOwnerIds = allowedBuilderPhids
+            ? ownerIds.filter((id) => allowedBuilderPhids!.has(id))
+            : ownerIds;
 
-          // Also index by opHub + period for sharing across subteams
-          const opHubPhid = builderToOpHub.get(ownerId);
-          if (opHubPhid) {
-            snapshotByOpHub.set(`${opHubPhid}_${periodKey}`, snapshotDoc);
+          for (const ownerId of effectiveOwnerIds) {
+            const key = `${ownerId}_${periodKey}`;
+            if (!budgetStatementsByOwnerAndPeriod.has(key)) {
+              budgetStatementsByOwnerAndPeriod.set(key, {
+                ownerId,
+                periodKey,
+                snapshotReport: null,
+                expenseReport: null,
+              });
+            }
+            budgetStatementsByOwnerAndPeriod.get(key)!.snapshotReport =
+              snapshotDoc;
+
+            // Also index by opHub + period for sharing across subteams
+            const opHubPhid = builderToOpHub.get(ownerId);
+            if (opHubPhid) {
+              snapshotByOpHub.set(`${opHubPhid}_${periodKey}`, snapshotDoc);
+            }
           }
         }
 

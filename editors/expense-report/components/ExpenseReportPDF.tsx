@@ -305,6 +305,7 @@ export function ExpenseReportPDF({
                     new Date(periodStart).toLocaleDateString("en-US", {
                       month: "short",
                       year: "numeric",
+                      timeZone: "UTC",
                     })}{" "}
                   Breakdown
                 </Text>

@@ -305,12 +305,16 @@ export default function Editor() {
   };
 
   // Format period title for the breakdown section
+  // Uses UTC to avoid timezone issues where midnight UTC becomes previous day locally
   const breakdownTitle = useMemo(() => {
     if (!periodStart) return "Breakdown";
 
     const date = new Date(periodStart);
-    const month = date.toLocaleDateString("en-US", { month: "short" });
-    const year = date.getFullYear();
+    const month = date.toLocaleDateString("en-US", {
+      month: "short",
+      timeZone: "UTC",
+    });
+    const year = date.getUTCFullYear();
 
     return `${month} ${year} Breakdown`;
   }, [periodStart]);
