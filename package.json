@@ -88,7 +88,7 @@
     "@safe-global/sdk-starter-kit": "^2.0.2",
     "@safe-global/types-kit": "^2.0.1",
     "@types/cors": "^2.8.17",
-    "axios": "^1.9.0",
+    "axios": "1.9.0",
     "cors": "^2.8.5",
     "document-model": "6.0.0-dev.105",
     "dotenv": "^16.5.0",
