@@ -80,6 +80,7 @@
     "@powerhousedao/common": "6.0.0-dev.105",
     "@powerhousedao/design-system": "6.0.0-dev.105",
     "@powerhousedao/document-engineering": "1.40.1",
+    "@powerhousedao/reactor": "6.0.0-dev.105",
     "@powerhousedao/service-offering": "1.0.0-dev.23",
     "@powerhousedao/vetra": "6.0.0-dev.105",
     "@react-pdf/renderer": "^4.3.1",
