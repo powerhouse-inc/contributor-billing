@@ -29,6 +29,11 @@ COPY . .
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
+# Generate code and build the project
+RUN pnpm generate
+RUN sed -i 's|^export \* from "./controller.js";|// export * from "./controller.js";|' document-models/*/v1/gen/index.ts
+RUN pnpm build
+
 # -----------------------------------------------------------------------------
 # Connect build stage
 # -----------------------------------------------------------------------------

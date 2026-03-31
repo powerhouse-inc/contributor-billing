@@ -118,6 +118,7 @@
     "@testing-library/react": "^16.3.0",
     "@types/node": "^24.9.2",
     "@types/react": "^19.2.3",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.0",
     "document-drive": "6.0.0-dev.105",
     "eslint": "^9.38.0",
