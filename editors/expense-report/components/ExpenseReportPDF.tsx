@@ -3,7 +3,7 @@ import type {
   Wallet,
   LineItemGroup,
   LineItem,
-} from "../../../document-models/expense-report/gen/types.js";
+} from "../../../document-models/expense-report/v1/gen/types.js";
 
 interface ExpenseReportPDFProps {
   periodStart?: string | null;
@@ -275,7 +275,8 @@ export function ExpenseReportPDF({
           <Text style={styles.title}>Expense Report</Text>
           {periodStart && (
             <Text style={styles.period}>
-              Period: {formatDate(periodStart)} to {formatDate(periodEnd)}
+              Transaction Period: {formatDate(periodStart)} to{" "}
+              {formatDate(periodEnd)}
             </Text>
           )}
         </View>

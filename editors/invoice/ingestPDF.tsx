@@ -7,9 +7,9 @@ import { invoiceToast as toast } from "./invoiceToast.js";
 import { uploadPdfChunked } from "./uploadPdfChunked.js";
 import { getCountryCodeFromName, mapChainNameToConfig } from "./utils/utils.js";
 import { LoaderCircle } from "lucide-react";
-import { getGraphQLUrl } from "../shared/graphql.js";
+import { getSubgraphUrl } from "../shared/graphql.js";
 
-const GRAPHQL_URL = getGraphQLUrl();
+const GRAPHQL_URL = getSubgraphUrl("invoice-addon");
 
 export async function loadPDFFile({
   file,

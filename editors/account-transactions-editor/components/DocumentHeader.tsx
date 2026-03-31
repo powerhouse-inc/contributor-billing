@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Form, StringField } from "@powerhousedao/document-engineering";
-import type { AccountTransactionsDocument } from "../../../document-models/account-transactions/gen/types.js";
+import type { AccountTransactionsDocument } from "../../../document-models/account-transactions/v1/gen/types.js";
 
 interface DocumentHeaderProps {
   document: AccountTransactionsDocument;

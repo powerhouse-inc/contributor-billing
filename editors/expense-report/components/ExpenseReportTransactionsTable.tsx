@@ -1,5 +1,5 @@
-import type { Wallet } from "../../../document-models/expense-report/gen/types.js";
-import type { TransactionEntry } from "../../../document-models/account-transactions/gen/types.js";
+import type { Wallet } from "../../../document-models/expense-report/v1/gen/types.js";
+import type { TransactionEntry } from "../../../document-models/account-transactions/v1/gen/types.js";
 
 interface ExpenseReportTransaction {
   walletName: string;

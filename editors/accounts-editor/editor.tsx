@@ -21,12 +21,12 @@ import {
   updateAccount,
   deleteAccount,
   updateKycStatus,
-} from "../../document-models/accounts/gen/accounts/creators.js";
+} from "../../document-models/accounts/v1/gen/accounts/creators.js";
 import type {
   AccountEntry,
   AccountTypeInput,
   KycAmlStatusTypeInput,
-} from "../../document-models/accounts/gen/schema/types.js";
+} from "../../document-models/accounts/v1/gen/schema/types.js";
 import { AccountForm } from "./components/AccountForm.js";
 import { AccountsList } from "./components/AccountsList.js";
 import { accountTransactionsService } from "./services/accountTransactionsService.js";

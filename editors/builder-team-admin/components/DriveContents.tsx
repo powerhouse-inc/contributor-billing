@@ -5,6 +5,8 @@ import { ProfileHeader } from "./overview/ProfileHeader.js";
 import { TeamMembersOverview } from "./overview/TeamMembersOverview.js";
 import { ExpenseReportsStats } from "./ExpenseReportsStats.js";
 import { useExpenseReportAutoPlacement } from "../hooks/useExpenseReportAutoPlacement.js";
+import { useIsOperator } from "../hooks/useIsOperator.js";
+import { OperatorDashboardStats } from "./OperatorDashboardStats.js";
 
 /**
  * Main overview dashboard showing aggregated data from all document types in the drive.
@@ -12,6 +14,7 @@ import { useExpenseReportAutoPlacement } from "../hooks/useExpenseReportAutoPlac
  */
 export function DriveContents() {
   const documentsInDrive = useDocumentsInSelectedDrive();
+  const { isOperator } = useIsOperator();
 
   // Extract builder profile document
   const builderProfileDoc = useMemo(() => {
@@ -50,6 +53,16 @@ export function DriveContents() {
             <ExpenseReportsStats
               expenseReportDocuments={expenseReportDocuments}
             />
+          </div>
+        )}
+
+        {/* Operator Dashboard Stats */}
+        {isOperator && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-slate-900">
+              Operator Dashboard
+            </h2>
+            <OperatorDashboardStats />
           </div>
         )}
       </div>

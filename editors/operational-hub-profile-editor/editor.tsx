@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { setName } from "document-model";
-import { useSelectedOperationalHubProfileDocument } from "../../document-models/operational-hub-profile/hooks.js";
-import { setOperationalHubName } from "../../document-models/operational-hub-profile/gen/configuration/creators.js";
+import { useSelectedOperationalHubProfileDocument } from "../../document-models/operational-hub-profile/v1/hooks.js";
+import { setOperationalHubName } from "../../document-models/operational-hub-profile/v1/gen/configuration/creators.js";
 import { Input } from "@powerhousedao/document-engineering";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {

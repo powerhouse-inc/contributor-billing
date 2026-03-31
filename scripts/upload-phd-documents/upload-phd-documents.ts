@@ -190,14 +190,14 @@ async function createDocument(
   name: string,
 ): Promise<string> {
   const mutationName = `${mutationPrefix}_createDocument`;
-  const data = await gql<Record<string, string>>(
+  const data = await gql<Record<string, { id: string }>>(
     endpoint,
-    `mutation ($name: String!, $driveId: String) {
-      ${mutationName}(name: $name, driveId: $driveId)
+    `mutation ($name: String!, $parentIdentifier: String) {
+      ${mutationName}(name: $name, parentIdentifier: $parentIdentifier) { id }
     }`,
-    { name, driveId },
+    { name, parentIdentifier: driveId },
   );
-  return data[mutationName];
+  return data[mutationName].id;
 }
 
 // ---------------------------------------------------------------------------

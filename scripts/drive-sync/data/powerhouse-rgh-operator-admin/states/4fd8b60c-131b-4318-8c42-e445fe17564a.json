@@ -1,0 +1,65 @@
+{
+  "contentSections": [],
+  "description": null,
+  "facetTargets": [
+    {
+      "categoryKey": "team",
+      "categoryLabel": "Team",
+      "id": "24d70aed-ab18-4c33-9aae-bdb008424e79",
+      "selectedOptions": [
+        "Remote",
+        "Local",
+        "Hybrid"
+      ]
+    },
+    {
+      "categoryKey": "legal-entity",
+      "categoryLabel": "Legal Entity",
+      "id": "f1d12af5-7b01-43eb-964c-ed957d68cbda",
+      "selectedOptions": [
+        "Swiss Association",
+        "BVI Entity"
+      ]
+    },
+    {
+      "categoryKey": "sno-function",
+      "categoryLabel": "SNO Function",
+      "id": "dacf127d-7792-479a-9cd8-8e5f00f3d4ba",
+      "selectedOptions": [
+        "Operational Hub for Open Source Builders",
+        "Operational Hub",
+        "IP SPV",
+        "Revenue Generating Hub",
+        "SNO Embryonic Hub",
+        "Self-Insurance Risk Management Hub"
+      ]
+    }
+  ],
+  "faqFields": [],
+  "id": null,
+  "infoLink": null,
+  "lastModified": "2026-03-18T17:19:19.348Z",
+  "operatorId": "a326c3a9-d29b-46d3-8ab0-14b361e11567",
+  "optionGroups": [],
+  "recurringServices": [
+    "Annual tax filing",
+    "Monthly accounting & close",
+    "Multi-currency payouts"
+  ],
+  "services": [],
+  "setupServices": [
+    "Registered address (Zug)",
+    "Swiss association entity"
+  ],
+  "status": "DRAFT",
+  "summary": "Apeiron Home Automation Service for everybody. ",
+  "targetAudiences": [
+    {
+      "color": "#0ea5e9",
+      "id": "1815e5a6-3f5c-43c0-a3db-2a815d9eed36",
+      "label": "Builders"
+    }
+  ],
+  "thumbnailUrl": "https://leccygenesis.com/cdn/shop/articles/homeautomation-featured-image-1.jpg?v=1670303229",
+  "title": "Apeiron Home + Automation Service"
+}

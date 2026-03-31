@@ -1,24 +1,35 @@
 {
+  "id": "powerhouse/billing-statement",
+  "name": "BillingStatement",
   "author": {
     "name": "Powerhouse",
     "website": "https://powerhouse.inc"
   },
-  "description": "The Billing Statement Document Model captures a contributor’s issued charges, with itemized line entries and auto-calculated totals in cash and POWT's.",
   "extension": "",
-  "id": "powerhouse/billing-statement",
-  "name": "Billing Statement",
+  "description": "The Billing Statement Document Model captures a contributor's issued charges, with itemized line entries and auto-calculated totals in cash and POWT's.",
   "specifications": [
     {
-      "changeLog": [],
+      "state": {
+        "local": {
+          "schema": "",
+          "examples": [],
+          "initialValue": ""
+        },
+        "global": {
+          "schema": "type BillingStatementState {\n  contributor: PHID\n  dateIssued: DateTime!\n  dateDue: DateTime\n  lineItems: [BillingStatementLineItem!]!\n  status: BillingStatementStatus!\n  currency: String!\n  totalCash: Float!\n  totalPowt: Float!\n  notes: String\n}\n\ntype BillingStatementLineItem {\n  id: OID!\n  description: String!\n  quantity: Float!\n  unit: BillingStatementUnit!\n  unitPricePwt: Float!\n  unitPriceCash: Float!\n  totalPricePwt: Float!\n  totalPriceCash: Float!\n  lineItemTag: [BillingStatementTag!]!\n}\n\ntype BillingStatementTag {\n  dimension: String!\n  value: String!\n  label: String\n}\n\nenum BillingStatementStatus {\n  DRAFT\n  ISSUED\n  ACCEPTED\n  REJECTED\n  PAID\n}\n\nenum BillingStatementStatusInput {\n  DRAFT\n  ISSUED\n  ACCEPTED\n  REJECTED\n  PAID\n}\n\nenum BillingStatementUnit {\n  MINUTE\n  HOUR\n  DAY\n  UNIT\n}\n\nenum BillingStatementUnitInput {\n  MINUTE\n  HOUR\n  DAY\n  UNIT\n}",
+          "examples": [],
+          "initialValue": "{\"contributor\": null, \"dateIssued\": \"2025-06-10T15:42:17.873Z\", \"dateDue\": \"2025-06-10T15:42:17.873Z\", \"lineItems\": [], \"status\": \"DRAFT\", \"currency\": \"\", \"totalCash\": 0, \"totalPowt\": 0, \"notes\": \"\"}"
+        }
+      },
       "modules": [
         {
-          "id": "dnNu8Q38g6PEhUWWnwSWA1mTr40=",
+          "id": "general",
           "name": "general",
           "description": "",
           "operations": [
             {
-              "id": "obKvjYTcH1TKFjSO5DGtmC9HS7w=",
-              "name": "EDIT_BILLING_STATEMENT",
+              "id": "edit-billing-statement",
+              "name": "editBillingStatement",
               "description": "",
               "schema": "input EditBillingStatementInput {\n  dateIssued: DateTime\n  dateDue: DateTime\n  currency: String\n  notes: String\n}",
               "template": "",
@@ -28,8 +39,8 @@
               "scope": "global"
             },
             {
-              "id": "pkU1fg9dl0SDxHb+294KsqUDMN4=",
-              "name": "EDIT_CONTRIBUTOR",
+              "id": "edit-contributor",
+              "name": "editContributor",
               "description": "",
               "schema": "input EditContributorInput {\n  contributor: PHID!\n}",
               "template": "",
@@ -39,8 +50,8 @@
               "scope": "global"
             },
             {
-              "id": "sAZCp+O/axy6cbtI/rrV0/A5eMw=",
-              "name": "EDIT_STATUS",
+              "id": "edit-status",
+              "name": "editStatus",
               "description": "",
               "schema": "input EditStatusInput {\n  status: BillingStatementStatusInput!\n}",
               "template": "",
@@ -52,35 +63,35 @@
           ]
         },
         {
-          "id": "kNoQafB6U1J4Gq8GrcjRyGhrRvg=",
+          "id": "line-items",
           "name": "line_items",
           "description": "",
           "operations": [
             {
-              "id": "5s+0/bYYzWZd4rOdj53uQ2orOaE=",
-              "name": "ADD_LINE_ITEM",
+              "id": "add-line-item",
+              "name": "addLineItem",
               "description": "BillingStatementState.totalCash / .totalPowt will be a sum of the line item values.",
               "schema": "input AddLineItemInput {\n  id: OID!\n  description: String!\n  quantity: Float!\n  unit: BillingStatementUnitInput!\n  unitPricePwt: Float!\n  unitPriceCash: Float!\n  totalPricePwt: Float!\n  totalPriceCash: Float!\n}",
-              "template": "",
+              "template": "BillingStatementState.totalCash / .totalPowt will be a sum of the line item values.",
               "reducer": "",
               "errors": [],
               "examples": [],
               "scope": "global"
             },
             {
-              "id": "iBzTjNAr/a4NsuxZmy821GoN/NE=",
-              "name": "EDIT_LINE_ITEM",
+              "id": "edit-line-item",
+              "name": "editLineItem",
               "description": "BillingStatementState.totalCash / .totalPowt will be a sum of the line item values.",
               "schema": "input EditLineItemInput {\n  id: OID!\n  description: String\n  quantity: Float\n  unit: BillingStatementUnitInput\n  unitPricePwt: Float\n  unitPriceCash: Float\n  totalPricePwt: Float\n  totalPriceCash: Float\n}",
-              "template": "",
+              "template": "BillingStatementState.totalCash / .totalPowt will be a sum of the line item values.",
               "reducer": "",
               "errors": [],
               "examples": [],
               "scope": "global"
             },
             {
-              "id": "6b6bad0d-ef1c-4aa8-81eb-6ca605bf46b8",
-              "name": "DELETE_LINE_ITEM",
+              "id": "delete-line-item",
+              "name": "deleteLineItem",
               "description": "",
               "schema": "input DeleteLineItemInput {\n  id: OID!\n}",
               "template": "",
@@ -92,13 +103,13 @@
           ]
         },
         {
-          "id": "jg5q35JaHcb5iNDdFkB2xYYNrDU=",
+          "id": "tags",
           "name": "tags",
           "description": "",
           "operations": [
             {
-              "id": "k5kMjZ+cO/7fVOPTvyTZ07XMVEA=",
-              "name": "EDIT_LINE_ITEM_TAG",
+              "id": "edit-line-item-tag",
+              "name": "editLineItemTag",
               "description": "",
               "schema": "input EditLineItemTagInput {\n  lineItemId: OID!\n  dimension: String!\n  value: String!\n  label: String\n}",
               "template": "",
@@ -110,19 +121,8 @@
           ]
         }
       ],
-      "state": {
-        "global": {
-          "examples": [],
-          "initialValue": "{\n  \"contributor\": null,\n  \"dateIssued\": \"2025-06-10T15:42:17.873Z\",\n  \"dateDue\": \"2025-06-10T15:42:17.873Z\",\n  \"lineItems\": [],\n  \"status\": \"DRAFT\",\n  \"currency\": \"\",\n  \"totalCash\": 0,\n  \"totalPowt\": 0,\n  \"notes\": \"\"\n}",
-          "schema": "type BillingStatementState {\n  contributor: PHID  # Change to AID when available\n  dateIssued: DateTime!\n  dateDue: DateTime\n  lineItems: [BillingStatementLineItem!]!\n  status: BillingStatementStatus!\n  currency: String!\n  totalCash: Float!\n  totalPowt: Float!\n  notes: String\n}\n\ntype BillingStatementLineItem {\n  id: OID!\n  description: String!\n  quantity: Float!\n  unit: BillingStatementUnit!\n  unitPricePwt: Float!\n  unitPriceCash: Float!\n  totalPricePwt: Float!\n  totalPriceCash: Float!\n  lineItemTag: [BillingStatementTag!]!\n}\n\ntype BillingStatementTag {\n  dimension: String!\n  value: String!\n  label: String\n}\n\nenum BillingStatementStatus {\n  DRAFT\n  ISSUED\n  ACCEPTED\n  REJECTED\n  PAID\n}\n\nenum BillingStatementStatusInput {\n  DRAFT\n  ISSUED\n  ACCEPTED\n  REJECTED\n  PAID\n}\n\nenum BillingStatementUnit {\n  MINUTE\n  HOUR\n  DAY\n  UNIT\n}\n\nenum BillingStatementUnitInput {\n  MINUTE\n  HOUR\n  DAY\n  UNIT\n}\n\n"
-        },
-        "local": {
-          "examples": [],
-          "initialValue": "",
-          "schema": ""
-        }
-      },
-      "version": 1
+      "version": 1,
+      "changeLog": []
     }
   ]
 }

@@ -10,15 +10,17 @@ import {
 import type { PHDocument } from "document-model";
 import { deleteNode, type FileNode } from "document-drive";
 import { actions as invoiceActions } from "../../../../document-models/invoice/index.js";
-import type { InvoiceTag } from "../../../../document-models/invoice/gen/types.js";
+import type { InvoiceTag } from "../../../../document-models/invoice/v1/gen/types.js";
 import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
 import {
   setPeriodStart,
   setPeriodEnd,
-} from "../../../../document-models/expense-report/gen/creators.js";
+} from "../../../../document-models/expense-report/v1/gen/creators.js";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
 import { exportExpenseReportCSV } from "../../../../scripts/contributor-billing/createExpenseReportCsv.js";
+import { cbToast } from "../cbToast.js";
+import { EmptyState } from "../EmptyState.js";
 import { HeaderControls } from "./HeaderControls.js";
 import { InvoiceTableSection } from "./InvoiceTableSection.js";
 import { InvoiceTableRow, type InvoiceRowData } from "./InvoiceTableRow.js";
@@ -605,12 +607,35 @@ export const InvoiceTable = ({
     const driveId = selectedDrive?.header.id;
     if (!driveId) return;
 
+    let successCount = 0;
+    let failCount = 0;
+
     for (const id of ids) {
       try {
         await dispatchActions(deleteNode({ id }), driveId);
+        successCount++;
       } catch (error) {
         console.error(`Failed to delete document ${id}:`, error);
+        failCount++;
       }
+    }
+
+    if (failCount === 0) {
+      cbToast(
+        `${successCount} document${successCount !== 1 ? "s" : ""} deleted`,
+        { type: "success" },
+      );
+    } else if (successCount === 0) {
+      cbToast(
+        `Failed to delete ${failCount} document${failCount !== 1 ? "s" : ""}`,
+        {
+          type: "error",
+        },
+      );
+    } else {
+      cbToast(`${successCount} deleted, ${failCount} failed`, {
+        type: "warning",
+      });
     }
   };
 
@@ -864,6 +889,13 @@ export const InvoiceTable = ({
         {renderSection("PAYMENTCLOSED", "Payment Closed", paymentClosed)}
         {renderSection("REJECTED", "Rejected", rejected)}
         {renderSection("OTHER", "Other", otherInvoices)}
+
+        {files.length === 0 && loadingFileIds.length === 0 && (
+          <EmptyState
+            title="No invoices yet"
+            description="Create a new invoice using the Draft section above, or drop an invoice file here"
+          />
+        )}
 
         {/* Loading section for files that haven't loaded yet */}
         {loadingFileIds.length > 0 && (

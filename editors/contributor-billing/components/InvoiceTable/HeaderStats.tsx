@@ -7,6 +7,7 @@ import {
 } from "@powerhousedao/reactor-browser";
 import { getExchangeRate } from "../../utils/exchangeRate.js";
 import { Tooltip, TooltipProvider } from "@powerhousedao/design-system/ui";
+import { cbToast } from "../cbToast.js";
 import type { InvoiceDocument } from "../../../../document-models/invoice/index.js";
 
 const currencyList = [
@@ -65,6 +66,7 @@ export const HeaderStats = ({ folderId }: HeaderStatsProps) => {
       }
 
       let total = 0;
+      let conversionFailed = false;
       for (const invoice of invoices) {
         const invoiceAmount = invoice.state.global.totalPriceTaxIncl;
         const invoiceCurrency = invoice.state.global.currency || "USD"; // Fallback to USD if currency is empty
@@ -95,10 +97,18 @@ export const HeaderStats = ({ folderId }: HeaderStatsProps) => {
             console.error("Error getting exchange rate:", error);
             // Fallback to original amount if exchange rate fails
             total += invoiceAmount;
+            conversionFailed = true;
           }
         }
       }
       setTotalExpenses(total);
+
+      if (conversionFailed) {
+        cbToast(
+          "Currency conversion failed for some invoices — totals shown using 1:1 fallback rate",
+          { type: "warning" },
+        );
+      }
     };
 
     calculateTotalExpenses().catch(console.error);

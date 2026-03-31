@@ -5,7 +5,7 @@ import {
 
 export const INVOICE_TOAST_CONTAINER_ID = "invoice-editor-toast";
 
-export const invoiceToast = (
+export const invoiceToast: typeof toast = (
   message: Parameters<typeof toast>[0],
   options?: ConnectToastOptions,
 ) =>

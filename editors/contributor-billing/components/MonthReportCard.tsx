@@ -31,6 +31,7 @@ interface MonthReportCardProps {
   onCreateExpenseReport?: (monthName: string, folderId: string) => void;
   onCreateSnapshotReport?: (monthName: string, folderId: string) => void;
   onDeleteReport?: (reportId: string, reportName: string) => Promise<void>;
+  onDeleteMonth?: (monthName: string) => Promise<void>;
   onViewPayments?: (monthName: string) => void;
   paymentStats?: MonthPaymentStats;
   /** Suggested start date based on previous month's snapshot period end + 1 day */
@@ -166,6 +167,7 @@ export function MonthReportCard({
   onCreateExpenseReport,
   onCreateSnapshotReport,
   onDeleteReport,
+  onDeleteMonth,
   onViewPayments,
   paymentStats,
   suggestedStartDate,
@@ -176,6 +178,8 @@ export function MonthReportCard({
     name: string;
   } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteMonthConfirm, setShowDeleteMonthConfirm] = useState(false);
+  const [isDeletingMonth, setIsDeletingMonth] = useState(false);
   const overallColors = getStatusColors(reportSet.overallStatus);
 
   const toggleExpanded = useCallback(() => {
@@ -220,6 +224,17 @@ export function MonthReportCard({
     onViewPayments?.(reportSet.monthName);
   }, [onViewPayments, reportSet.monthName]);
 
+  const handleDeleteMonth = useCallback(async () => {
+    if (!onDeleteMonth) return;
+    setIsDeletingMonth(true);
+    try {
+      await onDeleteMonth(reportSet.monthName);
+    } finally {
+      setIsDeletingMonth(false);
+      setShowDeleteMonthConfirm(false);
+    }
+  }, [onDeleteMonth, reportSet.monthName]);
+
   const reportCountText =
     reportSet.reportCount === 1
       ? "1 Report"
@@ -228,32 +243,43 @@ export function MonthReportCard({
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       {/* Header - Clickable to expand/collapse */}
-      <button
-        onClick={toggleExpanded}
-        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors text-left"
-      >
-        <div className="flex items-center gap-3">
-          {isExpanded ? (
-            <ChevronDown className="w-5 h-5 text-gray-400" />
-          ) : (
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          )}
-          <Calendar className="w-5 h-5 text-gray-600" />
-          <span className="font-medium text-gray-900">
-            {reportSet.monthName}
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500">{reportCountText}</span>
-          {reportSet.reportCount > 0 && (
-            <span
-              className={`px-2 py-0.5 text-xs font-medium rounded-full ${overallColors.bg} ${overallColors.text}`}
-            >
-              {getStatusLabel(reportSet.overallStatus)}
+      <div className="flex items-center">
+        <button
+          onClick={toggleExpanded}
+          className="flex-1 flex items-center justify-between p-4 hover:bg-gray-50 transition-colors text-left"
+        >
+          <div className="flex items-center gap-3">
+            {isExpanded ? (
+              <ChevronDown className="w-5 h-5 text-gray-400" />
+            ) : (
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            )}
+            <Calendar className="w-5 h-5 text-gray-600" />
+            <span className="font-medium text-gray-900">
+              {reportSet.monthName}
             </span>
-          )}
-        </div>
-      </button>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-500">{reportCountText}</span>
+            {reportSet.reportCount > 0 && (
+              <span
+                className={`px-2 py-0.5 text-xs font-medium rounded-full ${overallColors.bg} ${overallColors.text}`}
+              >
+                {getStatusLabel(reportSet.overallStatus)}
+              </span>
+            )}
+          </div>
+        </button>
+        {onDeleteMonth && (
+          <button
+            onClick={() => setShowDeleteMonthConfirm(true)}
+            className="p-4 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+            title={`Delete ${reportSet.monthName}`}
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
+      </div>
 
       {/* Expanded content */}
       {isExpanded && (
@@ -359,7 +385,7 @@ export function MonthReportCard({
         </div>
       )}
 
-      {/* Delete confirmation modal */}
+      {/* Delete report confirmation modal */}
       <ConfirmationModal
         open={!!deleteTarget}
         header="Delete Report"
@@ -376,6 +402,28 @@ export function MonthReportCard({
         {deleteTarget && (
           <p className="text-gray-700 text-sm font-medium">
             {deleteTarget.name}
+          </p>
+        )}
+      </ConfirmationModal>
+
+      {/* Delete month confirmation modal */}
+      <ConfirmationModal
+        open={showDeleteMonthConfirm}
+        header={`Delete ${reportSet.monthName}`}
+        onCancel={() => setShowDeleteMonthConfirm(false)}
+        onContinue={() => void handleDeleteMonth()}
+        cancelLabel="Cancel"
+        continueLabel={isDeletingMonth ? "Deleting..." : "Delete Month"}
+        continueDisabled={isDeletingMonth}
+      >
+        <p className="text-red-600 text-sm mb-2 font-medium">
+          This will permanently delete the {reportSet.monthName} folder and all
+          its contents including reports, invoices, and billing statements.
+        </p>
+        {reportSet.reportCount > 0 && (
+          <p className="text-gray-700 text-sm">
+            {reportSet.reportCount} report
+            {reportSet.reportCount !== 1 ? "s" : ""} will be deleted.
           </p>
         )}
       </ConfirmationModal>

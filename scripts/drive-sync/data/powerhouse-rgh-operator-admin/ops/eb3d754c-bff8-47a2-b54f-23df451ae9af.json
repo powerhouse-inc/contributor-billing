@@ -1,0 +1,1401 @@
+[
+  {
+    "action": {
+      "input": {
+        "branch": "main",
+        "documentId": "eb3d754c-bff8-47a2-b54f-23df451ae9af",
+        "meta": {},
+        "model": "powerhouse/service-offering",
+        "name": "OH-Artic",
+        "protocolVersions": {
+          "base-reducer": 2
+        },
+        "signing": {
+          "createdAtUtcIso": "2026-03-24T17:19:55.427Z",
+          "documentType": "powerhouse/service-offering",
+          "nonce": "",
+          "publicKey": {},
+          "signature": "eb3d754c-bff8-47a2-b54f-23df451ae9af"
+        },
+        "slug": "",
+        "version": 0
+      },
+      "scope": "document",
+      "type": "CREATE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "cd5b5f3ccbb19b0943c3ed2e80398e3c",
+    "index": 0,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:55.427Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:17:06.450Z",
+        "resourceTemplateId": "dfc7d263-2db6-45a4-a34f-631f1eaa7b6e"
+      },
+      "scope": "global",
+      "type": "SELECT_RESOURCE_TEMPLATE"
+    },
+    "error": null,
+    "hash": "YalZ5ox0X3yGBv0yLqlqEW4wngQ=",
+    "id": "8eb86196cf5ac14c81dbabf43d09e953",
+    "index": 0,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:55.733Z"
+  },
+  {
+    "action": {
+      "input": {
+        "documentId": "eb3d754c-bff8-47a2-b54f-23df451ae9af",
+        "fromVersion": 0,
+        "initialState": {
+          "auth": {},
+          "document": {
+            "hash": {
+              "algorithm": "sha1",
+              "encoding": "base64"
+            },
+            "version": 0
+          },
+          "global": {
+            "availableBillingCycles": [],
+            "description": null,
+            "facetTargets": [],
+            "id": null,
+            "infoLink": null,
+            "lastModified": null,
+            "operatorId": null,
+            "optionGroups": [],
+            "resourceTemplateId": null,
+            "services": [],
+            "status": "DRAFT",
+            "summary": "",
+            "thumbnailUrl": null,
+            "tiers": [],
+            "title": ""
+          },
+          "local": {}
+        },
+        "model": "powerhouse/service-offering",
+        "toVersion": 1
+      },
+      "scope": "document",
+      "type": "UPGRADE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "b530f7eaaebe6e6101d6290958c04691",
+    "index": 1,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:55.427Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": "Perform verification of standard contributor agreements for software developers.",
+        "lastModified": "2026-03-05T13:17:06.450Z",
+        "title": "OH - Artic "
+      },
+      "scope": "global",
+      "type": "UPDATE_OFFERING_INFO"
+    },
+    "error": null,
+    "hash": "DZOYb2Hkkex5DT/CP9E+aUf7Hf0=",
+    "id": "9bc2ba394bab1e3f61ed1e223c4a8fc2",
+    "index": 1,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:56.085Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:17:06.450Z",
+        "operatorId": "Operator-007"
+      },
+      "scope": "global",
+      "type": "SET_OPERATOR"
+    },
+    "error": null,
+    "hash": "TNPvcCCqhpdSB7X8Z8eWO9mAJec=",
+    "id": "866718134fbc89173575fb793730e787",
+    "index": 2,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:56.445Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "sno-function",
+        "categoryLabel": "SNO Function",
+        "id": "37d48782-6049-457d-be8b-f7d22a239eef",
+        "lastModified": "2026-03-05T13:17:18.303Z",
+        "selectedOptions": [
+          "Operational Hub"
+        ]
+      },
+      "scope": "global",
+      "type": "SET_FACET_TARGET"
+    },
+    "error": null,
+    "hash": "WOsSuJm1aT6ogu2H5yXObhGO9OA=",
+    "id": "9b3577ea4267b93fe8781c413dd6d567",
+    "index": 3,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:56.793Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "team",
+        "categoryLabel": "Team",
+        "id": "cbbfe890-0939-46ad-9bb0-94949bd77e33",
+        "lastModified": "2026-03-05T13:17:21.497Z",
+        "selectedOptions": [
+          "Remote"
+        ]
+      },
+      "scope": "global",
+      "type": "SET_FACET_TARGET"
+    },
+    "error": null,
+    "hash": "kDYzi2q/j4vaPr1SAfi7u3kvroA=",
+    "id": "e74be9587624e3511cca71c252df44ba",
+    "index": 4,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:57.140Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "team",
+        "lastModified": "2026-03-05T13:17:22.295Z",
+        "optionId": "Local"
+      },
+      "scope": "global",
+      "type": "ADD_FACET_OPTION"
+    },
+    "error": null,
+    "hash": "mp/GbXDH8CtZdwKFWDchYLUsA+A=",
+    "id": "a56d6def9a596ed67e238e5d65bcecb8",
+    "index": 5,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:57.494Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "team",
+        "lastModified": "2026-03-05T13:17:23.167Z",
+        "optionId": "Hybrid"
+      },
+      "scope": "global",
+      "type": "ADD_FACET_OPTION"
+    },
+    "error": null,
+    "hash": "jSd088IC+C9AIvVhpu96tbOl+xw=",
+    "id": "3c41b29e6fdeee4611406f5ab4208cf4",
+    "index": 6,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:57.852Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "anonymity",
+        "categoryLabel": "Anonymity",
+        "id": "350dd247-c626-42d4-8b70-4553c887a95f",
+        "lastModified": "2026-03-05T13:17:24.255Z",
+        "selectedOptions": [
+          "High"
+        ]
+      },
+      "scope": "global",
+      "type": "SET_FACET_TARGET"
+    },
+    "error": null,
+    "hash": "jGAlztYIx3YZpgG0WusM9VLFpuo=",
+    "id": "b929eedd877c324258a312b1a1691986",
+    "index": 7,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:58.214Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "anonymity",
+        "lastModified": "2026-03-05T13:17:24.695Z",
+        "optionId": "Highest"
+      },
+      "scope": "global",
+      "type": "ADD_FACET_OPTION"
+    },
+    "error": null,
+    "hash": "fpnmdVKlYCGq2IIIIJGb/l3MSv0=",
+    "id": "5da2c75711742993ad916f83c6d1933f",
+    "index": 8,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:58.557Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "anonymity",
+        "lastModified": "2026-03-05T13:17:25.599Z",
+        "optionId": "Low"
+      },
+      "scope": "global",
+      "type": "ADD_FACET_OPTION"
+    },
+    "error": null,
+    "hash": "AQplpCMDpv/KpBkMnnKDhExDJ0s=",
+    "id": "e2015f534eac2d455911c897f01a03fb",
+    "index": 9,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:58.898Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "legal-entity",
+        "categoryLabel": "Legal Entity",
+        "id": "65c2bbd9-1eb9-4d9c-b926-6a031af874ba",
+        "lastModified": "2026-03-05T13:17:27.207Z",
+        "selectedOptions": [
+          "Cyber"
+        ]
+      },
+      "scope": "global",
+      "type": "SET_FACET_TARGET"
+    },
+    "error": null,
+    "hash": "vrETrAuJat1nJTB+mphcIL8VSaA=",
+    "id": "831a7e9f22bf16eaf106f392e6dfc378",
+    "index": 10,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:59.237Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "legal-entity",
+        "lastModified": "2026-03-05T13:17:28.472Z",
+        "optionId": "Swiss Association"
+      },
+      "scope": "global",
+      "type": "ADD_FACET_OPTION"
+    },
+    "error": null,
+    "hash": "4XsbKRKmjKgeW1WEUMpvO2ro2cs=",
+    "id": "3a973c940820587941828c2aeb753602",
+    "index": 11,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:59.591Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "legal-entity",
+        "lastModified": "2026-03-05T13:17:29.674Z",
+        "optionId": "BVI Entity"
+      },
+      "scope": "global",
+      "type": "ADD_FACET_OPTION"
+    },
+    "error": null,
+    "hash": "ltNgoIQcz0H3foCMZLsekCO5vdk=",
+    "id": "8ed988d52c2f1b46bb0b6e67d8313c95",
+    "index": 12,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:59.937Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "sno-function",
+        "lastModified": "2026-03-05T13:17:54.633Z",
+        "optionId": "Operational Hub for Open Source Builders"
+      },
+      "scope": "global",
+      "type": "ADD_FACET_OPTION"
+    },
+    "error": null,
+    "hash": "x40zPPUF0GzbUc5/ZUgkBtycA4A=",
+    "id": "df72523434cba3be231a8622a4bf8fa8",
+    "index": 13,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:00.280Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "sno-function",
+        "lastModified": "2026-03-05T13:17:57.367Z",
+        "optionId": "Operational Hub for Open Source Builders"
+      },
+      "scope": "global",
+      "type": "REMOVE_FACET_OPTION"
+    },
+    "error": null,
+    "hash": "OvZyn9iLqyCV9R4uKKd3gpuYCYc=",
+    "id": "798a4cbd1d8d24fa71e6c4176de8f8e9",
+    "index": 14,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:00.632Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "sno-function",
+        "lastModified": "2026-03-05T13:17:59.000Z",
+        "optionId": "OH Artic"
+      },
+      "scope": "global",
+      "type": "ADD_FACET_OPTION"
+    },
+    "error": null,
+    "hash": "s072NK3kDXU/kWLICPCM0xie0PM=",
+    "id": "76be4fd40501b5d1160237a7a671e8f4",
+    "index": 15,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:00.977Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "sno-function",
+        "lastModified": "2026-03-05T13:18:03.071Z",
+        "optionId": "Operational Hub"
+      },
+      "scope": "global",
+      "type": "REMOVE_FACET_OPTION"
+    },
+    "error": null,
+    "hash": "3vPpgB1ZgptoLgJZphZMaiBdWPY=",
+    "id": "c679f147c875fc2f0cc33c52c5eb499e",
+    "index": 16,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:01.320Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "MONTHLY"
+        ],
+        "lastModified": "2026-03-05T13:18:25.119Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "0r8SGTKCuzLk9Ih6AGQm3bY7beo=",
+    "id": "4a432cb854df2f375b04e1c9519f580e",
+    "index": 17,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:01.673Z"
+  },
+  {
+    "action": {
+      "input": {
+        "currency": "USD",
+        "id": "e0f6b29d-f872-4d31-8a58-74789cc99eda",
+        "isCustomPricing": true,
+        "lastModified": "2026-03-05T13:18:44.469Z",
+        "name": "Essential"
+      },
+      "scope": "global",
+      "type": "ADD_TIER"
+    },
+    "error": null,
+    "hash": "NAatxQdZsnk4IdByzvzyFJra66M=",
+    "id": "51f45764123651d12396cb6a21343c77",
+    "index": 18,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:02.035Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": "Monthly Subscription  999.99 USD",
+        "id": "e0f6b29d-f872-4d31-8a58-74789cc99eda",
+        "lastModified": "2026-03-05T13:19:19.015Z"
+      },
+      "scope": "global",
+      "type": "UPDATE_TIER"
+    },
+    "error": null,
+    "hash": "0gVt8EXzSOBHPuZmp4JqWxrZcgQ=",
+    "id": "9ed296e659f149bc6161c823032ce283",
+    "index": 19,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:02.425Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "MONTHLY",
+          "ANNUAL"
+        ],
+        "lastModified": "2026-03-05T13:19:38.343Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "12RPb8hcWt6JQVqD/48g4f68Vuo=",
+    "id": "5a5e63c9a1ce3ece438691583c157e0c",
+    "index": 20,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:02.755Z"
+  },
+  {
+    "action": {
+      "input": {
+        "currency": "USD",
+        "id": "c62e4751-b716-48c4-bc48-250a76456f4e",
+        "isCustomPricing": true,
+        "lastModified": "2026-03-05T13:21:33.777Z",
+        "name": "Team"
+      },
+      "scope": "global",
+      "type": "ADD_TIER"
+    },
+    "error": null,
+    "hash": "2BTPBZbGVm9We5SzLtzpmy69zZM=",
+    "id": "c437ffb77fa80f2282d4511f083419af",
+    "index": 21,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:03.097Z"
+  },
+  {
+    "action": {
+      "input": {
+        "availableBillingCycles": [
+          "MONTHLY"
+        ],
+        "costType": "RECURRING",
+        "currency": "USD",
+        "defaultSelected": true,
+        "id": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "isAddOn": false,
+        "lastModified": "2026-03-05T13:23:01.552Z",
+        "name": "OH-Artic-1",
+        "price": 999.99
+      },
+      "scope": "global",
+      "type": "ADD_OPTION_GROUP"
+    },
+    "error": null,
+    "hash": "37byhOLoFBlU7QxYrFX6ykRrBEM=",
+    "id": "36bc9e1f7586313387b9128945afc1e5",
+    "index": 22,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:03.451Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:23:01.553Z",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "recurringPricing": [
+          {
+            "amount": 999.99,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "discount": null,
+            "id": "ad4569a5-c21c-416d-a05d-7b94b9b44b79"
+          }
+        ],
+        "setupCost": null
+      },
+      "scope": "global",
+      "type": "SET_OPTION_GROUP_STANDALONE_PRICING"
+    },
+    "error": null,
+    "hash": "3jhlTNhE4q1nk/Q8DRPt1NyzEm4=",
+    "id": "0f9a079c1811e349227a9c67ac9e333e",
+    "index": 23,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:03.795Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:23:01.554Z",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "recurringPricing": [
+          {
+            "amount": 999.99,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "discount": null,
+            "id": "b82e691b-1321-4e94-a1bd-74c1f9434aec"
+          }
+        ],
+        "setupCost": null,
+        "setupCostDiscounts": [],
+        "tierId": "e0f6b29d-f872-4d31-8a58-74789cc99eda",
+        "tierPricingId": "67ba0bec-9362-4d2f-90a0-ad83487bfb1e"
+      },
+      "scope": "global",
+      "type": "ADD_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "/e/oawDg+6goKpdNTddJw8dGrY4=",
+    "id": "e8cc48a91e5d7d5ee43457f244562f1d",
+    "index": 24,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:04.163Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:23:01.554Z",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "recurringPricing": [
+          {
+            "amount": 999.99,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "discount": null,
+            "id": "959f8376-5cd8-4f96-a448-97d53f9229d3"
+          }
+        ],
+        "setupCost": null,
+        "setupCostDiscounts": [],
+        "tierId": "c62e4751-b716-48c4-bc48-250a76456f4e",
+        "tierPricingId": "625f7b4a-c3f8-4115-959f-00b8820fbbe2"
+      },
+      "scope": "global",
+      "type": "ADD_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "bjsqFU76cqDo9jdk0QzcXaWy0IY=",
+    "id": "f60da1d6aa21f5a502eee18000047ca0",
+    "index": 25,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:04.523Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": "A comprehensive review of contributor agreements to ensure compliance, clarity, and proper terms, including IP rights, payment terms, and scope of work.",
+        "id": "0c1ddea9-29b3-4da4-962a-1a7a8416a38c",
+        "isSetupFormation": false,
+        "lastModified": "2026-03-05T13:24:18.312Z",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "title": "Formation & Setup"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE"
+    },
+    "error": null,
+    "hash": "tOZpYxOmHscdCcCtak4g8OrAXrI=",
+    "id": "9abfa1be0053a0814078f6456839f5f1",
+    "index": 26,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:04.872Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:24:18.312Z",
+        "level": "INCLUDED",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "serviceId": "0c1ddea9-29b3-4da4-962a-1a7a8416a38c",
+        "serviceLevelId": "cb0c91c8-2c15-4718-964e-eb87de6ce730",
+        "tierId": "e0f6b29d-f872-4d31-8a58-74789cc99eda"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE_LEVEL"
+    },
+    "error": null,
+    "hash": "89dCKro+MRmUTigq9p1XvEo/FF0=",
+    "id": "271bf8ba114cdf7d89a31cd63db5d99d",
+    "index": 27,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:05.222Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:24:18.312Z",
+        "level": "INCLUDED",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "serviceId": "0c1ddea9-29b3-4da4-962a-1a7a8416a38c",
+        "serviceLevelId": "4589e637-f2df-4b43-9e71-b251f0363788",
+        "tierId": "c62e4751-b716-48c4-bc48-250a76456f4e"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE_LEVEL"
+    },
+    "error": null,
+    "hash": "4+9A6sJPIjhO/0jVP4qb8ZgCBs0=",
+    "id": "3200bf233039367d64137dcd5248ff6d",
+    "index": 28,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:05.567Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": "Regular agreement checks or updates for contributors over time, you can add it as a recurring service:",
+        "id": "cb4e89d8-9b44-4b44-a6be-53f6346144eb",
+        "isSetupFormation": false,
+        "lastModified": "2026-03-05T13:24:55.537Z",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "title": "Recurring Services (Ongoing Services)"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE"
+    },
+    "error": null,
+    "hash": "ulBVsNL2fGRVnQFp1NUyEct7Imk=",
+    "id": "8f50f88be72836a0757141af6b6bf312",
+    "index": 29,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:05.925Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:24:55.537Z",
+        "level": "INCLUDED",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "serviceId": "cb4e89d8-9b44-4b44-a6be-53f6346144eb",
+        "serviceLevelId": "49edf204-ada8-4b25-a0fe-eb0218cdfb21",
+        "tierId": "e0f6b29d-f872-4d31-8a58-74789cc99eda"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE_LEVEL"
+    },
+    "error": null,
+    "hash": "QYU0LLVydIy+bvJDZVzqF2TTWE8=",
+    "id": "91f5a2ef9f94cd78a8c49db6a68e3e9e",
+    "index": 30,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:06.275Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:24:55.537Z",
+        "level": "INCLUDED",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "serviceId": "cb4e89d8-9b44-4b44-a6be-53f6346144eb",
+        "serviceLevelId": "38da8dd3-c032-4d8c-9319-4185a68961ca",
+        "tierId": "c62e4751-b716-48c4-bc48-250a76456f4e"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE_LEVEL"
+    },
+    "error": null,
+    "hash": "V2GHzcY5s9xS6lKuLJYZv9mJNuA=",
+    "id": "4eb97b67a5782f2290ddac1bb2f20743",
+    "index": 31,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:06.618Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": "Template for intellectual property rights in contributor agreements.",
+        "id": "7ca3e52c-84d1-4789-8a71-bdd04182a721",
+        "isSetupFormation": false,
+        "lastModified": "2026-03-05T13:26:24.897Z",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "title": "IP Clause Template"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE"
+    },
+    "error": null,
+    "hash": "KF+mSYnksq9P1CcK3HE7rd/Svng=",
+    "id": "41f6eeee100dd862cd499064b30a03e6",
+    "index": 32,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:06.964Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:26:24.897Z",
+        "level": "INCLUDED",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "serviceId": "7ca3e52c-84d1-4789-8a71-bdd04182a721",
+        "serviceLevelId": "1f81bb8a-7886-4a4d-b13b-3833277ed953",
+        "tierId": "e0f6b29d-f872-4d31-8a58-74789cc99eda"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE_LEVEL"
+    },
+    "error": null,
+    "hash": "xE7/sXW6RnB5+r4/oo9NDTeMetI=",
+    "id": "198727edc4f604224c304732ee097a1e",
+    "index": 33,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:07.318Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:26:24.897Z",
+        "level": "INCLUDED",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "serviceId": "7ca3e52c-84d1-4789-8a71-bdd04182a721",
+        "serviceLevelId": "4a981521-d2f6-45c8-8ee7-af0cdb95aaf9",
+        "tierId": "c62e4751-b716-48c4-bc48-250a76456f4e"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE_LEVEL"
+    },
+    "error": null,
+    "hash": "KLrw1Gi2dJxHTCQzxTEcay78D7w=",
+    "id": "46d9162b763670a903a77bc63ac7a578",
+    "index": 34,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:07.654Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": "Standard language for outlining payment terms and compensation.",
+        "id": "3fa07d28-b980-4ec2-85b6-746bd451625e",
+        "isSetupFormation": false,
+        "lastModified": "2026-03-05T13:26:43.977Z",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "title": "Payment Terms Template"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE"
+    },
+    "error": null,
+    "hash": "At06yx0F86k8Gi/mWwJQmaPNiyI=",
+    "id": "37f2608d18a5d70e7e4d75739c12ad9b",
+    "index": 35,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:08.004Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:26:43.977Z",
+        "level": "INCLUDED",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "serviceId": "3fa07d28-b980-4ec2-85b6-746bd451625e",
+        "serviceLevelId": "b1042218-f1a7-4f88-92c8-7e3ba05cc1f0",
+        "tierId": "e0f6b29d-f872-4d31-8a58-74789cc99eda"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE_LEVEL"
+    },
+    "error": null,
+    "hash": "38L0XDhlHYyJcV1jtpSYdU8foms=",
+    "id": "4a77346c64dcbcd25304b498ae448f64",
+    "index": 36,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:08.415Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:26:43.977Z",
+        "level": "INCLUDED",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "serviceId": "3fa07d28-b980-4ec2-85b6-746bd451625e",
+        "serviceLevelId": "b55b3ed7-d102-4b36-b198-07de85037928",
+        "tierId": "c62e4751-b716-48c4-bc48-250a76456f4e"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE_LEVEL"
+    },
+    "error": null,
+    "hash": "2lR4XGf6/3TXQaTBm72657ff0sM=",
+    "id": "4d549c24542ee02ed6e8875761cb20a2",
+    "index": 37,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:08.765Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": "Template for non-compete clauses that might be added to contributor agreements.",
+        "id": "5b10532a-cca8-42b0-b3a0-8ad7f8e9cfd2",
+        "isSetupFormation": false,
+        "lastModified": "2026-03-05T13:27:04.032Z",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "title": "Non-Compete Clause Template"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE"
+    },
+    "error": null,
+    "hash": "mU2Afw2VwvjZpf5jByGb6PoUNh0=",
+    "id": "30cce3da586cbbf47b59bdde0b8cd39e",
+    "index": 38,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:09.115Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:27:04.032Z",
+        "level": "INCLUDED",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "serviceId": "5b10532a-cca8-42b0-b3a0-8ad7f8e9cfd2",
+        "serviceLevelId": "c019c563-5b66-4220-8812-253ec505502e",
+        "tierId": "e0f6b29d-f872-4d31-8a58-74789cc99eda"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE_LEVEL"
+    },
+    "error": null,
+    "hash": "XdS2Xy6YCyol5r8BeJuc31zFa+A=",
+    "id": "97b875923938d07c030b5ab4fcb19800",
+    "index": 39,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:09.466Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:27:04.032Z",
+        "level": "INCLUDED",
+        "optionGroupId": "b9ad84e2-988f-4970-8a55-9580f4063b88",
+        "serviceId": "5b10532a-cca8-42b0-b3a0-8ad7f8e9cfd2",
+        "serviceLevelId": "cdd25053-e500-4e8f-89a6-ff569a931437",
+        "tierId": "c62e4751-b716-48c4-bc48-250a76456f4e"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE_LEVEL"
+    },
+    "error": null,
+    "hash": "widh4nV1CjyGBquhmoZ59htfzAY=",
+    "id": "34ba24d3df9564846b16df9563c9b824",
+    "index": 40,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:09.813Z"
+  },
+  {
+    "action": {
+      "input": {
+        "freeLimit": 0,
+        "lastModified": "2026-03-05T13:30:53.640Z",
+        "limitId": "59de6121-ab17-4b2e-af6d-8f1c2681fe83",
+        "metric": "Number of Contracts",
+        "notes": null,
+        "paidLimit": 1,
+        "resetCycle": "MONTHLY",
+        "serviceId": "0c1ddea9-29b3-4da4-962a-1a7a8416a38c",
+        "tierId": "e0f6b29d-f872-4d31-8a58-74789cc99eda",
+        "unitName": "Contract",
+        "unitPrice": 700,
+        "unitPriceCurrency": "USD"
+      },
+      "scope": "global",
+      "type": "ADD_USAGE_LIMIT"
+    },
+    "error": null,
+    "hash": "TQhQmOj8tC43WFhbtkv9bToNjKQ=",
+    "id": "706a13ef5aac91c8d7fb1c46635bc8f3",
+    "index": 41,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:10.169Z"
+  },
+  {
+    "action": {
+      "input": {
+        "freeLimit": 0,
+        "lastModified": "2026-03-05T13:30:53.640Z",
+        "limitId": "c5f2cb7e-4137-4c20-9cde-1459170e63c2",
+        "metric": "Number of Contracts",
+        "notes": null,
+        "paidLimit": 5,
+        "resetCycle": "MONTHLY",
+        "serviceId": "0c1ddea9-29b3-4da4-962a-1a7a8416a38c",
+        "tierId": "c62e4751-b716-48c4-bc48-250a76456f4e",
+        "unitName": "Contract",
+        "unitPrice": 500,
+        "unitPriceCurrency": "USD"
+      },
+      "scope": "global",
+      "type": "ADD_USAGE_LIMIT"
+    },
+    "error": null,
+    "hash": "Za9SxxYDE0AgA0rYANSzduLe0B8=",
+    "id": "a0e602fa2b908236a078198ccef08d1a",
+    "index": 42,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:10.518Z"
+  },
+  {
+    "action": {
+      "input": {
+        "freeLimit": 1,
+        "lastModified": "2026-03-05T13:31:36.392Z",
+        "limitId": "59de6121-ab17-4b2e-af6d-8f1c2681fe83",
+        "metric": "Number of Contracts",
+        "notes": null,
+        "paidLimit": 1,
+        "resetCycle": "MONTHLY",
+        "tierId": "e0f6b29d-f872-4d31-8a58-74789cc99eda",
+        "unitName": "Contract",
+        "unitPrice": 700,
+        "unitPriceCurrency": "USD"
+      },
+      "scope": "global",
+      "type": "UPDATE_USAGE_LIMIT"
+    },
+    "error": null,
+    "hash": "Mra7jJQzCEFMtBuqHv4Va6mW114=",
+    "id": "5f45a8580b43b2f53ab03f2607d75d35",
+    "index": 43,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:10.868Z"
+  },
+  {
+    "action": {
+      "input": {
+        "freeLimit": 1,
+        "lastModified": "2026-03-05T13:31:36.392Z",
+        "limitId": "c5f2cb7e-4137-4c20-9cde-1459170e63c2",
+        "metric": "Number of Contracts",
+        "notes": null,
+        "paidLimit": 5,
+        "resetCycle": "MONTHLY",
+        "tierId": "c62e4751-b716-48c4-bc48-250a76456f4e",
+        "unitName": "Contract",
+        "unitPrice": 500,
+        "unitPriceCurrency": "USD"
+      },
+      "scope": "global",
+      "type": "UPDATE_USAGE_LIMIT"
+    },
+    "error": null,
+    "hash": "ynsZrj69GS5fqdPNVRS4ZaxCvHA=",
+    "id": "6b58b9070763e8533fe9eb2542dd0f8f",
+    "index": 44,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:11.264Z"
+  },
+  {
+    "action": {
+      "input": {
+        "freeLimit": 0,
+        "lastModified": "2026-03-05T13:32:05.175Z",
+        "limitId": "59de6121-ab17-4b2e-af6d-8f1c2681fe83",
+        "metric": "Number of Contracts",
+        "notes": null,
+        "paidLimit": 1,
+        "resetCycle": "MONTHLY",
+        "tierId": "e0f6b29d-f872-4d31-8a58-74789cc99eda",
+        "unitName": "Contract",
+        "unitPrice": 700,
+        "unitPriceCurrency": "USD"
+      },
+      "scope": "global",
+      "type": "UPDATE_USAGE_LIMIT"
+    },
+    "error": null,
+    "hash": "s5ewFxviGASuSZ4MDodQ6TEHmUw=",
+    "id": "b025201d42bf4bc11d388bd744febda3",
+    "index": 45,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:11.616Z"
+  },
+  {
+    "action": {
+      "input": {
+        "freeLimit": 1,
+        "lastModified": "2026-03-05T13:32:05.175Z",
+        "limitId": "c5f2cb7e-4137-4c20-9cde-1459170e63c2",
+        "metric": "Number of Contracts",
+        "notes": null,
+        "paidLimit": 5,
+        "resetCycle": "MONTHLY",
+        "tierId": "c62e4751-b716-48c4-bc48-250a76456f4e",
+        "unitName": "Contract",
+        "unitPrice": 500,
+        "unitPriceCurrency": "USD"
+      },
+      "scope": "global",
+      "type": "UPDATE_USAGE_LIMIT"
+    },
+    "error": null,
+    "hash": "s5ewFxviGASuSZ4MDodQ6TEHmUw=",
+    "id": "e209f41ed97a4e78718a2d9b55bd75af",
+    "index": 46,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:11.963Z"
+  },
+  {
+    "action": {
+      "input": {
+        "freeLimit": 1,
+        "lastModified": "2026-03-05T13:35:09.985Z",
+        "limitId": "d52d9233-1193-4135-8079-8ee1d5e16d53",
+        "metric": "Number of Reviews",
+        "notes": null,
+        "paidLimit": 4,
+        "resetCycle": "MONTHLY",
+        "serviceId": "cb4e89d8-9b44-4b44-a6be-53f6346144eb",
+        "tierId": "e0f6b29d-f872-4d31-8a58-74789cc99eda",
+        "unitName": "Review",
+        "unitPrice": 35,
+        "unitPriceCurrency": "USD"
+      },
+      "scope": "global",
+      "type": "ADD_USAGE_LIMIT"
+    },
+    "error": null,
+    "hash": "B05p3pcWk/+rBCal5g1UOV7W5IY=",
+    "id": "1a3f7a56db85db30be4c91e4bafd8731",
+    "index": 47,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:12.323Z"
+  },
+  {
+    "action": {
+      "input": {
+        "freeLimit": 1,
+        "lastModified": "2026-03-05T13:35:09.985Z",
+        "limitId": "9b7c3d6a-7e59-4f9f-b687-0f365aa55515",
+        "metric": "Number of Reviews",
+        "notes": null,
+        "paidLimit": 10,
+        "resetCycle": "MONTHLY",
+        "serviceId": "cb4e89d8-9b44-4b44-a6be-53f6346144eb",
+        "tierId": "c62e4751-b716-48c4-bc48-250a76456f4e",
+        "unitName": "Review",
+        "unitPrice": 35,
+        "unitPriceCurrency": "USD"
+      },
+      "scope": "global",
+      "type": "ADD_USAGE_LIMIT"
+    },
+    "error": null,
+    "hash": "5aEad+pYSAhgaxsDetIuL+Z/Wz8=",
+    "id": "3c41ef3865cf39bdf8bdabd24bdb4437",
+    "index": 48,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:12.664Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "ANNUAL"
+        ],
+        "lastModified": "2026-03-05T13:47:33.449Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "bbg5+whyuMF6gEnMeQkET7tPE3g=",
+    "id": "a18adaa232c498f025fee1a49e6cfd3f",
+    "index": 49,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:13.006Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "ANNUAL",
+          "MONTHLY"
+        ],
+        "lastModified": "2026-03-05T13:48:09.192Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "GV+xp6Q9uo7JlF4C1TPfVlkK5V8=",
+    "id": "c446ce78c9d05360e159629197374920",
+    "index": 50,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:13.352Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": "Monthly Subscritption 10,000 USD",
+        "id": "c62e4751-b716-48c4-bc48-250a76456f4e",
+        "lastModified": "2026-03-05T13:48:44.246Z"
+      },
+      "scope": "global",
+      "type": "UPDATE_TIER"
+    },
+    "error": null,
+    "hash": "gWL0t1csDCknBzEvQysGDsLOrsM=",
+    "id": "8dad1f0008fef3455ad9f85778bbdf22",
+    "index": 51,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:13.703Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": "Monthly Subscription 10,000 USD",
+        "id": "c62e4751-b716-48c4-bc48-250a76456f4e",
+        "lastModified": "2026-03-05T13:48:54.799Z"
+      },
+      "scope": "global",
+      "type": "UPDATE_TIER"
+    },
+    "error": null,
+    "hash": "NE2pndgDIF8ou4PN6f3nkB8Jc9o=",
+    "id": "428c104f48fe083c2679fefc58731394",
+    "index": 52,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:14.053Z"
+  },
+  {
+    "action": {
+      "input": {
+        "id": "c62e4751-b716-48c4-bc48-250a76456f4e",
+        "lastModified": "2026-03-05T13:49:52.059Z"
+      },
+      "scope": "global",
+      "type": "DELETE_TIER"
+    },
+    "error": null,
+    "hash": "RJO+gMdI229K45rneuLFk8zV1QQ=",
+    "id": "1c928c65f0351582ff30f1fb97c12c17",
+    "index": 53,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:14.431Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "ANNUAL",
+          "MONTHLY",
+          "QUARTERLY"
+        ],
+        "lastModified": "2026-03-05T13:50:42.193Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "1XAf7aYDInejBrYKv88tBOYqQjo=",
+    "id": "77f9a1a7575b2ef6b1192a7af37e38d7",
+    "index": 54,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:14.782Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "ANNUAL",
+          "MONTHLY",
+          "QUARTERLY",
+          "SEMI_ANNUAL"
+        ],
+        "lastModified": "2026-03-05T13:50:43.056Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "V4fXXDyis2rBew8/liKJFbIrZZE=",
+    "id": "a6e9d0d5a40b7ad09562aa378af57237",
+    "index": 55,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:15.132Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "ANNUAL",
+          "MONTHLY",
+          "QUARTERLY"
+        ],
+        "lastModified": "2026-03-05T13:50:43.885Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "st6G+fMXhnoeNNJ+GiARKZI7YiY=",
+    "id": "c5b479e19adf4bede56acf22b90fde6b",
+    "index": 56,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:15.482Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "ANNUAL",
+          "MONTHLY"
+        ],
+        "lastModified": "2026-03-05T13:50:44.384Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "wgiGiPmYbHKp6bv/FWzHG6oUpRo=",
+    "id": "76c0791a6dda4c01ec049cbfd5934f2c",
+    "index": 57,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:15.831Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "MONTHLY"
+        ],
+        "lastModified": "2026-03-05T13:50:45.472Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "4thvfYb+YfcZ+ir/8kMb/WLnlZU=",
+    "id": "186b1541a91a89e1c8bbfdb4e00e0715",
+    "index": 58,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:16.171Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "MONTHLY",
+          "ANNUAL"
+        ],
+        "lastModified": "2026-03-05T13:50:49.103Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "YAhSj91O6I+ECr+guIHTXv0tgtY=",
+    "id": "3bc69a6b6f2f09886097d3b3068af787",
+    "index": 59,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:16.535Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:51:10.407Z",
+        "status": "COMING_SOON"
+      },
+      "scope": "global",
+      "type": "UPDATE_OFFERING_STATUS"
+    },
+    "error": null,
+    "hash": "1+FsCp8EqTvc2cAAoP7md9s/nMs=",
+    "id": "6d719880801c1da90c68d71c5d0c07ee",
+    "index": 60,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:16.887Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "MONTHLY",
+          "ANNUAL",
+          "QUARTERLY"
+        ],
+        "lastModified": "2026-03-05T13:58:17.520Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "+b7teIiMugoxNP2tmbyWeVPpDjY=",
+    "id": "ef2f8bb0a0170140c052713937ea60e9",
+    "index": 61,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:17.232Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "MONTHLY",
+          "ANNUAL"
+        ],
+        "lastModified": "2026-03-05T13:58:18.543Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "hMpt7JcbBWyJoG75ATQkDw9iu/M=",
+    "id": "ed20fe1470602fcc4a32300a390c374e",
+    "index": 62,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:17.583Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "MONTHLY",
+          "ANNUAL",
+          "SEMI_ANNUAL"
+        ],
+        "lastModified": "2026-03-05T13:58:20.063Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "VUDJDAKUqoN6XU34NRKDE2hQum8=",
+    "id": "bf39691d512a53a8403c59e47986cf91",
+    "index": 63,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:17.932Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "MONTHLY",
+          "ANNUAL"
+        ],
+        "lastModified": "2026-03-05T13:58:20.649Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "CUDy4k2xAn07tgUa55oQQzvGJYM=",
+    "id": "bd6b1eef591c90b947a695d1fdc7d063",
+    "index": 64,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:18.265Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-18T17:20:00.109Z",
+        "status": "DRAFT"
+      },
+      "scope": "global",
+      "type": "UPDATE_OFFERING_STATUS"
+    },
+    "error": null,
+    "hash": "myx1d4BYUmQUd4+6vDdPEoIYaPk=",
+    "id": "800660ab4b4e1bb055d6c20941fbf6ca",
+    "index": 65,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:18.609Z"
+  }
+]

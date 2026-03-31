@@ -1,11 +1,13 @@
-import { type ISubgraph } from "@powerhousedao/reactor-api";
+import { type BaseSubgraph } from "@powerhousedao/reactor-api";
 import { alchemyClient } from "../../scripts/alchemy/alchemyClient.js";
 import { actions } from "../../document-models/account-transactions/index.js";
 import type { AccountTransactionsDocument } from "../../document-models/account-transactions/index.js";
 import { generateId } from "document-model/core";
 
-export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
-  const reactor = subgraph.reactor;
+export const getResolvers = (
+  subgraph: BaseSubgraph,
+): Record<string, unknown> => {
+  const { reactorClient } = subgraph;
 
   return {
     Mutation: {
@@ -77,8 +79,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           fromBlock,
         });
 
-        const doc =
-          await reactor.getDocument<AccountTransactionsDocument>(docId);
+        const doc = await reactorClient.get<AccountTransactionsDocument>(docId);
         if (!doc) {
           throw new Error(`Document with id ${docId} not found`);
         }
@@ -126,33 +127,32 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               continue;
             }
 
-            const addResult = await reactor.addAction(
-              docId,
-              actions.addTransaction({
-                id: generateId(),
-                counterParty: tx.counterParty,
-                amount: tx.amount,
-                datetime: tx.datetime,
-                txHash: tx.txHash,
-                token: tx.token,
-                blockNumber: tx.blockNumber,
-                uniqueId: tx.uniqueId || null,
-                accountingPeriod: tx.accountingPeriod,
-                direction: tx.direction,
-                budget: null,
-              }),
-            );
+            try {
+              await reactorClient.execute(docId, "main", [
+                actions.addTransaction({
+                  id: generateId(),
+                  counterParty: tx.counterParty,
+                  amount: tx.amount,
+                  datetime: tx.datetime,
+                  txHash: tx.txHash,
+                  token: tx.token,
+                  blockNumber: tx.blockNumber,
+                  uniqueId: tx.uniqueId || null,
+                  accountingPeriod: tx.accountingPeriod,
+                  direction: tx.direction,
+                  budget: null,
+                }),
+              ]);
 
-            if (addResult.status === "SUCCESS") {
               successfullyAdded++;
               // Add to set to prevent duplicates within this batch
               if (tx.uniqueId) {
                 existingUniqueIds.add(tx.uniqueId);
               }
-            } else {
+            } catch (addError) {
               console.error(
                 `[Resolver] Failed to add transaction ${tx.txHash}:`,
-                addResult.error?.message,
+                addError instanceof Error ? addError.message : addError,
               );
             }
           }

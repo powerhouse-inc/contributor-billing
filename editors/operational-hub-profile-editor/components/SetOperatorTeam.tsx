@@ -6,7 +6,7 @@ import {
 } from "@powerhousedao/reactor-browser";
 import type { PHDocument } from "document-model";
 import { PHIDInput } from "@powerhousedao/document-engineering";
-import { setOperatorTeam } from "../../../document-models/operational-hub-profile/gen/configuration/creators.js";
+import { setOperatorTeam } from "../../../document-models/operational-hub-profile/v1/gen/configuration/creators.js";
 import { setOpHubMember } from "@powerhousedao/builder-profile/document-models/builder-profile";
 import { useRemoteBuilderProfiles } from "../../shared/hooks/useRemoteBuilderProfiles.js";
 import { setOpHubMemberOnBuilderProfile } from "../../shared/graphql-client.js";
@@ -190,7 +190,7 @@ export function SetOperatorTeam({
     // Add remote profiles that aren't already local
     for (const remoteProfile of remoteProfiles) {
       const name = remoteProfile.state.name || remoteProfile.id;
-      const driveName = remoteProfile.driveName || "Remote";
+      const driveName = "Remote";
 
       options.push({
         id: remoteProfile.id,

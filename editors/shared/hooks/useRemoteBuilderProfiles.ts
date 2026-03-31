@@ -1,10 +1,48 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   fetchAllRemoteBuilderProfiles,
   type RemoteBuilderProfile,
 } from "../graphql-client.js";
 
 export type { RemoteBuilderProfile };
+
+// Module-level cache shared across all hook instances
+let cachedProfiles: RemoteBuilderProfile[] | null = null;
+let cachedProfileMap: Map<string, RemoteBuilderProfile> | null = null;
+let fetchPromise: Promise<RemoteBuilderProfile[]> | null = null;
+let lastFetchTime = 0;
+
+const CACHE_TTL_MS = 60_000; // 1 minute
+
+function isCacheValid(): boolean {
+  return cachedProfiles !== null && Date.now() - lastFetchTime < CACHE_TTL_MS;
+}
+
+async function getProfiles(force = false): Promise<RemoteBuilderProfile[]> {
+  if (!force && isCacheValid()) {
+    return cachedProfiles!;
+  }
+
+  // Deduplicate concurrent requests
+  if (fetchPromise) {
+    return fetchPromise;
+  }
+
+  fetchPromise = fetchAllRemoteBuilderProfiles()
+    .then((profiles) => {
+      cachedProfiles = profiles;
+      const map = new Map<string, RemoteBuilderProfile>();
+      profiles.forEach((p) => map.set(p.id, p));
+      cachedProfileMap = map;
+      lastFetchTime = Date.now();
+      return profiles;
+    })
+    .finally(() => {
+      fetchPromise = null;
+    });
+
+  return fetchPromise;
+}
 
 interface UseRemoteBuilderProfilesResult {
   /** Map of PHID to remote builder profile data */
@@ -19,7 +57,7 @@ interface UseRemoteBuilderProfilesResult {
 
 /**
  * Hook for fetching builder profiles from remote Switchboard drives.
- * Used as a fallback when local drives don't have the builder profile documents.
+ * Uses a module-level cache so multiple components share one request.
  *
  * @param localProfileMap - Map of PHIDs that are already resolved locally (to avoid using remote data for those)
  */
@@ -28,36 +66,24 @@ export function useRemoteBuilderProfiles(
 ): UseRemoteBuilderProfilesResult {
   const [profileMap, setProfileMap] = useState<
     Map<string, RemoteBuilderProfile>
-  >(new Map());
-  const [allProfiles, setAllProfiles] = useState<RemoteBuilderProfile[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  >(() => cachedProfileMap ?? new Map());
+  const [allProfiles, setAllProfiles] = useState<RemoteBuilderProfile[]>(
+    () => cachedProfiles ?? [],
+  );
+  const [isLoading, setIsLoading] = useState(!isCacheValid());
 
-  // Track if we've already started fetching to avoid duplicate requests
-  const isFetchingRef = useRef(false);
-  const hasFetchedRef = useRef(false);
+  const applyResults = useCallback((profiles: RemoteBuilderProfile[]) => {
+    setAllProfiles(profiles);
+    const map = new Map<string, RemoteBuilderProfile>();
+    profiles.forEach((p) => map.set(p.id, p));
+    setProfileMap(map);
+  }, []);
 
-  // Fetch all available profiles
   const refetchAll = useCallback(async () => {
-    // Prevent concurrent fetches
-    if (isFetchingRef.current) {
-      return;
-    }
-
-    isFetchingRef.current = true;
     setIsLoading(true);
-
     try {
-      const profiles = await fetchAllRemoteBuilderProfiles();
-
-      hasFetchedRef.current = true;
-      setAllProfiles(profiles);
-
-      // Build profile map
-      const newMap = new Map<string, RemoteBuilderProfile>();
-      profiles.forEach((profile) => {
-        newMap.set(profile.id, profile);
-      });
-      setProfileMap(newMap);
+      const profiles = await getProfiles(true);
+      applyResults(profiles);
     } catch (error) {
       console.warn(
         "[useRemoteBuilderProfiles] Failed to fetch profiles:",
@@ -65,18 +91,27 @@ export function useRemoteBuilderProfiles(
       );
     } finally {
       setIsLoading(false);
-      isFetchingRef.current = false;
     }
-  }, []);
+  }, [applyResults]);
 
-  // Auto-fetch all profiles on mount
+  // Auto-fetch on mount (uses cache or deduplicates)
   useEffect(() => {
-    if (!hasFetchedRef.current && !isFetchingRef.current) {
-      void refetchAll();
-    }
-  }, [refetchAll]);
+    let cancelled = false;
+    setIsLoading(true);
+    getProfiles()
+      .then((profiles) => {
+        if (!cancelled) applyResults(profiles);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [applyResults]);
 
-  // Filter out profiles that exist locally from the returned allProfiles
+  // Filter out profiles that exist locally
   const filteredAllProfiles = allProfiles.filter(
     (profile) => !localProfileMap.has(profile.id),
   );

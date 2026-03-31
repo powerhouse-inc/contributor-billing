@@ -8,20 +8,20 @@
     },
     "documentModels": [
         {
-            "id": "powerhouse/accounts",
-            "name": "Accounts"
-        },
-        {
             "id": "powerhouse/account-transactions",
             "name": "AccountTransactions"
         },
         {
-            "id": "powerhouse/invoice",
-            "name": "Invoice"
+            "id": "powerhouse/operational-hub-profile",
+            "name": "OperationalHubProfile"
+        },
+        {
+            "id": "powerhouse/accounts",
+            "name": "Accounts"
         },
         {
             "id": "powerhouse/billing-statement",
-            "name": "Billing Statement"
+            "name": "BillingStatement"
         },
         {
             "id": "powerhouse/expense-report",
@@ -29,11 +29,11 @@
         },
         {
             "id": "powerhouse/snapshot-report",
-            "name": "Snapshot Report"
+            "name": "SnapshotReport"
         },
         {
-            "id": "powerhouse/operational-hub-profile",
-            "name": "OperationalHubProfile"
+            "id": "powerhouse/invoice",
+            "name": "Invoice"
         }
     ],
     "editors": [

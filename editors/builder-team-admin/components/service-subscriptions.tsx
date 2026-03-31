@@ -15,10 +15,11 @@ import { useEffect, useRef, useState, Fragment } from "react";
 import type { FolderNode } from "document-drive";
 import { Plus } from "lucide-react";
 import { useServiceSubscriptionAutoPlacement } from "../hooks/useServiceSubscriptionAutoPlacement.js";
+import { SubscriptionsDashboard } from "./subscriptions-dashboard/index.js";
+import { DashboardHeader } from "./subscriptions-dashboard/DashboardHeader.js";
 
-/**
- * Simple inline input for creating new folders.
- */
+// ---------- Folder browser sub-components (unchanged from original) ----------
+
 function FolderNameInput({
   onSubmit,
   onCancel,
@@ -65,11 +66,6 @@ function FolderNameInput({
   );
 }
 
-/**
- * Custom breadcrumbs component that treats "Service Subscriptions" folder as the root.
- * Only shows path from "Service Subscriptions" folder onwards.
- * Includes folder creation functionality.
- */
 function ServiceSubscriptionsBreadcrumbs({
   rootFolderId,
 }: {
@@ -80,12 +76,10 @@ function ServiceSubscriptionsBreadcrumbs({
   const { isAllowedToCreateDocuments } = useUserPermissions();
   const [isCreating, setIsCreating] = useState(false);
 
-  // Find the index of the root folder in the path
   const rootIndex = selectedNodePath.findIndex(
     (node) => node.id === rootFolderId,
   );
 
-  // Get the path starting from (and including) the root folder
   const visiblePath =
     rootIndex >= 0 ? selectedNodePath.slice(rootIndex) : selectedNodePath;
 
@@ -99,9 +93,7 @@ function ServiceSubscriptionsBreadcrumbs({
     const parentFolderId = selectedNodePath.at(-1)?.id;
     addFolder(selectedDriveId, name, parentFolderId)
       .then((node) => {
-        if (node) {
-          setSelectedNode(node);
-        }
+        setSelectedNode(node);
       })
       .catch((error) => {
         console.error(error);
@@ -129,8 +121,8 @@ function ServiceSubscriptionsBreadcrumbs({
           <span>/</span>
         </Fragment>
       ))}
-      {isAllowedToCreateDocuments &&
-        (isCreating ? (
+      {isAllowedToCreateDocuments ? (
+        isCreating ? (
           <FolderNameInput onSubmit={handleSubmit} onCancel={handleCancel} />
         ) : (
           <button
@@ -141,22 +133,25 @@ function ServiceSubscriptionsBreadcrumbs({
             <Plus size={14} />
             Add new
           </button>
-        ))}
+        )
+      ) : null}
     </div>
   );
 }
 
-export function ServiceSubscriptions() {
+// ---------- Folder browser view ----------
+
+function ServiceSubscriptionsFolderBrowser({
+  serviceSubscriptionsFolder,
+  onBackToDashboard,
+}: {
+  serviceSubscriptionsFolder: FolderNode;
+  onBackToDashboard: () => void;
+}) {
   const hasNavigatedToFolder = useRef(false);
   const selectedNodePath = useSelectedNodePath();
   const nodesInCurrentFolder = useNodesInSelectedDriveOrFolder();
 
-  // Use the shared auto-placement hook - this handles:
-  // 1. Creating the "Service Subscriptions" folder if it doesn't exist
-  // 2. Moving resource-instance and subscription-instance documents dropped anywhere into the proper folder
-  const { serviceSubscriptionsFolder } = useServiceSubscriptionAutoPlacement();
-
-  // Navigate to the folder when it exists (only once on mount)
   useEffect(() => {
     if (serviceSubscriptionsFolder && !hasNavigatedToFolder.current) {
       hasNavigatedToFolder.current = true;
@@ -164,34 +159,16 @@ export function ServiceSubscriptions() {
     }
   }, [serviceSubscriptionsFolder]);
 
-  // Check if we're currently within the Service Subscriptions folder tree
-  const isWithinServiceSubscriptions =
-    serviceSubscriptionsFolder &&
-    selectedNodePath.some((node) => node.id === serviceSubscriptionsFolder.id);
+  const isWithinServiceSubscriptions = selectedNodePath.some(
+    (node) => node.id === serviceSubscriptionsFolder.id,
+  );
 
-  // If user navigated outside Service Subscriptions folder, bring them back
   useEffect(() => {
-    if (
-      serviceSubscriptionsFolder &&
-      !isWithinServiceSubscriptions &&
-      hasNavigatedToFolder.current
-    ) {
+    if (!isWithinServiceSubscriptions && hasNavigatedToFolder.current) {
       setSelectedNode(serviceSubscriptionsFolder.id);
     }
   }, [serviceSubscriptionsFolder, isWithinServiceSubscriptions]);
 
-  // Show loading state while folder is being created
-  if (!serviceSubscriptionsFolder) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">
-          Setting up Service Subscriptions folder...
-        </div>
-      </div>
-    );
-  }
-
-  // Get folder and file nodes from current selection
   const folderNodes = nodesInCurrentFolder.filter((n) => isFolderNodeKind(n));
   const fileNodes = nodesInCurrentFolder.filter((n) => isFileNodeKind(n));
   const hasFolders = folderNodes.length > 0;
@@ -200,11 +177,13 @@ export function ServiceSubscriptions() {
 
   return (
     <div>
-      <div className="text-2xl font-bold text-center mb-4">
-        Service Subscriptions
-      </div>
-      <div className="space-y-6 px-6">
-        {/* Create Document Buttons */}
+      <DashboardHeader
+        title="Service Subscriptions"
+        subtitle="Browse and manage subscription documents"
+        onBackToDashboard={onBackToDashboard}
+        showBack
+      />
+      <div className="space-y-6 px-2">
         <div className="flex gap-2 justify-center pb-4 border-b border-gray-200">
           <button
             type="button"
@@ -232,7 +211,7 @@ export function ServiceSubscriptions() {
           rootFolderId={serviceSubscriptionsFolder.id}
         />
 
-        {hasFolders && (
+        {hasFolders ? (
           <div>
             <h3 className="mb-2 text-sm font-bold text-gray-600">Folders</h3>
             <div className="flex flex-wrap gap-4">
@@ -244,9 +223,9 @@ export function ServiceSubscriptions() {
               ))}
             </div>
           </div>
-        )}
+        ) : null}
 
-        {hasFiles && (
+        {hasFiles ? (
           <div>
             <h3 className="mb-2 text-sm font-semibold text-gray-600">
               Documents
@@ -257,9 +236,9 @@ export function ServiceSubscriptions() {
               ))}
             </div>
           </div>
-        )}
+        ) : null}
 
-        {isEmpty && (
+        {isEmpty ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="text-gray-400 mb-2">
               <svg
@@ -281,8 +260,34 @@ export function ServiceSubscriptions() {
               started.
             </p>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
+  );
+}
+
+// ---------- Main component ----------
+
+export function ServiceSubscriptions() {
+  const [showFolderBrowser, setShowFolderBrowser] = useState(false);
+  const { serviceSubscriptionsFolder } = useServiceSubscriptionAutoPlacement();
+
+  if (!serviceSubscriptionsFolder) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">
+          Setting up Service Subscriptions folder...
+        </div>
+      </div>
+    );
+  }
+
+  return showFolderBrowser ? (
+    <ServiceSubscriptionsFolderBrowser
+      serviceSubscriptionsFolder={serviceSubscriptionsFolder}
+      onBackToDashboard={() => setShowFolderBrowser(false)}
+    />
+  ) : (
+    <SubscriptionsDashboard onBrowseFiles={() => setShowFolderBrowser(true)} />
   );
 }

@@ -47,7 +47,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: '22'
+  NODE_VERSION: '24'
   BUN_VERSION: 'latest'
 
 jobs:
@@ -241,12 +241,14 @@ jobs:
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Run semantic-release (dry-run)
         if: inputs.dry-run == true
         run: npx semantic-release --dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Get released version
         id: get-version
@@ -254,29 +256,15 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-          # Check if this version is already published on npm
-          if npm view "@powerhousedao/contributor-billing@${VERSION}" version 2>/dev/null; then
-            echo "released=false" >> $GITHUB_OUTPUT
-            echo "Version $VERSION already published, skipping"
+          # Check if semantic-release created a new tag
+          git fetch --tags
+          if git tag --list "v$VERSION" | grep -q "v$VERSION"; then
+            echo "released=true" >> $GITHUB_OUTPUT
+            echo "Released version: $VERSION"
           else
-            # Check if semantic-release created a new tag
-            git fetch --tags
-            if git tag --list "v$VERSION" | grep -q "v$VERSION"; then
-              echo "released=true" >> $GITHUB_OUTPUT
-              echo "Released version: $VERSION"
-            else
-              echo "released=false" >> $GITHUB_OUTPUT
-              echo "No new release (version: $VERSION)"
-            fi
+            echo "released=false" >> $GITHUB_OUTPUT
+            echo "No new release (version: $VERSION)"
           fi
-
-      - name: Upgrade npm for trusted publishing
-        if: inputs.dry-run != true && steps.get-version.outputs.released == 'true'
-        run: npm install -g npm@latest
-
-      - name: Publish to npm
-        if: inputs.dry-run != true && steps.get-version.outputs.released == 'true'
-        run: npm publish --provenance --access public --tag ${{ steps.channel.outputs.channel }}
 
       - name: Notify bai-powerhouse-env
         if: inputs.dry-run != true && steps.get-version.outputs.released == 'true' && steps.channel.outputs.channel == 'dev'

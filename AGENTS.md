@@ -220,7 +220,6 @@ Errors referenced in the reducer code will be imported automatically.
 #### Error Definition Requirements
 
 1. **Add error definitions** to operations using `ADD_OPERATION_ERROR`:
-
    - `code`: Uppercase snake_case (e.g., `"MISSING_ID"`, `"ENTRY_NOT_FOUND"`)
    - `name`: PascalCase ending with "Error" (e.g., `"MissingIdError"`, `"EntryNotFoundError"`)
    - `description`: Human-readable description of the error condition
@@ -240,7 +239,7 @@ if (!action.input.id) {
 }
 
 if (entryIndex === -1) {
-  throw new EntryNotFoundError(`Entry with ID ${action.input.id} not found`);
+  throw new EntryNotFoundError(`Entry not found`);
 }
 
 // ❌ BAD - Generic Error
@@ -262,6 +261,47 @@ throw new MissingIdError("message");
 - **DuplicateIdError**: ID already exists when creating new entries
 - **InvalidInputError**: Business logic violations
 - **PermissionDeniedError**: Access control violations
+
+#### Testing Reducer Errors
+
+**CRITICAL**: When a reducer throws an error, the operation is **still added** to the document but with an `.error` property containing the error message as a string.
+
+**DO NOT** use `.toThrow()` or `expect(() => ...).toThrow()` patterns when testing reducer errors.
+
+##### How Errors Work in Operations
+
+1. The reducer throws an error (e.g., `throw new InvalidNameError("message")`)
+2. The operation is still recorded in `document.operations.global` (or `.local`)
+3. The error message is stored in `operation.error` as a string
+4. **The state is NOT mutated** - it remains unchanged from before the operation
+
+##### Accessing the Correct Operation Index
+
+**CRITICAL**: You must access the correct operation index. The index corresponds to how many operations were dispatched before it.
+
+- If this is the **first** operation dispatched, access `[0]`
+- If 3 operations were dispatched **before** the failing one, access `[3]`
+
+##### Example
+
+```typescript
+it("should return error and not mutate state", () => {
+  const document = utils.createDocument();
+  const initialState = document.state.global.name;
+
+  const updatedDocument = reducer(document, setName({ name: "invalid" }));
+
+  // Access the correct operation index (0 = first operation)
+  expect(updatedDocument.operations.global[0].error).toBe(
+    "Name is not allowed",
+  );
+  // State remains unchanged
+  expect(updatedDocument.state.global.name).toBe(initialState);
+});
+
+// ❌ WRONG - Never use toThrow()
+expect(() => reducer(document, setName({ name: "invalid" }))).toThrow();
+```
 
 ## Document Model Structure
 
@@ -375,7 +415,6 @@ type TodoListLocalState {
 There might be two drives available with a special use case:
 
 1. **Vetra Drive** (`vetra-{hash}`):
-
    - Contains **source documents**: document models and document editors
    - Used for development
    - Add document model and editor definitions here
@@ -397,7 +436,6 @@ When working with drives (adding/removing documents, creating folders, etc.):
    ```
 
 2. **Review available operations** in the schema, such as:
-
    - `ADD_FILE` - Add a document to the drive
    - `ADD_FOLDER` - Create a new folder
    - `DELETE_NODE` - Remove a file or folder (use this, NOT "DELETE_FILE")

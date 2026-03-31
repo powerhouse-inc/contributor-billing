@@ -1,0 +1,1113 @@
+[
+  {
+    "action": {
+      "input": {
+        "branch": "main",
+        "documentId": "58faac4a-113c-4dde-87b6-05677e8ef9de",
+        "meta": {},
+        "model": "powerhouse/service-offering",
+        "name": "Operator Agent subscription",
+        "protocolVersions": {
+          "base-reducer": 2
+        },
+        "signing": {
+          "createdAtUtcIso": "2026-03-24T17:20:19.766Z",
+          "documentType": "powerhouse/service-offering",
+          "nonce": "",
+          "publicKey": {},
+          "signature": "58faac4a-113c-4dde-87b6-05677e8ef9de"
+        },
+        "slug": "",
+        "version": 0
+      },
+      "scope": "document",
+      "type": "CREATE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "f35a6f21b5deb0450f9c4051c5b65439",
+    "index": 0,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:19.766Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:17:37.429Z",
+        "resourceTemplateId": "0fc0adc3-eb8a-490a-9f4d-b65f32fdb760"
+      },
+      "scope": "global",
+      "type": "SELECT_RESOURCE_TEMPLATE"
+    },
+    "error": null,
+    "hash": "J2rjnrspd6I7OUs/kjZfwK7HDVc=",
+    "id": "cb4a5fe7ffd343147d2256836136d8a9",
+    "index": 0,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:20.062Z"
+  },
+  {
+    "action": {
+      "input": {
+        "documentId": "58faac4a-113c-4dde-87b6-05677e8ef9de",
+        "fromVersion": 0,
+        "initialState": {
+          "auth": {},
+          "document": {
+            "hash": {
+              "algorithm": "sha1",
+              "encoding": "base64"
+            },
+            "version": 0
+          },
+          "global": {
+            "availableBillingCycles": [],
+            "description": null,
+            "facetTargets": [],
+            "id": null,
+            "infoLink": null,
+            "lastModified": null,
+            "operatorId": null,
+            "optionGroups": [],
+            "resourceTemplateId": null,
+            "services": [],
+            "status": "DRAFT",
+            "summary": "",
+            "thumbnailUrl": null,
+            "tiers": [],
+            "title": ""
+          },
+          "local": {}
+        },
+        "model": "powerhouse/service-offering",
+        "toVersion": 1
+      },
+      "scope": "document",
+      "type": "UPGRADE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "ab8bfdcaad533759e569ed0c34d4e8d5",
+    "index": 1,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:19.766Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:17:37.429Z",
+        "summary": "Agent that helps you run your operations. ",
+        "title": "Operator Agent"
+      },
+      "scope": "global",
+      "type": "UPDATE_OFFERING_INFO"
+    },
+    "error": null,
+    "hash": "nE0m0Kqcau3rpmBNONQA6pLxmGI=",
+    "id": "9d7656afc47047761e2685d0cdd7cd41",
+    "index": 1,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:20.401Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:17:37.429Z",
+        "operatorId": "a326c3a9-d29b-46d3-8ab0-14b361e11567"
+      },
+      "scope": "global",
+      "type": "SET_OPERATOR"
+    },
+    "error": null,
+    "hash": "Cdj6bEcP+N3TGaNxROA7csNMYJI=",
+    "id": "71725c6ffde04010813b0590b6cf1cc2",
+    "index": 2,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:20.732Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "product",
+        "categoryLabel": "Product",
+        "id": "f383d5c1-93d0-4a44-a357-be8eddb54595",
+        "lastModified": "2026-03-05T13:17:56.966Z",
+        "selectedOptions": [
+          "Operator-agent"
+        ]
+      },
+      "scope": "global",
+      "type": "SET_FACET_TARGET"
+    },
+    "error": null,
+    "hash": "/PVmOyK39EuLr5bX+v2E1zWxyMQ=",
+    "id": "9ce64224641ad4307dea6cd930d706b8",
+    "index": 3,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:21.071Z"
+  },
+  {
+    "action": {
+      "input": {
+        "currency": "USD",
+        "id": "56a559e6-de66-446a-81db-f9d48c24b29e",
+        "isCustomPricing": false,
+        "lastModified": "2026-03-05T13:20:17.845Z",
+        "name": "Per user"
+      },
+      "scope": "global",
+      "type": "ADD_TIER"
+    },
+    "error": null,
+    "hash": "SnlqKH5PUjsImesuwj6+gtCMffE=",
+    "id": "83932707ca02037cadb7e8dfbdf8ca5c",
+    "index": 4,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:21.401Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": "test",
+        "id": "56a559e6-de66-446a-81db-f9d48c24b29e",
+        "lastModified": "2026-03-05T13:20:45.879Z"
+      },
+      "scope": "global",
+      "type": "UPDATE_TIER"
+    },
+    "error": null,
+    "hash": "qJhdhBFnO5bEEKJcce7QqAgPS/g=",
+    "id": "967494a3090ec48e68a2346f2e2d5113",
+    "index": 5,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:21.729Z"
+  },
+  {
+    "action": {
+      "input": {
+        "id": "56a559e6-de66-446a-81db-f9d48c24b29e",
+        "lastModified": "2026-03-05T13:21:04.155Z"
+      },
+      "scope": "global",
+      "type": "DELETE_TIER"
+    },
+    "error": null,
+    "hash": "mz3nEkrrmJVDyBdlj6HMwxAZkjU=",
+    "id": "379f72ccde1e476719af51d1ffce7bdd",
+    "index": 6,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:22.221Z"
+  },
+  {
+    "action": {
+      "input": {
+        "currency": "USD",
+        "id": "32db57c5-e9f6-4146-944b-54236d703645",
+        "isCustomPricing": false,
+        "lastModified": "2026-03-05T13:21:10.668Z",
+        "name": "Free"
+      },
+      "scope": "global",
+      "type": "ADD_TIER"
+    },
+    "error": null,
+    "hash": "dV1avchzE36tR+LqPKGdhLRnWXw=",
+    "id": "236a96e7f56126a32ca7108512c24828",
+    "index": 7,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:22.552Z"
+  },
+  {
+    "action": {
+      "input": {
+        "currency": "USD",
+        "id": "ed2b16a5-0560-400f-98b8-1ab47f2b00c5",
+        "isCustomPricing": false,
+        "lastModified": "2026-03-05T13:21:27.285Z",
+        "name": "Small team <5p"
+      },
+      "scope": "global",
+      "type": "ADD_TIER"
+    },
+    "error": null,
+    "hash": "KdM0Hx86VZ/VReU+zpuQi8Fj+NA=",
+    "id": "f13f2c8058dddcffa7a843c0743c11cb",
+    "index": 8,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:22.881Z"
+  },
+  {
+    "action": {
+      "input": {
+        "currency": "USD",
+        "id": "59aed4bb-ded3-4d46-b3e8-6fd5ce43a073",
+        "isCustomPricing": false,
+        "lastModified": "2026-03-05T13:21:35.087Z",
+        "name": "Enterprise"
+      },
+      "scope": "global",
+      "type": "ADD_TIER"
+    },
+    "error": null,
+    "hash": "tMTe7235zxwqivpZFJgtJBPeUHc=",
+    "id": "8fe7d4a45220d522aa554720bd659f4a",
+    "index": 9,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:23.227Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "MONTHLY"
+        ],
+        "lastModified": "2026-03-05T13:21:48.525Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "Bcmt6KYQhaJ6gF+ytDc9FDZhTsU=",
+    "id": "e29e59932fb1c35c047f36a490830478",
+    "index": 10,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:23.581Z"
+  },
+  {
+    "action": {
+      "input": {
+        "billingCycles": [
+          "MONTHLY",
+          "ANNUAL"
+        ],
+        "lastModified": "2026-03-05T13:21:54.402Z"
+      },
+      "scope": "global",
+      "type": "SET_AVAILABLE_BILLING_CYCLES"
+    },
+    "error": null,
+    "hash": "3u8blT7fdpwcm7tjgh50e6UUfkA=",
+    "id": "92f8cd33a1fbdcd844964300e03d1411",
+    "index": 11,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:23.927Z"
+  },
+  {
+    "action": {
+      "input": {
+        "availableBillingCycles": [
+          "MONTHLY"
+        ],
+        "costType": "RECURRING",
+        "currency": "USD",
+        "defaultSelected": true,
+        "id": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "isAddOn": false,
+        "lastModified": "2026-03-05T13:23:00.512Z",
+        "name": "Operator Agent Model v1",
+        "price": 5
+      },
+      "scope": "global",
+      "type": "ADD_OPTION_GROUP"
+    },
+    "error": null,
+    "hash": "ANWf1hkgikyMFtxAxCRorqOBKTo=",
+    "id": "797d3486ceb8f0108480d77e499bd155",
+    "index": 12,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:24.271Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:23:00.513Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [
+          {
+            "amount": 5,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "discount": null,
+            "id": "435fc963-6d1d-48de-aa60-3990aa80b523"
+          }
+        ],
+        "setupCost": null
+      },
+      "scope": "global",
+      "type": "SET_OPTION_GROUP_STANDALONE_PRICING"
+    },
+    "error": null,
+    "hash": "FC66QtDMd7PBi348+MgPpTg1sgc=",
+    "id": "41d358e959cb89f86302639051213cb2",
+    "index": 13,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:24.620Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:23:00.513Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [
+          {
+            "amount": 5,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "discount": null,
+            "id": "5f4572b0-5b46-4e04-9b38-171b38c4178f"
+          }
+        ],
+        "setupCost": null,
+        "setupCostDiscounts": [],
+        "tierId": "32db57c5-e9f6-4146-944b-54236d703645",
+        "tierPricingId": "aaa884c7-22ff-454b-80de-de31acafbc5c"
+      },
+      "scope": "global",
+      "type": "ADD_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "y+tqhl2LXgHh4022t1t8H2+b5sM=",
+    "id": "dfd6d208a94a4afec5a3dbdc22fa6172",
+    "index": 14,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:25.062Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:23:00.514Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [
+          {
+            "amount": 5,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "discount": null,
+            "id": "b386dd18-121a-4602-a6f1-094210d1ec7f"
+          }
+        ],
+        "setupCost": null,
+        "setupCostDiscounts": [],
+        "tierId": "ed2b16a5-0560-400f-98b8-1ab47f2b00c5",
+        "tierPricingId": "79c06139-806a-4bd4-96cf-2a6823fd00d3"
+      },
+      "scope": "global",
+      "type": "ADD_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "a26UqUc37sed6hgHigsaaSRVzqw=",
+    "id": "63332d1062942d4fb2a052cb8a22e0f0",
+    "index": 15,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:25.407Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:23:00.514Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [
+          {
+            "amount": 5,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "discount": null,
+            "id": "72782604-bed4-4541-a925-79099f3148fd"
+          }
+        ],
+        "setupCost": null,
+        "setupCostDiscounts": [],
+        "tierId": "59aed4bb-ded3-4d46-b3e8-6fd5ce43a073",
+        "tierPricingId": "d0fe55ec-fca1-4c61-a5dc-66bc58665d46"
+      },
+      "scope": "global",
+      "type": "ADD_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "k8NGl1r3XddYpYsDNV5aD2e1rJA=",
+    "id": "179b4aebbba88dc2d0edb3f4f1b5ab58",
+    "index": 16,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:25.774Z"
+  },
+  {
+    "action": {
+      "input": {
+        "availableBillingCycles": [
+          "MONTHLY"
+        ],
+        "costType": "RECURRING",
+        "currency": "USD",
+        "defaultSelected": true,
+        "id": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "isAddOn": false,
+        "lastModified": "2026-03-05T13:23:15.212Z",
+        "name": "Operator Agent Model v1",
+        "price": 5
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP"
+    },
+    "error": null,
+    "hash": "KtpDG3LfnmeH87X/hykKTq5JyA8=",
+    "id": "3880607245f7d1614b8c71e3c77d16b4",
+    "index": 17,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:26.122Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:23:15.213Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [
+          {
+            "amount": 5,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "id": "8f667045-7544-419f-a56f-3b76f0bc5fb9"
+          }
+        ],
+        "tierId": "32db57c5-e9f6-4146-944b-54236d703645"
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "obCU3Q/mCUqT/wU+X0YQy+jRjcs=",
+    "id": "a4441e98151448a1f2cf1ab497f8af5a",
+    "index": 18,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:26.471Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:23:15.213Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [
+          {
+            "amount": 5,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "id": "c9f835d9-2df6-4551-b261-99258c8e58db"
+          }
+        ],
+        "tierId": "ed2b16a5-0560-400f-98b8-1ab47f2b00c5"
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "OdfqGJk7xWXm8Qmo9VZ7MUs5Zm4=",
+    "id": "a12262f26003f953032f623e3a539f37",
+    "index": 19,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:26.818Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:23:15.213Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [
+          {
+            "amount": 5,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "id": "86e7dcb4-1332-42d7-bb78-74f7739e80bf"
+          }
+        ],
+        "tierId": "59aed4bb-ded3-4d46-b3e8-6fd5ce43a073"
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "vTb9/Z9LnSdKCWuwSEqVUt86N7E=",
+    "id": "1d622119e490e1fe5341a7afb89b59ed",
+    "index": 20,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:27.166Z"
+  },
+  {
+    "action": {
+      "input": {
+        "id": "5662175c-677d-4260-8a73-d37c400598b2",
+        "isSetupFormation": false,
+        "lastModified": "2026-03-05T13:23:59.792Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "title": "Operator Agent Model V1"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE"
+    },
+    "error": null,
+    "hash": "VCX8uH9m1zG7R7MOjFDYBRwakNg=",
+    "id": "61753b7b11041090b08ef352f255a104",
+    "index": 21,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:27.515Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:24:12.145Z",
+        "level": "INCLUDED",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "serviceId": "5662175c-677d-4260-8a73-d37c400598b2",
+        "serviceLevelId": "6c7d905d-5ddd-4ee3-b640-ea68c3e985a1",
+        "tierId": "32db57c5-e9f6-4146-944b-54236d703645"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE_LEVEL"
+    },
+    "error": null,
+    "hash": "mlPESDnCCgJ5TUSr01m/7o0M19g=",
+    "id": "195edabdb5089191c000ce63ab5b2256",
+    "index": 22,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:27.877Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:24:13.536Z",
+        "level": "INCLUDED",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "serviceId": "5662175c-677d-4260-8a73-d37c400598b2",
+        "serviceLevelId": "cbe1b480-410e-4caf-a850-f7ec2ac6c8f7",
+        "tierId": "ed2b16a5-0560-400f-98b8-1ab47f2b00c5"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE_LEVEL"
+    },
+    "error": null,
+    "hash": "2DwbQyuzuOsVW60nqEG5BLxBvUw=",
+    "id": "18afc12a607c790dff18d87cc101613b",
+    "index": 23,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:28.225Z"
+  },
+  {
+    "action": {
+      "input": {
+        "id": "a1761727-663c-45ce-9452-0639e41e4375",
+        "isSetupFormation": false,
+        "lastModified": "2026-03-05T13:24:37.189Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "title": "Operator Agent Model Ultra"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE"
+    },
+    "error": null,
+    "hash": "YBzN/VqUmr1zIgK3Apt9s2cb3/0=",
+    "id": "c2a6b7dcea731abc36ffaac28dbb0b0b",
+    "index": 24,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:28.566Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:24:37.189Z",
+        "level": "INCLUDED",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "serviceId": "a1761727-663c-45ce-9452-0639e41e4375",
+        "serviceLevelId": "bca8dc9f-d536-4dcc-a712-10fe24136e96",
+        "tierId": "59aed4bb-ded3-4d46-b3e8-6fd5ce43a073"
+      },
+      "scope": "global",
+      "type": "ADD_SERVICE_LEVEL"
+    },
+    "error": null,
+    "hash": "GWtAw1V36kHAeK8hWv5zE7z/dNs=",
+    "id": "c59d1f9520b1fc98faec4980634551cf",
+    "index": 25,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:28.915Z"
+  },
+  {
+    "action": {
+      "input": {
+        "freeLimit": null,
+        "lastModified": "2026-03-05T13:30:46.565Z",
+        "limitId": "52ec98d4-f09e-4850-b300-d3ca6302f23e",
+        "metric": "Team size below 5 people",
+        "notes": null,
+        "paidLimit": null,
+        "resetCycle": "NONE",
+        "serviceId": "5662175c-677d-4260-8a73-d37c400598b2",
+        "tierId": "32db57c5-e9f6-4146-944b-54236d703645",
+        "unitName": "Team member"
+      },
+      "scope": "global",
+      "type": "ADD_USAGE_LIMIT"
+    },
+    "error": null,
+    "hash": "lQM1FTLCWljLrApSW5r7m7knJsk=",
+    "id": "acde8fe056b98ac1c838ab9e6b3d1f80",
+    "index": 26,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:29.257Z"
+  },
+  {
+    "action": {
+      "input": {
+        "freeLimit": 5,
+        "lastModified": "2026-03-05T13:30:46.565Z",
+        "limitId": "cffefb44-eb3a-4750-9a00-e07951bb3a33",
+        "metric": "Team size below 5 people",
+        "notes": null,
+        "paidLimit": 50,
+        "resetCycle": "NONE",
+        "serviceId": "5662175c-677d-4260-8a73-d37c400598b2",
+        "tierId": "ed2b16a5-0560-400f-98b8-1ab47f2b00c5",
+        "unitName": "Team member",
+        "unitPrice": 0.5,
+        "unitPriceCurrency": "USD"
+      },
+      "scope": "global",
+      "type": "ADD_USAGE_LIMIT"
+    },
+    "error": null,
+    "hash": "0z5D2GJ1CKdGE5JcglkIZFj5lzg=",
+    "id": "9c4e02fdb4a08d99a681fa3fdfff4342",
+    "index": 27,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:29.606Z"
+  },
+  {
+    "action": {
+      "input": {
+        "freeLimit": 50,
+        "lastModified": "2026-03-05T13:30:46.565Z",
+        "limitId": "3722c4b2-6a3a-4097-bccb-b04d5d1e5d29",
+        "metric": "Team size below 5 people",
+        "notes": null,
+        "paidLimit": null,
+        "resetCycle": "NONE",
+        "serviceId": "5662175c-677d-4260-8a73-d37c400598b2",
+        "tierId": "59aed4bb-ded3-4d46-b3e8-6fd5ce43a073",
+        "unitName": "Team member",
+        "unitPrice": 1,
+        "unitPriceCurrency": "USD"
+      },
+      "scope": "global",
+      "type": "ADD_USAGE_LIMIT"
+    },
+    "error": null,
+    "hash": "7fQBNugd8JmZt9TPkL2SPRdlzrQ=",
+    "id": "aa5717b85360e2702292bb68e8749d7b",
+    "index": 28,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:30.076Z"
+  },
+  {
+    "action": {
+      "input": {
+        "availableBillingCycles": [
+          "MONTHLY",
+          "ANNUAL"
+        ],
+        "costType": "RECURRING",
+        "currency": "USD",
+        "defaultSelected": true,
+        "id": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "isAddOn": false,
+        "lastModified": "2026-03-05T13:32:26.686Z",
+        "name": "Operator Agent Model v1",
+        "price": 5
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP"
+    },
+    "error": null,
+    "hash": "qD05wpzJb8++fM16ipCwm4eyMoE=",
+    "id": "587fccf61261507f8c1dfccb9442a835",
+    "index": 29,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:30.427Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:32:26.687Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [],
+        "tierId": "32db57c5-e9f6-4146-944b-54236d703645"
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "rrr4C5aoCfVdmkCO5ciXsb6C0mk=",
+    "id": "8dcd213e822723bf1ba03ab24dde30b4",
+    "index": 30,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:30.775Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:32:26.687Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [
+          {
+            "amount": 5,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "id": "5427d6a8-d2c9-41f6-99ee-42890b79e031"
+          },
+          {
+            "amount": 5,
+            "billingCycle": "ANNUAL",
+            "currency": "USD",
+            "id": "f9c808c1-972e-4d05-985e-5767db5176a0"
+          }
+        ],
+        "tierId": "ed2b16a5-0560-400f-98b8-1ab47f2b00c5"
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "wIvLqPoyIE1ZTbF/P9dCtuevJ+Q=",
+    "id": "3506b965e5b1e3d3323c64bcfcdd5ddc",
+    "index": 31,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:31.127Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:32:26.687Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [
+          {
+            "amount": 20,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "id": "cdd7234d-f311-43ab-b5bf-3362098b8496"
+          },
+          {
+            "amount": 20,
+            "billingCycle": "ANNUAL",
+            "currency": "USD",
+            "id": "e0369b73-61af-4fe6-9ab8-173ee11a1f08"
+          }
+        ],
+        "tierId": "59aed4bb-ded3-4d46-b3e8-6fd5ce43a073"
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "h34YlKwi4JsSzmJkyrGLqweQkSo=",
+    "id": "e90c6b2aa86caf2f099cbc96ee952d21",
+    "index": 32,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:31.483Z"
+  },
+  {
+    "action": {
+      "input": {
+        "availableBillingCycles": [
+          "MONTHLY",
+          "ANNUAL",
+          "QUARTERLY",
+          "SEMI_ANNUAL"
+        ],
+        "costType": "RECURRING",
+        "currency": "USD",
+        "defaultSelected": true,
+        "id": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "isAddOn": false,
+        "lastModified": "2026-03-05T13:32:34.431Z",
+        "name": "Operator Agent Model v1",
+        "price": 5
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP"
+    },
+    "error": null,
+    "hash": "N4M1MV96ITNOO9cyF3s+6C7OzLA=",
+    "id": "b82b30fa3e70fb7b66bea1c4c4639056",
+    "index": 33,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:31.825Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:32:34.432Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [],
+        "tierId": "32db57c5-e9f6-4146-944b-54236d703645"
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "Z+OSIC8UxV6jVkPG0MqrSMw9jYE=",
+    "id": "aa6779e2338610dad021be8f84d6487a",
+    "index": 34,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:32.381Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:32:34.432Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [
+          {
+            "amount": 5,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "id": "f5dd6c3b-8683-4042-9310-1cecdf2b6fc6"
+          },
+          {
+            "amount": 5,
+            "billingCycle": "ANNUAL",
+            "currency": "USD",
+            "id": "e969c503-84df-43ac-89a9-43ad2f3b945e"
+          },
+          {
+            "amount": 5,
+            "billingCycle": "QUARTERLY",
+            "currency": "USD",
+            "id": "4b9dc537-3b5a-42db-905f-aaa840db70e1"
+          },
+          {
+            "amount": 5,
+            "billingCycle": "SEMI_ANNUAL",
+            "currency": "USD",
+            "id": "88ce7e44-d061-420e-b175-407120bd6aab"
+          }
+        ],
+        "tierId": "ed2b16a5-0560-400f-98b8-1ab47f2b00c5"
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "hErZlRmkRVs2oQKhxOxMVlaDpCM=",
+    "id": "921b369e061cc9b321344acd164936e4",
+    "index": 35,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:32.725Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:32:34.432Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [
+          {
+            "amount": 20,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "id": "725713bc-ee89-4ffa-a5d1-3f8874b1f50d"
+          },
+          {
+            "amount": 20,
+            "billingCycle": "ANNUAL",
+            "currency": "USD",
+            "id": "be6aeda9-19fb-4387-b0a4-1655edf5ab03"
+          },
+          {
+            "amount": 20,
+            "billingCycle": "QUARTERLY",
+            "currency": "USD",
+            "id": "f6b3a50a-031d-432d-8842-1e25a77586c3"
+          },
+          {
+            "amount": 20,
+            "billingCycle": "SEMI_ANNUAL",
+            "currency": "USD",
+            "id": "1ead08e7-cdb9-4081-8caf-2e919bea3de4"
+          }
+        ],
+        "tierId": "59aed4bb-ded3-4d46-b3e8-6fd5ce43a073"
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "9wOXaVu3Vy8WSyYK0mRpHDmzTpQ=",
+    "id": "0254aa8b4b1e0ead6cd5efc342341c75",
+    "index": 36,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:33.078Z"
+  },
+  {
+    "action": {
+      "input": {
+        "availableBillingCycles": [
+          "MONTHLY",
+          "ANNUAL",
+          "QUARTERLY",
+          "SEMI_ANNUAL"
+        ],
+        "costType": "RECURRING",
+        "currency": "USD",
+        "defaultSelected": true,
+        "id": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "isAddOn": false,
+        "lastModified": "2026-03-05T13:33:38.650Z",
+        "name": "Operator Agent Model v1",
+        "price": 5
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP"
+    },
+    "error": null,
+    "hash": "s4T2FdNjeSTXmvVv0Snk8NqtFwI=",
+    "id": "a7a955f4bfd33d4908fde0aabf15cbed",
+    "index": 37,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:33.427Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:33:38.651Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [],
+        "tierId": "32db57c5-e9f6-4146-944b-54236d703645"
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "37KPMI5S/rDJylfPsYvUEMN1svU=",
+    "id": "610ed375c869add427f772d6b5b9923e",
+    "index": 38,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:33.773Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:33:38.651Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [
+          {
+            "amount": 5,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "id": "e9bb1d64-e13d-4a34-92d3-03afd95b614c"
+          },
+          {
+            "amount": 5,
+            "billingCycle": "ANNUAL",
+            "currency": "USD",
+            "discount": {
+              "discountType": "PERCENTAGE",
+              "discountValue": 10
+            },
+            "id": "af63ecb3-c590-4e4b-8b70-66ec47a5d7ef"
+          },
+          {
+            "amount": 5,
+            "billingCycle": "QUARTERLY",
+            "currency": "USD",
+            "id": "27a77efa-f782-4d6d-bd68-1bea86cdc29a"
+          },
+          {
+            "amount": 5,
+            "billingCycle": "SEMI_ANNUAL",
+            "currency": "USD",
+            "id": "cf7e9752-1dc7-457b-ab84-31abbe5895bd"
+          }
+        ],
+        "tierId": "ed2b16a5-0560-400f-98b8-1ab47f2b00c5"
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "6aq/ERRRBUWxXPpLLSowYWccrKM=",
+    "id": "93cd00e739ee6ab6883799861d3d78a2",
+    "index": 39,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:34.116Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:33:38.651Z",
+        "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+        "recurringPricing": [
+          {
+            "amount": 20,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "id": "86992e86-7312-43bb-be9b-b0b34cbcdf9d"
+          },
+          {
+            "amount": 20,
+            "billingCycle": "ANNUAL",
+            "currency": "USD",
+            "id": "03386f1f-f1bd-4598-ba2b-e38dcdae2256"
+          },
+          {
+            "amount": 20,
+            "billingCycle": "QUARTERLY",
+            "currency": "USD",
+            "id": "9fc4ddfa-a78c-40c1-8730-07f369bc5607"
+          },
+          {
+            "amount": 20,
+            "billingCycle": "SEMI_ANNUAL",
+            "currency": "USD",
+            "id": "b2e45123-c1b5-4f29-a58e-7831fe2d4b41"
+          }
+        ],
+        "tierId": "59aed4bb-ded3-4d46-b3e8-6fd5ce43a073"
+      },
+      "scope": "global",
+      "type": "UPDATE_OPTION_GROUP_TIER_PRICING"
+    },
+    "error": null,
+    "hash": "MWSjcRWI1KdYku2XwSjqTL2u++M=",
+    "id": "3f3469fd52371edde06be59a9bd81a20",
+    "index": 40,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:34.480Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:34:25.278Z",
+        "status": "ACTIVE"
+      },
+      "scope": "global",
+      "type": "UPDATE_OFFERING_STATUS"
+    },
+    "error": null,
+    "hash": "jS1n5tMkhN+MtZyr9cGQse55o4k=",
+    "id": "845c01ec4e2ec8a9df07b855fb04f8d8",
+    "index": 41,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:34.824Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-18T17:20:02.283Z",
+        "status": "DRAFT"
+      },
+      "scope": "global",
+      "type": "UPDATE_OFFERING_STATUS"
+    },
+    "error": null,
+    "hash": "3uud6dFiMo9vcdjlQrIcxUizJJY=",
+    "id": "7947135f6ebea72c4eecb921594b715c",
+    "index": 42,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:20:35.176Z"
+  }
+]

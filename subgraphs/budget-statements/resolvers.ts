@@ -1,8 +1,7 @@
-import { type ISubgraph } from "@powerhousedao/reactor-api";
+import { type BaseSubgraph } from "@powerhousedao/reactor-api";
 import type { PHDocument } from "document-model";
 import type { SnapshotReportDocument } from "../../document-models/snapshot-report/index.js";
 import type { ExpenseReportDocument } from "../../document-models/expense-report/index.js";
-import type { AccountTransactionsDocument } from "../../document-models/account-transactions/index.js";
 
 // Type definitions for builder profile (from external package)
 interface BuilderProfileState {
@@ -86,8 +85,10 @@ const sortByMonth = (a: { month: string }, b: { month: string }): number => {
   return parseMonth(b.month) - parseMonth(a.month);
 };
 
-export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
-  const reactor = subgraph.reactor;
+export const getResolvers = (
+  subgraph: BaseSubgraph,
+): Record<string, unknown> => {
+  const { reactorClient } = subgraph;
 
   return {
     Query: {
@@ -97,79 +98,61 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       ) => {
         const { teamId, networkSlug } = args.filter || {};
 
-        const drives = await reactor.getDrives();
+        // Step 1: Collect all documents by type using reactorClient.find()
+        const [snapshotResults, expenseResults, builderProfileResults] =
+          await Promise.all([
+            reactorClient.find({ type: "powerhouse/snapshot-report" }),
+            reactorClient.find({ type: "powerhouse/expense-report" }),
+            reactorClient.find({ type: "powerhouse/builder-profile" }),
+          ]);
 
-        // Step 1: Collect all documents from all drives (or filtered by networkSlug)
-        const snapshotReportDocs: SnapshotReportDocument[] = [];
-        const expenseReportDocs: ExpenseReportDocument[] = [];
-        const accountTransactionsDocs = new Map<
-          string,
-          AccountTransactionsDocument
-        >();
+        let snapshotReportDocs =
+          snapshotResults.results as SnapshotReportDocument[];
+        let expenseReportDocs =
+          expenseResults.results as ExpenseReportDocument[];
         const builderProfileDocs = new Map<string, PHDocument>();
+        for (const doc of builderProfileResults.results) {
+          builderProfileDocs.set(doc.header.id, doc);
+        }
 
-        // If networkSlug is provided, find the network drive and get valid builder PHIDs
+        // If networkSlug is provided, find the network profile and get valid builder PHIDs
         let allowedBuilderPhids: Set<string> | null = null;
 
         if (networkSlug) {
           const targetNetworkSlug = networkSlug.toLowerCase().trim();
 
-          // Find the network drive matching the slug
-          for (const driveId of drives) {
-            try {
-              const docIds = await reactor.getDocuments(driveId);
-              const docs = await Promise.all(
-                docIds.map(async (docId) => {
-                  try {
-                    return await reactor.getDocument<PHDocument>(docId);
-                  } catch {
-                    return null;
-                  }
-                }),
-              );
+          const networkResults = await reactorClient.find({
+            type: "powerhouse/network-profile",
+          });
 
-              const networkDoc = docs.find((doc) => {
-                if (
-                  !doc ||
-                  doc.header.documentType !== "powerhouse/network-profile"
-                )
-                  return false;
-                const state = (doc.state as { global?: { name?: string } })
-                  .global;
-                if (!state?.name) return false;
-                const slug = state.name
-                  .toLowerCase()
-                  .trim()
-                  .split(/\s+/)
-                  .join("-");
-                return slug === targetNetworkSlug;
-              });
+          const networkDoc = networkResults.results.find((doc) => {
+            const state = (doc.state as { global?: { name?: string } }).global;
+            if (!state?.name) return false;
+            const slug = state.name.toLowerCase().trim().split(/\s+/).join("-");
+            return slug === targetNetworkSlug;
+          });
 
-              if (networkDoc) {
-                // Get the builders list from this drive
-                const buildersDoc = docs.find(
-                  (doc) =>
-                    doc && doc.header.documentType === "powerhouse/builders",
-                );
+          if (networkDoc) {
+            // Find the builders list — look for a builders doc that shares a parent with the network doc
+            const buildersResults = await reactorClient.find({
+              type: "powerhouse/builders",
+            });
 
-                if (buildersDoc) {
-                  const state = (
-                    buildersDoc.state as {
-                      global?: { builders?: unknown[] };
-                    }
-                  ).global;
-                  if (Array.isArray(state?.builders)) {
-                    allowedBuilderPhids = new Set(
-                      state.builders.filter(
-                        (id): id is string => typeof id === "string",
-                      ),
-                    );
-                  }
+            const buildersDoc = buildersResults.results[0];
+
+            if (buildersDoc) {
+              const state = (
+                buildersDoc.state as {
+                  global?: { builders?: unknown[] };
                 }
-                break;
+              ).global;
+              if (Array.isArray(state?.builders)) {
+                allowedBuilderPhids = new Set(
+                  state.builders.filter(
+                    (id): id is string => typeof id === "string",
+                  ),
+                );
               }
-            } catch (error) {
-              console.warn(`Failed to inspect drive ${driveId}:`, error);
             }
           }
 
@@ -179,64 +162,25 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           }
         }
 
-        // Always scan all drives - reports may be in different drives than the network drive
-        // Filter is applied by ownerId matching allowedBuilderPhids
-        const drivesToScan = drives;
-
-        for (const driveId of drivesToScan) {
-          const docsIds = await reactor.getDocuments(driveId);
-
-          const docs = await Promise.all(
-            docsIds.map(async (docId) => {
-              try {
-                return await reactor.getDocument<PHDocument>(docId);
-              } catch {
-                return null;
-              }
-            }),
-          );
-
-          for (const doc of docs) {
-            if (!doc) continue;
-            const docType = doc.header.documentType;
-
-            if (docType === "powerhouse/snapshot-report") {
-              const snapshotDoc = doc as SnapshotReportDocument;
-              const ownerId = snapshotDoc.state.global.ownerIds?.[0] ?? null;
-
-              // Don't filter snapshot reports by teamId here — snapshots are often
-              // owned by the operational hub, not individual teams. The opHub sharing
-              // mechanism (Step 4) will associate them with the correct teams later.
-              if (
-                allowedBuilderPhids &&
-                ownerId &&
-                !allowedBuilderPhids.has(ownerId)
-              )
-                continue;
-
-              snapshotReportDocs.push(snapshotDoc);
-            } else if (docType === "powerhouse/expense-report") {
-              const expenseDoc = doc as ExpenseReportDocument;
-              const ownerId = expenseDoc.state.global.ownerId;
-
-              // Apply filters: teamId takes precedence, then networkSlug (via allowedBuilderPhids)
-              if (teamId && ownerId !== teamId) continue;
-              if (
-                allowedBuilderPhids &&
-                ownerId &&
-                !allowedBuilderPhids.has(ownerId)
-              )
-                continue;
-
-              expenseReportDocs.push(expenseDoc);
-            } else if (docType === "powerhouse/account-transactions") {
-              const txDoc = doc as AccountTransactionsDocument;
-              accountTransactionsDocs.set(doc.header.id, txDoc);
-            } else if (docType === "powerhouse/builder-profile") {
-              builderProfileDocs.set(doc.header.id, doc);
-            }
-          }
+        // Apply filters to snapshot and expense reports
+        if (allowedBuilderPhids) {
+          snapshotReportDocs = snapshotReportDocs.filter((doc) => {
+            const ownerId = doc.state.global.ownerIds?.[0] ?? null;
+            return !ownerId || allowedBuilderPhids.has(ownerId);
+          });
         }
+
+        expenseReportDocs = expenseReportDocs.filter((doc) => {
+          const ownerId = doc.state.global.ownerId;
+          if (teamId && ownerId !== teamId) return false;
+          if (
+            allowedBuilderPhids &&
+            ownerId &&
+            !allowedBuilderPhids.has(ownerId)
+          )
+            return false;
+          return true;
+        });
 
         // Step 2: Resolve builder profiles and build opHub lookup
         // We need this before grouping so snapshot reports can be shared across op hub members
@@ -250,7 +194,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           let doc = builderProfileDocs.get(phid) || null;
           if (!doc) {
             try {
-              doc = await reactor.getDocument<PHDocument>(phid);
+              doc = await reactorClient.get<PHDocument>(phid);
             } catch {
               // Profile may not exist
             }

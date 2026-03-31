@@ -1,0 +1,184 @@
+[
+  {
+    "action": {
+      "input": {
+        "branch": "main",
+        "documentId": "d30bc041-ba20-4af5-bc13-61e0476116ba",
+        "meta": {},
+        "model": "powerhouse/resource-template",
+        "name": "BAI Agent Executor",
+        "protocolVersions": {
+          "base-reducer": 2
+        },
+        "signing": {
+          "createdAtUtcIso": "2026-03-24T17:19:09.016Z",
+          "documentType": "powerhouse/resource-template",
+          "nonce": "",
+          "publicKey": {},
+          "signature": "d30bc041-ba20-4af5-bc13-61e0476116ba"
+        },
+        "slug": "",
+        "version": 0
+      },
+      "scope": "document",
+      "type": "CREATE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "f31eb8688c56c64e4484ddf082e24c67",
+    "index": 0,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:09.016Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T12:58:01.277Z",
+        "title": "BAI Agent Executor"
+      },
+      "scope": "global",
+      "type": "UPDATE_TEMPLATE_INFO"
+    },
+    "error": null,
+    "hash": "/DSjOShqMfp6ZgWUOhFmYzlpPfM=",
+    "id": "66b4af4b29108031864bb23d4768ffe5",
+    "index": 0,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:09.292Z"
+  },
+  {
+    "action": {
+      "input": {
+        "documentId": "d30bc041-ba20-4af5-bc13-61e0476116ba",
+        "fromVersion": 0,
+        "initialState": {
+          "auth": {},
+          "document": {
+            "hash": {
+              "algorithm": "sha1",
+              "encoding": "base64"
+            },
+            "version": 0
+          },
+          "global": {
+            "contentSections": [],
+            "description": null,
+            "facetTargets": [],
+            "faqFields": [],
+            "id": null,
+            "infoLink": null,
+            "lastModified": null,
+            "operatorId": null,
+            "optionGroups": [],
+            "recurringServices": [],
+            "services": [],
+            "setupServices": [],
+            "status": "DRAFT",
+            "summary": "",
+            "targetAudiences": [],
+            "thumbnailUrl": null,
+            "title": ""
+          },
+          "local": {}
+        },
+        "model": "powerhouse/resource-template",
+        "toVersion": 1
+      },
+      "scope": "document",
+      "type": "UPGRADE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "7bd2ceed29f6c4b95080b8ee4357048e",
+    "index": 1,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:09.016Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": " The BAI agent solves all your problems in the world of Business Analysis",
+        "lastModified": "2026-03-05T12:58:19.570Z"
+      },
+      "scope": "global",
+      "type": "UPDATE_TEMPLATE_INFO"
+    },
+    "error": null,
+    "hash": "Ej20D/fD60nyY5NgIp9EUo4GW4o=",
+    "id": "2d56bcddc63814e7b91f9f4dd0f9c15a",
+    "index": 1,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:09.631Z"
+  },
+  {
+    "action": {
+      "input": {
+        "answer": "You can find that in the Matrix",
+        "displayOrder": 0,
+        "id": "8d61fc3c-943b-43d3-b119-c264c4d3a3b4",
+        "question": "How much does it cost"
+      },
+      "scope": "global",
+      "type": "ADD_FAQ"
+    },
+    "error": null,
+    "hash": "qF7uJMasAIRwkd8htHj1pawQ5G8=",
+    "id": "6e90202273ada4897c7a2fa8af29fd70",
+    "index": 2,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:09.975Z"
+  },
+  {
+    "action": {
+      "input": {
+        "content": "The BAI agent forgot to fill",
+        "displayOrder": 0,
+        "id": "6ae27117-1414-4a09-b149-1fef8bd97cb5",
+        "lastModified": "2026-03-05T13:04:01.592Z",
+        "title": "NEW LONG FORM CONTENT BELOW"
+      },
+      "scope": "global",
+      "type": "ADD_CONTENT_SECTION"
+    },
+    "error": null,
+    "hash": "/tLC/Os2CJWn/vIetGFsbuPtYOI=",
+    "id": "beaa2059f534f2c1094e488fda35d227",
+    "index": 3,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:10.414Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-05T13:04:07.183Z",
+        "operatorId": "a326c3a9-d29b-46d3-8ab0-14b361e11567"
+      },
+      "scope": "global",
+      "type": "SET_OPERATOR"
+    },
+    "error": null,
+    "hash": "hojPjGp2n9FyPKZ/V+o9DGSNN1M=",
+    "id": "ae43f251c9c166757d720cb5c520a29f",
+    "index": 4,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:10.769Z"
+  },
+  {
+    "action": {
+      "input": {
+        "color": "#0ea5e9",
+        "id": "531d2db9-fcdf-45eb-8256-7affdb8b3645",
+        "label": "Builders",
+        "lastModified": "2026-03-17T10:59:01.701Z"
+      },
+      "scope": "global",
+      "type": "ADD_TARGET_AUDIENCE"
+    },
+    "error": null,
+    "hash": "XjY9WD8yb84/mUjI92cCWOJ1qV8=",
+    "id": "98b1aedf8dc1343dd84fcde5c29d1d70",
+    "index": 5,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-24T17:19:11.108Z"
+  }
+]

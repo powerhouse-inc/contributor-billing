@@ -21,7 +21,7 @@ export const requestDirectPayment = async (
   invoiceData: InvoicePaymentData | Record<string, unknown>,
 ): Promise<RequestFinanceResponse> => {
   const data = invoiceData as InvoicePaymentData;
-  data.buyerInfo.email = REQUEST_FINANCE_EMAIL ?? "";
+  data.buyerInfo.email = REQUEST_FINANCE_EMAIL ?? data.buyerInfo.email;
   console.log("Getting a request to create an invoice", data.invoiceNumber);
   try {
     // First API call to create the invoice

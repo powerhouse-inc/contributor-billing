@@ -8,6 +8,7 @@ import {
   useNodeActions,
 } from "@powerhousedao/reactor-browser";
 import type { FolderNode, FileNode, Node } from "document-drive";
+import { isDocumentSynced } from "../../shared/document-sync.js";
 
 const SERVICE_SUBSCRIPTIONS_FOLDER_NAME = "Service Subscriptions";
 
@@ -175,16 +176,32 @@ export function useServiceSubscriptionAutoPlacement(): UseServiceSubscriptionAut
       // Skip if already processed
       if (processedDocs.has(fileNode.id)) continue;
 
+      // Check if the document is synced before attempting the move
+      // If not synced yet, skip it — the effect will re-run when documentsInDrive updates
+      const doc = documentsInDrive?.find((d) => d.header.id === fileNode.id);
+      if (doc && !isDocumentSynced(doc)) {
+        // Document exists but hasn't finished syncing — skip for now
+        continue;
+      }
+
       // Mark as processed immediately to prevent duplicate processing
       processedDocs.add(fileNode.id);
 
       // Move the document to the Service Subscriptions folder root
       onMoveNode(fileNode, serviceSubscriptionsFolder).catch(
         (error: unknown) => {
-          console.error(
-            `Failed to move service subscription document to Service Subscriptions folder:`,
-            error,
-          );
+          const msg = error instanceof Error ? error.message : String(error);
+          if (msg.includes("source document not found")) {
+            // Document not yet synced — will retry on next render cycle
+            console.debug(
+              `[ServiceSubscriptionAutoPlacement] Document ${fileNode.id} not synced yet, will retry`,
+            );
+          } else {
+            console.error(
+              `[ServiceSubscriptionAutoPlacement] Failed to move document:`,
+              error,
+            );
+          }
           // Remove from processed so it can be retried
           processedDocs.delete(fileNode.id);
         },

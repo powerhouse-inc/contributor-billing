@@ -4,34 +4,11 @@ This project creates document models, editors, processors and subgraphs for the 
 
 ## Core Concepts
 
-- **Package Manager**: Use `bun` as the default package manager for the project.
 - **Document Model**: A template for creating documents. Defines schema and allowed operations for a document type.
 - **Document**: An instance of a document model containing actual data that follows the model's structure and can be modified using operations.
 - **Drive**: A document of type "powerhouse/document-drive" representing a collection of documents and folders. Add documents using "addActions" with "ADD_FILE" action.
-- **App (Drive Editor)**: A UI component that displays and manages documents within a drive. Created by adding a `powerhouse/app` document to the vetra drive. The terms "app" and "drive editor" are interchangeable.
 - **Action**: A proposed change to a document (JSON object with action name and input). Dispatch using "addActions" tool.
 - **Operation**: A completed change to a document containing the action plus metadata (index, timestamp, hash, errors). Actions become operations after dispatch.
-
-## Understanding User Requests: What to Create
-
-**CRITICAL**: When a user asks to create an "app", "drive editor", or wants to "manage/browse multiple documents", create a `powerhouse/app` document, NOT a `powerhouse/document-model`.
-
-### Quick Decision Guide
-
-| User Says | Create Document Type |
-|-----------|---------------------|
-| "Create an app" / "build a drive editor" | `powerhouse/app` |
-| "List/browse/manage multiple documents" | `powerhouse/app` |
-| "Container for my documents" | `powerhouse/app` |
-| "Define a new document type" / "create a schema" | `powerhouse/document-model` |
-| "Add operations/actions to a document" | `powerhouse/document-model` |
-| "Create a UI for editing X documents" | `powerhouse/document-editor` |
-
-### Definitions
-
-- **Document Model** (`powerhouse/document-model`) = Defines *structure* (schema + operations) for a document type
-- **Document Editor** (`powerhouse/document-editor`) = UI for *editing* a single document instance
-- **App / Drive Editor** (`powerhouse/app`) = UI for *managing collections* of documents in a drive
 
 ## CRITICAL: MCP Tool Usage Rules
 
@@ -129,127 +106,22 @@ export default function Editor() {
 
 The `useSelectedTodoDocument` gets generated automatically so you don't need to implement it yourself.
 
-#### Using Toasts in Editors and Apps
-
-**CRITICAL**: Do NOT import `ToastContainer` or any toast library directly. The host app (Connect) already provides the toast infrastructure. This applies to both document editors and drive apps.
-
-To show toasts in your editor or app, simply use the `usePHToast` hook from `@powerhousedao/reactor-browser`:
-
-```typescript
-import { usePHToast } from "@powerhousedao/reactor-browser";
-
-export default function Editor() {
-  const toast = usePHToast();
-
-  const handleSave = () => {
-    // ... save logic
-    toast("Document saved successfully!", { type: "success" });
-  };
-
-  const handleError = () => {
-    toast("Failed to save document", { type: "error" });
-  };
-
-  return <button onClick={handleSave}>Save</button>;
-}
-```
-
-**Available toast types:**
-- `"default"` - Standard notification
-- `"success"` - Success message
-- `"error"` - Error message
-- `"warning"` - Warning message
-- `"info"` - Informational message
-- `"connect-success"` - Connect-styled success
-- `"connect-warning"` - Connect-styled warning
-- `"connect-loading"` - Loading indicator
-- `"connect-deleted"` - Deletion confirmation
-
-**Toast options:**
-```typescript
-toast("Message", {
-  type: "success",        // Toast type (see above)
-  autoClose: 5000,        // Auto-close after ms (or false to disable)
-  containerId: "custom",  // Target specific container
-});
-```
-
-## App (Drive Editor) Creation Flow
-
-When the user requests to create an app or drive editor, follow these steps.
-
-### What is an App?
-
-An app (drive editor) is a React component that:
-- Displays and manages documents within a drive
-- Lists multiple document models, editors, or other files
-- Provides navigation, filtering, and CRUD operations for documents
-
-### 1. Planning Phase (Same as Document Models)
-
-**MANDATORY**: Present your proposal and ask for confirmation before implementing.
-
-Describe:
-- App name
-- Which document types it will manage (`allowedDocumentTypes`)
-- Whether drag-and-drop should be enabled
-
-### 2. Create the App Document
-
-Add a `powerhouse/app` document to the vetra drive using MCP tools:
-
-1. **Check schema first**:
-   ```
-   mcp__reactor-mcp__getDocumentModelSchema({ type: "powerhouse/app" })
-   ```
-
-2. **Create and configure the app** using `addActions`:
-   - `SET_APP_NAME` - Set the app name
-   - `SET_DOCUMENT_TYPES` or `ADD_DOCUMENT_TYPE` - Configure allowed document types
-   - `SET_DRAG_AND_DROP_ENABLED` - Enable/disable drag-and-drop (default: true)
-   - `SET_APP_STATUS` with `status: "CONFIRMED"` - **Triggers code generation**
-
-### 3. Generated Code
-
-When status is set to "CONFIRMED", the code generator automatically:
-- Creates editor scaffolding in `editors/<app-name>/`
-- Updates `powerhouse.manifest.json` with the app entry
-
-### 4. Work on Generated Code
-
-After code generation:
-- Editor files are created in `editors/<app-name>/`
-- Work on `editor.tsx` to customize the UI
-- Use `useSelectedDrive()` hook to access the drive document
-- Filter `document.state.global.nodes` to display documents by type
-- Reference `packages/vetra/editors/vetra-drive-app/` for patterns
-
-### 5. Key Patterns
-
-```typescript
-// Access the drive document
-const [document] = useSelectedDrive();
-
-// Get file nodes from the drive
-const fileNodes = document?.state.global.nodes.filter(
-  (node) => node.kind === "file"
-) || [];
-
-// Filter by document type
-const documentModels = fileNodes.filter(
-  (node) => node.documentType === "powerhouse/document-model"
-);
-```
-
-### Quality Assurance
-
-Same as document models - run `npm run tsc` and `npm run lint:fix` after changes.
-
 ## ⚠️ CRITICAL: Generated Files & Modification Rules
 
 ### Generated Files Rule
 
 **NEVER edit files in `gen/` folders** - they are auto-generated and will be overwritten.
+
+### ⚠️ controller.js barrel export fix (post-generate)
+
+After running `bun generate`, the codegen re-adds `export * from "./controller.js"` to every `document-models/*/v1/gen/index.ts`. This **must be commented out** because `controller.ts` imports from `../module.js`, which re-imports from the gen barrel, creating a **circular dependency** that crashes at runtime (`"Cannot access before initialization"`). This silently prevents the entire local package from registering in Connect — editors and drive apps won't appear.
+
+**After every `bun generate`, run:**
+```bash
+sed -i 's|^export \* from "./controller.js";|// export * from "./controller.js";|' document-models/*/v1/gen/index.ts
+```
+
+The `tsconfig.json` also excludes `**/gen/controller.ts` to prevent stale `controller.js` files in `dist/`.
 
 ### Document Model Modification Process
 
@@ -583,54 +455,6 @@ When working with drives (adding/removing documents, creating folders, etc.):
 
 3. **Check input schemas** for each operation to ensure you're passing correct parameters
 
-## Commit Message Convention (Conventional Commits)
-
-**MANDATORY**: All commit messages must follow the [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) specification.
-
-### Format
-
-```
-<type>(<optional scope>): <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-### Types
-
-| Type       | When to use                                      |
-| ---------- | ------------------------------------------------ |
-| `feat`     | New feature or capability                        |
-| `fix`      | Bug fix                                          |
-| `refactor` | Code change that neither fixes a bug nor adds a feature |
-| `docs`     | Documentation only                               |
-| `style`    | Formatting, whitespace, semicolons (no logic change) |
-| `perf`     | Performance improvement                          |
-| `test`     | Adding or updating tests                         |
-| `build`    | Build system or dependencies                     |
-| `ci`       | CI/CD configuration                              |
-| `chore`    | Other maintenance tasks                          |
-
-### Rules
-
-- **Scope** (optional): Section of codebase in parentheses, e.g. `feat(invoice-table): ...`
-- **Description**: Imperative, lowercase, no period at end
-- **Body**: Separate from description by blank line; explain *what* and *why*, not *how*
-- **Breaking changes**: Add `!` before colon (`feat!: ...`) and/or a `BREAKING CHANGE:` footer
-- **Footer format**: `Token: value` (e.g. `Reviewed-by: Name`, `Refs: #123`)
-
-### Examples
-
-```
-feat(invoice-table): add delete batch action for selected documents
-
-fix(editor): prevent duplicate billing statements on rapid clicks
-
-refactor(header-controls): extract currency modal into separate component
-```
-
----
 
 ## SENIOR SOFTWARE ENGINEER
 
@@ -815,4 +639,3 @@ The human is monitoring you in an IDE. They can see everything. They will catch 
 You have unlimited stamina. The human does not. Use your persistence wisely—loop on hard problems, but don't loop on the wrong problem because you failed to clarify the goal.
 </meta>
 </system_prompt>
-```

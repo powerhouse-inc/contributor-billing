@@ -14,5 +14,17 @@ export function getGraphQLUrl(): string {
     return "http://localhost:4001/graphql";
   }
 
-  return "https://jetstream.powerhouse.io/api/graphql/";
+  if (baseURI.includes("vetra.io")) {
+    return "https://switchboard.jetstream.vetra.io/graphql";
+  }
+
+  return "http://localhost:4001/graphql";
+}
+
+/**
+ * Returns the GraphQL endpoint for a custom subgraph.
+ * Custom subgraphs are served at `/graphql/<subgraph-name>`.
+ */
+export function getSubgraphUrl(subgraph: string): string {
+  return `${getGraphQLUrl()}/${subgraph}`;
 }

@@ -1,0 +1,355 @@
+{
+  "documentType": "powerhouse/document-drive",
+  "id": "e0bfaac3-5cce-47c9-880d-0af6e0e11d26",
+  "name": "Powerhouse Genesis Operational Hub",
+  "preferredEditor": "contributor-billing-editor",
+  "revisionsList": [
+    {
+      "revision": 125,
+      "scope": "document"
+    },
+    {
+      "revision": 85,
+      "scope": "global"
+    }
+  ],
+  "slug": "powerhouse-genesis-operational-hub",
+  "state": {
+    "auth": {},
+    "document": {
+      "hash": {
+        "algorithm": "sha1",
+        "encoding": "base64"
+      },
+      "version": 0
+    },
+    "global": {
+      "icon": null,
+      "name": "Powerhouse Genesis Operational Hub",
+      "nodes": [
+        {
+          "id": "0ae5c0ae-5369-4836-a3bc-1b3b4db8c31a",
+          "kind": "folder",
+          "name": "August 2025",
+          "parentFolder": "5d109478-0323-4971-86e9-0ac47d713636"
+        },
+        {
+          "id": "0c29a8c6-e8c2-497b-ab84-e1f91d942474",
+          "kind": "folder",
+          "name": "June 2025",
+          "parentFolder": "5d109478-0323-4971-86e9-0ac47d713636"
+        },
+        {
+          "documentType": "powerhouse/snapshot-report",
+          "id": "1448a37b-d4e8-4ede-96e6-71c10d3b3100",
+          "kind": "file",
+          "name": "February 2025 - Snapshot Report",
+          "parentFolder": "50060a9d-608f-4983-b5d9-f6939ef984df"
+        },
+        {
+          "id": "1e173aa9-ae54-49da-bc3b-febb9060ce05",
+          "kind": "folder",
+          "name": "Reporting",
+          "parentFolder": "0ae5c0ae-5369-4836-a3bc-1b3b4db8c31a"
+        },
+        {
+          "id": "1f1483a2-4bbc-4a61-86ef-ee39cf94a67d",
+          "kind": "folder",
+          "name": "July 2025",
+          "parentFolder": "5d109478-0323-4971-86e9-0ac47d713636"
+        },
+        {
+          "documentType": "powerhouse/accounts",
+          "id": "266382b7-04a9-4fac-8710-f9211cbfaa2f",
+          "kind": "file",
+          "name": "PHAccounts",
+          "parentFolder": null
+        },
+        {
+          "id": "28e0be42-98d7-4976-b048-c70a629a9ee9",
+          "kind": "folder",
+          "name": "Reporting",
+          "parentFolder": "a2ec23f1-82f6-4df2-be9e-c49e87f6f8a3"
+        },
+        {
+          "id": "2993c4ca-04f9-4b82-af67-1746cae5dcc1",
+          "kind": "folder",
+          "name": "February 2025",
+          "parentFolder": "5d109478-0323-4971-86e9-0ac47d713636"
+        },
+        {
+          "id": "2aa86df1-7d33-4361-a9ac-337b950a01b7",
+          "kind": "folder",
+          "name": "Reporting",
+          "parentFolder": "866a369c-18fd-480b-b3ca-02cbd74bbf02"
+        },
+        {
+          "id": "2b1fc89c-4db1-40cd-b1fe-90ab1e1c26fa",
+          "kind": "folder",
+          "name": "Reporting",
+          "parentFolder": "2f933255-1576-40ad-ad02-0336eafccc83"
+        },
+        {
+          "id": "2e2d849a-6fc4-4d3a-a262-bb4a7836fd48",
+          "kind": "folder",
+          "name": "Payments",
+          "parentFolder": "5d470ce0-06ee-4a8e-862e-6ccb748967e0"
+        },
+        {
+          "id": "2f933255-1576-40ad-ad02-0336eafccc83",
+          "kind": "folder",
+          "name": "December 2025",
+          "parentFolder": "5d109478-0323-4971-86e9-0ac47d713636"
+        },
+        {
+          "documentType": "powerhouse/expense-report",
+          "id": "34cbbf49-fd67-43ab-8e18-e18652119e64",
+          "kind": "file",
+          "name": "PH-OH-October-2025-expense-report",
+          "parentFolder": "743672c6-c8e2-4bac-94d3-cef945ac99f9"
+        },
+        {
+          "id": "3cbe57b1-9efb-4dd3-95a9-a71410f29278",
+          "kind": "folder",
+          "name": "Reporting",
+          "parentFolder": "1f1483a2-4bbc-4a61-86ef-ee39cf94a67d"
+        },
+        {
+          "documentType": "powerhouse/snapshot-report",
+          "id": "3e8d8d16-e17f-4660-b059-3d4f87e340b7",
+          "kind": "file",
+          "name": "December 2025 - Snapshot Report",
+          "parentFolder": "2b1fc89c-4db1-40cd-b1fe-90ab1e1c26fa"
+        },
+        {
+          "documentType": "powerhouse/snapshot-report",
+          "id": "43748bcf-71c0-44fb-9989-6731e42d559e",
+          "kind": "file",
+          "name": "July 2025 - Snapshot Report",
+          "parentFolder": "3cbe57b1-9efb-4dd3-95a9-a71410f29278"
+        },
+        {
+          "documentType": "powerhouse/expense-report",
+          "id": "46fc6873-1a14-40f9-8a88-41285f873cdf",
+          "kind": "file",
+          "name": "PH-OH-August-2025-expense-report",
+          "parentFolder": "1e173aa9-ae54-49da-bc3b-febb9060ce05"
+        },
+        {
+          "id": "4c5ed27d-2d48-444a-a44f-f6488678cb2d",
+          "kind": "folder",
+          "name": "Payments",
+          "parentFolder": "2993c4ca-04f9-4b82-af67-1746cae5dcc1"
+        },
+        {
+          "id": "50060a9d-608f-4983-b5d9-f6939ef984df",
+          "kind": "folder",
+          "name": "Reporting",
+          "parentFolder": "2993c4ca-04f9-4b82-af67-1746cae5dcc1"
+        },
+        {
+          "id": "59894954-b783-41ac-8741-edd46f788bac",
+          "kind": "folder",
+          "name": "Reporting",
+          "parentFolder": "d4855b4e-2766-4582-a726-aeb3f4dc5c93"
+        },
+        {
+          "id": "5d109478-0323-4971-86e9-0ac47d713636",
+          "kind": "folder",
+          "name": "Billing",
+          "parentFolder": null
+        },
+        {
+          "id": "5d470ce0-06ee-4a8e-862e-6ccb748967e0",
+          "kind": "folder",
+          "name": "October 2025",
+          "parentFolder": "5d109478-0323-4971-86e9-0ac47d713636"
+        },
+        {
+          "documentType": "powerhouse/snapshot-report",
+          "id": "63b5d661-846b-4776-bb83-757c9cb95af1",
+          "kind": "file",
+          "name": "March 2025 - Snapshot Report",
+          "parentFolder": "7ceb6513-93e5-4ebe-8a0d-32998627d4cc"
+        },
+        {
+          "documentType": "powerhouse/expense-report",
+          "id": "683a4b48-8a4b-4f78-b902-a406a469f764",
+          "kind": "file",
+          "name": "PH-OH-September-2025-expense-report",
+          "parentFolder": "59894954-b783-41ac-8741-edd46f788bac"
+        },
+        {
+          "documentType": "powerhouse/snapshot-report",
+          "id": "6ed7a3bd-0337-4cbb-9598-7da8472e5535",
+          "kind": "file",
+          "name": "April 2025 - Snapshot Report",
+          "parentFolder": "2aa86df1-7d33-4361-a9ac-337b950a01b7"
+        },
+        {
+          "id": "743672c6-c8e2-4bac-94d3-cef945ac99f9",
+          "kind": "folder",
+          "name": "Reporting",
+          "parentFolder": "5d470ce0-06ee-4a8e-862e-6ccb748967e0"
+        },
+        {
+          "id": "7ceb6513-93e5-4ebe-8a0d-32998627d4cc",
+          "kind": "folder",
+          "name": "Reporting",
+          "parentFolder": "8331422b-3e1a-4fca-bf94-d3aac8401616"
+        },
+        {
+          "id": "8331422b-3e1a-4fca-bf94-d3aac8401616",
+          "kind": "folder",
+          "name": "March 2025",
+          "parentFolder": "5d109478-0323-4971-86e9-0ac47d713636"
+        },
+        {
+          "id": "866a369c-18fd-480b-b3ca-02cbd74bbf02",
+          "kind": "folder",
+          "name": "April 2025",
+          "parentFolder": "5d109478-0323-4971-86e9-0ac47d713636"
+        },
+        {
+          "id": "8b36753b-8cc2-4c69-bc99-c9c84acd8bc0",
+          "kind": "folder",
+          "name": "Reporting",
+          "parentFolder": "f88c71d4-41b0-421e-8028-8b9f99ae105f"
+        },
+        {
+          "id": "a2601ec9-d8f6-443d-b71c-4fba36a622d4",
+          "kind": "folder",
+          "name": "Payments",
+          "parentFolder": "8331422b-3e1a-4fca-bf94-d3aac8401616"
+        },
+        {
+          "id": "a2ec23f1-82f6-4df2-be9e-c49e87f6f8a3",
+          "kind": "folder",
+          "name": "May 2025",
+          "parentFolder": "5d109478-0323-4971-86e9-0ac47d713636"
+        },
+        {
+          "id": "a3022447-9213-4cbe-99bb-216c0f92d01e",
+          "kind": "folder",
+          "name": "Payments",
+          "parentFolder": "a2ec23f1-82f6-4df2-be9e-c49e87f6f8a3"
+        },
+        {
+          "documentType": "powerhouse/snapshot-report",
+          "id": "a6106c09-ea2f-4f7c-b3b1-51862921d8ff",
+          "kind": "file",
+          "name": "May 2025 - Snapshot Report",
+          "parentFolder": "28e0be42-98d7-4976-b048-c70a629a9ee9"
+        },
+        {
+          "documentType": "powerhouse/operational-hub-profile",
+          "id": "ab700de9-90dd-4219-9fff-5aaf94ca2bc9",
+          "kind": "file",
+          "name": "Powerhouse Genesis",
+          "parentFolder": null
+        },
+        {
+          "documentType": "powerhouse/expense-report",
+          "id": "bf377886-71d7-4c19-93c9-709259465e16",
+          "kind": "file",
+          "name": "PH-OH-July-2025-expense-report",
+          "parentFolder": "3cbe57b1-9efb-4dd3-95a9-a71410f29278"
+        },
+        {
+          "id": "cd11c4fa-31f2-40a7-853f-c027dbb78bc8",
+          "kind": "folder",
+          "name": "Payments",
+          "parentFolder": "d4855b4e-2766-4582-a726-aeb3f4dc5c93"
+        },
+        {
+          "id": "d2a7488b-a100-46b8-8051-e309ac679e7b",
+          "kind": "folder",
+          "name": "Payments",
+          "parentFolder": "0ae5c0ae-5369-4836-a3bc-1b3b4db8c31a"
+        },
+        {
+          "id": "d4855b4e-2766-4582-a726-aeb3f4dc5c93",
+          "kind": "folder",
+          "name": "September 2025",
+          "parentFolder": "5d109478-0323-4971-86e9-0ac47d713636"
+        },
+        {
+          "id": "d825c394-6a2a-4877-8c71-67e9e02001ab",
+          "kind": "folder",
+          "name": "Payments",
+          "parentFolder": "1f1483a2-4bbc-4a61-86ef-ee39cf94a67d"
+        },
+        {
+          "id": "d83f8734-e884-4821-b215-aef36361f2f3",
+          "kind": "folder",
+          "name": "Payments",
+          "parentFolder": "2f933255-1576-40ad-ad02-0336eafccc83"
+        },
+        {
+          "id": "d851419a-65c2-4174-b09f-357381e52a6a",
+          "kind": "folder",
+          "name": "Payments",
+          "parentFolder": "866a369c-18fd-480b-b3ca-02cbd74bbf02"
+        },
+        {
+          "id": "e2e36e90-ce5f-493b-a996-50fefcb27576",
+          "kind": "folder",
+          "name": "Reporting",
+          "parentFolder": "0c29a8c6-e8c2-497b-ab84-e1f91d942474"
+        },
+        {
+          "documentType": "powerhouse/snapshot-report",
+          "id": "e2ead9d0-272e-4f27-b4a9-ed3eb61016eb",
+          "kind": "file",
+          "name": "June 2025 - Snapshot Report",
+          "parentFolder": "e2e36e90-ce5f-493b-a996-50fefcb27576"
+        },
+        {
+          "id": "e6fdd745-d98f-4278-854c-fa3f4c899c54",
+          "kind": "folder",
+          "name": "Payments",
+          "parentFolder": "0c29a8c6-e8c2-497b-ab84-e1f91d942474"
+        },
+        {
+          "documentType": "powerhouse/snapshot-report",
+          "id": "e90d2aef-e484-4223-a2a8-ebed1d1df3d7",
+          "kind": "file",
+          "name": "January 2025 - Snapshot Report",
+          "parentFolder": "8b36753b-8cc2-4c69-bc99-c9c84acd8bc0"
+        },
+        {
+          "documentType": "powerhouse/accounts",
+          "id": "e99c5a93-9d62-4ed8-ab43-4b24ea1b7811",
+          "kind": "file",
+          "name": "Accounts",
+          "parentFolder": null
+        },
+        {
+          "documentType": "powerhouse/expense-report",
+          "id": "f149bec7-5436-4b1a-a415-69935bf38e39",
+          "kind": "file",
+          "name": "PH-OH-December-2025-expense-report",
+          "parentFolder": "2b1fc89c-4db1-40cd-b1fe-90ab1e1c26fa"
+        },
+        {
+          "id": "f683e0a4-730f-4742-95c3-0c5c490f7990",
+          "kind": "folder",
+          "name": "Payments",
+          "parentFolder": "f88c71d4-41b0-421e-8028-8b9f99ae105f"
+        },
+        {
+          "id": "f88c71d4-41b0-421e-8028-8b9f99ae105f",
+          "kind": "folder",
+          "name": "January 2025",
+          "parentFolder": "5d109478-0323-4971-86e9-0ac47d713636"
+        }
+      ]
+    },
+    "local": {
+      "availableOffline": false,
+      "listeners": [],
+      "sharingType": "private",
+      "triggers": []
+    }
+  }
+}

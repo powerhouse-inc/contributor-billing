@@ -1,5 +1,5 @@
 import { type SelectOption } from "@powerhousedao/document-engineering/ui";
-import { type InvoiceTag } from "../../../document-models/invoice/gen/types.js";
+import { type InvoiceTag } from "../../../document-models/invoice/v1/gen/types.js";
 
 const billingTagMapping = [
   { fusion: "Budget", xero: "200 - Grants from Maker DAO" },

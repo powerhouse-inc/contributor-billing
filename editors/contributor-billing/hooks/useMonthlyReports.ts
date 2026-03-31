@@ -170,6 +170,11 @@ export function useMonthlyReports(): UseMonthlyReportsResult {
       const monthLower = monthName.toLowerCase();
       const reportingFolderId = folderInfo.reportingFolder?.id;
 
+      // Normalize name for matching: replace hyphens/underscores with spaces
+      const normalizeForMatch = (s: string) =>
+        s.toLowerCase().replace(/[-_]/g, " ");
+      const monthNormalized = normalizeForMatch(monthName);
+
       // Find expense reports in this Reporting folder OR matching this month by name
       const expenseReports: ReportDocument[] = allExpenseReports
         .filter((doc) => {
@@ -182,9 +187,11 @@ export function useMonthlyReports(): UseMonthlyReportsResult {
           }
 
           // Otherwise, check if name matches the month (for backwards compatibility)
+          // Normalizes hyphens/underscores to spaces so "July-2025" matches "July 2025"
           const docName = doc.header.name || "";
+          const docNameNormalized = normalizeForMatch(docName);
           return (
-            docName.toLowerCase().includes(monthLower) ||
+            docNameNormalized.includes(monthNormalized) ||
             docName.includes(monthCode)
           );
         })
@@ -202,8 +209,9 @@ export function useMonthlyReports(): UseMonthlyReportsResult {
 
         // Otherwise, check if name matches the month (for backwards compatibility)
         const docName = doc.header.name || "";
+        const docNameNormalized = normalizeForMatch(docName);
         return (
-          docName.toLowerCase().includes(monthLower) ||
+          docNameNormalized.includes(monthNormalized) ||
           docName.includes(monthCode)
         );
       });

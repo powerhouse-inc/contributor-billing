@@ -3,7 +3,7 @@
  * Uses reactor-browser APIs for universal local/remote drive compatibility
  */
 
-import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
+import type { AccountEntry } from "../../../document-models/accounts/v1/gen/schema/types.js";
 import { addDocument, dispatchActions } from "@powerhousedao/reactor-browser";
 import {
   actions as accountTransactionsActions,

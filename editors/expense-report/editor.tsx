@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { setName } from "document-model";
-import { useSelectedExpenseReportDocument } from "../../document-models/expense-report/hooks.js";
+import { useSelectedExpenseReportDocument } from "../../document-models/expense-report/v1/hooks.js";
 import {
   actions,
   type ExpenseReportStatus,
@@ -277,8 +277,8 @@ export default function Editor() {
     try {
       const blob = await pdf(
         <ExpenseReportPDF
-          periodStart={periodStart}
-          periodEnd={periodEnd}
+          periodStart={startDate || periodStart}
+          periodEnd={endDate || periodEnd}
           wallets={wallets}
           groups={groups}
         />,

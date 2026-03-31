@@ -8,7 +8,7 @@ import {
 import { Textarea, Select } from "@powerhousedao/document-engineering";
 import LineItemsTable from "./components/lineItemsTable.js";
 import { formatNumber } from "../invoice/lineItems.js";
-import { useSelectedBillingStatementDocument } from "../../document-models/billing-statement/hooks.js";
+import { useSelectedBillingStatementDocument } from "../../document-models/billing-statement/v1/hooks.js";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,

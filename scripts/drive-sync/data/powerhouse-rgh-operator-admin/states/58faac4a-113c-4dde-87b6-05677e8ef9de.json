@@ -1,0 +1,274 @@
+{
+  "availableBillingCycles": [
+    "MONTHLY",
+    "ANNUAL"
+  ],
+  "description": null,
+  "facetTargets": [
+    {
+      "categoryKey": "product",
+      "categoryLabel": "Product",
+      "id": "f383d5c1-93d0-4a44-a357-be8eddb54595",
+      "selectedOptions": [
+        "Operator-agent"
+      ]
+    }
+  ],
+  "id": null,
+  "infoLink": null,
+  "lastModified": "2026-03-18T17:20:02.283Z",
+  "operatorId": "a326c3a9-d29b-46d3-8ab0-14b361e11567",
+  "optionGroups": [
+    {
+      "availableBillingCycles": [
+        "MONTHLY",
+        "ANNUAL",
+        "QUARTERLY",
+        "SEMI_ANNUAL"
+      ],
+      "billingCycleDiscounts": [],
+      "costType": "RECURRING",
+      "currency": "USD",
+      "defaultSelected": true,
+      "description": null,
+      "discountMode": null,
+      "id": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+      "isAddOn": false,
+      "name": "Operator Agent Model v1",
+      "price": 5,
+      "pricingMode": "TIER_DEPENDENT",
+      "standalonePricing": {
+        "recurringPricing": [
+          {
+            "amount": 5,
+            "billingCycle": "MONTHLY",
+            "currency": "USD",
+            "discount": null,
+            "id": "435fc963-6d1d-48de-aa60-3990aa80b523"
+          }
+        ],
+        "setupCost": null
+      },
+      "tierDependentPricing": [
+        {
+          "id": "aaa884c7-22ff-454b-80de-de31acafbc5c",
+          "recurringPricing": [],
+          "setupCost": null,
+          "setupCostDiscounts": [],
+          "tierId": "32db57c5-e9f6-4146-944b-54236d703645"
+        },
+        {
+          "id": "79c06139-806a-4bd4-96cf-2a6823fd00d3",
+          "recurringPricing": [
+            {
+              "amount": 5,
+              "billingCycle": "MONTHLY",
+              "currency": "USD",
+              "discount": null,
+              "id": "e9bb1d64-e13d-4a34-92d3-03afd95b614c"
+            },
+            {
+              "amount": 5,
+              "billingCycle": "ANNUAL",
+              "currency": "USD",
+              "discount": {
+                "discountType": "PERCENTAGE",
+                "discountValue": 10
+              },
+              "id": "af63ecb3-c590-4e4b-8b70-66ec47a5d7ef"
+            },
+            {
+              "amount": 5,
+              "billingCycle": "QUARTERLY",
+              "currency": "USD",
+              "discount": null,
+              "id": "27a77efa-f782-4d6d-bd68-1bea86cdc29a"
+            },
+            {
+              "amount": 5,
+              "billingCycle": "SEMI_ANNUAL",
+              "currency": "USD",
+              "discount": null,
+              "id": "cf7e9752-1dc7-457b-ab84-31abbe5895bd"
+            }
+          ],
+          "setupCost": null,
+          "setupCostDiscounts": [],
+          "tierId": "ed2b16a5-0560-400f-98b8-1ab47f2b00c5"
+        },
+        {
+          "id": "d0fe55ec-fca1-4c61-a5dc-66bc58665d46",
+          "recurringPricing": [
+            {
+              "amount": 20,
+              "billingCycle": "MONTHLY",
+              "currency": "USD",
+              "discount": null,
+              "id": "86992e86-7312-43bb-be9b-b0b34cbcdf9d"
+            },
+            {
+              "amount": 20,
+              "billingCycle": "ANNUAL",
+              "currency": "USD",
+              "discount": null,
+              "id": "03386f1f-f1bd-4598-ba2b-e38dcdae2256"
+            },
+            {
+              "amount": 20,
+              "billingCycle": "QUARTERLY",
+              "currency": "USD",
+              "discount": null,
+              "id": "9fc4ddfa-a78c-40c1-8730-07f369bc5607"
+            },
+            {
+              "amount": 20,
+              "billingCycle": "SEMI_ANNUAL",
+              "currency": "USD",
+              "discount": null,
+              "id": "b2e45123-c1b5-4f29-a58e-7831fe2d4b41"
+            }
+          ],
+          "setupCost": null,
+          "setupCostDiscounts": [],
+          "tierId": "59aed4bb-ded3-4d46-b3e8-6fd5ce43a073"
+        }
+      ]
+    }
+  ],
+  "resourceTemplateId": "0fc0adc3-eb8a-490a-9f4d-b65f32fdb760",
+  "services": [
+    {
+      "description": null,
+      "displayOrder": null,
+      "id": "5662175c-677d-4260-8a73-d37c400598b2",
+      "isSetupFormation": false,
+      "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+      "title": "Operator Agent Model V1"
+    },
+    {
+      "description": null,
+      "displayOrder": null,
+      "id": "a1761727-663c-45ce-9452-0639e41e4375",
+      "isSetupFormation": false,
+      "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+      "title": "Operator Agent Model Ultra"
+    }
+  ],
+  "status": "DRAFT",
+  "summary": "Agent that helps you run your operations. ",
+  "thumbnailUrl": null,
+  "tiers": [
+    {
+      "billingCycleDiscounts": [],
+      "defaultBillingCycle": null,
+      "description": null,
+      "id": "32db57c5-e9f6-4146-944b-54236d703645",
+      "isCustomPricing": false,
+      "mostPopular": false,
+      "name": "Free",
+      "pricing": {
+        "amount": null,
+        "currency": "USD"
+      },
+      "pricingMode": null,
+      "serviceLevels": [
+        {
+          "customValue": null,
+          "id": "6c7d905d-5ddd-4ee3-b640-ea68c3e985a1",
+          "level": "INCLUDED",
+          "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+          "serviceId": "5662175c-677d-4260-8a73-d37c400598b2"
+        }
+      ],
+      "usageLimits": [
+        {
+          "freeLimit": null,
+          "id": "52ec98d4-f09e-4850-b300-d3ca6302f23e",
+          "metric": "Team size below 5 people",
+          "notes": null,
+          "paidLimit": null,
+          "resetCycle": "NONE",
+          "serviceId": "5662175c-677d-4260-8a73-d37c400598b2",
+          "unitName": "Team member",
+          "unitPrice": null,
+          "unitPriceCurrency": null
+        }
+      ]
+    },
+    {
+      "billingCycleDiscounts": [],
+      "defaultBillingCycle": null,
+      "description": null,
+      "id": "ed2b16a5-0560-400f-98b8-1ab47f2b00c5",
+      "isCustomPricing": false,
+      "mostPopular": false,
+      "name": "Small team <5p",
+      "pricing": {
+        "amount": null,
+        "currency": "USD"
+      },
+      "pricingMode": null,
+      "serviceLevels": [
+        {
+          "customValue": null,
+          "id": "cbe1b480-410e-4caf-a850-f7ec2ac6c8f7",
+          "level": "INCLUDED",
+          "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+          "serviceId": "5662175c-677d-4260-8a73-d37c400598b2"
+        }
+      ],
+      "usageLimits": [
+        {
+          "freeLimit": 5,
+          "id": "cffefb44-eb3a-4750-9a00-e07951bb3a33",
+          "metric": "Team size below 5 people",
+          "notes": null,
+          "paidLimit": 50,
+          "resetCycle": "NONE",
+          "serviceId": "5662175c-677d-4260-8a73-d37c400598b2",
+          "unitName": "Team member",
+          "unitPrice": 0.5,
+          "unitPriceCurrency": "USD"
+        }
+      ]
+    },
+    {
+      "billingCycleDiscounts": [],
+      "defaultBillingCycle": null,
+      "description": null,
+      "id": "59aed4bb-ded3-4d46-b3e8-6fd5ce43a073",
+      "isCustomPricing": false,
+      "mostPopular": false,
+      "name": "Enterprise",
+      "pricing": {
+        "amount": null,
+        "currency": "USD"
+      },
+      "pricingMode": null,
+      "serviceLevels": [
+        {
+          "customValue": null,
+          "id": "bca8dc9f-d536-4dcc-a712-10fe24136e96",
+          "level": "INCLUDED",
+          "optionGroupId": "f0107d5f-eac9-4e20-b8f1-76ccf2ccb160",
+          "serviceId": "a1761727-663c-45ce-9452-0639e41e4375"
+        }
+      ],
+      "usageLimits": [
+        {
+          "freeLimit": 50,
+          "id": "3722c4b2-6a3a-4097-bccb-b04d5d1e5d29",
+          "metric": "Team size below 5 people",
+          "notes": null,
+          "paidLimit": null,
+          "resetCycle": "NONE",
+          "serviceId": "5662175c-677d-4260-8a73-d37c400598b2",
+          "unitName": "Team member",
+          "unitPrice": 1,
+          "unitPriceCurrency": "USD"
+        }
+      ]
+    }
+  ],
+  "title": "Operator Agent"
+}

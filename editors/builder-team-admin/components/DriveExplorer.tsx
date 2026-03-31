@@ -10,13 +10,107 @@ import {
   dispatchActions,
   setSelectedNode,
 } from "@powerhousedao/reactor-browser";
-import { useCallback, useMemo, useState } from "react";
+import {
+  Component,
+  useCallback,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { isValidName } from "document-drive";
 import { ExpenseReports } from "./expense-reports.js";
 import { SnapshotReports } from "./snapshot-reports.js";
 import { ResourcesServices } from "./ResourcesServices.js";
 import { ServiceSubscriptions } from "./service-subscriptions.js";
 import { actions as builderProfileActions } from "@powerhousedao/builder-profile/document-models/builder-profile";
+import { useServiceSubscriptionAutoPlacement } from "../hooks/useServiceSubscriptionAutoPlacement.js";
+import { useSnapshotReportAutoPlacement } from "../hooks/useSnapshotReportAutoPlacement.js";
+
+/**
+ * Catches "Document not found" errors when the reactor tries to render a
+ * document that hasn't synced to the local DB yet. Auto-retries so the rest
+ * of the UI (sidebar, dashboard) stays usable.
+ */
+class DocumentEditorBoundary extends Component<
+  { children: ReactNode },
+  { error: Error | null; retryCount: number }
+> {
+  private retryTimer: ReturnType<typeof setTimeout> | null = null;
+
+  state = { error: null as Error | null, retryCount: 0 };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidUpdate() {
+    if (this.state.error && this.state.retryCount < 5 && !this.retryTimer) {
+      this.retryTimer = setTimeout(() => {
+        this.retryTimer = null;
+        this.setState((s) => ({
+          error: null,
+          retryCount: s.retryCount + 1,
+        }));
+      }, 2000);
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.retryTimer) clearTimeout(this.retryTimer);
+  }
+
+  render() {
+    if (!this.state.error) return this.props.children;
+
+    const isDocNotFound =
+      this.state.error.message.includes("Document not found");
+
+    const docId = isDocNotFound
+      ? this.state.error.message.replace("Document not found: ", "")
+      : null;
+
+    if (isDocNotFound && this.state.retryCount < 5) {
+      return (
+        <div className="flex h-64 items-center justify-center">
+          <div className="text-center">
+            <div className="mb-2 text-sm text-gray-500">Loading document…</div>
+            <code className="text-[10px] text-gray-300">{docId}</code>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="max-w-sm text-center">
+          <div className="mb-2 text-sm text-gray-600">
+            This document could not be loaded
+          </div>
+          <div className="mb-3 text-xs text-gray-400">
+            There may be an issue with this document&apos;s data. Use the
+            document ID below to investigate further.
+          </div>
+          {docId ? (
+            <code className="mb-4 block rounded bg-gray-50 px-3 py-2 text-xs text-gray-500 select-all border border-gray-200">
+              {docId}
+            </code>
+          ) : (
+            <div className="mb-4 text-xs text-gray-400">
+              {this.state.error.message}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => this.setState({ error: null, retryCount: 0 })}
+            className="rounded-md bg-gray-100 px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-200"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+}
 
 function generateCode(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
@@ -49,6 +143,11 @@ export function DriveExplorer({ children }: EditorProps) {
   const [profileName, setProfileName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [selectedDrive] = useSelectedDrive();
+
+  // Auto-placement hooks — must run regardless of which view is active so
+  // documents synced from the server get placed into the right folders.
+  useServiceSubscriptionAutoPlacement();
+  useSnapshotReportAutoPlacement();
 
   // Check if builder profile document exists
   const hasBuilderProfile = useMemo(() => {
@@ -201,9 +300,10 @@ export function DriveExplorer({ children }: EditorProps) {
 
   // Render the appropriate content based on state
   const renderContent = () => {
-    // Document editor takes priority
+    // Document editor takes priority — wrapped in boundary so a failed
+    // document load doesn't take down the sidebar / dashboard.
     if (showDocumentEditor) {
-      return children;
+      return <DocumentEditorBoundary>{children}</DocumentEditorBoundary>;
     }
 
     // Custom views

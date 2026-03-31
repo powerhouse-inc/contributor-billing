@@ -9,7 +9,7 @@ import type {
   TransactionEntry,
   Budget,
   AddTransactionInput,
-} from "../../../document-models/account-transactions/gen/types.js";
+} from "../../../document-models/account-transactions/v1/gen/types.js";
 
 interface TransactionFormProps {
   transaction?: TransactionEntry;
