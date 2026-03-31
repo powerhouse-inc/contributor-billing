@@ -1,6 +1,6 @@
 # =============================================================================
-# Multi-stage Dockerfile for Powerhouse Document Model Packages
-# Produces two images: connect (frontend) and switchboard (backend)
+# Multi-stage Dockerfile for Powerhouse Contributor Billing
+# Produces two targets: connect (frontend) and switchboard (backend)
 #
 # Build commands:
 #   docker build --target connect -t <registry>/<project>/connect:<tag> .
@@ -8,7 +8,7 @@
 # =============================================================================
 
 # -----------------------------------------------------------------------------
-# Base stage: Common setup for building
+# Base stage: install dependencies
 # -----------------------------------------------------------------------------
 FROM node:24-alpine AS base
 
@@ -23,40 +23,16 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Configure JSR registry
-RUN pnpm config set @jsr:registry https://npm.jsr.io
+# Copy project files
+COPY . .
 
-# Build arguments
-ARG TAG=latest
-ARG PH_CONNECT_BASE_PATH="/"
+# Install dependencies
+RUN pnpm install --frozen-lockfile
 
-# Install ph-cmd, prisma, and prettier globally
-RUN pnpm add -g ph-cmd@$TAG prisma@5.17.0 prettier
-
-# Initialize project based on tag (dev/staging/latest)
-RUN case "$TAG" in \
-        *dev*) ph init project --dev --package-manager pnpm ;; \
-        *staging*) ph init project --staging --package-manager pnpm ;; \
-        *) ph init project --package-manager pnpm ;; \
-    esac
-
-WORKDIR /app/project
-
-# Copy package files for the current package
-COPY package.json pnpm-lock.yaml ./
-
-# Install the current package (this package)
-ARG PACKAGE_NAME
-RUN if [ -n "$PACKAGE_NAME" ]; then \
-        echo "Installing package: $PACKAGE_NAME"; \
-        ph install "$PACKAGE_NAME"; \
-    else \
-        echo "Warning: PACKAGE_NAME not provided, using local build"; \
-        pnpm install; \
-    fi
-
-# Regenerate Prisma client for Alpine Linux
-RUN prisma generate --schema node_modules/document-drive/dist/prisma/schema.prisma || true
+# Generate code and build the project
+RUN pnpm generate
+RUN sed -i 's|^export \* from "./controller.js";|// export * from "./controller.js";|' document-models/*/v1/gen/index.ts
+RUN pnpm build
 
 # -----------------------------------------------------------------------------
 # Connect build stage
@@ -65,8 +41,7 @@ FROM base AS connect-builder
 
 ARG PH_CONNECT_BASE_PATH="/"
 
-# Build connect
-RUN ph connect build --base ${PH_CONNECT_BASE_PATH}
+RUN pnpm connect build --base ${PH_CONNECT_BASE_PATH}
 
 # -----------------------------------------------------------------------------
 # Connect final stage - nginx
@@ -80,7 +55,7 @@ RUN apk add --no-cache gettext
 COPY docker/nginx.conf /etc/nginx/nginx.conf.template
 
 # Copy built static files from build stage
-COPY --from=connect-builder /app/project/.ph/connect-build/dist /var/www/html/project
+COPY --from=connect-builder /app/.ph/connect-build/dist /var/www/html/project
 
 # Environment variables for nginx config
 ENV PORT=3001
@@ -98,7 +73,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 # -----------------------------------------------------------------------------
-# Switchboard final stage - node runtime
+# Switchboard final stage
 # -----------------------------------------------------------------------------
 FROM node:24-alpine AS switchboard
 
@@ -112,27 +87,21 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Configure JSR registry
-RUN pnpm config set @jsr:registry https://npm.jsr.io
+# Install prisma globally (needed at runtime for migrations)
+RUN pnpm add -g prisma@5.17.0
 
-# Install ph-cmd and prisma globally (needed at runtime)
-ARG TAG=latest
-RUN pnpm add -g ph-cmd@$TAG prisma@5.17.0
-
-# Copy built project from build stage
-COPY --from=base /app/project /app/project
-
-WORKDIR /app/project
-
-# Copy entrypoint
-COPY docker/switchboard-entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+# Copy built project from base stage
+COPY --from=base /app /app
 
 # Environment variables
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV DATABASE_URL=""
 ENV SKIP_DB_MIGRATIONS="false"
+
+# Copy entrypoint
+COPY docker/switchboard-entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 EXPOSE ${PORT}
 
