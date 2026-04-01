@@ -87,9 +87,6 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Install prisma globally (needed at runtime for migrations)
-RUN pnpm add -g prisma@5.17.0
-
 # Copy built project from base stage
 COPY --from=base /app /app
 

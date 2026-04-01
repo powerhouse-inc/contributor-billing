@@ -1,7 +1,14 @@
 #!/bin/sh
 set -e
 
-# Regenerate Prisma client for current platform (fixes darwin-arm64 vs linux-musl-openssl mismatch)
+# Install prisma CLI and regenerate client for current platform
+echo "[entrypoint] Installing Prisma CLI..."
+pnpm add -g prisma@5.17.0
+
+echo "[entrypoint] Patching Prisma schema to include linux-musl-openssl-3.0.x target..."
+sed -i 's/binaryTargets = \["native", "linux-musl", "debian-openssl-3.0.x"\]/binaryTargets = ["native", "linux-musl", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]/' \
+    node_modules/document-drive/dist/prisma/schema.prisma
+
 echo "[entrypoint] Regenerating Prisma client for current platform..."
 prisma generate --schema node_modules/document-drive/dist/prisma/schema.prisma
 
