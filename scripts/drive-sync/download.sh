@@ -86,7 +86,11 @@ try:
 except Exception:
     pass
 
-nodes = tree["document"]["state"]["global"]["nodes"]
+# Handle both old format (tree.document.state.global.nodes) and new format (tree.nodes)
+try:
+    nodes = tree["document"]["state"]["global"]["nodes"]
+except (KeyError, TypeError):
+    nodes = tree["nodes"]
 folders = [n for n in nodes if n["kind"] == "folder"]
 files_all = [n for n in nodes if n["kind"] == "file"]
 files = [n for n in files_all if n["id"] not in exclude_ids]

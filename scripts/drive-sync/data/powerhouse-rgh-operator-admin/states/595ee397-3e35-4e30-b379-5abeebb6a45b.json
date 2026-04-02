@@ -1,0 +1,270 @@
+{
+  "activatedSince": null,
+  "autoRenew": true,
+  "budget": null,
+  "cancellationReason": null,
+  "cancelledSince": null,
+  "createdAt": "2026-04-02T13:26:04.071Z",
+  "customerEmail": "yasiel@powerhouse.inc",
+  "customerId": "f06770cf-3666-449f-8235-86377841eba6",
+  "customerName": "Yasiel-testing",
+  "customerType": null,
+  "expiringSince": null,
+  "globalCurrency": "USD",
+  "nextBillingDate": null,
+  "operatorId": null,
+  "operatorNotes": null,
+  "pausedSince": null,
+  "projectedBillAmount": null,
+  "projectedBillCurrency": "USD",
+  "renewalDate": null,
+  "resource": {
+    "id": "8a543f5c-4bdf-4b44-9a42-f30a214983dc",
+    "label": "yasiel-testing-bot",
+    "thumbnailUrl": "https://staging.achra.com/_next/image?url=%2Fservices%2Fcovers%2Fcover-02.jpg&w=3840&q=75&dpl=dpl_FjkVSKv1rrWGpfaa2yG8PPxLE1Na"
+  },
+  "selectedBillingCycle": "QUARTERLY",
+  "serviceGroups": [
+    {
+      "costType": "RECURRING",
+      "id": "366057c8-2e82-428a-98e9-7aac95ba20a8",
+      "name": "Recurring Services",
+      "optional": false,
+      "recurringCost": {
+        "amount": 3750,
+        "billingCycle": "QUARTERLY",
+        "currency": "USD",
+        "discount": null,
+        "lastPaymentDate": null,
+        "nextBillingDate": null
+      },
+      "services": [
+        {
+          "customValue": null,
+          "description": "Professionally drafted contract templates for contributor agreements, internal Multisig Agreements, and other operational needs.",
+          "facetSelections": [],
+          "id": "c575bfd0-b8dc-4e34-bea1-dabe86a9271e",
+          "metrics": [],
+          "name": "Legal document templates",
+          "recurringCost": null,
+          "setupCost": null
+        },
+        {
+          "customValue": null,
+          "description": "A global invoice generation tool that creates professionally structured invoices following international best practices, while remaining independent from any specific legal or tax jurisdiction.",
+          "facetSelections": [],
+          "id": "99869f7d-00b8-4462-b54e-7aa0a995e893",
+          "metrics": [],
+          "name": "Global invoice generator",
+          "recurringCost": null,
+          "setupCost": null
+        },
+        {
+          "customValue": null,
+          "description": "A budget planning tool that helps organizations allocate resources across teams, projects, and categories following financial best practices, with defined budget categories and time horizons.",
+          "facetSelections": [],
+          "id": "d1dce024-1311-45f7-a248-cdd3b9a607cf",
+          "metrics": [],
+          "name": "Budget generator",
+          "recurringCost": null,
+          "setupCost": null
+        },
+        {
+          "customValue": null,
+          "description": "A guided self-assessment to help teams evaluate their operational and legal needs before choosing a plan.",
+          "facetSelections": [],
+          "id": "ed327bde-39f5-48f8-8755-766ba113d343",
+          "metrics": [],
+          "name": "Needs analysis",
+          "recurringCost": null,
+          "setupCost": null
+        },
+        {
+          "customValue": null,
+          "description": "Structured support for Swiss annual tax compliance and VAT reporting (by default, quarterly), handled by licensed tax professionals, coordinated through our operational framework. Documentation for Swiss VAT reporting, ensuring that all relevant invoices, payment records, and transaction classifications are properly maintained to support accurate VAT filings and potential audits by the Swiss Federal Tax Administration (FTA).",
+          "facetSelections": [],
+          "id": "bf0ab791-340e-4f23-9ce0-4b871564d513",
+          "metrics": [],
+          "name": "Annual tax filing and VAT reporting",
+          "recurringCost": null,
+          "setupCost": null
+        },
+        {
+          "customValue": null,
+          "description": "Expense tracking and reimbursement workflows.",
+          "facetSelections": [],
+          "id": "e277fc45-a112-49a3-833c-567315bc6af8",
+          "metrics": [],
+          "name": "Reimbursement management",
+          "recurringCost": null,
+          "setupCost": null
+        },
+        {
+          "customValue": null,
+          "description": "End-to-end handling of invoices from submission and approval to accounting and payment.",
+          "facetSelections": [],
+          "id": "222a711c-2b5c-44df-bced-4919a872d8cf",
+          "metrics": [
+            {
+              "currentUsage": 0,
+              "freeLimit": 50,
+              "id": "4a32b977-d8d8-4d84-b51e-f40191b120bd",
+              "limit": 50,
+              "name": "Invoice(s)",
+              "nextUsageReset": null,
+              "paidLimit": 100,
+              "unitCost": {
+                "amount": 21,
+                "billingCycle": "MONTHLY",
+                "currency": "USD",
+                "discount": null,
+                "lastPaymentDate": null,
+                "nextBillingDate": null
+              },
+              "unitName": "Invoice(s)",
+              "usageResetPeriod": "MONTHLY"
+            }
+          ],
+          "name": "Invoice management",
+          "recurringCost": null,
+          "setupCost": null
+        },
+        {
+          "customValue": null,
+          "description": "Reconciliation of transactions, validation of balances, and accurate financial records in the accounting system for reporting and decision-making.",
+          "facetSelections": [],
+          "id": "0c4a35f6-73f8-43f5-8c74-c84dd69645b1",
+          "metrics": [],
+          "name": "Monthly accounting & close",
+          "recurringCost": null,
+          "setupCost": null
+        },
+        {
+          "customValue": null,
+          "description": "A report of all expenses incurred during the month, categorized and reviewed to provide visibility into spending and budget performance.",
+          "facetSelections": [],
+          "id": "accdcb58-9380-4cf9-9883-b043acf9e689",
+          "metrics": [],
+          "name": "Monthly expense report",
+          "recurringCost": null,
+          "setupCost": null
+        },
+        {
+          "customValue": null,
+          "description": "Defined rules governing how expenses are submitted, approved, and reimbursed.",
+          "facetSelections": [],
+          "id": "6e133f12-b37b-4c6b-a6da-d4795fb47740",
+          "metrics": [],
+          "name": "Expense policies",
+          "recurringCost": null,
+          "setupCost": null
+        },
+        {
+          "customValue": null,
+          "description": "Operational processes to onboard contributors, manage contracts, and payment details.",
+          "facetSelections": [],
+          "id": "81f51d40-6030-40f2-9545-944fa4f202e6",
+          "metrics": [
+            {
+              "currentUsage": 0,
+              "freeLimit": 1,
+              "id": "65094db2-91d2-49d1-be30-a57d2f43973e",
+              "limit": 1,
+              "name": "Contributor(s)",
+              "nextUsageReset": null,
+              "paidLimit": 1,
+              "unitCost": {
+                "amount": 250,
+                "billingCycle": "MONTHLY",
+                "currency": "USD",
+                "discount": null,
+                "lastPaymentDate": null,
+                "nextBillingDate": null
+              },
+              "unitName": "Contributor(s)",
+              "usageResetPeriod": "MONTHLY"
+            }
+          ],
+          "name": "Contributor onboarding and operations",
+          "recurringCost": null,
+          "setupCost": null
+        },
+        {
+          "customValue": null,
+          "description": "Crypto-to-fiat conversions with 48-hour transfers in USD, GBP, EUR, CHF, and DKK. Additional currencies available upon request.",
+          "facetSelections": [],
+          "id": "5e9fe308-679a-44db-b6ff-66b2d1c25f42",
+          "metrics": [],
+          "name": "Multi-currency payouts",
+          "recurringCost": null,
+          "setupCost": null
+        },
+        {
+          "customValue": null,
+          "description": "Dedicated operational support with an assigned point of contact for handling day-to-day financial and administrative requests.",
+          "facetSelections": [],
+          "id": "0be37037-415d-49cf-851d-30d304230b68",
+          "metrics": [],
+          "name": "Dedicated ops support",
+          "recurringCost": null,
+          "setupCost": null
+        }
+      ],
+      "setupCost": null
+    },
+    {
+      "costType": "SETUP",
+      "id": "c267b3d2-68dc-4731-b0fe-20bf355d29a3",
+      "name": "Entity & Compliance Foundation",
+      "optional": false,
+      "recurringCost": null,
+      "services": [
+        {
+          "customValue": null,
+          "description": "Formation of a Swiss Association with the support of a Swiss licensed counsel. Includes onboarding checklist,  use of templates for founding documents and articles of association, a workshop, and a founding meeting with counsel.",
+          "facetSelections": [],
+          "id": "5dc2c7fa-ef52-4d7f-970c-8cb548934c5b",
+          "metrics": [],
+          "name": "Swiss association setup",
+          "recurringCost": null,
+          "setupCost": null
+        },
+        {
+          "customValue": null,
+          "description": "A registered legal address in Zug, Switzerland for the entity.",
+          "facetSelections": [],
+          "id": "a9438f7e-5009-473e-82c6-0a9e04d810e4",
+          "metrics": [],
+          "name": "Registered address (Zug)",
+          "recurringCost": null,
+          "setupCost": null
+        },
+        {
+          "customValue": null,
+          "description": "VAT registration and issuance of a VAT number. If the entity is not registered in the Commercial registry, the VAT ID may serve as the company identification number with customers and suppliers.",
+          "facetSelections": [],
+          "id": "c01b5c2b-6621-410b-85be-29e59dc12e57",
+          "metrics": [],
+          "name": "VAT registration",
+          "recurringCost": null,
+          "setupCost": null
+        }
+      ],
+      "setupCost": {
+        "amount": 3000,
+        "billingDate": null,
+        "currency": "USD",
+        "paymentDate": null
+      }
+    }
+  ],
+  "serviceOfferingId": null,
+  "services": [],
+  "status": "PENDING",
+  "teamMemberCount": null,
+  "tierCurrency": "USD",
+  "tierName": "Standard",
+  "tierPrice": null,
+  "tierPricingMode": "MANUAL_OVERRIDE",
+  "tierPricingOptionId": "2521782c-120b-49bd-be3e-14e86fd4eeb1"
+}
