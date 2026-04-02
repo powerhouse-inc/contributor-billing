@@ -671,5 +671,21 @@
     "index": 32,
     "skip": 0,
     "timestampUtcMs": "2026-03-24T17:19:23.612Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-31T12:47:42.502Z",
+        "operatorId": "8a65a724-7529-4300-92b1-c39732b6100f"
+      },
+      "scope": "global",
+      "type": "SET_OPERATOR"
+    },
+    "error": null,
+    "hash": "YTOE79C7mQZ1q3PaNfVOAsjcviA=",
+    "id": "00814eff2162058eb9be3aee32adc05b",
+    "index": 33,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-31T12:47:42.502Z"
   }
 ]

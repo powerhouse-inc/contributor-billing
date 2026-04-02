@@ -1,0 +1,79 @@
+[
+  {
+    "action": {
+      "input": {
+        "branch": "main",
+        "documentId": "685acb8a-84e9-4f4e-8b90-369210c5c52f",
+        "meta": {},
+        "model": "powerhouse/service-offering",
+        "name": "AgenticOps",
+        "protocolVersions": {
+          "base-reducer": 2
+        },
+        "signing": {
+          "createdAtUtcIso": "2026-04-01T14:52:10.273Z",
+          "documentType": "powerhouse/service-offering",
+          "nonce": "",
+          "publicKey": {},
+          "signature": "685acb8a-84e9-4f4e-8b90-369210c5c52f"
+        },
+        "slug": "",
+        "version": 0
+      },
+      "scope": "document",
+      "type": "CREATE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "d2211548779e71ff00bab38ebb9f1270",
+    "index": 0,
+    "skip": 0,
+    "timestampUtcMs": "2026-04-01T14:52:10.273Z"
+  },
+  {
+    "action": {
+      "input": {
+        "documentId": "685acb8a-84e9-4f4e-8b90-369210c5c52f",
+        "fromVersion": 0,
+        "initialState": {
+          "auth": {},
+          "document": {
+            "hash": {
+              "algorithm": "sha1",
+              "encoding": "base64"
+            },
+            "version": 0
+          },
+          "global": {
+            "availableBillingCycles": [],
+            "description": null,
+            "facetTargets": [],
+            "id": null,
+            "infoLink": null,
+            "lastModified": null,
+            "operatorId": null,
+            "optionGroups": [],
+            "resourceTemplateId": null,
+            "services": [],
+            "status": "DRAFT",
+            "summary": "",
+            "thumbnailUrl": null,
+            "tiers": [],
+            "title": ""
+          },
+          "local": {}
+        },
+        "model": "powerhouse/service-offering",
+        "toVersion": 1
+      },
+      "scope": "document",
+      "type": "UPGRADE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "3a3ea144ae8820dc6ebfa8e5a9c72498",
+    "index": 1,
+    "skip": 0,
+    "timestampUtcMs": "2026-04-01T14:52:10.273Z"
+  }
+]

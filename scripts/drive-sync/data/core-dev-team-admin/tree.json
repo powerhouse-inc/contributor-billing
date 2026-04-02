@@ -1,39 +1,13 @@
 {
-  "childIds": [
-    "7d0a153e-96d7-4f95-b025-df287021990b"
-  ],
-  "document": {
-    "id": "71aca3a2-8ad1-469b-bea8-ac2f3cedfa91",
-    "name": "Core Dev Team Admin",
-    "slug": "core-dev-team-admin",
-    "state": {
-      "auth": {},
-      "document": {
-        "hash": {
-          "algorithm": "sha1",
-          "encoding": "base64"
-        },
-        "version": 0
-      },
-      "global": {
-        "icon": null,
-        "name": "Core Dev Team Admin",
-        "nodes": [
-          {
-            "documentType": "powerhouse/builder-profile",
-            "id": "7d0a153e-96d7-4f95-b025-df287021990b",
-            "kind": "file",
-            "name": "Core Dev Team Profile",
-            "parentFolder": null
-          }
-        ]
-      },
-      "local": {
-        "availableOffline": false,
-        "listeners": [],
-        "sharingType": "private",
-        "triggers": []
-      }
+  "id": "71aca3a2-8ad1-469b-bea8-ac2f3cedfa91",
+  "name": "Core Dev Team Admin",
+  "nodes": [
+    {
+      "documentType": "powerhouse/builder-profile",
+      "id": "7d0a153e-96d7-4f95-b025-df287021990b",
+      "kind": "file",
+      "name": "Core Dev Team Profile",
+      "parentFolder": null
     }
-  }
+  ]
 }

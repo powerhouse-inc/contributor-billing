@@ -5,11 +5,11 @@
   "preferredEditor": "builder-team-admin",
   "revisionsList": [
     {
-      "revision": 15,
+      "revision": 81,
       "scope": "document"
     },
     {
-      "revision": 31,
+      "revision": 141,
       "scope": "global"
     }
   ],
@@ -41,6 +41,13 @@
           "parentFolder": null
         },
         {
+          "documentType": "powerhouse/resource-template",
+          "id": "0df91020-f88b-4135-8e96-83ea31ab6bc1",
+          "kind": "file",
+          "name": "NETWORK REVENUE GENERATING HUB",
+          "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+        },
+        {
           "id": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e",
           "kind": "folder",
           "name": "Products",
@@ -52,6 +59,13 @@
           "kind": "file",
           "name": "Teeps Offering 2",
           "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
+        },
+        {
+          "documentType": "powerhouse/resource-template",
+          "id": "4e01a503-4ad7-4140-a491-14519a6e2268",
+          "kind": "file",
+          "name": "Intellectual Property SPV (IP SPV)",
+          "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
         },
         {
           "documentType": "powerhouse/resource-template",
@@ -76,6 +90,48 @@
         },
         {
           "documentType": "powerhouse/service-offering",
+          "id": "5bf6f01b-3fea-47b8-b3fd-38edcc2478bc",
+          "kind": "file",
+          "name": "OperationalHubOffering",
+          "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
+        },
+        {
+          "documentType": "powerhouse/resource-template",
+          "id": "5fa8f679-d3d4-44fb-9e23-b70c53724a65",
+          "kind": "file",
+          "name": "FUNDRAISING VEHICLE (OCF)",
+          "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+        },
+        {
+          "documentType": "powerhouse/resource-template",
+          "id": "6542338e-e6d1-4167-8d2c-9aeddcd0996c",
+          "kind": "file",
+          "name": "AgentOps",
+          "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+        },
+        {
+          "documentType": "powerhouse/service-offering",
+          "id": "685acb8a-84e9-4f4e-8b90-369210c5c52f",
+          "kind": "file",
+          "name": "AgenticOps",
+          "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
+        },
+        {
+          "documentType": "powerhouse/resource-template",
+          "id": "792d170e-ae2d-4795-a305-8af9f26cd2ba",
+          "kind": "file",
+          "name": "REVENUE GENERATING HUB (RGH)",
+          "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+        },
+        {
+          "documentType": "powerhouse/resource-template",
+          "id": "79ff8ec4-6be9-4d55-803a-9c259a27342f",
+          "kind": "file",
+          "name": "NETWORK OPERATIONAL HUB",
+          "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+        },
+        {
+          "documentType": "powerhouse/service-offering",
           "id": "7b18db23-4cda-4dc8-b6f3-75f509e9935a",
           "kind": "file",
           "name": "apeiron_operator_HA",
@@ -89,11 +145,32 @@
           "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
         },
         {
-          "documentType": "powerhouse/builder-profile",
-          "id": "8a65a724-7529-4300-92b1-c39732b6100f",
+          "documentType": "powerhouse/resource-template",
+          "id": "8f59ad07-5d53-4727-9290-e412b6f8b96d",
           "kind": "file",
-          "name": "Powerhouse RGH",
-          "parentFolder": null
+          "name": "rupert",
+          "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+        },
+        {
+          "documentType": "powerhouse/resource-template",
+          "id": "8f6ef572-9c9f-403a-80e8-ad8d8f3059a8",
+          "kind": "file",
+          "name": "NETWORK IP SPV",
+          "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+        },
+        {
+          "documentType": "powerhouse/resource-template",
+          "id": "a17c55fd-eb6a-4437-80b4-675e7e9077b8",
+          "kind": "file",
+          "name": "NETWORK EMBRYONIC HUB",
+          "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+        },
+        {
+          "documentType": "powerhouse/resource-template",
+          "id": "a952735e-e195-40d3-8407-42a22210f4f7",
+          "kind": "file",
+          "name": "OperationalHub",
+          "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
         },
         {
           "id": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5",
@@ -115,11 +192,30 @@
           "parentFolder": null
         },
         {
+          "id": "c9ef99cd-7ece-4f74-813b-3cb6ba262c78",
+          "kind": "folder",
+          "name": "Snapshot Reports",
+          "parentFolder": null
+        },
+        {
           "documentType": "powerhouse/resource-template",
           "id": "d30bc041-ba20-4af5-bc13-61e0476116ba",
           "kind": "file",
           "name": "BAI Agent Executor",
           "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+        },
+        {
+          "documentType": "powerhouse/resource-template",
+          "id": "d8ecbcd4-b4b1-4426-b8b0-06938eeb6575",
+          "kind": "file",
+          "name": "COMMERCIAL OPERATIONAL HUB (OH)",
+          "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+        },
+        {
+          "id": "db5f3db8-2091-42b6-aa92-4bbc7868ab2c",
+          "kind": "folder",
+          "name": "Expense Reports",
+          "parentFolder": null
         },
         {
           "documentType": "powerhouse/resource-template",
@@ -141,6 +237,20 @@
           "kind": "file",
           "name": "OH-Artic",
           "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
+        },
+        {
+          "documentType": "powerhouse/builder-profile",
+          "id": "ed5a114e-1494-45a9-8e0b-d4a43247aeff",
+          "kind": "file",
+          "name": "Powerhouse RGH",
+          "parentFolder": null
+        },
+        {
+          "documentType": "powerhouse/resource-template",
+          "id": "f094388c-8be5-4d69-8282-5a1bbb127443",
+          "kind": "file",
+          "name": "ALTERNATIVE RISK TRANSFER (ART)",
+          "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
         }
       ]
     },

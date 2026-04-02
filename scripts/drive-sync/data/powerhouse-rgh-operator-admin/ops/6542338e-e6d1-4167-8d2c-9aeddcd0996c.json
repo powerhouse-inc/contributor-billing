@@ -1,0 +1,81 @@
+[
+  {
+    "action": {
+      "input": {
+        "branch": "main",
+        "documentId": "6542338e-e6d1-4167-8d2c-9aeddcd0996c",
+        "meta": {},
+        "model": "powerhouse/resource-template",
+        "name": "AgentOps",
+        "protocolVersions": {
+          "base-reducer": 2
+        },
+        "signing": {
+          "createdAtUtcIso": "2026-04-01T14:52:12.806Z",
+          "documentType": "powerhouse/resource-template",
+          "nonce": "",
+          "publicKey": {},
+          "signature": "6542338e-e6d1-4167-8d2c-9aeddcd0996c"
+        },
+        "slug": "",
+        "version": 0
+      },
+      "scope": "document",
+      "type": "CREATE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "911925180d9cf2b946b2f7e7413b6868",
+    "index": 0,
+    "skip": 0,
+    "timestampUtcMs": "2026-04-01T14:52:12.806Z"
+  },
+  {
+    "action": {
+      "input": {
+        "documentId": "6542338e-e6d1-4167-8d2c-9aeddcd0996c",
+        "fromVersion": 0,
+        "initialState": {
+          "auth": {},
+          "document": {
+            "hash": {
+              "algorithm": "sha1",
+              "encoding": "base64"
+            },
+            "version": 0
+          },
+          "global": {
+            "contentSections": [],
+            "description": null,
+            "facetTargets": [],
+            "faqFields": [],
+            "id": null,
+            "infoLink": null,
+            "lastModified": null,
+            "operatorId": null,
+            "optionGroups": [],
+            "recurringServices": [],
+            "services": [],
+            "setupServices": [],
+            "status": "DRAFT",
+            "summary": "",
+            "targetAudiences": [],
+            "thumbnailUrl": null,
+            "title": ""
+          },
+          "local": {}
+        },
+        "model": "powerhouse/resource-template",
+        "toVersion": 1
+      },
+      "scope": "document",
+      "type": "UPGRADE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "d4d704ce82ec42d55dbd3391a9a425e5",
+    "index": 1,
+    "skip": 0,
+    "timestampUtcMs": "2026-04-01T14:52:12.806Z"
+  }
+]
