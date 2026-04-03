@@ -4,8 +4,9 @@ import {
   isFolderNodeKind,
   useSelectedDrive,
   useDocumentsInSelectedDrive,
-  useNodeActions,
+  dispatchActions,
 } from "@powerhousedao/reactor-browser";
+import { moveNode } from "document-drive";
 import type { FileNode, Node } from "document-drive";
 import type { ExpenseReportDocument } from "../../../document-models/expense-report/v1/gen/types.js";
 import type { InvoiceDocument } from "../../../document-models/invoice/v1/gen/types.js";
@@ -45,7 +46,6 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
     billingFolder,
     createMonthFolder,
   } = useBillingFolderStructure();
-  const { onMoveNode } = useNodeActions();
   const driveId = driveDocument?.header.id;
 
   // Initialize module-level tracking for this drive
@@ -131,7 +131,13 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
 
         if (reportingFolder) {
           // Attempt move once — don't retry on failure since name matching handles display
-          onMoveNode(fileNode, reportingFolder)
+          dispatchActions(
+            moveNode({
+              srcFolder: fileNode.id,
+              targetParentFolder: reportingFolder.id,
+            }),
+            driveId,
+          )
             .then(() => {
               cbToast(
                 `Expense report "${fileNode.name}" placed in ${monthName} > Reporting`,
@@ -170,7 +176,6 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
     monthFolders,
     billingFolder,
     createMonthFolder,
-    onMoveNode,
   ]);
 
   // Auto-place invoices into appropriate Payments folders based on dateIssued
@@ -216,7 +221,13 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
             `[DocumentAutoPlacement] Moving invoice ${fileNode.id} ("${fileNode.name}") to Payments folder for ${monthName}`,
           );
 
-          onMoveNode(fileNode, paymentsFolder)
+          dispatchActions(
+            moveNode({
+              srcFolder: fileNode.id,
+              targetParentFolder: paymentsFolder.id,
+            }),
+            driveId,
+          )
             .then(() => {
               cbToast(
                 `Invoice "${fileNode.name}" placed in ${monthName} > Payments`,
@@ -256,7 +267,6 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
     monthFolders,
     billingFolder,
     createMonthFolder,
-    onMoveNode,
   ]);
 
   // Auto-place snapshot reports into appropriate Reporting folders based on reportPeriodStart
@@ -297,7 +307,13 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
         const reportingFolder = monthInfo?.reportingFolder;
 
         if (reportingFolder) {
-          onMoveNode(fileNode, reportingFolder)
+          dispatchActions(
+            moveNode({
+              srcFolder: fileNode.id,
+              targetParentFolder: reportingFolder.id,
+            }),
+            driveId,
+          )
             .then(() => {
               cbToast(
                 `Snapshot report "${fileNode.name}" placed in ${monthName} > Reporting`,
@@ -334,7 +350,6 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
     monthFolders,
     billingFolder,
     createMonthFolder,
-    onMoveNode,
   ]);
 
   // Auto-place billing statements into appropriate Payments folders based on dateIssued
@@ -375,7 +390,13 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
         const paymentsFolder = monthInfo?.paymentsFolder;
 
         if (paymentsFolder) {
-          onMoveNode(fileNode, paymentsFolder)
+          dispatchActions(
+            moveNode({
+              srcFolder: fileNode.id,
+              targetParentFolder: paymentsFolder.id,
+            }),
+            driveId,
+          )
             .then(() => {
               cbToast(
                 `Billing statement "${fileNode.name}" placed in ${monthName} > Payments`,
@@ -412,7 +433,6 @@ export function useDocumentAutoPlacement(): UseDocumentAutoPlacementResult {
     monthFolders,
     billingFolder,
     createMonthFolder,
-    onMoveNode,
   ]);
 
   return {

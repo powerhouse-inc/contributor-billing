@@ -5,8 +5,9 @@ import {
   addFolder,
   useSelectedDrive,
   useDocumentsInSelectedDrive,
-  useNodeActions,
+  dispatchActions,
 } from "@powerhousedao/reactor-browser";
+import { moveNode } from "document-drive";
 import type { FolderNode, FileNode, Node } from "document-drive";
 import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/v1/gen/types.js";
 import { isDocumentSynced } from "../../shared/document-sync.js";
@@ -45,7 +46,6 @@ interface UseSnapshotReportAutoPlacementResult {
 export function useSnapshotReportAutoPlacement(): UseSnapshotReportAutoPlacementResult {
   const [driveDocument] = useSelectedDrive();
   const documentsInDrive = useDocumentsInSelectedDrive();
-  const { onMoveNode } = useNodeActions();
   const driveId = driveDocument?.header.id;
 
   // Initialize module-level tracking sets for this drive if needed
@@ -203,15 +203,19 @@ export function useSnapshotReportAutoPlacement(): UseSnapshotReportAutoPlacement
 
         // Only move if not already in the Snapshot Reports folder
         if (!snapshotReportsFolderNodeIds.has(fileNode.id)) {
-          onMoveNode(fileNode, snapshotReportsFolder).catch(
-            (error: unknown) => {
-              console.error(
-                `Failed to move snapshot report to Snapshot Reports folder:`,
-                error,
-              );
-              processedDocs.delete(fileNode.id);
-            },
-          );
+          dispatchActions(
+            moveNode({
+              srcFolder: fileNode.id,
+              targetParentFolder: snapshotReportsFolder.id,
+            }),
+            driveId,
+          ).catch((error: unknown) => {
+            console.error(
+              `Failed to move snapshot report to Snapshot Reports folder:`,
+              error,
+            );
+            processedDocs.delete(fileNode.id);
+          });
         }
         continue;
       }
@@ -227,7 +231,13 @@ export function useSnapshotReportAutoPlacement(): UseSnapshotReportAutoPlacement
 
       if (existingYearFolder) {
         // Year folder exists - move the document there
-        onMoveNode(fileNode, existingYearFolder).catch((error: unknown) => {
+        dispatchActions(
+          moveNode({
+            srcFolder: fileNode.id,
+            targetParentFolder: existingYearFolder.id,
+          }),
+          driveId,
+        ).catch((error: unknown) => {
           console.error(
             `Failed to move snapshot report to ${year} folder:`,
             error,
@@ -248,7 +258,13 @@ export function useSnapshotReportAutoPlacement(): UseSnapshotReportAutoPlacement
           .then((newFolder) => {
             if (newFolder) {
               // Move the document to the new year folder
-              return onMoveNode(fileNode, newFolder);
+              return dispatchActions(
+                moveNode({
+                  srcFolder: fileNode.id,
+                  targetParentFolder: newFolder.id,
+                }),
+                driveId,
+              );
             }
           })
           .catch((error: unknown) => {
@@ -272,7 +288,6 @@ export function useSnapshotReportAutoPlacement(): UseSnapshotReportAutoPlacement
     documentsInDrive,
     snapshotReportsFolderNodeIds,
     yearFolders,
-    onMoveNode,
   ]);
 
   return {

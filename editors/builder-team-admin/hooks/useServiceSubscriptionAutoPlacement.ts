@@ -5,8 +5,9 @@ import {
   addFolder,
   useSelectedDrive,
   useDocumentsInSelectedDrive,
-  useNodeActions,
+  dispatchActions,
 } from "@powerhousedao/reactor-browser";
+import { moveNode } from "document-drive";
 import type { FolderNode, FileNode, Node } from "document-drive";
 import { isDocumentSynced } from "../../shared/document-sync.js";
 
@@ -43,7 +44,6 @@ interface UseServiceSubscriptionAutoPlacementResult {
 export function useServiceSubscriptionAutoPlacement(): UseServiceSubscriptionAutoPlacementResult {
   const [driveDocument] = useSelectedDrive();
   const documentsInDrive = useDocumentsInSelectedDrive();
-  const { onMoveNode } = useNodeActions();
   const driveId = driveDocument?.header.id;
 
   // Initialize module-level tracking sets for this drive if needed
@@ -188,24 +188,28 @@ export function useServiceSubscriptionAutoPlacement(): UseServiceSubscriptionAut
       processedDocs.add(fileNode.id);
 
       // Move the document to the Service Subscriptions folder root
-      onMoveNode(fileNode, serviceSubscriptionsFolder).catch(
-        (error: unknown) => {
-          const msg = error instanceof Error ? error.message : String(error);
-          if (msg.includes("source document not found")) {
-            // Document not yet synced — will retry on next render cycle
-            console.debug(
-              `[ServiceSubscriptionAutoPlacement] Document ${fileNode.id} not synced yet, will retry`,
-            );
-          } else {
-            console.error(
-              `[ServiceSubscriptionAutoPlacement] Failed to move document:`,
-              error,
-            );
-          }
-          // Remove from processed so it can be retried
-          processedDocs.delete(fileNode.id);
-        },
-      );
+      dispatchActions(
+        moveNode({
+          srcFolder: fileNode.id,
+          targetParentFolder: serviceSubscriptionsFolder.id,
+        }),
+        driveId,
+      ).catch((error: unknown) => {
+        const msg = error instanceof Error ? error.message : String(error);
+        if (msg.includes("source document not found")) {
+          // Document not yet synced — will retry on next render cycle
+          console.debug(
+            `[ServiceSubscriptionAutoPlacement] Document ${fileNode.id} not synced yet, will retry`,
+          );
+        } else {
+          console.error(
+            `[ServiceSubscriptionAutoPlacement] Failed to move document:`,
+            error,
+          );
+        }
+        // Remove from processed so it can be retried
+        processedDocs.delete(fileNode.id);
+      });
     }
   }, [
     driveId,
@@ -213,7 +217,6 @@ export function useServiceSubscriptionAutoPlacement(): UseServiceSubscriptionAut
     serviceSubscriptionsFolder,
     documentsInDrive,
     serviceSubscriptionsFolderNodeIds,
-    onMoveNode,
   ]);
 
   return {

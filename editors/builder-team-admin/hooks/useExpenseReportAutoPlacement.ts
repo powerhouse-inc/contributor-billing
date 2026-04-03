@@ -5,8 +5,9 @@ import {
   addFolder,
   useSelectedDrive,
   useDocumentsInSelectedDrive,
-  useNodeActions,
+  dispatchActions,
 } from "@powerhousedao/reactor-browser";
+import { moveNode } from "document-drive";
 import type { FolderNode, FileNode, Node } from "document-drive";
 import type { ExpenseReportDocument } from "../../../document-models/expense-report/v1/gen/types.js";
 import { isDocumentSynced } from "../../shared/document-sync.js";
@@ -45,7 +46,6 @@ interface UseExpenseReportAutoPlacementResult {
 export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementResult {
   const [driveDocument] = useSelectedDrive();
   const documentsInDrive = useDocumentsInSelectedDrive();
-  const { onMoveNode } = useNodeActions();
   const driveId = driveDocument?.header.id;
 
   // Initialize module-level tracking sets for this drive if needed
@@ -203,7 +203,13 @@ export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementRe
 
         // Only move if not already in the Expense Reports folder
         if (!expenseReportsFolderNodeIds.has(fileNode.id)) {
-          onMoveNode(fileNode, expenseReportsFolder).catch((error: unknown) => {
+          dispatchActions(
+            moveNode({
+              srcFolder: fileNode.id,
+              targetParentFolder: expenseReportsFolder.id,
+            }),
+            driveId,
+          ).catch((error: unknown) => {
             console.error(
               `Failed to move expense report to Expense Reports folder:`,
               error,
@@ -225,7 +231,13 @@ export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementRe
 
       if (existingYearFolder) {
         // Year folder exists - move the document there
-        onMoveNode(fileNode, existingYearFolder).catch((error: unknown) => {
+        dispatchActions(
+          moveNode({
+            srcFolder: fileNode.id,
+            targetParentFolder: existingYearFolder.id,
+          }),
+          driveId,
+        ).catch((error: unknown) => {
           console.error(
             `Failed to move expense report to ${year} folder:`,
             error,
@@ -246,7 +258,13 @@ export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementRe
           .then((newFolder) => {
             if (newFolder) {
               // Move the document to the new year folder
-              return onMoveNode(fileNode, newFolder);
+              return dispatchActions(
+                moveNode({
+                  srcFolder: fileNode.id,
+                  targetParentFolder: newFolder.id,
+                }),
+                driveId,
+              );
             }
           })
           .catch((error: unknown) => {
@@ -270,7 +288,6 @@ export function useExpenseReportAutoPlacement(): UseExpenseReportAutoPlacementRe
     documentsInDrive,
     expenseReportsFolderNodeIds,
     yearFolders,
-    onMoveNode,
   ]);
 
   return {
