@@ -1,3 +1,10 @@
+# [1.0.0-dev.32](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.31...v1.0.0-dev.32) (2026-04-03)
+
+
+### Bug Fixes
+
+* replace onMoveNode with drive-level moveNode in auto-placement hooks ([f57b596](https://github.com/powerhouse-inc/contributor-billing/commit/f57b5961900a2a38886c6b0a20f46cc1979971ef))
+
 # [1.0.0-dev.31](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.30...v1.0.0-dev.31) (2026-04-02)
 
 
