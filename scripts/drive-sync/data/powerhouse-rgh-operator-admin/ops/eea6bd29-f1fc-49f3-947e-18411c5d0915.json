@@ -1,0 +1,130 @@
+[
+  {
+    "action": {
+      "input": {
+        "branch": "main",
+        "documentId": "eea6bd29-f1fc-49f3-947e-18411c5d0915",
+        "meta": {},
+        "model": "powerhouse/service-offering",
+        "name": "OperationalHubOffering (copy) 1",
+        "protocolVersions": {
+          "base-reducer": 2
+        },
+        "signing": {
+          "createdAtUtcIso": "2026-04-01T14:52:10.676Z",
+          "documentType": "powerhouse/service-offering",
+          "nonce": "",
+          "publicKey": {},
+          "signature": "eea6bd29-f1fc-49f3-947e-18411c5d0915"
+        },
+        "slug": "",
+        "version": 0
+      },
+      "scope": "document",
+      "type": "CREATE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "8e639d0263060f0d36feb3d8af40d343",
+    "index": 0,
+    "skip": 0,
+    "timestampUtcMs": "2026-04-01T14:52:10.677Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-04-01T15:53:14.414Z",
+        "resourceTemplateId": "a952735e-e195-40d3-8407-42a22210f4f7"
+      },
+      "scope": "global",
+      "type": "SELECT_RESOURCE_TEMPLATE"
+    },
+    "error": null,
+    "hash": "5XNSCMue5p5IUZrGCiYTv7ISOPA=",
+    "id": "8d54b1366a4e2387ae1f3d3c027370a0",
+    "index": 0,
+    "skip": 0,
+    "timestampUtcMs": "2026-04-01T15:53:14.414Z"
+  },
+  {
+    "action": {
+      "input": {
+        "documentId": "eea6bd29-f1fc-49f3-947e-18411c5d0915",
+        "fromVersion": 0,
+        "initialState": {
+          "auth": {},
+          "document": {
+            "hash": {
+              "algorithm": "sha1",
+              "encoding": "base64"
+            },
+            "version": 0
+          },
+          "global": {
+            "availableBillingCycles": [],
+            "description": null,
+            "facetTargets": [],
+            "id": null,
+            "infoLink": null,
+            "lastModified": null,
+            "operatorId": null,
+            "optionGroups": [],
+            "resourceTemplateId": null,
+            "services": [],
+            "status": "DRAFT",
+            "summary": "",
+            "thumbnailUrl": null,
+            "tiers": [],
+            "title": ""
+          },
+          "local": {}
+        },
+        "model": "powerhouse/service-offering",
+        "toVersion": 1
+      },
+      "scope": "document",
+      "type": "UPGRADE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "6a0f30ec44152843ee13b793a21cce80",
+    "index": 1,
+    "skip": 0,
+    "timestampUtcMs": "2026-04-01T14:52:10.677Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": "A ready-to-use operational setup that gives open-source and public-goods builder teams the legal and financial infrastructure to receive funding, pay contributors, and operate compliantly from day one.\n\nStructured as a Swiss Association \u2014 a cost-efficient, privacy-preserving legal form with strong international recognition \u2014 the Operational Hub reduces personal liability for contributors, simplifies compliance, and provides a professional foundation for teams that are already doing the work.",
+        "lastModified": "2026-04-01T15:53:14.414Z",
+        "summary": "A turnkey legal and operational setup for open-source builder teams \u2014 entity formation, invoicing, payouts, and compliance bundled under one roof.",
+        "thumbnailUrl": "https://staging.achra.com/_next/image?url=%2Fservices%2Fcovers%2Fcover-02.jpg&w=3840&q=75&dpl=dpl_FjkVSKv1rrWGpfaa2yG8PPxLE1Na",
+        "title": "Operational Hub"
+      },
+      "scope": "global",
+      "type": "UPDATE_OFFERING_INFO"
+    },
+    "error": null,
+    "hash": "0AnJw8ot6B+/3vOaYgQz2+Toifw=",
+    "id": "ca69c5bb6f4d31fa25b535cb3a9ddbb5",
+    "index": 1,
+    "skip": 0,
+    "timestampUtcMs": "2026-04-01T15:53:14.415Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-04-01T15:53:14.414Z",
+        "operatorId": "8a65a724-7529-4300-92b1-c39732b6100f"
+      },
+      "scope": "global",
+      "type": "SET_OPERATOR"
+    },
+    "error": null,
+    "hash": "6N8NQAm0tvQe+dpt4B13SJShiG0=",
+    "id": "2bdbab4520a576fcbf4e1fd01faf5cf2",
+    "index": 2,
+    "skip": 0,
+    "timestampUtcMs": "2026-04-01T15:53:14.416Z"
+  }
+]

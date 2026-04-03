@@ -1,0 +1,234 @@
+[
+  {
+    "action": {
+      "input": {
+        "branch": "main",
+        "documentId": "8d980ae6-3587-4762-8514-fb3be2811feb",
+        "meta": {},
+        "model": "powerhouse/resource-template",
+        "name": "FUNDRAISING VEHICLE  (OCF)",
+        "protocolVersions": {
+          "base-reducer": 2
+        },
+        "signing": {
+          "createdAtUtcIso": "2026-03-23T18:53:12.414Z",
+          "documentType": "powerhouse/resource-template",
+          "nonce": "",
+          "publicKey": {},
+          "signature": "8d980ae6-3587-4762-8514-fb3be2811feb"
+        },
+        "slug": "",
+        "version": 0
+      },
+      "scope": "document",
+      "type": "CREATE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "8f8d45a84edee51ce810254246afda7b",
+    "index": 0,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-23T18:53:12.414Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": " A standalone vehicle for issuing equity, tokens, or revenue\u2011participation instruments to DAOs or traditional investors. Keeps fundraising, investor rights, and distributions separate from operations.\n\n\n**Typical use cases:**\n\n- DAO\u2011based fundraising\n- Token issuance\n- Hybrid Web2 / Web3 capital raises\n\nSuitable for teams needing regulatory clarity and clean cap\u2011table separation.\n",
+        "lastModified": "2026-03-23T18:53:04.000Z",
+        "summary": "A purpose\u2011built entity for raising and distributing capital.\n",
+        "thumbnailUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNGcgm98TZZ6ESUv4wQuTg1VcC0xl2rpyzyA&s",
+        "title": "FUNDRAISING VEHICLE  (OCF)"
+      },
+      "scope": "global",
+      "type": "UPDATE_TEMPLATE_INFO"
+    },
+    "error": null,
+    "hash": "KpwJp/AbxjNpMDde/NXCbgIKMwA=",
+    "id": "7a468d3ae07c222711803c3df64e9b69",
+    "index": 0,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-23T18:53:38.766Z"
+  },
+  {
+    "action": {
+      "input": {
+        "documentId": "8d980ae6-3587-4762-8514-fb3be2811feb",
+        "fromVersion": 0,
+        "initialState": {
+          "auth": {},
+          "document": {
+            "hash": {
+              "algorithm": "sha1",
+              "encoding": "base64"
+            },
+            "version": 0
+          },
+          "global": {
+            "contentSections": [],
+            "description": null,
+            "facetTargets": [],
+            "faqFields": [],
+            "id": null,
+            "infoLink": null,
+            "lastModified": null,
+            "operatorId": null,
+            "optionGroups": [],
+            "recurringServices": [],
+            "services": [],
+            "setupServices": [],
+            "status": "DRAFT",
+            "summary": "",
+            "targetAudiences": [],
+            "thumbnailUrl": null,
+            "title": ""
+          },
+          "local": {}
+        },
+        "model": "powerhouse/resource-template",
+        "toVersion": 1
+      },
+      "scope": "document",
+      "type": "UPGRADE_DOCUMENT"
+    },
+    "error": null,
+    "hash": "",
+    "id": "56cfd0c53996d586c81ead0d6d7c2270",
+    "index": 1,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-23T18:53:12.414Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-23T18:53:04.000Z",
+        "status": "COMING_SOON"
+      },
+      "scope": "global",
+      "type": "UPDATE_TEMPLATE_STATUS"
+    },
+    "error": null,
+    "hash": "WmjKIJdPof6NgpQaCDTmbkEUQws=",
+    "id": "c850589e162e638684519fc645308606",
+    "index": 1,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-23T18:53:38.766Z"
+  },
+  {
+    "action": {
+      "input": {
+        "lastModified": "2026-03-23T18:53:04.000Z",
+        "operatorId": "831efda4-c052-42b1-8df3-dfae977b732b"
+      },
+      "scope": "global",
+      "type": "SET_OPERATOR"
+    },
+    "error": null,
+    "hash": "iQKCIauVymOOW5gSoaetcg+eRDo=",
+    "id": "dfc0263e71fdf3b8f2f2344a1daa9286",
+    "index": 2,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-23T18:53:38.766Z"
+  },
+  {
+    "action": {
+      "input": {
+        "color": "#10b981",
+        "id": "07bea701-a531-41f8-a3ef-a52e668a7d4e",
+        "label": "Networks",
+        "lastModified": "2026-03-23T18:53:04.000Z"
+      },
+      "scope": "global",
+      "type": "ADD_TARGET_AUDIENCE"
+    },
+    "error": null,
+    "hash": "MRmmbWBg/nAUYonF6nLy056ta+c=",
+    "id": "faf57401ae815e14c99a4f7bea8b9d42",
+    "index": 3,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-23T18:53:38.766Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "sno-function",
+        "categoryLabel": "SNO Function",
+        "id": "03392b63-b36b-4304-bfc4-021a864a040e",
+        "lastModified": "2026-03-23T18:53:04.000Z",
+        "selectedOptions": [
+          "Operational Hub"
+        ]
+      },
+      "scope": "global",
+      "type": "SET_FACET_TARGET"
+    },
+    "error": null,
+    "hash": "ZQ+/wmpCO1X0zbPGX0ASLIJNa0A=",
+    "id": "4023a5cf9b963de9cbae6df493361790",
+    "index": 4,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-23T18:53:38.766Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "legal-entity",
+        "categoryLabel": "Legal Entity",
+        "id": "70dd899e-0b78-4129-9de4-01b99d67aa34",
+        "lastModified": "2026-03-23T18:53:04.000Z",
+        "selectedOptions": [
+          "BVI Entity"
+        ]
+      },
+      "scope": "global",
+      "type": "SET_FACET_TARGET"
+    },
+    "error": null,
+    "hash": "3m/N3rkE1lcVvpw2ou3sgZ6P51Y=",
+    "id": "cf2e4b3a3d0f4c8a21333b2578f0cebe",
+    "index": 5,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-23T18:53:38.766Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "team",
+        "categoryLabel": "Team",
+        "id": "756e5616-38d4-401a-9b99-0cf9f7fddbfd",
+        "lastModified": "2026-03-23T18:53:04.000Z",
+        "selectedOptions": [
+          "Local"
+        ]
+      },
+      "scope": "global",
+      "type": "SET_FACET_TARGET"
+    },
+    "error": null,
+    "hash": "iLaavJ2WmZkeHaj9qB4t8brIRcE=",
+    "id": "dfb34b04577603b63be7cb44a28fd47c",
+    "index": 6,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-23T18:53:38.766Z"
+  },
+  {
+    "action": {
+      "input": {
+        "categoryKey": "anonymity",
+        "categoryLabel": "Anonymity",
+        "id": "3c7918ea-fdff-4c14-a519-b5580fece37c",
+        "lastModified": "2026-03-23T18:53:04.000Z",
+        "selectedOptions": [
+          "Highest"
+        ]
+      },
+      "scope": "global",
+      "type": "SET_FACET_TARGET"
+    },
+    "error": null,
+    "hash": "UNVTaUZCdW4qGMcAtofz+Gb88cA=",
+    "id": "73a8ec834ac100c453720a81b0015322",
+    "index": 7,
+    "skip": 0,
+    "timestampUtcMs": "2026-03-23T18:53:38.766Z"
+  }
+]
