@@ -5,20 +5,20 @@ import {
   baseLoadFromInput,
   defaultBaseState,
   generateId,
-} from "document-model/core";
-import type {
-  SnapshotReportGlobalState,
-  SnapshotReportLocalState,
-} from "./types.js";
-import type { SnapshotReportPHState } from "./types.js";
+} from "document-model";
 import { reducer } from "./reducer.js";
 import { snapshotReportDocumentType } from "./document-type.js";
 import {
-  isSnapshotReportDocument,
   assertIsSnapshotReportDocument,
-  isSnapshotReportState,
   assertIsSnapshotReportState,
+  isSnapshotReportDocument,
+  isSnapshotReportState,
 } from "./document-schema.js";
+import type {
+  SnapshotReportGlobalState,
+  SnapshotReportLocalState,
+  SnapshotReportPHState,
+} from "./types.js";
 
 export const initialGlobalState: SnapshotReportGlobalState = {
   ownerIds: [],
@@ -70,12 +70,3 @@ export const utils: DocumentModelUtils<SnapshotReportPHState> = {
     return assertIsSnapshotReportDocument(document);
   },
 };
-
-export const createDocument = utils.createDocument;
-export const createState = utils.createState;
-export const saveToFileHandle = utils.saveToFileHandle;
-export const loadFromInput = utils.loadFromInput;
-export const isStateOfType = utils.isStateOfType;
-export const assertIsStateOfType = utils.assertIsStateOfType;
-export const isDocumentOfType = utils.isDocumentOfType;
-export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

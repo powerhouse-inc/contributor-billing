@@ -8,7 +8,7 @@ import {
 import type {
   OperationalHubProfileAction,
   OperationalHubProfileDocument,
-} from "@powerhousedao/contributor-billing/document-models/operational-hub-profile/v1";
+} from "document-models/operational-hub-profile/v1";
 import {
   assertIsOperationalHubProfileDocument,
   isOperationalHubProfileDocument,

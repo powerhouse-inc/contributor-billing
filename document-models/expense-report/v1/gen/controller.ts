@@ -1,4 +1,4 @@
-import { PHDocumentController } from "document-model/core";
+import { PHDocumentController } from "document-model";
 import { ExpenseReport } from "../module.js";
 import type { ExpenseReportAction, ExpenseReportPHState } from "./types.js";
 

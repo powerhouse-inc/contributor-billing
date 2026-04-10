@@ -1,4 +1,10 @@
-import type { SnapshotReportTransactionsOperations } from "@powerhousedao/contributor-billing/document-models/snapshot-report/v1";
+import type { SnapshotReportTransactionsOperations } from "document-models/snapshot-report/v1";
+import {
+  DuplicateTransactionError,
+  AddTransactionAccountNotFoundError,
+  RemoveTransactionNotFoundError,
+  UpdateFlowTypeTransactionNotFoundError,
+} from "../../gen/transactions/error.js";
 
 export const snapshotReportTransactionsOperations: SnapshotReportTransactionsOperations =
   {
@@ -7,16 +13,94 @@ export const snapshotReportTransactionsOperations: SnapshotReportTransactionsOpe
         (a) => a.id === action.input.accountId,
       );
       if (!account) {
-        throw new Error(`Account with ID ${action.input.accountId} not found`);
+        throw new AddTransactionAccountNotFoundError(
+          `Account with ID ${action.input.accountId} not found`,
+        );
       }
 
       const existingTransaction = account.transactions.find(
         (t) => t.id === action.input.id,
       );
       if (existingTransaction) {
-        throw new Error(
+        throw new DuplicateTransactionError(
           `Transaction with ID ${action.input.id} already exists`,
         );
+      }
+
+      // Known swap protocol addresses (lowercase)
+      const SWAP_ADDRESSES = new Set([
+        "0x9008d19f58aabd9ed0d60971565aa8510560ab41", // CoW Protocol Settlement
+        "0x7a250d5630b4cf539739df2c5dacb4c659f2488d", // Uniswap V2 Router
+        "0xe592427a0aece92de3edee1f18e0157c05861564", // Uniswap V3 Router
+        "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45", // Uniswap V3 Router 2
+        "0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad", // Uniswap Universal Router
+        "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f", // SushiSwap Router
+        "0x1111111254eeb25477b68fb85ed929f73a960582", // 1inch Router v5
+        "0x1111111254fb6c44bac0bed2854e76f90643097d", // 1inch Router v4
+        "0xdef1c0ded9bec7f1a1670819833240f027b25eff", // 0x Exchange Proxy
+        "0x881d40237659c251811cec9c364ef91dc08d300c", // Metamask Swap Router
+      ]);
+
+      function isSwapAddress(address: string | null | undefined) {
+        if (!address) return false;
+        return SWAP_ADDRESSES.has(address.toLowerCase());
+      }
+
+      // AUTO-CATEGORIZATION: Determine flow type and counter-party account ID
+      let flowType = action.input.flowType || null;
+      let counterPartyAccountId = action.input.counterPartyAccountId || null;
+
+      // Check for swap transactions first (highest priority)
+      if (!flowType && isSwapAddress(action.input.counterParty)) {
+        flowType = "Swap";
+      } else if (action.input.counterParty) {
+        // Find counter-party account in snapshot
+        const counterPartyAccount = state.snapshotAccounts.find(
+          (acc) =>
+            acc.accountAddress.toLowerCase() ===
+            action.input.counterParty!.toLowerCase(),
+        );
+
+        if (counterPartyAccount) {
+          // Auto-link counter-party account
+          counterPartyAccountId = counterPartyAccount.id;
+
+          // Auto-categorize flow type if not explicitly provided
+          if (!flowType) {
+            // Determine sender and receiver types based on transaction direction
+            const fromType =
+              action.input.direction === "OUTFLOW"
+                ? account.type
+                : counterPartyAccount.type;
+            const toType =
+              action.input.direction === "OUTFLOW"
+                ? counterPartyAccount.type
+                : account.type;
+
+            // Flow categorization rules
+            if (fromType === "Source") {
+              flowType = "TopUp";
+            } else if (toType === "Source") {
+              flowType = "Return";
+            } else if (toType === "Destination") {
+              flowType = "TopUp";
+            } else if (fromType === "External") {
+              flowType = "External";
+            } else if (fromType === "Internal" && toType === "Internal") {
+              flowType = "Internal";
+            } else if (fromType === "Internal" && toType === "External") {
+              flowType = "External";
+            } else {
+              flowType = "External";
+            }
+          }
+        } else if (!flowType) {
+          // FALLBACK: Counter-party not found in snapshot, default to External
+          flowType = "External";
+        }
+      } else if (!flowType) {
+        // FALLBACK: No counter-party provided, default to External
+        flowType = "External";
       }
 
       const newTransaction = {
@@ -29,8 +113,8 @@ export const snapshotReportTransactionsOperations: SnapshotReportTransactionsOpe
         token: action.input.token,
         blockNumber: action.input.blockNumber || null,
         direction: action.input.direction,
-        flowType: action.input.flowType || null,
-        counterPartyAccountId: action.input.counterPartyAccountId || null,
+        flowType: flowType,
+        counterPartyAccountId: counterPartyAccountId,
       };
 
       account.transactions.push(newTransaction);
@@ -50,7 +134,9 @@ export const snapshotReportTransactionsOperations: SnapshotReportTransactionsOpe
       }
 
       if (!found) {
-        throw new Error(`Transaction with ID ${action.input.id} not found`);
+        throw new RemoveTransactionNotFoundError(
+          `Transaction with ID ${action.input.id} not found`,
+        );
       }
     },
     updateTransactionFlowTypeOperation(state, action) {
@@ -66,21 +152,48 @@ export const snapshotReportTransactionsOperations: SnapshotReportTransactionsOpe
       }
 
       if (!transaction) {
-        throw new Error(`Transaction with ID ${action.input.id} not found`);
+        throw new UpdateFlowTypeTransactionNotFoundError(
+          `Transaction with ID ${action.input.id} not found`,
+        );
       }
 
       transaction.flowType = action.input.flowType;
     },
-    recalculateFlowTypesOperation(state, _action) {
+    recalculateFlowTypesOperation(state, action) {
+      // Known swap protocol addresses (lowercase)
+      const SWAP_ADDRESSES = new Set([
+        "0x9008d19f58aabd9ed0d60971565aa8510560ab41", // CoW Protocol Settlement
+        "0x7a250d5630b4cf539739df2c5dacb4c659f2488d", // Uniswap V2 Router
+        "0xe592427a0aece92de3edee1f18e0157c05861564", // Uniswap V3 Router
+        "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45", // Uniswap V3 Router 2
+        "0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad", // Uniswap Universal Router
+        "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f", // SushiSwap Router
+        "0x1111111254eeb25477b68fb85ed929f73a960582", // 1inch Router v5
+        "0x1111111254fb6c44bac0bed2854e76f90643097d", // 1inch Router v4
+        "0xdef1c0ded9bec7f1a1670819833240f027b25eff", // 0x Exchange Proxy
+        "0x881d40237659c251811cec9c364ef91dc08d300c", // Metamask Swap Router
+      ]);
+
+      function isSwapAddress(address: string | null | undefined) {
+        if (!address) return false;
+        return SWAP_ADDRESSES.has(address.toLowerCase());
+      }
+
       for (const account of state.snapshotAccounts) {
         for (const tx of account.transactions) {
+          // Check for swap transactions first
+          if (isSwapAddress(tx.counterParty)) {
+            tx.flowType = "Swap";
+            continue;
+          }
+
           if (!tx.counterParty) continue;
 
           // Find counter-party account
           const counterPartyAccount = state.snapshotAccounts.find(
             (acc) =>
               acc.accountAddress.toLowerCase() ===
-              tx.counterParty?.toLowerCase(),
+              tx.counterParty!.toLowerCase(),
           );
 
           if (counterPartyAccount) {

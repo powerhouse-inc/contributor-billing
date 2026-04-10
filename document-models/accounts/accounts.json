@@ -6,7 +6,7 @@
     "website": "https://powerhouse.inc"
   },
   "extension": "",
-  "description": "Document model for managing accounts with KYC/AML status tracking",
+  "description": "Document model for managing accounts with KYC/AML status tracking.",
   "specifications": [
     {
       "state": {
@@ -25,53 +25,53 @@
         {
           "id": "accounts",
           "name": "accounts",
-          "description": "",
           "operations": [
             {
               "id": "add-account",
               "name": "addAccount",
-              "description": "",
-              "schema": "input AddAccountInput {\n  id: OID!\n  account: String!\n  name: String!\n  budgetPath: String\n  accountTransactionsId: PHID\n  chain: [String!]\n  type: AccountTypeInput!\n  owners: [String!]\n  KycAmlStatus: KycAmlStatusTypeInput\n}",
-              "template": "",
-              "reducer": "",
+              "scope": "global",
               "errors": [],
+              "schema": "input AddAccountInput {\n  id: OID!\n  account: String!\n  name: String!\n  budgetPath: String\n  accountTransactionsId: PHID\n  chain: [String!]\n  type: AccountTypeInput!\n  owners: [String!]\n  KycAmlStatus: KycAmlStatusTypeInput\n}",
+              "reducer": "",
               "examples": [],
-              "scope": "global"
+              "template": "",
+              "description": ""
             },
             {
               "id": "update-account",
               "name": "updateAccount",
-              "description": "",
-              "schema": "input UpdateAccountInput {\n    id: OID!\n    account: String\n    name: String\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: AccountTypeInput\n    owners: [String!]\n    KycAmlStatus: KycAmlStatusTypeInput\n}",
-              "template": "",
-              "reducer": "",
+              "scope": "global",
               "errors": [],
+              "schema": "input UpdateAccountInput {\n    id: OID!\n    account: String\n    name: String\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: AccountTypeInput\n    owners: [String!]\n    KycAmlStatus: KycAmlStatusTypeInput\n}",
+              "reducer": "",
               "examples": [],
-              "scope": "global"
+              "template": "",
+              "description": ""
             },
             {
               "id": "delete-account",
               "name": "deleteAccount",
-              "description": "",
-              "schema": "input DeleteAccountInput {\n    id: OID!\n}",
-              "template": "",
-              "reducer": "",
+              "scope": "global",
               "errors": [],
+              "schema": "input DeleteAccountInput {\n    id: OID!\n}",
+              "reducer": "",
               "examples": [],
-              "scope": "global"
+              "template": "",
+              "description": ""
             },
             {
               "id": "update-kyc-status",
               "name": "updateKycStatus",
-              "description": "",
-              "schema": "input UpdateKycStatusInput {\n    id: OID!\n    KycAmlStatus: KycAmlStatusTypeInput!\n}",
-              "template": "",
-              "reducer": "",
+              "scope": "global",
               "errors": [],
+              "schema": "input UpdateKycStatusInput {\n    id: OID!\n    KycAmlStatus: KycAmlStatusTypeInput!\n}",
+              "reducer": "",
               "examples": [],
-              "scope": "global"
+              "template": "",
+              "description": ""
             }
-          ]
+          ],
+          "description": ""
         }
       ],
       "version": 1,

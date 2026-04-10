@@ -5,20 +5,20 @@ import {
   baseLoadFromInput,
   defaultBaseState,
   generateId,
-} from "document-model/core";
-import type {
-  ExpenseReportGlobalState,
-  ExpenseReportLocalState,
-} from "./types.js";
-import type { ExpenseReportPHState } from "./types.js";
+} from "document-model";
 import { reducer } from "./reducer.js";
 import { expenseReportDocumentType } from "./document-type.js";
 import {
-  isExpenseReportDocument,
   assertIsExpenseReportDocument,
-  isExpenseReportState,
   assertIsExpenseReportState,
+  isExpenseReportDocument,
+  isExpenseReportState,
 } from "./document-schema.js";
+import type {
+  ExpenseReportGlobalState,
+  ExpenseReportLocalState,
+  ExpenseReportPHState,
+} from "./types.js";
 
 export const initialGlobalState: ExpenseReportGlobalState = {
   ownerId: null,
@@ -211,12 +211,3 @@ export const utils: DocumentModelUtils<ExpenseReportPHState> = {
     return assertIsExpenseReportDocument(document);
   },
 };
-
-export const createDocument = utils.createDocument;
-export const createState = utils.createState;
-export const saveToFileHandle = utils.saveToFileHandle;
-export const loadFromInput = utils.loadFromInput;
-export const isStateOfType = utils.isStateOfType;
-export const assertIsStateOfType = utils.assertIsStateOfType;
-export const isDocumentOfType = utils.isDocumentOfType;
-export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

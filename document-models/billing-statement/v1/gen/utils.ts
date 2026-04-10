@@ -5,20 +5,20 @@ import {
   baseLoadFromInput,
   defaultBaseState,
   generateId,
-} from "document-model/core";
-import type {
-  BillingStatementGlobalState,
-  BillingStatementLocalState,
-} from "./types.js";
-import type { BillingStatementPHState } from "./types.js";
+} from "document-model";
 import { reducer } from "./reducer.js";
 import { billingStatementDocumentType } from "./document-type.js";
 import {
-  isBillingStatementDocument,
   assertIsBillingStatementDocument,
-  isBillingStatementState,
   assertIsBillingStatementState,
+  isBillingStatementDocument,
+  isBillingStatementState,
 } from "./document-schema.js";
+import type {
+  BillingStatementGlobalState,
+  BillingStatementLocalState,
+  BillingStatementPHState,
+} from "./types.js";
 
 export const initialGlobalState: BillingStatementGlobalState = {
   contributor: null,
@@ -71,12 +71,3 @@ export const utils: DocumentModelUtils<BillingStatementPHState> = {
     return assertIsBillingStatementDocument(document);
   },
 };
-
-export const createDocument = utils.createDocument;
-export const createState = utils.createState;
-export const saveToFileHandle = utils.saveToFileHandle;
-export const loadFromInput = utils.loadFromInput;
-export const isStateOfType = utils.isStateOfType;
-export const assertIsStateOfType = utils.assertIsStateOfType;
-export const isDocumentOfType = utils.isDocumentOfType;
-export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

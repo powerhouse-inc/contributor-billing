@@ -8,7 +8,7 @@ import {
 import type {
   AccountTransactionsAction,
   AccountTransactionsDocument,
-} from "@powerhousedao/contributor-billing/document-models/account-transactions/v1";
+} from "document-models/account-transactions/v1";
 import {
   assertIsAccountTransactionsDocument,
   isAccountTransactionsDocument,

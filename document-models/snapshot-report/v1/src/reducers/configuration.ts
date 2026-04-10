@@ -1,4 +1,4 @@
-import type { SnapshotReportConfigurationOperations } from "@powerhousedao/contributor-billing/document-models/snapshot-report/v1";
+import type { SnapshotReportConfigurationOperations } from "document-models/snapshot-report/v1";
 
 export const snapshotReportConfigurationOperations: SnapshotReportConfigurationOperations =
   {

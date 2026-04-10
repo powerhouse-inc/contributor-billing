@@ -1,15 +1,15 @@
 import { baseActions } from "document-model";
 import {
-  generalActions,
-  lineItemsActions,
-  tagsActions,
+  billingStatementGeneralActions,
+  billingStatementLineItemsActions,
+  billingStatementTagsActions,
 } from "./gen/creators.js";
 
 /** Actions for the BillingStatement document model */
 
 export const actions = {
   ...baseActions,
-  ...generalActions,
-  ...lineItemsActions,
-  ...tagsActions,
+  ...billingStatementGeneralActions,
+  ...billingStatementLineItemsActions,
+  ...billingStatementTagsActions,
 };

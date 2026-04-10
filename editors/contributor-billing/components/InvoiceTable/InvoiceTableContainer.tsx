@@ -1,8 +1,8 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
+import type { DocumentModelModule } from "document-model";
 import {
   isFileNodeKind,
   useDocumentModelModules,
-  type VetraDocumentModelModule,
   type FileUploadProgress,
   useDocumentsInSelectedDrive,
   useSelectedDrive,
@@ -256,7 +256,7 @@ export function InvoiceTableContainer({
 
   // Handle document model selection - create invoice directly in the payments folder
   const onSelectDocumentModel = useCallback(
-    async (documentModel: VetraDocumentModelModule, name: string) => {
+    async (documentModel: DocumentModelModule, name: string) => {
       if (!driveId) {
         cbToast("No drive selected", { type: "error" });
         return;
@@ -267,7 +267,7 @@ export function InvoiceTableContainer({
         const createdNode = await addDocument(
           driveId,
           name,
-          documentModel.id,
+          documentModel.documentModel?.global?.id,
           folderId, // Create directly in the payments folder
           undefined,
           undefined,

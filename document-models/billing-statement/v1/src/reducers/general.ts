@@ -1,5 +1,5 @@
 import { BillingStatementStatusInputSchema } from "../../gen/schema/zod.js";
-import type { BillingStatementGeneralOperations } from "@powerhousedao/contributor-billing/document-models/billing-statement/v1";
+import type { BillingStatementGeneralOperations } from "document-models/billing-statement/v1";
 
 export const billingStatementGeneralOperations: BillingStatementGeneralOperations =
   {

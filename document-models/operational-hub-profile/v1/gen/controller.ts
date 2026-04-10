@@ -1,4 +1,4 @@
-import { PHDocumentController } from "document-model/core";
+import { PHDocumentController } from "document-model";
 import { OperationalHubProfile } from "../module.js";
 import type {
   OperationalHubProfileAction,

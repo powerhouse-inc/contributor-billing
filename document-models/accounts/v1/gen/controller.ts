@@ -1,4 +1,4 @@
-import { PHDocumentController } from "document-model/core";
+import { PHDocumentController } from "document-model";
 import { Accounts } from "../module.js";
 import type { AccountsAction, AccountsPHState } from "./types.js";
 

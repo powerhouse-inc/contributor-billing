@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/common/utils";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -10,7 +10,7 @@ import {
   AddBudgetInputSchema,
   UpdateBudgetInputSchema,
   DeleteBudgetInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/account-transactions/v1";
+} from "document-models/account-transactions/v1";
 
 describe("BudgetsOperations", () => {
   it("should handle addBudget operation", () => {

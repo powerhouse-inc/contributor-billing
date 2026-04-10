@@ -1,4 +1,4 @@
-import { PHDocumentController } from "document-model/core";
+import { PHDocumentController } from "document-model";
 import { Invoice } from "../module.js";
 import type { InvoiceAction, InvoicePHState } from "./types.js";
 

@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/common/utils";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -14,7 +14,7 @@ import {
   EditLineItemInputSchema,
   SetInvoiceTagInputSchema,
   SetLineItemTagInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/invoice/v1";
+} from "document-models/invoice/v1";
 
 describe("ItemsOperations", () => {
   it("should handle addLineItem operation", () => {

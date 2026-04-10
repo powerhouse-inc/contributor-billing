@@ -1,4 +1,4 @@
-import { PHDocumentController } from "document-model/core";
+import { PHDocumentController } from "document-model";
 import { SnapshotReport } from "../module.js";
 import type { SnapshotReportAction, SnapshotReportPHState } from "./types.js";
 

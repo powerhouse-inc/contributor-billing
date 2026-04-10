@@ -1,9 +1,8 @@
-// TODO: remove eslint-disable rules once refactor is done
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import type { StateReducer } from "document-model";
-import { isDocumentAction, createReducer } from "document-model/core";
-import type { OperationalHubProfilePHState } from "@powerhousedao/contributor-billing/document-models/operational-hub-profile/v1";
+import type { Reducer, StateReducer } from "document-model";
+import { isDocumentAction, createReducer } from "document-model";
+import type { OperationalHubProfilePHState } from "document-models/operational-hub-profile/v1";
 
 import { operationalHubProfileConfigurationOperations } from "../src/reducers/configuration.js";
 
@@ -76,5 +75,5 @@ const stateReducer: StateReducer<OperationalHubProfilePHState> = (
   }
 };
 
-export const reducer =
-  createReducer<OperationalHubProfilePHState>(stateReducer);
+export const reducer: Reducer<OperationalHubProfilePHState> =
+  createReducer(stateReducer);

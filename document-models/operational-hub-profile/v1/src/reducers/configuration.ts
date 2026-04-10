@@ -1,4 +1,4 @@
-import type { OperationalHubProfileConfigurationOperations } from "@powerhousedao/contributor-billing/document-models/operational-hub-profile/v1";
+import type { OperationalHubProfileConfigurationOperations } from "document-models/operational-hub-profile/v1";
 
 export const operationalHubProfileConfigurationOperations: OperationalHubProfileConfigurationOperations =
   {

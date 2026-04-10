@@ -2,14 +2,14 @@
  * Factory methods for creating InvoiceDocument instances
  */
 import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
-import { createBaseState, defaultBaseState } from "document-model/core";
+import { createBaseState, defaultBaseState } from "document-model";
 import type {
   InvoiceDocument,
-  InvoiceLocalState,
   InvoiceGlobalState,
+  InvoiceLocalState,
   InvoicePHState,
 } from "./types.js";
-import { createDocument } from "./utils.js";
+import { utils } from "./utils.js";
 
 export function defaultGlobalState(): InvoiceGlobalState {
   return {
@@ -106,7 +106,7 @@ export function createInvoiceDocument(
     local?: Partial<InvoiceLocalState>;
   }>,
 ): InvoiceDocument {
-  const document = createDocument(
+  const document = utils.createDocument(
     state
       ? createState(
           createBaseState(state.auth, state.document),

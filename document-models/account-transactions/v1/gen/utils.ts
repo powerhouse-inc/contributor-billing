@@ -5,20 +5,20 @@ import {
   baseLoadFromInput,
   defaultBaseState,
   generateId,
-} from "document-model/core";
-import type {
-  AccountTransactionsGlobalState,
-  AccountTransactionsLocalState,
-} from "./types.js";
-import type { AccountTransactionsPHState } from "./types.js";
+} from "document-model";
 import { reducer } from "./reducer.js";
 import { accountTransactionsDocumentType } from "./document-type.js";
 import {
-  isAccountTransactionsDocument,
   assertIsAccountTransactionsDocument,
-  isAccountTransactionsState,
   assertIsAccountTransactionsState,
+  isAccountTransactionsDocument,
+  isAccountTransactionsState,
 } from "./document-schema.js";
+import type {
+  AccountTransactionsGlobalState,
+  AccountTransactionsLocalState,
+  AccountTransactionsPHState,
+} from "./types.js";
 
 export const initialGlobalState: AccountTransactionsGlobalState = {
   account: {
@@ -75,12 +75,3 @@ export const utils: DocumentModelUtils<AccountTransactionsPHState> = {
     return assertIsAccountTransactionsDocument(document);
   },
 };
-
-export const createDocument = utils.createDocument;
-export const createState = utils.createState;
-export const saveToFileHandle = utils.saveToFileHandle;
-export const loadFromInput = utils.loadFromInput;
-export const isStateOfType = utils.isStateOfType;
-export const assertIsStateOfType = utils.assertIsStateOfType;
-export const isDocumentOfType = utils.isDocumentOfType;
-export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

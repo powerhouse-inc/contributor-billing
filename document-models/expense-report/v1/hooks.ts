@@ -8,7 +8,7 @@ import {
 import type {
   ExpenseReportAction,
   ExpenseReportDocument,
-} from "@powerhousedao/contributor-billing/document-models/expense-report/v1";
+} from "document-models/expense-report/v1";
 import {
   assertIsExpenseReportDocument,
   isExpenseReportDocument,

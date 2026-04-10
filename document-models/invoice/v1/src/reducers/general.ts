@@ -1,4 +1,4 @@
-import type { InvoiceGeneralOperations } from "@powerhousedao/contributor-billing/document-models/invoice/v1";
+import type { InvoiceGeneralOperations } from "document-models/invoice/v1";
 
 /**
  * Converts a date string to ISO datetime format if it's not already in that format

@@ -1,4 +1,4 @@
-import type { InvoicePartiesOperations } from "@powerhousedao/contributor-billing/document-models/invoice/v1";
+import type { InvoicePartiesOperations } from "document-models/invoice/v1";
 
 function getStateValue<T>(
   input: T | undefined,

@@ -93,7 +93,7 @@ export const CHAIN_CONFIGS: Record<string, ChainConfig> = {
   ethereum: {
     chainName: "Ethereum",
     chainId: "1",
-    rpc: "https://eth.llamarpc.com",
+    rpc: "https://cloudflare-eth.com/",
   },
   "arbitrum one": {
     chainName: "Arbitrum One",

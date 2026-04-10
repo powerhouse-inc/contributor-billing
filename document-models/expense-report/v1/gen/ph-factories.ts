@@ -2,14 +2,14 @@
  * Factory methods for creating ExpenseReportDocument instances
  */
 import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
-import { createBaseState, defaultBaseState } from "document-model/core";
+import { createBaseState, defaultBaseState } from "document-model";
 import type {
   ExpenseReportDocument,
-  ExpenseReportLocalState,
   ExpenseReportGlobalState,
+  ExpenseReportLocalState,
   ExpenseReportPHState,
 } from "./types.js";
-import { createDocument } from "./utils.js";
+import { utils } from "./utils.js";
 
 export function defaultGlobalState(): ExpenseReportGlobalState {
   return {
@@ -220,7 +220,7 @@ export function createExpenseReportDocument(
     local?: Partial<ExpenseReportLocalState>;
   }>,
 ): ExpenseReportDocument {
-  const document = createDocument(
+  const document = utils.createDocument(
     state
       ? createState(
           createBaseState(state.auth, state.document),

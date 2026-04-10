@@ -1,4 +1,4 @@
-import type { AccountsAccountsOperations } from "@powerhousedao/contributor-billing/document-models/accounts/v1";
+import type { AccountsAccountsOperations } from "document-models/accounts/v1";
 
 export const accountsAccountsOperations: AccountsAccountsOperations = {
   addAccountOperation(state, action) {

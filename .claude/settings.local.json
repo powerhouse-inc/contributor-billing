@@ -150,7 +150,13 @@
       "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_snapshot",
       "Bash(jq \".models[] | select\\(.name | contains\\(\"\"subscription\"\"\\) or contains\\(\"\"resource\"\"\\)\\) | {name, id, type}\")",
       "mcp__plugin_chrome-devtools-mcp_chrome-devtools__click",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(SB_PROFILE=staging-remote switchboard docs delete --help)",
+      "Bash(SB_PROFILE=staging-remote switchboard config use staging-remote)",
+      "Bash(SB_PROFILE=staging-remote switchboard docs get a326c3a9-d29b-46d3-8ab0-14b361e11567 --format json)",
+      "Bash(SB_PROFILE=staging-remote switchboard docs get 8a65a724-7529-4300-92b1-c39732b6100f --format json)",
+      "Bash(SB_PROFILE=staging-remote switchboard drives get powerhouse-rgh-operator-admin --format json)",
+      "Bash(SB_PROFILE=staging-remote python3 /tmp/upload-24.py)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

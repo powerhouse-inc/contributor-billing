@@ -1,4 +1,9 @@
-import type { SnapshotReportAccountsOperations } from "@powerhousedao/contributor-billing/document-models/snapshot-report/v1";
+import type { SnapshotReportAccountsOperations } from "document-models/snapshot-report/v1";
+import {
+  DuplicateAccountError,
+  UpdateAccountTypeNotFoundError,
+  RemoveAccountNotFoundError,
+} from "../../gen/accounts/error.js";
 
 export const snapshotReportAccountsOperations: SnapshotReportAccountsOperations =
   {
@@ -7,7 +12,9 @@ export const snapshotReportAccountsOperations: SnapshotReportAccountsOperations 
         (a) => a.id === action.input.id,
       );
       if (existingAccount) {
-        throw new Error(`Account with ID ${action.input.id} already exists`);
+        throw new DuplicateAccountError(
+          `Account with ID ${action.input.id} already exists`,
+        );
       }
 
       const newAccount = {
@@ -29,7 +36,9 @@ export const snapshotReportAccountsOperations: SnapshotReportAccountsOperations 
         (a) => a.id === action.input.id,
       );
       if (!account) {
-        throw new Error(`Account with ID ${action.input.id} not found`);
+        throw new UpdateAccountTypeNotFoundError(
+          `Account with ID ${action.input.id} not found`,
+        );
       }
 
       account.type = action.input.type;
@@ -39,7 +48,9 @@ export const snapshotReportAccountsOperations: SnapshotReportAccountsOperations 
         (a) => a.id === action.input.id,
       );
       if (accountIndex === -1) {
-        throw new Error(`Account with ID ${action.input.id} not found`);
+        throw new RemoveAccountNotFoundError(
+          `Account with ID ${action.input.id} not found`,
+        );
       }
 
       state.snapshotAccounts.splice(accountIndex, 1);

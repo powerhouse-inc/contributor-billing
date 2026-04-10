@@ -1,9 +1,8 @@
-// TODO: remove eslint-disable rules once refactor is done
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import type { StateReducer } from "document-model";
-import { isDocumentAction, createReducer } from "document-model/core";
-import type { InvoicePHState } from "@powerhousedao/contributor-billing/document-models/invoice/v1";
+import type { Reducer, StateReducer } from "document-model";
+import { isDocumentAction, createReducer } from "document-model";
+import type { InvoicePHState } from "document-models/invoice/v1";
 
 import { invoiceGeneralOperations } from "../src/reducers/general.js";
 import { invoicePartiesOperations } from "../src/reducers/parties.js";
@@ -391,4 +390,4 @@ const stateReducer: StateReducer<InvoicePHState> = (
   }
 };
 
-export const reducer = createReducer<InvoicePHState>(stateReducer);
+export const reducer: Reducer<InvoicePHState> = createReducer(stateReducer);

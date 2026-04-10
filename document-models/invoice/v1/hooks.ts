@@ -8,7 +8,7 @@ import {
 import type {
   InvoiceAction,
   InvoiceDocument,
-} from "@powerhousedao/contributor-billing/document-models/invoice/v1";
+} from "document-models/invoice/v1";
 import {
   assertIsInvoiceDocument,
   isInvoiceDocument,
