@@ -19,3 +19,5 @@ export * from "./configuration/operations.js";
 export * from "./accounts/operations.js";
 export * from "./balances/operations.js";
 export * from "./transactions/operations.js";
+export * as balancesActions from "./balances/creators.js";
+export * as transactionsActions from "./transactions/creators.js";

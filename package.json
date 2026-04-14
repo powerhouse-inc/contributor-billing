@@ -73,6 +73,7 @@
     "service-unstartup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-unstartup.sh"
   },
   "dependencies": {
+    "@liberuum-org/bee-reactor-adapter": "^0.23.0",
     "@powerhousedao/analytics-engine-core": "6.0.0-dev.164",
     "@powerhousedao/builder-profile": "1.1.0-dev.19",
     "@powerhousedao/connect": "6.0.0-dev.164",
@@ -103,7 +104,8 @@
   },
   "overrides": {
     "react": "$react",
-    "react-dom": "$react-dom"
+    "react-dom": "$react-dom",
+    "@powerhousedao/connect": "npm:@liberuum-org/connect@6.0.0-dev.163-swarm.27"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.3.15",

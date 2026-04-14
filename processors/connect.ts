@@ -1,3 +1,3 @@
-import type { ProcessorFactoryBuilder } from "@powerhousedao/reactor";
+import { swarmPluginProcessorBuilder } from "@liberuum-org/bee-reactor-adapter/dist/plugin/init.js";
 
-export const processorFactoryBuilders: ProcessorFactoryBuilder[] = [];
+export const processorFactoryBuilders = [swarmPluginProcessorBuilder];
