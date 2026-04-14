@@ -9,6 +9,7 @@
   "reactor": {
     "port": 4001
   },
+  "packageRegistryUrl": "https://registry.dev.vetra.io",
   "packages": [
     {
       "packageName": "@powerhousedao/builder-profile",
