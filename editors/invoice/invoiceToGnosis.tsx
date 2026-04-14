@@ -7,6 +7,7 @@ import type {
 } from "../../document-models/invoice/index.js";
 import { getSubgraphUrl } from "../shared/graphql.js";
 
+
 const GRAPHQL_URL = getSubgraphUrl("invoice-addon");
 
 interface InvoiceToGnosisProps {
@@ -49,22 +50,29 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
       USDC: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       USDS: "0x820C137fa70C8691f0e44Dc420a5e53c168921Dc",
       DAI: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
+      EURC: "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42",
+      EURE: "0xbf6e2966A9C3D99C9E4D069E04f7Bdb9C8aa762C",
       // Add more tokens as needed
     },
     ETHEREUM: {
       USDC: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
       USDS: "0xdC035D45d973E3EC169d2276DDab16f1e407384F",
       DAI: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+      EURC: "0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c",
+      EURE: "0x39b8B6385416f4cA36a20319F70D28621895279D",
       // Add more tokens as needed
     },
     "ARBITRUM ONE": {
       USDC: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
       USDS: "0x6491c05A82219b8D1479057361ff1654749b876b",
       DAI: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+      EURE: "0x0c06cCF38114ddfc35e07427B9424adcca9F44F8",
       // Add more tokens as needed
     },
     // Add more networks as needed
   };
+
+  const SIX_DECIMALS_TOKENS = ["EURC", "USDC"];
 
   // Extract payment details from current-state.json
   const paymentDetails = {
@@ -78,7 +86,7 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
       symbol: docState.currency,
       chainName: docState.issuer?.paymentRouting?.wallet?.chainName || "",
       chainId: docState.issuer?.paymentRouting?.wallet?.chainId || "",
-      decimals: docState.currency === "USDC" ? 6 : 18,
+      decimals: SIX_DECIMALS_TOKENS.includes(docState.currency) ? 6 : 18,
     },
     amount: docState.totalPriceTaxIncl || 0.000015, // Make the amount small for testing
   };
@@ -223,6 +231,8 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
     return null;
   }
 
+  const tokenUnsupported = !paymentDetails.token.evmAddress;
+
   const parseChainName = (chainName: string) => {
     switch (chainName) {
       case "Base":
@@ -240,7 +250,12 @@ const InvoiceToGnosis: React.FC<InvoiceToGnosisProps> = ({
 
   return (
     <div className="space-y-4">
-      {currency && chainName && currency !== "" && chainName !== "" && (
+      {tokenUnsupported && (
+        <div className="text-red-500 bg-red-50 p-3 rounded-md">
+          {currency} is not supported on {chainName}
+        </div>
+      )}
+      {currency && chainName && currency !== "" && chainName !== "" && !tokenUnsupported && (
         <button
           className="bg-blue-500 text-black px-4 py-2 rounded-md hover:bg-blue-600"
           onClick={handleInvoiceToGnosis}

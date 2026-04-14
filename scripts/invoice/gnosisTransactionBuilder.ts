@@ -3,7 +3,7 @@ import Safe from "@safe-global/protocol-kit";
 import { OperationType } from "@safe-global/types-kit";
 import { ethers, AbiCoder } from "ethers";
 import dotenv from "dotenv";
-import { CHAIN_CONFIGS } from "../../editors/invoice/utils/utils.js";
+import { getChainConfigs } from "../../editors/invoice/utils/utils.js";
 
 dotenv.config();
 
@@ -57,20 +57,23 @@ console.log(
   `----- GNOSIS TRANSACTION BUILDER ----- Using ${isProduction ? "PRODUCTION" : "DEV/STAGING"} Safe address: ${safeAddress}`,
 );
 
-const payerWallets: Record<string, PayerWallet> = {
-  BASE: {
-    ...CHAIN_CONFIGS.base,
-    address: safeAddress, // Safe address
-  },
-  ETHEREUM: {
-    ...CHAIN_CONFIGS.ethereum,
-    address: safeAddress, // Safe address
-  },
-  "ARBITRUM ONE": {
-    ...CHAIN_CONFIGS["arbitrum one"],
-    address: safeAddress, // Safe address
-  },
-};
+function getPayerWallets(): Record<string, PayerWallet> {
+  const configs = getChainConfigs();
+  return {
+    BASE: {
+      ...configs.base,
+      address: safeAddress!,
+    },
+    ETHEREUM: {
+      ...configs.ethereum,
+      address: safeAddress!,
+    },
+    "ARBITRUM ONE": {
+      ...configs["arbitrum one"],
+      address: safeAddress!,
+    },
+  };
+}
 
 /**
  * Retry helper with exponential backoff for Safe API calls
@@ -108,11 +111,41 @@ async function withRetry<T>(
 }
 
 // --- Implementation ---
+async function initSafeProtocolKit(
+  rpcs: string[],
+  privateKey: string,
+  walletAddress: string,
+) {
+  let lastError: Error = new Error("No RPC endpoints provided");
+  for (const rpc of rpcs) {
+    try {
+      console.log(`Trying RPC: ${rpc}`);
+      // @ts-expect-error - Safe.init typing mismatch with runtime API
+      const kit = await Safe.init({
+        provider: rpc,
+        signer: privateKey,
+        safeAddress: walletAddress,
+      });
+      console.log(`Connected via RPC: ${rpc}`);
+      return kit;
+    } catch (err) {
+      console.warn(
+        `RPC failed (${rpc}):`,
+        err instanceof Error ? err.message : err,
+      );
+      lastError = err instanceof Error ? err : new Error(String(err));
+    }
+  }
+  throw lastError;
+}
+
 async function executeTransferProposal(
   chainName: string,
   paymentDetailsInput: PaymentDetail | PaymentDetail[],
 ): Promise<TransferResult> {
-  const payerWallet = payerWallets[chainName.toUpperCase()];
+  const wallets = getPayerWallets();
+  const payerWallet = wallets[chainName.toUpperCase()];
+  const chainConfig = getChainConfigs()[chainName.toLowerCase()];
 
   const paymentDetails = Array.isArray(paymentDetailsInput)
     ? paymentDetailsInput
@@ -127,7 +160,13 @@ async function executeTransferProposal(
   console.log(`Chain: ${payerWallet.chainName} (${payerWallet.chainId})`);
   console.log(`Safe Address: ${payerWallet.address}`);
 
-  // Set up provider and signer
+  // Build ordered list of RPCs: primary + fallbacks
+  const rpcs: string[] = [
+    payerWallet.rpc,
+    ...(chainConfig ? chainConfig.fallbackRpcs : []),
+  ];
+
+  // Set up provider and signer using the primary RPC
   const provider = new ethers.JsonRpcProvider(payerWallet.rpc);
   const signer = new ethers.Wallet(privateKey, provider);
 
@@ -147,12 +186,12 @@ async function executeTransferProposal(
   );
   console.log("Next Nonce: ", nextNonce);
 
-  // @ts-ignore - Ignoring constructor error as per requirements
-  const protocolKit = await Safe.init({
-    provider: payerWallet.rpc,
-    signer: privateKey,
-    safeAddress: payerWallet.address,
-  });
+  // Initialize Safe Protocol Kit with RPC fallback
+  const protocolKit = await initSafeProtocolKit(
+    rpcs,
+    privateKey,
+    payerWallet.address,
+  );
 
   // Build the batch of ERC-20 transfer calls
   const coder = AbiCoder.defaultAbiCoder();
@@ -173,7 +212,7 @@ async function executeTransferProposal(
         .slice(2);
 
     return {
-      to: token.evmAddress,
+      to: ethers.getAddress(token.evmAddress),
       value: "0",
       data,
       operation: OperationType.Call,
@@ -195,14 +234,49 @@ async function executeTransferProposal(
 
   // Propose transaction with retry logic for rate limiting
   await withRetry(
-    async () =>
-      safeApiKit.proposeTransaction({
-        safeAddress: payerWallet.address,
-        safeTransactionData: safeTx.data,
-        safeTxHash,
-        senderAddress,
-        senderSignature: signature.data,
-      }),
+    async () => {
+      try {
+        await safeApiKit.proposeTransaction({
+          safeAddress: payerWallet.address,
+          safeTransactionData: safeTx.data,
+          safeTxHash,
+          senderAddress,
+          senderSignature: signature.data,
+        });
+      } catch (err: any) {
+        console.error("Propose TX payload:", {
+          safeAddress: payerWallet.address,
+          safeTxHash,
+          senderAddress,
+          nonce: nextNonce,
+        });
+        // Make a raw fetch to surface the actual API error body
+        try {
+          const apiUrl = `https://safe-transaction-mainnet.safe.global/api/v1/safes/${payerWallet.address}/multisig-transactions/`;
+          const rawRes = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              ...safeTx.data,
+              safeTxHash,
+              sender: senderAddress,
+              signature: signature.data,
+            }),
+          });
+          const rawBody = await rawRes.text();
+          console.error(
+            `Safe API raw response (${rawRes.status}):`,
+            rawBody,
+          );
+        } catch {
+          // ignore debug fetch failure
+        }
+        throw err;
+      }
+    },
     3,
     1000,
     "proposeTransaction",
