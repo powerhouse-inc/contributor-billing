@@ -8,7 +8,7 @@ import {
 import type {
   SnapshotReportAction,
   SnapshotReportDocument,
-} from "@powerhousedao/contributor-billing/document-models/snapshot-report/v1";
+} from "document-models/snapshot-report/v1";
 import {
   assertIsSnapshotReportDocument,
   isSnapshotReportDocument,

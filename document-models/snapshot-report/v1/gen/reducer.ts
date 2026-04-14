@@ -1,9 +1,8 @@
-// TODO: remove eslint-disable rules once refactor is done
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import type { StateReducer } from "document-model";
-import { isDocumentAction, createReducer } from "document-model/core";
-import type { SnapshotReportPHState } from "@powerhousedao/contributor-billing/document-models/snapshot-report/v1";
+import type { Reducer, StateReducer } from "document-model";
+import { isDocumentAction, createReducer } from "document-model";
+import type { SnapshotReportPHState } from "document-models/snapshot-report/v1";
 
 import { snapshotReportConfigurationOperations } from "../src/reducers/configuration.js";
 import { snapshotReportAccountsOperations } from "../src/reducers/accounts.js";
@@ -261,4 +260,5 @@ const stateReducer: StateReducer<SnapshotReportPHState> = (
   }
 };
 
-export const reducer = createReducer<SnapshotReportPHState>(stateReducer);
+export const reducer: Reducer<SnapshotReportPHState> =
+  createReducer(stateReducer);

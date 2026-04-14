@@ -1,4 +1,10 @@
-import type { SnapshotReportBalancesOperations } from "@powerhousedao/contributor-billing/document-models/snapshot-report/v1";
+import type { SnapshotReportBalancesOperations } from "document-models/snapshot-report/v1";
+import {
+  SetStartingBalanceAccountNotFoundError,
+  SetEndingBalanceAccountNotFoundError,
+  RemoveStartingBalanceNotFoundError,
+  RemoveEndingBalanceNotFoundError,
+} from "../../gen/balances/error.js";
 
 export const snapshotReportBalancesOperations: SnapshotReportBalancesOperations =
   {
@@ -7,7 +13,9 @@ export const snapshotReportBalancesOperations: SnapshotReportBalancesOperations 
         (a) => a.id === action.input.accountId,
       );
       if (!account) {
-        throw new Error(`Account with ID ${action.input.accountId} not found`);
+        throw new SetStartingBalanceAccountNotFoundError(
+          `Account with ID ${action.input.accountId} not found`,
+        );
       }
 
       // First check by balanceId
@@ -42,7 +50,9 @@ export const snapshotReportBalancesOperations: SnapshotReportBalancesOperations 
         (a) => a.id === action.input.accountId,
       );
       if (!account) {
-        throw new Error(`Account with ID ${action.input.accountId} not found`);
+        throw new SetEndingBalanceAccountNotFoundError(
+          `Account with ID ${action.input.accountId} not found`,
+        );
       }
 
       // First check by balanceId
@@ -77,14 +87,18 @@ export const snapshotReportBalancesOperations: SnapshotReportBalancesOperations 
         (a) => a.id === action.input.accountId,
       );
       if (!account) {
-        throw new Error(`Account with ID ${action.input.accountId} not found`);
+        throw new SetStartingBalanceAccountNotFoundError(
+          `Account with ID ${action.input.accountId} not found`,
+        );
       }
 
       const balanceIndex = account.startingBalances.findIndex(
         (b) => b.id === action.input.balanceId,
       );
       if (balanceIndex === -1) {
-        throw new Error(`Balance with ID ${action.input.balanceId} not found`);
+        throw new RemoveStartingBalanceNotFoundError(
+          `Balance with ID ${action.input.balanceId} not found`,
+        );
       }
 
       account.startingBalances.splice(balanceIndex, 1);
@@ -94,14 +108,18 @@ export const snapshotReportBalancesOperations: SnapshotReportBalancesOperations 
         (a) => a.id === action.input.accountId,
       );
       if (!account) {
-        throw new Error(`Account with ID ${action.input.accountId} not found`);
+        throw new SetEndingBalanceAccountNotFoundError(
+          `Account with ID ${action.input.accountId} not found`,
+        );
       }
 
       const balanceIndex = account.endingBalances.findIndex(
         (b) => b.id === action.input.balanceId,
       );
       if (balanceIndex === -1) {
-        throw new Error(`Balance with ID ${action.input.balanceId} not found`);
+        throw new RemoveEndingBalanceNotFoundError(
+          `Balance with ID ${action.input.balanceId} not found`,
+        );
       }
 
       account.endingBalances.splice(balanceIndex, 1);

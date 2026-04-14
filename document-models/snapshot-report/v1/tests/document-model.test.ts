@@ -17,7 +17,7 @@ import {
   assertIsSnapshotReportDocument,
   isSnapshotReportState,
   assertIsSnapshotReportState,
-} from "@powerhousedao/contributor-billing/document-models/snapshot-report/v1";
+} from "document-models/snapshot-report/v1";
 import { ZodError } from "zod";
 
 describe("SnapshotReport Document Model", () => {

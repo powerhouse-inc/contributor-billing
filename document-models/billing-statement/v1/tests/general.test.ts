@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/common/utils";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -10,7 +10,7 @@ import {
   EditBillingStatementInputSchema,
   EditContributorInputSchema,
   EditStatusInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/billing-statement/v1";
+} from "document-models/billing-statement/v1";
 
 describe("GeneralOperations", () => {
   it("should handle editBillingStatement operation", () => {

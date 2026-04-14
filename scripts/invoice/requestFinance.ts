@@ -1,5 +1,3 @@
-import axios from "axios";
-
 const API_URL = "https://api.request.finance/invoices";
 const API_KEY = process.env.REQUEST_FINANCE_API_KEY; // Store in .env file
 const REQUEST_FINANCE_EMAIL = process.env.REQUEST_FINANCE_EMAIL;
@@ -17,6 +15,24 @@ export interface RequestFinanceResponse {
   [key: string]: unknown;
 }
 
+const REQUEST_HEADERS = {
+  Authorization: `${API_KEY}`,
+  "Content-Type": "application/json",
+  "X-Network": "mainnet",
+};
+
+const getResponseData = async (
+  response: Response,
+): Promise<RequestFinanceResponse> => {
+  try {
+    return (await response.json()) as RequestFinanceResponse;
+  } catch {
+    return {
+      errors: [`Request failed with status ${response.status}`],
+    };
+  }
+};
+
 export const requestDirectPayment = async (
   invoiceData: InvoicePaymentData | Record<string, unknown>,
 ): Promise<RequestFinanceResponse> => {
@@ -25,53 +41,52 @@ export const requestDirectPayment = async (
   console.log("Getting a request to create an invoice", data.invoiceNumber);
   try {
     // First API call to create the invoice
-    const response = await axios.post<{ id: string }>(API_URL, invoiceData, {
-      headers: {
-        Authorization: `${API_KEY}`,
-        "Content-Type": "application/json",
-        "X-Network": "mainnet",
-      },
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: REQUEST_HEADERS,
+      body: JSON.stringify(invoiceData),
     });
 
-    console.log("Server: Invoice created successfully:", response.data.id);
+    const responseData = await getResponseData(response);
+
+    if (!response.ok || !responseData.id) {
+      console.error("Error creating invoice: response", responseData);
+      return responseData;
+    }
+
+    console.log("Server: Invoice created successfully:", responseData.id);
 
     try {
       // Second API call to make it on-chain
-      const onChainResponse = await axios.post<RequestFinanceResponse>(
-        `https://api.request.finance/invoices/${response.data.id}`,
-        {},
+      const onChainResponse = await fetch(
+        `https://api.request.finance/invoices/${responseData.id}`,
         {
-          headers: {
-            Authorization: `${API_KEY}`,
-            "Content-Type": "application/json",
-            "X-Network": "mainnet",
-          },
+          method: "POST",
+          headers: REQUEST_HEADERS,
+          body: JSON.stringify({}),
         },
       );
+      const onChainData = await getResponseData(onChainResponse);
+
+      if (!onChainResponse.ok) {
+        console.error("Server: Error making invoice on-chain:", onChainData);
+        return onChainData;
+      }
+
       console.log(
         "Server: Invoice made on-chain successfully:",
-        onChainResponse.data.invoiceLinks,
+        onChainData.invoiceLinks,
       );
 
       // Send only one response
-      return onChainResponse.data;
+      return onChainData;
     } catch (error: unknown) {
       console.error("Server: Error making invoice on-chain:", error);
-      if (axios.isAxiosError(error) && error.response) {
-        return error.response.data as RequestFinanceResponse;
-      }
       return {
         errors: [error instanceof Error ? error.message : "Unknown error"],
       };
     }
   } catch (error: unknown) {
-    if (axios.isAxiosError(error) && error.response) {
-      console.error(
-        "Error creating invoice: error.response",
-        error.response.data,
-      );
-      return error.response.data as RequestFinanceResponse;
-    }
     console.error("Error creating invoice:", error);
     return {
       errors: [error instanceof Error ? error.message : "Unknown error"],

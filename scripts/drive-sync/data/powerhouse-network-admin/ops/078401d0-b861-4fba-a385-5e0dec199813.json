@@ -390,5 +390,38 @@
     "index": 20,
     "skip": 0,
     "timestampUtcMs": "2026-03-30T14:34:53.705Z"
+<<<<<<< HEAD
+=======
+  },
+  {
+    "action": {
+      "input": {
+        "description": "Powerhouse was born from the frustrations of DAO scaling issues & organizational chaos. "
+      },
+      "scope": "global",
+      "type": "SET_DESCRIPTION"
+    },
+    "error": null,
+    "hash": "kAPLXjMBYGr8Beju1b4q8xO5ny0=",
+    "id": "eb025f668b46a5862f8a62b92f06634a",
+    "index": 21,
+    "skip": 0,
+    "timestampUtcMs": "2026-04-02T14:57:15.520Z"
+  },
+  {
+    "action": {
+      "input": {
+        "description": "Powerhouse is a network that was born from the frustrations of DAO scaling issues & organizational chaos. "
+      },
+      "scope": "global",
+      "type": "SET_DESCRIPTION"
+    },
+    "error": null,
+    "hash": "eHf/reqvSBewE5dPGNXc6dHuHEI=",
+    "id": "ecb5894488d13aa901209d2f97abadd9",
+    "index": 22,
+    "skip": 0,
+    "timestampUtcMs": "2026-04-02T15:01:28.558Z"
+>>>>>>> dev
   }
 ]

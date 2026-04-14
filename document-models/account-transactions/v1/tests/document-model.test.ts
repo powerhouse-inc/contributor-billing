@@ -17,7 +17,7 @@ import {
   assertIsAccountTransactionsDocument,
   isAccountTransactionsState,
   assertIsAccountTransactionsState,
-} from "@powerhousedao/contributor-billing/document-models/account-transactions/v1";
+} from "document-models/account-transactions/v1";
 import { ZodError } from "zod";
 
 describe("AccountTransactions Document Model", () => {

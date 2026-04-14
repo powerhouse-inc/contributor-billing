@@ -8,7 +8,7 @@ import {
 import type {
   BillingStatementAction,
   BillingStatementDocument,
-} from "@powerhousedao/contributor-billing/document-models/billing-statement/v1";
+} from "document-models/billing-statement/v1";
 import {
   assertIsBillingStatementDocument,
   isBillingStatementDocument,

@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { ChevronDown, ChevronRight, X } from "lucide-react";
-import type { VetraDocumentModelModule } from "@powerhousedao/reactor-browser";
+import type { DocumentModelModule } from "document-model";
 
 interface InvoiceTableSectionProps {
   title: string;
@@ -8,10 +8,10 @@ interface InvoiceTableSectionProps {
   children: React.ReactNode;
   color?: string;
   onSelectDocumentModel?: (
-    model: VetraDocumentModelModule,
+    model: DocumentModelModule,
     name: string,
   ) => void;
-  filteredDocumentModels?: VetraDocumentModelModule[];
+  filteredDocumentModels?: DocumentModelModule[];
   defaultExpanded?: boolean;
 }
 
@@ -30,7 +30,7 @@ export const InvoiceTableSection = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const invoiceDocModel = filteredDocumentModels?.find(
-    (model) => model.id === "powerhouse/invoice",
+    (model) => model.documentModel?.global?.id === "powerhouse/invoice",
   );
 
   const handleToggle = useCallback(() => {

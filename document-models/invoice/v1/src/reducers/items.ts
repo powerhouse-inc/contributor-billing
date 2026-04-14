@@ -3,7 +3,7 @@ import type {
   InvoiceState,
   InvoiceTag,
 } from "../../gen/schema/types.js";
-import type { InvoiceItemsOperations } from "@powerhousedao/contributor-billing/document-models/invoice/v1";
+import type { InvoiceItemsOperations } from "document-models/invoice/v1";
 
 export const invoiceItemsOperations: InvoiceItemsOperations = {
   addLineItemOperation(state, action) {
@@ -112,25 +112,20 @@ function updateTotals(state: InvoiceState) {
 }
 
 function validatePrices(item: InvoiceLineItem) {
-  const EPSILON = 0.00001; // Small value for floating point comparisons
+  const EPSILON = 0.00001;
 
-  // Calculate total prices from unit prices and quantity
   const calcPriceIncl = item.quantity * item.unitPriceTaxIncl;
   const calcPriceExcl = item.quantity * item.unitPriceTaxExcl;
 
-  // Convert tax percentage to decimal rate
   const taxRate = item.taxPercent / 100;
 
-  // Helper function to compare floating point numbers
   const isClose = (a: number, b: number) => Math.abs(a - b) < EPSILON;
 
-  // Validate unit prices (tax-exclusive should equal tax-inclusive / (1 + taxRate))
   const expectedUnitPriceExcl = item.unitPriceTaxIncl / (1 + taxRate);
   if (!isClose(item.unitPriceTaxExcl, expectedUnitPriceExcl)) {
     throw new Error("Tax inclusive/exclusive unit prices failed comparison.");
   }
 
-  // Validate total prices
   if (!isClose(calcPriceIncl, item.totalPriceTaxIncl)) {
     throw new Error("Calculated unitPriceTaxIncl does not match input total");
   }
@@ -139,7 +134,6 @@ function validatePrices(item: InvoiceLineItem) {
     throw new Error("Calculated unitPriceTaxExcl does not match input total");
   }
 
-  // Validate total prices using the tax rate
   const expectedTotalPriceExcl = calcPriceIncl / (1 + taxRate);
   if (!isClose(calcPriceExcl, expectedTotalPriceExcl)) {
     throw new Error("Tax inclusive/exclusive totals failed comparison.");
@@ -147,61 +141,45 @@ function validatePrices(item: InvoiceLineItem) {
 }
 
 const applyInvariants = (state: InvoiceState, nextItem: InvoiceLineItem) => {
-  const EPSILON = 0.00001; // Small value for floating point comparisons
+  const EPSILON = 0.00001;
 
-  // Helper function to compare floating point numbers
   const isClose = (a: number, b: number) => Math.abs(a - b) < EPSILON;
 
-  // Helper function to check if a value has changed significantly
   const hasChanged = (oldValue: number, newValue: number) =>
     !isClose(oldValue, newValue);
 
-  // Find the current state of this line item
   const currentItem = state.lineItems.find((item) => item.id === nextItem.id);
   if (!currentItem) {
-    // New item, no comparison needed
     return;
   }
 
   const taxRate = nextItem.taxPercent / 100;
 
-  // Check if totalPriceTaxExcl was changed and update unitPriceTaxExcl accordingly
   const expectedTotalPriceTaxExcl =
     nextItem.quantity * nextItem.unitPriceTaxExcl;
   if (hasChanged(expectedTotalPriceTaxExcl, nextItem.totalPriceTaxExcl)) {
-    // Total was changed, update unit price
     nextItem.unitPriceTaxExcl = nextItem.totalPriceTaxExcl / nextItem.quantity;
-    // Update tax-inclusive unit price to maintain tax relationship
     nextItem.unitPriceTaxIncl = nextItem.unitPriceTaxExcl * (1 + taxRate);
-    // Update tax-inclusive total to maintain consistency
     nextItem.totalPriceTaxIncl = nextItem.quantity * nextItem.unitPriceTaxIncl;
   }
 
-  // Check if totalPriceTaxIncl was changed and update unitPriceTaxIncl accordingly
   const expectedTotalPriceTaxIncl =
     nextItem.quantity * nextItem.unitPriceTaxIncl;
   if (hasChanged(expectedTotalPriceTaxIncl, nextItem.totalPriceTaxIncl)) {
-    // Total was changed, update unit price
     nextItem.unitPriceTaxIncl = nextItem.totalPriceTaxIncl / nextItem.quantity;
-    // Update tax-exclusive unit price to maintain tax relationship
     nextItem.unitPriceTaxExcl = nextItem.unitPriceTaxIncl / (1 + taxRate);
-    // Update tax-exclusive total to maintain consistency
     nextItem.totalPriceTaxExcl = nextItem.quantity * nextItem.unitPriceTaxExcl;
   }
 
-  // Check if unitPriceTaxExcl was changed and update totals accordingly
   const expectedUnitPriceTaxIncl = nextItem.unitPriceTaxExcl * (1 + taxRate);
   if (hasChanged(expectedUnitPriceTaxIncl, nextItem.unitPriceTaxIncl)) {
-    // Unit price was changed, update tax-inclusive unit price and totals
     nextItem.unitPriceTaxIncl = nextItem.unitPriceTaxExcl * (1 + taxRate);
     nextItem.totalPriceTaxExcl = nextItem.quantity * nextItem.unitPriceTaxExcl;
     nextItem.totalPriceTaxIncl = nextItem.quantity * nextItem.unitPriceTaxIncl;
   }
 
-  // Check if unitPriceTaxIncl was changed and update totals accordingly
   const expectedUnitPriceTaxExcl = nextItem.unitPriceTaxIncl / (1 + taxRate);
   if (hasChanged(expectedUnitPriceTaxExcl, nextItem.unitPriceTaxExcl)) {
-    // Unit price was changed, update tax-exclusive unit price and totals
     nextItem.unitPriceTaxExcl = nextItem.unitPriceTaxIncl / (1 + taxRate);
     nextItem.totalPriceTaxExcl = nextItem.quantity * nextItem.unitPriceTaxExcl;
     nextItem.totalPriceTaxIncl = nextItem.quantity * nextItem.unitPriceTaxIncl;

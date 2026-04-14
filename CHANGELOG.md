@@ -1,91 +1,67 @@
-# [1.2.0-jetstream.2](https://github.com/powerhouse-inc/contributor-billing/compare/v1.2.0-jetstream.1...v1.2.0-jetstream.2) (2026-02-27)
+# [1.0.0-dev.32](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.31...v1.0.0-dev.32) (2026-04-03)
 
 
 ### Bug Fixes
 
-* add downstream notification to jetstream repo ([830df5a](https://github.com/powerhouse-inc/contributor-billing/commit/830df5aab2cf9e380dea138b73dbae0e6a0fc876))
+* replace onMoveNode with drive-level moveNode in auto-placement hooks ([f57b596](https://github.com/powerhouse-inc/contributor-billing/commit/f57b5961900a2a38886c6b0a20f46cc1979971ef))
 
-# [1.2.0-jetstream.1](https://github.com/powerhouse-inc/contributor-billing/compare/v1.1.0...v1.2.0-jetstream.1) (2026-02-27)
+# [1.0.0-dev.31](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.30...v1.0.0-dev.31) (2026-04-02)
+
+
+### Bug Fixes
+
+* update service offering to latest ([4043356](https://github.com/powerhouse-inc/contributor-billing/commit/404335665116f95f124377e1aa4e9df006987411))
+
+# [1.0.0-dev.30](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.29...v1.0.0-dev.30) (2026-03-25)
+
+
+### Bug Fixes
+
+* **builder-team-admin:** add error boundary for unloadable documents ([f7992cb](https://github.com/powerhouse-inc/contributor-billing/commit/f7992cb1d79be2b29cd09c808e7c325c83ebf0b7))
+
+# [1.0.0-dev.29](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.28...v1.0.0-dev.29) (2026-03-25)
 
 
 ### Features
 
-* enable jetstream release pipeline ([1ccfe0c](https://github.com/powerhouse-inc/contributor-billing/commit/1ccfe0cdb227ae8099d6673178658c401caf6fbf))
+* added service subscriptions dashboard view for operator and builder teams ([9e26526](https://github.com/powerhouse-inc/contributor-billing/commit/9e265262cb4d94b100e83e953887f6ec8a8b0726))
+* **knowledge:** add reactor recipes, drive app flow maps, and health report ([1ee5deb](https://github.com/powerhouse-inc/contributor-billing/commit/1ee5deba92801e377e87c574bf4b8d1711b0271b))
 
-# [1.1.0](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.4...v1.1.0) (2026-02-26)
-
-
-### Bug Fixes
-
-* add repository url for npm trusted publishing ([0f99459](https://github.com/powerhouse-inc/contributor-billing/commit/0f99459d96a8ae9d7013339ee860e1a7f65bd7c0))
-* add repository url for npm trusted publishing ([a34c46d](https://github.com/powerhouse-inc/contributor-billing/commit/a34c46d9e1f7f67bb1eaacc51bf4a15171c00520))
-* add semantic-release plugins to devDependencies ([b36d5c9](https://github.com/powerhouse-inc/contributor-billing/commit/b36d5c906b94b4fa304a91c2615c0505f775e3b8))
-* **ci:** add pnpm alongside bun for build scripts ([34ee952](https://github.com/powerhouse-inc/contributor-billing/commit/34ee952eb6bdc704345715c5c5bea05c51a78f8c))
-* **ci:** check npm before publishing to avoid duplicate version errors ([21ceadf](https://github.com/powerhouse-inc/contributor-billing/commit/21ceadf589637ca31be2bdc77c9a2334b5f75fec))
-* **ci:** check npm before publishing to avoid duplicate version errors ([388b3c8](https://github.com/powerhouse-inc/contributor-billing/commit/388b3c8a1d06895c234e4e65d142b0f74abf9e69))
-* **ci:** remove leftover pnpm steps from workflow ([1982726](https://github.com/powerhouse-inc/contributor-billing/commit/19827260a4c2f6b65d6dab212a5073b0ea442878))
-* **ci:** switch to npm trusted publishing (remove NPM_TOKEN) ([dfa3a05](https://github.com/powerhouse-inc/contributor-billing/commit/dfa3a05afb340676da64bb05578d4adee87400cf))
-* **ci:** switch to npm trusted publishing (remove NPM_TOKEN) ([931ab05](https://github.com/powerhouse-inc/contributor-billing/commit/931ab0523d01e634a25a9ce826a565aac4f8b660))
-* **ci:** switch workflow from pnpm to bun ([e1060f7](https://github.com/powerhouse-inc/contributor-billing/commit/e1060f74071f4efde7218f00ac793005baaef8b7))
-* **ci:** switch workflow from pnpm to bun ([319097a](https://github.com/powerhouse-inc/contributor-billing/commit/319097ab5e6c371c6d24a3be80c3d73675a69d07))
-* **contributor-billing:** replace react-toastify with custom toast system ([1905ac4](https://github.com/powerhouse-inc/contributor-billing/commit/1905ac43d0351e0e18a21784722b2496e0188710))
-* correct semantic-release plugin order ([8d9c226](https://github.com/powerhouse-inc/contributor-billing/commit/8d9c2260f2b8351db40e9d73884c79ffd527297d))
-* correct semantic-release plugin order ([b9149b4](https://github.com/powerhouse-inc/contributor-billing/commit/b9149b4f2a35b9ffdd62407be8def251fa89256b))
-* correct version ([cf2bfb9](https://github.com/powerhouse-inc/contributor-billing/commit/cf2bfb9c69b8231b5451ba2b72ff1eb9cc90f94e))
-* **editors:** validate document names with isValidName before creation ([fae6bb7](https://github.com/powerhouse-inc/contributor-billing/commit/fae6bb78bc536abddfb44974f50d643234a95450))
-* fix drag&drop overlay stuck and invoice placement in Payments view ([e9e31bc](https://github.com/powerhouse-inc/contributor-billing/commit/e9e31bc880bce70bb77a9b067ebb9caf5154d0a1))
-* fix validation rule for the issueInvoiceOperation for crypto payments ([85e1ac4](https://github.com/powerhouse-inc/contributor-billing/commit/85e1ac4889389c663b39df01bd45bdb6671fbbb7))
-* regenerate and fix pkg ([32818d7](https://github.com/powerhouse-inc/contributor-billing/commit/32818d7f09bfd8704eca2b3ae0c72a08b2a270fe))
-* release on all commit types via semantic-release releaseRules ([a6e9e39](https://github.com/powerhouse-inc/contributor-billing/commit/a6e9e39aaac292ec908851895ea6e6a4a386fd17))
-* replace pnpm exec with bunx in build scripts ([2658e11](https://github.com/powerhouse-inc/contributor-billing/commit/2658e116844c9b0076b7f1266bb6d2d3a6e6063c))
-* replace pnpm exec with bunx in build scripts ([ca48a54](https://github.com/powerhouse-inc/contributor-billing/commit/ca48a5474edeaea7fa344e2e0ab0a60f76a60b5c))
+# [1.0.0-dev.28](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.27...v1.0.0-dev.28) (2026-03-24)
 
 
 ### Features
 
-* Add "Delete Selected" batch action to invoice table ([f994ea0](https://github.com/powerhouse-inc/contributor-billing/commit/f994ea0a36a25559cb2a7fc23a9fdef8c16f196b))
-* add input form in welcome drive view for user to add details for auto doc creation ([d1b8e90](https://github.com/powerhouse-inc/contributor-billing/commit/d1b8e900714598751bdc3baa2e4eb56f54139efb))
-* add service-offering pkg and replace custom queries ([2c47cec](https://github.com/powerhouse-inc/contributor-billing/commit/2c47cec2cbc9bdfd323ee7911267db8ab984a0ce))
-* **contributor-billing:** add welcome window for operational hub creation ([18201b6](https://github.com/powerhouse-inc/contributor-billing/commit/18201b6d452e3c24b0cbafd29345ef34aaee0c4b))
-* update builder profile pkg ([02fd473](https://github.com/powerhouse-inc/contributor-billing/commit/02fd4731cd908403d8ab52df76bf1e318f216118))
-* update service offering pkg ([457054b](https://github.com/powerhouse-inc/contributor-billing/commit/457054bcaf010f9f9a0fdb6c23a80a76deb932b3))
+* add snapshot report to editor configuration and update start date for monthly reports ([aa66527](https://github.com/powerhouse-inc/contributor-billing/commit/aa6652788739df2480a0d26434f6e4eb95073f9e))
+* implement month deletion functionality in MonthlyReportsOverview and MonthReportCard ([23fdc46](https://github.com/powerhouse-inc/contributor-billing/commit/23fdc4636e16f1109f736d76c0acbed2022e92f0))
 
-## [1.0.4](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.3...v1.0.4) (2026-02-26)
-
-## [1.0.3](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.2...v1.0.3) (2026-02-25)
-
-## [1.0.2](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.1...v1.0.2) (2026-02-16)
+# [1.0.0-dev.27](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.26...v1.0.0-dev.27) (2026-03-24)
 
 
 ### Bug Fixes
 
-* **ci:** check npm before publishing to avoid duplicate version errors ([a662fda](https://github.com/powerhouse-inc/contributor-billing/commit/a662fdaaf070f45ff44a789fd82872da07944889))
-* release on all commit types via semantic-release releaseRules ([f0db13e](https://github.com/powerhouse-inc/contributor-billing/commit/f0db13e1e76daf6678572ce89e8c9fb521cad549))
+* update service offering with fix ([529d47c](https://github.com/powerhouse-inc/contributor-billing/commit/529d47c1a85fd3477be9ca5ffeadac97a79a6290))
 
-## [1.0.1](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0...v1.0.1) (2026-02-16)
-
-
-### Bug Fixes
-
-* add repository url for npm trusted publishing ([96a0fcc](https://github.com/powerhouse-inc/contributor-billing/commit/96a0fccf472c3681f394fc301f5db5ac505b8fea))
-
-# 1.0.0 (2026-02-16)
+# [1.0.0-dev.26](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.25...v1.0.0-dev.26) (2026-03-23)
 
 
 ### Bug Fixes
 
-* add semantic-release plugins to devDependencies ([5e906b1](https://github.com/powerhouse-inc/contributor-billing/commit/5e906b1ea89d46e8031322ad467984a2b87d2139))
-* add Vite override to resolve Vitest plugin compatibility ([e3e9beb](https://github.com/powerhouse-inc/contributor-billing/commit/e3e9bebed0c2c8a13396319f8e3796bf0b23ce77))
-* **ci:** switch to npm trusted publishing (remove NPM_TOKEN) ([c0b579d](https://github.com/powerhouse-inc/contributor-billing/commit/c0b579d43b9943916e6b0f8ebe7fc12e28d1d988))
-* **ci:** switch workflow from pnpm to bun ([48ccbff](https://github.com/powerhouse-inc/contributor-billing/commit/48ccbff8d7ef872da6089f780bb61ef15f4697e1))
-* correct semantic-release plugin order ([284b7df](https://github.com/powerhouse-inc/contributor-billing/commit/284b7df4ed552b6efe69fbccd16e5cd1f9c57596))
-* exclude common from build ([f22ad01](https://github.com/powerhouse-inc/contributor-billing/commit/f22ad0125e77739d13361c12c0fde061dd93b4f4))
-* removing empty processors index file ([ee7b9d3](https://github.com/powerhouse-inc/contributor-billing/commit/ee7b9d38dcbcbb9b8438b1082cd5b89d6e41c1de))
-* replace pnpm exec with bunx in build scripts ([a8f8ee9](https://github.com/powerhouse-inc/contributor-billing/commit/a8f8ee9d776c8b9f2b0ad2efc7911d2daee63c29))
+* service offering editor ([76b1fe3](https://github.com/powerhouse-inc/contributor-billing/commit/76b1fe30b1d8246385c81c7d0422e22bb8f536fc))
+
+# [1.0.0-dev.25](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.24...v1.0.0-dev.25) (2026-03-23)
+
+# [1.0.0-dev.24](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.23...v1.0.0-dev.24) (2026-03-23)
 
 
 ### Features
 
-* added contributor and administrator ([b7e5290](https://github.com/powerhouse-inc/contributor-billing/commit/b7e529084f9f8f52ac21677391f07ecb9b66d227))
-* added new batch action export csv expense report ([9e36e9d](https://github.com/powerhouse-inc/contributor-billing/commit/9e36e9d34fcbe84d7202df1c89453bdea564e916))
-* generated a processor ([bc69a1a](https://github.com/powerhouse-inc/contributor-billing/commit/bc69a1ae7656ba846890658677451f3c3ebbbced))
+* add drive-sync scripts for cross-environment drive replication ([d0ea069](https://github.com/powerhouse-inc/contributor-billing/commit/d0ea069c5e9dc99c5f2118de6d7c7b2cc1ddfc54))
+
+# [1.0.0-dev.23](https://github.com/powerhouse-inc/contributor-billing/compare/v1.0.0-dev.22...v1.0.0-dev.23) (2026-03-23)
+
+
+### Bug Fixes
+
+* migrate to Powerhouse v6 generic Reactor API and clean up dependencies ([9332962](https://github.com/powerhouse-inc/contributor-billing/commit/9332962954f11f2e27b616f1ada459ec01fe3b77))
+* refactor drive scripts ([d9afff3](https://github.com/powerhouse-inc/contributor-billing/commit/d9afff31c2d83cee2b724d5e15db940af2d621b4))

@@ -219,164 +219,145 @@ const EditableLineItem = forwardRef(function EditableLineItem(
     };
   }, [onEditingItemChange, item.id]);
 
+  /**
+   * Parses a numeric string, stripping thousand-separator commas
+   * and rounding to the given precision.
+   * Returns NaN if the string is not a valid number.
+   */
+  function parseNumericInput(raw: string, precision: number): number {
+    // Strip thousand-separator commas
+    const cleaned = raw.replace(/,/g, "");
+    const num = parseFloat(cleaned);
+    if (isNaN(num)) return NaN;
+    // Round to desired precision
+    const factor = Math.pow(10, precision);
+    return Math.round(num * factor) / factor;
+  }
+
   function handleInputChange(field: keyof EditableLineItem) {
     return function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-      const value = event.target.value;
+      const raw = event.target.value;
+      // Strip thousand-separator commas for all processing
+      const value = raw.replace(/,/g, "");
 
       if (field === "description") {
         setEditedItem((prev) => ({ ...prev, [field]: value }));
         return;
       }
 
-      // For numeric fields (except quantity which is handled separately)
+      // Allow empty and zero for non-quantity fields
       if (field !== "quantity" && (value === "" || value === "0")) {
         setEditedItem((prev) => ({ ...prev, [field]: value }));
         return;
       }
 
       if (field === "quantity") {
-        // Allow up to 2 decimal places for quantity, default to 1 if empty or invalid
         if (value === "" || value === "0") {
           setEditedItem((prev) => ({ ...prev, [field]: 1 }));
-        } else if (/^\d*\.?\d{0,2}$/.test(value)) {
-          setEditedItem((prev) => ({
-            ...prev,
-            [field]: parseFloat(value) || 1,
-          }));
+        } else {
+          const num = parseNumericInput(value, 2);
+          if (!isNaN(num)) {
+            setEditedItem((prev) => ({ ...prev, [field]: num || 1 }));
+          }
         }
       } else if (field === "taxPercent") {
-        // Allow integers from 0-100 for tax percent, with more permissive validation
         const numValue = parseInt(value, 10);
         if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
           setEditedItem((prev) => ({ ...prev, [field]: value }));
         }
-      } else if (field === "unitPriceTaxExcl") {
-        // For unit price, allow up to dynamic decimal places based on currency
+      } else if (
+        field === "unitPriceTaxExcl" ||
+        field === "totalPriceTaxExcl" ||
+        field === "totalPriceTaxIncl"
+      ) {
         const maxDecimals = getCurrencyPrecision(currency);
-        // Allow negative numbers with optional minus sign at start
-        const regex = new RegExp(`^-?\\d*\\.?\\d{0,${maxDecimals}}$`);
-        if (regex.test(value)) {
-          setEditedItem((prev) => ({ ...prev, [field]: value }));
-        }
-      } else if (field === "totalPriceTaxExcl") {
-        // For total price, allow up to dynamic decimal places based on currency
-        const maxDecimals = getCurrencyPrecision(currency);
-        // Allow negative numbers with optional minus sign at start
-        const regex = new RegExp(`^-?\\d*\\.?\\d{0,${maxDecimals}}$`);
-        if (regex.test(value)) {
-          setEditedItem((prev) => ({ ...prev, [field]: Number(value) }));
-        }
-      } else if (field === "totalPriceTaxIncl") {
-        // For total price, allow up to dynamic decimal places based on currency
-        const maxDecimals = getCurrencyPrecision(currency);
-        // Allow negative numbers with optional minus sign at start
-        const regex = new RegExp(`^-?\\d*\\.?\\d{0,${maxDecimals}}$`);
-        if (regex.test(value)) {
-          setEditedItem((prev) => ({ ...prev, [field]: value }));
+        // Allow typing in progress (e.g. "12." or "-")
+        if (/^-?\d*\.?\d*$/.test(value)) {
+          // If it's a complete number, round to precision
+          const num = parseNumericInput(value, maxDecimals);
+          if (!isNaN(num) || value === "" || value === "-" || value.endsWith(".")) {
+            const storeValue = value.endsWith(".") || value === "-" ? value : num;
+            setEditedItem((prev) => ({
+              ...prev,
+              [field]: field === "totalPriceTaxExcl" ? Number(storeValue) || 0 : storeValue,
+            }));
+          }
+        } else {
+          // Pasted value with commas already stripped — try to parse directly
+          const num = parseNumericInput(value, maxDecimals);
+          if (!isNaN(num)) {
+            setEditedItem((prev) => ({
+              ...prev,
+              [field]: field === "totalPriceTaxExcl" ? num : num,
+            }));
+          }
         }
       } else {
         // For other decimal fields
-        if (/^-?\d*\.?\d*$/.test(value)) {
-          setEditedItem((prev) => ({ ...prev, [field]: value }));
+        const num = parseNumericInput(value, 2);
+        if (!isNaN(num) || value === "" || value === "-" || value.endsWith(".")) {
+          setEditedItem((prev) => ({ ...prev, [field]: isNaN(num) ? value : value }));
         }
       }
     };
   }
 
   function handleSave() {
-    // Helper function for floating point comparison
+    const isNewItem = !item.id;
+
+    // For new items, always include all required fields
+    if (isNewItem) {
+      onSave({
+        id: editedItem.id ?? generateId(),
+        currency,
+        description: editedItem.description ?? "",
+        quantity: calculatedValues.quantity,
+        taxPercent: calculatedValues.taxPercent,
+        unitPriceTaxExcl: calculatedValues.unitPriceTaxExcl,
+        unitPriceTaxIncl: calculatedValues.unitPriceTaxIncl,
+        totalPriceTaxExcl: calculatedValues.totalPriceTaxExcl,
+        totalPriceTaxIncl: calculatedValues.totalPriceTaxIncl,
+        lineItemTag: [],
+      } as LineItem);
+      return;
+    }
+
+    // For edits, only send changed fields
     const isClose = (a: number, b: number) => Math.abs(a - b) < 0.00001;
 
-    // Create an object with only the fields that have changed
     const updateInput: any = {
-      id: editedItem.id ?? generateId(),
+      id: editedItem.id,
       currency,
     };
 
-    // Check if any field was explicitly edited by the user
-    const hasEditedDescription =
+    if (
       editedItem.description !== undefined &&
-      editedItem.description !== item.description;
-    const hasEditedQuantity =
-      editedItem.quantity !== undefined &&
-      editedItem.quantity !== item.quantity;
-    const hasEditedTaxPercent =
-      editedItem.taxPercent !== undefined &&
-      editedItem.taxPercent !== item.taxPercent;
-    const hasEditedUnitPriceTaxExcl =
-      editedItem.unitPriceTaxExcl !== undefined &&
-      editedItem.unitPriceTaxExcl !== item.unitPriceTaxExcl;
-    const hasEditedTotalPriceTaxExcl =
-      editedItem.totalPriceTaxExcl !== undefined &&
-      editedItem.totalPriceTaxExcl !== item.totalPriceTaxExcl;
-    const hasEditedTotalPriceTaxIncl =
-      editedItem.totalPriceTaxIncl !== undefined &&
-      editedItem.totalPriceTaxIncl !== item.totalPriceTaxIncl;
-
-    // Always include fields that were explicitly edited
-    if (hasEditedDescription) {
+      editedItem.description !== item.description
+    ) {
       updateInput.description = editedItem.description ?? "";
     }
 
-    if (hasEditedQuantity) {
+    if (!isClose(calculatedValues.quantity, item.quantity ?? 0)) {
       updateInput.quantity = calculatedValues.quantity;
     }
 
-    if (hasEditedTaxPercent) {
+    if (!isClose(calculatedValues.taxPercent, item.taxPercent ?? 0)) {
       updateInput.taxPercent = calculatedValues.taxPercent;
     }
 
-    if (hasEditedUnitPriceTaxExcl) {
+    if (!isClose(calculatedValues.unitPriceTaxExcl, item.unitPriceTaxExcl ?? 0)) {
       updateInput.unitPriceTaxExcl = calculatedValues.unitPriceTaxExcl;
     }
 
-    if (hasEditedTotalPriceTaxExcl) {
-      updateInput.totalPriceTaxExcl = calculatedValues.totalPriceTaxExcl;
-    }
-
-    if (hasEditedTotalPriceTaxIncl) {
-      updateInput.totalPriceTaxIncl = calculatedValues.totalPriceTaxIncl;
-    }
-
-    // Also include fields that changed due to calculations (even if not explicitly edited)
-    if (
-      !hasEditedQuantity &&
-      !isClose(calculatedValues.quantity, item.quantity ?? 0)
-    ) {
-      updateInput.quantity = calculatedValues.quantity;
-    }
-
-    if (
-      !hasEditedTaxPercent &&
-      !isClose(calculatedValues.taxPercent, item.taxPercent ?? 0)
-    ) {
-      updateInput.taxPercent = calculatedValues.taxPercent;
-    }
-
-    if (
-      !hasEditedUnitPriceTaxExcl &&
-      !isClose(calculatedValues.unitPriceTaxExcl, item.unitPriceTaxExcl ?? 0)
-    ) {
-      updateInput.unitPriceTaxExcl = calculatedValues.unitPriceTaxExcl;
-    }
-
-    if (
-      !isClose(calculatedValues.unitPriceTaxIncl, item.unitPriceTaxIncl ?? 0)
-    ) {
+    if (!isClose(calculatedValues.unitPriceTaxIncl, item.unitPriceTaxIncl ?? 0)) {
       updateInput.unitPriceTaxIncl = calculatedValues.unitPriceTaxIncl;
     }
 
-    if (
-      !hasEditedTotalPriceTaxExcl &&
-      !isClose(calculatedValues.totalPriceTaxExcl, item.totalPriceTaxExcl ?? 0)
-    ) {
+    if (!isClose(calculatedValues.totalPriceTaxExcl, item.totalPriceTaxExcl ?? 0)) {
       updateInput.totalPriceTaxExcl = calculatedValues.totalPriceTaxExcl;
     }
 
-    if (
-      !hasEditedTotalPriceTaxIncl &&
-      !isClose(calculatedValues.totalPriceTaxIncl, item.totalPriceTaxIncl ?? 0)
-    ) {
+    if (!isClose(calculatedValues.totalPriceTaxIncl, item.totalPriceTaxIncl ?? 0)) {
       updateInput.totalPriceTaxIncl = calculatedValues.totalPriceTaxIncl;
     }
 

@@ -2,14 +2,14 @@
  * Factory methods for creating OperationalHubProfileDocument instances
  */
 import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
-import { createBaseState, defaultBaseState } from "document-model/core";
+import { createBaseState, defaultBaseState } from "document-model";
 import type {
   OperationalHubProfileDocument,
-  OperationalHubProfileLocalState,
   OperationalHubProfileGlobalState,
+  OperationalHubProfileLocalState,
   OperationalHubProfilePHState,
 } from "./types.js";
-import { createDocument } from "./utils.js";
+import { utils } from "./utils.js";
 
 export function defaultGlobalState(): OperationalHubProfileGlobalState {
   return { name: "", operatorTeam: null, subteams: [] };
@@ -70,7 +70,7 @@ export function createOperationalHubProfileDocument(
     local?: Partial<OperationalHubProfileLocalState>;
   }>,
 ): OperationalHubProfileDocument {
-  const document = createDocument(
+  const document = utils.createDocument(
     state
       ? createState(
           createBaseState(state.auth, state.document),

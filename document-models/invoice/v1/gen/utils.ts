@@ -5,17 +5,20 @@ import {
   baseLoadFromInput,
   defaultBaseState,
   generateId,
-} from "document-model/core";
-import type { InvoiceGlobalState, InvoiceLocalState } from "./types.js";
-import type { InvoicePHState } from "./types.js";
+} from "document-model";
 import { reducer } from "./reducer.js";
 import { invoiceDocumentType } from "./document-type.js";
 import {
-  isInvoiceDocument,
   assertIsInvoiceDocument,
-  isInvoiceState,
   assertIsInvoiceState,
+  isInvoiceDocument,
+  isInvoiceState,
 } from "./document-schema.js";
+import type {
+  InvoiceGlobalState,
+  InvoiceLocalState,
+  InvoicePHState,
+} from "./types.js";
 
 export const initialGlobalState: InvoiceGlobalState = {
   status: "DRAFT",
@@ -94,12 +97,3 @@ export const utils: DocumentModelUtils<InvoicePHState> = {
     return assertIsInvoiceDocument(document);
   },
 };
-
-export const createDocument = utils.createDocument;
-export const createState = utils.createState;
-export const saveToFileHandle = utils.saveToFileHandle;
-export const loadFromInput = utils.loadFromInput;
-export const isStateOfType = utils.isStateOfType;
-export const assertIsStateOfType = utils.assertIsStateOfType;
-export const isDocumentOfType = utils.isDocumentOfType;
-export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

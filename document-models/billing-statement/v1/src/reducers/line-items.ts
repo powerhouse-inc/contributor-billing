@@ -1,5 +1,5 @@
 import type { BillingStatementState } from "../../gen/schema/types.js";
-import type { BillingStatementLineItemsOperations } from "@powerhousedao/contributor-billing/document-models/billing-statement/v1";
+import type { BillingStatementLineItemsOperations } from "document-models/billing-statement/v1";
 
 export const billingStatementLineItemsOperations: BillingStatementLineItemsOperations =
   {

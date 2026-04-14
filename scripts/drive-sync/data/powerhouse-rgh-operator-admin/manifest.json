@@ -2,7 +2,11 @@
   "source": {
     "slug": "powerhouse-rgh-operator-admin",
     "name": "Powerhouse RGH Operator Admin",
+<<<<<<< HEAD
     "downloadedAt": "2026-04-02T11:35:08.000Z"
+=======
+    "downloadedAt": "2026-04-03T10:42:25.000Z"
+>>>>>>> dev
   },
   "excluded": [],
   "folders": [
@@ -22,6 +26,11 @@
       "parentFolder": "0ccaa8c8-e04e-4ff3-9e62-8122dec3d424"
     },
     {
+      "id": "bddbf0b9-049b-4414-af62-7c207721fb43",
+      "name": "yasiel-testing-bot",
+      "parentFolder": "c07a2edb-b9db-4a99-b7b5-9dd736215cd8"
+    },
+    {
       "id": "c07a2edb-b9db-4a99-b7b5-9dd736215cd8",
       "name": "Service Subscriptions",
       "parentFolder": null
@@ -39,6 +48,7 @@
   ],
   "documents": [
     {
+<<<<<<< HEAD
       "id": "014a0405-3542-4a9e-94f6-9c192c6df5b4",
       "name": "OH - Artic",
       "type": "powerhouse/resource-template",
@@ -53,10 +63,15 @@
     {
       "id": "41a8d389-e4a3-4832-85f8-a8aa6f52cdd6",
       "name": "Teeps Offering 2",
+=======
+      "id": "18bcabe2-8127-4ccd-a7a8-bf55446c3bc8",
+      "name": "Operational Hub",
+>>>>>>> dev
       "type": "powerhouse/service-offering",
       "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
     },
     {
+<<<<<<< HEAD
       "id": "4e01a503-4ad7-4140-a491-14519a6e2268",
       "name": "Intellectual Property SPV (IP SPV)",
       "type": "powerhouse/resource-template",
@@ -77,10 +92,15 @@
     {
       "id": "58faac4a-113c-4dde-87b6-05677e8ef9de",
       "name": "Operator Agent subscription",
+=======
+      "id": "2400b5b3-66db-4c26-92a2-b8d57e64a9f1",
+      "name": "AgenticOps",
+>>>>>>> dev
       "type": "powerhouse/service-offering",
       "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
     },
     {
+<<<<<<< HEAD
       "id": "5bf6f01b-3fea-47b8-b3fd-38edcc2478bc",
       "name": "OperationalHubOffering",
       "type": "powerhouse/service-offering",
@@ -119,36 +139,118 @@
     {
       "id": "7b18db23-4cda-4dc8-b6f3-75f509e9935a",
       "name": "apeiron_operator_HA",
+=======
+      "id": "289428a9-015f-47db-a19a-f14c8e69c7f3",
+      "name": "OH-Artic",
+>>>>>>> dev
       "type": "powerhouse/service-offering",
       "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
     },
     {
-      "id": "85f284d7-aeb7-4279-ae92-c174212d1d6c",
-      "name": "Teeps Product",
+      "id": "2e18fa5b-d986-472d-9e0e-d4d052cfda7f",
+      "name": "OperationalHubOffering (active 2)",
+      "type": "powerhouse/service-offering",
+      "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
+    },
+    {
+      "id": "3b20fc20-71b3-409b-a3c6-92856ce37216",
+      "name": "REVENUE GENERATING HUB (RGH)",
       "type": "powerhouse/resource-template",
       "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
     },
     {
+<<<<<<< HEAD
       "id": "8f59ad07-5d53-4727-9290-e412b6f8b96d",
+=======
+      "id": "3c528905-7645-45d1-a9a0-d029b65e50cc",
+      "name": "OperationalHubOffering (active 3)",
+      "type": "powerhouse/service-offering",
+      "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
+    },
+    {
+      "id": "47ae8d9b-f9fe-4fd1-96cb-23f92bfaea54",
+      "name": "OperationalHubOffering (draft)",
+      "type": "powerhouse/service-offering",
+      "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
+    },
+    {
+      "id": "56dce7ce-e65d-4fd6-b3d8-7a8506528aa9",
+      "name": "OperationalHub",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+    },
+    {
+      "id": "595ee397-3e35-4e30-b379-5abeebb6a45b",
+      "name": "yasiel-testing-bot Subscription Instance",
+      "type": "powerhouse/subscription-instance",
+      "parentFolder": "bddbf0b9-049b-4414-af62-7c207721fb43"
+    },
+    {
+      "id": "667336cb-dba8-4c2e-858e-0ddaa869ba33",
+      "name": "NETWORK OPERATIONAL HUB",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+    },
+    {
+      "id": "694ccfba-f8d3-405a-a19a-99c557dcd9f9",
+      "name": "ALTERNATIVE RISK TRANSFER (ART)",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+    },
+    {
+      "id": "72556f1d-dcee-4689-a152-6322a83bbe01",
+>>>>>>> dev
       "name": "rupert",
       "type": "powerhouse/resource-template",
       "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
     },
     {
+<<<<<<< HEAD
       "id": "8f6ef572-9c9f-403a-80e8-ad8d8f3059a8",
+=======
+      "id": "75932a19-3d38-4ac1-bd71-2b0c7bd4c27a",
+>>>>>>> dev
       "name": "NETWORK IP SPV",
       "type": "powerhouse/resource-template",
       "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
     },
     {
+<<<<<<< HEAD
       "id": "a17c55fd-eb6a-4437-80b4-675e7e9077b8",
       "name": "NETWORK EMBRYONIC HUB",
+=======
+      "id": "8a543f5c-4bdf-4b44-9a42-f30a214983dc",
+      "name": "yasiel-testing-bot Resource Instance",
+      "type": "powerhouse/resource-instance",
+      "parentFolder": "bddbf0b9-049b-4414-af62-7c207721fb43"
+    },
+    {
+      "id": "8d980ae6-3587-4762-8514-fb3be2811feb",
+      "name": "FUNDRAISING VEHICLE (OCF)",
+>>>>>>> dev
       "type": "powerhouse/resource-template",
       "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
     },
     {
+<<<<<<< HEAD
       "id": "a952735e-e195-40d3-8407-42a22210f4f7",
       "name": "OperationalHub",
+=======
+      "id": "9cefda9c-5b63-429a-8c47-fe686f92eb4d",
+      "name": "COMMERCIAL OPERATIONAL HUB (OH)",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+    },
+    {
+      "id": "a5fd869c-3fa0-437e-8f60-79b9cd6fb92f",
+      "name": "OperationalHubOffering (active)",
+      "type": "powerhouse/service-offering",
+      "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
+    },
+    {
+      "id": "ad1eabc5-9742-417a-9c25-de379440b48c",
+      "name": "Intellectual Property SPV (IP SPV)",
+>>>>>>> dev
       "type": "powerhouse/resource-template",
       "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
     },
@@ -159,12 +261,13 @@
       "parentFolder": "c07a2edb-b9db-4a99-b7b5-9dd736215cd8"
     },
     {
-      "id": "d30bc041-ba20-4af5-bc13-61e0476116ba",
-      "name": "BAI Agent Executor",
+      "id": "c4118d12-238b-4782-9703-99d5ac8f66af",
+      "name": "AgentOps",
       "type": "powerhouse/resource-template",
       "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
     },
     {
+<<<<<<< HEAD
       "id": "d8ecbcd4-b4b1-4426-b8b0-06938eeb6575",
       "name": "COMMERCIAL OPERATIONAL HUB (OH)",
       "type": "powerhouse/resource-template",
@@ -173,8 +276,24 @@
     {
       "id": "e4d77202-459f-4463-92d2-e020ad57184f",
       "name": "App builder Agent",
+=======
+      "id": "cb49e571-6007-4240-ae0b-e7e9db214f98",
+      "name": "NETWORK EMBRYONIC HUB",
+>>>>>>> dev
       "type": "powerhouse/resource-template",
       "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+    },
+    {
+      "id": "d07ee3ea-f101-439d-8deb-4df88cdedf87",
+      "name": "NETWORK REVENUE GENERATING HUB",
+      "type": "powerhouse/resource-template",
+      "parentFolder": "24ab1f7c-53c1-4ac7-85c0-d77290d9954e"
+    },
+    {
+      "id": "da598460-435f-42e5-bbe3-30a07a8bf33b",
+      "name": "OperationalHubOffering",
+      "type": "powerhouse/service-offering",
+      "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
     },
     {
       "id": "e91c35bb-1f8e-467a-8b09-0d5dd466c97a",
@@ -183,8 +302,14 @@
       "parentFolder": "c07a2edb-b9db-4a99-b7b5-9dd736215cd8"
     },
     {
-      "id": "eb3d754c-bff8-47a2-b54f-23df451ae9af",
-      "name": "OH-Artic",
+      "id": "ed5a114e-1494-45a9-8e0b-d4a43247aeff",
+      "name": "Powerhouse RGH",
+      "type": "powerhouse/builder-profile",
+      "parentFolder": null
+    },
+    {
+      "id": "eea6bd29-f1fc-49f3-947e-18411c5d0915",
+      "name": "OperationalHubOffering (copy) 1",
       "type": "powerhouse/service-offering",
       "parentFolder": "b6073d7e-3aff-40a7-a5a9-5a2bfab5e4e5"
     },

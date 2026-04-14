@@ -2,14 +2,14 @@
  * Factory methods for creating AccountsDocument instances
  */
 import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
-import { createBaseState, defaultBaseState } from "document-model/core";
+import { createBaseState, defaultBaseState } from "document-model";
 import type {
   AccountsDocument,
-  AccountsLocalState,
   AccountsGlobalState,
+  AccountsLocalState,
   AccountsPHState,
 } from "./types.js";
-import { createDocument } from "./utils.js";
+import { utils } from "./utils.js";
 
 export function defaultGlobalState(): AccountsGlobalState {
   return { accounts: [] };
@@ -70,7 +70,7 @@ export function createAccountsDocument(
     local?: Partial<AccountsLocalState>;
   }>,
 ): AccountsDocument {
-  const document = createDocument(
+  const document = utils.createDocument(
     state
       ? createState(
           createBaseState(state.auth, state.document),

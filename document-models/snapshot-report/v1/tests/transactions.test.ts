@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/common/utils";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -12,7 +12,7 @@ import {
   RemoveTransactionInputSchema,
   UpdateTransactionFlowTypeInputSchema,
   RecalculateFlowTypesInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/snapshot-report/v1";
+} from "document-models/snapshot-report/v1";
 
 describe("TransactionsOperations", () => {
   it("should handle addTransaction operation", () => {

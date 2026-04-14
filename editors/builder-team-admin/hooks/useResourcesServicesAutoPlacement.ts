@@ -4,10 +4,9 @@ import {
   isFileNodeKind,
   addFolder,
   useSelectedDrive,
-  useNodeActions,
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
-import { deleteNode } from "document-drive";
+import { deleteNode, moveNode } from "document-drive";
 import type { FolderNode, FileNode, Node } from "document-drive";
 
 const SERVICES_AND_OFFERINGS_FOLDER_NAME = "Services And Offerings";
@@ -61,7 +60,6 @@ interface UseResourcesServicesAutoPlacementResult {
  */
 export function useResourcesServicesAutoPlacement(): UseResourcesServicesAutoPlacementResult {
   const [driveDocument] = useSelectedDrive();
-  const { onMoveNode } = useNodeActions();
   const driveId = driveDocument?.header.id;
 
   // Initialize module-level tracking sets for this drive if needed
@@ -294,7 +292,13 @@ export function useResourcesServicesAutoPlacement(): UseResourcesServicesAutoPla
     // Move resource templates to Products folder
     for (const fileNode of resourceTemplatesToMigrate) {
       processedDocs.add(fileNode.id);
-      onMoveNode(fileNode, resourceTemplatesFolder).catch((error: unknown) => {
+      dispatchActions(
+        moveNode({
+          srcFolder: fileNode.id,
+          targetParentFolder: resourceTemplatesFolder.id,
+        }),
+        driveId,
+      ).catch((error: unknown) => {
         console.error(`Failed to migrate resource template:`, error);
         processedDocs.delete(fileNode.id);
       });
@@ -303,7 +307,13 @@ export function useResourcesServicesAutoPlacement(): UseResourcesServicesAutoPla
     // Move service offerings to Service Offerings folder
     for (const fileNode of serviceOfferingsToMigrate) {
       processedDocs.add(fileNode.id);
-      onMoveNode(fileNode, serviceOfferingsFolder).catch((error: unknown) => {
+      dispatchActions(
+        moveNode({
+          srcFolder: fileNode.id,
+          targetParentFolder: serviceOfferingsFolder.id,
+        }),
+        driveId,
+      ).catch((error: unknown) => {
         console.error(`Failed to migrate service offering:`, error);
         processedDocs.delete(fileNode.id);
       });
@@ -374,7 +384,6 @@ export function useResourcesServicesAutoPlacement(): UseResourcesServicesAutoPla
     serviceOfferingsNodeIds,
     oldResourceTemplatesFolder,
     oldServiceOfferingsFolder,
-    onMoveNode,
   ]);
 
   return {

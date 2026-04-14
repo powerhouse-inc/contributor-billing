@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/common/utils";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -28,7 +28,7 @@ import {
   ReportPaymentIssueInputSchema,
   ResetInputSchema,
   SchedulePaymentInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/invoice/v1";
+} from "document-models/invoice/v1";
 
 describe("TransitionsOperations", () => {
   it("should handle accept operation", () => {
@@ -98,8 +98,8 @@ describe("TransitionsOperations", () => {
   it("should handle issue operation", () => {
     const document = utils.createDocument();
     const input = {
-      ...generateMock(IssueInputSchema()),
-      dateIssued: "2024-01-01T00:00:00.000Z",
+      invoiceNo: "INV-001",
+      dateIssued: "2025-01-15T00:00:00.000Z",
     };
 
     const updatedDocument = reducer(document, issue(input));

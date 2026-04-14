@@ -9,7 +9,7 @@ export const documentModel: DocumentModelGlobalState = {
   },
   extension: "",
   description:
-    "Profile document for Operational Hubs that manages operator team assignment and subteam relationships",
+    "Profile document for Operational Hubs that manages operator team assignment and subteam relationships.",
   specifications: [
     {
       state: {
@@ -29,59 +29,59 @@ export const documentModel: DocumentModelGlobalState = {
         {
           id: "configuration",
           name: "configuration",
-          description: "Operations for configuring the operational hub profile",
           operations: [
             {
               id: "set-operational-hub-name",
               name: "setOperationalHubName",
-              description: "Set the name of the operational hub",
-              schema: "input SetOperationalHubNameInput {\n  name: String!\n}",
-              template: "Set the name of the operational hub",
-              reducer: "state.name = action.input.name;",
-              errors: [],
-              examples: [],
               scope: "global",
+              errors: [],
+              schema: "input SetOperationalHubNameInput {\n  name: String!\n}",
+              reducer: "state.name = action.input.name;",
+              examples: [],
+              template: "Set the name of the operational hub",
+              description: "Set the name of the operational hub",
             },
             {
               id: "set-operator-team",
               name: "setOperatorTeam",
-              description:
-                "Set the operator team PHID for this operational hub",
+              scope: "global",
+              errors: [],
               schema: "input SetOperatorTeamInput {\n  operatorTeam: PHID\n}",
-              template: "Set the operator team PHID for this operational hub",
               reducer:
                 "state.operatorTeam = action.input.operatorTeam || null;",
-              errors: [],
               examples: [],
-              scope: "global",
+              template: "Set the operator team PHID for this operational hub",
+              description:
+                "Set the operator team PHID for this operational hub",
             },
             {
               id: "add-subteam",
               name: "addSubteam",
-              description:
-                "Add a subteam (builder profile) to the operational hub",
+              scope: "global",
+              errors: [],
               schema: "input AddSubteamInput {\n  subteam: PHID!\n}",
-              template:
-                "Add a subteam (builder profile) to the operational hub",
               reducer:
                 "if (!state.subteams.includes(action.input.subteam)) {\n  state.subteams.push(action.input.subteam);\n}",
-              errors: [],
               examples: [],
-              scope: "global",
+              template:
+                "Add a subteam (builder profile) to the operational hub",
+              description:
+                "Add a subteam (builder profile) to the operational hub",
             },
             {
               id: "remove-subteam",
               name: "removeSubteam",
-              description: "Remove a subteam from the operational hub",
+              scope: "global",
+              errors: [],
               schema: "input RemoveSubteamInput {\n  subteam: PHID!\n}",
-              template: "Remove a subteam from the operational hub",
               reducer:
                 "const index = state.subteams.indexOf(action.input.subteam);\nif (index !== -1) {\n  state.subteams.splice(index, 1);\n}",
-              errors: [],
               examples: [],
-              scope: "global",
+              template: "Remove a subteam from the operational hub",
+              description: "Remove a subteam from the operational hub",
             },
           ],
+          description: "Operations for configuring the operational hub profile",
         },
       ],
       version: 1,

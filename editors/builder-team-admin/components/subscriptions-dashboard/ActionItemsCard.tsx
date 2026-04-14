@@ -40,14 +40,14 @@ export function ActionItemsCard({ items }: ActionItemsCardProps) {
   const warning = items.filter((i) => i.severity === "warning");
   const info = items.filter((i) => i.severity === "info");
 
-  const grouped = [
-    ...critical,
-    ...warning,
-    ...info,
-  ];
+  const grouped = [...critical, ...warning, ...info];
 
   // Summary counts
-  const counts = { critical: critical.length, warning: warning.length, info: info.length };
+  const counts = {
+    critical: critical.length,
+    warning: warning.length,
+    info: info.length,
+  };
 
   return (
     <div>
@@ -84,7 +84,10 @@ export function ActionItemsCard({ items }: ActionItemsCardProps) {
               key={`${item.title}-${item.customerName ?? ""}-${String(i)}`}
               className={`flex items-start gap-2.5 rounded-md border-l-[3px] ${config.border} ${config.bg} px-3 py-2.5`}
             >
-              <Icon size={14} className={`mt-0.5 shrink-0 ${config.iconColor}`} />
+              <Icon
+                size={14}
+                className={`mt-0.5 shrink-0 ${config.iconColor}`}
+              />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm font-medium text-stone-700">

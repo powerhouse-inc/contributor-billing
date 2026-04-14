@@ -5,9 +5,8 @@ import {
   setSelectedNode,
   useSelectedDrive,
   useDocumentsInSelectedDrive,
-  type VetraDocumentModelModule,
 } from "@powerhousedao/reactor-browser";
-import type { PHDocument } from "document-model";
+import type { PHDocument, DocumentModelModule } from "document-model";
 import { deleteNode, type FileNode } from "document-drive";
 import { actions as invoiceActions } from "../../../../document-models/invoice/index.js";
 import type { InvoiceTag } from "../../../../document-models/invoice/v1/gen/types.js";
@@ -120,9 +119,9 @@ interface InvoiceTableProps {
       | Record<string, boolean>
       | ((prev: Record<string, boolean>) => Record<string, boolean>),
   ) => void;
-  filteredDocumentModels: VetraDocumentModelModule[];
+  filteredDocumentModels: DocumentModelModule[];
   onSelectDocumentModel: (
-    model: VetraDocumentModelModule,
+    model: DocumentModelModule,
     name: string,
   ) => void;
   getDocDispatcher: (
@@ -647,7 +646,7 @@ export const InvoiceTable = ({
   // Create integrations document - simple async function
   const createIntegrationsDocument = async () => {
     const integrationsModel = filteredDocumentModels.find(
-      (model) => model.id === "powerhouse/integrations",
+      (model) => model.documentModel?.global?.id === "powerhouse/integrations",
     );
 
     if (integrationsModel) {
@@ -703,7 +702,7 @@ export const InvoiceTable = ({
   // Create a new expense report
   const handleCreateExpenseReport = async () => {
     const expenseReportModel = filteredDocumentModels.find(
-      (model) => model.id === "powerhouse/expense-report",
+      (model) => model.documentModel?.global?.id === "powerhouse/expense-report",
     );
 
     if (expenseReportModel && monthName) {

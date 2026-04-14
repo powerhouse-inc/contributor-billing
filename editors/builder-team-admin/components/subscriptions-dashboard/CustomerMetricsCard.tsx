@@ -14,11 +14,7 @@ const SEVERITY_STROKE = {
   ok: "#10b981",
 };
 
-function MiniGauge({
-  m,
-}: {
-  m: CustomerMetric;
-}) {
+function MiniGauge({ m }: { m: CustomerMetric }) {
   const limit = m.paidLimit ?? m.freeLimit;
   const pct = limit > 0 ? (m.currentUsage / limit) * 100 : 0;
   const stroke = SEVERITY_STROKE[m.severity];
@@ -57,7 +53,13 @@ function MiniGauge({
       </div>
 
       {/* Gauge */}
-      <svg width={size} height={106} viewBox={`0 0 ${size} 106`} role="img" aria-label={`${m.currentUsage} of ${limit} ${m.unitName}`}>
+      <svg
+        width={size}
+        height={106}
+        viewBox={`0 0 ${size} 106`}
+        role="img"
+        aria-label={`${m.currentUsage} of ${limit} ${m.unitName}`}
+      >
         <path
           d={`M ${x1} ${y1} A ${r} ${r} 0 1 1 ${bgX2} ${bgY2}`}
           fill="none"
@@ -74,10 +76,22 @@ function MiniGauge({
             strokeLinecap="round"
           />
         ) : null}
-        <text x={cx} y={cy - 12} textAnchor="middle" className="text-2xl font-bold" fill="#292524">
+        <text
+          x={cx}
+          y={cy - 12}
+          textAnchor="middle"
+          className="text-2xl font-bold"
+          fill="#292524"
+        >
           {m.currentUsage}
         </text>
-        <text x={cx} y={cy + 4} textAnchor="middle" className="text-xs" fill="#a8a29e">
+        <text
+          x={cx}
+          y={cy + 4}
+          textAnchor="middle"
+          className="text-xs"
+          fill="#a8a29e"
+        >
           / {limit}
         </text>
       </svg>

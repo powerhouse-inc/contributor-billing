@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/common/utils";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -14,16 +14,16 @@ import {
   EditPaymentDataInputSchema,
   EditStatusInputSchema,
   SetExportedDataInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/invoice/v1";
+} from "document-models/invoice/v1";
 
 describe("GeneralOperations", () => {
   it("should handle editInvoice operation", () => {
     const document = utils.createDocument();
     const input = {
       ...generateMock(EditInvoiceInputSchema()),
-      dateIssued: "2024-01-01T00:00:00.000Z",
-      dateDue: "2024-02-01T00:00:00.000Z",
-      dateDelivered: "2024-01-15T00:00:00.000Z",
+      dateIssued: "2025-01-15T00:00:00.000Z",
+      dateDue: "2025-02-15T00:00:00.000Z",
+      dateDelivered: "2025-01-20T00:00:00.000Z",
     };
 
     const updatedDocument = reducer(document, editInvoice(input));

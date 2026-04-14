@@ -158,6 +158,8 @@ export const currencyList = [
   { ticker: "USDS", crypto: true },
   { ticker: "USDC", crypto: true },
   { ticker: "DAI", crypto: true },
+  { ticker: "EURC", crypto: true },
+  { ticker: "EURE", crypto: true },
   { ticker: "USD", crypto: false },
   { ticker: "EUR", crypto: false },
   { ticker: "DKK", crypto: false },
