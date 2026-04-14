@@ -9,17 +9,16 @@
   "reactor": {
     "port": 4001
   },
-  "packageRegistryUrl": "https://registry.dev.vetra.io",
   "packages": [
     {
       "packageName": "@powerhousedao/builder-profile",
-      "version": "1.1.0-dev.19",
-      "provider": "registry"
+      "version": "1.1.0-dev.20",
+      "provider": "npm"
     },
     {
       "packageName": "@powerhousedao/service-offering",
-      "version": "1.0.0-dev.32",
-      "provider": "registry"
+      "version": "1.0.0-dev.33",
+      "provider": "npm"
     }
   ]
 }
