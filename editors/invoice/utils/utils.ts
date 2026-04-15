@@ -81,60 +81,29 @@ export interface ChainConfig {
   chainName: string;
   chainId: string;
   rpc: string;
-  fallbackRpcs: string[];
 }
 
-// Alchemy RPC base URLs per chain (append API key at runtime)
-const ALCHEMY_RPC = {
-  base: "https://base-mainnet.g.alchemy.com/v2",
-  ethereum: "https://eth-mainnet.g.alchemy.com/v2",
-  arbitrum: "https://arb-mainnet.g.alchemy.com/v2",
-} as const;
+// Single source of truth for blockchain chain configurations (browser-safe, public RPCs only)
+export const CHAIN_CONFIGS: Record<string, ChainConfig> = {
+  base: {
+    chainName: "Base",
+    chainId: "8453",
+    rpc: "https://base-mainnet.public.blastapi.io",
+  },
+  ethereum: {
+    chainName: "Ethereum",
+    chainId: "1",
+    rpc: "https://ethereum-rpc.publicnode.com",
+  },
+  "arbitrum one": {
+    chainName: "Arbitrum One",
+    chainId: "42161",
+    rpc: "https://arb1.arbitrum.io/rpc",
+  },
+};
 
-function alchemyRpc(chain: keyof typeof ALCHEMY_RPC): string {
-  const apiKey =
-    typeof process !== "undefined" ? process.env?.ALCHEMY_API_KEY : undefined;
-  if (!apiKey) {
-    return "";
-  }
-  return `${ALCHEMY_RPC[chain]}/${apiKey}`;
-}
-
-// Single source of truth for blockchain chain configurations
-// Primary RPC is Alchemy (requires ALCHEMY_API_KEY); public RPCs are fallbacks.
-export function getChainConfigs(): Record<string, ChainConfig> {
-  return {
-    base: {
-      chainName: "Base",
-      chainId: "8453",
-      rpc: alchemyRpc("base") || "https://base-mainnet.public.blastapi.io",
-      fallbackRpcs: [
-        "https://base-mainnet.public.blastapi.io",
-        "https://base-rpc.publicnode.com",
-      ],
-    },
-    ethereum: {
-      chainName: "Ethereum",
-      chainId: "1",
-      rpc: alchemyRpc("ethereum") || "https://ethereum-rpc.publicnode.com",
-      fallbackRpcs: [
-        "https://ethereum-rpc.publicnode.com",
-        "https://eth-mainnet.public.blastapi.io",
-        "https://1rpc.io/eth",
-      ],
-    },
-    "arbitrum one": {
-      chainName: "Arbitrum One",
-      chainId: "42161",
-      rpc: alchemyRpc("arbitrum") || "https://arb1.arbitrum.io/rpc",
-      fallbackRpcs: [
-        "https://arb1.arbitrum.io/rpc",
-        "https://arbitrum-one-rpc.publicnode.com",
-        "https://arbitrum-one.public.blastapi.io",
-      ],
-    },
-  };
-}
+// Default chain configuration (Ethereum)
+export const DEFAULT_CHAIN_CONFIG: ChainConfig = CHAIN_CONFIGS.ethereum;
 
 /**
  * Maps a chain name to its full configuration including chainId and RPC endpoint
@@ -145,18 +114,15 @@ export function getChainConfigs(): Record<string, ChainConfig> {
 export function mapChainNameToConfig(
   chainName: string | null | undefined,
 ): ChainConfig {
-  const configs = getChainConfigs();
-  const defaultConfig = configs.ethereum;
-
   if (!chainName) {
-    return defaultConfig;
+    return DEFAULT_CHAIN_CONFIG;
   }
 
   const normalizedChainName = chainName.toLowerCase().trim();
 
   // Direct lookup
-  if (configs[normalizedChainName]) {
-    return configs[normalizedChainName];
+  if (CHAIN_CONFIGS[normalizedChainName]) {
+    return CHAIN_CONFIGS[normalizedChainName];
   }
 
   // Handle alternative names and variations
@@ -169,15 +135,15 @@ export function mapChainNameToConfig(
   };
 
   const aliasedName = chainAliases[normalizedChainName];
-  if (aliasedName && configs[aliasedName]) {
-    return configs[aliasedName];
+  if (aliasedName && CHAIN_CONFIGS[aliasedName]) {
+    return CHAIN_CONFIGS[aliasedName];
   }
 
   // If no match found, return default (Ethereum)
   console.warn(
-    `Unknown chain name: "${chainName}". Using default chain: ${defaultConfig.chainName}`,
+    `Unknown chain name: "${chainName}". Using default chain: ${DEFAULT_CHAIN_CONFIG.chainName}`,
   );
-  return defaultConfig;
+  return DEFAULT_CHAIN_CONFIG;
 }
 
 /**
@@ -185,7 +151,7 @@ export function mapChainNameToConfig(
  * Useful for UI dropdowns and validation
  */
 export function getAllChainConfigs(): ChainConfig[] {
-  return Object.values(getChainConfigs());
+  return Object.values(CHAIN_CONFIGS);
 }
 
 /**
@@ -195,8 +161,7 @@ export function getAllChainConfigs(): ChainConfig[] {
  */
 export function getChainConfigByChainId(chainId: string): ChainConfig | null {
   return (
-    Object.values(getChainConfigs()).find(
-      (config) => config.chainId === chainId,
-    ) || null
+    Object.values(CHAIN_CONFIGS).find((config) => config.chainId === chainId) ||
+    null
   );
 }

@@ -3,7 +3,10 @@ import Safe from "@safe-global/protocol-kit";
 import { OperationType } from "@safe-global/types-kit";
 import { ethers, AbiCoder } from "ethers";
 import dotenv from "dotenv";
-import { getChainConfigs } from "../../editors/invoice/utils/utils.js";
+import {
+  CHAIN_CONFIGS,
+  type ChainConfig,
+} from "../../editors/invoice/utils/utils.js";
 
 dotenv.config();
 
@@ -13,6 +16,7 @@ export interface PayerWallet {
   chainName: string;
   chainId: string;
   address: string;
+  fallbackRpcs: string[];
 }
 
 export interface PayeeWallet {
@@ -38,6 +42,38 @@ export interface TransferResult {
   paymentDetails: PaymentDetail[];
 }
 
+// Alchemy RPC endpoints (server-side only, requires ALCHEMY_API_KEY)
+const ALCHEMY_RPC: Record<string, string> = {
+  base: "https://base-mainnet.g.alchemy.com/v2",
+  ethereum: "https://eth-mainnet.g.alchemy.com/v2",
+  "arbitrum one": "https://arb-mainnet.g.alchemy.com/v2",
+};
+
+function getAlchemyRpc(chainKey: string): string {
+  const apiKey = process.env.ALCHEMY_API_KEY;
+  const baseUrl = ALCHEMY_RPC[chainKey];
+  if (!apiKey || !baseUrl) return "";
+  return `${baseUrl}/${apiKey}`;
+}
+
+// Public RPC fallbacks per chain
+const FALLBACK_RPCS: Record<string, string[]> = {
+  base: [
+    "https://base-mainnet.public.blastapi.io",
+    "https://base-rpc.publicnode.com",
+  ],
+  ethereum: [
+    "https://ethereum-rpc.publicnode.com",
+    "https://eth-mainnet.public.blastapi.io",
+    "https://1rpc.io/eth",
+  ],
+  "arbitrum one": [
+    "https://arb1.arbitrum.io/rpc",
+    "https://arbitrum-one-rpc.publicnode.com",
+    "https://arbitrum-one.public.blastapi.io",
+  ],
+};
+
 // Determine environment and use appropriate Safe address
 const isProduction = process.env.NODE_ENV === "production";
 const safeAddress = isProduction
@@ -57,21 +93,25 @@ console.log(
   `----- GNOSIS TRANSACTION BUILDER ----- Using ${isProduction ? "PRODUCTION" : "DEV/STAGING"} Safe address: ${safeAddress}`,
 );
 
-function getPayerWallets(): Record<string, PayerWallet> {
-  const configs = getChainConfigs();
+function buildPayerWallet(chainKey: string, config: ChainConfig): PayerWallet {
+  const alchemyRpc = getAlchemyRpc(chainKey);
   return {
-    BASE: {
-      ...configs.base,
-      address: safeAddress!,
-    },
-    ETHEREUM: {
-      ...configs.ethereum,
-      address: safeAddress!,
-    },
-    "ARBITRUM ONE": {
-      ...configs["arbitrum one"],
-      address: safeAddress!,
-    },
+    chainName: config.chainName,
+    chainId: config.chainId,
+    rpc: alchemyRpc || config.rpc,
+    address: safeAddress!,
+    fallbackRpcs: FALLBACK_RPCS[chainKey] ?? [],
+  };
+}
+
+function getPayerWallets(): Record<string, PayerWallet> {
+  return {
+    BASE: buildPayerWallet("base", CHAIN_CONFIGS.base),
+    ETHEREUM: buildPayerWallet("ethereum", CHAIN_CONFIGS.ethereum),
+    "ARBITRUM ONE": buildPayerWallet(
+      "arbitrum one",
+      CHAIN_CONFIGS["arbitrum one"],
+    ),
   };
 }
 
@@ -88,14 +128,19 @@ async function withRetry<T>(
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await fn();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      const errStatus =
+        error instanceof Object && "status" in error
+          ? (error as { status: number }).status
+          : undefined;
       const isRateLimit =
-        error?.message?.includes("Too Many Requests") ||
-        error?.message?.includes("429") ||
-        error?.status === 429;
+        errMsg.includes("Too Many Requests") ||
+        errMsg.includes("429") ||
+        errStatus === 429;
 
       if (isRateLimit && attempt < maxRetries - 1) {
-        const waitTime = initialDelay * Math.pow(2, attempt); // Exponential backoff
+        const waitTime = initialDelay * Math.pow(2, attempt);
         console.log(
           `[${operationName}] Rate limited, retrying in ${waitTime}ms... (attempt ${attempt + 1}/${maxRetries})`,
         );
@@ -103,7 +148,6 @@ async function withRetry<T>(
         continue;
       }
 
-      // If it's not a rate limit error, or we've exhausted retries, throw
       throw error;
     }
   }
@@ -111,6 +155,7 @@ async function withRetry<T>(
 }
 
 // --- Implementation ---
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
 async function initSafeProtocolKit(
   rpcs: string[],
   privateKey: string,
@@ -128,7 +173,7 @@ async function initSafeProtocolKit(
       });
       console.log(`Connected via RPC: ${rpc}`);
       return kit;
-    } catch (err) {
+    } catch (err: unknown) {
       console.warn(
         `RPC failed (${rpc}):`,
         err instanceof Error ? err.message : err,
@@ -138,14 +183,15 @@ async function initSafeProtocolKit(
   }
   throw lastError;
 }
+/* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 async function executeTransferProposal(
   chainName: string,
   paymentDetailsInput: PaymentDetail | PaymentDetail[],
 ): Promise<TransferResult> {
   const wallets = getPayerWallets();
   const payerWallet = wallets[chainName.toUpperCase()];
-  const chainConfig = getChainConfigs()[chainName.toLowerCase()];
 
   const paymentDetails = Array.isArray(paymentDetailsInput)
     ? paymentDetailsInput
@@ -161,17 +207,14 @@ async function executeTransferProposal(
   console.log(`Safe Address: ${payerWallet.address}`);
 
   // Build ordered list of RPCs: primary + fallbacks
-  const rpcs: string[] = [
-    payerWallet.rpc,
-    ...(chainConfig ? chainConfig.fallbackRpcs : []),
-  ];
+  const rpcs: string[] = [payerWallet.rpc, ...payerWallet.fallbackRpcs];
 
   // Set up provider and signer using the primary RPC
   const provider = new ethers.JsonRpcProvider(payerWallet.rpc);
   const signer = new ethers.Wallet(privateKey, provider);
 
   // Safe API and Protocol Kit instances
-  // @ts-ignore - Ignoring constructor error as per requirements
+  // @ts-expect-error - SafeApiKit constructor typing mismatch with runtime API
   const safeApiKit = new SafeApiKit({
     chainId: BigInt(payerWallet.chainId),
     apiKey: process.env.SAFE_API_KEY,
@@ -243,7 +286,7 @@ async function executeTransferProposal(
           senderAddress,
           senderSignature: signature.data,
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Propose TX payload:", {
           safeAddress: payerWallet.address,
           safeTxHash,
@@ -267,10 +310,7 @@ async function executeTransferProposal(
             }),
           });
           const rawBody = await rawRes.text();
-          console.error(
-            `Safe API raw response (${rawRes.status}):`,
-            rawBody,
-          );
+          console.error(`Safe API raw response (${rawRes.status}):`, rawBody);
         } catch {
           // ignore debug fetch failure
         }
@@ -289,5 +329,6 @@ async function executeTransferProposal(
     paymentDetails,
   };
 }
+/* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 
 export { executeTransferProposal };
