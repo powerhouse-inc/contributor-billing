@@ -1,7 +1,7 @@
 {
   "name": "@powerhousedao/contributor-billing",
   "description": "Document models that help contributors of open organisations get paid anonymously for their work on a monthly basis.",
-  "version": "1.2.0-jetstream.7",
+  "version": "1.2.0-jetstream.8",
   "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
@@ -65,7 +65,7 @@
     "check-circular-imports": "npx dpdm -T ./index.ts",
     "generate": "ph-cli generate",
     "connect": "ph-cli connect",
-    "build": "ph-cli build && node scripts/fix-browser-build.mjs",
+    "build": "ph-cli build",
     "reactor": "ph-cli reactor",
     "service": "ph-cli service",
     "vetra": "ph-cli vetra",
