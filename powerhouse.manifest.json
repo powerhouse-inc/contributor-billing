@@ -102,5 +102,25 @@
         }
     ],
     "subgraphs": [],
-    "importScripts": []
+    "importScripts": [],
+    "config": [
+        {
+            "name": "REQUEST_FINANCE_API_KEY",
+            "type": "secret",
+            "description": "API key for the Request Finance SaaS. Read by the invoice subgraph's `requestDirectPayment` resolver (via scripts/invoice/requestFinance.ts) to create invoices on the external platform. Obtain from your Request Finance account settings.",
+            "required": true
+        },
+        {
+            "name": "REQUEST_FINANCE_EMAIL",
+            "type": "var",
+            "description": "Email address associated with the Request Finance account. Sent as the requestor identity when the invoice subgraph creates invoices.",
+            "required": true
+        },
+        {
+            "name": "ALCHEMY_SIGNING_KEY",
+            "type": "secret",
+            "description": "Alchemy webhook signing key. Used by the invoice subgraph (`subgraphs/invoice-addon/customResolvers.ts`) to verify incoming payment-confirmation webhooks. Generate in the Alchemy dashboard when creating the webhook.",
+            "required": true
+        }
+    ]
 }
