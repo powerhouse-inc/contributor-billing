@@ -1,3 +1,11 @@
+## [1.2.1](https://github.com/powerhouse-inc/contributor-billing/compare/v1.2.0...v1.2.1) (2026-04-17)
+
+
+### Reverts
+
+* Revert "chore(release): 1.2.0 [skip ci]" ([052f2b5](https://github.com/powerhouse-inc/contributor-billing/commit/052f2b5278f57d0f0c5812b1ea326e7ee345a607))
+* Revert "feat(manifest): declare REQUEST_FINANCE_API_KEY and REQUEST_FINANCE_BASE_URL" ([264c809](https://github.com/powerhouse-inc/contributor-billing/commit/264c809329f8093972a68e0b231e1d312d952bae))
+
 ## [1.1.2](https://github.com/powerhouse-inc/contributor-billing/compare/v1.1.1...v1.1.2) (2026-03-23)
 
 ## [1.1.1](https://github.com/powerhouse-inc/contributor-billing/compare/v1.1.0...v1.1.1) (2026-03-06)
