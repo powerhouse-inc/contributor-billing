@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/powerhouse-inc/contributor-billing/compare/v1.1.2...v1.2.0) (2026-04-17)
+
+
+### Features
+
+* **manifest:** declare REQUEST_FINANCE_API_KEY and REQUEST_FINANCE_BASE_URL ([721a8c2](https://github.com/powerhouse-inc/contributor-billing/commit/721a8c2cca2c3460601ce5fcd4319e0e7604aa71))
+
 ## [1.1.2](https://github.com/powerhouse-inc/contributor-billing/compare/v1.1.1...v1.1.2) (2026-03-23)
 
 ## [1.1.1](https://github.com/powerhouse-inc/contributor-billing/compare/v1.1.0...v1.1.1) (2026-03-06)
