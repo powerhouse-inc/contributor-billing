@@ -117,23 +117,10 @@
             "required": true
         },
         {
-            "name": "ALCHEMY_SIGNING_KEY",
-            "type": "secret",
-            "description": "Alchemy webhook signing key. Used by the invoice subgraph (`subgraphs/invoice-addon/customResolvers.ts`) to verify incoming payment-confirmation webhooks. Generate in the Alchemy dashboard when creating the webhook.",
-            "required": true
-        },
-        {
             "name": "ALCHEMY_API_KEY",
             "type": "secret",
             "description": "Alchemy RPC API key. Used by scripts/alchemy/* (Alchemy environment + helpers) to query on-chain data and by account-transactions / accounts editors. Obtain from the Alchemy dashboard.",
             "required": false
-        },
-        {
-            "name": "ALCHEMY_NETWORK",
-            "type": "var",
-            "description": "Alchemy network name (e.g. `mainnet`, `sepolia`, `matic`). Used alongside ALCHEMY_API_KEY to target a specific chain.",
-            "required": false,
-            "default": "mainnet"
         },
         {
             "name": "CLAUDE_API_KEY",
