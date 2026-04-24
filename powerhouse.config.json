@@ -13,12 +13,12 @@
   "packages": [
     {
       "packageName": "@powerhousedao/builder-profile",
-      "version": "1.1.0-dev.21",
+      "version": "1.1.0-dev.27",
       "provider": "registry"
     },
     {
       "packageName": "@powerhousedao/service-offering",
-      "version": "1.0.0-dev.34",
+      "version": "1.0.0-dev.36",
       "provider": "registry"
     }
   ]
