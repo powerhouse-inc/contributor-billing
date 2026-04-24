@@ -3,7 +3,7 @@
  * based on the current environment.
  */
 
-function getGraphQLUrl(): string {
+export function getGraphQLUrl(): string {
   if (typeof window === "undefined") {
     return "http://localhost:4001/graphql";
   }
