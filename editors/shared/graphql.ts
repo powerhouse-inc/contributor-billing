@@ -3,7 +3,7 @@
  * based on the current environment.
  */
 
-export function getGraphQLUrl(): string {
+function getGraphQLUrl(): string {
   if (typeof window === "undefined") {
     return "http://localhost:4001/graphql";
   }
@@ -14,16 +14,9 @@ export function getGraphQLUrl(): string {
     return "http://localhost:4001/graphql";
   }
 
-  if (baseURI.includes("-dev.")) {
-    return "https://switchboard-dev.powerhouse.xyz/graphql";
-  }
-
-  if (baseURI.includes("-staging.")) {
-    return "https://switchboard-staging.powerhouse.xyz/graphql";
-  }
-
-  // Production environment
-  return "https://switchboard.powerhouse.xyz/graphql";
+  const url = new URL(baseURI);
+  url.host = url.host.replace(/^connect\./, "switchboard.");
+  return `${url.origin}/graphql`;
 }
 
 /**
