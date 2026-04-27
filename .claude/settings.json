@@ -40,5 +40,10 @@
   "enabledPlugins": {
     "arscontexta@agenticnotetaking": true,
     "chrome-devtools-mcp@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(bun build.ts --no-emit)"
+    ]
   }
 }
