@@ -80,7 +80,7 @@
     "@powerhousedao/document-engineering": "1.40.2",
     "@powerhousedao/reactor-api": "6.0.0-dev.195",
     "@powerhousedao/reactor-browser": "6.0.0-dev.195",
-    "@powerhousedao/service-offering": "1.0.0-dev.36",
+    "@powerhousedao/service-offering": "1.0.0-dev.38",
     "@powerhousedao/shared": "6.0.0-dev.195",
     "@react-pdf/renderer": "^4.3.1",
     "@safe-global/api-kit": "^4.0.0",
