@@ -73,15 +73,15 @@
     "service-unstartup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-unstartup.sh"
   },
   "dependencies": {
-    "@powerhousedao/analytics-engine-core": "6.0.0-dev.195",
+    "@powerhousedao/analytics-engine-core": "6.0.0-dev.202",
     "@powerhousedao/builder-profile": "1.1.0-dev.27",
-    "@powerhousedao/connect": "6.0.0-dev.195",
-    "@powerhousedao/design-system": "6.0.0-dev.195",
+    "@powerhousedao/connect": "6.0.0-dev.202",
+    "@powerhousedao/design-system": "6.0.0-dev.202",
     "@powerhousedao/document-engineering": "1.40.2",
-    "@powerhousedao/reactor-api": "6.0.0-dev.195",
-    "@powerhousedao/reactor-browser": "6.0.0-dev.195",
+    "@powerhousedao/reactor-api": "6.0.0-dev.202",
+    "@powerhousedao/reactor-browser": "6.0.0-dev.202",
     "@powerhousedao/service-offering": "1.0.0-dev.38",
-    "@powerhousedao/shared": "6.0.0-dev.195",
+    "@powerhousedao/shared": "6.0.0-dev.202",
     "@react-pdf/renderer": "^4.3.1",
     "@safe-global/api-kit": "^4.0.0",
     "@safe-global/protocol-kit": "^6.0.3",
@@ -89,7 +89,7 @@
     "@safe-global/types-kit": "^2.0.1",
     "@types/cors": "^2.8.17",
     "cors": "^2.8.5",
-    "document-model": "6.0.0-dev.195",
+    "document-model": "6.0.0-dev.202",
     "dotenv": "^16.5.0",
     "ethers": "^6.14.0",
     "google-auth-library": "^9.15.1",
@@ -110,8 +110,8 @@
     "@electric-sql/pglite": "0.3.15",
     "@electric-sql/pglite-tools": "0.2.20",
     "@eslint/js": "^9.38.0",
-    "@powerhousedao/ph-cli": "6.0.0-dev.195",
-    "@powerhousedao/reactor": "6.0.0-dev.195",
+    "@powerhousedao/ph-cli": "6.0.0-dev.202",
+    "@powerhousedao/reactor": "6.0.0-dev.202",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@tailwindcss/cli": "^4.1.18",
@@ -136,5 +136,5 @@
   },
   "readme": "ERROR: No README data found!",
   "homepage": "https://github.com/powerhouse-inc/contributor-billing#readme",
-  "_id": "@powerhousedao/contributor-billing@1.0.0-dev.36"
+  "_id": "@powerhousedao/contributor-billing@1.0.0-dev.38"
 }
