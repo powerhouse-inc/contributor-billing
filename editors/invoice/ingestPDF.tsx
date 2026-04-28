@@ -3,7 +3,7 @@ import {
   type InvoiceAction,
   actions,
 } from "../../document-models/invoice/index.js";
-import { invoiceToast as toast } from "./invoiceToast.js";
+import { usePHToast } from "@powerhousedao/reactor-browser";
 import { uploadPdfChunked } from "./uploadPdfChunked.js";
 import { getCountryCodeFromName, mapChainNameToConfig } from "./utils/utils.js";
 import { LoaderCircle } from "lucide-react";
@@ -61,6 +61,7 @@ export default function PDFUploader({
   dispatch,
   changeDropdownOpen,
 }: PDFUploaderProps) {
+  const toast = usePHToast();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
@@ -277,7 +278,7 @@ export default function PDFUploader({
             }
 
             setIsLoading(false);
-            toast("Invoice uploaded successfully", {
+            toast?.("Invoice uploaded successfully", {
               type: "success",
             });
 

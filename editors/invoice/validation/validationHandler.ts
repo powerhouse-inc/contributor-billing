@@ -3,8 +3,12 @@ import {
   type ValidationContext,
   validateField,
 } from "./validationManager.js";
-import { invoiceToast as toast } from "../invoiceToast.js";
 import { isValidIBAN } from "./validationRules.js";
+
+type ToastFn = (
+  message: string,
+  options?: { type?: "error" | "warning" | "success" | "info" | "default" },
+) => void;
 
 const validateStatusBeforeContinue = (
   newStatus: string,
@@ -26,6 +30,7 @@ const validateStatusBeforeContinue = (
   setRoutingNumberValidation: (validation: ValidationResult) => void,
   isFiatCurrency: (currency: string) => boolean,
   setChainValidation?: (validation: ValidationResult | null) => void,
+  toast?: ToastFn,
 ) => {
   if (newStatus === "PAYMENTSCHEDULED" || newStatus === "ISSUED") {
     const context: ValidationContext = {
@@ -265,7 +270,7 @@ const validateStatusBeforeContinue = (
     // If there are any validation errors, show them and return
     if (validationErrors.length > 0) {
       validationErrors.forEach((error) => {
-        toast(error.message, {
+        toast?.(error.message, {
           type: error.severity === "error" ? "error" : "warning",
         });
       });

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@powerhousedao/document-engineering";
 import { Tooltip, TooltipProvider } from "@powerhousedao/design-system/ui";
-import { toast } from "@powerhousedao/design-system/connect";
+import { usePHToast } from "@powerhousedao/reactor-browser";
 import { Info } from "lucide-react";
 import { isValidEthereumAddress } from "../../../scripts/alchemy/alchemyHelpers.js";
 import type {
@@ -27,6 +27,7 @@ interface AccountFormProps {
 }
 
 export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
+  const toast = usePHToast();
   const [formData, setFormData] = useState({
     account: account?.account || "",
     name: account?.name || "",
@@ -86,7 +87,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
         typeSelect.setCustomValidity("Please select an Account Type");
         typeSelect.reportValidity();
       } else {
-        toast("Account Type is required", { type: "warning" });
+        toast?.("Account Type is required", { type: "warning" });
       }
       return;
     } else if (typeSelect) {

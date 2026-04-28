@@ -8,9 +8,10 @@ import {
   RefreshCw,
   X,
 } from "lucide-react";
-import { DocumentToolbar, toast } from "@powerhousedao/design-system/connect";
+import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
+  usePHToast,
   useParentFolderForSelectedNode,
   useSelectedDrive,
 } from "@powerhousedao/reactor-browser";
@@ -136,6 +137,7 @@ export default function Editor() {
   const [document, dispatch] = useSelectedAccountsDocument();
   const parentFolder = useParentFolderForSelectedNode();
   const [selectedDrive] = useSelectedDrive();
+  const toast = usePHToast();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [editingAccount, setEditingAccount] = useState<AccountEntry | null>(
     null,
@@ -238,7 +240,7 @@ export default function Editor() {
   function confirmDelete() {
     if (deleteConfirm.accountId) {
       dispatch(deleteAccount({ id: deleteConfirm.accountId }));
-      toast("Account deleted successfully", { type: "success" });
+      toast?.("Account deleted successfully", { type: "success" });
     }
     setDeleteConfirm({ isOpen: false, accountId: null, accountName: "" });
   }
@@ -283,15 +285,15 @@ export default function Editor() {
             }),
           );
         }
-        toast(
+        toast?.(
           `Created document and fetched ${result.transactionsAdded} transactions`,
           { type: "success" },
         );
       } else {
-        toast(`Error: ${result.message}`, { type: "error" });
+        toast?.(`Error: ${result.message}`, { type: "error" });
       }
     } catch (error) {
-      toast(
+      toast?.(
         `Error: ${error instanceof Error ? error.message : "Unknown error occurred"}`,
         { type: "error" },
       );
@@ -302,7 +304,7 @@ export default function Editor() {
 
   function initiateSync() {
     if (accounts.length === 0) {
-      toast("No accounts to sync transactions for", { type: "warning" });
+      toast?.("No accounts to sync transactions for", { type: "warning" });
       return;
     }
     setSyncConfirm(true);
@@ -391,18 +393,18 @@ export default function Editor() {
       const failedCount = results.length - successCount;
 
       if (failedCount === 0) {
-        toast(
+        toast?.(
           `Synced ${successCount} account${successCount !== 1 ? "s" : ""}, ${totalAdded} new transactions`,
           { type: "success" },
         );
       } else {
-        toast(
+        toast?.(
           `Synced ${successCount}/${results.length} accounts. ${failedCount} failed.`,
           { type: "warning" },
         );
       }
     } catch (error) {
-      toast(
+      toast?.(
         `Error during sync: ${error instanceof Error ? error.message : "Unknown error occurred"}`,
         { type: "error" },
       );

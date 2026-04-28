@@ -5,8 +5,9 @@ import {
   useParentFolderForSelectedNode,
   setSelectedNode,
   dispatchActions,
+  usePHToast,
 } from "@powerhousedao/reactor-browser";
-import { DocumentToolbar, toast } from "@powerhousedao/design-system/connect";
+import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import { Button, Select } from "@powerhousedao/document-engineering";
 import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { DateRangePicker } from "./components/DateRangePicker.js";
@@ -73,6 +74,7 @@ function getMonthDateRange(yearMonth: string) {
 export default function Editor() {
   const [document, dispatch] = useSelectedSnapshotReportDocument();
   const documentsInDrive = useDocumentsInSelectedDrive();
+  const toast = usePHToast();
   const [isAccountPickerOpen, setIsAccountPickerOpen] = useState(false);
   const [selectedAccountIds, setSelectedAccountIds] = useState<Set<string>>(
     new Set(),
@@ -428,7 +430,9 @@ export default function Editor() {
     let syncedCount = 0;
     let failedCount = 0;
 
-    toast(`Syncing ${totalAccounts} accounts...`, { type: "connect-loading" });
+    toast?.(`Syncing ${totalAccounts} accounts...`, {
+      type: "connect-loading",
+    });
 
     try {
       const internalAccounts = snapshotAccounts.filter(
@@ -532,18 +536,18 @@ export default function Editor() {
       }
 
       if (failedCount === 0) {
-        toast(
+        toast?.(
           `Synced ${syncedCount} account${syncedCount !== 1 ? "s" : ""} successfully`,
           { type: "success" },
         );
       } else {
-        toast(
+        toast?.(
           `Synced ${syncedCount}/${totalAccounts} accounts. ${failedCount} failed.`,
           { type: "warning" },
         );
       }
     } catch (error) {
-      toast(
+      toast?.(
         `Sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
         { type: "error" },
       );

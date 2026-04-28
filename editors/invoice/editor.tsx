@@ -15,11 +15,6 @@ import { loadUBLFile } from "./ingestUBL.js";
 import PDFUploader from "./ingestPDF.js";
 import RequestFinance from "./requestFinance.js";
 import InvoiceToGnosis from "./invoiceToGnosis.js";
-import { ToastContainer } from "@powerhousedao/design-system/connect";
-import {
-  invoiceToast as toast,
-  INVOICE_TOAST_CONTAINER_ID,
-} from "./invoiceToast.js";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { InvoicePDF } from "./InvoicePDF.js";
 import { createRoot } from "react-dom/client";
@@ -49,6 +44,7 @@ import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   type DocumentDispatch,
   setSelectedNode,
+  usePHToast,
   useParentFolderForSelectedNode,
 } from "@powerhousedao/reactor-browser";
 
@@ -84,6 +80,7 @@ export default function Editor() {
     DocumentDispatch<InvoiceAction>,
   ];
   const state = doc?.state.global;
+  const toast = usePHToast();
 
   // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
 
@@ -374,13 +371,13 @@ export default function Editor() {
 
     try {
       await loadUBLFile({ file, dispatch });
-      toast("UBL file uploaded successfully", {
+      toast?.("UBL file uploaded successfully", {
         type: "success",
       });
     } catch (error) {
       // Handle error presentation to user
       console.error("Failed to load UBL file:", error);
-      toast("Failed to load UBL file", {
+      toast?.("Failed to load UBL file", {
         type: "error",
       });
     }
@@ -415,7 +412,7 @@ export default function Editor() {
 
             if (error) {
               cleanup();
-              toast("Failed to export PDF", { type: "error" });
+              toast?.("Failed to export PDF", { type: "error" });
               console.error("PDF generation error:", error);
               return null;
             }
@@ -439,7 +436,7 @@ export default function Editor() {
     } catch (error) {
       console.error("Error exporting PDF:", error);
       cleanup();
-      toast("Failed to export PDF", { type: "error" });
+      toast?.("Failed to export PDF", { type: "error" });
     }
   };
 
@@ -458,7 +455,7 @@ export default function Editor() {
       });
     } catch (error) {
       console.error("Error exporting to UBL:", error);
-      toast("Failed to export UBL", { type: "error" });
+      toast?.("Failed to export UBL", { type: "error" });
       throw error;
     }
   }
@@ -538,6 +535,7 @@ export default function Editor() {
       setRoutingNumberValidation,
       isFiatCurrency,
       setChainValidation,
+      toast,
     );
     if (validationResult) {
       return;
@@ -687,19 +685,6 @@ export default function Editor() {
     <div className="w-full min-h-full flex flex-col">
       <DocumentToolbar />
       <div className="flex-1 max-w-7xl mx-auto w-full mt-4 px-4 pb-8">
-        <ToastContainer
-          containerId={INVOICE_TOAST_CONTAINER_ID}
-          position="bottom-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick={false}
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
         {/* Header Section */}
         <div className="mb-6">
           {/* Header - responsive via flex-wrap */}

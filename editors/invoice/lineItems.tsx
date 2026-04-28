@@ -1,4 +1,4 @@
-import { invoiceToast as toast } from "./invoiceToast.js";
+import { usePHToast } from "@powerhousedao/reactor-browser";
 import { RWAButton } from "@powerhousedao/design-system/rwa";
 import {
   type DeleteLineItemInput,
@@ -275,11 +275,20 @@ const EditableLineItem = forwardRef(function EditableLineItem(
         if (/^-?\d*\.?\d*$/.test(value)) {
           // If it's a complete number, round to precision
           const num = parseNumericInput(value, maxDecimals);
-          if (!isNaN(num) || value === "" || value === "-" || value.endsWith(".")) {
-            const storeValue = value.endsWith(".") || value === "-" ? value : num;
+          if (
+            !isNaN(num) ||
+            value === "" ||
+            value === "-" ||
+            value.endsWith(".")
+          ) {
+            const storeValue =
+              value.endsWith(".") || value === "-" ? value : num;
             setEditedItem((prev) => ({
               ...prev,
-              [field]: field === "totalPriceTaxExcl" ? Number(storeValue) || 0 : storeValue,
+              [field]:
+                field === "totalPriceTaxExcl"
+                  ? Number(storeValue) || 0
+                  : storeValue,
             }));
           }
         } else {
@@ -295,8 +304,16 @@ const EditableLineItem = forwardRef(function EditableLineItem(
       } else {
         // For other decimal fields
         const num = parseNumericInput(value, 2);
-        if (!isNaN(num) || value === "" || value === "-" || value.endsWith(".")) {
-          setEditedItem((prev) => ({ ...prev, [field]: isNaN(num) ? value : value }));
+        if (
+          !isNaN(num) ||
+          value === "" ||
+          value === "-" ||
+          value.endsWith(".")
+        ) {
+          setEditedItem((prev) => ({
+            ...prev,
+            [field]: isNaN(num) ? value : value,
+          }));
         }
       }
     };
@@ -345,19 +362,27 @@ const EditableLineItem = forwardRef(function EditableLineItem(
       updateInput.taxPercent = calculatedValues.taxPercent;
     }
 
-    if (!isClose(calculatedValues.unitPriceTaxExcl, item.unitPriceTaxExcl ?? 0)) {
+    if (
+      !isClose(calculatedValues.unitPriceTaxExcl, item.unitPriceTaxExcl ?? 0)
+    ) {
       updateInput.unitPriceTaxExcl = calculatedValues.unitPriceTaxExcl;
     }
 
-    if (!isClose(calculatedValues.unitPriceTaxIncl, item.unitPriceTaxIncl ?? 0)) {
+    if (
+      !isClose(calculatedValues.unitPriceTaxIncl, item.unitPriceTaxIncl ?? 0)
+    ) {
       updateInput.unitPriceTaxIncl = calculatedValues.unitPriceTaxIncl;
     }
 
-    if (!isClose(calculatedValues.totalPriceTaxExcl, item.totalPriceTaxExcl ?? 0)) {
+    if (
+      !isClose(calculatedValues.totalPriceTaxExcl, item.totalPriceTaxExcl ?? 0)
+    ) {
       updateInput.totalPriceTaxExcl = calculatedValues.totalPriceTaxExcl;
     }
 
-    if (!isClose(calculatedValues.totalPriceTaxIncl, item.totalPriceTaxIncl ?? 0)) {
+    if (
+      !isClose(calculatedValues.totalPriceTaxIncl, item.totalPriceTaxIncl ?? 0)
+    ) {
       updateInput.totalPriceTaxIncl = calculatedValues.totalPriceTaxIncl;
     }
 
@@ -487,6 +512,7 @@ export function LineItemsTable({
   dispatch,
   paymentAccounts,
 }: LineItemsTableProps) {
+  const toast = usePHToast();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [showTagTable, setShowTagTable] = useState(false);
@@ -522,26 +548,26 @@ export function LineItemsTable({
               </div>
             );
 
-            toast(errorJSX, {
+            toast?.(errorJSX, {
               type: "error",
             });
             return;
           }
         } catch (parseError) {
           console.error("Failed to parse Zod error:", parseError);
-          toast("Invalid input data", {
+          toast?.("Invalid input data", {
             type: "error",
           });
           return;
         }
       } else if (error?.message) {
-        toast(error.message, {
+        toast?.(error.message, {
           type: "error",
         });
         return;
       }
 
-      toast("Failed to add line item", {
+      toast?.("Failed to add line item", {
         type: "error",
       });
     }
@@ -689,7 +715,7 @@ export function LineItemsTable({
                                   </div>
                                 );
 
-                                toast(errorJSX, {
+                                toast?.(errorJSX, {
                                   type: "error",
                                 });
                                 return;
@@ -699,19 +725,19 @@ export function LineItemsTable({
                                 "Failed to parse Zod error:",
                                 parseError,
                               );
-                              toast("Invalid input data", {
+                              toast?.("Invalid input data", {
                                 type: "error",
                               });
                               return;
                             }
                           } else if (error?.message) {
-                            toast(error.message, {
+                            toast?.(error.message, {
                               type: "error",
                             });
                             return;
                           }
 
-                          toast("Failed to update line item", {
+                          toast?.("Failed to update line item", {
                             type: "error",
                           });
                         }
