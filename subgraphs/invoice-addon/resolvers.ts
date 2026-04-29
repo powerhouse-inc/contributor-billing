@@ -1,4 +1,4 @@
-import { type BaseSubgraph } from "@powerhousedao/reactor-api";
+import type { BaseSubgraph } from "@powerhousedao/reactor-api";
 import {
   Invoice_processGnosisPayment,
   Invoice_createRequestFinancePayment,

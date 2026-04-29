@@ -1,4 +1,4 @@
-import { type BaseSubgraph } from "@powerhousedao/reactor-api";
+import type { BaseSubgraph } from "@powerhousedao/reactor-api";
 import { alchemyClient } from "../../scripts/alchemy/alchemyClient.js";
 import { actions } from "../../document-models/account-transactions/index.js";
 import type { AccountTransactionsDocument } from "../../document-models/account-transactions/index.js";
