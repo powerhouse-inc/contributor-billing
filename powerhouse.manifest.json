@@ -102,7 +102,18 @@
 	],
 	"processors": [],
 	"subgraphs": [
-
+		{
+			"id": "acc-txs-addon",
+			"name": "AccTxsAddon"
+		},
+		{
+			"id": "budget-statements",
+			"name": "BudgetStatements"
+		},
+		{
+			"id": "invoice-addon",
+			"name": "InvoiceAddon"
+		}
 	],
 	"config": [
 		{

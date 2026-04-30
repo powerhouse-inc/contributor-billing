@@ -1,4 +1,52 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(bun build.ts --no-emit)",
+      "Bash(ph --help)",
+      "Bash(switchboard --profile staging-remote ping)",
+      "Bash(switchboard --profile bai-dev ping)",
+      "Bash(switchboard --profile staging-remote drives list)",
+      "Bash(switchboard --profile staging-remote drives list --format table)",
+      "Bash(switchboard --profile staging-remote drives list --format json)",
+      "Bash(switchboard --profile staging-remote drives get powerhouse-network-admin --format json)",
+      "Bash(switchboard --profile staging-remote docs get f8e243db --state --format json)",
+      "Bash(switchboard --profile staging-remote docs get f8e243db-0000-0000-0000-000000000000 --state --format json)",
+      "Bash(switchboard --profile staging-remote docs get f8e243db-3d85-41e8-a27b-6a22103e2a87 --state --format json)",
+      "Bash(switchboard --profile staging-remote drives get builders --format json)",
+      "Bash(switchboard --profile staging-remote drives get bai-team-admin --format json)",
+      "Bash(switchboard --profile staging-remote drives get powerhouse-genesis-operational-hub --format json)",
+      "Bash(switchboard --profile bai-dev models list --format json)",
+      "Bash(switchboard --profile bai-dev introspect)",
+      "Bash(switchboard --profile bai-dev models get 'powerhouse/builders' --format json)",
+      "Bash(switchboard --profile bai-dev schema)",
+      "Bash(bash scripts/drive-sync/sync.sh --source staging-remote --target bai-dev --clean --drives builders,bai-team-admin,teeps-team-admin,growth-team-admin,core-dev-team-admin,powerhouse-rgh-operator-admin,powerhouse-genesis-operational-hub,powerhouse-network-admin)",
+      "Bash(CONFIRM_REMOTE=yes bash scripts/drive-sync/sync.sh --source staging-remote --target bai-dev --clean --drives builders,bai-team-admin,teeps-team-admin,growth-team-admin,core-dev-team-admin,powerhouse-rgh-operator-admin,powerhouse-genesis-operational-hub,powerhouse-network-admin)",
+      "Bash(tee /tmp/drive-sync.log)",
+      "Bash(switchboard --profile bai-dev drives list --format json)",
+      "Bash(switchboard --profile staging-remote docs tree builders --format json)",
+      "Bash(switchboard --profile staging-remote docs tree 887db86d-34a5-4db6-9ef4-d69d4d529454 --format json)",
+      "Bash(switchboard --profile staging-remote docs tree 73da91bc-41d0-48d3-b69b-b65764b58657 --format json)",
+      "Bash(CONFIRM_REMOTE=yes bash scripts/drive-sync/sync.sh --source staging-remote --target bai-dev --clean --drives 887db86d-34a5-4db6-9ef4-d69d4d529454,8362910f-d488-4296-8a5f-b930af66eb1d,c2224951-ce79-4c30-9fc1-3f3c678f23bf,1a93d20e-9b05-460e-a03c-8b9ea1dc0cd6,71aca3a2-8ad1-469b-bea8-ac2f3cedfa91,73da91bc-41d0-48d3-b69b-b65764b58657,4c1287e1-972f-4a9a-ba8f-557a92802b13,5e9df222-ed39-4f44-a3eb-87f6098e43b4)",
+      "Bash(switchboard --profile bai-dev drives get 933f946f-5fab-4dea-85ea-aeb85f1f2fd1 --format json)",
+      "Bash(switchboard --profile bai-dev drives get cdd2a1a9-d1e4-4e55-a071-dee036faa0c7 --format json)",
+      "Bash(switchboard --profile staging-remote drives get 887db86d-34a5-4db6-9ef4-d69d4d529454 --format json)",
+      "Bash(switchboard --profile bai-dev models get 'powerhouse/document-drive' --format json)",
+      "Bash(switchboard --profile bai-dev docs mutate 933f946f-5fab-4dea-85ea-aeb85f1f2fd1 --op setDriveName --input '{\"name\":\"builders\"}' --format json)",
+      "Bash(TARGET_PROFILE=bai-dev DATA_DIR=scripts/drive-sync/data python3 scripts/drive-sync/verify-sync.py 887db86d-34a5-4db6-9ef4-d69d4d529454 8362910f-d488-4296-8a5f-b930af66eb1d c2224951-ce79-4c30-9fc1-3f3c678f23bf 1a93d20e-9b05-460e-a03c-8b9ea1dc0cd6 71aca3a2-8ad1-469b-bea8-ac2f3cedfa91 73da91bc-41d0-48d3-b69b-b65764b58657 4c1287e1-972f-4a9a-ba8f-557a92802b13 5e9df222-ed39-4f44-a3eb-87f6098e43b4)",
+      "Bash(TARGET_PROFILE=bai-dev DATA_DIR=scripts/drive-sync/data python3 scripts/drive-sync/phase3-remap.py)",
+      "Bash(TARGET_PROFILE=bai-dev DATA_DIR=scripts/drive-sync/data NETWORK_ADMIN=5e9df222-ed39-4f44-a3eb-87f6098e43b4 python3 scripts/drive-sync/remap-builders-doc.py)",
+      "Bash(switchboard --profile local ping)",
+      "Bash(switchboard --profile local introspect)",
+      "Bash(switchboard --profile local drives list --format json)",
+      "Bash(mv merged-id-map.json merged-id-map.bai-dev.json)",
+      "Bash([ -f \"$d/id-map.json\" ])",
+      "Bash(mv __TRACKED_VAR__/id-map.json __TRACKED_VAR__/id-map.bai-dev.json)",
+      "Bash(switchboard --profile local models list --format json)",
+      "Bash(TARGET_PROFILE=local DATA_DIR=scripts/drive-sync/data python3 scripts/drive-sync/phase3-remap.py)",
+      "Bash(TARGET_PROFILE=local DATA_DIR=scripts/drive-sync/data NETWORK_ADMIN=5e9df222-ed39-4f44-a3eb-87f6098e43b4 python3 scripts/drive-sync/remap-builders-doc.py)",
+      "Bash(TARGET_PROFILE=local DATA_DIR=scripts/drive-sync/data python3 scripts/drive-sync/verify-sync.py 887db86d-34a5-4db6-9ef4-d69d4d529454 8362910f-d488-4296-8a5f-b930af66eb1d c2224951-ce79-4c30-9fc1-3f3c678f23bf 1a93d20e-9b05-460e-a03c-8b9ea1dc0cd6 71aca3a2-8ad1-469b-bea8-ac2f3cedfa91 73da91bc-41d0-48d3-b69b-b65764b58657 4c1287e1-972f-4a9a-ba8f-557a92802b13 5e9df222-ed39-4f44-a3eb-87f6098e43b4)"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {
@@ -40,10 +88,5 @@
   "enabledPlugins": {
     "arscontexta@agenticnotetaking": true,
     "chrome-devtools-mcp@claude-plugins-official": true
-  },
-  "permissions": {
-    "allow": [
-      "Bash(bun build.ts --no-emit)"
-    ]
   }
 }
