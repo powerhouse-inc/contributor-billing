@@ -44,7 +44,16 @@
       "Bash(switchboard --profile local models list --format json)",
       "Bash(TARGET_PROFILE=local DATA_DIR=scripts/drive-sync/data python3 scripts/drive-sync/phase3-remap.py)",
       "Bash(TARGET_PROFILE=local DATA_DIR=scripts/drive-sync/data NETWORK_ADMIN=5e9df222-ed39-4f44-a3eb-87f6098e43b4 python3 scripts/drive-sync/remap-builders-doc.py)",
-      "Bash(TARGET_PROFILE=local DATA_DIR=scripts/drive-sync/data python3 scripts/drive-sync/verify-sync.py 887db86d-34a5-4db6-9ef4-d69d4d529454 8362910f-d488-4296-8a5f-b930af66eb1d c2224951-ce79-4c30-9fc1-3f3c678f23bf 1a93d20e-9b05-460e-a03c-8b9ea1dc0cd6 71aca3a2-8ad1-469b-bea8-ac2f3cedfa91 73da91bc-41d0-48d3-b69b-b65764b58657 4c1287e1-972f-4a9a-ba8f-557a92802b13 5e9df222-ed39-4f44-a3eb-87f6098e43b4)"
+      "Bash(TARGET_PROFILE=local DATA_DIR=scripts/drive-sync/data python3 scripts/drive-sync/verify-sync.py 887db86d-34a5-4db6-9ef4-d69d4d529454 8362910f-d488-4296-8a5f-b930af66eb1d c2224951-ce79-4c30-9fc1-3f3c678f23bf 1a93d20e-9b05-460e-a03c-8b9ea1dc0cd6 71aca3a2-8ad1-469b-bea8-ac2f3cedfa91 73da91bc-41d0-48d3-b69b-b65764b58657 4c1287e1-972f-4a9a-ba8f-557a92802b13 5e9df222-ed39-4f44-a3eb-87f6098e43b4)",
+      "Bash(sed -n '185,210p' scripts/upload-phd-documents/upload-phd-documents.ts)",
+      "Bash(sed -n '285,305p' editors/expense-report/services/walletAccountService.ts)",
+      "Bash(switchboard --profile local schema --format json)",
+      "Bash(switchboard --profile local schema --help)",
+      "Bash(switchboard --profile local schema)",
+      "Bash(switchboard --profile bai-dev schema --format json)",
+      "Bash(ps -p 1219 -o pid,etime,cmd)",
+      "Bash(ps -p 1219 -o pid,etime,stat,cmd)",
+      "Bash(awk '$4 ~ /:\\(3001|4001\\)$/')"
     ]
   },
   "hooks": {
