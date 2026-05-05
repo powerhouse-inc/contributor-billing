@@ -156,13 +156,13 @@
 			"name": "PRODUCTION_SAFE_ADDRESS",
 			"type": "var",
 			"description": "Gnosis Safe address (0x-prefixed) used by scripts/invoice/gnosisTransactionBuilder.ts when NODE_ENV=production.",
-			"required": false
+			"required": true
 		},
 		{
 			"name": "DEV_STAGING_SAFE_ADDRESS",
 			"type": "var",
 			"description": "Gnosis Safe address (0x-prefixed) used by scripts/invoice/gnosisTransactionBuilder.ts when NODE_ENV is not `production` (dev / staging).",
-			"required": false
+			"required": true
 		}
 	]
 }

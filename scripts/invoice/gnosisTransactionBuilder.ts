@@ -74,24 +74,29 @@ const FALLBACK_RPCS: Record<string, string[]> = {
   ],
 };
 
-// Determine environment and use appropriate Safe address
-const isProduction = process.env.NODE_ENV === "production";
-const safeAddress = isProduction
-  ? process.env.PRODUCTION_SAFE_ADDRESS
-  : process.env.DEV_STAGING_SAFE_ADDRESS;
-
-if (!safeAddress) {
-  const envVarName = isProduction
-    ? "PRODUCTION_SAFE_ADDRESS"
-    : "DEV_STAGING_SAFE_ADDRESS";
-  throw new Error(
-    `Missing ${envVarName} in .env (NODE_ENV=${process.env.NODE_ENV || "undefined"})`,
+// Resolved lazily so a missing env var only breaks Gnosis-payment calls,
+// not module import (which would take down the whole subgraph bundle).
+let cachedSafeAddress: string | undefined;
+function getSafeAddress(): string {
+  if (cachedSafeAddress) return cachedSafeAddress;
+  const isProduction = process.env.NODE_ENV === "production";
+  const value = isProduction
+    ? process.env.PRODUCTION_SAFE_ADDRESS
+    : process.env.DEV_STAGING_SAFE_ADDRESS;
+  if (!value) {
+    const envVarName = isProduction
+      ? "PRODUCTION_SAFE_ADDRESS"
+      : "DEV_STAGING_SAFE_ADDRESS";
+    throw new Error(
+      `Missing ${envVarName} in .env (NODE_ENV=${process.env.NODE_ENV || "undefined"})`,
+    );
+  }
+  console.log(
+    `----- GNOSIS TRANSACTION BUILDER ----- Using ${isProduction ? "PRODUCTION" : "DEV/STAGING"} Safe address: ${value}`,
   );
+  cachedSafeAddress = value;
+  return value;
 }
-
-console.log(
-  `----- GNOSIS TRANSACTION BUILDER ----- Using ${isProduction ? "PRODUCTION" : "DEV/STAGING"} Safe address: ${safeAddress}`,
-);
 
 function buildPayerWallet(chainKey: string, config: ChainConfig): PayerWallet {
   const alchemyRpc = getAlchemyRpc(chainKey);
@@ -99,7 +104,7 @@ function buildPayerWallet(chainKey: string, config: ChainConfig): PayerWallet {
     chainName: config.chainName,
     chainId: config.chainId,
     rpc: alchemyRpc || config.rpc,
-    address: safeAddress!,
+    address: getSafeAddress(),
     fallbackRpcs: FALLBACK_RPCS[chainKey] ?? [],
   };
 }
@@ -222,7 +227,7 @@ async function executeTransferProposal(
 
   // Get next nonce with retry logic for rate limiting
   const nextNonce = await withRetry(
-    () => safeApiKit.getNextNonce(safeAddress),
+    () => safeApiKit.getNextNonce(getSafeAddress()),
     3,
     1000,
     "getNextNonce",
