@@ -17,7 +17,7 @@ import {
   assertIsOperationalHubProfileDocument,
   isOperationalHubProfileState,
   assertIsOperationalHubProfileState,
-} from "@powerhousedao/contributor-billing/document-models/operational-hub-profile";
+} from "document-models/operational-hub-profile";
 import { ZodError } from "zod";
 
 describe("OperationalHubProfile Document Model", () => {

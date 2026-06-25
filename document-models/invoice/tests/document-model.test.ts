@@ -17,7 +17,7 @@ import {
   assertIsInvoiceDocument,
   isInvoiceState,
   assertIsInvoiceState,
-} from "@powerhousedao/contributor-billing/document-models/invoice";
+} from "document-models/invoice";
 import { ZodError } from "zod";
 
 describe("Invoice Document Model", () => {

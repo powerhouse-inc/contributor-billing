@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -38,7 +38,7 @@ import {
   UpdateWalletInputSchema,
   SetOwnerIdInputSchema,
   SetStatusInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/expense-report";
+} from "document-models/expense-report";
 
 describe("WalletOperations", () => {
   it("should handle addWallet operation", () => {

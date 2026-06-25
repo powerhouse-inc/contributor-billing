@@ -17,12 +17,12 @@ import {
   addTransaction,
   setPeriodStart,
   setPeriodEnd,
-} from "../../document-models/snapshot-report/gen/creators.js";
+} from "document-models/snapshot-report";
 import { SetOwner } from "./components/SetOwner.js";
 import { useSyncSnapshotAccount } from "./hooks/useSyncSnapshotAccount.js";
 import { formatBalance } from "./utils/balanceCalculations.js";
 import { calculateTransactionFlowInfo } from "./utils/flowTypeCalculations.js";
-import { actions as accountsActions } from "../../document-models/accounts/index.js";
+import { actions as accountsActions } from "document-models/accounts";
 
 // Helper function to generate month options from January 2025 to current month
 function generateMonthOptions() {
@@ -616,7 +616,7 @@ export default function Editor() {
 
   return (
     <div>
-      <DocumentToolbar document={document} onClose={handleClose} />
+      <DocumentToolbar />
       <div className="p-6 max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Snapshot Report</h1>
 

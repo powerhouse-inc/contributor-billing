@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -12,7 +12,7 @@ import {
   UpdateTransactionInputSchema,
   DeleteTransactionInputSchema,
   UpdateTransactionPeriodInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/account-transactions";
+} from "document-models/account-transactions";
 
 describe("TransactionsOperations", () => {
   it("should handle addTransaction operation", () => {

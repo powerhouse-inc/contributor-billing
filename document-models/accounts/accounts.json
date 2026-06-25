@@ -1,15 +1,26 @@
 {
+  "id": "powerhouse/accounts",
+  "name": "Accounts",
   "author": {
     "name": "Powerhouse",
     "website": "https://powerhouse.inc"
   },
-  "description": "Document model for managing accounts with KYC/AML status tracking",
   "extension": "",
-  "id": "powerhouse/accounts",
-  "name": "Accounts",
+  "description": "Document model for managing accounts with KYC/AML status tracking",
   "specifications": [
     {
-      "changeLog": [],
+      "state": {
+        "local": {
+          "schema": "",
+          "examples": [],
+          "initialValue": ""
+        },
+        "global": {
+          "schema": "type AccountsState {\n   accounts: [AccountEntry!]!\n}\n\ntype AccountEntry {\n    id: OID!\n    account: String!\n    name: String!\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: AccountType!\n    owners: [String!]\n    KycAmlStatus: KycAmlStatusType\n}\n\nenum AccountType {\n    Source\n    Internal\n    Destination\n    External\n}\n\nenum KycAmlStatusType {\n    PASSED\n    PENDING\n    FAILED\n}\n\nenum AccountTypeInput {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum KycAmlStatusTypeInput {\n  PASSED\n  PENDING\n  FAILED\n}",
+          "examples": [],
+          "initialValue": "{\n  \"accounts\": []\n}"
+        }
+      },
       "modules": [
         {
           "id": "e89202e8-4f6e-4ca3-a326-a5846e909d83",
@@ -63,19 +74,8 @@
           ]
         }
       ],
-      "state": {
-        "global": {
-          "examples": [],
-          "initialValue": "{\n  \"accounts\": []\n}",
-          "schema": "type AccountsState {\n   accounts: [AccountEntry!]!\n}\n\ntype AccountEntry {\n    id: OID!\n    account: String!\n    name: String!\n    budgetPath: String\n    accountTransactionsId: PHID\n    chain: [String!]\n    type: AccountType!\n    owners: [String!]\n    KycAmlStatus: KycAmlStatusType\n}\n\nenum AccountType {\n    Source\n    Internal\n    Destination\n    External\n}\n\nenum KycAmlStatusType {\n    PASSED\n    PENDING\n    FAILED\n}\n\nenum AccountTypeInput {\n  Source\n  Internal\n  Destination\n  External\n}\n\nenum KycAmlStatusTypeInput {\n  PASSED\n  PENDING\n  FAILED\n}"
-        },
-        "local": {
-          "examples": [],
-          "initialValue": "",
-          "schema": ""
-        }
-      },
-      "version": 1
+      "version": 1,
+      "changeLog": []
     }
   ]
 }

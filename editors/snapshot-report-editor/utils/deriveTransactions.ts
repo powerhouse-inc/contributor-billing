@@ -10,7 +10,7 @@ import { generateId } from "document-model/core";
 import type {
   SnapshotAccount,
   TransactionFlowType,
-} from "../../../document-models/snapshot-report/gen/schema/types.js";
+} from "document-models/snapshot-report";
 import { calculateFlowType } from "./flowTypeCalculations.js";
 
 /**

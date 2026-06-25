@@ -1,3 +1,4 @@
-export * as InvoiceAddonSubgraph from "./invoice-addon/index.js";
-export * as AccTxsAddonSubgraph from "./acc-txs-addon/index.js";
-export * as BudgetStatementsSubgraph from "./budget-statements/index.js";
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */

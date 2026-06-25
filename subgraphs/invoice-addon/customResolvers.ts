@@ -4,7 +4,7 @@ import {
   type TransferResult,
 } from "../../scripts/invoice/gnosisTransactionBuilder.js";
 import { requestDirectPayment } from "../../scripts/invoice/requestFinance.js";
-import { actions } from "../../document-models/invoice/index.js";
+import { actions } from "document-models/invoice";
 import { uploadPdfAndGetJsonClaude } from "../../scripts/invoice/pdfToClaudeAI.js";
 import * as crypto from "crypto";
 

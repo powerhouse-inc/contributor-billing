@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -12,7 +12,7 @@ import {
   UpdateAccountInputSchema,
   DeleteAccountInputSchema,
   UpdateKycStatusInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/accounts";
+} from "document-models/accounts";
 
 describe("AccountsOperations", () => {
   it("should handle addAccount operation", () => {

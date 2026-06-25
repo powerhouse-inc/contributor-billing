@@ -17,7 +17,7 @@ import {
   assertIsBillingStatementDocument,
   isBillingStatementState,
   assertIsBillingStatementState,
-} from "@powerhousedao/contributor-billing/document-models/billing-statement";
+} from "document-models/billing-statement";
 import { ZodError } from "zod";
 
 describe("BillingStatement Document Model", () => {

@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -12,7 +12,7 @@ import {
   SetOperatorTeamInputSchema,
   AddSubteamInputSchema,
   RemoveSubteamInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/operational-hub-profile";
+} from "document-models/operational-hub-profile";
 
 describe("ConfigurationOperations", () => {
   it("should handle setOperationalHubName operation", () => {

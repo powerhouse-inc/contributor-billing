@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Button } from "@powerhousedao/document-engineering";
 import { Tooltip, TooltipProvider } from "@powerhousedao/design-system/ui";
-import { toast } from "@powerhousedao/design-system/connect";
+import { toast } from "@powerhousedao/design-system/connect/toast";
 import { Info } from "lucide-react";
 import { isValidEthereumAddress } from "../../../scripts/alchemy/alchemyHelpers.js";
 import type {
   AccountEntry,
   AccountTypeInput,
   KycAmlStatusTypeInput,
-} from "../../../document-models/accounts/gen/schema/types.js";
+} from "document-models/accounts";
 
 interface AccountFormProps {
   account?: AccountEntry;

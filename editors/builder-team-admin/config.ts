@@ -1,7 +1,7 @@
-import type { PHDriveEditorConfig } from "@powerhousedao/reactor-browser";
+import type { PHAppConfig } from "@powerhousedao/reactor-browser";
 
 /** Editor config for the <%= pascalCaseDriveEditorName %> */
-export const editorConfig: PHDriveEditorConfig = {
+export const editorConfig: PHAppConfig = {
   isDragAndDropEnabled: true,
   allowedDocumentTypes: [
     "powerhouse/builder-profile",

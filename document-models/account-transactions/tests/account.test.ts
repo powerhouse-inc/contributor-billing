@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -6,7 +6,7 @@ import {
   isAccountTransactionsDocument,
   setAccount,
   SetAccountInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/account-transactions";
+} from "document-models/account-transactions";
 
 describe("AccountOperations", () => {
   it("should handle setAccount operation", () => {

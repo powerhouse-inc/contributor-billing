@@ -1,5 +1,5 @@
 import { Button } from "@powerhousedao/document-engineering";
-import type { TransactionEntry } from "../../../document-models/account-transactions/gen/types.js";
+import type { TransactionEntry } from "document-models/account-transactions";
 
 interface TransactionsTableProps {
   transactions: TransactionEntry[];

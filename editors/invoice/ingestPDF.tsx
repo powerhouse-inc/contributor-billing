@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   type InvoiceAction,
   actions,
-} from "../../document-models/invoice/index.js";
+} from "document-models/invoice";
 import { invoiceToast as toast } from "./invoiceToast.js";
 import { uploadPdfChunked } from "./uploadPdfChunked.js";
 import { getCountryCodeFromName, mapChainNameToConfig } from "./utils/utils.js";

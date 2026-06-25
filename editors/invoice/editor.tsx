@@ -8,14 +8,14 @@ import {
   type Rejection,
   type Status,
   actions,
-} from "../../document-models/invoice/index.js";
+} from "document-models/invoice";
 import { LegalEntityForm } from "./legalEntity/legalEntity.js";
 import { LineItemsTable } from "./lineItems.js";
 import { loadUBLFile } from "./ingestUBL.js";
 import PDFUploader from "./ingestPDF.js";
 import RequestFinance from "./requestFinance.js";
 import InvoiceToGnosis from "./invoiceToGnosis.js";
-import { ToastContainer } from "@powerhousedao/design-system/connect";
+import { ToastContainer } from "@powerhousedao/design-system/connect/toast";
 import {
   invoiceToast as toast,
   INVOICE_TOAST_CONTAINER_ID,
@@ -42,9 +42,9 @@ import {
   ReportPaymentIssueModalContent,
   SchedulePaymentModalContent,
 } from "./components/statusModalComponents.js";
-import { InvoiceStateSchema } from "../../document-models/invoice/gen/schema/zod.js";
+import { InvoiceStateSchema } from "document-models/invoice";
 import validateStatusBeforeContinue from "./validation/validationHandler.js";
-import { useSelectedInvoiceDocument } from "../../document-models/invoice/hooks.js";
+import { useSelectedInvoiceDocument } from "document-models/invoice";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   type DocumentDispatch,

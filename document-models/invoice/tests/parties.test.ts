@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -16,7 +16,7 @@ import {
   editPayerWallet,
   EditPayerBankInputSchema,
   EditPayerWalletInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/invoice";
+} from "document-models/invoice";
 
 describe("PartiesOperations", () => {
   it("should handle editIssuer operation", () => {

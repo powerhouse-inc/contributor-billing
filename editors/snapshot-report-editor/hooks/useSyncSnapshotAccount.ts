@@ -11,17 +11,21 @@ import {
 import { generateId } from "document-model/core";
 import { accountTransactionsService } from "../../accounts-editor/services/accountTransactionsService.js";
 import {
-  balancesActions,
-  transactionsActions,
-} from "../../../document-models/snapshot-report/index.js";
+  addTransaction,
+  removeTransaction,
+  setStartingBalance,
+  setEndingBalance,
+  removeStartingBalance,
+  removeEndingBalance,
+} from "document-models/snapshot-report";
 import { calculateBalances } from "../utils/balanceCalculations.js";
 // deriveTransactionsForAccount not used - syncNonInternalAccount fetches from AccountTransactions docs directly
 import type {
   SnapshotAccount,
   SnapshotTransaction,
   TransactionFlowType,
-} from "../../../document-models/snapshot-report/gen/types.js";
-import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
+} from "document-models/snapshot-report";
+import type { AccountEntry } from "document-models/accounts";
 import { calculateTransactionFlowInfo } from "../utils/flowTypeCalculations.js";
 
 /**
@@ -302,7 +306,7 @@ export function useSyncSnapshotAccount() {
 
       // 1. Remove existing transactions
       snapshotAccount.transactions.forEach((tx) => {
-        allActions.push(transactionsActions.removeTransaction({ id: tx.id }));
+        allActions.push(removeTransaction({ id: tx.id }));
       });
 
       // 2. Add new transactions
@@ -318,7 +322,7 @@ export function useSyncSnapshotAccount() {
           );
 
         allActions.push(
-          transactionsActions.addTransaction({
+          addTransaction({
             accountId: snapshotAccount.id,
             id: generateId(),
             transactionId: tx.id,
@@ -338,7 +342,7 @@ export function useSyncSnapshotAccount() {
       // 3. Remove existing starting balances
       snapshotAccount.startingBalances.forEach((b) => {
         allActions.push(
-          balancesActions.removeStartingBalance({
+          removeStartingBalance({
             accountId: snapshotAccount.id,
             balanceId: b.id,
           }),
@@ -348,7 +352,7 @@ export function useSyncSnapshotAccount() {
       // 4. Add new starting balances
       balances.forEach((balance) => {
         allActions.push(
-          balancesActions.setStartingBalance({
+          setStartingBalance({
             accountId: snapshotAccount.id,
             balanceId: generateId(),
             token: balance.token,
@@ -360,7 +364,7 @@ export function useSyncSnapshotAccount() {
       // 5. Remove existing ending balances
       snapshotAccount.endingBalances.forEach((b) => {
         allActions.push(
-          balancesActions.removeEndingBalance({
+          removeEndingBalance({
             accountId: snapshotAccount.id,
             balanceId: b.id,
           }),
@@ -371,7 +375,7 @@ export function useSyncSnapshotAccount() {
       // Always add ending balances for all tokens, even if closing equals opening (no period transactions)
       balances.forEach((balance) => {
         allActions.push(
-          balancesActions.setEndingBalance({
+          setEndingBalance({
             accountId: snapshotAccount.id,
             balanceId: generateId(),
             token: balance.token,
@@ -405,7 +409,7 @@ export function useSyncSnapshotAccount() {
           // Remove existing starting balances for this account
           account.startingBalances.forEach((b) => {
             allActions.push(
-              balancesActions.removeStartingBalance({
+              removeStartingBalance({
                 accountId,
                 balanceId: b.id,
               }),
@@ -415,7 +419,7 @@ export function useSyncSnapshotAccount() {
           // Add new starting balances
           tokenBalances.forEach((amount, token) => {
             allActions.push(
-              balancesActions.setStartingBalance({
+              setStartingBalance({
                 accountId,
                 balanceId: generateId(),
                 token,
@@ -657,13 +661,13 @@ export function useSyncSnapshotAccount() {
 
       // 1. Remove existing transactions
       snapshotAccount.transactions.forEach((tx) => {
-        allActions.push(transactionsActions.removeTransaction({ id: tx.id }));
+        allActions.push(removeTransaction({ id: tx.id }));
       });
 
       // 2. Add derived transactions
       for (const tx of periodTransactions) {
         allActions.push(
-          transactionsActions.addTransaction({
+          addTransaction({
             accountId: snapshotAccount.id,
             id: tx.id,
             transactionId: tx.transactionId,
@@ -683,7 +687,7 @@ export function useSyncSnapshotAccount() {
       // 3. Remove existing starting balances
       snapshotAccount.startingBalances.forEach((b) => {
         allActions.push(
-          balancesActions.removeStartingBalance({
+          removeStartingBalance({
             accountId: snapshotAccount.id,
             balanceId: b.id,
           }),
@@ -693,7 +697,7 @@ export function useSyncSnapshotAccount() {
       // 4. Add new starting balances
       balances.forEach((balance) => {
         allActions.push(
-          balancesActions.setStartingBalance({
+          setStartingBalance({
             accountId: snapshotAccount.id,
             balanceId: generateId(),
             token: balance.token,
@@ -705,7 +709,7 @@ export function useSyncSnapshotAccount() {
       // 5. Remove existing ending balances
       snapshotAccount.endingBalances.forEach((b) => {
         allActions.push(
-          balancesActions.removeEndingBalance({
+          removeEndingBalance({
             accountId: snapshotAccount.id,
             balanceId: b.id,
           }),
@@ -743,7 +747,7 @@ export function useSyncSnapshotAccount() {
         });
 
         allActions.push(
-          balancesActions.setEndingBalance({
+          setEndingBalance({
             accountId: snapshotAccount.id,
             balanceId: generateId(),
             token: balance.token,
