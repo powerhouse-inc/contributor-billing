@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect } from "react";
 import { setName } from "document-model";
-import { useSelectedExpenseReportDocument } from "../../document-models/expense-report/hooks.js";
+import { useSelectedExpenseReportDocument } from "document-models/expense-report";
 import {
   actions,
   type ExpenseReportStatus,
-} from "../../document-models/expense-report/index.js";
+} from "document-models/expense-report";
 import { Icon, Button, Select } from "@powerhousedao/document-engineering";
 import {
   DatePickerField,
@@ -383,7 +383,7 @@ export default function Editor() {
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      <DocumentToolbar document={document} onClose={handleClose} />
+      <DocumentToolbar />
       <div className="ph-default-styles flex flex-col flex-1 min-h-0 w-full bg-gray-50 dark:bg-gray-900">
         {/* Main Content */}
         <div className="flex-1 overflow-auto px-3 sm:px-4 lg:px-6 py-4">

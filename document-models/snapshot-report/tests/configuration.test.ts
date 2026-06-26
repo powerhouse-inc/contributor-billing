@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -18,7 +18,7 @@ import {
   removeOwnerId,
   AddOwnerIdInputSchema,
   RemoveOwnerIdInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/snapshot-report";
+} from "document-models/snapshot-report";
 
 describe("ConfigurationOperations", () => {
   it("should handle setReportConfig operation", () => {

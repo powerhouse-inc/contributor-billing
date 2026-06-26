@@ -1,12 +1,12 @@
 import { type Dispatch } from "react";
 import { X, Tag } from "lucide-react";
-import { PowerhouseButton as Button } from "@powerhousedao/design-system/powerhouse/components/index";
+import { PowerhouseButton as Button } from "@powerhousedao/design-system";
 import { Select, DatePicker } from "@powerhousedao/document-engineering/ui";
 import { expenseAccountOptions, paymentAccountOptions } from "./tagMapping.js";
 import {
   actions,
   type InvoiceTag,
-} from "../../../document-models/invoice/index.js";
+} from "document-models/invoice";
 import { InputField } from "../components/inputField.js";
 
 interface TagAssignmentRow {

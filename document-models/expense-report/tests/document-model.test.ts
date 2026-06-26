@@ -17,7 +17,7 @@ import {
   assertIsExpenseReportDocument,
   isExpenseReportState,
   assertIsExpenseReportState,
-} from "@powerhousedao/contributor-billing/document-models/expense-report";
+} from "document-models/expense-report";
 import { ZodError } from "zod";
 
 describe("ExpenseReport Document Model", () => {

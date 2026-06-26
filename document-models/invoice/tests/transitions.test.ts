@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -27,7 +27,7 @@ import {
   ReportPaymentIssueInputSchema,
   ConfirmPaymentInputSchema,
   ClosePaymentInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/invoice";
+} from "document-models/invoice";
 
 describe("TransitionsOperations", () => {
   it("should handle cancel operation", () => {

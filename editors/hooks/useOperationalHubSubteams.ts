@@ -4,8 +4,8 @@ import {
   useDrives,
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
-import { addSubteam } from "../../document-models/operational-hub-profile/gen/configuration/creators.js";
-import type { OperationalHubProfileDocument } from "../../document-models/operational-hub-profile/gen/types.js";
+import { addSubteam } from "document-models/operational-hub-profile";
+import type { OperationalHubProfileDocument } from "document-models/operational-hub-profile";
 import type { SelectOption } from "@powerhousedao/document-engineering/ui";
 
 type BuilderProfileInfo = {

@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -10,7 +10,7 @@ import {
   AddSnapshotAccountInputSchema,
   UpdateSnapshotAccountTypeInputSchema,
   RemoveSnapshotAccountInputSchema,
-} from "@powerhousedao/contributor-billing/document-models/snapshot-report";
+} from "document-models/snapshot-report";
 
 describe("AccountsOperations", () => {
   it("should handle addSnapshotAccount operation", () => {

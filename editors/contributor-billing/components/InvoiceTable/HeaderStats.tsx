@@ -7,7 +7,7 @@ import {
 } from "@powerhousedao/reactor-browser";
 import { getExchangeRate } from "../../utils/exchangeRate.js";
 import { Tooltip, TooltipProvider } from "@powerhousedao/design-system/ui";
-import type { InvoiceDocument } from "../../../../document-models/invoice/index.js";
+import type { InvoiceDocument } from "document-models/invoice";
 
 const currencyList = [
   { ticker: "USDS", crypto: true },

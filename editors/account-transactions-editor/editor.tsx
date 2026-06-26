@@ -16,17 +16,17 @@ import {
   updateTransaction,
   deleteTransaction,
   setAccount,
-} from "../../document-models/account-transactions/gen/creators.js";
+} from "document-models/account-transactions";
 import type {
   TransactionEntry,
   AddTransactionInput,
-} from "../../document-models/account-transactions/gen/types.js";
+} from "document-models/account-transactions";
 import { TransactionsTable } from "./components/TransactionsTable.js";
 import { TransactionForm } from "./components/TransactionForm.js";
 import { AccountSection } from "./components/AccountSection.js";
 import { alchemyIntegration } from "./alchemyIntegration.js";
-import { actions as accountsActions } from "../../document-models/accounts/index.js";
-import { actions as expenseReportActions } from "../../document-models/expense-report/index.js";
+import { actions as accountsActions } from "document-models/accounts";
+import { actions as expenseReportActions } from "document-models/expense-report";
 
 type ViewMode = "list" | "add" | "edit";
 
@@ -354,7 +354,7 @@ export default function Editor() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      <DocumentToolbar document={document} onClose={handleClose} />
+      <DocumentToolbar />
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-semibold text-gray-900">
           Account Transactions

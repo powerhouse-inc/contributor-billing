@@ -2,7 +2,6 @@ import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import {
   isFileNodeKind,
   useDocumentModelModules,
-  type VetraDocumentModelModule,
   type FileUploadProgress,
   useDocumentsInSelectedDrive,
   useSelectedDrive,
@@ -11,7 +10,11 @@ import {
   addDocument,
   setSelectedNode,
 } from "@powerhousedao/reactor-browser";
-import type { PHBaseState, PHDocument } from "document-model";
+import type {
+  DocumentModelModule,
+  PHBaseState,
+  PHDocument,
+} from "document-model";
 import type { FileNode } from "document-drive";
 import { moveNode } from "document-drive";
 import { cbToast } from "../cbToast.js";
@@ -256,7 +259,7 @@ export function InvoiceTableContainer({
 
   // Handle document model selection - create invoice directly in the payments folder
   const onSelectDocumentModel = useCallback(
-    async (documentModel: VetraDocumentModelModule, name: string) => {
+    async (documentModel: DocumentModelModule, name: string) => {
       if (!driveId) {
         cbToast("No drive selected", { type: "error" });
         return;
@@ -267,7 +270,7 @@ export function InvoiceTableContainer({
         const createdNode = await addDocument(
           driveId,
           name,
-          documentModel.id,
+          documentModel.documentModel?.global?.id,
           folderId, // Create directly in the payments folder
           undefined,
           undefined,

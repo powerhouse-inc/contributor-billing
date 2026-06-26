@@ -5,17 +5,16 @@ import {
   setSelectedNode,
   useSelectedDrive,
   useDocumentsInSelectedDrive,
-  type VetraDocumentModelModule,
 } from "@powerhousedao/reactor-browser";
-import type { PHDocument } from "document-model";
+import type { DocumentModelModule, PHDocument } from "document-model";
 import { deleteNode, type FileNode } from "document-drive";
-import { actions as invoiceActions } from "../../../../document-models/invoice/index.js";
-import type { InvoiceTag } from "../../../../document-models/invoice/gen/types.js";
-import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
+import { actions as invoiceActions } from "document-models/invoice";
+import type { InvoiceTag } from "document-models/invoice";
+import { actions as billingStatementActions } from "document-models/billing-statement";
 import {
   setPeriodStart,
   setPeriodEnd,
-} from "../../../../document-models/expense-report/gen/creators.js";
+} from "document-models/expense-report";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
 import { exportExpenseReportCSV } from "../../../../scripts/contributor-billing/createExpenseReportCsv.js";
@@ -118,9 +117,9 @@ interface InvoiceTableProps {
       | Record<string, boolean>
       | ((prev: Record<string, boolean>) => Record<string, boolean>),
   ) => void;
-  filteredDocumentModels: VetraDocumentModelModule[];
+  filteredDocumentModels: DocumentModelModule[];
   onSelectDocumentModel: (
-    model: VetraDocumentModelModule,
+    model: DocumentModelModule,
     name: string,
   ) => void;
   getDocDispatcher: (
@@ -622,7 +621,7 @@ export const InvoiceTable = ({
   // Create integrations document - simple async function
   const createIntegrationsDocument = async () => {
     const integrationsModel = filteredDocumentModels.find(
-      (model) => model.id === "powerhouse/integrations",
+      (model) => model.documentModel?.global?.id === "powerhouse/integrations",
     );
 
     if (integrationsModel) {
@@ -678,7 +677,8 @@ export const InvoiceTable = ({
   // Create a new expense report
   const handleCreateExpenseReport = async () => {
     const expenseReportModel = filteredDocumentModels.find(
-      (model) => model.id === "powerhouse/expense-report",
+      (model) =>
+        model.documentModel?.global?.id === "powerhouse/expense-report",
     );
 
     if (expenseReportModel && monthName) {

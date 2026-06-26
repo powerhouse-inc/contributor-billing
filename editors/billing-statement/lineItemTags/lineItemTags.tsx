@@ -1,6 +1,6 @@
 import type { Dispatch } from "react";
 import { X, Tag } from "lucide-react";
-import { PowerhouseButton as Button } from "@powerhousedao/design-system/powerhouse/components/index";
+import { PowerhouseButton as Button } from "@powerhousedao/design-system";
 import { Select, DatePicker } from "@powerhousedao/document-engineering/ui";
 import type { SelectOption } from "@powerhousedao/document-engineering/ui";
 import {
@@ -11,7 +11,7 @@ import {
   actions,
   type BillingStatementTag,
   type BillingStatementAction,
-} from "../../../document-models/billing-statement/index.js";
+} from "document-models/billing-statement";
 import { InputField } from "../../invoice/components/inputField.js";
 
 interface TagAssignmentRow {

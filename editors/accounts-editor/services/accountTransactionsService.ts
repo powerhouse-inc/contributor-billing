@@ -3,13 +3,13 @@
  * Uses reactor-browser APIs for universal local/remote drive compatibility
  */
 
-import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
+import type { AccountEntry } from "document-models/accounts";
 import { addDocument, dispatchActions } from "@powerhousedao/reactor-browser";
 import {
   actions as accountTransactionsActions,
   addTransaction,
-} from "../../../document-models/account-transactions/index.js";
-import { actions as accountsActions } from "../../../document-models/accounts/index.js";
+} from "document-models/account-transactions";
+import { actions as accountsActions } from "document-models/accounts";
 import { generateId } from "document-model/core";
 import { alchemyIntegration } from "../../account-transactions-editor/alchemyIntegration.js";
 

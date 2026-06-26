@@ -1,7 +1,7 @@
 import {
-  toast,
   type ConnectToastOptions,
-} from "@powerhousedao/design-system/connect";
+  toast,
+} from "@powerhousedao/design-system/connect/toast";
 
 export const INVOICE_TOAST_CONTAINER_ID = "invoice-editor-toast";
 

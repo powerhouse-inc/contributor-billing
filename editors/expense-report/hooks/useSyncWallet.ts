@@ -1,11 +1,11 @@
 import { useDocumentsInSelectedDrive } from "@powerhousedao/reactor-browser";
-import { actions } from "../../../document-models/expense-report/index.js";
+import { actions } from "document-models/expense-report";
 import { generateId } from "document-model";
 import type {
   LineItemGroup,
   LineItem,
   Wallet,
-} from "../../../document-models/expense-report/gen/types.js";
+} from "document-models/expense-report";
 import { isSwapAddress } from "../../snapshot-report-editor/utils/flowTypeCalculations.js";
 
 interface BillingStatementLineItem {

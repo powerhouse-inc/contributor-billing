@@ -1,10 +1,10 @@
 import { invoiceToast as toast } from "./invoiceToast.js";
-import { RWAButton } from "@powerhousedao/design-system/rwa";
+import { Button as RWAButton } from "@powerhousedao/design-system/ui";
 import {
   type DeleteLineItemInput,
   type EditInvoiceInput,
   type InvoiceTag,
-} from "../../document-models/invoice/index.js";
+} from "document-models/invoice";
 import {
   forwardRef,
   useState,

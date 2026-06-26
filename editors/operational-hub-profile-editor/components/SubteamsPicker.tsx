@@ -8,7 +8,7 @@ import type { PHDocument } from "document-model";
 import {
   addSubteam,
   removeSubteam,
-} from "../../../document-models/operational-hub-profile/gen/configuration/creators.js";
+} from "document-models/operational-hub-profile";
 import { setOpHubMember } from "@powerhousedao/builder-profile/document-models/builder-profile";
 import { useRemoteBuilderProfiles } from "../../shared/hooks/useRemoteBuilderProfiles.js";
 import { setOpHubMemberOnBuilderProfile } from "../../shared/graphql-client.js";

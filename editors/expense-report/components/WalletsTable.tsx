@@ -19,8 +19,8 @@ import type {
   Wallet,
   LineItemGroup,
   LineItem,
-} from "../../../document-models/expense-report/gen/types.js";
-import { actions } from "../../../document-models/expense-report/index.js";
+} from "document-models/expense-report";
+import { actions } from "document-models/expense-report";
 import { generateId } from "document-model/core";
 import { useWalletSync } from "../hooks/useWalletSync.js";
 import { useSyncWallet } from "../hooks/useSyncWallet.js";
@@ -32,12 +32,12 @@ import {
   setSelectedNode,
   useDocumentById,
 } from "@powerhousedao/reactor-browser";
-import { actions as accountsActions } from "../../../document-models/accounts/index.js";
+import { actions as accountsActions } from "document-models/accounts";
 import {
   actions as accountTransactionsActions,
   addTransaction,
-} from "../../../document-models/account-transactions/index.js";
-import type { AccountEntry } from "../../../document-models/accounts/gen/schema/types.js";
+} from "document-models/account-transactions";
+import type { AccountEntry } from "document-models/accounts";
 import { alchemyIntegration } from "../../account-transactions-editor/alchemyIntegration.js";
 import { isSwapAddress } from "../../snapshot-report-editor/utils/flowTypeCalculations.js";
 

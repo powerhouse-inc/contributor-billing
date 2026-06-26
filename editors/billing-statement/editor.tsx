@@ -4,11 +4,11 @@ import {
   type BillingStatementDocument,
   type BillingStatementState,
   actions,
-} from "../../document-models/billing-statement/index.js";
+} from "document-models/billing-statement";
 import { Textarea, Select } from "@powerhousedao/document-engineering";
 import LineItemsTable from "./components/lineItemsTable.js";
 import { formatNumber } from "../invoice/lineItems.js";
-import { useSelectedBillingStatementDocument } from "../../document-models/billing-statement/hooks.js";
+import { useSelectedBillingStatementDocument } from "document-models/billing-statement";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
@@ -57,7 +57,7 @@ export default function Editor(
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
-      <DocumentToolbar document={doc} onClose={handleClose} />
+      <DocumentToolbar />
 
       <div className="w-full">
         <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">

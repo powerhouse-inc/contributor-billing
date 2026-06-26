@@ -8,7 +8,8 @@ import {
   RefreshCw,
   X,
 } from "lucide-react";
-import { DocumentToolbar, toast } from "@powerhousedao/design-system/connect";
+import { DocumentToolbar } from "@powerhousedao/design-system/connect";
+import { toast } from "@powerhousedao/design-system/connect/toast";
 import {
   setSelectedNode,
   useParentFolderForSelectedNode,
@@ -21,12 +22,12 @@ import {
   updateAccount,
   deleteAccount,
   updateKycStatus,
-} from "../../document-models/accounts/gen/accounts/creators.js";
+} from "document-models/accounts";
 import type {
   AccountEntry,
   AccountTypeInput,
   KycAmlStatusTypeInput,
-} from "../../document-models/accounts/gen/schema/types.js";
+} from "document-models/accounts";
 import { AccountForm } from "./components/AccountForm.js";
 import { AccountsList } from "./components/AccountsList.js";
 import { accountTransactionsService } from "./services/accountTransactionsService.js";
@@ -416,7 +417,7 @@ export default function Editor() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      <DocumentToolbar document={document} onClose={handleClose} />
+      <DocumentToolbar />
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-semibold text-gray-900">Accounts</h1>
       </div>
