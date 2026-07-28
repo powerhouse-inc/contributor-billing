@@ -1,4 +1,8 @@
-import type { PHDocument, PHBaseState } from "document-model";
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
+import type { PHBaseState, PHDocument } from "document-model";
 import type { OperationalHubProfileAction } from "./actions.js";
 import type { OperationalHubProfileState as OperationalHubProfileGlobalState } from "./schema/types.js";
 
@@ -13,9 +17,9 @@ type OperationalHubProfileDocument = PHDocument<OperationalHubProfilePHState>;
 export * from "./schema/types.js";
 
 export type {
+  OperationalHubProfileAction,
+  OperationalHubProfileDocument,
   OperationalHubProfileGlobalState,
   OperationalHubProfileLocalState,
   OperationalHubProfilePHState,
-  OperationalHubProfileAction,
-  OperationalHubProfileDocument,
 };

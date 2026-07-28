@@ -1,30 +1,34 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { createAction } from "document-model";
 import {
-  SetReportConfigInputSchema,
-  SetAccountsDocumentInputSchema,
-  SetPeriodInputSchema,
   AddOwnerIdInputSchema,
-  SetPeriodStartInputSchema,
-  SetPeriodEndInputSchema,
   RemoveOwnerIdInputSchema,
+  SetAccountsDocumentInputSchema,
+  SetPeriodEndInputSchema,
+  SetPeriodInputSchema,
+  SetPeriodStartInputSchema,
+  SetReportConfigInputSchema,
 } from "../schema/zod.js";
 import type {
-  SetReportConfigInput,
-  SetAccountsDocumentInput,
-  SetPeriodInput,
   AddOwnerIdInput,
-  SetPeriodStartInput,
-  SetPeriodEndInput,
   RemoveOwnerIdInput,
+  SetAccountsDocumentInput,
+  SetPeriodEndInput,
+  SetPeriodInput,
+  SetPeriodStartInput,
+  SetReportConfigInput,
 } from "../types.js";
 import type {
-  SetReportConfigAction,
+  AddOwnerIdAction,
+  RemoveOwnerIdAction,
   SetAccountsDocumentAction,
   SetPeriodAction,
-  AddOwnerIdAction,
-  SetPeriodStartAction,
   SetPeriodEndAction,
-  RemoveOwnerIdAction,
+  SetPeriodStartAction,
+  SetReportConfigAction,
 } from "./actions.js";
 
 export const setReportConfig = (input: SetReportConfigInput) =>

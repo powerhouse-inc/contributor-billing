@@ -1,9 +1,13 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import type { Action } from "document-model";
 import type {
-  SetOperationalHubNameInput,
-  SetOperatorTeamInput,
   AddSubteamInput,
   RemoveSubteamInput,
+  SetOperationalHubNameInput,
+  SetOperatorTeamInput,
 } from "../types.js";
 
 export type SetOperationalHubNameAction = Action & {

@@ -1,7 +1,7 @@
-import type { PHDocumentEditorConfig } from "@powerhousedao/reactor-browser";
+import type { PHAppConfig } from "@powerhousedao/reactor-browser";
 
-/** Editor config for the <%= pascalCaseDriveEditorName %> */
-export const editorConfig: PHDocumentEditorConfig = {
+/** Editor config for the ContributorBilling drive editor */
+export const editorConfig: PHAppConfig = {
   isDragAndDropEnabled: false,
   allowedDocumentTypes: [
     "powerhouse/invoice",

@@ -12,7 +12,7 @@ import {
   type BillingStatementTag,
   type BillingStatementAction,
 } from "../../../document-models/billing-statement/index.js";
-import { InputField } from "../../invoice/components/inputField.js";
+import { InputField } from "../../shared/inputField.js";
 
 interface TagAssignmentRow {
   id: string;

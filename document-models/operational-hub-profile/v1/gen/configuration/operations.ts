@@ -1,30 +1,34 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { type SignalDispatch } from "document-model";
+import type { OperationalHubProfileGlobalState } from "../types.js";
 import type {
-  SetOperationalHubNameAction,
-  SetOperatorTeamAction,
   AddSubteamAction,
   RemoveSubteamAction,
+  SetOperationalHubNameAction,
+  SetOperatorTeamAction,
 } from "./actions.js";
-import type { OperationalHubProfileState } from "../types.js";
 
 export interface OperationalHubProfileConfigurationOperations {
   setOperationalHubNameOperation: (
-    state: OperationalHubProfileState,
+    state: OperationalHubProfileGlobalState,
     action: SetOperationalHubNameAction,
     dispatch?: SignalDispatch,
   ) => void;
   setOperatorTeamOperation: (
-    state: OperationalHubProfileState,
+    state: OperationalHubProfileGlobalState,
     action: SetOperatorTeamAction,
     dispatch?: SignalDispatch,
   ) => void;
   addSubteamOperation: (
-    state: OperationalHubProfileState,
+    state: OperationalHubProfileGlobalState,
     action: AddSubteamAction,
     dispatch?: SignalDispatch,
   ) => void;
   removeSubteamOperation: (
-    state: OperationalHubProfileState,
+    state: OperationalHubProfileGlobalState,
     action: RemoveSubteamAction,
     dispatch?: SignalDispatch,
   ) => void;

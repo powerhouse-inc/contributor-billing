@@ -1,18 +1,20 @@
-import type { DocumentModelModule } from "document-model";
-import { AccountTransactions as AccountTransactionsV1 } from "./account-transactions/v1/module.js";
-import { Accounts as AccountsV1 } from "./accounts/v1/module.js";
-import { BillingStatement as BillingStatementV1 } from "./billing-statement/v1/module.js";
-import { ExpenseReport as ExpenseReportV1 } from "./expense-report/v1/module.js";
-import { Invoice as InvoiceV1 } from "./invoice/v1/module.js";
-import { OperationalHubProfile as OperationalHubProfileV1 } from "./operational-hub-profile/v1/module.js";
-import { SnapshotReport as SnapshotReportV1 } from "./snapshot-report/v1/module.js";
+import { AccountTransactions as AccountTransactionsV1 } from "document-models/account-transactions/v1";
+import { Accounts as AccountsV1 } from "document-models/accounts/v1";
+import { BillingStatement as BillingStatementV1 } from "document-models/billing-statement/v1";
+import { ExpenseReport as ExpenseReportV1 } from "document-models/expense-report/v1";
+import { OperationalHubProfile as OperationalHubProfileV1 } from "document-models/operational-hub-profile/v1";
+import { SnapshotReport as SnapshotReportV1 } from "document-models/snapshot-report/v1";
 
-export const documentModels: DocumentModelModule<any>[] = [
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
+
+export const documentModels = [
   AccountTransactionsV1,
   AccountsV1,
   BillingStatementV1,
   ExpenseReportV1,
-  InvoiceV1,
   OperationalHubProfileV1,
   SnapshotReportV1,
-];
+] as const;

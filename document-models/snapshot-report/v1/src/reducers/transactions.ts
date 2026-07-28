@@ -1,7 +1,7 @@
 import type { SnapshotReportTransactionsOperations } from "document-models/snapshot-report/v1";
 import {
-  DuplicateTransactionError,
   AddTransactionAccountNotFoundError,
+  DuplicateTransactionError,
   RemoveTransactionNotFoundError,
   UpdateFlowTypeTransactionNotFoundError,
 } from "../../gen/transactions/error.js";

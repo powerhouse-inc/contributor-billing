@@ -1,20 +1,24 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { createAction } from "document-model";
 import {
   AddTransactionInputSchema,
-  UpdateTransactionInputSchema,
   DeleteTransactionInputSchema,
+  UpdateTransactionInputSchema,
   UpdateTransactionPeriodInputSchema,
 } from "../schema/zod.js";
 import type {
   AddTransactionInput,
-  UpdateTransactionInput,
   DeleteTransactionInput,
+  UpdateTransactionInput,
   UpdateTransactionPeriodInput,
 } from "../types.js";
 import type {
   AddTransactionAction,
-  UpdateTransactionAction,
   DeleteTransactionAction,
+  UpdateTransactionAction,
   UpdateTransactionPeriodAction,
 } from "./actions.js";
 

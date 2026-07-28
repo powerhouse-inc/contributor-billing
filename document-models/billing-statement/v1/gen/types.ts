@@ -1,4 +1,8 @@
-import type { PHDocument, PHBaseState } from "document-model";
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
+import type { PHBaseState, PHDocument } from "document-model";
 import type { BillingStatementAction } from "./actions.js";
 import type { BillingStatementState as BillingStatementGlobalState } from "./schema/types.js";
 
@@ -13,9 +17,9 @@ type BillingStatementDocument = PHDocument<BillingStatementPHState>;
 export * from "./schema/types.js";
 
 export type {
+  BillingStatementAction,
+  BillingStatementDocument,
   BillingStatementGlobalState,
   BillingStatementLocalState,
   BillingStatementPHState,
-  BillingStatementAction,
-  BillingStatementDocument,
 };

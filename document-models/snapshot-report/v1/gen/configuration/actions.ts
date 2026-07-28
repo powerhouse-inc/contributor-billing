@@ -1,12 +1,16 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import type { Action } from "document-model";
 import type {
-  SetReportConfigInput,
-  SetAccountsDocumentInput,
-  SetPeriodInput,
   AddOwnerIdInput,
-  SetPeriodStartInput,
-  SetPeriodEndInput,
   RemoveOwnerIdInput,
+  SetAccountsDocumentInput,
+  SetPeriodEndInput,
+  SetPeriodInput,
+  SetPeriodStartInput,
+  SetReportConfigInput,
 } from "../types.js";
 
 export type SetReportConfigAction = Action & {

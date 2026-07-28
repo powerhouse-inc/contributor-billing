@@ -53,7 +53,8 @@
       "Bash(switchboard --profile bai-dev schema --format json)",
       "Bash(ps -p 1219 -o pid,etime,cmd)",
       "Bash(ps -p 1219 -o pid,etime,stat,cmd)",
-      "Bash(awk '$4 ~ /:\\(3001|4001\\)$/')"
+      "Bash(awk '$4 ~ /:\\(3001|4001\\)$/')",
+      "Bash(switchboard --profile bai-dev docs mutate c4618bc9-e06a-479f-9813-13e37cba4e86 --op deleteNode --input '{\"id\":\"0f9c13ac-bd7c-4db4-9830-c015bc6db8ec\"}' --format json)"
     ]
   },
   "hooks": {

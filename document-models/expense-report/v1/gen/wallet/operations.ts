@@ -1,114 +1,118 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { type SignalDispatch } from "document-model";
+import type { ExpenseReportGlobalState } from "../types.js";
 import type {
-  AddWalletAction,
-  RemoveWalletAction,
   AddBillingStatementAction,
-  RemoveBillingStatementAction,
   AddLineItemAction,
-  UpdateLineItemAction,
-  RemoveLineItemAction,
   AddLineItemGroupAction,
-  UpdateLineItemGroupAction,
-  RemoveLineItemGroupAction,
-  SetGroupTotalsAction,
+  AddWalletAction,
+  RemoveBillingStatementAction,
   RemoveGroupTotalsAction,
-  SetPeriodStartAction,
-  SetPeriodEndAction,
-  UpdateWalletAction,
+  RemoveLineItemAction,
+  RemoveLineItemGroupAction,
+  RemoveWalletAction,
+  SetGroupTotalsAction,
   SetOwnerIdAction,
-  SetStatusAction,
   SetPeriodAction,
+  SetPeriodEndAction,
+  SetPeriodStartAction,
+  SetStatusAction,
+  UpdateLineItemAction,
+  UpdateLineItemGroupAction,
+  UpdateWalletAction,
 } from "./actions.js";
-import type { ExpenseReportState } from "../types.js";
 
 export interface ExpenseReportWalletOperations {
   addWalletOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: AddWalletAction,
     dispatch?: SignalDispatch,
   ) => void;
   removeWalletOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: RemoveWalletAction,
     dispatch?: SignalDispatch,
   ) => void;
   addBillingStatementOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: AddBillingStatementAction,
     dispatch?: SignalDispatch,
   ) => void;
   removeBillingStatementOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: RemoveBillingStatementAction,
     dispatch?: SignalDispatch,
   ) => void;
   addLineItemOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: AddLineItemAction,
     dispatch?: SignalDispatch,
   ) => void;
   updateLineItemOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: UpdateLineItemAction,
     dispatch?: SignalDispatch,
   ) => void;
   removeLineItemOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: RemoveLineItemAction,
     dispatch?: SignalDispatch,
   ) => void;
   addLineItemGroupOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: AddLineItemGroupAction,
     dispatch?: SignalDispatch,
   ) => void;
   updateLineItemGroupOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: UpdateLineItemGroupAction,
     dispatch?: SignalDispatch,
   ) => void;
   removeLineItemGroupOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: RemoveLineItemGroupAction,
     dispatch?: SignalDispatch,
   ) => void;
   setGroupTotalsOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: SetGroupTotalsAction,
     dispatch?: SignalDispatch,
   ) => void;
   removeGroupTotalsOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: RemoveGroupTotalsAction,
     dispatch?: SignalDispatch,
   ) => void;
   setPeriodStartOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: SetPeriodStartAction,
     dispatch?: SignalDispatch,
   ) => void;
   setPeriodEndOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: SetPeriodEndAction,
     dispatch?: SignalDispatch,
   ) => void;
   updateWalletOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: UpdateWalletAction,
     dispatch?: SignalDispatch,
   ) => void;
   setOwnerIdOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: SetOwnerIdAction,
     dispatch?: SignalDispatch,
   ) => void;
   setStatusOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: SetStatusAction,
     dispatch?: SignalDispatch,
   ) => void;
   setPeriodOperation: (
-    state: ExpenseReportState,
+    state: ExpenseReportGlobalState,
     action: SetPeriodAction,
     dispatch?: SignalDispatch,
   ) => void;

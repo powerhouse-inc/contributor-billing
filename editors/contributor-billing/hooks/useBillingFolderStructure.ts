@@ -4,7 +4,7 @@ import {
   addFolder,
   useSelectedDrive,
 } from "@powerhousedao/reactor-browser";
-import type { FolderNode, Node } from "document-drive";
+import type { FolderNode, Node } from "@powerhousedao/shared/document-drive";
 
 const BILLING_FOLDER_NAME = "Billing";
 const PAYMENTS_FOLDER_NAME = "Payments";

@@ -5,7 +5,7 @@ import {
   useSelectedDrive,
   isFileNodeKind,
 } from "@powerhousedao/reactor-browser";
-import type { FileNode } from "document-drive";
+import type { FileNode } from "@powerhousedao/shared/document-drive";
 import { generateId } from "document-model";
 import { X, FileText, Check } from "lucide-react";
 import type { LineItemGroup } from "../../../document-models/expense-report/v1/gen/types.js";

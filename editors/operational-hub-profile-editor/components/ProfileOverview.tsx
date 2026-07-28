@@ -1,6 +1,6 @@
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { Pencil, Users } from "lucide-react";
-import type { FileNode } from "document-drive";
+import type { FileNode } from "@powerhousedao/shared/document-drive";
 import type { PHDocument } from "document-model";
 import { useDrives, useGetDocuments } from "@powerhousedao/reactor-browser";
 import type { BuilderProfileDocument } from "@powerhousedao/builder-profile/document-models/builder-profile";

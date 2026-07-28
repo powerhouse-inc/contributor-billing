@@ -7,17 +7,17 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
-import { describe, it, expect } from "vitest";
 import {
-  utils,
+  accountTransactionsDocumentType,
+  assertIsAccountTransactionsDocument,
+  assertIsAccountTransactionsState,
   initialGlobalState,
   initialLocalState,
-  accountTransactionsDocumentType,
   isAccountTransactionsDocument,
-  assertIsAccountTransactionsDocument,
   isAccountTransactionsState,
-  assertIsAccountTransactionsState,
+  utils,
 } from "document-models/account-transactions/v1";
+import { describe, expect, it } from "vitest";
 import { ZodError } from "zod";
 
 describe("AccountTransactions Document Model", () => {

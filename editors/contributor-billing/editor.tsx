@@ -1,4 +1,4 @@
-import { useSetPHDocumentEditorConfig } from "@powerhousedao/reactor-browser";
+import { useSetPHAppConfig } from "@powerhousedao/reactor-browser";
 import type { EditorProps } from "document-model";
 import { DriveExplorer } from "./components/DriveExplorer.js";
 import { editorConfig } from "./config.js";
@@ -7,6 +7,6 @@ import { editorConfig } from "./config.js";
 export default function Editor(props: EditorProps) {
   // set the config for this drive editor
   // you can update these configs in `./config.ts`
-  useSetPHDocumentEditorConfig(editorConfig);
+  useSetPHAppConfig(editorConfig);
   return <DriveExplorer {...props} />;
 }

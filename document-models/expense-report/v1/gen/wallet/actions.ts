@@ -1,23 +1,27 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import type { Action } from "document-model";
 import type {
-  AddWalletInput,
-  RemoveWalletInput,
   AddBillingStatementInput,
-  RemoveBillingStatementInput,
-  AddLineItemInput,
-  UpdateLineItemInput,
-  RemoveLineItemInput,
   AddLineItemGroupInput,
-  UpdateLineItemGroupInput,
-  RemoveLineItemGroupInput,
-  SetGroupTotalsInput,
+  AddLineItemInput,
+  AddWalletInput,
+  RemoveBillingStatementInput,
   RemoveGroupTotalsInput,
-  SetPeriodStartInput,
-  SetPeriodEndInput,
-  UpdateWalletInput,
+  RemoveLineItemGroupInput,
+  RemoveLineItemInput,
+  RemoveWalletInput,
+  SetGroupTotalsInput,
   SetOwnerIdInput,
-  SetStatusInput,
+  SetPeriodEndInput,
   SetPeriodInput,
+  SetPeriodStartInput,
+  SetStatusInput,
+  UpdateLineItemGroupInput,
+  UpdateLineItemInput,
+  UpdateWalletInput,
 } from "../types.js";
 
 export type AddWalletAction = Action & {

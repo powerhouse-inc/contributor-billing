@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { Reducer, StateReducer } from "document-model";
-import { isDocumentAction, createReducer } from "document-model";
+import { createReducer, isDocumentAction } from "document-model";
 import type { BillingStatementPHState } from "document-models/billing-statement/v1";
 
 import { billingStatementGeneralOperations } from "../src/reducers/general.js";
@@ -9,13 +9,13 @@ import { billingStatementLineItemsOperations } from "../src/reducers/line-items.
 import { billingStatementTagsOperations } from "../src/reducers/tags.js";
 
 import {
+  AddLineItemInputSchema,
+  DeleteLineItemInputSchema,
   EditBillingStatementInputSchema,
   EditContributorInputSchema,
-  EditStatusInputSchema,
-  AddLineItemInputSchema,
   EditLineItemInputSchema,
-  DeleteLineItemInputSchema,
   EditLineItemTagInputSchema,
+  EditStatusInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<BillingStatementPHState> = (

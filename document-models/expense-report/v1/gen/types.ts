@@ -1,4 +1,8 @@
-import type { PHDocument, PHBaseState } from "document-model";
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
+import type { PHBaseState, PHDocument } from "document-model";
 import type { ExpenseReportAction } from "./actions.js";
 import type { ExpenseReportState as ExpenseReportGlobalState } from "./schema/types.js";
 
@@ -13,9 +17,9 @@ type ExpenseReportDocument = PHDocument<ExpenseReportPHState>;
 export * from "./schema/types.js";
 
 export type {
+  ExpenseReportAction,
+  ExpenseReportDocument,
   ExpenseReportGlobalState,
   ExpenseReportLocalState,
   ExpenseReportPHState,
-  ExpenseReportAction,
-  ExpenseReportDocument,
 };

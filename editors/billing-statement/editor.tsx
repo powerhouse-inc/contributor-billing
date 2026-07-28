@@ -7,13 +7,9 @@ import {
 } from "../../document-models/billing-statement/index.js";
 import { Textarea, Select } from "@powerhousedao/document-engineering";
 import LineItemsTable from "./components/lineItemsTable.js";
-import { formatNumber } from "../invoice/lineItems.js";
+import { formatNumber } from "../shared/formatNumber.js";
 import { useSelectedBillingStatementDocument } from "../../document-models/billing-statement/v1/hooks.js";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
-import {
-  setSelectedNode,
-  useParentFolderForSelectedNode,
-} from "@powerhousedao/reactor-browser";
 
 export type IProps = EditorProps;
 
@@ -44,22 +40,14 @@ export default function Editor(
   // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
   const [notes, setNotes] = useState(state?.notes ?? "");
 
-  // Get the parent folder node for the currently selected node
-  const parentFolder = useParentFolderForSelectedNode();
-
   if (!state) {
     console.log("Document state not found from document id", props.documentId);
     return null;
   }
 
-  // Set the selected node to the parent folder node (close the editor)
-  function handleClose() {
-    setSelectedNode(parentFolder);
-  }
-
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
-      <DocumentToolbar document={doc} onClose={handleClose} />
+      <DocumentToolbar document={doc} />
 
       <div className="w-full">
         <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">

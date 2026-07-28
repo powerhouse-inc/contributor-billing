@@ -7,17 +7,17 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
-import { describe, it, expect } from "vitest";
 import {
-  utils,
+  assertIsBillingStatementDocument,
+  assertIsBillingStatementState,
+  billingStatementDocumentType,
   initialGlobalState,
   initialLocalState,
-  billingStatementDocumentType,
   isBillingStatementDocument,
-  assertIsBillingStatementDocument,
   isBillingStatementState,
-  assertIsBillingStatementState,
+  utils,
 } from "document-models/billing-statement/v1";
+import { describe, expect, it } from "vitest";
 import { ZodError } from "zod";
 
 describe("BillingStatement Document Model", () => {

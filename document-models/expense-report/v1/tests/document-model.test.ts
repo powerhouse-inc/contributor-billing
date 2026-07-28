@@ -7,17 +7,17 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
-import { describe, it, expect } from "vitest";
 import {
-  utils,
+  assertIsExpenseReportDocument,
+  assertIsExpenseReportState,
+  expenseReportDocumentType,
   initialGlobalState,
   initialLocalState,
-  expenseReportDocumentType,
   isExpenseReportDocument,
-  assertIsExpenseReportDocument,
   isExpenseReportState,
-  assertIsExpenseReportState,
+  utils,
 } from "document-models/expense-report/v1";
+import { describe, expect, it } from "vitest";
 import { ZodError } from "zod";
 
 describe("ExpenseReport Document Model", () => {

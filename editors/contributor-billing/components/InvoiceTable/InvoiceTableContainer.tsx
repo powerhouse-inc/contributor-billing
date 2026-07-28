@@ -12,8 +12,8 @@ import {
   setSelectedNode,
 } from "@powerhousedao/reactor-browser";
 import type { PHBaseState, PHDocument } from "document-model";
-import type { FileNode } from "document-drive";
-import { moveNode } from "document-drive";
+import type { FileNode } from "@powerhousedao/shared/document-drive";
+import { moveNode } from "@powerhousedao/shared/document-drive";
 import { cbToast } from "../cbToast.js";
 import { InvoiceTable } from "./InvoiceTable.js";
 

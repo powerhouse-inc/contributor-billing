@@ -1,18 +1,22 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { createAction } from "document-model";
 import {
   AddBudgetInputSchema,
-  UpdateBudgetInputSchema,
   DeleteBudgetInputSchema,
+  UpdateBudgetInputSchema,
 } from "../schema/zod.js";
 import type {
   AddBudgetInput,
-  UpdateBudgetInput,
   DeleteBudgetInput,
+  UpdateBudgetInput,
 } from "../types.js";
 import type {
   AddBudgetAction,
-  UpdateBudgetAction,
   DeleteBudgetAction,
+  UpdateBudgetAction,
 } from "./actions.js";
 
 export const addBudget = (input: AddBudgetInput) =>

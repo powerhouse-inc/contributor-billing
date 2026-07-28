@@ -17,12 +17,10 @@ import { ExpenseReportPDF } from "./components/ExpenseReportPDF.js";
 import { pdf } from "@react-pdf/renderer";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
-  setSelectedNode,
-  useParentFolderForSelectedNode,
   useSelectedDrive,
   isFolderNodeKind,
 } from "@powerhousedao/reactor-browser";
-import type { FolderNode } from "document-drive";
+import type { FolderNode } from "@powerhousedao/shared/document-drive";
 import { useSyncWallet } from "./hooks/useSyncWallet.js";
 import { RefreshCw } from "lucide-react";
 import { SetOwner } from "./components/SetOwner.js";
@@ -329,8 +327,6 @@ export default function Editor() {
     return new Date().toISOString().split("T")[0];
   }, [startDate, endDate]);
 
-  // Get the parent folder node for the currently selected node (this is the Reporting folder)
-  const parentFolder = useParentFolderForSelectedNode();
   const [driveDocument] = useSelectedDrive();
 
   // Find the sibling "Payments" folder dynamically
@@ -376,14 +372,9 @@ export default function Editor() {
     return paymentsFolder?.id ?? null;
   }, [driveDocument, document]);
 
-  // Set the selected node to the parent folder node (close the editor)
-  function handleClose() {
-    setSelectedNode(parentFolder?.id);
-  }
-
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      <DocumentToolbar document={document} onClose={handleClose} />
+      <DocumentToolbar document={document} />
       <div className="ph-default-styles flex flex-col flex-1 min-h-0 w-full bg-gray-50 dark:bg-gray-900">
         {/* Main Content */}
         <div className="flex-1 overflow-auto px-3 sm:px-4 lg:px-6 py-4">

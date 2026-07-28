@@ -1,20 +1,24 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { createAction } from "document-model";
 import {
   AddAccountInputSchema,
-  UpdateAccountInputSchema,
   DeleteAccountInputSchema,
+  UpdateAccountInputSchema,
   UpdateKycStatusInputSchema,
 } from "../schema/zod.js";
 import type {
   AddAccountInput,
-  UpdateAccountInput,
   DeleteAccountInput,
+  UpdateAccountInput,
   UpdateKycStatusInput,
 } from "../types.js";
 import type {
   AddAccountAction,
-  UpdateAccountAction,
   DeleteAccountAction,
+  UpdateAccountAction,
   UpdateKycStatusAction,
 } from "./actions.js";
 

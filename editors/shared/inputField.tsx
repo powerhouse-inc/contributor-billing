@@ -1,5 +1,5 @@
 import { Form, StringField } from "@powerhousedao/document-engineering/scalars";
-import { type ValidationResult } from "../validation/validationManager.js";
+import { type ValidationResult } from "./validationManager.js";
 import { twMerge } from "tailwind-merge";
 
 interface InputFieldProps {

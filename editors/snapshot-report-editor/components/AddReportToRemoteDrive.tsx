@@ -4,7 +4,7 @@ import {
   useDrives,
   useDriveById,
 } from "@powerhousedao/reactor-browser";
-import { addFile } from "document-drive";
+import { addFile } from "@powerhousedao/shared/document-drive";
 import { useSelectedSnapshotReportDocument } from "../../hooks/useSnapshotReportDocument.js";
 import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/v1/gen/types.js";
 

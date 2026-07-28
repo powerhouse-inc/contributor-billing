@@ -1,24 +1,28 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { type SignalDispatch } from "document-model";
+import type { SnapshotReportGlobalState } from "../types.js";
 import type {
   AddSnapshotAccountAction,
-  UpdateSnapshotAccountTypeAction,
   RemoveSnapshotAccountAction,
+  UpdateSnapshotAccountTypeAction,
 } from "./actions.js";
-import type { SnapshotReportState } from "../types.js";
 
 export interface SnapshotReportAccountsOperations {
   addSnapshotAccountOperation: (
-    state: SnapshotReportState,
+    state: SnapshotReportGlobalState,
     action: AddSnapshotAccountAction,
     dispatch?: SignalDispatch,
   ) => void;
   updateSnapshotAccountTypeOperation: (
-    state: SnapshotReportState,
+    state: SnapshotReportGlobalState,
     action: UpdateSnapshotAccountTypeAction,
     dispatch?: SignalDispatch,
   ) => void;
   removeSnapshotAccountOperation: (
-    state: SnapshotReportState,
+    state: SnapshotReportGlobalState,
     action: RemoveSnapshotAccountAction,
     dispatch?: SignalDispatch,
   ) => void;

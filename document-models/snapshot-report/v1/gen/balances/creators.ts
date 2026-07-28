@@ -1,21 +1,25 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { createAction } from "document-model";
 import {
-  SetStartingBalanceInputSchema,
-  SetEndingBalanceInputSchema,
-  RemoveStartingBalanceInputSchema,
   RemoveEndingBalanceInputSchema,
+  RemoveStartingBalanceInputSchema,
+  SetEndingBalanceInputSchema,
+  SetStartingBalanceInputSchema,
 } from "../schema/zod.js";
 import type {
-  SetStartingBalanceInput,
-  SetEndingBalanceInput,
-  RemoveStartingBalanceInput,
   RemoveEndingBalanceInput,
+  RemoveStartingBalanceInput,
+  SetEndingBalanceInput,
+  SetStartingBalanceInput,
 } from "../types.js";
 import type {
-  SetStartingBalanceAction,
-  SetEndingBalanceAction,
-  RemoveStartingBalanceAction,
   RemoveEndingBalanceAction,
+  RemoveStartingBalanceAction,
+  SetEndingBalanceAction,
+  SetStartingBalanceAction,
 } from "./actions.js";
 
 export const setStartingBalance = (input: SetStartingBalanceInput) =>

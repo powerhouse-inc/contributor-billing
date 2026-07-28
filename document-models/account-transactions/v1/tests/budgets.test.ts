@@ -1,16 +1,16 @@
 import { generateMock } from "document-model";
-import { describe, expect, it } from "vitest";
 import {
-  reducer,
-  utils,
-  isAccountTransactionsDocument,
   addBudget,
-  updateBudget,
-  deleteBudget,
   AddBudgetInputSchema,
-  UpdateBudgetInputSchema,
+  deleteBudget,
   DeleteBudgetInputSchema,
+  isAccountTransactionsDocument,
+  reducer,
+  updateBudget,
+  UpdateBudgetInputSchema,
+  utils,
 } from "document-models/account-transactions/v1";
+import { describe, expect, it } from "vitest";
 
 describe("BudgetsOperations", () => {
   it("should handle addBudget operation", () => {

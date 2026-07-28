@@ -1,21 +1,24 @@
 import { generateMock } from "document-model";
-import { describe, expect, it } from "vitest";
 import {
+  editBillingStatement,
+  EditBillingStatementInputSchema,
+  editContributor,
+  EditContributorInputSchema,
+  editStatus,
+  EditStatusInputSchema,
+  isBillingStatementDocument,
   reducer,
   utils,
-  isBillingStatementDocument,
-  editBillingStatement,
-  editContributor,
-  editStatus,
-  EditBillingStatementInputSchema,
-  EditContributorInputSchema,
-  EditStatusInputSchema,
 } from "document-models/billing-statement/v1";
+import { describe, expect, it } from "vitest";
 
 describe("GeneralOperations", () => {
   it("should handle editBillingStatement operation", () => {
     const document = utils.createDocument();
-    const input = generateMock(EditBillingStatementInputSchema());
+    const input = generateMock(EditBillingStatementInputSchema(), {
+      dateIssued: "2024-01-01T00:00:00.000Z",
+      dateDue: "2024-01-01T00:00:00.000Z",
+    });
 
     const updatedDocument = reducer(document, editBillingStatement(input));
 

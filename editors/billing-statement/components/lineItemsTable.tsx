@@ -1,7 +1,7 @@
 import { Tag, Plus, Trash2 } from "lucide-react";
 import { Select } from "@powerhousedao/document-engineering";
-import { InputField } from "../../invoice/components/inputField.js";
-import { NumberForm } from "../../invoice/components/numberForm.js";
+import { InputField } from "../../shared/inputField.js";
+import { NumberForm } from "../../shared/numberForm.js";
 import {
   actions,
   type BillingStatementAction,
@@ -9,7 +9,7 @@ import {
   type BillingStatementUnitInput,
 } from "../../../document-models/billing-statement/index.js";
 import { useState, useRef, useEffect } from "react";
-import { formatNumber } from "../../invoice/lineItems.js";
+import { formatNumber } from "../../shared/formatNumber.js";
 import { LineItemTagsTable } from "../lineItemTags/lineItemTags.js";
 import { generateId } from "document-model";
 import { useOperationalHubSubteams } from "../../hooks/useOperationalHubSubteams.js";

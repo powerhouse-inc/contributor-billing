@@ -1,16 +1,16 @@
 import { generateMock } from "document-model";
-import { describe, expect, it } from "vitest";
 import {
+  addLineItem,
+  AddLineItemInputSchema,
+  deleteLineItem,
+  DeleteLineItemInputSchema,
+  editLineItem,
+  EditLineItemInputSchema,
+  isBillingStatementDocument,
   reducer,
   utils,
-  isBillingStatementDocument,
-  addLineItem,
-  editLineItem,
-  deleteLineItem,
-  AddLineItemInputSchema,
-  EditLineItemInputSchema,
-  DeleteLineItemInputSchema,
 } from "document-models/billing-statement/v1";
+import { describe, expect, it } from "vitest";
 
 describe("LineItemsOperations", () => {
   it("should handle addLineItem operation", () => {

@@ -1,12 +1,12 @@
 import { generateMock } from "document-model";
-import { describe, expect, it } from "vitest";
 import {
-  reducer,
-  utils,
   isAccountTransactionsDocument,
+  reducer,
   setAccount,
   SetAccountInputSchema,
+  utils,
 } from "document-models/account-transactions/v1";
+import { describe, expect, it } from "vitest";
 
 describe("AccountOperations", () => {
   it("should handle setAccount operation", () => {

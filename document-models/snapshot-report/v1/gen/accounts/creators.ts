@@ -1,18 +1,22 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { createAction } from "document-model";
 import {
   AddSnapshotAccountInputSchema,
-  UpdateSnapshotAccountTypeInputSchema,
   RemoveSnapshotAccountInputSchema,
+  UpdateSnapshotAccountTypeInputSchema,
 } from "../schema/zod.js";
 import type {
   AddSnapshotAccountInput,
-  UpdateSnapshotAccountTypeInput,
   RemoveSnapshotAccountInput,
+  UpdateSnapshotAccountTypeInput,
 } from "../types.js";
 import type {
   AddSnapshotAccountAction,
-  UpdateSnapshotAccountTypeAction,
   RemoveSnapshotAccountAction,
+  UpdateSnapshotAccountTypeAction,
 } from "./actions.js";
 
 export const addSnapshotAccount = (input: AddSnapshotAccountInput) =>

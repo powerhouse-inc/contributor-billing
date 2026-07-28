@@ -1,18 +1,22 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { createAction } from "document-model";
 import {
   AddLineItemInputSchema,
-  EditLineItemInputSchema,
   DeleteLineItemInputSchema,
+  EditLineItemInputSchema,
 } from "../schema/zod.js";
 import type {
   AddLineItemInput,
-  EditLineItemInput,
   DeleteLineItemInput,
+  EditLineItemInput,
 } from "../types.js";
 import type {
   AddLineItemAction,
-  EditLineItemAction,
   DeleteLineItemAction,
+  EditLineItemAction,
 } from "./actions.js";
 
 export const addLineItem = (input: AddLineItemInput) =>

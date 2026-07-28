@@ -1,8 +1,8 @@
 import type { SnapshotReportAccountsOperations } from "document-models/snapshot-report/v1";
 import {
   DuplicateAccountError,
-  UpdateAccountTypeNotFoundError,
   RemoveAccountNotFoundError,
+  UpdateAccountTypeNotFoundError,
 } from "../../gen/accounts/error.js";
 
 export const snapshotReportAccountsOperations: SnapshotReportAccountsOperations =

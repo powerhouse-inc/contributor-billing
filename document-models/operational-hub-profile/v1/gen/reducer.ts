@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { Reducer, StateReducer } from "document-model";
-import { isDocumentAction, createReducer } from "document-model";
+import { createReducer, isDocumentAction } from "document-model";
 import type { OperationalHubProfilePHState } from "document-models/operational-hub-profile/v1";
 
 import { operationalHubProfileConfigurationOperations } from "../src/reducers/configuration.js";
 
 import {
-  SetOperationalHubNameInputSchema,
-  SetOperatorTeamInputSchema,
   AddSubteamInputSchema,
   RemoveSubteamInputSchema,
+  SetOperationalHubNameInputSchema,
+  SetOperatorTeamInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<OperationalHubProfilePHState> = (

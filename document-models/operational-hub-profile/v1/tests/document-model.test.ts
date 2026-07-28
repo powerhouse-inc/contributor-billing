@@ -7,17 +7,17 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
-import { describe, it, expect } from "vitest";
 import {
-  utils,
+  assertIsOperationalHubProfileDocument,
+  assertIsOperationalHubProfileState,
   initialGlobalState,
   initialLocalState,
-  operationalHubProfileDocumentType,
   isOperationalHubProfileDocument,
-  assertIsOperationalHubProfileDocument,
   isOperationalHubProfileState,
-  assertIsOperationalHubProfileState,
+  operationalHubProfileDocumentType,
+  utils,
 } from "document-models/operational-hub-profile/v1";
+import { describe, expect, it } from "vitest";
 import { ZodError } from "zod";
 
 describe("OperationalHubProfile Document Model", () => {

@@ -1,48 +1,52 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { type SignalDispatch } from "document-model";
+import type { SnapshotReportGlobalState } from "../types.js";
 import type {
-  SetReportConfigAction,
+  AddOwnerIdAction,
+  RemoveOwnerIdAction,
   SetAccountsDocumentAction,
   SetPeriodAction,
-  AddOwnerIdAction,
-  SetPeriodStartAction,
   SetPeriodEndAction,
-  RemoveOwnerIdAction,
+  SetPeriodStartAction,
+  SetReportConfigAction,
 } from "./actions.js";
-import type { SnapshotReportState } from "../types.js";
 
 export interface SnapshotReportConfigurationOperations {
   setReportConfigOperation: (
-    state: SnapshotReportState,
+    state: SnapshotReportGlobalState,
     action: SetReportConfigAction,
     dispatch?: SignalDispatch,
   ) => void;
   setAccountsDocumentOperation: (
-    state: SnapshotReportState,
+    state: SnapshotReportGlobalState,
     action: SetAccountsDocumentAction,
     dispatch?: SignalDispatch,
   ) => void;
   setPeriodOperation: (
-    state: SnapshotReportState,
+    state: SnapshotReportGlobalState,
     action: SetPeriodAction,
     dispatch?: SignalDispatch,
   ) => void;
   addOwnerIdOperation: (
-    state: SnapshotReportState,
+    state: SnapshotReportGlobalState,
     action: AddOwnerIdAction,
     dispatch?: SignalDispatch,
   ) => void;
   setPeriodStartOperation: (
-    state: SnapshotReportState,
+    state: SnapshotReportGlobalState,
     action: SetPeriodStartAction,
     dispatch?: SignalDispatch,
   ) => void;
   setPeriodEndOperation: (
-    state: SnapshotReportState,
+    state: SnapshotReportGlobalState,
     action: SetPeriodEndAction,
     dispatch?: SignalDispatch,
   ) => void;
   removeOwnerIdOperation: (
-    state: SnapshotReportState,
+    state: SnapshotReportGlobalState,
     action: RemoveOwnerIdAction,
     dispatch?: SignalDispatch,
   ) => void;

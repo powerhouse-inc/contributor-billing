@@ -9,12 +9,7 @@ import {
   X,
 } from "lucide-react";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
-import {
-  setSelectedNode,
-  usePHToast,
-  useParentFolderForSelectedNode,
-  useSelectedDrive,
-} from "@powerhousedao/reactor-browser";
+import { usePHToast, useSelectedDrive } from "@powerhousedao/reactor-browser";
 import { generateId } from "document-model/core";
 import { useSelectedAccountsDocument } from "../hooks/useAccountsDocument.js";
 import {
@@ -135,7 +130,6 @@ function InstructionSection({ onDismiss }: { onDismiss: () => void }) {
 
 export default function Editor() {
   const [document, dispatch] = useSelectedAccountsDocument();
-  const parentFolder = useParentFolderForSelectedNode();
   const [selectedDrive] = useSelectedDrive();
   const toast = usePHToast();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
@@ -167,10 +161,6 @@ export default function Editor() {
   function handleDismissHelp() {
     setShowHelp(false);
     localStorage.setItem(HELP_DISMISSED_KEY, "true");
-  }
-
-  function handleClose() {
-    setSelectedNode(parentFolder?.id);
   }
 
   function handleAddAccount(values: {
@@ -418,7 +408,7 @@ export default function Editor() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      <DocumentToolbar document={document} onClose={handleClose} />
+      <DocumentToolbar document={document} />
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-semibold text-gray-900">Accounts</h1>
       </div>

@@ -1,18 +1,18 @@
 import { generateMock } from "document-model";
-import { describe, expect, it } from "vitest";
 import {
-  reducer,
-  utils,
-  isAccountsDocument,
   addAccount,
-  updateAccount,
-  deleteAccount,
-  updateKycStatus,
   AddAccountInputSchema,
-  UpdateAccountInputSchema,
+  deleteAccount,
   DeleteAccountInputSchema,
+  isAccountsDocument,
+  reducer,
+  updateAccount,
+  UpdateAccountInputSchema,
+  updateKycStatus,
   UpdateKycStatusInputSchema,
+  utils,
 } from "document-models/accounts/v1";
+import { describe, expect, it } from "vitest";
 
 describe("AccountsOperations", () => {
   it("should handle addAccount operation", () => {

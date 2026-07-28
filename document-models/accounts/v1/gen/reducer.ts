@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { Reducer, StateReducer } from "document-model";
-import { isDocumentAction, createReducer } from "document-model";
+import { createReducer, isDocumentAction } from "document-model";
 import type { AccountsPHState } from "document-models/accounts/v1";
 
 import { accountsAccountsOperations } from "../src/reducers/accounts.js";
 
 import {
   AddAccountInputSchema,
-  UpdateAccountInputSchema,
   DeleteAccountInputSchema,
+  UpdateAccountInputSchema,
   UpdateKycStatusInputSchema,
 } from "./schema/zod.js";
 

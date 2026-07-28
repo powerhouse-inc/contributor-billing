@@ -1,21 +1,25 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { createAction } from "document-model";
 import {
   AddTransactionInputSchema,
+  RecalculateFlowTypesInputSchema,
   RemoveTransactionInputSchema,
   UpdateTransactionFlowTypeInputSchema,
-  RecalculateFlowTypesInputSchema,
 } from "../schema/zod.js";
 import type {
   AddTransactionInput,
+  RecalculateFlowTypesInput,
   RemoveTransactionInput,
   UpdateTransactionFlowTypeInput,
-  RecalculateFlowTypesInput,
 } from "../types.js";
 import type {
   AddTransactionAction,
+  RecalculateFlowTypesAction,
   RemoveTransactionAction,
   UpdateTransactionFlowTypeAction,
-  RecalculateFlowTypesAction,
 } from "./actions.js";
 
 export const addTransaction = (input: AddTransactionInput) =>

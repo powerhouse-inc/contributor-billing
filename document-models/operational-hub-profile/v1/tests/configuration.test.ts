@@ -1,18 +1,18 @@
 import { generateMock } from "document-model";
-import { describe, expect, it } from "vitest";
 import {
-  reducer,
-  utils,
-  isOperationalHubProfileDocument,
-  setOperationalHubName,
-  setOperatorTeam,
   addSubteam,
-  removeSubteam,
-  SetOperationalHubNameInputSchema,
-  SetOperatorTeamInputSchema,
   AddSubteamInputSchema,
+  isOperationalHubProfileDocument,
+  reducer,
+  removeSubteam,
   RemoveSubteamInputSchema,
+  setOperationalHubName,
+  SetOperationalHubNameInputSchema,
+  setOperatorTeam,
+  SetOperatorTeamInputSchema,
+  utils,
 } from "document-models/operational-hub-profile/v1";
+import { describe, expect, it } from "vitest";
 
 describe("ConfigurationOperations", () => {
   it("should handle setOperationalHubName operation", () => {

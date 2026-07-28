@@ -1,30 +1,34 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { type SignalDispatch } from "document-model";
+import type { SnapshotReportGlobalState } from "../types.js";
 import type {
-  SetStartingBalanceAction,
-  SetEndingBalanceAction,
-  RemoveStartingBalanceAction,
   RemoveEndingBalanceAction,
+  RemoveStartingBalanceAction,
+  SetEndingBalanceAction,
+  SetStartingBalanceAction,
 } from "./actions.js";
-import type { SnapshotReportState } from "../types.js";
 
 export interface SnapshotReportBalancesOperations {
   setStartingBalanceOperation: (
-    state: SnapshotReportState,
+    state: SnapshotReportGlobalState,
     action: SetStartingBalanceAction,
     dispatch?: SignalDispatch,
   ) => void;
   setEndingBalanceOperation: (
-    state: SnapshotReportState,
+    state: SnapshotReportGlobalState,
     action: SetEndingBalanceAction,
     dispatch?: SignalDispatch,
   ) => void;
   removeStartingBalanceOperation: (
-    state: SnapshotReportState,
+    state: SnapshotReportGlobalState,
     action: RemoveStartingBalanceAction,
     dispatch?: SignalDispatch,
   ) => void;
   removeEndingBalanceOperation: (
-    state: SnapshotReportState,
+    state: SnapshotReportGlobalState,
     action: RemoveEndingBalanceAction,
     dispatch?: SignalDispatch,
   ) => void;

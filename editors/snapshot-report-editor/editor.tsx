@@ -2,8 +2,6 @@ import { generateId, setName } from "document-model";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   useDocumentsInSelectedDrive,
-  useParentFolderForSelectedNode,
-  setSelectedNode,
   dispatchActions,
   usePHToast,
 } from "@powerhousedao/reactor-browser";
@@ -750,16 +748,9 @@ export default function Editor() {
     setSelectedAccountIds(new Set());
   };
 
-  // Get the parent folder node for the currently selected node
-  const parentFolder = useParentFolderForSelectedNode();
-  // Set the selected node to the parent folder node (close the editor)
-  function handleClose() {
-    setSelectedNode(parentFolder?.id);
-  }
-
   return (
     <div>
-      <DocumentToolbar document={document} onClose={handleClose} />
+      <DocumentToolbar document={document} />
       <div className="p-6 max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Snapshot Report</h1>
 

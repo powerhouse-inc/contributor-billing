@@ -1,33 +1,33 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { Reducer, StateReducer } from "document-model";
-import { isDocumentAction, createReducer } from "document-model";
+import { createReducer, isDocumentAction } from "document-model";
 import type { SnapshotReportPHState } from "document-models/snapshot-report/v1";
 
-import { snapshotReportConfigurationOperations } from "../src/reducers/configuration.js";
 import { snapshotReportAccountsOperations } from "../src/reducers/accounts.js";
 import { snapshotReportBalancesOperations } from "../src/reducers/balances.js";
+import { snapshotReportConfigurationOperations } from "../src/reducers/configuration.js";
 import { snapshotReportTransactionsOperations } from "../src/reducers/transactions.js";
 
 import {
-  SetReportConfigInputSchema,
-  SetAccountsDocumentInputSchema,
-  SetPeriodInputSchema,
   AddOwnerIdInputSchema,
-  SetPeriodStartInputSchema,
-  SetPeriodEndInputSchema,
-  RemoveOwnerIdInputSchema,
   AddSnapshotAccountInputSchema,
-  UpdateSnapshotAccountTypeInputSchema,
-  RemoveSnapshotAccountInputSchema,
-  SetStartingBalanceInputSchema,
-  SetEndingBalanceInputSchema,
-  RemoveStartingBalanceInputSchema,
-  RemoveEndingBalanceInputSchema,
   AddTransactionInputSchema,
-  RemoveTransactionInputSchema,
-  UpdateTransactionFlowTypeInputSchema,
   RecalculateFlowTypesInputSchema,
+  RemoveEndingBalanceInputSchema,
+  RemoveOwnerIdInputSchema,
+  RemoveSnapshotAccountInputSchema,
+  RemoveStartingBalanceInputSchema,
+  RemoveTransactionInputSchema,
+  SetAccountsDocumentInputSchema,
+  SetEndingBalanceInputSchema,
+  SetPeriodEndInputSchema,
+  SetPeriodInputSchema,
+  SetPeriodStartInputSchema,
+  SetReportConfigInputSchema,
+  SetStartingBalanceInputSchema,
+  UpdateSnapshotAccountTypeInputSchema,
+  UpdateTransactionFlowTypeInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<SnapshotReportPHState> = (

@@ -1,30 +1,34 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { type SignalDispatch } from "document-model";
+import type { AccountTransactionsGlobalState } from "../types.js";
 import type {
   AddTransactionAction,
-  UpdateTransactionAction,
   DeleteTransactionAction,
+  UpdateTransactionAction,
   UpdateTransactionPeriodAction,
 } from "./actions.js";
-import type { AccountTransactionsState } from "../types.js";
 
 export interface AccountTransactionsTransactionsOperations {
   addTransactionOperation: (
-    state: AccountTransactionsState,
+    state: AccountTransactionsGlobalState,
     action: AddTransactionAction,
     dispatch?: SignalDispatch,
   ) => void;
   updateTransactionOperation: (
-    state: AccountTransactionsState,
+    state: AccountTransactionsGlobalState,
     action: UpdateTransactionAction,
     dispatch?: SignalDispatch,
   ) => void;
   deleteTransactionOperation: (
-    state: AccountTransactionsState,
+    state: AccountTransactionsGlobalState,
     action: DeleteTransactionAction,
     dispatch?: SignalDispatch,
   ) => void;
   updateTransactionPeriodOperation: (
-    state: AccountTransactionsState,
+    state: AccountTransactionsGlobalState,
     action: UpdateTransactionPeriodAction,
     dispatch?: SignalDispatch,
   ) => void;

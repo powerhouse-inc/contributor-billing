@@ -1,3 +1,7 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import type { BillingStatementGeneralAction } from "./general/actions.js";
 import type { BillingStatementLineItemsAction } from "./line-items/actions.js";
 import type { BillingStatementTagsAction } from "./tags/actions.js";

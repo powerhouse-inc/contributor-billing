@@ -1,16 +1,20 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import type { UpgradeManifest } from "document-model";
-import { accountTransactionsUpgradeManifest } from "./account-transactions/upgrades/upgrade-manifest.js";
-import { accountsUpgradeManifest } from "./accounts/upgrades/upgrade-manifest.js";
-import { billingStatementUpgradeManifest } from "./billing-statement/upgrades/upgrade-manifest.js";
-import { expenseReportUpgradeManifest } from "./expense-report/upgrades/upgrade-manifest.js";
-import { invoiceUpgradeManifest } from "./invoice/upgrades/upgrade-manifest.js";
-import { operationalHubProfileUpgradeManifest } from "./operational-hub-profile/upgrades/upgrade-manifest.js";
+import { accountTransactionsUpgradeManifest } from "document-models/account-transactions/upgrades";
+import { accountsUpgradeManifest } from "document-models/accounts/upgrades";
+import { billingStatementUpgradeManifest } from "document-models/billing-statement/upgrades";
+import { expenseReportUpgradeManifest } from "document-models/expense-report/upgrades";
+import { operationalHubProfileUpgradeManifest } from "document-models/operational-hub-profile/upgrades";
+import { snapshotReportUpgradeManifest } from "document-models/snapshot-report/upgrades";
 
 export const upgradeManifests: UpgradeManifest<readonly number[]>[] = [
   accountTransactionsUpgradeManifest,
   accountsUpgradeManifest,
   billingStatementUpgradeManifest,
   expenseReportUpgradeManifest,
-  invoiceUpgradeManifest,
   operationalHubProfileUpgradeManifest,
+  snapshotReportUpgradeManifest,
 ];

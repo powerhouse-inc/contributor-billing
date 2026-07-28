@@ -12,8 +12,8 @@ import {
 import { generateId } from "document-model/core";
 import { accountTransactionsService } from "../../accounts-editor/services/accountTransactionsService.js";
 import {
-  balancesActions,
-  transactionsActions,
+  snapshotReportBalancesActions as balancesActions,
+  snapshotReportTransactionsActions as transactionsActions,
 } from "../../../document-models/snapshot-report/index.js";
 import { calculateBalances } from "../utils/balanceCalculations.js";
 // deriveTransactionsForAccount not used - syncNonInternalAccount fetches from AccountTransactions docs directly

@@ -1,46 +1,46 @@
 import { generateMock } from "document-model";
-import { describe, expect, it } from "vitest";
 import {
-  reducer,
-  utils,
-  isExpenseReportDocument,
-  addWallet,
-  removeWallet,
   addBillingStatement,
-  removeBillingStatement,
-  addLineItem,
-  updateLineItem,
-  removeLineItem,
-  addLineItemGroup,
-  updateLineItemGroup,
-  removeLineItemGroup,
-  setGroupTotals,
-  removeGroupTotals,
-  setPeriodStart,
-  setPeriodEnd,
-  updateWallet,
-  setOwnerId,
-  setStatus,
-  setPeriod,
-  AddWalletInputSchema,
-  RemoveWalletInputSchema,
   AddBillingStatementInputSchema,
-  RemoveBillingStatementInputSchema,
-  AddLineItemInputSchema,
-  UpdateLineItemInputSchema,
-  RemoveLineItemInputSchema,
+  addLineItem,
+  addLineItemGroup,
   AddLineItemGroupInputSchema,
-  UpdateLineItemGroupInputSchema,
-  RemoveLineItemGroupInputSchema,
-  SetGroupTotalsInputSchema,
+  AddLineItemInputSchema,
+  addWallet,
+  AddWalletInputSchema,
+  isExpenseReportDocument,
+  reducer,
+  removeBillingStatement,
+  RemoveBillingStatementInputSchema,
+  removeGroupTotals,
   RemoveGroupTotalsInputSchema,
-  SetPeriodStartInputSchema,
-  SetPeriodEndInputSchema,
-  UpdateWalletInputSchema,
+  removeLineItem,
+  removeLineItemGroup,
+  RemoveLineItemGroupInputSchema,
+  RemoveLineItemInputSchema,
+  removeWallet,
+  RemoveWalletInputSchema,
+  setGroupTotals,
+  SetGroupTotalsInputSchema,
+  setOwnerId,
   SetOwnerIdInputSchema,
-  SetStatusInputSchema,
+  setPeriod,
+  setPeriodEnd,
+  SetPeriodEndInputSchema,
   SetPeriodInputSchema,
+  setPeriodStart,
+  SetPeriodStartInputSchema,
+  setStatus,
+  SetStatusInputSchema,
+  updateLineItem,
+  updateLineItemGroup,
+  UpdateLineItemGroupInputSchema,
+  UpdateLineItemInputSchema,
+  updateWallet,
+  UpdateWalletInputSchema,
+  utils,
 } from "document-models/expense-report/v1";
+import { describe, expect, it } from "vitest";
 
 describe("WalletOperations", () => {
   it("should handle addWallet operation", () => {
@@ -247,7 +247,9 @@ describe("WalletOperations", () => {
 
   it("should handle setPeriodStart operation", () => {
     const document = utils.createDocument();
-    const input = generateMock(SetPeriodStartInputSchema());
+    const input = generateMock(SetPeriodStartInputSchema(), {
+      periodStart: "2024-01-01T00:00:00.000Z",
+    });
 
     const updatedDocument = reducer(document, setPeriodStart(input));
 
@@ -264,7 +266,9 @@ describe("WalletOperations", () => {
 
   it("should handle setPeriodEnd operation", () => {
     const document = utils.createDocument();
-    const input = generateMock(SetPeriodEndInputSchema());
+    const input = generateMock(SetPeriodEndInputSchema(), {
+      periodEnd: "2024-01-01T00:00:00.000Z",
+    });
 
     const updatedDocument = reducer(document, setPeriodEnd(input));
 
@@ -330,7 +334,10 @@ describe("WalletOperations", () => {
 
   it("should handle setPeriod operation", () => {
     const document = utils.createDocument();
-    const input = generateMock(SetPeriodInputSchema());
+    const input = generateMock(SetPeriodInputSchema(), {
+      startDate: "2024-01-01T00:00:00.000Z",
+      endDate: "2024-01-01T00:00:00.000Z",
+    });
 
     const updatedDocument = reducer(document, setPeriod(input));
 

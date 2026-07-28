@@ -1,18 +1,18 @@
 import { generateMock } from "document-model";
-import { describe, expect, it } from "vitest";
 import {
-  reducer,
-  utils,
   isSnapshotReportDocument,
-  setStartingBalance,
-  setEndingBalance,
-  removeStartingBalance,
+  reducer,
   removeEndingBalance,
-  SetStartingBalanceInputSchema,
-  SetEndingBalanceInputSchema,
-  RemoveStartingBalanceInputSchema,
   RemoveEndingBalanceInputSchema,
+  removeStartingBalance,
+  RemoveStartingBalanceInputSchema,
+  setEndingBalance,
+  SetEndingBalanceInputSchema,
+  setStartingBalance,
+  SetStartingBalanceInputSchema,
+  utils,
 } from "document-models/snapshot-report/v1";
+import { describe, expect, it } from "vitest";
 
 describe("BalancesOperations", () => {
   it("should handle setStartingBalance operation", () => {

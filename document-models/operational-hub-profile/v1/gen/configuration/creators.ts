@@ -1,21 +1,25 @@
+/**
+ * WARNING: DO NOT EDIT
+ * This file is auto-generated and updated by codegen
+ */
 import { createAction } from "document-model";
 import {
-  SetOperationalHubNameInputSchema,
-  SetOperatorTeamInputSchema,
   AddSubteamInputSchema,
   RemoveSubteamInputSchema,
+  SetOperationalHubNameInputSchema,
+  SetOperatorTeamInputSchema,
 } from "../schema/zod.js";
 import type {
-  SetOperationalHubNameInput,
-  SetOperatorTeamInput,
   AddSubteamInput,
   RemoveSubteamInput,
+  SetOperationalHubNameInput,
+  SetOperatorTeamInput,
 } from "../types.js";
 import type {
-  SetOperationalHubNameAction,
-  SetOperatorTeamAction,
   AddSubteamAction,
   RemoveSubteamAction,
+  SetOperationalHubNameAction,
+  SetOperatorTeamAction,
 } from "./actions.js";
 
 export const setOperationalHubName = (input: SetOperationalHubNameInput) =>

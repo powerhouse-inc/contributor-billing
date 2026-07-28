@@ -6,10 +6,10 @@ import {
   useDocumentsInSelectedDrive,
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
-import { moveNode } from "document-drive";
-import type { FileNode, Node } from "document-drive";
+import { moveNode } from "@powerhousedao/shared/document-drive";
+import type { FileNode, Node } from "@powerhousedao/shared/document-drive";
 import type { ExpenseReportDocument } from "../../../document-models/expense-report/v1/gen/types.js";
-import type { InvoiceDocument } from "../../../document-models/invoice/v1/gen/types.js";
+import type { InvoiceDocument } from "@powerhousedao/invoice/document-models/invoice";
 import type { SnapshotReportDocument } from "../../../document-models/snapshot-report/v1/gen/types.js";
 import type { BillingStatementDocument } from "../../../document-models/billing-statement/v1/gen/types.js";
 import { useBillingFolderStructure } from "./useBillingFolderStructure.js";

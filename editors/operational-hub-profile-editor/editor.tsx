@@ -5,17 +5,12 @@ import { useSelectedOperationalHubProfileDocument } from "../../document-models/
 import { setOperationalHubName } from "../../document-models/operational-hub-profile/v1/gen/configuration/creators.js";
 import { Input } from "@powerhousedao/document-engineering";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
-import {
-  setSelectedNode,
-  useParentFolderForSelectedNode,
-} from "@powerhousedao/reactor-browser";
 import { SetOperatorTeam } from "./components/SetOperatorTeam.js";
 import { SubteamsPicker } from "./components/SubteamsPicker.js";
 import { ProfileOverview } from "./components/ProfileOverview.js";
 
 export default function Editor() {
   const [document, dispatch] = useSelectedOperationalHubProfileDocument();
-  const parentFolder = useParentFolderForSelectedNode();
 
   const [mode, setMode] = useState<"overview" | "edit">("overview");
 
@@ -45,13 +40,9 @@ export default function Editor() {
     }
   };
 
-  function handleClose() {
-    setSelectedNode(parentFolder?.id);
-  }
-
   return (
     <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <DocumentToolbar document={document} onClose={handleClose} />
+      <DocumentToolbar document={document} />
       <div className="flex-1 overflow-auto">
         {showOverview ? (
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

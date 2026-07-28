@@ -1,9 +1,9 @@
 import type { SnapshotReportBalancesOperations } from "document-models/snapshot-report/v1";
 import {
-  SetStartingBalanceAccountNotFoundError,
-  SetEndingBalanceAccountNotFoundError,
-  RemoveStartingBalanceNotFoundError,
   RemoveEndingBalanceNotFoundError,
+  RemoveStartingBalanceNotFoundError,
+  SetEndingBalanceAccountNotFoundError,
+  SetStartingBalanceAccountNotFoundError,
 } from "../../gen/balances/error.js";
 
 export const snapshotReportBalancesOperations: SnapshotReportBalancesOperations =

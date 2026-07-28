@@ -1,12 +1,12 @@
 import { generateMock } from "document-model";
-import { describe, expect, it } from "vitest";
 import {
-  reducer,
-  utils,
-  isBillingStatementDocument,
   editLineItemTag,
   EditLineItemTagInputSchema,
+  isBillingStatementDocument,
+  reducer,
+  utils,
 } from "document-models/billing-statement/v1";
+import { describe, expect, it } from "vitest";
 
 describe("TagsOperations", () => {
   it("should handle editLineItemTag operation", () => {
