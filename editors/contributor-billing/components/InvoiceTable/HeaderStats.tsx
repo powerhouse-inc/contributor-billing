@@ -77,21 +77,11 @@ export const HeaderStats = ({ folderId }: HeaderStatsProps) => {
           total += invoiceAmount;
         } else {
           try {
-            // Only convert crypto currencies to USD for the API call
-            let fromCurrency = invoiceCurrency;
-            let toCurrency = selectedCurrency;
-
-            // Convert crypto to USD for API compatibility
-            if (invoiceCurrency === "DAI" || invoiceCurrency === "USDS") {
-              fromCurrency = "USD";
-            }
-            if (selectedCurrency === "DAI" || selectedCurrency === "USDS") {
-              toCurrency = "USD";
-            }
-
+            // getExchangeRate resolves stablecoins to their fiat peg internally,
+            // so the raw invoice/selected currencies can be passed through.
             const exchangeRate = await getExchangeRate(
-              fromCurrency,
-              toCurrency,
+              invoiceCurrency,
+              selectedCurrency,
               invoiceAmount,
             );
             total += invoiceAmount * exchangeRate;

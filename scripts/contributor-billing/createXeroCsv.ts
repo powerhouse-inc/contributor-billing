@@ -1,3 +1,5 @@
+import { toFiatCurrency } from "./currency.js";
+
 // Simple in-memory cache: { '2024-06-10|USD|CHF': 0.91 }
 const exchangeRateCache: Record<string, number> = {};
 
@@ -13,22 +15,23 @@ export async function getExchangeRate(
 ): Promise<number> {
   if (!date || !from || !to || from === to) return 1;
 
-  // Use the invoice currency as base, CHF as symbol
-  let effectiveTo = from;
-  if (from === "DAI" || from === "USDS") {
-    effectiveTo = "USD";
-  }
+  // Frankfurter only serves fiat, so resolve each side to its fiat peg first
+  // (USDC/USDS/DAI -> USD, EURC/EURE -> EUR). Without this the request is made
+  // with e.g. base=USDC and the API answers 404.
+  const base = toFiatCurrency(from);
+  const quote = toFiatCurrency(to);
+
+  // Both sides share a peg (e.g. USDC -> USD, or DAI -> USDC): 1:1, no request.
+  if (base === quote) return 1;
 
   const formattedDate = date.split("T")[0];
-  const cacheKey = `${formattedDate}|${effectiveTo}|${to}`;
+  const cacheKey = `${formattedDate}|${base}|${quote}`;
   if (exchangeRateCache[cacheKey] !== undefined) {
     return exchangeRateCache[cacheKey];
   }
 
   try {
-    // base=effectiveTo (invoice currency), symbols=CHF
-    const url = `https://api.frankfurter.dev/v1/${formattedDate}?base=${effectiveTo}&symbols=${to}`;
-    console.log("Fetching from Frankfurter URL:", url);
+    const url = `https://api.frankfurter.dev/v1/${formattedDate}?base=${base}&symbols=${quote}`;
     const res = await fetch(url);
     if (!res.ok) {
       throw new Error(
@@ -36,10 +39,10 @@ export async function getExchangeRate(
       );
     }
     const data = await res.json();
-    const rate = data?.rates?.[to];
+    const rate = data?.rates?.[quote];
     if (typeof rate !== "number") {
       throw new Error(
-        `Frankfurter exchange rate for ${effectiveTo} to CHF on ${formattedDate} not found in response`,
+        `Frankfurter exchange rate for ${base} to ${quote} on ${formattedDate} not found in response`,
       );
     }
     exchangeRateCache[cacheKey] = rate;
@@ -92,11 +95,6 @@ export async function exportInvoicesToXeroCSV(
     const currency = state.currency || "USD";
     const invoiceAmount = Number(state.totalPriceTaxIncl || 0);
 
-    let effectiveCurrency = currency;
-    if (currency === "DAI" || currency === "USDS") {
-      effectiveCurrency = "USD";
-    }
-
     if (!dateIssued) {
       missingDateIssuedInvoices.push(invoiceName);
       continue;
@@ -120,8 +118,9 @@ export async function exportInvoicesToXeroCSV(
       rateOnIssue,
       //rateOnPayment
     ] = await Promise.all([
-      getExchangeRate(dateIssued, effectiveCurrency, baseCurrency),
-      //getExchangeRate(datePaid, effectiveCurrency, 'CHF')
+      // getExchangeRate resolves stablecoins to their fiat peg internally.
+      getExchangeRate(dateIssued, currency, baseCurrency),
+      //getExchangeRate(datePaid, currency, 'CHF')
     ]);
 
     const amountAtIssue = invoiceAmount * rateOnIssue;
