@@ -1,3 +1,5 @@
+import { toFiatCurrency } from "./currency.js";
+
 // Simple in-memory cache for exchange rates
 const exchangeRateCache: Record<string, number> = {};
 
@@ -12,16 +14,13 @@ async function getExchangeRate(
 ): Promise<number> {
   if (!date || !from || !to || from === to) return 1;
 
-  // Convert crypto currencies to USD for API compatibility
-  let effectiveFrom = from;
-  if (from === "DAI" || from === "USDS") {
-    effectiveFrom = "USD";
-  }
+  // Frankfurter only serves fiat, so resolve each side to its fiat peg first
+  // (USDC/USDS/DAI -> USD, EURC/EURE -> EUR).
+  const effectiveFrom = toFiatCurrency(from);
+  const effectiveTo = toFiatCurrency(to);
 
-  let effectiveTo = to;
-  if (to === "DAI" || to === "USDS") {
-    effectiveTo = "USD";
-  }
+  // Both sides share a peg (e.g. USDC -> USD): 1:1, no request needed.
+  if (effectiveFrom === effectiveTo) return 1;
 
   const formattedDate = date.split("T")[0];
   const cacheKey = `${formattedDate}|${effectiveFrom}|${effectiveTo}`;
@@ -85,15 +84,11 @@ export async function exportExpenseReportCSV(
       continue; // Skip this invoice
     }
 
-    // Get exchange rate for this invoice
-    let effectiveCurrency = currency;
-    if (currency === "DAI" || currency === "USDS") {
-      effectiveCurrency = "USD";
-    }
-
+    // Get exchange rate for this invoice. getExchangeRate normalises stablecoins
+    // to their fiat peg internally, so the raw invoice currency is fine here.
     const exchangeRate = await getExchangeRate(
       dateIssued,
-      effectiveCurrency,
+      currency,
       baseCurrency,
     );
 

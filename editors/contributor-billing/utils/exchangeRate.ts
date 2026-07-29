@@ -1,3 +1,8 @@
+import {
+  coinGeckoId,
+  toFiatCurrency,
+} from "../../../scripts/contributor-billing/currency.js";
+
 // Cache for exchange rates to avoid repeated API calls
 const exchangeRateCache: Record<string, number> = {};
 
@@ -31,16 +36,21 @@ export const getExchangeRate = async (
   toCurrency: string,
   amount?: number,
 ): Promise<number> => {
-  // Normalize inputs
-  const base = (fromCurrency || "").trim().toUpperCase();
-  const quote = (toCurrency || "").trim().toUpperCase();
+  // Keep the tickers as given (uppercased) for the CoinGecko fallback, which
+  // needs to know a side was a stablecoin, and resolve each to its fiat peg for
+  // the primary lookup (USDC/USDS/DAI -> USD, EURC/EURE -> EUR). ExchangeRate-API
+  // only serves fiat, so an unmapped stablecoin ticker makes the request fail.
+  const rawBase = (fromCurrency || "").trim().toUpperCase();
+  const rawQuote = (toCurrency || "").trim().toUpperCase();
+  const base = toFiatCurrency(rawBase);
+  const quote = toFiatCurrency(rawQuote);
 
   // Guard empty currencies
   if (!base || !quote) {
     return 1;
   }
 
-  // Return 1 if currencies are the same
+  // Same currency, or two stablecoins sharing a peg (e.g. USDC and USDS): 1:1
   if (base === quote) {
     return 1;
   }
@@ -89,59 +99,40 @@ export const getExchangeRate = async (
   } catch (error) {
     console.error("ExchangeRate-API error:", error);
 
-    // Fallback: try CoinGecko for crypto currencies
-    if (["USDS", "DAI"].includes(base) || ["USDS", "DAI"].includes(quote)) {
+    // Fallback: when one side was a stablecoin, ask CoinGecko for its live price
+    // in the other side's fiat currency. This is checked against the ORIGINAL
+    // tickers, not the pegged ones — by this point `base`/`quote` are always fiat,
+    // so testing them would make this branch unreachable.
+    //
+    // CoinGecko's public API needs no key (verified), and `vs_currencies` accepts
+    // the fiat codes we support (usd, eur, chf, gbp, jpy, cny, dkk).
+    const baseCoin = coinGeckoId(rawBase);
+    const quoteCoin = coinGeckoId(rawQuote);
+
+    if (baseCoin || quoteCoin) {
+      // Price the stablecoin side in the other side's fiat; invert when it's the
+      // quote that's the stablecoin.
+      const coin = baseCoin ?? quoteCoin!;
+      const vsFiat = (baseCoin ? quote : base).toLowerCase();
+      const invert = !baseCoin;
+
       try {
-        const cryptoMapping: Record<string, string> = {
-          USDS: "usd-coin",
-          DAI: "dai",
-        };
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-        const fromMapped = cryptoMapping[base] || base.toLowerCase();
-        const toMapped = cryptoMapping[quote] || quote.toLowerCase();
+        const response = await fetch(
+          `https://api.coingecko.com/api/v3/simple/price?ids=${coin}&vs_currencies=${vsFiat}`,
+          { signal: controller.signal },
+        );
 
-        if (cryptoMapping[base]) {
-          const cryptoController = new AbortController();
-          const cryptoTimeoutId = setTimeout(
-            () => cryptoController.abort(),
-            8000,
-          );
-
-          const response = await fetch(
-            `https://api.coingecko.com/api/v3/simple/price?ids=${fromMapped}&vs_currencies=${toMapped}`,
-            { signal: cryptoController.signal },
-          );
-
-          clearTimeout(cryptoTimeoutId);
-          if (response.ok) {
-            const data = (await response.json()) as CoinGeckoResponse;
-            const rate = data[fromMapped]?.[toMapped];
-            if (rate) {
-              exchangeRateCache[cacheKey] = rate;
-              return rate;
-            }
-          }
-        } else if (cryptoMapping[quote]) {
-          const cryptoController2 = new AbortController();
-          const cryptoTimeoutId2 = setTimeout(
-            () => cryptoController2.abort(),
-            8000,
-          );
-
-          const response = await fetch(
-            `https://api.coingecko.com/api/v3/simple/price?ids=${toMapped}&vs_currencies=${fromMapped}`,
-            { signal: cryptoController2.signal },
-          );
-
-          clearTimeout(cryptoTimeoutId2);
-          if (response.ok) {
-            const data = (await response.json()) as CoinGeckoResponse;
-            const rate = data[toMapped]?.[fromMapped];
-            if (rate) {
-              const invertedRate = 1 / rate;
-              exchangeRateCache[cacheKey] = invertedRate;
-              return invertedRate;
-            }
+        clearTimeout(timeoutId);
+        if (response.ok) {
+          const data = (await response.json()) as CoinGeckoResponse;
+          const price = data[coin]?.[vsFiat];
+          if (typeof price === "number" && price > 0) {
+            const rate = invert ? 1 / price : price;
+            exchangeRateCache[cacheKey] = rate;
+            return rate;
           }
         }
       } catch (cryptoError) {
