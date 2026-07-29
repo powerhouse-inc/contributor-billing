@@ -4,9 +4,9 @@ import {
   useDrives,
   useDriveById,
 } from "@powerhousedao/reactor-browser";
-import { addFile } from "document-drive";
-import { useSelectedExpenseReportDocument } from "document-models/expense-report";
-import type { ExpenseReportDocument } from "document-models/expense-report";
+import { addFile } from "@powerhousedao/shared/document-drive";
+import { useSelectedExpenseReportDocument } from "../../../document-models/expense-report/v1/hooks.js";
+import type { ExpenseReportDocument } from "../../../document-models/expense-report/v1/gen/types.js";
 
 export function useAddReportToRemoteDrive(ownerIdOverride?: string | null) {
   const [selectedDocument] = useSelectedExpenseReportDocument();

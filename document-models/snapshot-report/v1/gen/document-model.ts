@@ -2,14 +2,14 @@ import type { DocumentModelGlobalState } from "document-model";
 
 export const documentModel: DocumentModelGlobalState = {
   id: "powerhouse/snapshot-report",
-  name: "Snapshot Report",
+  name: "SnapshotReport",
   author: {
     name: "Powerhouse",
     website: "https://www.powerhouse.inc/",
   },
   extension: "",
   description:
-    "Document model for creating snapshot reports that track fund flows through categorized accounts over a specified accounting period",
+    "Document model for creating snapshot reports that track fund flows through categorized accounts over a specified accounting period.",
   specifications: [
     {
       state: {
@@ -34,7 +34,7 @@ export const documentModel: DocumentModelGlobalState = {
           operations: [
             {
               id: "set-report-config",
-              name: "SET_REPORT_CONFIG",
+              name: "setReportConfig",
               description:
                 "Set the report configuration including name, period, and accounts document reference",
               schema:
@@ -49,7 +49,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "set-accounts-document",
-              name: "SET_ACCOUNTS_DOCUMENT",
+              name: "setAccountsDocument",
               description: "Link the snapshot report to an Accounts document",
               schema:
                 "input SetAccountsDocumentInput {\n  accountsDocumentId: PHID!\n}",
@@ -62,7 +62,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "set-period",
-              name: "SET_PERIOD",
+              name: "setPeriod",
               description: "Set the accounting period for the snapshot report",
               schema:
                 "input SetPeriodInput {\n  startDate: DateTime!\n  endDate: DateTime!\n}",
@@ -75,7 +75,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "set-owner-id",
-              name: "ADD_OWNER_ID",
+              name: "addOwnerId",
               description:
                 "Add an owner ID (builder team) to the snapshot report",
               schema: "input AddOwnerIdInput {\n  ownerId: PHID!\n}",
@@ -89,7 +89,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "80c12645-0005-4534-b578-52a40582d18e",
-              name: "SET_PERIOD_START",
+              name: "setPeriodStart",
               description: "",
               schema:
                 "input SetPeriodStartInput {\n  periodStart: DateTime!\n}",
@@ -101,7 +101,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "05d31622-9b31-493a-948b-c817867ce5eb",
-              name: "SET_PERIOD_END",
+              name: "setPeriodEnd",
               description: "",
               schema: "input SetPeriodEndInput {\n  periodEnd: DateTime!\n}",
               template: "",
@@ -112,10 +112,10 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "remove-owner-id",
-              name: "REMOVE_OWNER_ID",
+              name: "removeOwnerId",
               description: "Remove an owner ID from the snapshot report",
               schema: "input RemoveOwnerIdInput {\n  ownerId: PHID!\n}",
-              template: "",
+              template: "Remove an owner ID from the snapshot report",
               reducer:
                 "const index = state.ownerIds.indexOf(action.input.ownerId);\nif (index !== -1) {\n  state.ownerIds.splice(index, 1);\n}",
               errors: [],
@@ -131,7 +131,7 @@ export const documentModel: DocumentModelGlobalState = {
           operations: [
             {
               id: "add-snapshot-account",
-              name: "ADD_SNAPSHOT_ACCOUNT",
+              name: "addSnapshotAccount",
               description: "Add an account to the snapshot report",
               schema:
                 "input AddSnapshotAccountInput {\n  id: OID!\n  accountId: OID!\n  accountAddress: String!\n  accountName: String!\n  type: AccountTypeInput!\n  accountTransactionsId: PHID\n}",
@@ -153,7 +153,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "update-account-type",
-              name: "UPDATE_SNAPSHOT_ACCOUNT_TYPE",
+              name: "updateSnapshotAccountType",
               description:
                 "Update the type categorization of a snapshot account",
               schema:
@@ -176,7 +176,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "remove-snapshot-account",
-              name: "REMOVE_SNAPSHOT_ACCOUNT",
+              name: "removeSnapshotAccount",
               description: "Remove an account from the snapshot report",
               schema: "input RemoveSnapshotAccountInput {\n  id: OID!\n}",
               template: "Remove an account from the snapshot report",
@@ -204,7 +204,7 @@ export const documentModel: DocumentModelGlobalState = {
           operations: [
             {
               id: "set-starting-balance",
-              name: "SET_STARTING_BALANCE",
+              name: "setStartingBalance",
               description:
                 "Set or update a starting balance for a token in a snapshot account",
               schema:
@@ -228,7 +228,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "set-ending-balance",
-              name: "SET_ENDING_BALANCE",
+              name: "setEndingBalance",
               description:
                 "Set or update an ending balance for a token in a snapshot account",
               schema:
@@ -252,7 +252,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "remove-starting-balance",
-              name: "REMOVE_STARTING_BALANCE",
+              name: "removeStartingBalance",
               description:
                 "Remove a starting balance entry from a snapshot account",
               schema:
@@ -275,7 +275,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "remove-ending-balance",
-              name: "REMOVE_ENDING_BALANCE",
+              name: "removeEndingBalance",
               description:
                 "Remove an ending balance entry from a snapshot account",
               schema:
@@ -305,7 +305,7 @@ export const documentModel: DocumentModelGlobalState = {
           operations: [
             {
               id: "add-transaction",
-              name: "ADD_TRANSACTION",
+              name: "addTransaction",
               description:
                 "Add a transaction to the snapshot with enrichment data",
               schema:
@@ -337,7 +337,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "remove-transaction",
-              name: "REMOVE_TRANSACTION",
+              name: "removeTransaction",
               description: "Remove a transaction from the snapshot",
               schema: "input RemoveTransactionInput {\n  id: OID!\n}",
               template: "Remove a transaction from the snapshot",
@@ -357,7 +357,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "update-flow-type",
-              name: "UPDATE_TRANSACTION_FLOW_TYPE",
+              name: "updateTransactionFlowType",
               description:
                 "Update the flow type categorization of a transaction",
               schema:
@@ -379,7 +379,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "recalculate-flow-types",
-              name: "RECALCULATE_FLOW_TYPES",
+              name: "recalculateFlowTypes",
               description:
                 "Recalculate all transaction flow types based on current account types and counter-party relationships",
               schema: "input RecalculateFlowTypesInput {\n  _: String\n}",

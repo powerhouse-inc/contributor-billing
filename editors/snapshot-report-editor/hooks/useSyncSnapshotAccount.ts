@@ -6,26 +6,23 @@
 import {
   useDocumentsInSelectedDrive,
   useSelectedDrive,
+  useGetDocument,
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import { generateId } from "document-model/core";
 import { accountTransactionsService } from "../../accounts-editor/services/accountTransactionsService.js";
 import {
-  addTransaction,
-  removeTransaction,
-  setStartingBalance,
-  setEndingBalance,
-  removeStartingBalance,
-  removeEndingBalance,
-} from "document-models/snapshot-report";
+  snapshotReportBalancesActions as balancesActions,
+  snapshotReportTransactionsActions as transactionsActions,
+} from "../../../document-models/snapshot-report/index.js";
 import { calculateBalances } from "../utils/balanceCalculations.js";
 // deriveTransactionsForAccount not used - syncNonInternalAccount fetches from AccountTransactions docs directly
 import type {
   SnapshotAccount,
   SnapshotTransaction,
   TransactionFlowType,
-} from "document-models/snapshot-report";
-import type { AccountEntry } from "document-models/accounts";
+} from "../../../document-models/snapshot-report/v1/gen/types.js";
+import type { AccountEntry } from "../../../document-models/accounts/v1/gen/schema/types.js";
 import { calculateTransactionFlowInfo } from "../utils/flowTypeCalculations.js";
 
 /**
@@ -100,6 +97,7 @@ function calculateNonInternalStartingBalances(
 export function useSyncSnapshotAccount() {
   const documents = useDocumentsInSelectedDrive();
   const [selectedDrive] = useSelectedDrive();
+  const getDocument = useGetDocument();
 
   const syncAccount = async (
     snapshotAccount: SnapshotAccount,
@@ -110,11 +108,13 @@ export function useSyncSnapshotAccount() {
     dispatch: any,
     allSnapshotAccounts: SnapshotAccount[] = [],
     snapshotDocumentId?: string,
+    accountTransactionsIdMap?: Map<string, string>,
   ): Promise<{
     success: boolean;
     message: string;
     transactionsAdded?: number;
     documentId?: string;
+    updatedSnapshotDoc?: any;
   }> => {
     if (!documents || !startDate || !endDate) {
       return {
@@ -133,6 +133,7 @@ export function useSyncSnapshotAccount() {
           dispatch,
           allSnapshotAccounts,
           snapshotDocumentId,
+          accountTransactionsIdMap,
         );
       }
 
@@ -202,11 +203,12 @@ export function useSyncSnapshotAccount() {
         };
       }
 
-      const txDoc = documents.find(
-        (doc) =>
-          doc.header.id === accountTransactionsDocId &&
-          doc.header.documentType === "powerhouse/account-transactions",
-      ) as any;
+      let txDoc: any;
+      try {
+        txDoc = await getDocument(accountTransactionsDocId);
+      } catch {
+        txDoc = undefined;
+      }
 
       if (!txDoc?.state?.global?.transactions) {
         return {
@@ -306,7 +308,7 @@ export function useSyncSnapshotAccount() {
 
       // 1. Remove existing transactions
       snapshotAccount.transactions.forEach((tx) => {
-        allActions.push(removeTransaction({ id: tx.id }));
+        allActions.push(transactionsActions.removeTransaction({ id: tx.id }));
       });
 
       // 2. Add new transactions
@@ -322,7 +324,7 @@ export function useSyncSnapshotAccount() {
           );
 
         allActions.push(
-          addTransaction({
+          transactionsActions.addTransaction({
             accountId: snapshotAccount.id,
             id: generateId(),
             transactionId: tx.id,
@@ -342,7 +344,7 @@ export function useSyncSnapshotAccount() {
       // 3. Remove existing starting balances
       snapshotAccount.startingBalances.forEach((b) => {
         allActions.push(
-          removeStartingBalance({
+          balancesActions.removeStartingBalance({
             accountId: snapshotAccount.id,
             balanceId: b.id,
           }),
@@ -352,7 +354,7 @@ export function useSyncSnapshotAccount() {
       // 4. Add new starting balances
       balances.forEach((balance) => {
         allActions.push(
-          setStartingBalance({
+          balancesActions.setStartingBalance({
             accountId: snapshotAccount.id,
             balanceId: generateId(),
             token: balance.token,
@@ -364,7 +366,7 @@ export function useSyncSnapshotAccount() {
       // 5. Remove existing ending balances
       snapshotAccount.endingBalances.forEach((b) => {
         allActions.push(
-          removeEndingBalance({
+          balancesActions.removeEndingBalance({
             accountId: snapshotAccount.id,
             balanceId: b.id,
           }),
@@ -375,7 +377,7 @@ export function useSyncSnapshotAccount() {
       // Always add ending balances for all tokens, even if closing equals opening (no period transactions)
       balances.forEach((balance) => {
         allActions.push(
-          setEndingBalance({
+          balancesActions.setEndingBalance({
             accountId: snapshotAccount.id,
             balanceId: generateId(),
             token: balance.token,
@@ -409,7 +411,7 @@ export function useSyncSnapshotAccount() {
           // Remove existing starting balances for this account
           account.startingBalances.forEach((b) => {
             allActions.push(
-              removeStartingBalance({
+              balancesActions.removeStartingBalance({
                 accountId,
                 balanceId: b.id,
               }),
@@ -419,7 +421,7 @@ export function useSyncSnapshotAccount() {
           // Add new starting balances
           tokenBalances.forEach((amount, token) => {
             allActions.push(
-              setStartingBalance({
+              balancesActions.setStartingBalance({
                 accountId,
                 balanceId: generateId(),
                 token,
@@ -431,8 +433,12 @@ export function useSyncSnapshotAccount() {
       }
 
       // Dispatch all actions in a single batch if we have a document ID
+      let updatedSnapshotDoc: any;
       if (snapshotDocumentId && allActions.length > 0) {
-        await dispatchActions(allActions, snapshotDocumentId);
+        updatedSnapshotDoc = await dispatchActions(
+          allActions,
+          snapshotDocumentId,
+        );
       } else {
         // Fallback to individual dispatches if no document ID
         allActions.forEach((action) => dispatch(action));
@@ -443,6 +449,7 @@ export function useSyncSnapshotAccount() {
         message: `Synced ${periodTransactions.length} transactions and updated balances`,
         transactionsAdded: periodTransactions.length,
         documentId: accountTransactionsDocId,
+        updatedSnapshotDoc,
       };
     } catch (error) {
       console.error("[useSyncSnapshotAccount] Error syncing account:", error);
@@ -465,11 +472,13 @@ export function useSyncSnapshotAccount() {
     dispatch: any,
     allSnapshotAccounts: SnapshotAccount[],
     snapshotDocumentId?: string,
+    accountTransactionsIdMap?: Map<string, string>,
   ): Promise<{
     success: boolean;
     message: string;
     transactionsAdded?: number;
     documentId?: string;
+    updatedSnapshotDoc?: any;
   }> => {
     try {
       // Get Internal accounts
@@ -510,15 +519,19 @@ export function useSyncSnapshotAccount() {
 
       // Scan ALL transactions from each Internal account's AccountTransactions document
       for (const internalAccount of internalAccounts) {
-        const accountTxDocId = internalAccount.accountTransactionsId;
+        // Use override map first (from Phase 1 results), then fall back to snapshot state
+        const accountTxDocId =
+          accountTransactionsIdMap?.get(internalAccount.id) ||
+          internalAccount.accountTransactionsId;
         if (!accountTxDocId) continue;
 
-        // Find the AccountTransactions document
-        const txDoc = documents?.find(
-          (doc) =>
-            doc.header.id === accountTxDocId &&
-            doc.header.documentType === "powerhouse/account-transactions",
-        ) as any;
+        // Fetch fresh from document cache instead of stale React state
+        let txDoc: any;
+        try {
+          txDoc = await getDocument(accountTxDocId);
+        } catch {
+          txDoc = undefined;
+        }
 
         if (!txDoc?.state?.global?.transactions) continue;
 
@@ -661,13 +674,13 @@ export function useSyncSnapshotAccount() {
 
       // 1. Remove existing transactions
       snapshotAccount.transactions.forEach((tx) => {
-        allActions.push(removeTransaction({ id: tx.id }));
+        allActions.push(transactionsActions.removeTransaction({ id: tx.id }));
       });
 
       // 2. Add derived transactions
       for (const tx of periodTransactions) {
         allActions.push(
-          addTransaction({
+          transactionsActions.addTransaction({
             accountId: snapshotAccount.id,
             id: tx.id,
             transactionId: tx.transactionId,
@@ -687,7 +700,7 @@ export function useSyncSnapshotAccount() {
       // 3. Remove existing starting balances
       snapshotAccount.startingBalances.forEach((b) => {
         allActions.push(
-          removeStartingBalance({
+          balancesActions.removeStartingBalance({
             accountId: snapshotAccount.id,
             balanceId: b.id,
           }),
@@ -697,7 +710,7 @@ export function useSyncSnapshotAccount() {
       // 4. Add new starting balances
       balances.forEach((balance) => {
         allActions.push(
-          setStartingBalance({
+          balancesActions.setStartingBalance({
             accountId: snapshotAccount.id,
             balanceId: generateId(),
             token: balance.token,
@@ -709,7 +722,7 @@ export function useSyncSnapshotAccount() {
       // 5. Remove existing ending balances
       snapshotAccount.endingBalances.forEach((b) => {
         allActions.push(
-          removeEndingBalance({
+          balancesActions.removeEndingBalance({
             accountId: snapshotAccount.id,
             balanceId: b.id,
           }),
@@ -747,7 +760,7 @@ export function useSyncSnapshotAccount() {
         });
 
         allActions.push(
-          setEndingBalance({
+          balancesActions.setEndingBalance({
             accountId: snapshotAccount.id,
             balanceId: generateId(),
             token: balance.token,
@@ -766,6 +779,7 @@ export function useSyncSnapshotAccount() {
       });
 
       // Dispatch all actions in a single batch if we have a document ID
+      let updatedSnapshotDoc: any;
       if (snapshotDocumentId && allActions.length > 0) {
         console.log("[syncNonInternalAccount] Dispatching actions:", {
           accountId: snapshotAccount.id,
@@ -774,7 +788,10 @@ export function useSyncSnapshotAccount() {
             (a) => a.type === "SET_ENDING_BALANCE",
           ).length,
         });
-        await dispatchActions(allActions, snapshotDocumentId);
+        updatedSnapshotDoc = await dispatchActions(
+          allActions,
+          snapshotDocumentId,
+        );
       } else {
         // Fallback to individual dispatches if no document ID
         allActions.forEach((action) => dispatch(action));
@@ -784,6 +801,7 @@ export function useSyncSnapshotAccount() {
         success: true,
         message: `Derived ${periodTransactions.length} transactions from Internal accounts`,
         transactionsAdded: periodTransactions.length,
+        updatedSnapshotDoc,
       };
     } catch (error) {
       console.error(

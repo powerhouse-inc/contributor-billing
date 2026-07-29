@@ -7,7 +7,6 @@ import { accountTransactionsUpgradeManifest } from "document-models/account-tran
 import { accountsUpgradeManifest } from "document-models/accounts/upgrades";
 import { billingStatementUpgradeManifest } from "document-models/billing-statement/upgrades";
 import { expenseReportUpgradeManifest } from "document-models/expense-report/upgrades";
-import { invoiceUpgradeManifest } from "document-models/invoice/upgrades";
 import { operationalHubProfileUpgradeManifest } from "document-models/operational-hub-profile/upgrades";
 import { snapshotReportUpgradeManifest } from "document-models/snapshot-report/upgrades";
 
@@ -16,7 +15,6 @@ export const upgradeManifests: UpgradeManifest<readonly number[]>[] = [
   accountsUpgradeManifest,
   billingStatementUpgradeManifest,
   expenseReportUpgradeManifest,
-  invoiceUpgradeManifest,
   operationalHubProfileUpgradeManifest,
   snapshotReportUpgradeManifest,
 ];

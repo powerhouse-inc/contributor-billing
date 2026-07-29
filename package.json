@@ -7,50 +7,53 @@
     "type": "git",
     "url": "git+https://github.com/powerhouse-inc/contributor-billing.git"
   },
+  "homepage": "https://github.com/powerhouse-inc/contributor-billing#readme",
+  "bugs": {
+    "url": "https://github.com/powerhouse-inc/contributor-billing/issues"
+  },
   "type": "module",
+  "sideEffects": false,
   "files": [
-    "/dist"
+    "/dist",
+    "/browser",
+    "style.css"
   ],
   "publishConfig": {
     "access": "public"
   },
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
+      "types": "./dist/index.d.ts",
       "browser": "./dist/browser/index.js",
       "node": "./dist/node/index.mjs"
     },
-    "./reactor": {
-      "types": "./dist/types/reactor/index.d.ts",
-      "browser": "./dist/browser/reactor/index.js"
-    },
     "./document-models": {
-      "types": "./dist/types/document-models/index.d.ts",
+      "types": "./dist/document-models/index.d.ts",
       "browser": "./dist/browser/document-models/index.js",
       "node": "./dist/node/document-models/index.mjs"
     },
     "./document-models/*": {
-      "types": "./dist/types/document-models/*/index.d.ts",
+      "types": "./dist/document-models/*/index.d.ts",
       "browser": "./dist/browser/document-models/*/index.js",
       "node": "./dist/node/document-models/*/index.mjs"
     },
     "./editors": {
-      "types": "./dist/types/editors/index.d.ts",
+      "types": "./dist/editors/index.d.ts",
       "browser": "./dist/browser/editors/index.js",
       "node": "./dist/node/editors/index.mjs"
     },
     "./editors/*": {
-      "types": "./dist/types/editors/*/editor.d.ts",
-      "browser": "./dist/browser/editors/*/editor.js",
-      "node": "./dist/node/editors/*/editor.mjs"
+      "types": "./dist/editors/*/module.d.ts",
+      "browser": "./dist/browser/editors/*/module.js",
+      "node": "./dist/node/editors/*/module.mjs"
     },
     "./subgraphs": {
-      "types": "./dist/types/subgraphs/index.d.ts",
+      "types": "./dist/subgraphs/index.d.ts",
       "browser": "./dist/browser/subgraphs/index.js",
       "node": "./dist/node/subgraphs/index.mjs"
     },
     "./processors": {
-      "types": "./dist/types/processors/index.d.ts",
+      "types": "./dist/processors/index.d.ts",
       "browser": "./dist/browser/processors/index.js",
       "node": "./dist/node/processors/index.mjs"
     },
@@ -58,101 +61,94 @@
     "./style.css": "./dist/style.css"
   },
   "scripts": {
-    "build": "ph-cli build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "oxlint --type-aware --type-check",
-    "lint:fix": "oxlint --type-aware --type-check --fix",
+    "lint": "eslint --config eslint.config.js --cache --cache-strategy content",
+    "lint:fix": "npm run lint -- --fix",
     "tsc": "tsc",
     "tsc:watch": "tsc --watch",
-    "tailwind": "bunx tailwindcss -i ./style.css -o ./dist/style.css",
-    "prepublishOnly": "npm run build",
     "check-circular-imports": "npx dpdm -T ./index.ts",
     "generate": "ph-cli generate",
     "connect": "ph-cli connect",
+    "build": "ph-cli build",
     "reactor": "ph-cli reactor",
     "service": "ph-cli service",
     "vetra": "ph-cli vetra",
     "service-startup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-startup.sh",
     "service-unstartup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-unstartup.sh",
+    "tailwind": "bunx tailwindcss -i ./style.css -o ./dist/style.css",
+    "prepublishOnly": "npm run build",
     "migrate": "ph-cli migrate",
     "format": "oxfmt",
     "format:check": "oxfmt --check"
   },
-  "devDependencies": {
-    "@electric-sql/pglite": "0.3.15",
-    "@electric-sql/pglite-tools": "0.2.20",
-    "@powerhousedao/analytics-engine-core": "6.2.0-dev.34",
-    "@powerhousedao/builder-profile": "^1.0.7",
-    "@powerhousedao/builder-tools": "6.2.0-dev.34",
-    "@powerhousedao/codegen": "6.2.0-dev.34",
-    "@powerhousedao/common": "6.2.0-dev.34",
-    "@powerhousedao/config": "6.2.0-dev.34",
-    "@powerhousedao/connect": "6.2.0-dev.34",
-    "@powerhousedao/design-system": "6.2.0-dev.34",
-    "@powerhousedao/document-engineering": "1.40.5",
-    "@powerhousedao/ph-cli": "6.2.0-dev.34",
-    "@powerhousedao/reactor": "6.2.0-dev.34",
-    "@powerhousedao/reactor-api": "6.2.0-dev.34",
-    "@powerhousedao/reactor-browser": "6.2.0-dev.34",
-    "@powerhousedao/reactor-local": "5.3.6",
-    "@powerhousedao/scalars": "^2.0.1",
-    "@powerhousedao/service-offering": "0.0.17",
-    "@powerhousedao/shared": "6.2.0-dev.34",
-    "@powerhousedao/switchboard": "6.2.0-dev.34",
-    "@powerhousedao/vetra": "6.2.0-dev.34",
+  "dependencies": {
+    "@powerhousedao/builder-profile": "1.1.2",
+    "@powerhousedao/invoice": "1.0.4",
     "@react-pdf/renderer": "^4.3.1",
     "@safe-global/api-kit": "^4.0.0",
     "@safe-global/protocol-kit": "^6.0.3",
     "@safe-global/sdk-starter-kit": "^2.0.2",
     "@safe-global/types-kit": "^2.0.1",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
-    "@tailwindcss/cli": "^4.1.18",
-    "@tailwindcss/vite": "^4.1.18",
-    "@testing-library/react": "^16.3.0",
-    "@types/cors": "^2.8.17",
-    "@types/node": "^24.9.2",
-    "@types/react": "^19.2.3",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
-    "@vitest/coverage-v8": "4.1.1",
-    "axios": "^1.9.0",
-    "cors": "^2.8.5",
-    "document-drive": "5.3.6",
-    "document-model": "6.2.0-dev.34",
     "dotenv": "^16.5.0",
-    "error": "^10.4.0",
     "ethers": "^6.14.0",
-    "google-auth-library": "^9.15.1",
-    "graphql": "16.12.0",
-    "graphql-tag": "2.12.6",
-    "lucide-react": "^0.560.0",
-    "oxfmt": "0.55.0",
-    "oxlint": "1.70.0",
-    "oxlint-tsgolint": "0.23.0",
-    "package-manager-detector": "^0.2.8",
-    "pm2": "^5.4.3",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "semantic-release": "^25.0.2",
+    "lucide-react": "^0.577.0",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss": "^4.1.16",
-    "typescript": "^5.9.3",
-    "vite": "^8.0.10",
-    "vite-tsconfig-paths": "6.1.1",
-    "vitest": "4.1.1",
-    "world-countries": "^5.1.0",
-    "zod": "4.3.6"
+    "world-countries": "^5.1.0"
   },
   "peerDependencies": {
-    "@powerhousedao/reactor-browser": "6.2.0-dev.34",
-    "document-model": "6.2.0-dev.34",
+    "@powerhousedao/reactor-api": "6.2.1",
+    "@powerhousedao/reactor-browser": "6.2.1",
+    "document-model": "6.2.1",
     "graphql": "^16",
     "graphql-tag": "^2",
     "react": "^19",
     "react-dom": "^19",
     "zod": "^4"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.3.15",
+    "@electric-sql/pglite-tools": "0.2.20",
+    "@eslint/js": "^9.38.0",
+    "@powerhousedao/connect": "6.2.1",
+    "@powerhousedao/design-system": "6.2.1",
+    "@powerhousedao/document-engineering": "1.40.2",
+    "@powerhousedao/ph-cli": "6.2.1",
+    "@powerhousedao/reactor": "6.2.1",
+    "@powerhousedao/reactor-api": "6.2.1",
+    "@powerhousedao/reactor-browser": "6.2.1",
+    "@powerhousedao/shared": "6.2.1",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@tailwindcss/cli": "^4.1.18",
+    "@types/node": "^24.9.2",
+    "@types/react": "^19.2.3",
+    "@vitejs/plugin-react": "6.0.1",
+    "document-model": "6.2.1",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "globals": "^16.4.0",
+    "graphql": "^16.10.0",
+    "graphql-tag": "^2.12.6",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "tailwindcss": "^4.1.16",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.2",
+    "vite": "8.0.2",
+    "vite-tsconfig-paths": "6.1.1",
+    "vitest": "4.1.1",
+    "zod": "^4.3.5"
+  },
+  "overrides": {
+    "react": "$react",
+    "react-dom": "$react-dom"
+  },
+  "resolutions": {
+    "graphql": "16.13.0"
   },
   "release": {
     "branches": [
@@ -209,17 +205,5 @@
       "@semantic-release/github",
       "@semantic-release/git"
     ]
-  },
-  "bugs": {
-    "url": "https://github.com/powerhouse-inc/contributor-billing/issues"
-  },
-  "readme": "ERROR: No README data found!",
-  "homepage": "https://github.com/powerhouse-inc/contributor-billing#readme",
-  "sideEffects": false,
-  "overrides": {
-    "graphql": "16.13.0"
-  },
-  "resolutions": {
-    "graphql": "16.13.0"
   }
 }

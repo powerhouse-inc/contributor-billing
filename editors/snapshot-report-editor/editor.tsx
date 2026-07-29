@@ -2,9 +2,8 @@ import { generateId, setName } from "document-model";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   useDocumentsInSelectedDrive,
-  useParentFolderForSelectedNode,
-  setSelectedNode,
   dispatchActions,
+  usePHToast,
 } from "@powerhousedao/reactor-browser";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import { Button, Select } from "@powerhousedao/document-engineering";
@@ -17,12 +16,12 @@ import {
   addTransaction,
   setPeriodStart,
   setPeriodEnd,
-} from "document-models/snapshot-report";
+} from "../../document-models/snapshot-report/v1/gen/creators.js";
 import { SetOwner } from "./components/SetOwner.js";
 import { useSyncSnapshotAccount } from "./hooks/useSyncSnapshotAccount.js";
 import { formatBalance } from "./utils/balanceCalculations.js";
 import { calculateTransactionFlowInfo } from "./utils/flowTypeCalculations.js";
-import { actions as accountsActions } from "document-models/accounts";
+import { actions as accountsActions } from "../../document-models/accounts/index.js";
 
 // Helper function to generate month options from January 2025 to current month
 function generateMonthOptions() {
@@ -73,6 +72,7 @@ function getMonthDateRange(yearMonth: string) {
 export default function Editor() {
   const [document, dispatch] = useSelectedSnapshotReportDocument();
   const documentsInDrive = useDocumentsInSelectedDrive();
+  const toast = usePHToast();
   const [isAccountPickerOpen, setIsAccountPickerOpen] = useState(false);
   const [selectedAccountIds, setSelectedAccountIds] = useState<Set<string>>(
     new Set(),
@@ -211,6 +211,63 @@ export default function Editor() {
     return suggested;
   }, [documentsInDrive, reportPeriodStart, document.header.id]);
 
+  // Compute suggested end date from next month's snapshot startDate
+  const suggestedEndDate = useMemo(() => {
+    if (!documentsInDrive || !reportPeriodStart) return null;
+
+    const currentPeriodStart = new Date(reportPeriodStart);
+    if (isNaN(currentPeriodStart.getTime())) return null;
+
+    // Find all other snapshot reports in the drive
+    const otherSnapshots = documentsInDrive.filter(
+      (doc) =>
+        doc.header.documentType === "powerhouse/snapshot-report" &&
+        doc.header.id !== document.header.id,
+    );
+
+    // Find the snapshot whose reportPeriodStart is closest after this one
+    let nextSnapshot: {
+      startDate: string | null;
+      reportPeriodStart: string;
+    } | null = null;
+    let closestDistance = Infinity;
+
+    for (const snap of otherSnapshots) {
+      const state = snap.state as {
+        global?: {
+          reportPeriodStart?: string | null;
+          startDate?: string | null;
+        };
+      };
+      const rps = state?.global?.reportPeriodStart;
+      if (!rps) continue;
+
+      const rpDate = new Date(rps);
+      if (isNaN(rpDate.getTime())) continue;
+
+      // Must be after current period
+      const diff = rpDate.getTime() - currentPeriodStart.getTime();
+      if (diff > 0 && diff < closestDistance) {
+        closestDistance = diff;
+        nextSnapshot = {
+          startDate: state?.global?.startDate || null,
+          reportPeriodStart: rps,
+        };
+      }
+    }
+
+    if (!nextSnapshot?.startDate) return null;
+
+    const nextStart = new Date(nextSnapshot.startDate);
+    if (isNaN(nextStart.getTime())) return null;
+
+    // Suggested end = next startDate - 1 day (end of previous day)
+    const suggested = new Date(nextStart);
+    suggested.setUTCDate(suggested.getUTCDate() - 1);
+    suggested.setUTCHours(23, 59, 59, 999);
+    return suggested;
+  }, [documentsInDrive, reportPeriodStart, document.header.id]);
+
   const handleSnapshotPeriodChange = useCallback(
     (newFromDate: string, newToDate: string) => {
       dispatch?.(
@@ -231,6 +288,13 @@ export default function Editor() {
     const toISO = endDate || "";
     handleSnapshotPeriodChange(fromISO, toISO);
   }, [suggestedStartDate, endDate, handleSnapshotPeriodChange]);
+
+  const handleApplySuggestedEndDate = useCallback(() => {
+    if (!suggestedEndDate) return;
+    const fromISO = startDate || "";
+    const toISO = suggestedEndDate.toISOString();
+    handleSnapshotPeriodChange(fromISO, toISO);
+  }, [suggestedEndDate, startDate, handleSnapshotPeriodChange]);
 
   // Update selected period when document period changes externally
   useEffect(() => {
@@ -348,7 +412,7 @@ export default function Editor() {
     }
   };
 
-  // Handle sync all accounts - parallel with concurrency limit
+  // Handle sync all accounts — Internal first (sequentially), then non-Internal
   const handleSyncAll = async () => {
     if (!startDate || !endDate) {
       alert(
@@ -360,45 +424,105 @@ export default function Editor() {
     setIsSyncingAll(true);
     const accountUpdates: Array<{ id: string; accountTransactionsId: string }> =
       [];
-    const CONCURRENCY_LIMIT = 5;
+    const totalAccounts = snapshotAccounts.length;
+    let syncedCount = 0;
+    let failedCount = 0;
+
+    toast?.(`Syncing ${totalAccounts} accounts...`, {
+      type: "connect-loading",
+    });
 
     try {
-      // Process accounts in batches of 5 for parallel execution
-      for (let i = 0; i < snapshotAccounts.length; i += CONCURRENCY_LIMIT) {
-        const batch = snapshotAccounts.slice(i, i + CONCURRENCY_LIMIT);
-        await Promise.all(
-          batch.map(async (account) => {
-            const accountEntry = accountEntryMap.get(account.accountId);
+      const internalAccounts = snapshotAccounts.filter(
+        (a: any) => a.type === "Internal",
+      );
 
-            setSyncingAccounts((prev) => new Set(prev).add(account.id));
+      // Phase 1: Sync Internal accounts sequentially to avoid race conditions
+      // on concurrent dispatchActions to the same document
+      const accountTransactionsIdMap = new Map<string, string>();
+      let latestSnapshotDoc: any;
 
-            try {
-              const result = await syncAccount(
-                account,
-                accountEntry,
-                accountsDocumentId || undefined,
-                startDate,
-                endDate,
-                dispatch,
-                snapshotAccounts,
-                document?.header?.id,
-              );
+      for (const account of internalAccounts) {
+        const accountEntry = accountEntryMap.get(account.accountId);
+        setSyncingAccounts((prev) => new Set(prev).add(account.id));
 
-              if (result.documentId && accountEntry) {
-                accountUpdates.push({
-                  id: accountEntry.id,
-                  accountTransactionsId: result.documentId,
-                });
-              }
-            } finally {
-              setSyncingAccounts((prev) => {
-                const newSet = new Set(prev);
-                newSet.delete(account.id);
-                return newSet;
+        try {
+          const result = await syncAccount(
+            account,
+            accountEntry,
+            accountsDocumentId || undefined,
+            startDate,
+            endDate,
+            dispatch,
+            snapshotAccounts,
+            document?.header?.id,
+          );
+
+          if (result.documentId) {
+            accountTransactionsIdMap.set(account.id, result.documentId);
+            if (accountEntry) {
+              accountUpdates.push({
+                id: accountEntry.id,
+                accountTransactionsId: result.documentId,
               });
             }
-          }),
-        );
+          }
+          if (result.updatedSnapshotDoc) {
+            latestSnapshotDoc = result.updatedSnapshotDoc;
+          }
+
+          if (result.success) {
+            syncedCount++;
+          } else {
+            failedCount++;
+          }
+        } finally {
+          setSyncingAccounts((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(account.id);
+            return newSet;
+          });
+        }
+      }
+
+      // Use fresh snapshot accounts from the latest dispatch result for Phase 2
+      const freshSnapshotAccounts: any[] =
+        latestSnapshotDoc?.state?.global?.snapshotAccounts ?? snapshotAccounts;
+      const freshNonInternalAccounts = freshSnapshotAccounts.filter(
+        (a: any) => a.type !== "Internal",
+      );
+
+      // Phase 2: Sync non-Internal accounts sequentially
+      // These derive transactions from Internal accounts' AccountTransactions docs
+      for (const account of freshNonInternalAccounts) {
+        const accountEntry = accountEntryMap.get(account.accountId);
+        setSyncingAccounts((prev) => new Set(prev).add(account.id));
+
+        try {
+          const result = await syncAccount(
+            account,
+            accountEntry,
+            accountsDocumentId || undefined,
+            startDate,
+            endDate,
+            dispatch,
+            freshSnapshotAccounts,
+            document?.header?.id,
+            accountTransactionsIdMap,
+          );
+
+          if (result.success) {
+            syncedCount++;
+          } else {
+            failedCount++;
+          }
+        } finally {
+          setSyncingAccounts((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(account.id);
+            return newSet;
+          });
+        }
       }
 
       // Single batch update to Accounts document
@@ -408,6 +532,23 @@ export default function Editor() {
           accountsDocumentId,
         );
       }
+
+      if (failedCount === 0) {
+        toast?.(
+          `Synced ${syncedCount} account${syncedCount !== 1 ? "s" : ""} successfully`,
+          { type: "success" },
+        );
+      } else {
+        toast?.(
+          `Synced ${syncedCount}/${totalAccounts} accounts. ${failedCount} failed.`,
+          { type: "warning" },
+        );
+      }
+    } catch (error) {
+      toast?.(
+        `Sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { type: "error" },
+      );
     } finally {
       setIsSyncingAll(false);
     }
@@ -607,47 +748,44 @@ export default function Editor() {
     setSelectedAccountIds(new Set());
   };
 
-  // Get the parent folder node for the currently selected node
-  const parentFolder = useParentFolderForSelectedNode();
-  // Set the selected node to the parent folder node (close the editor)
-  function handleClose() {
-    setSelectedNode(parentFolder?.id);
-  }
-
   return (
     <div>
-      <DocumentToolbar />
+      <DocumentToolbar document={document} />
       <div className="p-6 max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Snapshot Report</h1>
+        <h1 className="text-3xl font-bold mb-6 text-foreground">
+          Snapshot Report
+        </h1>
 
         {/* Report Configuration */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Report Configuration</h2>
+        <div className="bg-card rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-foreground">
+            Report Configuration
+          </h2>
 
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Report Name
                 </label>
                 <input
                   type="text"
                   value={reportName || ""}
                   onChange={(e) => handleSetReportName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground"
                   placeholder="Q4 2024 Treasury Report"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Teams
                 </label>
                 <SetOwner ownerIds={ownerIds ?? []} dispatch={dispatch} />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Accounts Document
                 </label>
                 <select
@@ -662,7 +800,7 @@ export default function Editor() {
                       }),
                     )
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                 >
                   <option value="">Select an Accounts document...</option>
                   {accountsDocuments.map((doc) => (
@@ -673,7 +811,7 @@ export default function Editor() {
                   ))}
                 </select>
                 {selectedAccountsDoc && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {(selectedAccountsDoc.state as any).global?.accounts
                       ?.length || 0}{" "}
                     accounts available
@@ -683,7 +821,7 @@ export default function Editor() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Reporting Period
               </label>
               {isEditingPeriod ? (
@@ -698,7 +836,7 @@ export default function Editor() {
                     <Button
                       variant="default"
                       onClick={handleConfirmPeriod}
-                      className="text-sm"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
                     >
                       Set Period
                     </Button>
@@ -706,13 +844,13 @@ export default function Editor() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-gray-900">
+                  <span className="text-lg font-bold text-foreground">
                     {periodDisplayLabel}
                   </span>
                   <Button
                     variant="ghost"
                     onClick={handleEditPeriod}
-                    className="text-sm"
+                    className="px-3 py-1.5 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
                   >
                     Change
                   </Button>
@@ -731,8 +869,8 @@ export default function Editor() {
                 (!startDate ||
                   startDate.split("T")[0] !==
                     suggestedStartDate.toISOString().split("T")[0]) && (
-                  <div className="mt-2 flex items-center gap-2 p-2 bg-indigo-50 border border-indigo-200 rounded-md">
-                    <span className="text-xs text-indigo-700 flex-1">
+                  <div className="mt-2 flex items-center gap-2 p-2 bg-primary/10 border border-primary/30 rounded-md">
+                    <span className="text-xs text-primary flex-1">
                       Previous snapshot period ends{" "}
                       {new Date(
                         suggestedStartDate.getTime() - 86400000,
@@ -753,7 +891,38 @@ export default function Editor() {
                     </span>
                     <button
                       onClick={handleApplySuggestedStartDate}
-                      className="px-2 py-1 text-xs font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-200 rounded transition-colors whitespace-nowrap"
+                      className="px-2 py-1 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded transition-colors whitespace-nowrap"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                )}
+              {suggestedEndDate &&
+                endDate &&
+                new Date(endDate) >= suggestedEndDate && (
+                  <div className="mt-2 flex items-center gap-2 p-2 bg-primary/10 border border-primary/30 rounded-md">
+                    <span className="text-xs text-primary flex-1">
+                      Next snapshot period starts{" "}
+                      {new Date(
+                        suggestedEndDate.getTime() + 86400000,
+                      ).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        timeZone: "UTC",
+                      })}
+                      . End by{" "}
+                      <strong>
+                        {suggestedEndDate.toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          timeZone: "UTC",
+                        })}
+                      </strong>{" "}
+                      to avoid overlap.
+                    </span>
+                    <button
+                      onClick={handleApplySuggestedEndDate}
+                      className="px-2 py-1 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded transition-colors whitespace-nowrap"
                     >
                       Apply
                     </button>
@@ -764,15 +933,17 @@ export default function Editor() {
         </div>
 
         {/* Accounts Section */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-card rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Snapshot Accounts</h2>
+            <h2 className="text-xl font-semibold text-foreground">
+              Snapshot Accounts
+            </h2>
             <div className="flex gap-2">
               {snapshotAccounts.length > 0 && (
                 <button
                   onClick={handleSyncAll}
                   disabled={isSyncingAll || !startDate || !endDate}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <RefreshCw
                     className={`w-4 h-4 ${isSyncingAll ? "animate-spin" : ""}`}
@@ -783,7 +954,7 @@ export default function Editor() {
               <button
                 onClick={handleOpenAccountPicker}
                 disabled={!accountsDocumentId}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
               >
                 Add Account
               </button>
@@ -791,9 +962,9 @@ export default function Editor() {
           </div>
 
           {snapshotAccounts.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-muted-foreground">
               <p>No accounts added yet</p>
-              <p className="text-sm mt-2">
+              <p className="text-sm mt-2 text-muted-foreground">
                 Click "Add Account" to select accounts for this snapshot
               </p>
             </div>
@@ -805,26 +976,26 @@ export default function Editor() {
                   {
                     type: "Source",
                     label: "Source",
-                    borderClass: "border-emerald-300",
-                    badgeClass: "bg-emerald-100 text-emerald-800",
+                    borderClass: "border-input",
+                    badgeClass: "bg-muted text-foreground",
                   },
                   {
                     type: "Internal",
                     label: "Internal",
-                    borderClass: "border-blue-300",
-                    badgeClass: "bg-blue-100 text-blue-800",
+                    borderClass: "border-input",
+                    badgeClass: "bg-muted text-foreground",
                   },
                   {
                     type: "Destination",
                     label: "Destination",
-                    borderClass: "border-amber-300",
-                    badgeClass: "bg-amber-100 text-amber-800",
+                    borderClass: "border-input",
+                    badgeClass: "bg-muted text-foreground",
                   },
                   {
                     type: "External",
                     label: "External",
-                    borderClass: "border-gray-300",
-                    badgeClass: "bg-gray-100 text-gray-800",
+                    borderClass: "border-input",
+                    badgeClass: "bg-muted text-foreground",
                   },
                 ] as const
               ).map(({ type, label, borderClass, badgeClass }) => {
@@ -843,7 +1014,7 @@ export default function Editor() {
                       >
                         {label}
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-muted-foreground">
                         {accountsOfType.length} account
                         {accountsOfType.length !== 1 ? "s" : ""}
                       </span>
@@ -852,14 +1023,14 @@ export default function Editor() {
                       {accountsOfType.map((account: any) => (
                         <div
                           key={account.id}
-                          className="border border-gray-200 rounded-lg overflow-hidden"
+                          className="border border-border rounded-lg overflow-hidden"
                         >
                           {/* Header - Always Visible */}
                           <div className="p-4">
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-2">
-                                  <h3 className="font-semibold">
+                                  <h3 className="font-semibold text-foreground">
                                     {account.accountName}
                                   </h3>
                                   <button
@@ -869,40 +1040,40 @@ export default function Editor() {
                                       !startDate ||
                                       !endDate
                                     }
-                                    className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="p-1.5 rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Sync account transactions and balances"
                                   >
                                     <RefreshCw
                                       className={`w-4 h-4 ${
                                         syncingAccounts.has(account.id)
-                                          ? "animate-spin text-blue-600"
-                                          : "text-gray-600"
+                                          ? "animate-spin text-primary"
+                                          : "text-muted-foreground"
                                       }`}
                                     />
                                   </button>
                                 </div>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-muted-foreground">
                                   {account.accountAddress}
                                 </p>
                                 <span
                                   className={`inline-block mt-2 px-3 py-1 text-xs font-medium rounded-full ${
                                     account.type === "Source"
-                                      ? "bg-emerald-100 text-emerald-800"
+                                      ? "bg-primary/10 text-foreground"
                                       : account.type === "Internal"
-                                        ? "bg-blue-100 text-blue-800"
+                                        ? "bg-primary/10 text-primary"
                                         : account.type === "Destination"
-                                          ? "bg-amber-100 text-amber-800"
-                                          : "bg-gray-100 text-gray-800"
+                                          ? "bg-muted text-foreground"
+                                          : "bg-muted text-foreground"
                                   }`}
                                 >
                                   {account.type}
                                 </span>
                               </div>
                               <div className="text-right">
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-muted-foreground">
                                   Transactions: {account.transactions.length}
                                 </p>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-muted-foreground">
                                   Tokens: {account.startingBalances.length}
                                 </p>
                               </div>
@@ -945,8 +1116,8 @@ export default function Editor() {
                               if (!hasBalances) return null;
 
                               return (
-                                <div className="mt-4 pt-4 border-t border-gray-200">
-                                  <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                                <div className="mt-4 pt-4 border-t border-border">
+                                  <h4 className="text-sm font-semibold text-foreground mb-2">
                                     Balances
                                   </h4>
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -959,13 +1130,13 @@ export default function Editor() {
                                       return (
                                         <div
                                           key={balance.id}
-                                          className="bg-gray-50 rounded p-2 text-sm"
+                                          className="bg-muted rounded p-2 text-sm text-foreground"
                                         >
-                                          <div className="font-medium text-gray-700 mb-1">
+                                          <div className="font-medium text-foreground mb-1">
                                             {balance.token}
                                           </div>
                                           <div
-                                            className="text-xs text-gray-600 space-y-1"
+                                            className="text-xs text-muted-foreground space-y-1"
                                             style={{
                                               fontVariantNumeric:
                                                 "tabular-nums",
@@ -973,14 +1144,14 @@ export default function Editor() {
                                           >
                                             <div>
                                               Opening:{" "}
-                                              <span className="font-medium">
+                                              <span className="font-medium text-foreground">
                                                 {formatBalance(balance.amount)}
                                               </span>
                                             </div>
                                             {endingBalance && (
                                               <div>
                                                 Closing:{" "}
-                                                <span className="font-medium">
+                                                <span className="font-medium text-foreground">
                                                   {formatBalance(
                                                     endingBalance.amount,
                                                   )}
@@ -994,26 +1165,26 @@ export default function Editor() {
                                     {endingOnlyBalances.map((balance: any) => (
                                       <div
                                         key={balance.id}
-                                        className="bg-gray-50 rounded p-2 text-sm"
+                                        className="bg-muted rounded p-2 text-sm text-foreground"
                                       >
-                                        <div className="font-medium text-gray-700 mb-1">
+                                        <div className="font-medium text-foreground mb-1">
                                           {balance.token}
                                         </div>
                                         <div
-                                          className="text-xs text-gray-600 space-y-1"
+                                          className="text-xs text-muted-foreground space-y-1"
                                           style={{
                                             fontVariantNumeric: "tabular-nums",
                                           }}
                                         >
                                           <div>
                                             Opening:{" "}
-                                            <span className="font-medium">
+                                            <span className="font-medium text-foreground">
                                               0.000000 {balance.token}
                                             </span>
                                           </div>
                                           <div>
                                             Closing:{" "}
-                                            <span className="font-medium">
+                                            <span className="font-medium text-foreground">
                                               {formatBalance(balance.amount)}
                                             </span>
                                           </div>
@@ -1031,7 +1202,7 @@ export default function Editor() {
                                 onClick={() =>
                                   handleToggleAccountExpansion(account.id)
                                 }
-                                className="mt-3 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                                className="mt-3 flex items-center gap-2 text-sm text-primary hover:text-primary/80"
                               >
                                 {expandedAccounts.has(account.id) ? (
                                   <>
@@ -1051,9 +1222,9 @@ export default function Editor() {
                           {/* Expandable Transaction List */}
                           {expandedAccounts.has(account.id) &&
                             account.transactions.length > 0 && (
-                              <div className="border-t border-gray-200 bg-gray-50">
+                              <div className="border-t border-border bg-muted">
                                 <div className="p-4">
-                                  <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                                  <h4 className="text-sm font-semibold text-foreground mb-3">
                                     Transactions ({account.transactions.length})
                                   </h4>
                                   <div className="space-y-2">
@@ -1066,29 +1237,29 @@ export default function Editor() {
                                       .map((tx: any) => (
                                         <div
                                           key={tx.id}
-                                          className="bg-white border border-gray-200 rounded p-3 text-sm"
+                                          className="bg-card border border-border rounded p-3 text-sm text-foreground"
                                         >
                                           <div className="grid grid-cols-2 gap-2">
                                             {/* Transaction Details Grid */}
                                             <div>
-                                              <span className="text-gray-500">
+                                              <span className="text-muted-foreground">
                                                 Direction:
                                               </span>
                                               <span
                                                 className={`ml-2 font-medium ${
                                                   tx.direction === "INFLOW"
-                                                    ? "text-green-600"
-                                                    : "text-red-600"
+                                                    ? "text-foreground"
+                                                    : "text-destructive"
                                                 }`}
                                               >
                                                 {tx.direction}
                                               </span>
                                             </div>
                                             <div>
-                                              <span className="text-gray-500">
+                                              <span className="text-muted-foreground">
                                                 Amount:
                                               </span>
-                                              <span className="ml-2 font-medium">
+                                              <span className="ml-2 font-medium text-foreground">
                                                 {typeof tx.amount ===
                                                   "object" &&
                                                 tx.amount?.value !== undefined
@@ -1097,7 +1268,7 @@ export default function Editor() {
                                               </span>
                                             </div>
                                             <div>
-                                              <span className="text-gray-500">
+                                              <span className="text-muted-foreground">
                                                 Date:
                                               </span>
                                               <span className="ml-2">
@@ -1107,7 +1278,7 @@ export default function Editor() {
                                               </span>
                                             </div>
                                             <div>
-                                              <span className="text-gray-500">
+                                              <span className="text-muted-foreground">
                                                 Time:
                                               </span>
                                               <span className="ml-2">
@@ -1118,32 +1289,32 @@ export default function Editor() {
                                             </div>
                                             {tx.counterParty && (
                                               <div className="col-span-2">
-                                                <span className="text-gray-500">
+                                                <span className="text-muted-foreground">
                                                   Counter Party:
                                                 </span>
-                                                <span className="ml-2 font-mono text-xs">
+                                                <span className="ml-2 font-mono text-xs text-muted-foreground">
                                                   {tx.counterParty}
                                                 </span>
                                               </div>
                                             )}
                                             {tx.flowType && (
                                               <div>
-                                                <span className="text-gray-500">
+                                                <span className="text-muted-foreground">
                                                   Flow Type:
                                                 </span>
                                                 <span
                                                   className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
                                                     tx.flowType === "TopUp"
-                                                      ? "bg-green-100 text-green-800"
+                                                      ? "bg-primary/10 text-foreground"
                                                       : tx.flowType === "Return"
-                                                        ? "bg-orange-100 text-orange-800"
+                                                        ? "bg-muted text-foreground"
                                                         : tx.flowType ===
                                                             "Internal"
-                                                          ? "bg-purple-100 text-purple-800"
+                                                          ? "bg-primary/10 text-primary"
                                                           : tx.flowType ===
                                                               "Swap"
-                                                            ? "bg-blue-100 text-blue-800"
-                                                            : "bg-red-100 text-red-800"
+                                                            ? "bg-primary/10 text-primary"
+                                                            : "bg-destructive/15 text-destructive"
                                                   }`}
                                                 >
                                                   {tx.flowType}
@@ -1151,14 +1322,14 @@ export default function Editor() {
                                               </div>
                                             )}
                                             <div className="col-span-2">
-                                              <span className="text-gray-500">
+                                              <span className="text-muted-foreground">
                                                 Tx Hash:
                                               </span>
                                               <a
                                                 href={`https://etherscan.io/tx/${tx.txHash}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="ml-2 text-blue-600 hover:underline font-mono text-xs"
+                                                className="ml-2 text-primary hover:underline font-mono text-xs"
                                               >
                                                 {tx.txHash.substring(0, 10)}...
                                                 {tx.txHash.substring(
@@ -1185,15 +1356,15 @@ export default function Editor() {
 
         {/* Account Picker Modal */}
         {isAccountPickerOpen && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center pt-8 backdrop-blur-sm">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[85vh] flex flex-col border border-gray-200">
+          <div className="fixed inset-0 z-50 flex items-start justify-center pt-8 bg-black/50 backdrop-blur-md">
+            <div className="bg-card rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[85vh] flex flex-col border border-border">
               <div className="p-6 border-b">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xl font-semibold">
+                    <h3 className="text-xl font-semibold text-foreground">
                       Select Accounts to Import
                     </h3>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       Choose accounts from the selected Accounts document
                     </p>
                   </div>
@@ -1202,7 +1373,7 @@ export default function Editor() {
                   ) && (
                     <button
                       onClick={handleSelectAllAccounts}
-                      className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                      className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
                     >
                       Add All Accounts
                     </button>
@@ -1212,7 +1383,7 @@ export default function Editor() {
 
               <div className="p-6 overflow-y-auto flex-1">
                 {availableAccounts.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-muted-foreground">
                     No accounts available in the selected document
                   </div>
                 ) : (
@@ -1229,10 +1400,10 @@ export default function Editor() {
                           }
                           className={`p-4 border rounded-lg cursor-pointer transition-colors ${
                             isAlreadyAdded
-                              ? "bg-gray-100 cursor-not-allowed opacity-50"
+                              ? "bg-muted cursor-not-allowed opacity-50"
                               : isSelected
-                                ? "bg-blue-50 border-blue-500"
-                                : "hover:bg-gray-50"
+                                ? "bg-primary/10 border-primary"
+                                : "hover:bg-accent"
                           }`}
                         >
                           <div className="flex items-start justify-between">
@@ -1242,22 +1413,24 @@ export default function Editor() {
                                 checked={isSelected}
                                 disabled={isAlreadyAdded}
                                 onChange={() => {}}
-                                className="mt-1"
+                                className="mt-1 bg-background text-foreground"
                               />
                               <div>
-                                <h4 className="font-medium">{account.name}</h4>
-                                <p className="text-sm text-gray-600">
+                                <h4 className="font-medium text-foreground">
+                                  {account.name}
+                                </h4>
+                                <p className="text-sm text-muted-foreground">
                                   {account.account}
                                 </p>
                                 <span
                                   className={`inline-block mt-2 px-2 py-1 text-xs rounded ${
                                     account.type === "Source"
-                                      ? "bg-emerald-100 text-emerald-800"
+                                      ? "bg-primary/10 text-foreground"
                                       : account.type === "Internal"
-                                        ? "bg-blue-100 text-blue-800"
+                                        ? "bg-primary/10 text-primary"
                                         : account.type === "Destination"
-                                          ? "bg-amber-100 text-amber-800"
-                                          : "bg-gray-100 text-gray-700"
+                                          ? "bg-muted text-foreground"
+                                          : "bg-muted text-foreground"
                                   }`}
                                 >
                                   {account.type || "External"}
@@ -1265,7 +1438,7 @@ export default function Editor() {
                               </div>
                             </div>
                             {isAlreadyAdded && (
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-muted-foreground">
                                 Already added
                               </span>
                             )}
@@ -1283,14 +1456,14 @@ export default function Editor() {
                     setIsAccountPickerOpen(false);
                     setSelectedAccountIds(new Set());
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="px-4 py-2 border border-border rounded-md hover:bg-accent text-foreground"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleImportAccounts}
                   disabled={selectedAccountIds.size === 0}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
                 >
                   Import{" "}
                   {selectedAccountIds.size > 0

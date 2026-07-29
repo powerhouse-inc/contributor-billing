@@ -32,16 +32,16 @@ export const snapshotReportConfigurationOperations: SnapshotReportConfigurationO
       state.startDate = action.input.startDate;
       state.endDate = action.input.endDate;
     },
+    addOwnerIdOperation(state, action) {
+      if (!state.ownerIds.includes(action.input.ownerId)) {
+        state.ownerIds.push(action.input.ownerId);
+      }
+    },
     setPeriodStartOperation(state, action) {
       state.reportPeriodStart = action.input.periodStart;
     },
     setPeriodEndOperation(state, action) {
       state.reportPeriodEnd = action.input.periodEnd;
-    },
-    addOwnerIdOperation(state, action) {
-      if (!state.ownerIds.includes(action.input.ownerId)) {
-        state.ownerIds.push(action.input.ownerId);
-      }
     },
     removeOwnerIdOperation(state, action) {
       const index = state.ownerIds.indexOf(action.input.ownerId);

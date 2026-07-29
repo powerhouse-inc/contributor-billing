@@ -20,7 +20,7 @@ scalar Amount
 scalar Upload
 
 type BillingStatementState {
-  contributor: PHID  # Change to AID when available
+  contributor: PHID
   dateIssued: DateTime!
   dateDue: DateTime
   lineItems: [BillingStatementLineItem!]!
@@ -78,8 +78,6 @@ enum BillingStatementUnitInput {
   DAY
   UNIT
 }
-
-
 
 # general
 

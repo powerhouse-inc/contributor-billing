@@ -2,19 +2,15 @@ import type { AccountsAccountsOperations } from "document-models/accounts/v1";
 
 export const accountsAccountsOperations: AccountsAccountsOperations = {
   addAccountOperation(state, action) {
-    // Type is required in schema, but generated types haven't been updated yet
-    if (!action.input.type) {
-      throw new Error("Account type is required");
-    }
     state.accounts.push({
       id: action.input.id,
-      account: action.input.account || "",
-      name: action.input.name || "",
-      budgetPath: action.input.budgetPath || "",
-      accountTransactionsId: action.input.accountTransactionsId || "",
-      chain: action.input.chain || [],
+      account: action.input.account,
+      name: action.input.name,
+      budgetPath: action.input.budgetPath || null,
+      accountTransactionsId: action.input.accountTransactionsId || null,
+      chain: action.input.chain || null,
       type: action.input.type,
-      owners: action.input.owners || [],
+      owners: action.input.owners || null,
       KycAmlStatus: action.input.KycAmlStatus || "PENDING",
     });
   },
@@ -25,7 +21,6 @@ export const accountsAccountsOperations: AccountsAccountsOperations = {
     if (!account) {
       throw new Error(`Account with id ${action.input.id} not found`);
     }
-    // Only update fields that are provided (not undefined/null)
     if (action.input.account) account.account = action.input.account;
     if (action.input.name) account.name = action.input.name;
     if (action.input.budgetPath) account.budgetPath = action.input.budgetPath;

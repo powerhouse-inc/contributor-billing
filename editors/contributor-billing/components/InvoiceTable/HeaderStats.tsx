@@ -7,12 +7,15 @@ import {
 } from "@powerhousedao/reactor-browser";
 import { getExchangeRate } from "../../utils/exchangeRate.js";
 import { Tooltip, TooltipProvider } from "@powerhousedao/design-system/ui";
-import type { InvoiceDocument } from "document-models/invoice";
+import { cbToast } from "../cbToast.js";
+import type { InvoiceDocument } from "@powerhousedao/invoice/document-models/invoice";
 
 const currencyList = [
   { ticker: "USDS", crypto: true },
   { ticker: "USDC", crypto: true },
   { ticker: "DAI", crypto: true },
+  { ticker: "EURC", crypto: true },
+  { ticker: "EURE", crypto: true },
   { ticker: "USD", crypto: false },
   { ticker: "EUR", crypto: false },
   { ticker: "DKK", crypto: false },
@@ -65,6 +68,7 @@ export const HeaderStats = ({ folderId }: HeaderStatsProps) => {
       }
 
       let total = 0;
+      let conversionFailed = false;
       for (const invoice of invoices) {
         const invoiceAmount = invoice.state.global.totalPriceTaxIncl;
         const invoiceCurrency = invoice.state.global.currency || "USD"; // Fallback to USD if currency is empty
@@ -95,10 +99,18 @@ export const HeaderStats = ({ folderId }: HeaderStatsProps) => {
             console.error("Error getting exchange rate:", error);
             // Fallback to original amount if exchange rate fails
             total += invoiceAmount;
+            conversionFailed = true;
           }
         }
       }
       setTotalExpenses(total);
+
+      if (conversionFailed) {
+        cbToast(
+          "Currency conversion failed for some invoices — totals shown using 1:1 fallback rate",
+          { type: "warning" },
+        );
+      }
     };
 
     calculateTotalExpenses().catch(console.error);
@@ -110,11 +122,11 @@ export const HeaderStats = ({ folderId }: HeaderStatsProps) => {
   }));
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+    <div className="bg-card rounded-lg border border-border p-4 shadow-sm">
       <TooltipProvider delayDuration={0} skipDelayDuration={0}>
         {/* Header with Currency Selector */}
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-xl font-semibold text-gray-900">
+          <h1 className="text-xl font-semibold text-foreground">
             Operational Hub
           </h1>
           <div className="max-w-[200px]">
@@ -130,21 +142,21 @@ export const HeaderStats = ({ folderId }: HeaderStatsProps) => {
 
         {/* Main Content - Stats */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gray-50 rounded-lg p-3">
+          <div className="bg-muted rounded-lg p-3">
             <div className="flex items-center gap-1 mb-1">
-              <h3 className="text-sm font-medium text-gray-600">
+              <h3 className="text-sm font-medium text-muted-foreground">
                 Total Expenses
               </h3>
               <Tooltip
                 content="Approximate value calculated using exchangerate-api.com. DAI + USDS are converted to USD for simplicity"
                 side="right"
               >
-                <div className="w-4 h-4 rounded-full bg-gray-300 text-white text-xs flex items-center justify-center cursor-help">
+                <div className="w-4 h-4 rounded-full bg-muted text-muted-foreground text-xs flex items-center justify-center cursor-help">
                   !
                 </div>
               </Tooltip>
             </div>
-            <p className="text-xl font-bold text-gray-900">
+            <p className="text-xl font-bold text-foreground">
               {selectedCurrency}{" "}
               {totalExpenses.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
@@ -152,11 +164,11 @@ export const HeaderStats = ({ folderId }: HeaderStatsProps) => {
               })}
             </p>
           </div>
-          <div className="bg-gray-50 rounded-lg p-3">
-            <h3 className="text-sm font-medium text-gray-600 mb-1">
+          <div className="bg-muted rounded-lg p-3">
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">
               Total Invoices
             </h3>
-            <p className="text-xl font-bold text-gray-900">
+            <p className="text-xl font-bold text-foreground">
               {invoices?.length}
             </p>
           </div>

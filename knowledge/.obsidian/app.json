@@ -1,0 +1,9 @@
+{
+  "userIgnoreFilters": [
+    "backup-documents/",
+    "docker/",
+    "document-models/",
+    "editors/",
+    "node_modules/"
+  ]
+}

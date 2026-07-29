@@ -3,11 +3,11 @@
  * from transactions in snapshot reports
  */
 
-import type { SnapshotTransaction } from "document-models/snapshot-report";
+import type { SnapshotTransaction } from "../../../document-models/snapshot-report/v1/gen/types.js";
 import type {
   Scalars,
   AccountType,
-} from "document-models/snapshot-report";
+} from "../../../document-models/snapshot-report/v1/gen/schema/types.js";
 
 export type Amount_Currency = Scalars["Amount_Currency"]["output"];
 

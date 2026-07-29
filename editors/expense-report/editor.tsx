@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect } from "react";
 import { setName } from "document-model";
-import { useSelectedExpenseReportDocument } from "document-models/expense-report";
+import { useSelectedExpenseReportDocument } from "../../document-models/expense-report/v1/hooks.js";
 import {
   actions,
   type ExpenseReportStatus,
-} from "document-models/expense-report";
+} from "../../document-models/expense-report/index.js";
 import { Icon, Button, Select } from "@powerhousedao/document-engineering";
 import {
   DatePickerField,
@@ -17,12 +17,10 @@ import { ExpenseReportPDF } from "./components/ExpenseReportPDF.js";
 import { pdf } from "@react-pdf/renderer";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
-  setSelectedNode,
-  useParentFolderForSelectedNode,
   useSelectedDrive,
   isFolderNodeKind,
 } from "@powerhousedao/reactor-browser";
-import type { FolderNode } from "document-drive";
+import type { FolderNode } from "@powerhousedao/shared/document-drive";
 import { useSyncWallet } from "./hooks/useSyncWallet.js";
 import { RefreshCw } from "lucide-react";
 import { SetOwner } from "./components/SetOwner.js";
@@ -277,8 +275,8 @@ export default function Editor() {
     try {
       const blob = await pdf(
         <ExpenseReportPDF
-          periodStart={periodStart}
-          periodEnd={periodEnd}
+          periodStart={startDate || periodStart}
+          periodEnd={endDate || periodEnd}
           wallets={wallets}
           groups={groups}
         />,
@@ -329,8 +327,6 @@ export default function Editor() {
     return new Date().toISOString().split("T")[0];
   }, [startDate, endDate]);
 
-  // Get the parent folder node for the currently selected node (this is the Reporting folder)
-  const parentFolder = useParentFolderForSelectedNode();
   const [driveDocument] = useSelectedDrive();
 
   // Find the sibling "Payments" folder dynamically
@@ -376,24 +372,19 @@ export default function Editor() {
     return paymentsFolder?.id ?? null;
   }, [driveDocument, document]);
 
-  // Set the selected node to the parent folder node (close the editor)
-  function handleClose() {
-    setSelectedNode(parentFolder?.id);
-  }
-
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      <DocumentToolbar />
-      <div className="ph-default-styles flex flex-col flex-1 min-h-0 w-full bg-gray-50 dark:bg-gray-900">
+      <DocumentToolbar document={document} />
+      <div className="ph-default-styles flex flex-col flex-1 min-h-0 w-full bg-muted">
         {/* Main Content */}
         <div className="flex-1 overflow-auto px-3 sm:px-4 lg:px-6 py-4">
           <div className="w-full max-w-none space-y-4 lg:space-y-6">
             {/* Header Section */}
-            <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <section className="bg-card rounded-lg shadow-sm border border-border">
               <div className="px-4 sm:px-6 py-4 sm:py-6">
                 {/* Top row: Title and Export button */}
                 <div className="flex items-start justify-between gap-4 mb-4">
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
                     Expense Report
                   </h1>
                   <Button
@@ -409,7 +400,7 @@ export default function Editor() {
                 <div className="flex flex-wrap items-center gap-x-8 gap-y-3 mb-4">
                   {/* Reporting Period */}
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <span className="text-sm font-medium text-muted-foreground">
                       Reporting Period:
                     </span>
                     {isEditingPeriod ? (
@@ -433,14 +424,14 @@ export default function Editor() {
                         )}
                       </div>
                     ) : (
-                      <span className="text-lg font-bold text-gray-900 dark:text-white">
+                      <span className="text-lg font-bold text-foreground">
                         {periodDisplayLabel}
                       </span>
                     )}
                   </div>
                   {/* Status */}
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <span className="text-sm font-medium text-muted-foreground">
                       Status:
                     </span>
                     <Select
@@ -470,7 +461,7 @@ export default function Editor() {
 
                 {/* Transaction Period - exact same structure as Snapshot Report editor */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-foreground mb-2">
                     Transaction Period
                   </label>
                   <div className="flex gap-2 items-center">
@@ -513,9 +504,9 @@ export default function Editor() {
             </section>
 
             {/* Wallets Section */}
-            <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+            <section className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border flex items-center justify-between">
+                <h2 className="text-lg sm:text-xl font-semibold text-foreground">
                   Wallets
                 </h2>
                 <Button
@@ -547,9 +538,9 @@ export default function Editor() {
 
             {/* Aggregated Expenses Section */}
             {wallets.length > 0 && (
-              <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700">
-                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+              <section className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
+                <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border">
+                  <h2 className="text-lg sm:text-xl font-semibold text-foreground">
                     {breakdownTitle}
                   </h2>
                 </div>

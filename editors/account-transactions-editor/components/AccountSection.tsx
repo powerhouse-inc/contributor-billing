@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Form, StringField } from "@powerhousedao/document-engineering";
-import type { Account } from "document-models/account-transactions";
+import type { Account } from "../../../document-models/account-transactions/v1/gen/types.js";
 
 interface AccountSectionProps {
   account: Account;
@@ -26,15 +26,15 @@ export function AccountSection({
   const isLocked = hasAccount && hasFetchedTransactions;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+    <div className="bg-card rounded-xl border border-border p-6 mb-8">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Account Settings
         </h2>
         {hasAccount && !isLocked && !isEditing && (
           <Button
             onClick={() => setIsEditing(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 text-sm"
           >
             Change Account
           </Button>
@@ -42,10 +42,10 @@ export function AccountSection({
       </div>
 
       {!hasAccount && !isEditing ? (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div className="bg-muted border border-border rounded-lg p-4">
           <div className="flex items-center">
             <svg
-              className="h-5 w-5 text-yellow-400 mr-3"
+              className="h-5 w-5 text-foreground mr-3"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -58,27 +58,27 @@ export function AccountSection({
               />
             </svg>
             <div className="flex-1">
-              <h3 className="text-sm font-medium text-yellow-800">
+              <h3 className="text-sm font-medium text-foreground">
                 No Account Set
               </h3>
-              <p className="text-sm text-yellow-700 mt-1">
+              <p className="text-sm text-foreground mt-1">
                 Set an Ethereum address to start tracking transactions for this
                 account.
               </p>
             </div>
             <Button
               onClick={() => setIsEditing(true)}
-              className="ml-4 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 text-sm"
+              className="ml-4 bg-muted hover:bg-accent text-primary-foreground px-4 py-2 text-sm"
             >
               Set Account
             </Button>
           </div>
         </div>
       ) : hasAccount && !isEditing ? (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div className="bg-primary/10 border border-border rounded-lg p-4">
           <div className="flex items-center">
             <svg
-              className="h-5 w-5 text-green-400 mr-3"
+              className="h-5 w-5 text-foreground mr-3"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -91,19 +91,19 @@ export function AccountSection({
               />
             </svg>
             <div className="flex-1">
-              <h3 className="text-sm font-medium text-green-800">
+              <h3 className="text-sm font-medium text-foreground">
                 Account Configured{isLocked && " (Locked)"}
               </h3>
-              <p className="text-sm text-green-700 mt-1 font-mono break-all">
+              <p className="text-sm text-foreground mt-1 font-mono break-all">
                 {account.account}
               </p>
               {account.name && (
-                <p className="text-sm text-green-600 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Name: {account.name}
                 </p>
               )}
               {isLocked && (
-                <p className="text-xs text-gray-600 mt-2">
+                <p className="text-xs text-muted-foreground mt-2">
                   Account is locked after fetching transactions. Create a new
                   document to use a different account.
                 </p>
@@ -121,12 +121,12 @@ export function AccountSection({
           className="space-y-4"
         >
           {isLocked && (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Account changes are disabled after transactions have been fetched.
             </p>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Ethereum Address *
             </label>
             <StringField
@@ -136,12 +136,12 @@ export function AccountSection({
               required
               disabled={Boolean(isLocked)}
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Enter the Ethereum address for this account
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Account Name (Optional)
             </label>
             <StringField
@@ -150,14 +150,14 @@ export function AccountSection({
               className="w-full"
               disabled={Boolean(isLocked)}
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               A friendly name for this account
             </p>
           </div>
           <div className="flex gap-3">
             <Button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2"
               disabled={Boolean(isLocked)}
             >
               Set Account
@@ -165,7 +165,7 @@ export function AccountSection({
             <Button
               type="button"
               onClick={() => setIsEditing(false)}
-              className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2"
+              className="bg-muted hover:bg-accent text-foreground px-6 py-2"
               disabled={Boolean(isLocked)}
             >
               Cancel

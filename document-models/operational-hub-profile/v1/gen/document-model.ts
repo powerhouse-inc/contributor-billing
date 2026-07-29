@@ -7,9 +7,9 @@ export const documentModel: DocumentModelGlobalState = {
     name: "Powerhouse",
     website: "https://www.powerhouse.inc/",
   },
-  extension: "ohp",
+  extension: "",
   description:
-    "Profile document for Operational Hubs that manages operator team assignment and subteam relationships",
+    "Profile document for Operational Hubs that manages operator team assignment and subteam relationships.",
   specifications: [
     {
       state: {
@@ -22,8 +22,7 @@ export const documentModel: DocumentModelGlobalState = {
           schema:
             "type OperationalHubProfileState {\n  name: String!\n  operatorTeam: PHID\n  subteams: [PHID!]!\n}",
           examples: [],
-          initialValue:
-            '{\n  "name": "",\n  "operatorTeam": null,\n  "subteams": []\n}',
+          initialValue: '{"name": "", "operatorTeam": null, "subteams": []}',
         },
       },
       modules: [
@@ -34,7 +33,7 @@ export const documentModel: DocumentModelGlobalState = {
           operations: [
             {
               id: "set-operational-hub-name",
-              name: "SET_OPERATIONAL_HUB_NAME",
+              name: "setOperationalHubName",
               description: "Set the name of the operational hub",
               schema: "input SetOperationalHubNameInput {\n  name: String!\n}",
               template: "Set the name of the operational hub",
@@ -45,7 +44,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "set-operator-team",
-              name: "SET_OPERATOR_TEAM",
+              name: "setOperatorTeam",
               description:
                 "Set the operator team PHID for this operational hub",
               schema: "input SetOperatorTeamInput {\n  operatorTeam: PHID\n}",
@@ -58,7 +57,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "add-subteam",
-              name: "ADD_SUBTEAM",
+              name: "addSubteam",
               description:
                 "Add a subteam (builder profile) to the operational hub",
               schema: "input AddSubteamInput {\n  subteam: PHID!\n}",
@@ -72,7 +71,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "remove-subteam",
-              name: "REMOVE_SUBTEAM",
+              name: "removeSubteam",
               description: "Remove a subteam from the operational hub",
               schema: "input RemoveSubteamInput {\n  subteam: PHID!\n}",
               template: "Remove a subteam from the operational hub",

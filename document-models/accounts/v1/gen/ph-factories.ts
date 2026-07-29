@@ -14,9 +14,7 @@ import type {
 import { utils } from "./utils.js";
 
 export function defaultGlobalState(): AccountsGlobalState {
-  return {
-    accounts: [],
-  };
+  return { accounts: [] };
 }
 
 export function defaultLocalState(): AccountsLocalState {

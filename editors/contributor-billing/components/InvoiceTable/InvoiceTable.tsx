@@ -6,18 +6,23 @@ import {
   useSelectedDrive,
   useDocumentsInSelectedDrive,
 } from "@powerhousedao/reactor-browser";
-import type { DocumentModelModule, PHDocument } from "document-model";
-import { deleteNode, type FileNode } from "document-drive";
-import { actions as invoiceActions } from "document-models/invoice";
-import type { InvoiceTag } from "document-models/invoice";
-import { actions as billingStatementActions } from "document-models/billing-statement";
+import type { PHDocument, DocumentModelModule } from "document-model";
+import {
+  deleteNode,
+  type FileNode,
+} from "@powerhousedao/shared/document-drive";
+import { actions as invoiceActions } from "@powerhousedao/invoice/document-models/invoice";
+import type { InvoiceTag } from "@powerhousedao/invoice/document-models/invoice";
+import { actions as billingStatementActions } from "../../../../document-models/billing-statement/index.js";
 import {
   setPeriodStart,
   setPeriodEnd,
-} from "document-models/expense-report";
+} from "../../../../document-models/expense-report/v1/gen/creators.js";
 import { mapTags } from "../../../billing-statement/lineItemTags/tagMapping.js";
 import { exportInvoicesToXeroCSV } from "../../../../scripts/contributor-billing/createXeroCsv.js";
 import { exportExpenseReportCSV } from "../../../../scripts/contributor-billing/createExpenseReportCsv.js";
+import { cbToast } from "../cbToast.js";
+import { EmptyState } from "../EmptyState.js";
 import { HeaderControls } from "./HeaderControls.js";
 import { InvoiceTableSection } from "./InvoiceTableSection.js";
 import { InvoiceTableRow, type InvoiceRowData } from "./InvoiceTableRow.js";
@@ -98,15 +103,15 @@ export const statusOptions = [
 
 // Status color mappings
 const statusColors: Record<string, string> = {
-  DRAFT: "bg-blue-100 text-blue-600",
-  ISSUED: "bg-blue-100 text-blue-600",
-  ACCEPTED: "bg-green-100 text-green-600",
-  PAYMENTSCHEDULED: "bg-green-100 text-green-600",
-  PAYMENTSENT: "bg-green-100 text-green-600",
-  PAYMENTISSUE: "bg-yellow-100 text-yellow-600",
-  PAYMENTCLOSED: "bg-red-100 text-red-600",
-  REJECTED: "bg-red-100 text-red-600",
-  OTHER: "bg-blue-100 text-blue-600",
+  DRAFT: "bg-info/20 text-info",
+  ISSUED: "bg-info/20 text-info",
+  ACCEPTED: "bg-success/20 text-success",
+  PAYMENTSCHEDULED: "bg-success/20 text-success",
+  PAYMENTSENT: "bg-success/20 text-success",
+  PAYMENTISSUE: "bg-warning/15 text-warning",
+  PAYMENTCLOSED: "bg-destructive/15 text-destructive",
+  REJECTED: "bg-destructive/15 text-destructive",
+  OTHER: "bg-info/20 text-info",
 };
 
 interface InvoiceTableProps {
@@ -118,10 +123,7 @@ interface InvoiceTableProps {
       | ((prev: Record<string, boolean>) => Record<string, boolean>),
   ) => void;
   filteredDocumentModels: DocumentModelModule[];
-  onSelectDocumentModel: (
-    model: DocumentModelModule,
-    name: string,
-  ) => void;
+  onSelectDocumentModel: (model: DocumentModelModule, name: string) => void;
   getDocDispatcher: (
     id: string,
   ) => [PHDocument, (action: unknown) => Promise<void>] | null;
@@ -144,7 +146,7 @@ const TableHeader = ({
   showBillingStatement?: boolean;
 }) => (
   <thead>
-    <tr className="bg-gray-50 font-medium text-gray-500 text-xs">
+    <tr className="bg-muted font-medium text-muted-foreground text-xs">
       <th className="px-2 py-2 w-8 rounded-tl-sm" />
       <th className="px-2 py-2 text-center">
         {showIssuer ? "Issuer" : "Invoice"}
@@ -604,12 +606,35 @@ export const InvoiceTable = ({
     const driveId = selectedDrive?.header.id;
     if (!driveId) return;
 
+    let successCount = 0;
+    let failCount = 0;
+
     for (const id of ids) {
       try {
         await dispatchActions(deleteNode({ id }), driveId);
+        successCount++;
       } catch (error) {
         console.error(`Failed to delete document ${id}:`, error);
+        failCount++;
       }
+    }
+
+    if (failCount === 0) {
+      cbToast(
+        `${successCount} document${successCount !== 1 ? "s" : ""} deleted`,
+        { type: "success" },
+      );
+    } else if (successCount === 0) {
+      cbToast(
+        `Failed to delete ${failCount} document${failCount !== 1 ? "s" : ""}`,
+        {
+          type: "error",
+        },
+      );
+    } else {
+      cbToast(`${successCount} deleted, ${failCount} failed`, {
+        type: "warning",
+      });
     }
   };
 
@@ -778,7 +803,7 @@ export const InvoiceTable = ({
           showCreateButton ? filteredDocumentModels : undefined
         }
       >
-        <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-300 overflow-hidden">
+        <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-border overflow-hidden">
           <TableHeader
             showIssuer={showIssuer}
             showBillingStatement={showBillingStatement}
@@ -815,7 +840,7 @@ export const InvoiceTable = ({
         details={notification.details}
         onClose={() => setNotification({ ...notification, show: false })}
       />
-      <div className="contributor-billing-table w-full h-full bg-white rounded-lg p-4 border border-gray-200 shadow-sm mt-4 overflow-x-auto">
+      <div className="contributor-billing-table w-full h-full bg-card rounded-lg p-4 border border-border shadow-sm mt-4 overflow-x-auto">
         <HeaderControls
           statusOptions={statusOptions}
           selectedStatuses={selectedStatuses}
@@ -865,16 +890,23 @@ export const InvoiceTable = ({
         {renderSection("REJECTED", "Rejected", rejected)}
         {renderSection("OTHER", "Other", otherInvoices)}
 
+        {files.length === 0 && loadingFileIds.length === 0 && (
+          <EmptyState
+            title="No invoices yet"
+            description="Create a new invoice using the Draft section above, or drop an invoice file here"
+          />
+        )}
+
         {/* Loading section for files that haven't loaded yet */}
         {loadingFileIds.length > 0 && (
           <InvoiceTableSection
             title="Loading"
             count={loadingFileIds.length}
-            color="bg-gray-100 text-gray-600"
+            color="bg-muted text-muted-foreground"
           >
-            <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-gray-300 overflow-hidden">
+            <table className="w-full text-sm rounded-sm border-separate border-spacing-0 border border-border overflow-hidden">
               <thead>
-                <tr className="bg-gray-50 font-medium text-gray-500 text-xs">
+                <tr className="bg-muted font-medium text-muted-foreground text-xs">
                   <th className="px-2 py-2 w-8 rounded-tl-sm" />
                   <th className="px-2 py-2 text-center">Invoice</th>
                   <th className="px-2 py-2 text-center">Invoice No.</th>
@@ -893,29 +925,29 @@ export const InvoiceTable = ({
                   return (
                     <tr
                       key={id}
-                      className="border-t border-gray-200 animate-pulse"
+                      className="border-t border-border animate-pulse"
                     >
                       <td className="px-2 py-2" />
-                      <td className="px-2 py-2 text-center text-gray-400">
+                      <td className="px-2 py-2 text-center text-muted-foreground">
                         {file?.name || "Loading..."}
                       </td>
                       <td className="px-2 py-2 text-center">
-                        <div className="h-4 bg-gray-200 rounded w-16 mx-auto" />
+                        <div className="h-4 bg-muted rounded w-16 mx-auto" />
                       </td>
                       <td className="px-2 py-2 text-center">
-                        <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
+                        <div className="h-4 bg-muted rounded w-20 mx-auto" />
                       </td>
                       <td className="px-2 py-2 text-center">
-                        <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
+                        <div className="h-4 bg-muted rounded w-20 mx-auto" />
                       </td>
                       <td className="px-2 py-2 text-center">
-                        <div className="h-4 bg-gray-200 rounded w-12 mx-auto" />
+                        <div className="h-4 bg-muted rounded w-12 mx-auto" />
                       </td>
                       <td className="px-2 py-2 text-center">
-                        <div className="h-4 bg-gray-200 rounded w-16 mx-auto" />
+                        <div className="h-4 bg-muted rounded w-16 mx-auto" />
                       </td>
                       <td className="px-2 py-2 text-center">
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-muted-foreground">
                           Loading...
                         </span>
                       </td>

@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
+import type { DocumentModelModule } from "document-model";
 import {
   isFileNodeKind,
   useDocumentModelModules,
@@ -10,13 +11,9 @@ import {
   addDocument,
   setSelectedNode,
 } from "@powerhousedao/reactor-browser";
-import type {
-  DocumentModelModule,
-  PHBaseState,
-  PHDocument,
-} from "document-model";
-import type { FileNode } from "document-drive";
-import { moveNode } from "document-drive";
+import type { PHBaseState, PHDocument } from "document-model";
+import type { FileNode } from "@powerhousedao/shared/document-drive";
+import { moveNode } from "@powerhousedao/shared/document-drive";
 import { cbToast } from "../cbToast.js";
 import { InvoiceTable } from "./InvoiceTable.js";
 

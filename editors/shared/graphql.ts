@@ -14,14 +14,15 @@ export function getGraphQLUrl(): string {
     return "http://localhost:4001/graphql";
   }
 
-  if (baseURI.includes("-dev.")) {
-    return "https://switchboard-dev.powerhouse.xyz/graphql";
-  }
+  const url = new URL(baseURI);
+  url.host = url.host.replace(/^connect\./, "switchboard.");
+  return `${url.origin}/graphql`;
+}
 
-  if (baseURI.includes("-staging.")) {
-    return "https://switchboard-staging.powerhouse.xyz/graphql";
-  }
-
-  // Production environment
-  return "https://switchboard.powerhouse.xyz/graphql";
+/**
+ * Returns the GraphQL endpoint for a custom subgraph.
+ * Custom subgraphs are served at `/graphql/<subgraph-name>`.
+ */
+export function getSubgraphUrl(subgraph: string): string {
+  return `${getGraphQLUrl()}/${subgraph}`;
 }

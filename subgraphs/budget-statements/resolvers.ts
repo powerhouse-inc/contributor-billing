@@ -1,7 +1,7 @@
 import type { BaseSubgraph } from "@powerhousedao/reactor-api";
 import type { PHDocument } from "document-model";
-import type { SnapshotReportDocument } from "document-models/snapshot-report";
-import type { ExpenseReportDocument } from "document-models/expense-report";
+import type { SnapshotReportDocument } from "../../document-models/snapshot-report/index.js";
+import type { ExpenseReportDocument } from "../../document-models/expense-report/index.js";
 
 // Type definitions for builder profile (from external package)
 interface BuilderProfileState {

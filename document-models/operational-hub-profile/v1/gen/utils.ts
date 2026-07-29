@@ -32,7 +32,7 @@ export const initialGlobalState: OperationalHubProfileGlobalState = {
 export const initialLocalState: OperationalHubProfileLocalState = {};
 
 export const utils: DocumentModelUtils<OperationalHubProfilePHState> = {
-  fileExtension: "ohp",
+  fileExtension: "",
   createState(state) {
     return {
       ...createBaseState(state?.auth, { version: 1, ...state?.document }),

@@ -7,7 +7,11 @@ import {
   useDocumentsInSelectedDrive,
   useNodeActions,
 } from "@powerhousedao/reactor-browser";
-import type { FolderNode, FileNode, Node } from "document-drive";
+import type {
+  FolderNode,
+  FileNode,
+  Node,
+} from "@powerhousedao/shared/document-drive";
 
 const SUBSCRIPTIONS_FOLDER_NAME = "Subscriptions";
 

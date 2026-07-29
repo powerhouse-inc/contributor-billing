@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useDocumentsInSelectedDrive } from "@powerhousedao/reactor-browser";
-import type { Wallet } from "document-models/expense-report";
+import type { Wallet } from "../../../document-models/expense-report/v1/gen/types.js";
 
 interface SyncStatus {
   needsSync: boolean;

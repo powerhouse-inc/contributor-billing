@@ -8,7 +8,7 @@ import {
   useDocumentsInSelectedDrive,
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
-import { deleteNode } from "document-drive";
+import { deleteNode } from "@powerhousedao/shared/document-drive";
 import { generateId } from "document-model/core";
 import { useSelectedAccountTransactionsDocument } from "../hooks/useAccountTransactionsDocument.js";
 import {
@@ -16,17 +16,17 @@ import {
   updateTransaction,
   deleteTransaction,
   setAccount,
-} from "document-models/account-transactions";
+} from "../../document-models/account-transactions/v1/gen/creators.js";
 import type {
   TransactionEntry,
   AddTransactionInput,
-} from "document-models/account-transactions";
+} from "../../document-models/account-transactions/v1/gen/types.js";
 import { TransactionsTable } from "./components/TransactionsTable.js";
 import { TransactionForm } from "./components/TransactionForm.js";
 import { AccountSection } from "./components/AccountSection.js";
 import { alchemyIntegration } from "./alchemyIntegration.js";
-import { actions as accountsActions } from "document-models/accounts";
-import { actions as expenseReportActions } from "document-models/expense-report";
+import { actions as accountsActions } from "../../document-models/accounts/index.js";
+import { actions as expenseReportActions } from "../../document-models/expense-report/index.js";
 
 type ViewMode = "list" | "add" | "edit";
 
@@ -40,10 +40,6 @@ export default function Editor() {
     useState<TransactionEntry | null>(null);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  function handleClose() {
-    setSelectedNode(parentFolder?.id);
-  }
 
   function handleAddTransaction(values: Omit<AddTransactionInput, "id">) {
     dispatch(
@@ -353,16 +349,16 @@ export default function Editor() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      <DocumentToolbar />
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-gray-900">
+    <div className="h-screen flex flex-col bg-muted">
+      <DocumentToolbar document={document} />
+      <div className="bg-card border-b border-border px-4 py-3 flex items-center justify-between">
+        <h1 className="text-lg font-semibold text-foreground">
           Account Transactions
         </h1>
         <Button
           onClick={handleDeleteDocument}
           disabled={isDeleting}
-          className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors"
+          className="bg-destructive hover:bg-destructive/90 disabled:bg-muted disabled:text-muted-foreground text-primary-foreground px-4 py-2 rounded-lg font-medium shadow-sm transition-colors"
         >
           {isDeleting ? "Deleting..." : "Delete Document"}
         </Button>
@@ -391,10 +387,10 @@ export default function Editor() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-2xl font-semibold text-gray-900">
+                    <h2 className="text-2xl font-semibold text-foreground">
                       Transactions ({document.state.global.transactions.length})
                     </h2>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Manage account transactions with details and budgets. Only
                       new transactions will be added when fetching.
                     </p>
@@ -406,7 +402,7 @@ export default function Editor() {
                         isLoadingTransactions ||
                         !document.state.global.account?.account
                       }
-                      className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors"
+                      className="bg-primary hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground text-primary-foreground px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors"
                     >
                       {isLoadingTransactions
                         ? "Fetching..."
@@ -414,7 +410,7 @@ export default function Editor() {
                     </Button>
                     <Button
                       onClick={() => setViewMode("add")}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors"
                     >
                       Add Transaction
                     </Button>
@@ -432,10 +428,10 @@ export default function Editor() {
             {viewMode === "add" && (
               <div className="max-w-3xl">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-semibold text-gray-900">
+                  <h2 className="text-2xl font-semibold text-foreground">
                     Add New Transaction
                   </h2>
-                  <p className="mt-1 text-sm text-gray-600">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Fill in the transaction details below
                   </p>
                 </div>
@@ -450,10 +446,10 @@ export default function Editor() {
             {viewMode === "edit" && editingTransaction && (
               <div className="max-w-3xl">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-semibold text-gray-900">
+                  <h2 className="text-2xl font-semibold text-foreground">
                     Edit Transaction
                   </h2>
-                  <p className="mt-1 text-sm text-gray-600">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Update the transaction details below
                   </p>
                 </div>

@@ -24,9 +24,7 @@ import type {
   AccountsPHState,
 } from "./types.js";
 
-export const initialGlobalState: AccountsGlobalState = {
-  accounts: [],
-};
+export const initialGlobalState: AccountsGlobalState = { accounts: [] };
 export const initialLocalState: AccountsLocalState = {};
 
 export const utils: DocumentModelUtils<AccountsPHState> = {

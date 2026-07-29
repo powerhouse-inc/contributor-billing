@@ -9,7 +9,7 @@ export const documentModel: DocumentModelGlobalState = {
   },
   extension: "",
   description:
-    "A document that contains expenses for n amount wallets across different dimensions, such as expense types and categories. The flow inside a new expense report starts with the user adding wallets that would represent the expenses. Each wallet would be able to extract the expenses from the list of billing statements that are added to the wallet. From the billing statements, the line items inside the wallet are built with the rich data. For example, a line item has a tag that could be directly linked to a LineItemGroup by the group field. Once all line items are added to the Wallet.lineItems list, the next Wallet.totals field could start being populated. This Wallet.total field holds a list of GroupTotals. These group totals aggregate the line item values by the group they belong to. Once the Wallet.totals is finished, the user will be able to see a full expense report. The last steps for the user are to set the periodStart and periodEnd fields to complete the report. ",
+    "A document that contains expenses for n amount wallets across different dimensions, such as expense types and categories",
   specifications: [
     {
       state: {
@@ -28,13 +28,13 @@ export const documentModel: DocumentModelGlobalState = {
       },
       modules: [
         {
-          id: "17d59066-f922-45f9-b5c4-69bf3e7c951c",
+          id: "wallet",
           name: "wallet",
           description: "",
           operations: [
             {
-              id: "4aee28bb-309e-4e12-8805-9b57506fcba1",
-              name: "ADD_WALLET",
+              id: "add-wallet",
+              name: "addWallet",
               description: "",
               schema:
                 "input AddWalletInput {\n  wallet: EthereumAddress!\n  name: String\n}",
@@ -45,8 +45,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "c7b274ca-b24a-4142-b46a-ecb431b0f502",
-              name: "REMOVE_WALLET",
+              id: "remove-wallet",
+              name: "removeWallet",
               description: "",
               schema:
                 "input RemoveWalletInput {\n  wallet: EthereumAddress!\n}",
@@ -57,8 +57,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "6e735183-a4fd-4355-8db4-63902d5a7348",
-              name: "ADD_BILLING_STATEMENT",
+              id: "add-billing-statement",
+              name: "addBillingStatement",
               description: "",
               schema:
                 "input AddBillingStatementInput {\n  wallet: EthereumAddress!\n  billingStatementId: OID!\n}",
@@ -69,8 +69,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "f8c5a682-cff9-4d68-a07e-b8f6187e3d6d",
-              name: "REMOVE_BILLING_STATEMENT",
+              id: "remove-billing-statement",
+              name: "removeBillingStatement",
               description: "",
               schema:
                 "input RemoveBillingStatementInput {\n  wallet: EthereumAddress!\n  billingStatementId: OID!\n}",
@@ -81,8 +81,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "6a7fa2df-5ecb-422d-8626-6c74eb1efd35",
-              name: "ADD_LINE_ITEM",
+              id: "add-line-item",
+              name: "addLineItem",
               description: "",
               schema:
                 "input AddLineItemInput {\n  wallet: EthereumAddress!\n  lineItem: LineItemInput!\n}\n\ninput LineItemInput {\n  id: ID!\n  label: String\n  group: ID\n  budget: Float\n  actuals: Float\n  forecast: Float\n  payments: Float\n  comments: String\n}",
@@ -93,8 +93,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "efe1b4b0-d8bf-4ad0-970e-ea100d197da3",
-              name: "UPDATE_LINE_ITEM",
+              id: "update-line-item",
+              name: "updateLineItem",
               description: "",
               schema:
                 "input UpdateLineItemInput {\n  wallet: EthereumAddress!\n  lineItemId: ID!\n  label: String\n  group: ID\n  budget: Float\n  actuals: Float\n  forecast: Float\n  payments: Float\n  comments: String\n}",
@@ -105,8 +105,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "526341c8-c9fb-4c9e-b948-458a6bd53eda",
-              name: "REMOVE_LINE_ITEM",
+              id: "remove-line-item",
+              name: "removeLineItem",
               description: "",
               schema:
                 "input RemoveLineItemInput {\n  wallet: EthereumAddress!\n  lineItemId: ID!\n}",
@@ -117,8 +117,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "1a96ab65-6b2a-4424-906b-75c2d83e6306",
-              name: "ADD_LINE_ITEM_GROUP",
+              id: "add-line-item-group",
+              name: "addLineItemGroup",
               description: "",
               schema:
                 "input AddLineItemGroupInput {\n  id: ID!\n  label: String\n  parentId: ID\n}",
@@ -129,8 +129,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "847cff5a-32a1-4246-941c-62b0a4045717",
-              name: "UPDATE_LINE_ITEM_GROUP",
+              id: "update-line-item-group",
+              name: "updateLineItemGroup",
               description: "",
               schema:
                 "input UpdateLineItemGroupInput {\n  id: ID!\n  label: String\n  parentId: ID\n}",
@@ -141,8 +141,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "1085423f-fb20-4a9e-8e51-97e317c70d93",
-              name: "REMOVE_LINE_ITEM_GROUP",
+              id: "remove-line-item-group",
+              name: "removeLineItemGroup",
               description: "",
               schema: "input RemoveLineItemGroupInput {\n  id: ID!\n}",
               template: "",
@@ -152,8 +152,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "fa19fce6-ace0-4867-b50a-7401a1f2a8d4",
-              name: "SET_GROUP_TOTALS",
+              id: "set-group-totals",
+              name: "setGroupTotals",
               description: "",
               schema:
                 "input SetGroupTotalsInput {\n  wallet: EthereumAddress!\n  groupTotals: GroupTotalsInput!\n}\n\ninput GroupTotalsInput {\n  group: ID!\n  totalBudget: Float\n  totalForecast: Float\n  totalActuals: Float\n  totalPayments: Float\n}",
@@ -164,8 +164,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "9671164b-7f09-4cdd-b52e-335791e9f94b",
-              name: "REMOVE_GROUP_TOTALS",
+              id: "remove-group-totals",
+              name: "removeGroupTotals",
               description: "",
               schema:
                 "input RemoveGroupTotalsInput {\n  wallet: EthereumAddress!\n  groupId: ID!\n}",
@@ -176,8 +176,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "0b4aa24e-fdd6-46ee-ab87-eefbd51ad9e2",
-              name: "SET_PERIOD_START",
+              id: "set-period-start",
+              name: "setPeriodStart",
               description: "",
               schema:
                 "input SetPeriodStartInput {\n  periodStart: DateTime!\n}",
@@ -188,8 +188,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "3e496dde-9119-4d20-916e-37119b58f5a6",
-              name: "SET_PERIOD_END",
+              id: "set-period-end",
+              name: "setPeriodEnd",
               description: "",
               schema: "input SetPeriodEndInput {\n  periodEnd: DateTime!\n}",
               template: "",
@@ -199,8 +199,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "59eacc42-f916-44c1-ac75-7027d8e69a23",
-              name: "UPDATE_WALLET",
+              id: "update-wallet",
+              name: "updateWallet",
               description: "",
               schema:
                 "input UpdateWalletInput {\n  address: EthereumAddress!\n  name: String\n  accountDocumentId: PHID\n  accountTransactionsDocumentId: PHID\n}",
@@ -213,7 +213,7 @@ export const documentModel: DocumentModelGlobalState = {
             },
             {
               id: "set-owner-id",
-              name: "SET_OWNER_ID",
+              name: "setOwnerId",
               description:
                 "Set the owner ID (builder team) for the expense report",
               schema: "input SetOwnerIdInput {\n  ownerId: PHID!\n}",
@@ -225,8 +225,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "6c8962e6-a50b-4547-9011-f5841ac256d2",
-              name: "SET_STATUS",
+              id: "set-status",
+              name: "setStatus",
               description: "",
               schema:
                 "input SetStatusInput {\n  status: ExpenseReportStatusInput!\n}\n\nenum ExpenseReportStatusInput {\n  DRAFT\n  REVIEW\n  FINAL\n}",
@@ -237,8 +237,8 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
             },
             {
-              id: "set-snapshot-period",
-              name: "SET_PERIOD",
+              id: "set-period",
+              name: "setPeriod",
               description:
                 "Set the snapshot period dates for transaction filtering",
               schema:

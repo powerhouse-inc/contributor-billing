@@ -95,14 +95,22 @@ function extractStatus(doc: PHDocument): ReportStatus {
  * Priority: NONE (no reports) < DRAFT < REVIEW < FINAL
  * If any report is DRAFT, overall is DRAFT. If any is REVIEW, overall is REVIEW.
  * Only FINAL if all reports are FINAL.
+ *
+ * Snapshot reports are skipped: their document model has no `status` field, so
+ * `extractStatus` falls back to "DRAFT" for them. Letting that phantom value
+ * vote here would pin any month containing a snapshot report to DRAFT forever,
+ * regardless of the expense reports' real status.
  */
 function calculateOverallStatus(reports: ReportDocument[]): ReportStatus {
-  if (reports.length === 0) return "NONE";
+  const withStatus = reports.filter(
+    (report) => report.documentType !== "powerhouse/snapshot-report",
+  );
+  if (withStatus.length === 0) return "NONE";
 
   let hasDraft = false;
   let hasReview = false;
 
-  for (const report of reports) {
+  for (const report of withStatus) {
     if (report.status === "DRAFT") hasDraft = true;
     if (report.status === "REVIEW") hasReview = true;
   }
@@ -170,6 +178,11 @@ export function useMonthlyReports(): UseMonthlyReportsResult {
       const monthLower = monthName.toLowerCase();
       const reportingFolderId = folderInfo.reportingFolder?.id;
 
+      // Normalize name for matching: replace hyphens/underscores with spaces
+      const normalizeForMatch = (s: string) =>
+        s.toLowerCase().replace(/[-_]/g, " ");
+      const monthNormalized = normalizeForMatch(monthName);
+
       // Find expense reports in this Reporting folder OR matching this month by name
       const expenseReports: ReportDocument[] = allExpenseReports
         .filter((doc) => {
@@ -182,9 +195,11 @@ export function useMonthlyReports(): UseMonthlyReportsResult {
           }
 
           // Otherwise, check if name matches the month (for backwards compatibility)
+          // Normalizes hyphens/underscores to spaces so "July-2025" matches "July 2025"
           const docName = doc.header.name || "";
+          const docNameNormalized = normalizeForMatch(docName);
           return (
-            docName.toLowerCase().includes(monthLower) ||
+            docNameNormalized.includes(monthNormalized) ||
             docName.includes(monthCode)
           );
         })
@@ -202,8 +217,9 @@ export function useMonthlyReports(): UseMonthlyReportsResult {
 
         // Otherwise, check if name matches the month (for backwards compatibility)
         const docName = doc.header.name || "";
+        const docNameNormalized = normalizeForMatch(docName);
         return (
-          docName.toLowerCase().includes(monthLower) ||
+          docNameNormalized.includes(monthNormalized) ||
           docName.includes(monthCode)
         );
       });

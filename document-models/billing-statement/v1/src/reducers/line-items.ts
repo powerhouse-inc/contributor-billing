@@ -1,5 +1,5 @@
 import type { BillingStatementLineItemsOperations } from "document-models/billing-statement/v1";
-import type { BillingStatementState } from "../../gen/types.js";
+import type { BillingStatementState } from "../../gen/schema/types.js";
 
 export const billingStatementLineItemsOperations: BillingStatementLineItemsOperations =
   {

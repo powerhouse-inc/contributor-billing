@@ -14,11 +14,7 @@ import type {
 import { utils } from "./utils.js";
 
 export function defaultGlobalState(): OperationalHubProfileGlobalState {
-  return {
-    name: "",
-    operatorTeam: null,
-    subteams: [],
-  };
+  return { name: "", operatorTeam: null, subteams: [] };
 }
 
 export function defaultLocalState(): OperationalHubProfileLocalState {
