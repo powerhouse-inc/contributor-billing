@@ -35,15 +35,15 @@ function InstructionSection({ onDismiss }: { onDismiss: () => void }) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <div className="bg-blue-50 border border-blue-200 rounded-lg overflow-hidden">
-      <div className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-blue-100 transition-colors">
+    <div className="bg-primary/10 border border-primary rounded-lg overflow-hidden">
+      <div className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-primary/10 transition-colors">
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex items-center gap-2 flex-1"
         >
-          <HelpCircle className="w-5 h-5 text-blue-600" />
-          <span className="font-medium text-blue-900">
+          <HelpCircle className="w-5 h-5 text-primary" />
+          <span className="font-medium text-foreground">
             Getting Started with Accounts
           </span>
         </button>
@@ -51,7 +51,7 @@ function InstructionSection({ onDismiss }: { onDismiss: () => void }) {
           <button
             type="button"
             onClick={onDismiss}
-            className="p-1 hover:bg-blue-200 rounded text-blue-600"
+            className="p-1 hover:bg-primary/15 rounded text-primary"
             title="Don't show again"
             aria-label="Dismiss help section"
           >
@@ -60,20 +60,20 @@ function InstructionSection({ onDismiss }: { onDismiss: () => void }) {
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1 hover:bg-blue-100 rounded"
+            className="p-1 hover:bg-primary/10 rounded"
           >
             {isExpanded ? (
-              <ChevronUp className="w-5 h-5 text-blue-600" />
+              <ChevronUp className="w-5 h-5 text-primary" />
             ) : (
-              <ChevronDown className="w-5 h-5 text-blue-600" />
+              <ChevronDown className="w-5 h-5 text-primary" />
             )}
           </button>
         </div>
       </div>
       {isExpanded && (
-        <div className="px-4 pb-4 text-sm text-blue-800 space-y-3">
+        <div className="px-4 pb-4 text-sm text-foreground space-y-3">
           <div>
-            <strong className="text-blue-900">What is an Account?</strong>
+            <strong className="text-foreground">What is an Account?</strong>
             <p className="mt-1">
               An account represents a wallet address or entity that participates
               in your financial flows. This could be a treasury wallet, a
@@ -81,7 +81,7 @@ function InstructionSection({ onDismiss }: { onDismiss: () => void }) {
             </p>
           </div>
           <div>
-            <strong className="text-blue-900">
+            <strong className="text-foreground">
               Why specify an Account Type?
             </strong>
             <p className="mt-1">
@@ -91,7 +91,7 @@ function InstructionSection({ onDismiss }: { onDismiss: () => void }) {
             </p>
           </div>
           <div>
-            <strong className="text-blue-900">Account Type Meanings:</strong>
+            <strong className="text-foreground">Account Type Meanings:</strong>
             <ul className="mt-1 ml-4 list-disc space-y-1">
               <li>
                 <strong>Source:</strong> Where funds originate (e.g., revenue
@@ -110,11 +110,11 @@ function InstructionSection({ onDismiss }: { onDismiss: () => void }) {
               </li>
             </ul>
           </div>
-          <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mt-2">
-            <strong className="text-amber-900">
+          <div className="bg-muted border border-border rounded-md p-3 mt-2">
+            <strong className="text-foreground">
               📊 Why fetch transactions?
             </strong>
-            <p className="mt-1 text-amber-800">
+            <p className="mt-1 text-foreground">
               Transaction history is essential for generating accurate expense
               reports. Without complete transaction data, your reports may have
               gaps or inaccuracies. After adding an account, click "Fetch
@@ -407,10 +407,10 @@ export default function Editor() {
   const accounts = document.state.global.accounts;
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-muted">
       <DocumentToolbar document={document} />
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-gray-900">Accounts</h1>
+      <div className="bg-card border-b border-border px-4 py-3 flex items-center justify-between">
+        <h1 className="text-lg font-semibold text-foreground">Accounts</h1>
       </div>
 
       <div className="flex-1 overflow-auto">
@@ -420,10 +420,10 @@ export default function Editor() {
               <div className="space-y-6">
                 {/* Header */}
                 <div>
-                  <h2 className="text-2xl font-semibold text-gray-900">
+                  <h2 className="text-2xl font-semibold text-foreground">
                     Accounts
                   </h2>
-                  <p className="mt-1 text-sm text-gray-600">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Manage your accounts and sync transactions
                   </p>
                 </div>
@@ -437,7 +437,7 @@ export default function Editor() {
                 <div className="flex items-center justify-end gap-3">
                   <Button
                     onClick={() => setViewMode("add")}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2"
                   >
                     <Plus className="w-4 h-4" aria-hidden="true" />
                     Add Account
@@ -445,7 +445,7 @@ export default function Editor() {
                   <Button
                     onClick={initiateSync}
                     disabled={isSyncingAll || accounts.length === 0}
-                    className="border border-gray-300 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                    className="border border-border bg-card hover:bg-accent disabled:bg-muted disabled:text-muted-foreground disabled:text-muted-foreground text-foreground px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                   >
                     {isSyncingAll ? (
                       <>
@@ -484,20 +484,20 @@ export default function Editor() {
                 </div>
 
                 {syncProgress && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="bg-primary/10 border border-primary rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-blue-900">
+                        <p className="text-sm font-medium text-foreground">
                           Syncing transactions: {syncProgress.account}
                         </p>
-                        <p className="text-xs text-blue-700 mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           Progress: {syncProgress.current} of{" "}
                           {syncProgress.total} accounts
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
                         <svg
-                          className="animate-spin h-5 w-5 text-blue-600"
+                          className="animate-spin h-5 w-5 text-primary"
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
@@ -522,9 +522,9 @@ export default function Editor() {
                 )}
 
                 {accounts.length === 0 ? (
-                  <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+                  <div className="bg-card rounded-xl border border-border p-12 text-center">
                     <svg
-                      className="mx-auto h-12 w-12 text-gray-400"
+                      className="mx-auto h-12 w-12 text-muted-foreground"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -536,15 +536,15 @@ export default function Editor() {
                         d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                       />
                     </svg>
-                    <h3 className="mt-4 text-lg font-medium text-gray-900">
+                    <h3 className="mt-4 text-lg font-medium text-foreground">
                       No accounts yet
                     </h3>
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-muted-foreground">
                       Get started by creating your first account
                     </p>
                     <Button
                       onClick={() => setViewMode("add")}
-                      className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors"
+                      className="mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors"
                     >
                       Add Account
                     </Button>
@@ -567,10 +567,10 @@ export default function Editor() {
             {viewMode === "add" && (
               <div className="max-w-3xl">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-semibold text-gray-900">
+                  <h2 className="text-2xl font-semibold text-foreground">
                     Add New Account
                   </h2>
-                  <p className="mt-1 text-sm text-gray-600">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Fill in the account details below
                   </p>
                 </div>
@@ -584,10 +584,10 @@ export default function Editor() {
             {viewMode === "edit" && editingAccount && (
               <div className="max-w-3xl">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-semibold text-gray-900">
+                  <h2 className="text-2xl font-semibold text-foreground">
                     Edit Account
                   </h2>
-                  <p className="mt-1 text-sm text-gray-600">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Update the account details below
                   </p>
                 </div>
@@ -605,7 +605,7 @@ export default function Editor() {
       {/* Delete Confirmation Modal */}
       {deleteConfirm.isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50"
           onClick={() =>
             setDeleteConfirm({
               isOpen: false,
@@ -615,7 +615,7 @@ export default function Editor() {
           }
         >
           <div
-            className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6"
+            className="bg-card rounded-lg shadow-xl max-w-md w-full mx-4 p-6"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -623,11 +623,11 @@ export default function Editor() {
           >
             <h3
               id="delete-modal-title"
-              className="text-lg font-semibold text-gray-900 mb-2"
+              className="text-lg font-semibold text-foreground mb-2"
             >
               Delete Account
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-muted-foreground mb-6">
               Are you sure you want to delete "{deleteConfirm.accountName}"?
               This action cannot be undone.
             </p>
@@ -640,13 +640,15 @@ export default function Editor() {
                     accountName: "",
                   })
                 }
-                className="px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                variant="outline"
+                className="px-4 py-2 rounded-lg font-medium text-foreground"
               >
                 Cancel
               </Button>
               <Button
                 onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                variant="destructive"
+                className="px-4 py-2 rounded-lg font-medium"
               >
                 Delete Account
               </Button>
@@ -658,11 +660,11 @@ export default function Editor() {
       {/* Sync Confirmation Modal */}
       {syncConfirm && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50"
           onClick={() => setSyncConfirm(false)}
         >
           <div
-            className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6"
+            className="bg-card rounded-lg shadow-xl max-w-md w-full mx-4 p-6"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -670,11 +672,11 @@ export default function Editor() {
           >
             <h3
               id="sync-modal-title"
-              className="text-lg font-semibold text-gray-900 mb-2"
+              className="text-lg font-semibold text-foreground mb-2"
             >
               Sync Transactions
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-muted-foreground mb-6">
               This will sync transactions for all {accounts.length} account
               {accounts.length !== 1 ? "s" : ""}. Accounts without transaction
               documents will have them created automatically.
@@ -682,13 +684,14 @@ export default function Editor() {
             <div className="flex justify-end gap-3">
               <Button
                 onClick={() => setSyncConfirm(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                variant="outline"
+                className="px-4 py-2 rounded-lg font-medium text-foreground"
               >
                 Cancel
               </Button>
               <Button
                 onClick={() => void handleSyncAllTransactions()}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-medium transition-colors"
               >
                 Sync All
               </Button>

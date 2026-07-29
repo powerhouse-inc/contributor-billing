@@ -116,16 +116,16 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
       `}</style>
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-xl border border-gray-200 shadow-sm p-6"
+        className="bg-card rounded-xl border border-border shadow-sm p-6"
       >
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label
                 htmlFor="account-address"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-foreground mb-2"
               >
-                Account <span className="text-red-500">*</span>
+                Account <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
@@ -147,18 +147,18 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
                 placeholder="e.g., 0x1234...abcd"
                 spellCheck={false}
                 autoComplete="off"
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent ${
                   accountError
-                    ? "border-red-300 focus:ring-red-500"
-                    : "border-gray-300"
-                }`}
+                    ? "border-destructive focus:ring-destructive"
+                    : "border-input"
+                } bg-background text-foreground placeholder:text-muted-foreground`}
                 required
               />
               {accountError && (
-                <p className="mt-1 text-sm text-red-600">{accountError}</p>
+                <p className="mt-1 text-sm text-destructive">{accountError}</p>
               )}
               {!accountError && formData.account && (
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Ethereum address format: 0x followed by 40 hexadecimal
                   characters
                 </p>
@@ -168,9 +168,9 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
             <div>
               <label
                 htmlFor="account-name"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-foreground mb-2"
               >
-                Name <span className="text-red-500">*</span>
+                Name <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
@@ -181,7 +181,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 placeholder="e.g., Main Treasury"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground placeholder:text-muted-foreground"
                 required
               />
             </div>
@@ -192,9 +192,9 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
               <TooltipProvider delayDuration={0}>
                 <label
                   htmlFor="account-type"
-                  className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-2"
+                  className="flex items-center gap-1 text-sm font-medium text-foreground mb-2"
                 >
-                  Account Type <span className="text-red-500">*</span>
+                  Account Type <span className="text-destructive">*</span>
                   <Tooltip
                     content={
                       <div className="text-xs">
@@ -219,7 +219,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
                     }
                     side="right"
                   >
-                    <Info className="w-4 h-4 text-gray-400 cursor-help" />
+                    <Info className="w-4 h-4 text-muted-foreground cursor-help" />
                   </Tooltip>
                 </label>
               </TooltipProvider>
@@ -235,7 +235,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
                   // Clear custom validation message when user selects a value
                   e.target.setCustomValidity("");
                 }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-card text-foreground"
                 required
               >
                 <option value="">Select type...</option>
@@ -249,7 +249,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
             <div>
               <label
                 htmlFor="kyc-status"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-foreground mb-2"
               >
                 KYC/AML Status
               </label>
@@ -263,7 +263,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
                     KycAmlStatus: e.target.value as KycAmlStatusTypeInput,
                   })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-card text-foreground"
               >
                 <option value="">Select status...</option>
                 <option value="PASSED">Passed</option>
@@ -276,7 +276,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
           <div>
             <label
               htmlFor="budget-path"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-foreground mb-2"
             >
               Budget Path
             </label>
@@ -289,7 +289,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
                 setFormData({ ...formData, budgetPath: e.target.value })
               }
               placeholder="e.g., /treasury/operations"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
@@ -297,7 +297,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
             <div>
               <label
                 htmlFor="account-transactions-id"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-foreground mb-2"
               >
                 Account Transactions ID
               </label>
@@ -313,7 +313,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
                   })
                 }
                 placeholder="e.g., tx-12345"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground placeholder:text-muted-foreground"
               />
             </div>
           )}
@@ -321,10 +321,10 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
           <div>
             <label
               htmlFor="chains"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-foreground mb-2"
             >
               Chains
-              <span className="ml-2 text-xs text-gray-500 font-normal">
+              <span className="ml-2 text-xs text-muted-foreground font-normal">
                 (comma-separated)
               </span>
             </label>
@@ -337,17 +337,17 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
                 setFormData({ ...formData, chain: e.target.value })
               }
               placeholder="e.g., Ethereum, Polygon, Arbitrum"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           <div>
             <label
               htmlFor="owners"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-foreground mb-2"
             >
               Owners
-              <span className="ml-2 text-xs text-gray-500 font-normal">
+              <span className="ml-2 text-xs text-muted-foreground font-normal">
                 (comma-separated)
               </span>
             </label>
@@ -360,22 +360,23 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
                 setFormData({ ...formData, owners: e.target.value })
               }
               placeholder="e.g., Alice, Bob, Charlie"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground placeholder:text-muted-foreground"
             />
           </div>
         </div>
 
-        <div className="mt-8 flex items-center justify-end gap-3 pt-6 border-t border-gray-200">
+        <div className="mt-8 flex items-center justify-end gap-3 pt-6 border-t border-border">
           <Button
             type="button"
             onClick={onCancel}
-            className="px-6 py-2.5 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            variant="outline"
+            className="px-6 py-2.5 rounded-lg font-medium text-foreground"
           >
             Cancel
           </Button>
           <Button
             type="submit"
-            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-sm transition-colors"
+            className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-medium shadow-sm transition-colors"
           >
             {account ? "Update Account" : "Add Account"}
           </Button>

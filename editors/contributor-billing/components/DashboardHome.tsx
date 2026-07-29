@@ -261,7 +261,7 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
               >
                 <div className="mt-0.5">
                   {step.done ? (
-                    <CheckCircle2 className="w-5 h-5 text-status-success" />
+                    <CheckCircle2 className="w-5 h-5 text-success" />
                   ) : (
                     <div className="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center text-xs font-semibold text-primary">
                       {index + 1}
@@ -322,7 +322,7 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
           </div>
           {!operationalHubProfileDocument && (
             <div className="mt-3 pt-3 border-t border-border">
-              <span className="text-xs font-medium text-status-warning bg-status-warning/15 px-2 py-1 rounded">
+              <span className="text-xs font-medium text-warning bg-warning/15 px-2 py-1 rounded">
                 Action Required
               </span>
             </div>
@@ -336,12 +336,8 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
         >
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div
-                className={`p-3 rounded-lg ${accountsDocument ? "bg-status-success/20" : "bg-status-warning/15"}`}
-              >
-                <Wallet
-                  className={`w-5 h-5 ${accountsDocument ? "text-status-success" : "text-status-warning"}`}
-                />
+              <div className="p-3 rounded-lg bg-primary/15">
+                <Wallet className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">Accounts</h3>
@@ -356,7 +352,7 @@ export function DashboardHome({ onFolderSelect }: DashboardHomeProps) {
           </div>
           {!accountsDocument && (
             <div className="mt-3 pt-3 border-t border-border">
-              <span className="text-xs font-medium text-status-warning bg-status-warning/15 px-2 py-1 rounded">
+              <span className="text-xs font-medium text-warning bg-warning/15 px-2 py-1 rounded">
                 Action Required
               </span>
             </div>

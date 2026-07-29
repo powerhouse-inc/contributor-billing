@@ -21,7 +21,7 @@ export function DocumentHeader({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+    <div className="bg-card rounded-xl border border-border p-6 mb-8">
       <div className="flex items-center justify-between mb-4">
         {isEditing ? (
           <Form
@@ -33,20 +33,20 @@ export function DocumentHeader({
               <StringField
                 name="name"
                 placeholder="Enter document name"
-                className="text-2xl font-semibold border-0 border-b-2 border-gray-300 focus:border-blue-500 bg-transparent p-0"
+                className="text-2xl font-semibold border-0 border-b-2 border-border focus:border-primary bg-transparent p-0"
               />
             </div>
             <div className="flex gap-2">
               <Button
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-sm"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1 text-sm"
               >
                 Save
               </Button>
               <Button
                 type="button"
                 onClick={() => setIsEditing(false)}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-3 py-1 text-sm"
+                className="bg-muted hover:bg-accent text-foreground px-3 py-1 text-sm"
               >
                 Cancel
               </Button>
@@ -54,12 +54,12 @@ export function DocumentHeader({
           </Form>
         ) : (
           <>
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1 className="text-2xl font-semibold text-foreground">
               {document.header.name}
             </h1>
             <Button
               onClick={() => setIsEditing(true)}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 text-sm border border-gray-300"
+              className="bg-muted hover:bg-accent text-foreground px-3 py-1 text-sm border border-border"
             >
               Edit Name
             </Button>
@@ -67,7 +67,7 @@ export function DocumentHeader({
         )}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
         <div>
           <span className="font-medium">ID:</span>
           <p className="font-mono text-xs break-all">{document.header.id}</p>

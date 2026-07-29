@@ -1,10 +1,10 @@
 import { useToasts } from "./cbToast.js";
 
 const typeStyles: Record<string, string> = {
-  success: "bg-status-success",
+  success: "bg-success",
   error: "bg-destructive",
-  warning: "bg-status-warning",
-  info: "bg-status-progress",
+  warning: "bg-warning",
+  info: "bg-info",
 };
 
 export function ToastRenderer() {

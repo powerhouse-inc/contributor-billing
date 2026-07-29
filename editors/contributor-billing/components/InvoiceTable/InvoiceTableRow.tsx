@@ -179,8 +179,8 @@ export const InvoiceTableRow = ({
       <td className="px-2 py-2 text-center">
         {hasExportedData ? (
           <div className="flex flex-col items-center">
-            <span className="text-status-success text-sm font-medium">Yes</span>
-            <span className="text-status-success text-xs">
+            <span className="text-success text-sm font-medium">Yes</span>
+            <span className="text-success text-xs">
               {formatTimestamp(row.exported!.timestamp!)}
             </span>
           </div>

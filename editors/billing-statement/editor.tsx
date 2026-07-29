@@ -46,35 +46,35 @@ export default function Editor(
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
+    <div className="min-h-screen w-full bg-gradient-to-br from-background via-primary/10 to-background">
       <DocumentToolbar document={doc} />
 
       <div className="w-full">
         <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-          <div className="overflow-hidden rounded-3xl border border-slate-200/60 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             {/* Header */}
-            <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-blue-50/50 px-8 py-6">
+            <div className="border-b border-border bg-gradient-to-r from-background to-primary/10 px-8 py-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-3xl font-light tracking-tight text-slate-800">
+                  <h1 className="text-3xl font-light tracking-tight text-foreground">
                     Billing Statement
                   </h1>
                 </div>
 
                 <div className="flex items-center gap-10">
                   <div className="flex flex-col items-end gap-1.5">
-                    <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                    <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                       Submitter
                     </div>
-                    <div className="text-sm font-medium text-slate-700">
+                    <div className="text-sm font-medium text-foreground">
                       {state.contributor}
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1.5">
-                    <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                    <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                       Status
                     </div>
-                    <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                    <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
                       {String(state.status || "—")}
                     </span>
                   </div>
@@ -84,16 +84,16 @@ export default function Editor(
 
             {/* Body */}
             <div className="px-8 py-8">
-              <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/50 px-5 py-4">
-                <div className="text-sm text-slate-500">
+              <div className="flex items-center justify-between rounded-2xl border border-border bg-muted px-5 py-4">
+                <div className="text-sm text-muted-foreground">
                   Keep edits lightweight: double‑click a row to edit, click
                   outside to auto‑save.
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                  <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     Currency
                   </span>
-                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                  <div className="rounded-xl border border-border bg-card px-3 py-2 shadow-sm">
                     <Select
                       className="w-28"
                       options={currencyList.map((currency) => ({
@@ -120,7 +120,7 @@ export default function Editor(
 
               {/* Notes + Totals */}
               <div className="mt-8 grid gap-6 lg:grid-cols-2">
-                <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
                   <Textarea
                     label="Notes"
                     placeholder="Add notes"
@@ -141,44 +141,44 @@ export default function Editor(
                     }}
                     className="p-2"
                   />
-                  <div className="mt-3 text-xs text-slate-400">
+                  <div className="mt-3 text-xs text-muted-foreground">
                     Tip: notes are saved by clicking outside of the textarea or
                     pressing tab.
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
                   <div className="flex items-baseline justify-between">
-                    <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                    <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                       Totals
                     </div>
-                    <div className="text-xs text-slate-300">read‑only</div>
+                    <div className="text-xs text-muted-foreground">read‑only</div>
                   </div>
-                  <div className="mt-4 overflow-hidden rounded-xl border border-slate-100">
+                  <div className="mt-4 overflow-hidden rounded-xl border border-border">
                     <table className="w-full border-collapse">
-                      <thead className="bg-gradient-to-r from-slate-50 to-blue-50/30">
+                      <thead className="bg-gradient-to-r from-background to-primary/10">
                         <tr>
-                          <th className="border-b border-slate-100 px-5 py-3.5 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+                          <th className="border-b border-border px-5 py-3.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                             Total Fiat
                           </th>
-                          <th className="border-b border-slate-100 px-5 py-3.5 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+                          <th className="border-b border-border px-5 py-3.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                             Total POWT
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white">
+                      <tbody className="bg-card">
                         <tr>
-                          <td className="border-t border-slate-50 px-5 py-4 font-mono text-base tabular-nums text-slate-700">
+                          <td className="border-t border-border px-5 py-4 font-mono text-base tabular-nums text-foreground">
                             {formatNumber(state.totalCash)}
                           </td>
-                          <td className="border-t border-slate-50 px-5 py-4 font-mono text-base tabular-nums text-slate-700">
+                          <td className="border-t border-border px-5 py-4 font-mono text-base tabular-nums text-foreground">
                             {formatNumber(state.totalPowt)}
                           </td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
-                  <div className="mt-3 text-xs text-slate-400">
+                  <div className="mt-3 text-xs text-muted-foreground">
                     Totals update from line items.
                   </div>
                 </div>

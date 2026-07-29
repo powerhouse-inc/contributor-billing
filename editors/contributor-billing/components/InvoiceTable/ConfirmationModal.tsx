@@ -24,7 +24,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   if (!open) return null;
 
   return (
-    <div className="contributor-billing-modal fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-sm">
+    <div className="contributor-billing-modal fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md">
       <div className="bg-card rounded-2xl shadow-xl w-full max-w-md p-6">
         <div className="border-b border-border pb-3 text-xl font-semibold text-foreground">
           {header}

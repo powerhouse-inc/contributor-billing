@@ -19,12 +19,12 @@ export const NotificationDialog = ({
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md">
       <div className="mx-4 w-full max-w-md rounded-2xl border border-border bg-card shadow-lg">
         {/* Header */}
         <div
           className={`border-b border-border px-6 py-4 ${
-            type === "error" ? "bg-destructive/15" : "bg-status-success/20"
+            type === "error" ? "bg-destructive/15" : "bg-success/20"
           }`}
         >
           <div className="flex items-center gap-3">
@@ -45,9 +45,9 @@ export const NotificationDialog = ({
                 </svg>
               </div>
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-status-success/20">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/20">
                 <svg
-                  className="h-5 w-5 text-status-success"
+                  className="h-5 w-5 text-success"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -63,7 +63,7 @@ export const NotificationDialog = ({
             )}
             <h3
               className={`text-lg font-semibold ${
-                type === "error" ? "text-destructive" : "text-status-success"
+                type === "error" ? "text-destructive" : "text-success"
               }`}
             >
               {title}
@@ -102,7 +102,7 @@ export const NotificationDialog = ({
             className={`w-full rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
               type === "error"
                 ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                : "bg-status-success text-primary-foreground hover:bg-status-success/90"
+                : "bg-success text-primary-foreground hover:bg-success/90"
             }`}
           >
             Got it

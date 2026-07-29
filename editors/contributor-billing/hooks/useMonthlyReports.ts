@@ -95,14 +95,22 @@ function extractStatus(doc: PHDocument): ReportStatus {
  * Priority: NONE (no reports) < DRAFT < REVIEW < FINAL
  * If any report is DRAFT, overall is DRAFT. If any is REVIEW, overall is REVIEW.
  * Only FINAL if all reports are FINAL.
+ *
+ * Snapshot reports are skipped: their document model has no `status` field, so
+ * `extractStatus` falls back to "DRAFT" for them. Letting that phantom value
+ * vote here would pin any month containing a snapshot report to DRAFT forever,
+ * regardless of the expense reports' real status.
  */
 function calculateOverallStatus(reports: ReportDocument[]): ReportStatus {
-  if (reports.length === 0) return "NONE";
+  const withStatus = reports.filter(
+    (report) => report.documentType !== "powerhouse/snapshot-report",
+  );
+  if (withStatus.length === 0) return "NONE";
 
   let hasDraft = false;
   let hasReview = false;
 
-  for (const report of reports) {
+  for (const report of withStatus) {
     if (report.status === "DRAFT") hasDraft = true;
     if (report.status === "REVIEW") hasReview = true;
   }

@@ -138,12 +138,12 @@ export function DriveExplorer({ children }: EditorProps) {
       <div className="flex h-full items-center justify-center px-4 py-12">
         <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-border bg-card p-12 shadow-lg">
           {/* Decorative background elements */}
-          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gradient-to-br from-primary/20 to-purple/20 blur-3xl" />
-          <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-gradient-to-br from-purple/15 to-primary/15 blur-2xl" />
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 blur-3xl" />
+          <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-gradient-to-br from-secondary/15 to-primary/15 blur-2xl" />
 
           {/* Content */}
           <div className="relative z-10 text-center">
-            <div className="mb-6 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-primary to-purple p-3 shadow-primary">
+            <div className="mb-6 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-primary to-secondary p-3 shadow-primary">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="32"
@@ -188,7 +188,7 @@ export function DriveExplorer({ children }: EditorProps) {
               <button
                 type="submit"
                 disabled={!isValid || isCreating}
-                className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-primary to-purple px-8 py-4 text-base font-semibold text-primary-foreground shadow-primary transition-all duration-300 hover:scale-105 active:scale-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+                className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-primary to-secondary px-8 py-4 text-base font-semibold text-primary-foreground shadow-primary transition-all duration-300 hover:scale-105 active:scale-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   <span>
@@ -210,7 +210,7 @@ export function DriveExplorer({ children }: EditorProps) {
                     </svg>
                   )}
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-purple to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="absolute inset-0 bg-gradient-to-r from-secondary to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </button>
             </form>
           </div>

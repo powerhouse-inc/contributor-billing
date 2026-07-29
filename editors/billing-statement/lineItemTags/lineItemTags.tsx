@@ -51,27 +51,27 @@ export function LineItemTagsTable({
     });
   };
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 text-slate-800">
+    <div className="min-h-screen w-full bg-gradient-to-br from-background via-primary/10 to-background text-foreground">
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white text-slate-800 shadow-[0_18px_50px_rgba(15,23,42,0.10)]">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card text-foreground shadow-[0_18px_50px_rgba(15,23,42,0.10)]">
           {/* Header */}
-          <div className="relative border-b border-slate-200/60 bg-gradient-to-r from-slate-50 to-blue-50/50 px-6 py-5 text-slate-800">
+          <div className="relative border-b border-border bg-gradient-to-r from-background to-primary/10 px-6 py-5 text-foreground">
             {/* Close button - absolute positioned top right */}
             <button
               type="button"
               onClick={onClose}
-              className="absolute top-4 right-4 inline-flex items-center justify-center rounded-full border border-slate-300/60 bg-slate-100/50 p-2 text-slate-600 transition hover:bg-slate-200/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50"
+              className="absolute top-4 right-4 inline-flex items-center justify-center rounded-full border border-border bg-muted p-2 text-muted-foreground transition hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50"
               aria-label="Close tag editor"
             >
               <X className="h-5 w-5" />
             </button>
 
             <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200/60 bg-white">
-                <Tag className="h-5 w-5 text-slate-600" />
+              <div className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-card">
+                <Tag className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <div className="text-[11px] font-medium tracking-[0.22em] text-slate-500">
+                <div className="text-[11px] font-medium tracking-[0.22em] text-muted-foreground">
                   TAG EDITOR
                 </div>
                 <h2 className="text-xl font-medium tracking-tight">
@@ -89,32 +89,32 @@ export function LineItemTagsTable({
 
           {/* Table */}
           <div className="p-6">
-            <div className="overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+            <div className="overflow-hidden rounded-xl border border-border bg-card shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
-                  <thead className="bg-gradient-to-r from-slate-50 to-blue-50/30 text-slate-800">
+                  <thead className="bg-gradient-to-r from-background to-primary/10 text-foreground">
                     <tr>
-                      <th className="border-b border-slate-200/60 px-3 py-3 text-left text-[11px] font-medium tracking-[0.20em] text-slate-600">
+                      <th className="border-b border-border px-3 py-3 text-left text-[11px] font-medium tracking-[0.20em] text-muted-foreground">
                         ITEM
                       </th>
-                      <th className="border-b border-slate-200/60 px-3 py-3 text-left text-[11px] font-medium tracking-[0.20em] text-slate-600">
+                      <th className="border-b border-border px-3 py-3 text-left text-[11px] font-medium tracking-[0.20em] text-muted-foreground">
                         PERIOD
                       </th>
-                      <th className="border-b border-slate-200/60 px-3 py-3 text-left text-[11px] font-medium tracking-[0.20em] text-slate-600">
+                      <th className="border-b border-border px-3 py-3 text-left text-[11px] font-medium tracking-[0.20em] text-muted-foreground">
                         EXPENSE ACCOUNT
                       </th>
-                      <th className="border-b border-slate-200/60 px-3 py-3 text-left text-[11px] font-medium tracking-[0.20em] text-slate-600">
+                      <th className="border-b border-border px-3 py-3 text-left text-[11px] font-medium tracking-[0.20em] text-muted-foreground">
                         BUDGET ALLOCATION
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="text-sm text-slate-700">
+                  <tbody className="text-sm">
                     {lineItems.map((item) => (
                       <tr
                         key={item.id}
-                        className="odd:bg-slate-50/30 even:bg-white hover:bg-blue-50/30"
+                        className="odd:bg-muted even:bg-card hover:bg-primary/10"
                       >
-                        <td className="border-b border-slate-200/60 p-2">
+                        <td className="border-b border-border p-2">
                           <InputField
                             value={item.description}
                             handleInputChange={() => {}}
@@ -129,7 +129,7 @@ export function LineItemTagsTable({
                             className="w-full text-xs"
                           />
                         </td>
-                        <td className="border-b border-slate-200/60 p-2 w-50">
+                        <td className="border-b border-border p-2 w-50">
                           <DatePicker
                             name="period"
                             dateFormat="YYYY-MM-DD"
@@ -162,10 +162,10 @@ export function LineItemTagsTable({
                                 }),
                               )
                             }
-                            className="w-full text-xs bg-white"
+                            className="w-full text-xs bg-card"
                           />
                         </td>
-                        <td className="border-b border-slate-200/60 p-2">
+                        <td className="border-b border-border p-2">
                           <Select
                             options={expenseAccountOptions}
                             value={
@@ -191,7 +191,7 @@ export function LineItemTagsTable({
                             className="w-full text-xs"
                           />
                         </td>
-                        <td className="border-b border-slate-200/60 p-2">
+                        <td className="border-b border-border p-2">
                           <Select
                             options={budgetOptions}
                             value={
@@ -222,7 +222,7 @@ export function LineItemTagsTable({
               </div>
             </div>
 
-            <div className="mt-4 text-xs text-slate-400">
+            <div className="mt-4 text-xs text-muted-foreground">
               Changes persist as you blur fields/selects.
             </div>
           </div>

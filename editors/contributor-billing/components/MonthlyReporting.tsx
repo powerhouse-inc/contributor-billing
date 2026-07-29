@@ -29,17 +29,17 @@ function getStatusColors(status: string | null): {
     case "final":
     case "approved":
     case "completed":
-      return { bg: "bg-status-success/20", text: "text-status-success" };
+      return { bg: "bg-success/20", text: "text-success" };
     case "submitted":
     case "review":
     case "in_review":
-      return { bg: "bg-status-progress/20", text: "text-status-progress" };
+      return { bg: "bg-info/20", text: "text-info" };
     case "rejected":
     case "cancelled":
       return { bg: "bg-destructive/15", text: "text-destructive" };
     case "draft":
     default:
-      return { bg: "bg-status-warning/15", text: "text-status-warning" };
+      return { bg: "bg-warning/15", text: "text-warning" };
   }
 }
 
@@ -199,18 +199,14 @@ export function MonthlyReporting({
                   >
                     Snapshot Report
                   </span>
-                  {snapshotReport.exists && (
-                    <span
-                      className={`text-xs font-medium px-1.5 py-0.5 rounded ml-auto ${snapshotReport.colors.bg} ${snapshotReport.colors.text}`}
-                    >
-                      {snapshotReport.status}
-                    </span>
-                  )}
+                  {/* No status badge: the snapshot-report document model has no
+                      `status` field, so anything shown here would be the
+                      fabricated "Draft" fallback rather than real state. */}
                 </div>
               </div>
               {!expenseReport.exists && !snapshotReport.exists && (
                 <div className="mt-3 pt-3 border-t border-border">
-                  <span className="text-xs font-medium text-status-warning bg-status-warning/15 px-2 py-1 rounded">
+                  <span className="text-xs font-medium text-warning bg-warning/15 px-2 py-1 rounded">
                     Reports pending for {monthName}
                   </span>
                 </div>

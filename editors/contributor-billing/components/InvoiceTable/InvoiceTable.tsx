@@ -103,15 +103,15 @@ export const statusOptions = [
 
 // Status color mappings
 const statusColors: Record<string, string> = {
-  DRAFT: "bg-status-progress/20 text-status-progress",
-  ISSUED: "bg-status-progress/20 text-status-progress",
-  ACCEPTED: "bg-status-success/20 text-status-success",
-  PAYMENTSCHEDULED: "bg-status-success/20 text-status-success",
-  PAYMENTSENT: "bg-status-success/20 text-status-success",
-  PAYMENTISSUE: "bg-status-warning/15 text-status-warning",
+  DRAFT: "bg-info/20 text-info",
+  ISSUED: "bg-info/20 text-info",
+  ACCEPTED: "bg-success/20 text-success",
+  PAYMENTSCHEDULED: "bg-success/20 text-success",
+  PAYMENTSENT: "bg-success/20 text-success",
+  PAYMENTISSUE: "bg-warning/15 text-warning",
   PAYMENTCLOSED: "bg-destructive/15 text-destructive",
   REJECTED: "bg-destructive/15 text-destructive",
-  OTHER: "bg-status-progress/20 text-status-progress",
+  OTHER: "bg-info/20 text-info",
 };
 
 interface InvoiceTableProps {

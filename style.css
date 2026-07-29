@@ -338,3 +338,29 @@ div:has(> .select__search) {
 .base-picker__input button {
   background-color: transparent !important;
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Native date / time inputs — the browser-drawn calendar indicator
+   ──────────────────────────────────────────────────────────────────────────
+   `<input type="date">` renders its little calendar glyph via
+   ::-webkit-calendar-picker-indicator, which the browser paints itself — no
+   className reaches it, so none of our tokens apply. It follows the CSS
+   `color-scheme` property, and that defaults to `light`: in dark mode the glyph
+   stays dark and disappears against the dark field (and the native picker popup
+   opens light). Declaring the scheme per theme fixes both the indicator and the
+   popup. Applies to every native date/time control (the Snapshot Period range
+   and the account-transactions datetime field). */
+input[type="date"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"],
+input[type="time"] {
+  color-scheme: light;
+}
+.dark input[type="date"],
+.dark input[type="datetime-local"],
+.dark input[type="month"],
+.dark input[type="week"],
+.dark input[type="time"] {
+  color-scheme: dark;
+}

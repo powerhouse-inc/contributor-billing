@@ -203,6 +203,11 @@ export function BillingOverview({
     );
   }
 
+  // Only tint the Pending / Paid tiles when they actually have something to
+  // report — a zero count should read as neutral, not as a warning/success.
+  const hasPending = paymentStats.pendingCount > 0;
+  const hasPaid = paymentStats.paidCount > 0;
+
   return (
     <div>
       {/* Page Header */}
@@ -256,36 +261,52 @@ export function BillingOverview({
               })}
             </p>
           </div>
-          <div className="bg-status-warning/15 rounded-lg p-3">
-            <span className="text-sm text-status-warning">Pending</span>
-            <p className="text-xl font-bold text-status-warning">
+          <div
+            className={`rounded-lg p-3 ${hasPending ? "bg-warning/15" : "bg-muted"}`}
+          >
+            <span
+              className={`text-sm ${hasPending ? "text-warning" : "text-muted-foreground"}`}
+            >
+              Pending
+            </span>
+            <p
+              className={`text-xl font-bold ${hasPending ? "text-warning" : "text-foreground"}`}
+            >
               {paymentStats.pendingCount}
             </p>
           </div>
-          <div className="bg-status-success/20 rounded-lg p-3">
-            <span className="text-sm text-status-success">Paid</span>
-            <p className="text-xl font-bold text-status-success">
+          <div
+            className={`rounded-lg p-3 ${hasPaid ? "bg-success/20" : "bg-muted"}`}
+          >
+            <span
+              className={`text-sm ${hasPaid ? "text-success" : "text-muted-foreground"}`}
+            >
+              Paid
+            </span>
+            <p
+              className={`text-xl font-bold ${hasPaid ? "text-success" : "text-foreground"}`}
+            >
               {paymentStats.paidCount}
             </p>
           </div>
           <div
-            className={`${reportingCompleteness.total > 0 && reportingCompleteness.complete === reportingCompleteness.total ? "bg-status-success/20" : "bg-status-warning/15"} rounded-lg p-3`}
+            className={`${reportingCompleteness.total > 0 && reportingCompleteness.complete === reportingCompleteness.total ? "bg-success/20" : "bg-warning/15"} rounded-lg p-3`}
           >
             <div className="flex items-center gap-2 mb-1">
               {reportingCompleteness.total > 0 &&
               reportingCompleteness.complete === reportingCompleteness.total ? (
-                <CheckCircle2 className="w-4 h-4 text-status-success" />
+                <CheckCircle2 className="w-4 h-4 text-success" />
               ) : (
-                <AlertTriangle className="w-4 h-4 text-status-warning" />
+                <AlertTriangle className="w-4 h-4 text-warning" />
               )}
               <span
-                className={`text-sm ${reportingCompleteness.total > 0 && reportingCompleteness.complete === reportingCompleteness.total ? "text-status-success" : "text-status-warning"}`}
+                className={`text-sm ${reportingCompleteness.total > 0 && reportingCompleteness.complete === reportingCompleteness.total ? "text-success" : "text-warning"}`}
               >
                 Reports Complete
               </span>
             </div>
             <p
-              className={`text-xl font-bold ${reportingCompleteness.total > 0 && reportingCompleteness.complete === reportingCompleteness.total ? "text-status-success" : "text-status-warning"}`}
+              className={`text-xl font-bold ${reportingCompleteness.total > 0 && reportingCompleteness.complete === reportingCompleteness.total ? "text-success" : "text-warning"}`}
             >
               {reportingCompleteness.complete}/{reportingCompleteness.total}
             </p>
@@ -295,10 +316,10 @@ export function BillingOverview({
 
       {/* Action Items */}
       {actionItems.length > 0 && (
-        <div className="bg-status-warning/15 border border-status-warning/30 rounded-xl p-4 mb-6">
+        <div className="bg-warning/15 border border-warning/30 rounded-xl p-4 mb-6">
           <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="w-4 h-4 text-status-warning" />
-            <span className="text-sm font-semibold text-status-warning">
+            <AlertTriangle className="w-4 h-4 text-warning" />
+            <span className="text-sm font-semibold text-warning">
               Needs attention
             </span>
           </div>
@@ -308,11 +329,11 @@ export function BillingOverview({
                 {item.folderInfo && onFolderSelect ? (
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between text-left text-sm text-foreground hover:bg-status-warning/25 rounded px-2 py-1.5 transition-colors"
+                    className="w-full flex items-center justify-between text-left text-sm text-foreground hover:bg-warning/25 rounded px-2 py-1.5 transition-colors"
                     onClick={() => onFolderSelect(item.folderInfo!)}
                   >
                     <span>• {item.label}</span>
-                    <ChevronRight className="w-4 h-4 text-status-warning flex-shrink-0" />
+                    <ChevronRight className="w-4 h-4 text-warning flex-shrink-0" />
                   </button>
                 ) : (
                   <span className="text-sm text-foreground px-2 py-1.5 block">

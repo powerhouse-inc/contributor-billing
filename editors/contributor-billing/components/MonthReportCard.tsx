@@ -44,11 +44,11 @@ interface MonthReportCardProps {
 function getStatusColors(status: ReportStatus): { bg: string; text: string } {
   switch (status) {
     case "FINAL":
-      return { bg: "bg-status-success/20", text: "text-status-success" };
+      return { bg: "bg-success/20", text: "text-success" };
     case "REVIEW":
-      return { bg: "bg-status-progress/20", text: "text-status-progress" };
+      return { bg: "bg-info/20", text: "text-info" };
     case "DRAFT":
-      return { bg: "bg-status-warning/15", text: "text-status-warning" };
+      return { bg: "bg-warning/15", text: "text-warning" };
     case "NONE":
     default:
       return { bg: "bg-muted", text: "text-muted-foreground" };
@@ -115,11 +115,16 @@ function ReportRow({
           </span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span
-            className={`px-2 py-0.5 text-xs font-medium rounded-full ${colors.bg} ${colors.text}`}
-          >
-            {getStatusLabel(report.status)}
-          </span>
+          {/* Snapshot reports have no `status` field in their document model, so
+              there is nothing to show — rendering a badge here would display a
+              fabricated default. Only expense reports carry a real status. */}
+          {!isSnapshot && (
+            <span
+              className={`px-2 py-0.5 text-xs font-medium rounded-full ${colors.bg} ${colors.text}`}
+            >
+              {getStatusLabel(report.status)}
+            </span>
+          )}
           <ArrowRight className="w-4 h-4 text-muted-foreground" />
         </div>
       </button>
@@ -295,7 +300,7 @@ export function MonthReportCard({
               className="w-full flex items-center justify-between p-3 hover:bg-accent cursor-pointer transition-colors border-b border-border"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <CreditCard className="w-4 h-4 text-status-success flex-shrink-0" />
+                <CreditCard className="w-4 h-4 text-success flex-shrink-0" />
                 <span className="text-sm font-medium text-foreground">
                   Payments
                 </span>
@@ -304,13 +309,13 @@ export function MonthReportCard({
                     {paymentStats.totalInvoices} invoice
                     {paymentStats.totalInvoices !== 1 ? "s" : ""}
                     {paymentStats.pendingCount > 0 && (
-                      <span className="text-status-warning">
+                      <span className="text-warning">
                         {" "}
                         · {paymentStats.pendingCount} pending
                       </span>
                     )}
                     {paymentStats.paidCount > 0 && (
-                      <span className="text-status-success">
+                      <span className="text-success">
                         {" "}
                         · {paymentStats.paidCount} paid
                       </span>
@@ -375,7 +380,7 @@ export function MonthReportCard({
                   !reportSet.snapshotReport &&
                   suggestedStartDate &&
                   !isFirstOfMonth(suggestedStartDate, reportSet.monthName) && (
-                    <div className="flex items-center gap-1.5 mt-2 text-xs text-status-progress">
+                    <div className="flex items-center gap-1.5 mt-2 text-xs text-info">
                       <Info className="w-3.5 h-3.5 flex-shrink-0" />
                       <span>
                         Transaction period will start{" "}
