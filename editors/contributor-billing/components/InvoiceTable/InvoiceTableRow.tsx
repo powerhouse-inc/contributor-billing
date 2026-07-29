@@ -116,18 +116,27 @@ export const InvoiceTableRow = ({
         />
       </td>
 
-      {/* Invoice/Issuer Column */}
+      {/* Invoice/Issuer Column.
+          FileItem's own surface is `bg-muted`, and in dark mode the design system
+          resolves --muted and --card to the same slate-700 - so the tile vanishes
+          against the table's bg-card (it reads fine in light, where they differ).
+          FileItem merges className through twMerge, so a background passed here
+          wins. A --foreground overlay lifts the tile off the card in BOTH themes
+          rather than needing a dark-only override. */}
       <td className="py-1 px-2">
         {showIssuerColumn ? (
           invoiceFile ? (
-            <FileItem fileNode={invoiceFile} className="h-10" />
+            <FileItem
+              fileNode={invoiceFile}
+              className="h-10 bg-foreground/10"
+            />
           ) : (
             <span className="text-muted-foreground">
               {row.issuer || "Unknown"}
             </span>
           )
         ) : invoiceFile ? (
-          <FileItem fileNode={invoiceFile} className="h-10" />
+          <FileItem fileNode={invoiceFile} className="h-10 bg-foreground/10" />
         ) : (
           <span className="text-muted-foreground">-</span>
         )}
@@ -170,7 +179,10 @@ export const InvoiceTableRow = ({
               Generate Billing Statement
             </button>
           ) : billingFile ? (
-            <FileItem fileNode={billingFile} className="h-10" />
+            <FileItem
+              fileNode={billingFile}
+              className="h-10 bg-foreground/10"
+            />
           ) : null}
         </td>
       )}
