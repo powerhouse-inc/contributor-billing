@@ -364,3 +364,40 @@ input[type="time"] {
 .dark input[type="time"] {
   color-scheme: dark;
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Dark-mode surface separation
+   ──────────────────────────────────────────────────────────────────────────
+   The design system resolves --card, --muted, --accent AND --popover all to
+   slate-700 in dark mode. In light mode they differ (white vs gray-100), so
+   anything relying on the contrast between them works there and silently
+   collapses in dark: a `bg-muted` tile on a `bg-card` panel is invisible,
+   `hover:bg-accent` produces no visible hover, and a `bg-popover` control on a
+   card shows only its border.
+
+   Give each a distinct step above --card. Derived from --card via color-mix
+   rather than hardcoded slate values so the relationship survives a palette
+   change, and expressed as a lift toward --foreground so the amount of
+   separation is readable at a glance:
+
+     --card     the panel surface                     (unchanged)
+     --muted    +10% - fills/tiles sitting on a panel
+     --popover  +10% - floating surfaces above a panel
+     --accent   +18% - hover, needs to read against BOTH card and muted
+
+   Only the dark scale is touched; light mode already has usable contrast. */
+.dark {
+  /* Base values double as the no-color-mix fallback. Written as real palette
+     steps rather than a mix so that if color-mix is unavailable these still
+     differ from --card (slate-700) instead of degrading back to it. */
+  --muted: var(--color-slate-600);
+  --popover: var(--color-slate-600);
+  --accent: var(--color-slate-500);
+}
+@supports (color: color-mix(in oklab, red, red)) {
+  .dark {
+    --muted: color-mix(in oklab, var(--card) 90%, var(--foreground));
+    --popover: color-mix(in oklab, var(--card) 90%, var(--foreground));
+    --accent: color-mix(in oklab, var(--card) 82%, var(--foreground));
+  }
+}
